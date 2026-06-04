@@ -9525,7 +9525,7 @@ function applyChildHeader() {
   if (pt) pt.innerHTML = headerLabel
     + ' <span class="res-type">' + headerType + '</span>'
     + healthIconHtml;
-  if (pi) pi.innerHTML = catIconHTML(headerCat);
+  if (pi) pi.innerHTML = typeIconHTML(headerType, headerCat);
   // Phase 4 — populate the summary strip with Type / Status / Policies
   // Applied / Last Backup chips for the current drill scope.
   if (typeof renderChildPanelStrip === 'function') renderChildPanelStrip(cur);
@@ -13386,9 +13386,10 @@ function applyDriveHeader() {
   var pi = document.getElementById('gwsPanelIcon');
   if (pt) pt.innerHTML = driveRow.name + ' <span class="res-type" style="margin-left:4px;vertical-align:2px">Drive</span>';
   if (ps) ps.textContent = driveRow.meta || '';
-  // Render the drives-category tile so the drill-down panel has the same visual
-  // anchor as the inventory page's panel header.
-  if (pi) pi.innerHTML = catIconHTML(driveRow.cat || 'drives');
+  // Render the same type glyph the tree-nav shows for this object (Drive),
+  // on the category-colored tile — so the drill-down panel icon matches the
+  // tree node icon for that drive.
+  if (pi) pi.innerHTML = typeIconHTML(driveRow.type || 'Drive', driveRow.cat || 'drives');
 }
 // Build the sibling rail for the drive drill-down. Pulls from RESOURCES the set
 // of rows in the same workload+category (e.g. all Drives in Google Workspace)
@@ -14782,6 +14783,18 @@ function catIconHTML(catId) {
   return '<div class="res-icon-tile" style="background:' + def.tint + ';color:' + def.color + '">' +
          '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
          def.svg + '</svg></div>';
+}
+// Header tile for a SELECTED object (drill level). Uses the exact same
+// type-driven glyph the left tree-nav draws for that object (_treeIconSvgFor),
+// scaled to the header tile size, so the icon a level shows in the tree matches
+// the icon in the table header (e.g. a Folder reads as a folder in both, not a
+// folder in the tree and the category glyph in the header). The tile keeps the
+// category tint/color so the header retains its category-color cue.
+function typeIconHTML(typeName, catId) {
+  var def = CAT_ICONS[catId] || CAT_ICONS['records'];
+  var glyph = _treeIconSvgFor({ type: typeName })
+                .replace('width="14" height="14"', 'width="22" height="22"');
+  return '<div class="res-icon-tile" style="background:' + def.tint + ';color:' + def.color + '">' + glyph + '</div>';
 }
 // Refresh the icon in the inventory panel header to match the active category.
 function updateInvTitleIcon() {
@@ -28850,7 +28863,7 @@ function applyRecordsHeader() {
   var pi = document.getElementById('recPanelIcon');
   if (pt) pt.innerHTML = escapeText(cur.name) + ' <span class="res-type" style="margin-left:4px;vertical-align:2px">' + escapeText(cur.type || 'Table') + '</span>';
   if (ps) ps.textContent = cur.meta || '';
-  if (pi) pi.innerHTML = catIconHTML(cur.cat || 'records');
+  if (pi) pi.innerHTML = typeIconHTML(cur.type || 'Table', cur.cat || 'records');
 }
 
 // ─── DIFF MODE for records drill-down ───────────────────────────────
