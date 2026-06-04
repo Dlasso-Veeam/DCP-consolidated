@@ -125,6 +125,23 @@ tr.is-open .chev { transform:rotate(90deg); }
 .other-link { font-size:12px; color:var(--blue); cursor:pointer; }
 .other-link:hover { text-decoration:underline; }
 .other-none { font-size:12px; color:var(--black-30); }
+
+/* Concept D — change-density strip (radar) */
+.strip { display:flex; gap:2px; align-items:center; flex-wrap:nowrap; }
+.tick { width:9px; height:18px; border-radius:2px; background:var(--black-10); cursor:pointer; transition:transform .1s ease, box-shadow .1s ease; }
+.tick.tick-mod { background:var(--yellow); } .tick.tick-add { background:var(--green); } .tick.tick-rem { background:var(--red); }
+.tick.col-hot { transform:scaleY(1.18); box-shadow:0 0 0 2px var(--blue); position:relative; z-index:1; }
+.strip-count { display:inline-flex; align-items:center; justify-content:center; min-width:22px; height:20px; padding:0 6px;
+  font-size:12px; font-weight:500; color:var(--black-100); background:var(--black-3); border:1px solid var(--border-light); border-radius:10px; }
+.strip-hint { font-size:12px; color:var(--black-60); padding:8px 16px 0; }
+.tip { position:fixed; z-index:50; max-width:280px; background:var(--black-100); color:var(--white); font-size:12px; line-height:1.4;
+  padding:8px 10px; border-radius:6px; pointer-events:none; box-shadow:0 4px 14px rgba(0,0,0,.22); opacity:0; transition:opacity .1s ease; }
+.tip .tip-field { font-weight:500; } .tip .tip-dist { display:block; margin-top:4px; color:var(--blue-30); }
+.tip .tb { text-decoration:line-through; opacity:.65; } .tip .ta { color:#cdeecd; }
+
+/* Concept E — auto-pivot columns */
+.col-freq { display:inline-block; min-width:16px; text-align:center; font-size:10px; font-weight:600; color:var(--blue-dark);
+  background:var(--blue-10); border-radius:8px; padding:0 5px; margin-left:4px; }
 </style>
 </head>
 <body>
@@ -209,6 +226,42 @@ tr.is-open .chev { transform:rotate(90deg); }
       </tr></thead>
       <tbody></tbody>
     </table>
+  </div>
+
+  <!-- CONCEPT D -->
+  <div class="concept">
+    <div class="concept-head">
+      <span class="tag">Concept D · novel</span>
+      <h2>Change-density strip — the table as a change radar</h2>
+      <p class="rationale">Each record gets a per-field tick strip, fields <b>aligned across rows</b>. The point isn't one record — it's the <b>vertical bands</b>: a column lit up everywhere means a field that changed fleet-wide (a bulk reassignment, a migration). Hover any tick for its before→after and how many records share that change. This answers a question no drawer can.</p>
+      <div class="pc">
+        <span class="pro">Reveals fleet-wide patterns at a glance</span>
+        <span class="pro">Zero clicks; all fields visible at once</span>
+        <span class="pro">Tiny footprint — scales to many fields</span>
+        <span class="con">Values are hover-only (overview, not deep read)</span>
+      </div>
+    </div>
+    <div class="strip-hint">Each tick = one field, in the same order every row. <span style="color:var(--yellow-dark)">▮</span> modified · <span style="color:#4a7919">▮</span> added · <span style="color:var(--red)">▮</span> removed · <span style="color:var(--black-30)">▮</span> unchanged. Hover to inspect; the column highlights across all records.</div>
+    <table id="tbl-d">
+      <thead><tr><th style="width:24%">Record</th><th style="width:12%">Type</th><th>Field changes (aligned)</th><th style="width:60px;text-align:right">#</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- CONCEPT E -->
+  <div class="concept">
+    <div class="concept-head">
+      <span class="tag">Concept E · novel</span>
+      <h2>Auto-pivot — the most-changed fields become before/after columns</h2>
+      <p class="rationale">No hand-picked columns and no click: the table <b>computes</b> its columns as the fields that changed in the most records (the same bands the radar surfaces), each cell stacking <span style="text-decoration:line-through;color:var(--black-60)">old</span> over <strong>new</strong>. Per-record long-tail changes collapse into "+k". It's a real, sortable diff grid that stays bounded because columns track <em>frequency of change</em>, not field count.</p>
+      <div class="pc">
+        <span class="pro">Inline before/after with zero clicks, zero curation</span>
+        <span class="pro">Bounded width (top-N changed fields)</span>
+        <span class="pro">Sortable grid — "who changed Status?"</span>
+        <span class="con">Rare per-record fields live in the "+k" overflow</span>
+      </div>
+    </div>
+    <table id="tbl-e"><thead><tr></tr></thead><tbody></tbody></table>
   </div>
 
   <p class="ctx" style="margin-top:8px">Adventure Works has <b>no changes</b> — shown so you can see how each pattern handles the unchanged case. Tailspin Toys is intentionally high-churn (12 changed fields) to stress the overflow/expand behavior.</p>
@@ -396,7 +449,108 @@ function renderC(){
   });
 }
 
-function renderAll(){ renderA(); renderB(); renderC(); }
+// ── Concept D — change-density strip (radar) ────────────────────────────────
+var FIELDS_UNION = (function(){
+  var set = SCHEMA.slice();
+  RECORDS.forEach(function(rec){ Object.keys(rec.changes).forEach(function(f){ if(set.indexOf(f)<0) set.push(f); }); });
+  return set;
+})();
+function fieldChangedCount(field){ return RECORDS.filter(function(r){ return r.changes[field]; }).length; }
+var _tip;
+function ensureTip(){ if(!_tip){ _tip=document.createElement('div'); _tip.className='tip'; document.body.appendChild(_tip); } return _tip; }
+function renderD(){
+  var tb = document.querySelector('#tbl-d tbody'); tb.innerHTML='';
+  RECORDS.forEach(function(rec){
+    var ticks = FIELDS_UNION.map(function(f){
+      var c = rec.changes[f];
+      var cls = c ? ('tick-'+c.type) : 'tick-none';
+      return '<span class="tick '+cls+'" data-field="'+esc(f)+'"></span>';
+    }).join('');
+    var total = changedList(rec).length;
+    var count = total ? '<span class="strip-count">'+total+'</span>' : '<span class="no-change">0</span>';
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td><span class="rec-name" style="padding-left:0">'+esc(rec.name)+'</span></td>'+
+      '<td><span class="type-pill">'+esc(rec.type)+'</span></td>'+
+      '<td><div class="strip" data-rec="'+esc(rec.name)+'">'+ticks+'</div></td>'+
+      '<td style="text-align:right">'+count+'</td>';
+    tb.appendChild(tr);
+  });
+  wireStrip();
+}
+function wireStrip(){
+  var tb = document.querySelector('#tbl-d tbody');
+  var tip = ensureTip();
+  tb.querySelectorAll('.tick').forEach(function(t){
+    t.addEventListener('mouseenter', function(e){
+      var field = t.dataset.field;
+      // highlight the whole column (same field across all rows)
+      tb.querySelectorAll('.tick[data-field="'+(window.CSS&&CSS.escape?CSS.escape(field):field)+'"]').forEach(function(x){ x.classList.add('col-hot'); });
+      var recName = t.closest('.strip').dataset.rec;
+      var rec = RECORDS.find(function(r){ return r.name===recName; });
+      var c = rec.changes[field];
+      var body = c ? (c.type==='add' ? '<span class="ta">added — '+esc(c.after)+'</span>'
+                    : c.type==='rem' ? '<span class="tb">'+esc(c.before)+'</span> → removed'
+                    : '<span class="tb">'+esc(c.before)+'</span> → <span class="ta">'+esc(c.after)+'</span>')
+                  : 'unchanged';
+      var n = fieldChangedCount(field);
+      tip.innerHTML = '<span class="tip-field">'+esc(field)+'</span><br>'+body+
+        '<span class="tip-dist">Changed in '+n+' of '+RECORDS.length+' records</span>';
+      tip.style.opacity='1';
+      moveTip(e);
+    });
+    t.addEventListener('mousemove', moveTip);
+    t.addEventListener('mouseleave', function(){
+      tb.querySelectorAll('.tick.col-hot').forEach(function(x){ x.classList.remove('col-hot'); });
+      tip.style.opacity='0';
+    });
+  });
+  function moveTip(e){ tip.style.left=Math.min(e.clientX+12, window.innerWidth-300)+'px'; tip.style.top=(e.clientY+14)+'px'; }
+}
+
+// ── Concept E — auto-pivot (most-changed fields as columns) ──────────────────
+function renderE(){
+  var freq = {};
+  RECORDS.forEach(function(r){ Object.keys(r.changes).forEach(function(f){ freq[f]=(freq[f]||0)+1; }); });
+  var ranked = Object.keys(freq).sort(function(a,b){ return freq[b]-freq[a] || FIELDS_UNION.indexOf(a)-FIELDS_UNION.indexOf(b); });
+  var COLS = ranked.slice(0,4);
+  var thr = document.querySelector('#tbl-e thead tr');
+  thr.innerHTML = '<th style="width:20%">Record</th>'+
+    COLS.map(function(f){ return '<th>'+esc(f)+'<span class="col-freq">'+freq[f]+'</span></th>'; }).join('')+
+    '<th style="width:14%">+ other</th>';
+  var tb = document.querySelector('#tbl-e tbody'); tb.innerHTML='';
+  RECORDS.forEach(function(rec,i){
+    var cells = COLS.map(function(f){
+      var c = rec.changes[f];
+      if (c){
+        var b = c.type==='add' ? '—' : esc(c.before);
+        var a = c.type==='rem' ? 'removed' : esc(c.after);
+        return '<td class="cell-'+c.type+'"><span class="stack"><span class="s-before">'+b+'</span><span class="s-after">'+a+'</span></span></td>';
+      }
+      var v = (rec.fields[f]!==undefined) ? rec.fields[f] : '—';
+      return '<td><span class="stack unchanged"><span class="s-after">'+esc(v)+'</span></span></td>';
+    }).join('');
+    var others = changedList(rec).filter(function(x){ return COLS.indexOf(x.name)<0; });
+    var otherCell = others.length ? '<span class="other-link" data-idx="'+i+'">+'+others.length+'</span>' : '<span class="other-none">—</span>';
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td><span class="rec-name" style="padding-left:0">'+esc(rec.name)+'</span></td>'+cells+'<td>'+otherCell+'</td>';
+    tb.appendChild(tr);
+    var dr = document.createElement('tr'); dr.className='detail-row'; dr.style.display='none';
+    dr.innerHTML = '<td colspan="'+(COLS.length+2)+'" style="padding:0"><div class="detail-wrap"></div></td>';
+    tb.appendChild(dr);
+  });
+  tb.querySelectorAll('.other-link').forEach(function(lnk){
+    lnk.onclick = function(){
+      var idx=+this.dataset.idx; var dr=this.closest('tr').nextElementSibling; var open=dr.style.display!=='none';
+      if(open){ dr.style.display='none'; return; }
+      var others = changedList(RECORDS[idx]).filter(function(x){ return COLS.indexOf(x.name)<0; });
+      var rows = others.map(function(f){ return '<tr class="'+rowCls(f.type)+'"><td class="fld-name">'+esc(f.name)+miniTag(f.type)+'</td><td>'+valCell(f)+'</td></tr>'; }).join('');
+      dr.querySelector('.detail-wrap').innerHTML='<table class="detail"><thead><tr><th style="width:32%">Field</th><th>Before → after</th></tr></thead><tbody>'+rows+'</tbody></table>';
+      dr.style.display='';
+    };
+  });
+}
+
+function renderAll(){ renderA(); renderB(); renderC(); renderD(); renderE(); }
 document.getElementById('seg-mode').addEventListener('click', function(e){
   var b=e.target.closest('button'); if(!b) return;
   MODE=b.dataset.mode;
