@@ -1,0 +1,63 @@
+[
+  {
+    "wl": "d365",
+    "screen": "auth",
+    "label": "D365 Express copy is its own (not generic / not Entra)",
+    "asserts": [
+      { "sel": "#express-desc", "contains": "Veeam application" },
+      { "sel": "#express-benefit-1", "textEquals": "Secure connection" },
+      { "sel": "#express-benefit-2", "textEquals": "Fast and automated onboarding" },
+      { "sel": "#express-benefit-3", "textEquals": "Discovery of environments" },
+      { "sel": "#express-benefit-4", "textEquals": "No credentials management" },
+      { "sel": "#express-perenv-note-text", "contains": "verify and remove Veeam service principal" }
+    ]
+  },
+  {
+    "wl": "d365",
+    "screen": "protect",
+    "label": "D365 Backup step uses per-env policy cards, not the single toggle",
+    "asserts": [
+      { "sel": "#protect-form-title", "textEquals": "Backup policy" },
+      { "sel": "#protect-toggle-card", "hidden": true },
+      { "sel": "#protect-mode-cards-host", "visible": true }
+    ]
+  },
+  {
+    "wl": "github",
+    "screen": "auth",
+    "label": "GitHub Express copy is unchanged (no D365 bleed)",
+    "asserts": [
+      { "sel": "#express-desc", "contains": "GitHub" },
+      { "sel": "#express-desc", "notContains": "Veeam application" }
+    ]
+  },
+  {
+    "wl": "github",
+    "screen": "protect",
+    "label": "GitHub still uses the single Protection toggle card",
+    "asserts": [
+      { "sel": "#protect-form-title", "textEquals": "Protection" },
+      { "sel": "#protect-toggle-card", "visible": true },
+      { "sel": "#protect-mode-cards-host", "hidden": true }
+    ]
+  },
+  {
+    "wl": "pp",
+    "screen": "auth",
+    "label": "Power Platform keeps its 3-benefit Express tile (4th row hidden)",
+    "asserts": [
+      { "sel": "#express-benefit-1", "textEquals": "No credentials to manage" },
+      { "sel": "#express-benefit-4-row", "hidden": true }
+    ]
+  },
+  {
+    "wl": "okta",
+    "screen": "auth",
+    "label": "Okta Manual card shows Okta copy, never leaks Entra default",
+    "setup": "if(typeof selectAuthMethod==='function')selectAuthMethod('manual');",
+    "asserts": [
+      { "sel": "#manual-perenv-note", "notContains": "Entra" },
+      { "sel": "#manual-perenv-note", "notContains": "Azure" }
+    ]
+  }
+]

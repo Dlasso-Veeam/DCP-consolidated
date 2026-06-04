@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compare-mode entry — concept review (A & B)</title>
+<style>
+  :root {
+    --blue: #1ca8dd;
+    --blue-60: #49b9e4;
+    --blue-light: #f3fafd;   /* blue S5 */
+    --blue-30: #bbe5f5;
+    --blue-10: #e8f6fc;
+    --blue-dark: #0779a5;
+    --black-100: #1f2229;
+    --black-60: #626469;
+    --black-30: #bcbdbf;
+    --black-10: #e9e9ea;
+    --black-5: #f4f6f8;
+    --black-3: #f8f8f9;
+    --white: #ffffff;
+    --green: #86b62c;
+    --green-10: #eff6ea;
+    --green-30: #add395;
+    --orange: #f6772c;
+    --orange-10: #fef1ea;
+    --orange-30: #fbc9ab;
+    --red: #d96758;
+    --red-10: #fbeeec;
+    --yellow: #f0b400;
+    --border: #d2d3d4;
+    --border-light: #e9e9ea;
+    --layout-bg: #edf0f0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 32px;
+    background: var(--layout-bg);
+    color: var(--black-100);
+    font-family: 'Circular Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px; font-weight: 450; line-height: 1.45;
+  }
+  .review-wrap { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+  .review-intro h1 { font-size: 24px; font-weight: 500; margin: 0 0 4px; }
+  .review-intro p { font-size: 14px; color: var(--black-60); margin: 0; max-width: 760px; }
+  .review-note { font-size: 12px; color: var(--black-60); margin-top: 8px; }
+
+  .review-section { background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; overflow: hidden; }
+  .review-section-hdr { padding: 16px 24px; border-bottom: 1px solid var(--border-light); }
+  .review-section-title { font-size: 18px; font-weight: 500; margin: 0; }
+  .review-section-desc { font-size: 14px; color: var(--black-60); margin: 4px 0 0; }
+
+  .state-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--black-60); padding: 18px 24px 0; }
+
+  /* Faux page surface so the bar reads in context (bar + mini table). */
+  .stage { margin: 8px 24px 24px; border: 1px solid var(--border-light); border-radius: 8px; overflow: hidden; }
+  .stage-asof { padding: 12px 16px; background: var(--white); border-bottom: 1px solid var(--border-light); display: flex; align-items: center; gap: 12px; min-height: 60px; }
+  .stage-table { width: 100%; border-collapse: collapse; }
+  .stage-table th { text-align: left; font-size: 14px; font-weight: 450; color: var(--black-60); padding: 10px 16px; background: var(--black-3); border-bottom: 1px solid var(--border-light); }
+  .stage-table td { font-size: 14px; padding: 12px 16px; border-bottom: 1px solid var(--border-light); }
+  .stage-table tr:last-child td { border-bottom: none; }
+  .stage-name { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; color: var(--blue); }
+  .row-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: transparent; }
+  .row-dot.mod { background: var(--yellow); } .row-dot.add { background: var(--green); }
+  .row-dot.rem { background: var(--red); } .row-dot.un { background: var(--black-30); }
+  .mini-chip { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 4px; background: var(--blue-10); color: var(--blue); font-size: 14px; font-weight: 500; }
+
+  /* shared diff legend */
+  .cmp-legend { display: inline-flex; align-items: center; gap: 16px; margin-left: auto; flex-wrap: wrap; }
+  .cmp-legend .cnt { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--black-100); white-space: nowrap; }
+  .cmp-legend .cnt strong { font-weight: 500; }
+  .ld { width: 8px; height: 8px; border-radius: 50%; }
+  .ld.mod { background: var(--yellow); } .ld.add { background: var(--green); } .ld.rem { background: var(--red); } .ld.un { background: var(--black-30); }
+
+  /* shared active compare chrome (two chips) */
+  .cmp-active { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border); border-radius: 8px; padding: 4px 6px 4px 8px; }
+  .rp-chip { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 4px; background: var(--blue-light); border: 1px solid var(--blue-30); color: var(--blue); font-size: 14px; font-weight: 500; }
+  .rp-chip svg { color: var(--blue); }
+  .rp-vs { font-size: 14px; color: var(--black-60); padding: 0 2px; }
+  .cmp-x { width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; }
+  .cmp-x:hover { background: var(--black-3); }
+
+  /* ─────────── OPTION A — discovery callout strip ─────────── */
+  .cmp-callout { display: flex; align-items: center; gap: 16px; width: 100%; padding: 12px 16px; background: var(--blue-10); border: 1px solid var(--blue-30); border-radius: 8px; }
+  .cmp-callout.is-tight { padding: 8px 16px; }
+  .cmp-callout.is-tight .cmp-callout-text { gap: 0; }
+  .cmp-callout.is-tight .cmp-callout-sub { line-height: 18px; }
+  .cmp-callout-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--blue); color: var(--white); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .cmp-callout-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .cmp-callout-title { font-size: 14px; font-weight: 500; color: var(--black-100); }
+  .cmp-callout-sub { font-size: 14px; font-weight: 450; color: var(--black-60); }
+  .cmp-callout-cta { flex-shrink: 0; height: 36px; padding: 0 16px; border-radius: 4px; border: 1px solid var(--blue); background: var(--white); color: var(--blue); font-size: 14px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-family: inherit; }
+  .cmp-callout-cta:hover { background: var(--blue-light); }
+
+  /* ─────────── OPTION B — restore-point timeline ribbon ─────────── */
+  .rp-ribbon { display: flex; align-items: center; gap: 16px; width: 100%; }
+  .rp-ribbon-lead { display: inline-flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
+  .rp-ribbon-lead .t { font-size: 14px; font-weight: 500; color: var(--black-100); display: inline-flex; align-items: center; gap: 8px; }
+  .rp-ribbon-lead .s { font-size: 12px; color: var(--black-60); }
+  .rp-track { position: relative; flex: 1; height: 44px; }
+  .rp-line { position: absolute; left: 6px; right: 6px; top: 15px; height: 2px; background: var(--border); border-radius: 2px; }
+  .rp-line-active { position: absolute; top: 15px; height: 2px; background: var(--blue); border-radius: 2px; display: none; }
+  .rp-pt { position: absolute; top: 6px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; background: none; border: none; padding: 0; font-family: inherit; }
+  .rp-pt-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--white); border: 2px solid var(--black-30); transition: all 0.12s ease; }
+  .rp-pt:hover .rp-pt-dot { border-color: var(--blue); }
+  .rp-pt.sel .rp-pt-dot { border-color: var(--blue); background: var(--blue); box-shadow: 0 0 0 4px var(--blue-10); }
+  .rp-pt-date { font-size: 12px; color: var(--black-60); white-space: nowrap; }
+  .rp-pt.sel .rp-pt-date { color: var(--blue); font-weight: 500; }
+  .rp-pt.latest .rp-pt-date { font-weight: 500; color: var(--black-100); }
+  .rp-ribbon-exit { flex-shrink: 0; height: 28px; padding: 0 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); color: var(--black-100); font-size: 14px; cursor: pointer; font-family: inherit; display: none; }
+
+  /* ─── today's baseline button + variants C / D ─── */
+  .cmp-plain-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); color: var(--black-100); font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; }
+  .cmp-plain-btn:hover { background: var(--black-3); }
+  .cmp-plain-btn svg { color: var(--black-60); }
+  .cmp-callout-dismiss { flex-shrink: 0; width: 28px; height: 28px; border: none; background: none; color: var(--black-60); cursor: pointer; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-size: 15px; }
+  .cmp-callout-dismiss:hover { background: var(--blue-30); color: var(--black-100); }
+  .demo-reset { margin: 0 24px 16px; font-size: 12px; color: var(--blue); background: none; border: none; cursor: pointer; padding: 0; font-family: inherit; }
+  .demo-reset:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="review-wrap">
+
+  <div class="review-intro">
+    <h1>Compare-mode entry — concept review</h1>
+    <p>Two directions for making the “enter comparison” affordance more visible and giving the as-of bar a reason to exist. Each is shown in context (the bar sitting above a mini inventory table), in both its resting and active states. Click the controls to try them.</p>
+    <p class="review-note">Note: this is a layout/affordance mockup — fonts fall back to system UI (the real prototype embeds Circular Pro). Colors, spacing, radii, and icons all use the Securiti tokens.</p>
+  </div>
+
+  <!-- ══════════════════ OPTION A ══════════════════ -->
+  <div class="review-section">
+    <div class="review-section-hdr">
+      <h2 class="review-section-title">Option A — Discovery callout strip</h2>
+      <p class="review-section-desc">The empty bar becomes a tinted info strip (blue-10, the DS info-card treatment) with a solid-blue icon tile, a one-line value prop, and an outline CTA. Eye-catching via tint + icon + copy, not a competing solid-blue button. Collapses into the existing two-chip compare chrome on activation.</p>
+    </div>
+
+    <div class="state-label">Resting</div>
+    <div class="stage" id="stageA">
+      <div class="stage-asof" id="asofA-rest">
+        <div class="cmp-callout is-tight">
+          <span class="cmp-callout-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </span>
+          <div class="cmp-callout-text">
+            <span class="cmp-callout-title">Compare restore points</span>
+            <span class="cmp-callout-sub">See exactly what changed between two backups — added, modified, or removed.</span>
+          </div>
+          <button class="cmp-callout-cta" onclick="setA(true)">
+            Compare
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="stage-asof" id="asofA-active" style="display:none">
+        <div class="cmp-active">
+          <span class="rp-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Jun 3, 2026 · 3:15 AM</span>
+          <span class="rp-vs">compared to</span>
+          <span class="rp-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Jun 1, 2026 · 3:45 PM</span>
+          <button class="cmp-x" onclick="setA(false)" title="Exit compare">✕</button>
+        </div>
+        <div class="cmp-legend">
+          <span class="cnt"><span class="ld mod"></span><strong>9</strong> modified</span>
+          <span class="cnt"><span class="ld add"></span><strong>0</strong> added</span>
+          <span class="cnt"><span class="ld rem"></span><strong>1</strong> removed</span>
+          <span class="cnt"><span class="ld un"></span><strong>2</strong> unchanged</span>
+        </div>
+      </div>
+      <table class="stage-table">
+        <thead><tr><th style="width:46%">Resource</th><th>Contents</th><th>Policy</th><th>Last Backup</th></tr></thead>
+        <tbody id="tbodyA">
+          <tr><td><span class="stage-name"><span class="row-dot" data-dot></span>acme-corp</span></td><td><span class="mini-chip">14 repos</span></td><td>Production</td><td>Jun 3, 2026</td></tr>
+          <tr><td><span class="stage-name"><span class="row-dot" data-dot></span>acme-platform</span></td><td><span class="mini-chip">3 repos</span></td><td>Production</td><td>Jun 2, 2026</td></tr>
+          <tr><td><span class="stage-name"><span class="row-dot" data-dot></span>acme-recovery</span></td><td><span class="mini-chip">3 repos</span></td><td>Standard</td><td>Jun 1, 2026</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════ OPTION B ══════════════════ -->
+  <div class="review-section">
+    <div class="review-section-hdr">
+      <h2 class="review-section-title">Option B — Restore-point timeline ribbon</h2>
+      <p class="review-section-desc">The bar stops being empty because it now <em>shows your backup history</em> — a thin timeline of recent restore points. Comparison is the natural gesture: pick any two points. Click two dots below to try it.</p>
+    </div>
+
+    <div class="state-label">Resting → pick two points</div>
+    <div class="stage" id="stageB">
+      <div class="stage-asof">
+        <div class="rp-ribbon">
+          <div class="rp-ribbon-lead">
+            <span class="t">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--black-60)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+              Restore points
+            </span>
+            <span class="s" id="ribbonHint">Pick any two to compare</span>
+          </div>
+          <div class="rp-track" id="rpTrack">
+            <div class="rp-line"></div>
+            <div class="rp-line-active" id="rpLineActive"></div>
+            <!-- 7 restore points, oldest → latest -->
+            <button class="rp-pt"        style="left:6%"  data-i="0" data-date="May 8" onclick="pickB(this)"><span class="rp-pt-dot"></span><span class="rp-pt-date">May 8</span></button>
+            <button class="rp-pt"        style="left:21%" data-i="1" data-date="May 15" onclick="pickB(this)"><span class="rp-pt-dot"></span><span class="rp-pt-date">May 15</span></button>
+            <button class="rp-pt"        style="left:36%" data-i="2" data-date="May 22" onclick="pickB(this)"><span class="rp-pt-dot"></span><span class="rp-pt-date">May 22</span></button>
+            <button class="rp-pt"        style="left:51%" data-i="3" data-date="May 29" onclick="pickB(this)"><span class="rp-pt-dot"></span><span class="rp-pt-date">May 29</span></button>
+            <button class="rp-pt"        style="left:66%" data-i="4" data-date="Jun 1" onclick="pickB(this)"><span class="rp-pt-dot"></span><span class="rp-pt-date">Jun 1</span></button>
+            <button class="rp-pt"        style="left:81%" data-i="5" data-date="Jun 2" onclick="pickB(this)"><span class="rp-pt-dot"></span><span class="rp-pt-date">Jun 2</span></button>
+            <button class="rp-pt latest" style="left:96%" data-i="6" data-date="Jun 3" onclick="pickB(this)"><span class="rp-pt-dot"></span><span class="rp-pt-date">Jun 3 · now</span></button>
+          </div>
+          <button class="rp-ribbon-exit" id="ribbonExit" onclick="resetB()">Reset</button>
+          <div class="cmp-legend" id="ribbonLegend" style="display:none">
+            <span class="cnt"><span class="ld mod"></span><strong>9</strong> modified</span>
+            <span class="cnt"><span class="ld add"></span><strong>0</strong> added</span>
+            <span class="cnt"><span class="ld rem"></span><strong>1</strong> removed</span>
+            <span class="cnt"><span class="ld un"></span><strong>2</strong> unchanged</span>
+          </div>
+        </div>
+      </div>
+      <table class="stage-table">
+        <thead><tr><th style="width:46%">Resource</th><th>Contents</th><th>Policy</th><th>Last Backup</th></tr></thead>
+        <tbody id="tbodyB">
+          <tr><td><span class="stage-name"><span class="row-dot" data-dot></span>acme-corp</span></td><td><span class="mini-chip">14 repos</span></td><td>Production</td><td>Jun 3, 2026</td></tr>
+          <tr><td><span class="stage-name"><span class="row-dot" data-dot></span>acme-platform</span></td><td><span class="mini-chip">3 repos</span></td><td>Production</td><td>Jun 2, 2026</td></tr>
+          <tr><td><span class="stage-name"><span class="row-dot" data-dot></span>acme-recovery</span></td><td><span class="mini-chip">3 repos</span></td><td>Standard</td><td>Jun 1, 2026</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════ REFERENCE — TODAY ══════════════════ -->
+  <div class="review-section">
+    <div class="review-section-hdr">
+      <h2 class="review-section-title">Reference — what we have today</h2>
+      <p class="review-section-desc">The current lone outline button on an otherwise empty bar. Shown here as the baseline to compare the options against.</p>
+    </div>
+    <div class="state-label">Resting</div>
+    <div class="stage">
+      <div class="stage-asof" id="asof-cur-rest">
+        <button class="cmp-plain-btn" onclick="enterCompare('cur')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="12" y1="4" x2="12" y2="20"/></svg>Compare restore points</button>
+      </div>
+      <div class="stage-asof" id="asof-cur-active" style="display:none"></div>
+      <table class="stage-table"><thead><tr><th style="width:46%">Resource</th><th>Contents</th><th>Policy</th><th>Last Backup</th></tr></thead>
+        <tbody id="tbody-cur">
+          <tr><td><span class="stage-name"><span class="row-dot" data-dot></span>acme-corp</span></td><td><span class="mini-chip">14 repos</span></td><td>Production</td><td>Jun 3, 2026</td></tr>
+          <tr><td><span class="stage-name"><span class="row-dot" data-dot></span>acme-platform</span></td><td><span class="mini-chip">3 repos</span></td><td>Production</td><td>Jun 2, 2026</td></tr>
+          <tr><td><span class="stage-name"><span class="row-dot" data-dot></span>acme-recovery</span></td><td><span class="mini-chip">3 repos</span></td><td>Standard</td><td>Jun 1, 2026</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════ OPTION C — one-line ══════════════════ -->
+  <div class="review-section">
+    <div class="review-section-hdr">
+      <h2 class="review-section-title">Option C — One-line callout strip</h2>
+      <p class="review-section-desc">Option A trimmed to a single line (icon + label + CTA, no value-prop subline). Keeps the tinted anchor so it doesn't float, but reads as a control bar rather than a promo — lower vertical weight and less “marketing.”</p>
+    </div>
+    <div class="state-label">Resting</div>
+    <div class="stage">
+      <div class="stage-asof" id="asof-c-rest">
+        <div class="cmp-callout">
+          <span class="cmp-callout-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+          <div class="cmp-callout-text"><span class="cmp-callout-title">Compare restore points</span></div>
+          <button class="cmp-callout-cta" onclick="enterCompare('c')">Compare <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+      </div>
+      <div class="stage-asof" id="asof-c-active" style="display:none"></div>
+      <table class="stage-table"><thead><tr><th style="width:46%">Resource</th><th>Contents</th><th>Policy</th><th>Last Backup</th></tr></thead>
+        <tbody id="tbody-c">
+          <tr><td><span class="stage-name"><span class="row-dot" data-dot></span>acme-corp</span></td><td><span class="mini-chip">14 repos</span></td><td>Production</td><td>Jun 3, 2026</td></tr>
+          <tr><td><span class="stage-name"><span class="row-dot" data-dot></span>acme-platform</span></td><td><span class="mini-chip">3 repos</span></td><td>Production</td><td>Jun 2, 2026</td></tr>
+          <tr><td><span class="stage-name"><span class="row-dot" data-dot></span>acme-recovery</span></td><td><span class="mini-chip">3 repos</span></td><td>Standard</td><td>Jun 1, 2026</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════════ OPTION D — hybrid ══════════════════ -->
+  <div class="review-section">
+    <div class="review-section-hdr">
+      <h2 class="review-section-title">Option D — Hybrid: discovery strip → quiet button</h2>
+      <p class="review-section-desc">Full strip for first-time discovery; dismiss the ✕ and it collapses to today's quiet button for the rest of the session. New users get discovery, veterans get the unobtrusive control back. (In product the dismissed state would persist per user.) Try the ✕, then the collapsed button.</p>
+    </div>
+    <div class="state-label">Resting — full strip (dismiss the ✕ to collapse)</div>
+    <div class="stage">
+      <div class="stage-asof" id="asof-d-rest">
+        <div class="cmp-callout" id="dStrip">
+          <span class="cmp-callout-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+          <div class="cmp-callout-text"><span class="cmp-callout-title">Compare restore points</span><span class="cmp-callout-sub">See exactly what changed between two backups — added, modified, or removed.</span></div>
+          <button class="cmp-callout-cta" onclick="enterCompare('d')">Compare <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+          <button class="cmp-callout-dismiss" onclick="dDismiss()" title="Dismiss">✕</button>
+        </div>
+        <button class="cmp-plain-btn" id="dBtn" style="display:none" onclick="enterCompare('d')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="12" y1="4" x2="12" y2="20"/></svg>Compare restore points</button>
+      </div>
+      <div class="stage-asof" id="asof-d-active" style="display:none"></div>
+      <table class="stage-table"><thead><tr><th style="width:46%">Resource</th><th>Contents</th><th>Policy</th><th>Last Backup</th></tr></thead>
+        <tbody id="tbody-d">
+          <tr><td><span class="stage-name"><span class="row-dot" data-dot></span>acme-corp</span></td><td><span class="mini-chip">14 repos</span></td><td>Production</td><td>Jun 3, 2026</td></tr>
+          <tr><td><span class="stage-name"><span class="row-dot" data-dot></span>acme-platform</span></td><td><span class="mini-chip">3 repos</span></td><td>Production</td><td>Jun 2, 2026</td></tr>
+          <tr><td><span class="stage-name"><span class="row-dot" data-dot></span>acme-recovery</span></td><td><span class="mini-chip">3 repos</span></td><td>Standard</td><td>Jun 1, 2026</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <button class="demo-reset" onclick="dRestore()">↩ Reset demo (show full strip again)</button>
+  </div>
+
+</div>
+
+<script>
+  // ---- Option A: toggle resting callout <-> active compare chrome ----
+  function setA(active) {
+    document.getElementById('asofA-rest').style.display = active ? 'none' : 'flex';
+    document.getElementById('asofA-active').style.display = active ? 'flex' : 'none';
+    paintDots('tbodyA', active ? ['mod','un','rem'] : [null,null,null]);
+  }
+
+  // ---- Option B: pick two restore points ----
+  var selB = [];
+  function pickB(btn) {
+    var i = parseInt(btn.getAttribute('data-i'), 10);
+    var idx = selB.indexOf(i);
+    if (idx >= 0) { selB.splice(idx, 1); }
+    else {
+      selB.push(i);
+      if (selB.length > 2) selB.shift(); // keep most recent two
+    }
+    renderB();
+  }
+  function resetB() { selB = []; renderB(); }
+  function renderB() {
+    var pts = Array.prototype.slice.call(document.querySelectorAll('#rpTrack .rp-pt'));
+    pts.forEach(function(p){ p.classList.toggle('sel', selB.indexOf(parseInt(p.getAttribute('data-i'),10)) >= 0); });
+    var hint = document.getElementById('ribbonHint');
+    var legend = document.getElementById('ribbonLegend');
+    var exit = document.getElementById('ribbonExit');
+    var lineA = document.getElementById('rpLineActive');
+    if (selB.length === 2) {
+      var a = pts.find(function(p){return parseInt(p.getAttribute('data-i'),10)===selB[0];});
+      var b = pts.find(function(p){return parseInt(p.getAttribute('data-i'),10)===selB[1];});
+      var da = a.getAttribute('data-date'), db = b.getAttribute('data-date');
+      // order by data-i for the label
+      var lo = selB[0] < selB[1] ? da : db, hi = selB[0] < selB[1] ? db : da;
+      hint.textContent = 'Comparing ' + lo + ' → ' + hi;
+      legend.style.display = 'inline-flex';
+      exit.style.display = 'inline-flex';
+      // draw active segment between the two selected dots
+      var la = parseFloat(a.style.left), lb = parseFloat(b.style.left);
+      var left = Math.min(la, lb), right = Math.max(la, lb);
+      lineA.style.left = left + '%'; lineA.style.width = (right - left) + '%'; lineA.style.display = 'block';
+      paintDots('tbodyB', ['mod','un','rem']);
+    } else {
+      hint.textContent = selB.length === 1 ? 'Pick one more to compare' : 'Pick any two to compare';
+      legend.style.display = 'none';
+      exit.style.display = selB.length ? 'inline-flex' : 'none';
+      lineA.style.display = 'none';
+      paintDots('tbodyB', [null,null,null]);
+    }
+  }
+
+  function paintDots(tbodyId, statuses) {
+    var dots = document.querySelectorAll('#' + tbodyId + ' [data-dot]');
+    dots.forEach(function(d, i){
+      d.className = 'row-dot' + (statuses[i] ? ' ' + statuses[i] : '');
+    });
+  }
+
+  // ---- Shared active-compare chrome for the baseline + C + D stages ----
+  function _chip(t) {
+    return '<span class="rp-chip"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' + t + '</span>';
+  }
+  function _legend() {
+    return '<div class="cmp-legend">'
+      + '<span class="cnt"><span class="ld mod"></span><strong>9</strong> modified</span>'
+      + '<span class="cnt"><span class="ld add"></span><strong>0</strong> added</span>'
+      + '<span class="cnt"><span class="ld rem"></span><strong>1</strong> removed</span>'
+      + '<span class="cnt"><span class="ld un"></span><strong>2</strong> unchanged</span>'
+    + '</div>';
+  }
+  function enterCompare(s) {
+    var active = document.getElementById('asof-' + s + '-active');
+    active.innerHTML = '<div class="cmp-active">' + _chip('Jun 3, 2026 · 3:15 AM')
+      + '<span class="rp-vs">compared to</span>' + _chip('Jun 1, 2026 · 3:45 PM')
+      + '<button class="cmp-x" onclick="exitCompare(\'' + s + '\')" title="Exit compare">✕</button></div>'
+      + _legend();
+    document.getElementById('asof-' + s + '-rest').style.display = 'none';
+    active.style.display = 'flex';
+    paintDots('tbody-' + s, ['mod', 'un', 'rem']);
+  }
+  function exitCompare(s) {
+    document.getElementById('asof-' + s + '-active').style.display = 'none';
+    document.getElementById('asof-' + s + '-rest').style.display = 'flex';
+    paintDots('tbody-' + s, [null, null, null]);
+  }
+
+  // ---- Option D: dismiss strip <-> collapsed button ----
+  function dDismiss() {
+    document.getElementById('dStrip').style.display = 'none';
+    document.getElementById('dBtn').style.display = 'inline-flex';
+  }
+  function dRestore() {
+    exitCompare('d');
+    document.getElementById('dStrip').style.display = 'flex';
+    document.getElementById('dBtn').style.display = 'none';
+  }
+</script>
+</body>
+</html>

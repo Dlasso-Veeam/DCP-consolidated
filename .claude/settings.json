@@ -1,0 +1,55 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/scripts/hook-precheck.mjs\"" }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "node \"$CLAUDE_PROJECT_DIR/scripts/hook-stop.mjs\"" }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_screenshot",
+      "mcp__Claude_Preview__preview_console_logs",
+      "mcp__Claude_Preview__preview_list",
+      "mcp__Claude_Preview__preview_inspect",
+      "mcp__figma__search_design_system",
+      "mcp__figma__get_screenshot",
+      "mcp__figma__get_metadata",
+      "mcp__figma__get_variable_defs",
+      "mcp__figma__get_design_context",
+      "mcp__figma__get_libraries",
+      "mcp__22726670-f63e-40a6-8ba2-43e4c9b56322__search_design_system",
+      "mcp__22726670-f63e-40a6-8ba2-43e4c9b56322__get_screenshot",
+      "mcp__22726670-f63e-40a6-8ba2-43e4c9b56322__get_metadata",
+      "mcp__22726670-f63e-40a6-8ba2-43e4c9b56322__get_variable_defs",
+      "mcp__22726670-f63e-40a6-8ba2-43e4c9b56322__get_design_context",
+      "mcp__22726670-f63e-40a6-8ba2-43e4c9b56322__get_libraries",
+      "mcp__22726670-f63e-40a6-8ba2-43e4c9b56322__get_context_for_code_connect",
+      "mcp__22726670-f63e-40a6-8ba2-43e4c9b56322__get_code_connect_map",
+      "mcp__22726670-f63e-40a6-8ba2-43e4c9b56322__get_code_connect_suggestions",
+      "mcp__unified-platform-kb__search_docs",
+      "mcp__unified-platform-kb__read_document",
+      "mcp__unified-platform-kb__list_documents",
+      "mcp__unified-platform-kb__get_document_structure",
+      "mcp__ccd_session_mgmt__search_session_transcripts",
+      "mcp__ccd_session_mgmt__list_sessions",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "mcp__Claude_in_Chrome__get_page_text",
+      "mcp__Claude_in_Chrome__read_page",
+      "mcp__Claude_in_Chrome__read_console_messages",
+      "mcp__Claude_in_Chrome__read_network_requests",
+      "mcp__Claude_in_Chrome__list_connected_browsers",
+      "mcp__Claude_in_Chrome__find"
+    ]
+  }
+}

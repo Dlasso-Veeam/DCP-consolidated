@@ -1,0 +1,9 @@
+# macOS
+.DS_Store
+
+# smoke-test sentinel (local state, regenerated)
+.claude/.last-smoke
+
+# editor/OS noise
+*.swp
+*~
