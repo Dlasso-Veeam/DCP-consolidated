@@ -16,7 +16,7 @@
 // Usage: node scripts/smoke.mjs [file.html]   (default: index.html)
 
 import { spawn } from 'node:child_process';
-import { existsSync, readFileSync, globSync } from 'node:fs';
+import { existsSync, readFileSync, globSync, rmSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
@@ -58,9 +58,13 @@ const chrome = spawn(CHROME, [
 
 function cleanup(code) {
   try { chrome.kill('SIGKILL'); } catch {}
+  try { rmSync(userDataDir, { recursive: true, force: true }); } catch {}
   process.exit(code);
 }
+// Reap the spawned browser + temp profile on any exit signal — otherwise a
+// hook-stop timeout (SIGTERM) would orphan the headless Chrome process.
 process.on('SIGINT', () => cleanup(130));
+process.on('SIGTERM', () => cleanup(143));
 
 const browserWsP = new Promise((resolve, reject) => {
   let buf = '';
@@ -78,8 +82,11 @@ let ws, msgId = 0;
 const pending = new Map();
 let sessionId = null;
 const loadWaiters = [];
-// findings buffered from console/exception events, tagged with the current step
-let currentTag = 'init';
+// findings buffered from console/exception events, tagged with the current step.
+// 'page-load' covers anything thrown while the page boots (before the walk) —
+// a top-level script crash here MUST be reported, not filtered out, or smoke
+// would pass a page that throws on load.
+let currentTag = 'page-load';
 const findings = [];
 
 function send(method, params = {}, useSession = true) {
@@ -242,8 +249,12 @@ async function main() {
     }
   }
 
+  // Final drain so trailing async console/exception events from the last
+  // screen land before we decide pass/fail.
+  await sleep(60);
+
   // ---------- report ----------
-  const errFindings = findings.filter((f) => f.tag !== 'init');
+  const errFindings = findings;
   const ok = errFindings.length === 0 && assertFailures.length === 0;
 
   if (ok) {

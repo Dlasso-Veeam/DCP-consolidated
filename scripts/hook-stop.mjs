@@ -35,8 +35,12 @@ const input = JSON.parse((await readStdin()) || '{}');
 if (input.stop_hook_active) process.exit(0);
 
 // mtime guard — only run when index.html is newer than the last passing smoke.
+// Capture the target mtime BEFORE the run; on pass we stamp the sentinel with
+// THIS value (not "now"), so any edit landing during the smoke run has a newer
+// mtime and is re-tested next time instead of being silently skipped.
+let targetM;
 try {
-  const targetM = fs.statSync(TARGET).mtimeMs;
+  targetM = fs.statSync(TARGET).mtimeMs;
   const lastM = fs.existsSync(SENTINEL) ? fs.statSync(SENTINEL).mtimeMs : 0;
   if (targetM <= lastM) process.exit(0);
 } catch {
@@ -51,8 +55,13 @@ const run = spawnSync('node', [path.join(ROOT, 'scripts', 'smoke.mjs'), 'index.h
 const out = ((run.stdout || '') + (run.stderr || '')).trim();
 
 if (run.status === 0) {
-  // pass — stamp the sentinel so we don't re-run until index.html changes again
-  try { fs.writeFileSync(SENTINEL, new Date().toISOString() + '\n'); } catch {}
+  // pass — stamp the sentinel, then backdate its mtime to the target's pre-run
+  // mtime so edits made during the run aren't treated as already-tested.
+  try {
+    fs.writeFileSync(SENTINEL, new Date().toISOString() + '\n');
+    const t = new Date(targetM);
+    fs.utimesSync(SENTINEL, t, t);
+  } catch {}
   process.exit(0);
 }
 
