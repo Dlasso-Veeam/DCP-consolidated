@@ -16114,15 +16114,29 @@ function resetColWidth(e, tableId, cssKey) {
 var NAV_COMPACT_MQ = window.matchMedia('(max-width: 1024px)');
 function _appEl() { return document.querySelector('.app'); }
 function _isCompact() { var a = _appEl(); return !!a && a.getAttribute('data-layout') === 'compact'; }
+function _enableNavAnimSoon() {
+  // Re-enable drawer/scrim transitions after the next paint, so the mode flip
+  // itself is instant (transition:none) but interactive open/close animate.
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () { var a = _appEl(); if (a) a.classList.add('nav-anim-ready'); });
+  });
+}
 function applyLayoutMode() {
   var app = _appEl(); if (!app) return;
-  if (NAV_COMPACT_MQ.matches) {
-    app.setAttribute('data-layout', 'compact');
-  } else {
-    app.setAttribute('data-layout', 'wide');
+  var want = NAV_COMPACT_MQ.matches ? 'compact' : 'wide';
+  var changed = app.getAttribute('data-layout') !== want;
+  if (changed) {
+    // Crossing the breakpoint moves the panel between in-flow and off-canvas.
+    // Disable transitions for the flip so it doesn't wash across the screen,
+    // then re-enable them a paint later for normal open/close.
+    app.classList.remove('nav-anim-ready');
+    app.setAttribute('data-layout', want);
+  }
+  if (want === 'wide') {
     app.classList.remove('nav-drawer-open');
     closeNavWlPicker();
   }
+  if (changed) _enableNavAnimSoon();
   updateNavDrawerWlLabel();
 }
 function _setDrawerBtnsAria(expanded) {
@@ -16187,15 +16201,11 @@ else if (NAV_COMPACT_MQ.addListener) NAV_COMPACT_MQ.addListener(applyLayoutMode)
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape' && _appEl() && _appEl().classList.contains('nav-drawer-open')) closeNavDrawer();
 });
+// First run: applyLayoutMode() sets the initial mode with transitions disabled
+// (no attribute yet → treated as a change) and re-enables them a paint later,
+// so neither the initial load nor any later breakpoint crossing animates the
+// panel across the screen.
 applyLayoutMode();
-// Enable drawer/scrim transitions only AFTER the initial compact flip has
-// painted, so the first desktop→compact application is instant (no panel
-// sliding across the screen on load). Double-rAF guarantees a paint between.
-requestAnimationFrame(function () {
-  requestAnimationFrame(function () {
-    var a = _appEl(); if (a) a.classList.add('nav-anim-ready');
-  });
-});
 
 // ─────────────────────────────────────────────────────────────────────────
 (function initTreeNavSize() {
