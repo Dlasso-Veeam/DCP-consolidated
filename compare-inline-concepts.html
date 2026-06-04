@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inline field-diff concepts — Compare mode</title>
+<style>
+@font-face { font-family:'Circular Pro'; src:url('./fonts/CircularPro-Book.otf') format('opentype'); font-weight:450; font-style:normal; font-display:swap; }
+@font-face { font-family:'Circular Pro'; src:url('./fonts/CircularPro-Medium.otf') format('opentype'); font-weight:500; font-style:normal; font-display:swap; }
+@font-face { font-family:'Circular Pro'; src:url('./fonts/CircularPro-Bold.otf') format('opentype'); font-weight:700; font-style:normal; font-display:swap; }
+@font-face { font-family:'ITC Avant Garde Gothic Std'; src:url('./fonts/ITCAvantGardeStdBk.otf') format('opentype'); font-weight:450; font-style:normal; font-display:swap; }
+@font-face { font-family:'ITC Avant Garde Gothic Std'; src:url('./fonts/ITCAvantGardeStdMd.otf') format('opentype'); font-weight:500; font-style:normal; font-display:swap; }
+
+:root {
+  --blue:#1ca8dd; --blue-light:#f3fafd; --blue-30:#bbe5f5; --blue-10:#e8f6fc; --blue-dark:#0779a5;
+  --black-100:#1f2229; --black-60:#626469; --black-30:#bcbdbf; --black-10:#e9e9ea; --black-5:#f4f6f8; --black-3:#f8f8f9;
+  --white:#fff; --green:#86b62c; --green-10:#eff6ea; --green-30:#add395;
+  --orange:#f6772c; --orange-dark:#e8823e; --orange-10:#fef1ea; --orange-30:#fbc9ab;
+  --red:#d96758; --red-10:#fbeeec; --red-30:#f1c0b7;
+  --form-bg:#f4f6f8; --layout-bg:#edf0f0; --yellow:#f0b400; --yellow-10:#fff8e0; --yellow-dark:#946700;
+  --border:#d2d3d4; --border-light:#e9e9ea;
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--layout-bg); color:var(--black-100);
+  font-family:'Circular Pro','Helvetica Neue',Arial,sans-serif; font-size:14px; font-weight:450; line-height:1.45; }
+h1,h2,h3 { font-family:'ITC Avant Garde Gothic Std','Helvetica Neue',Arial,sans-serif; margin:0; }
+
+.page { max-width:1180px; margin:0 auto; padding:32px 24px 80px; }
+.page-head { margin-bottom:8px; }
+.page-head h1 { font-size:24px; }
+.page-head p { color:var(--black-60); margin:8px 0 0; max-width:760px; }
+
+/* shared controls */
+.toolbar { display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin:24px 0 8px;
+  padding:12px 16px; background:var(--white); border:1px solid var(--border-light); border-radius:8px; }
+.seg { display:inline-flex; border:1px solid var(--border); border-radius:4px; overflow:hidden; }
+.seg button { height:28px; padding:0 12px; border:none; background:var(--white); color:var(--black-60);
+  font-family:inherit; font-size:13px; font-weight:500; cursor:pointer; }
+.seg button.active { background:var(--blue-10); color:var(--blue-dark); box-shadow:inset 0 -2px 0 var(--blue); }
+.legend { display:flex; align-items:center; gap:14px; margin-left:auto; font-size:12px; color:var(--black-60); }
+.legend .lg { display:inline-flex; align-items:center; gap:6px; }
+.lg .sw { width:12px; height:12px; border-radius:3px; border:1px solid; }
+.sw.mod { background:var(--yellow-10); border-color:var(--yellow); }
+.sw.add { background:var(--green-10); border-color:var(--green-30); }
+.sw.rem { background:var(--red-10); border-color:var(--red-30); }
+.ctx { font-size:13px; color:var(--black-60); margin:0 0 20px; }
+.ctx b { color:var(--black-100); font-weight:500; }
+
+/* concept card */
+.concept { background:var(--white); border:1px solid var(--border-light); border-radius:8px; margin-bottom:24px; overflow:hidden; }
+.concept-head { padding:16px 20px; border-bottom:1px solid var(--border-light); }
+.concept-head h2 { font-size:16px; }
+.concept-head .tag { display:inline-block; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+  color:var(--blue-dark); background:var(--blue-10); border-radius:4px; padding:2px 8px; margin-bottom:8px; }
+.concept-head .rationale { color:var(--black-60); margin:6px 0 10px; font-size:13px; }
+.pc { display:flex; gap:8px; flex-wrap:wrap; }
+.pc span { font-size:12px; border-radius:4px; padding:3px 8px; border:1px solid; }
+.pc .pro { color:#4a7919; background:var(--green-10); border-color:var(--green-30); }
+.pc .con { color:var(--black-60); background:var(--black-3); border-color:var(--border-light); }
+
+/* table */
+table { width:100%; border-collapse:collapse; }
+thead th { text-align:left; font-size:12px; font-weight:500; color:var(--black-60); text-transform:uppercase; letter-spacing:.03em;
+  padding:10px 16px; border-bottom:1px solid var(--border-light); background:var(--black-3); }
+tbody td { padding:12px 16px; border-bottom:1px solid var(--border-light); vertical-align:top; }
+tbody tr.rec-row { cursor:pointer; }
+tbody tr.rec-row:hover { background:var(--blue-light); }
+.rec-name { font-weight:500; color:var(--black-100); display:flex; align-items:center; gap:8px; }
+.chev { width:16px; height:16px; color:var(--black-60); transition:transform .15s ease; flex-shrink:0; }
+tr.is-open .chev { transform:rotate(90deg); }
+.type-pill { display:inline-block; font-size:11px; font-weight:500; padding:2px 8px; border-radius:4px;
+  background:var(--green-10); color:#4a7919; border:1px solid var(--green-30); white-space:nowrap; }
+
+/* change summary cell (Concept A + shared) */
+.chg-summary { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.chg-count { display:inline-flex; align-items:center; gap:6px; font-weight:500; color:var(--black-100); }
+.pips { display:inline-flex; gap:3px; }
+.pip { width:8px; height:8px; border-radius:2px; }
+.pip.mod { background:var(--yellow); } .pip.add { background:var(--green); } .pip.rem { background:var(--red); }
+.peek { color:var(--black-60); font-size:13px; }
+.peek .arrow { color:var(--black-30); margin:0 4px; }
+.no-change { color:var(--black-30); font-style:italic; font-size:13px; }
+
+/* nested changed-fields detail */
+.detail-wrap { padding:0 16px 14px 40px; background:var(--black-3); }
+.detail { width:100%; border:1px solid var(--border-light); border-radius:6px; overflow:hidden; background:var(--white); }
+.detail th { background:var(--white); border-bottom:1px solid var(--border-light); padding:8px 12px; font-size:11px; }
+.detail td { padding:8px 12px; border-bottom:1px solid var(--black-3); font-size:13px; }
+.detail tr:last-child td { border-bottom:none; }
+.fld-name { font-weight:500; color:var(--black-100); width:32%; }
+.val-before { color:var(--black-60); text-decoration:line-through; text-decoration-color:var(--black-30); }
+.val-arrow { color:var(--black-30); padding:0 8px; }
+.val-after { color:var(--black-100); font-weight:500; }
+.row-mod { box-shadow:inset 3px 0 0 var(--yellow); }
+.row-add { box-shadow:inset 3px 0 0 var(--green); }
+.row-rem { box-shadow:inset 3px 0 0 var(--red); }
+.tag-mini { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.03em; padding:1px 6px; border-radius:3px; margin-left:8px; }
+.tag-mini.mod { background:var(--yellow-10); color:var(--yellow-dark); }
+.tag-mini.add { background:var(--green-10); color:#4a7919; }
+.tag-mini.rem { background:var(--red-10); color:var(--red); }
+.show-all-link { display:inline-block; margin-top:8px; font-size:12px; color:var(--blue); cursor:pointer; }
+.show-all-link:hover { text-decoration:underline; }
+
+/* Concept B — change chips in one column */
+.chip-cell { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.diff-chip { display:inline-flex; align-items:center; gap:4px; font-size:12px; padding:3px 8px; border-radius:4px; border:1px solid; white-space:nowrap; }
+.diff-chip .k { font-weight:500; }
+.diff-chip .b { text-decoration:line-through; opacity:.7; }
+.diff-chip .ar { opacity:.55; }
+.diff-chip.mod { color:var(--yellow-dark); border-color:var(--yellow); background:var(--yellow-10); }
+.diff-chip.add { color:#4a7919; border-color:var(--green-30); background:var(--green-10); }
+.diff-chip.rem { color:var(--red); border-color:var(--red-30); background:var(--red-10); }
+.more-chip { font-size:12px; padding:3px 8px; border-radius:4px; border:1px dashed var(--border); background:var(--white);
+  color:var(--black-60); cursor:pointer; font-family:inherit; }
+.more-chip:hover { border-color:var(--blue); color:var(--blue-dark); background:var(--blue-light); }
+
+/* Concept C — stacked before/after watched columns */
+.stack { display:flex; flex-direction:column; line-height:1.3; }
+.stack .s-before { color:var(--black-60); text-decoration:line-through; text-decoration-color:var(--black-30); font-size:12px; }
+.stack .s-after { color:var(--black-100); font-weight:500; }
+.stack.unchanged .s-after { color:var(--black-60); font-weight:450; }
+.cell-mod { background:var(--yellow-10); }
+.cell-add { background:var(--green-10); }
+.cell-rem { background:var(--red-10); }
+.other-link { font-size:12px; color:var(--blue); cursor:pointer; }
+.other-link:hover { text-decoration:underline; }
+.other-none { font-size:12px; color:var(--black-30); }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="page-head">
+    <h1>Inline field-diff concepts — Compare mode</h1>
+    <p>Three ways to surface before/after field changes <strong>inside the records table</strong> instead of a drawer.
+       Same data in each. The shared lever — <b>changed-only</b> — is what keeps "a record has 22 fields" from becoming a wall of text.
+       Toggle it below to feel the difference.</p>
+  </div>
+
+  <div class="toolbar">
+    <span style="font-size:13px;font-weight:500">Field visibility</span>
+    <div class="seg" id="seg-mode">
+      <button data-mode="changed" class="active">Changed only</button>
+      <button data-mode="all">All fields</button>
+    </div>
+    <div class="legend">
+      <span class="lg"><span class="sw mod"></span>Modified</span>
+      <span class="lg"><span class="sw add"></span>Added</span>
+      <span class="lg"><span class="sw rem"></span>Removed</span>
+    </div>
+  </div>
+  <p class="ctx">Comparing <b>Accounts</b> · anchor <b>As of Jun 4, 2026 · 3:45 PM</b> (latest backup) → <b>As of Jun 1, 2026 · 9:00 AM</b></p>
+
+  <!-- CONCEPT A -->
+  <div class="concept">
+    <div class="concept-head">
+      <span class="tag">Concept A · recommended</span>
+      <h2>Summary cell + inline expand (master–detail)</h2>
+      <p class="rationale">One row per record with a compact change summary; click to expand the changed fields in place. Scan breadth like a table, drill depth without a drawer.</p>
+      <div class="pc">
+        <span class="pro">Scales to many fields (collapsed + changed-only)</span>
+        <span class="pro">One row per record — table stays scannable</span>
+        <span class="pro">No drawer round-trips</span>
+        <span class="con">Detail needs a click</span>
+      </div>
+    </div>
+    <table id="tbl-a">
+      <thead><tr><th style="width:30%">Record</th><th style="width:14%">Type</th><th>Changes</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- CONCEPT B -->
+  <div class="concept">
+    <div class="concept-head">
+      <span class="tag">Concept B</span>
+      <h2>Single "Changes" column — old → new chips</h2>
+      <p class="rationale">A fixed-width column shows the first couple of changes as <code>field: old → new</code> chips, with a "+N more" overflow that expands inline. Width stays bounded no matter how many fields exist.</p>
+      <div class="pc">
+        <span class="pro">Top changes visible with zero clicks</span>
+        <span class="pro">Bounded width</span>
+        <span class="con">Only a peek until expanded</span>
+        <span class="con">Chips get busy on high-churn rows</span>
+      </div>
+    </div>
+    <table id="tbl-b">
+      <thead><tr><th style="width:30%">Record</th><th style="width:14%">Type</th><th>Changes</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- CONCEPT C -->
+  <div class="concept">
+    <div class="concept-head">
+      <span class="tag">Concept C</span>
+      <h2>Stacked before/after — curated "watched" columns</h2>
+      <p class="rationale">A handful of key fields become real columns, each cell stacking <span style="text-decoration:line-through;color:var(--black-60)">old</span> over <strong>new</strong>. Everything else collapses into a "+N other changes" link. Best when a few fields matter most.</p>
+      <div class="pc">
+        <span class="pro">Zero clicks for the fields that matter</span>
+        <span class="pro">Reads like a spreadsheet diff</span>
+        <span class="con">Doesn't scale to arbitrary fields — only the curated set</span>
+        <span class="con">Needs someone to choose the watched fields</span>
+      </div>
+    </div>
+    <table id="tbl-c">
+      <thead><tr>
+        <th style="width:22%">Record</th>
+        <th>Status</th><th>Owner</th><th>Annual revenue</th>
+        <th style="width:16%">Other changes</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <p class="ctx" style="margin-top:8px">Adventure Works has <b>no changes</b> — shown so you can see how each pattern handles the unchanged case. Tailspin Toys is intentionally high-churn (12 changed fields) to stress the overflow/expand behavior.</p>
+</div>
+
+<script>
+// ── Mock data: D365 Accounts, anchor (latest) vs an earlier RP ──────────────
+// Each record carries a base field set; `changes` maps fieldName → {type, before, after}.
+// type: 'mod' | 'add' | 'rem'. Unchanged fields just have a single value.
+var WATCHED = ['Status','Owner','Annual revenue'];
+var SCHEMA = ['Account name','Account number','Owner','Status','Industry','Annual revenue','Employees',
+  'Phone','Email','Website','Billing city','Billing state','Billing country','Primary contact',
+  'Account type','Credit limit','Payment terms','Rating','Territory','Parent account','Created on','Modified on'];
+
+function base(over){ // build a full field map with sensible defaults, then override
+  var b = {'Account name':'—','Account number':'ACC-0000','Owner':'J. Smith','Status':'Active',
+    'Industry':'Technology','Annual revenue':'$2.4M','Employees':'1,200','Phone':'+1 415 555 0100',
+    'Email':'info@acme.com','Website':'acme.com','Billing city':'San Francisco','Billing state':'CA',
+    'Billing country':'USA','Primary contact':'A. Patel','Account type':'Customer','Credit limit':'$50,000',
+    'Payment terms':'Net 30','Rating':'Warm','Territory':'West','Parent account':'—',
+    'Created on':'Jan 12, 2023','Modified on':'Jun 3, 2026'};
+  for (var k in over) b[k]=over[k];
+  return b;
+}
+var RECORDS = [
+  { name:'Contoso Ltd', type:'Account', fields:base({'Account name':'Contoso Ltd','Account number':'ACC-1042'}),
+    changes:{ 'Status':{type:'mod',before:'Active',after:'On hold'}, 'Owner':{type:'mod',before:'J. Smith',after:'A. Lee'},
+      'Credit limit':{type:'mod',before:'$50,000',after:'$75,000'} } },
+  { name:'Fabrikam Inc', type:'Account', fields:base({'Account name':'Fabrikam Inc','Account number':'ACC-2087','Annual revenue':'$2.9M'}),
+    changes:{ 'Annual revenue':{type:'mod',before:'$2.4M',after:'$2.9M'} } },
+  { name:'Adventure Works', type:'Account', fields:base({'Account name':'Adventure Works','Account number':'ACC-3310'}),
+    changes:{} },
+  { name:'Northwind Traders', type:'Account', fields:base({'Account name':'Northwind Traders','Account number':'ACC-4521'}),
+    changes:{ 'Status':{type:'mod',before:'Active',after:'Prospect'}, 'Owner':{type:'mod',before:'J. Smith',after:'M. Diaz'},
+      'Industry':{type:'mod',before:'Technology',after:'Manufacturing'}, 'Employees':{type:'mod',before:'1,200',after:'1,540'},
+      'Primary contact':{type:'mod',before:'A. Patel',after:'R. Cole'},
+      'SLA tier':{type:'add',before:'—',after:'Gold'}, 'Fax':{type:'rem',before:'+1 415 555 0190',after:'—'} } },
+  { name:'Tailspin Toys', type:'Account', fields:base({'Account name':'Tailspin Toys','Account number':'ACC-5093'}),
+    changes:{ 'Status':{type:'mod',before:'Active',after:'Suspended'}, 'Owner':{type:'mod',before:'J. Smith',after:'K. Obi'},
+      'Annual revenue':{type:'mod',before:'$2.4M',after:'$1.8M'}, 'Employees':{type:'mod',before:'1,200',after:'860'},
+      'Industry':{type:'mod',before:'Technology',after:'Retail'}, 'Credit limit':{type:'mod',before:'$50,000',after:'$20,000'},
+      'Payment terms':{type:'mod',before:'Net 30',after:'Prepaid'}, 'Rating':{type:'mod',before:'Warm',after:'Cold'},
+      'Territory':{type:'mod',before:'West',after:'Central'}, 'Primary contact':{type:'mod',before:'A. Patel',after:'D. Vance'},
+      'Risk flag':{type:'add',before:'—',after:'Past due'}, 'Loyalty program':{type:'rem',before:'Tier 2',after:'—'} } },
+  { name:'Wingtip Toys', type:'Account', fields:base({'Account name':'Wingtip Toys','Account number':'ACC-6614'}),
+    changes:{ 'Phone':{type:'mod',before:'+1 415 555 0100',after:'+1 415 555 0247'}, 'Website':{type:'mod',before:'acme.com',after:'wingtip.com'} } },
+  { name:'Litware Inc', type:'Account', fields:base({'Account name':'Litware Inc','Account number':'ACC-7788'}),
+    changes:{ 'Status':{type:'mod',before:'Active',after:'Active (renewed)'}, 'Annual revenue':{type:'mod',before:'$2.4M',after:'$3.1M'},
+      'Account manager':{type:'add',before:'—',after:'S. Yang'}, 'Legacy ID':{type:'rem',before:'LW-09',after:'—'} } }
+];
+
+var MODE = 'changed';
+function changedList(rec){ return Object.keys(rec.changes).map(function(k){ var c=rec.changes[k]; return {name:k, type:c.type, before:c.before, after:c.after}; }); }
+function changeCounts(rec){ var c={mod:0,add:0,rem:0}; changedList(rec).forEach(function(f){ c[f.type]++; }); return c; }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// Field rows for the expand/detail — changed-only OR all fields per MODE.
+function detailRows(rec){
+  if (MODE === 'changed') return changedList(rec);
+  // all-fields mode: every schema field; mark changed ones
+  return SCHEMA.map(function(name){
+    var c = rec.changes[name];
+    if (c) return {name:name, type:c.type, before:c.before, after:c.after};
+    return {name:name, type:null, before:rec.fields[name], after:rec.fields[name]};
+  }).concat(changedList(rec).filter(function(f){ return SCHEMA.indexOf(f.name)<0; })); // added fields not in schema
+}
+
+function valCell(f){
+  if (f.type === 'add') return '<span class="val-after">'+esc(f.after)+'</span>';
+  if (f.type === 'rem') return '<span class="val-before">'+esc(f.before)+'</span> <span class="val-arrow">→</span> <span class="val-after">removed</span>';
+  if (f.type === 'mod') return '<span class="val-before">'+esc(f.before)+'</span> <span class="val-arrow">→</span> <span class="val-after">'+esc(f.after)+'</span>';
+  return '<span class="val-after" style="font-weight:450;color:var(--black-60)">'+esc(f.after)+'</span>'; // unchanged
+}
+function rowCls(t){ return t==='add'?'row-add':t==='rem'?'row-rem':t==='mod'?'row-mod':''; }
+function miniTag(t){ return t? '<span class="tag-mini '+t+'">'+(t==='add'?'added':t==='rem'?'removed':'modified')+'</span>':''; }
+
+// ── Concept A ───────────────────────────────────────────────────────────────
+function renderA(){
+  var tb = document.querySelector('#tbl-a tbody'); tb.innerHTML='';
+  RECORDS.forEach(function(rec,i){
+    var ch = changedList(rec), cc = changeCounts(rec);
+    var summary;
+    if (!ch.length) summary = '<span class="no-change">No changes</span>';
+    else {
+      var pips=''; for (var p=0;p<cc.mod;p++) pips+='<span class="pip mod"></span>';
+      for (var a=0;a<cc.add;a++) pips+='<span class="pip add"></span>'; for (var r=0;r<cc.rem;r++) pips+='<span class="pip rem"></span>';
+      var top = ch[0];
+      var peek = top.type==='add' ? esc(top.name)+': added' : top.type==='rem' ? esc(top.name)+': removed'
+        : esc(top.name)+': '+esc(top.before)+'<span class="arrow">→</span>'+esc(top.after);
+      summary = '<div class="chg-summary"><span class="chg-count"><span class="pips">'+pips+'</span>'+ch.length+' field'+(ch.length>1?'s':'')+' changed</span>'+
+        '<span class="peek">'+peek+(ch.length>1?'  ·  +'+(ch.length-1)+' more':'')+'</span></div>';
+    }
+    var chev = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>';
+    var tr = document.createElement('tr'); tr.className='rec-row'; tr.dataset.idx=i;
+    if (!ch.length) { tr.style.cursor='default'; chev='<span style="display:inline-block;width:16px"></span>'; }
+    tr.innerHTML = '<td><span class="rec-name">'+chev+esc(rec.name)+'</span></td>'+
+      '<td><span class="type-pill">'+esc(rec.type)+'</span></td><td>'+summary+'</td>';
+    if (ch.length) tr.onclick=function(){ toggleA(this); };
+    tb.appendChild(tr);
+    // detail row (hidden until expand)
+    var dr = document.createElement('tr'); dr.className='detail-row'; dr.style.display='none';
+    dr.innerHTML='<td colspan="3" style="padding:0"><div class="detail-wrap"></div></td>';
+    tb.appendChild(dr);
+  });
+}
+function toggleA(tr){
+  var dr = tr.nextElementSibling; var open = dr.style.display!=='none';
+  if (open){ dr.style.display='none'; tr.classList.remove('is-open'); return; }
+  var rec = RECORDS[+tr.dataset.idx];
+  var rows = detailRows(rec).map(function(f){
+    return '<tr class="'+rowCls(f.type)+'"><td class="fld-name">'+esc(f.name)+miniTag(f.type)+'</td><td>'+valCell(f)+'</td></tr>';
+  }).join('');
+  dr.querySelector('.detail-wrap').innerHTML =
+    '<table class="detail"><thead><tr><th style="width:32%">Field</th><th>'+(MODE==='changed'?'Before → after':'Value (before → after if changed)')+'</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  dr.style.display=''; tr.classList.add('is-open');
+}
+
+// ── Concept B ───────────────────────────────────────────────────────────────
+function chipHtml(f){
+  if (f.type==='add') return '<span class="diff-chip add"><span class="k">'+esc(f.name)+'</span> '+esc(f.after)+'</span>';
+  if (f.type==='rem') return '<span class="diff-chip rem"><span class="k">'+esc(f.name)+'</span> <span class="b">'+esc(f.before)+'</span></span>';
+  return '<span class="diff-chip mod"><span class="k">'+esc(f.name)+'</span> <span class="b">'+esc(f.before)+'</span><span class="ar"> → </span>'+esc(f.after)+'</span>';
+}
+function renderB(){
+  var tb = document.querySelector('#tbl-b tbody'); tb.innerHTML='';
+  var SHOW = 2;
+  RECORDS.forEach(function(rec,i){
+    var ch = changedList(rec);
+    var cell;
+    if (!ch.length) cell='<span class="no-change">No changes</span>';
+    else {
+      var shown = ch.slice(0,SHOW).map(chipHtml).join('');
+      var more = ch.length>SHOW ? '<button class="more-chip" data-idx="'+i+'">+'+(ch.length-SHOW)+' more</button>' : '';
+      cell='<div class="chip-cell">'+shown+more+'</div>';
+    }
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><span class="rec-name" style="padding-left:0">'+esc(rec.name)+'</span></td>'+
+      '<td><span class="type-pill">'+esc(rec.type)+'</span></td><td>'+cell+'</td>';
+    tb.appendChild(tr);
+    var dr=document.createElement('tr'); dr.className='detail-row'; dr.style.display='none';
+    dr.innerHTML='<td colspan="3" style="padding:0"><div class="detail-wrap"></div></td>';
+    tb.appendChild(dr);
+  });
+  tb.querySelectorAll('.more-chip').forEach(function(btn){
+    btn.onclick=function(){
+      var idx=+this.dataset.idx; var dr=this.closest('tr').nextElementSibling;
+      var open=dr.style.display!=='none';
+      if(open){ dr.style.display='none'; this.textContent='+'+(changedList(RECORDS[idx]).length-2)+' more'; return; }
+      var rows=detailRows(RECORDS[idx]).map(function(f){ return '<tr class="'+rowCls(f.type)+'"><td class="fld-name">'+esc(f.name)+miniTag(f.type)+'</td><td>'+valCell(f)+'</td></tr>'; }).join('');
+      dr.querySelector('.detail-wrap').innerHTML='<table class="detail"><thead><tr><th style="width:32%">Field</th><th>Before → after</th></tr></thead><tbody>'+rows+'</tbody></table>';
+      dr.style.display=''; this.textContent='Show less';
+    };
+  });
+}
+
+// ── Concept C ───────────────────────────────────────────────────────────────
+function watchedCell(rec,name){
+  var c=rec.changes[name];
+  if (c) return '<td class="cell-'+c.type+'"><span class="stack"><span class="s-before">'+esc(c.before)+'</span><span class="s-after">'+esc(c.after)+'</span></span></td>';
+  return '<td><span class="stack unchanged"><span class="s-after">'+esc(rec.fields[name])+'</span></span></td>';
+}
+function renderC(){
+  var tb=document.querySelector('#tbl-c tbody'); tb.innerHTML='';
+  RECORDS.forEach(function(rec,i){
+    var others = changedList(rec).filter(function(f){ return WATCHED.indexOf(f.name)<0; });
+    var otherCell = others.length ? '<span class="other-link" data-idx="'+i+'">+'+others.length+' other change'+(others.length>1?'s':'')+'</span>' : '<span class="other-none">—</span>';
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><span class="rec-name" style="padding-left:0">'+esc(rec.name)+'</span></td>'+
+      watchedCell(rec,'Status')+watchedCell(rec,'Owner')+watchedCell(rec,'Annual revenue')+
+      '<td>'+otherCell+'</td>';
+    tb.appendChild(tr);
+    var dr=document.createElement('tr'); dr.className='detail-row'; dr.style.display='none';
+    dr.innerHTML='<td colspan="5" style="padding:0"><div class="detail-wrap"></div></td>';
+    tb.appendChild(dr);
+  });
+  tb.querySelectorAll('.other-link').forEach(function(lnk){
+    lnk.onclick=function(){
+      var idx=+this.dataset.idx; var dr=this.closest('tr').nextElementSibling; var open=dr.style.display!=='none';
+      if(open){ dr.style.display='none'; return; }
+      var others=changedList(RECORDS[idx]).filter(function(f){ return WATCHED.indexOf(f.name)<0; });
+      var rows=others.map(function(f){ return '<tr class="'+rowCls(f.type)+'"><td class="fld-name">'+esc(f.name)+miniTag(f.type)+'</td><td>'+valCell(f)+'</td></tr>'; }).join('');
+      dr.querySelector('.detail-wrap').innerHTML='<table class="detail"><thead><tr><th style="width:32%">Field</th><th>Before → after</th></tr></thead><tbody>'+rows+'</tbody></table>';
+      dr.style.display='';
+    };
+  });
+}
+
+function renderAll(){ renderA(); renderB(); renderC(); }
+document.getElementById('seg-mode').addEventListener('click', function(e){
+  var b=e.target.closest('button'); if(!b) return;
+  MODE=b.dataset.mode;
+  this.querySelectorAll('button').forEach(function(x){ x.classList.toggle('active', x===b); });
+  renderAll();
+});
+renderAll();
+</script>
+</body>
+</html>
