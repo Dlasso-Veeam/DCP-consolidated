@@ -29641,7 +29641,12 @@ function openRecordDrawer(id, nameOverride, subOverride, asOfDate, ctxOverride) 
           if (_rightRp) _rightPinId = _rightRp.id;
         }
       }
-      rdState.leftSel  = _leftPinId  || 'prod';
+      // V1: the inventory anchor is locked to the LATEST BACKUP (a null
+      // invAsOfRpId means "latest", not production). So when the left side
+      // doesn't resolve to a specific RP/date, default it to the latest RP —
+      // NOT 'prod' — or the drawer mislabels the anchor as "Production (now)".
+      // RIGHT keeps its 'prod' fallback (compare-to "today" = vs live state).
+      rdState.leftSel  = _leftPinId  || (rps[0] ? rps[0].id : 'prod');
       rdState.rightSel = _rightPinId || 'prod';
     }
   } else {
