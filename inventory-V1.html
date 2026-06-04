@@ -1331,6 +1331,85 @@ tbody tr.rec-diff-row-unchanged .diff-dot { background: var(--black-30); }
 .tree-nav-search-inner:focus-within { box-shadow: inset 0 0 0 1px var(--blue); border-color: var(--blue); background: var(--white); }
 .tree-nav-search-inner svg { color: var(--black-60); flex-shrink: 0; }
 .tree-nav-body { flex: 1; overflow-y: auto; padding: 0; }
+
+/* ── Responsive: tablet/mobile nav drawer (≤1024px) ─────────────────────
+   Below this width the workload + tree panels leave the layout flow and
+   become a single slide-in drawer — a workload dropdown on top with the
+   tree directly below — that overlays the content. Opened from a ☰ button
+   in the inventory header, closed by selecting a node, tapping the scrim,
+   or Esc. EVERY rule here is gated behind .app[data-layout="compact"], so
+   the desktop three-pane layout is byte-for-byte unchanged. The mode flips
+   via a matchMedia listener (see applyLayoutMode()). */
+.nav-drawer-btn { display: none; }
+.tree-nav-wl-picker { display: none; }
+.nav-scrim { display: none; }
+
+/* compact: hide the desktop workload panel + the collapse pills */
+.app[data-layout="compact"] .wl-nav { display: none; }
+.app[data-layout="compact"] .wl-nav-toggle,
+.app[data-layout="compact"] .tree-nav-toggle,
+.app[data-layout="compact"] .panels-expand-btn { display: none !important; }
+
+/* compact: the ☰ trigger in the inventory header */
+.app[data-layout="compact"] .nav-drawer-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 36px; padding: 0 12px; margin-right: 12px; flex-shrink: 0;
+  background: var(--white); border: 1px solid var(--border-light); border-radius: 4px;
+  color: var(--black-100); font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer;
+}
+.app[data-layout="compact"] .nav-drawer-btn:hover { background: var(--black-3); }
+
+/* compact: tree-nav becomes the off-canvas drawer (left offset tracks the
+   64px sidenav width set at the .sidenav override) */
+.app[data-layout="compact"] .tree-nav {
+  position: fixed; top: var(--devjump-h, 0px); left: 64px;
+  height: calc(100vh - var(--devjump-h, 0px)); max-height: none;
+  width: min(86vw, 320px);
+  transform: translateX(-110%);
+  transition: transform 0.24s ease;
+  box-shadow: 2px 0 20px rgba(31,34,41,0.22);
+  z-index: 120;
+}
+.app[data-layout="compact"].nav-drawer-open .tree-nav { transform: translateX(0); }
+/* compact ignores the desktop collapse + resize affordances */
+.app[data-layout="compact"] .tree-nav.is-collapsed {
+  width: min(86vw, 320px); border-right: 1px solid var(--border-light);
+}
+.app[data-layout="compact"] .tree-nav.is-collapsed .tree-nav-search,
+.app[data-layout="compact"] .tree-nav.is-collapsed .tree-nav-body { display: flex; }
+.app[data-layout="compact"] .tree-nav-resize { display: none; }
+
+/* compact: scrim behind the open drawer */
+.app[data-layout="compact"] .nav-scrim {
+  display: block; position: fixed; inset: 0; background: rgba(31,34,41,0.42);
+  z-index: 110; opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+}
+.app[data-layout="compact"].nav-drawer-open .nav-scrim { opacity: 1; pointer-events: auto; }
+
+/* compact: workload picker (accordion) at the top of the drawer */
+.app[data-layout="compact"] .tree-nav-wl-picker {
+  display: block; flex-shrink: 0; padding: 10px 12px; border-bottom: 1px solid var(--border-light);
+}
+.tnwl-btn {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%;
+  height: 36px; padding: 0 12px; background: var(--form-bg); border: 1px solid var(--border-light);
+  border-radius: 4px; font-family: inherit; font-size: 14px; font-weight: 500; color: var(--black-100); cursor: pointer;
+}
+.tnwl-btn .tnwl-cur { display: flex; align-items: center; gap: 8px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tnwl-btn .tnwl-chev { flex-shrink: 0; color: var(--black-60); transition: transform 0.18s ease; }
+.tree-nav-wl-picker.is-open .tnwl-btn .tnwl-chev { transform: rotate(180deg); }
+.tnwl-list { display: none; margin-top: 8px; max-height: 46vh; overflow-y: auto; border: 1px solid var(--border-light); border-radius: 4px; }
+.tree-nav-wl-picker.is-open .tnwl-list { display: block; }
+.tnwl-item {
+  display: flex; align-items: center; gap: 10px; width: 100%; height: 40px; padding: 0 12px;
+  background: transparent; border: none; border-bottom: 1px solid var(--black-3);
+  font-family: inherit; font-size: 14px; color: var(--black-100); cursor: pointer; text-align: left;
+}
+.tnwl-item:last-child { border-bottom: none; }
+.tnwl-item:hover { background: var(--black-3); }
+.tnwl-item.is-active { box-shadow: inset 2px 0 0 var(--blue); font-weight: 500; }
+.tnwl-item-icon { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; color: var(--black-60); flex-shrink: 0; }
+.tnwl-item.is-active .tnwl-item-icon { color: var(--blue); }
 .tree-node { font-size: 16px; color: var(--black-100); }
 .tree-node-row { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 4px 16px; cursor: pointer; transition: background-color 0.1s ease; position: relative; }
 .tree-node-row:hover { background: var(--black-3); }
@@ -4556,6 +4635,9 @@ body.drawer-open { overflow: hidden; }
         <!-- Body: wl-nav + tree-nav + inventory -->
         <div class="body-row">
 
+          <!-- Compact-mode scrim behind the open nav drawer (≤1024px only) -->
+          <div class="nav-scrim" id="navScrim" onclick="closeNavDrawer()" aria-hidden="true"></div>
+
           <!-- ============================================================
                WORKLOAD PANEL — leftmost panel; replaces the top dropdown.
                Same sticky/collapse design language as the tree-nav.
@@ -4634,6 +4716,15 @@ body.drawer-open { overflow: hidden; }
                  us capture-and-drag without losing tracking when the
                  cursor leaves the 6px hit area. -->
             <div class="tree-nav-resize" onpointerdown="startTreeNavResize(event)" aria-hidden="true"></div>
+            <!-- Compact-mode workload picker (≤1024px). Hidden on desktop; the
+                 standalone .wl-nav panel covers this on wide layouts. -->
+            <div class="tree-nav-wl-picker" id="treeNavWlPicker">
+              <button class="tnwl-btn" id="tnwlBtn" type="button" aria-expanded="false" aria-haspopup="true" onclick="toggleNavWlPicker()">
+                <span class="tnwl-cur" id="tnwlCur">Workload</span>
+                <span class="tnwl-chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></span>
+              </button>
+              <div class="tnwl-list" id="tnwlList" role="menu"></div>
+            </div>
             <div class="tree-nav-search">
               <div class="tree-nav-search-inner">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -4647,6 +4738,9 @@ body.drawer-open { overflow: hidden; }
           <div class="inv-panel" data-inv-mode="list">
             <div class="inv-sticky-head">
               <div class="inv-header">
+                <button class="nav-drawer-btn" id="navDrawerBtn" type="button" aria-expanded="false" aria-controls="treeNav" onclick="toggleNavDrawer()" title="Browse workloads & items" aria-label="Open navigation">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
                 <div style="display:flex;align-items:center;gap:12px;min-width:0;flex:1">
                   <div id="invTitleIcon"></div>
                   <div style="min-width:0">
@@ -16002,6 +16096,85 @@ function resetColWidth(e, tableId, cssKey) {
   // column snaps back to its content-fitted natural width.
   _autoSizeColumns(table);
 }
+// ── Responsive nav drawer (tablet/mobile, ≤1024px) ─────────────────────────
+// Below the breakpoint the workload + tree panels leave the layout flow and
+// become a single slide-in drawer (workload dropdown on top, tree below) that
+// overlays the content. Mode is driven by matchMedia and recorded as
+// data-layout="compact"|"wide" on .app; all compact styling is gated behind
+// that attribute so the desktop three-pane layout is untouched.
+var NAV_COMPACT_MQ = window.matchMedia('(max-width: 1024px)');
+function _appEl() { return document.querySelector('.app'); }
+function _isCompact() { var a = _appEl(); return !!a && a.getAttribute('data-layout') === 'compact'; }
+function applyLayoutMode() {
+  var app = _appEl(); if (!app) return;
+  if (NAV_COMPACT_MQ.matches) {
+    app.setAttribute('data-layout', 'compact');
+  } else {
+    app.setAttribute('data-layout', 'wide');
+    app.classList.remove('nav-drawer-open');
+    closeNavWlPicker();
+  }
+  updateNavDrawerWlLabel();
+}
+function openNavDrawer() {
+  var a = _appEl(); if (!a) return;
+  a.classList.add('nav-drawer-open');
+  var b = document.getElementById('navDrawerBtn'); if (b) b.setAttribute('aria-expanded', 'true');
+}
+function closeNavDrawer() {
+  var a = _appEl(); if (!a) return;
+  a.classList.remove('nav-drawer-open');
+  var b = document.getElementById('navDrawerBtn'); if (b) b.setAttribute('aria-expanded', 'false');
+  closeNavWlPicker();
+}
+function toggleNavDrawer() {
+  var a = _appEl(); if (!a) return;
+  if (a.classList.contains('nav-drawer-open')) closeNavDrawer(); else openNavDrawer();
+}
+// Workload picker (accordion at the top of the drawer). Reuses the existing
+// .wl-nav workload list as the single source of truth — no duplicate data.
+function updateNavDrawerWlLabel() {
+  var cur = document.querySelector('.wl-nav .wl-nav-item.is-active .wl-nav-label');
+  var el = document.getElementById('tnwlCur');
+  if (el) el.textContent = cur ? cur.textContent.trim() : 'Workload';
+}
+function buildNavWlList() {
+  var list = document.getElementById('tnwlList'); if (!list) return;
+  var items = Array.prototype.slice.call(document.querySelectorAll('.wl-nav .wl-nav-item'));
+  list.innerHTML = items.map(function (it) {
+    var name = ((it.querySelector('.wl-nav-label') || {}).textContent || '').trim();
+    var wl = it.getAttribute('data-wl') || '';
+    var icon = (it.querySelector('.wl-nav-icon') || {}).innerHTML || '';
+    var active = it.classList.contains('is-active');
+    return '<button type="button" role="menuitem" class="tnwl-item' + (active ? ' is-active' : '') + '"'
+      + ' data-name="' + name.replace(/"/g, '&quot;') + '" data-wl="' + wl + '"'
+      + ' onclick="pickWorkloadFromDrawer(this.getAttribute(\'data-name\'), this.getAttribute(\'data-wl\'))">'
+      + '<span class="tnwl-item-icon">' + icon + '</span><span>' + name + '</span></button>';
+  }).join('');
+}
+function toggleNavWlPicker() {
+  var p = document.getElementById('treeNavWlPicker'); if (!p) return;
+  var open = p.classList.toggle('is-open');
+  var btn = document.getElementById('tnwlBtn'); if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  if (open) buildNavWlList();
+}
+function closeNavWlPicker() {
+  var p = document.getElementById('treeNavWlPicker'); if (p) p.classList.remove('is-open');
+  var b = document.getElementById('tnwlBtn'); if (b) b.setAttribute('aria-expanded', 'false');
+}
+function pickWorkloadFromDrawer(name, wl) {
+  closeNavWlPicker();
+  try { if (typeof selectWl === 'function') selectWl(name, wl); } catch (e) {}
+  updateNavDrawerWlLabel();
+  // Drawer stays open so the user can drill the tree for the new workload.
+}
+if (NAV_COMPACT_MQ.addEventListener) NAV_COMPACT_MQ.addEventListener('change', applyLayoutMode);
+else if (NAV_COMPACT_MQ.addListener) NAV_COMPACT_MQ.addListener(applyLayoutMode);
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && _appEl() && _appEl().classList.contains('nav-drawer-open')) closeNavDrawer();
+});
+applyLayoutMode();
+
 // ─────────────────────────────────────────────────────────────────────────
 (function initTreeNavSize() {
   function apply() {
@@ -16346,6 +16519,14 @@ function treeNavSelect(key) {
     renderTreeNav();
   } finally {
     state._suppressScrollToTop = false;
+    // Compact (drawer) mode: selecting a node that drills into content
+    // auto-closes the drawer so the result is visible. Category-root
+    // re-scoping (cat: keys) keeps the drawer open — the user is about to
+    // pick a node within it.
+    var _isCatRoot = (typeof key === 'string' && key.indexOf('cat:') === 0);
+    if (!_isCatRoot && typeof _isCompact === 'function' && _isCompact() && typeof closeNavDrawer === 'function') {
+      closeNavDrawer();
+    }
   }
 }
 // Toggle expand/collapse on a node (chevron click). Stops the click
