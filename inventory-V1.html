@@ -1353,7 +1353,7 @@ tbody tr.rec-diff-row-unchanged .diff-dot { background: var(--black-30); }
 /* compact: the ☰ trigger in the inventory header */
 .app[data-layout="compact"] .nav-drawer-btn {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 30px; height: 30px; padding: 0; margin-right: 10px; flex-shrink: 0;
+  width: 32px; height: 32px; padding: 0; margin-right: 8px; flex-shrink: 0;
   background: var(--white); border: 1px solid var(--border-light); border-radius: 4px;
   color: var(--black-100); cursor: pointer;
 }
@@ -4443,9 +4443,6 @@ body.drawer-open { overflow: hidden; }
     <!-- Topbar -->
     <div class="topbar">
       <div class="breadcrumbs">
-        <button class="nav-drawer-btn" id="navDrawerBtn" type="button" aria-expanded="false" aria-controls="treeNav" onclick="toggleNavDrawer()" title="Browse workloads & items" aria-label="Open navigation">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
         <span>Data Command Center</span>
         <span class="bc-sep">›</span>
@@ -4620,6 +4617,9 @@ body.drawer-open { overflow: hidden; }
       <div class="content-container">
         <!-- Filter bars — list + drill siblings, .app[data-inv-mode] picks one -->
         <div class="filter-bar" id="filterBar-inv" data-inv-mode="list">
+          <button class="nav-drawer-btn" type="button" aria-expanded="false" aria-controls="treeNav" onclick="toggleNavDrawer()" title="Browse workloads & items" aria-label="Open navigation">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
           <button class="filter-ai" type="button" title="Filter with AI" aria-label="Filter with AI">
             <svg viewBox="0 0 36 36" aria-hidden="true">
               <path fill="#fff" d="M18 9.75C18.5502 9.75 19.0272 10.1307 19.1492 10.6672L19.8013 13.5349C20.1029 14.8613 21.1387 15.8971 22.4651 16.1987L25.3328 16.8508C25.8693 16.9728 26.25 17.4498 26.25 18C26.25 18.5502 25.8693 19.0272 25.3328 19.1492L22.4651 19.8013C21.1387 20.1029 20.1029 21.1387 19.8013 22.4651L19.1492 25.3328C19.0272 25.8693 18.5502 26.25 18 26.25C17.4498 26.25 16.9728 25.8693 16.8508 25.3328L16.1987 22.4651C15.8971 21.1387 14.8613 20.1029 13.5349 19.8013L10.6672 19.1492C10.1307 19.0272 9.75 18.5502 9.75 18C9.75 17.4498 10.1307 16.9728 10.6672 16.8508L13.5349 16.1987C14.8613 15.8971 15.8971 14.8613 16.1987 13.5349L16.8508 10.6672C16.9728 10.1307 17.4498 9.75 18 9.75Z"/>
@@ -4629,6 +4629,9 @@ body.drawer-open { overflow: hidden; }
           <span class="filter-placeholder" id="filterPlaceholder-inv">No filters applied — click + to filter by tenant, workload, status, existence, resource type, or policy</span>
         </div>
         <div class="filter-bar" id="filterBar-child" data-inv-mode="drill">
+          <button class="nav-drawer-btn" type="button" aria-expanded="false" aria-controls="treeNav" onclick="toggleNavDrawer()" title="Browse workloads & items" aria-label="Open navigation">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
           <button class="filter-ai" type="button" title="Filter with AI" aria-label="Filter with AI">
             <svg viewBox="0 0 36 36" aria-hidden="true">
               <path fill="#fff" d="M18 9.75C18.5502 9.75 19.0272 10.1307 19.1492 10.6672L19.8013 13.5349C20.1029 14.8613 21.1387 15.8971 22.4651 16.1987L25.3328 16.8508C25.8693 16.9728 26.25 17.4498 26.25 18C26.25 18.5502 25.8693 19.0272 25.3328 19.1492L22.4651 19.8013C21.1387 20.1029 20.1029 21.1387 19.8013 22.4651L19.1492 25.3328C19.0272 25.8693 18.5502 26.25 18 26.25C17.4498 26.25 16.9728 25.8693 16.8508 25.3328L16.1987 22.4651C15.8971 21.1387 14.8613 20.1029 13.5349 19.8013L10.6672 19.1492C10.1307 19.0272 9.75 18.5502 9.75 18C9.75 17.4498 10.1307 16.9728 10.6672 16.8508L13.5349 16.1987C14.8613 15.8971 15.8971 14.8613 16.1987 13.5349L16.8508 10.6672C16.9728 10.1307 17.4498 9.75 18 9.75Z"/>
@@ -16122,15 +16125,20 @@ function applyLayoutMode() {
   }
   updateNavDrawerWlLabel();
 }
+function _setDrawerBtnsAria(expanded) {
+  // There's a trigger in each filter bar (list + drill); keep both in sync.
+  var btns = document.querySelectorAll('.nav-drawer-btn');
+  for (var i = 0; i < btns.length; i++) btns[i].setAttribute('aria-expanded', expanded ? 'true' : 'false');
+}
 function openNavDrawer() {
   var a = _appEl(); if (!a) return;
   a.classList.add('nav-drawer-open');
-  var b = document.getElementById('navDrawerBtn'); if (b) b.setAttribute('aria-expanded', 'true');
+  _setDrawerBtnsAria(true);
 }
 function closeNavDrawer() {
   var a = _appEl(); if (!a) return;
   a.classList.remove('nav-drawer-open');
-  var b = document.getElementById('navDrawerBtn'); if (b) b.setAttribute('aria-expanded', 'false');
+  _setDrawerBtnsAria(false);
   closeNavWlPicker();
 }
 function toggleNavDrawer() {
