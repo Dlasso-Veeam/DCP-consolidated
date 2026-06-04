@@ -1368,10 +1368,13 @@ tbody tr.rec-diff-row-unchanged .diff-dot { background: var(--black-30); }
   /* Fully clear the viewport when closed: own width (100%) PLUS the 64px
      left offset + a small margin, so no sliver peeks past the sidenav. */
   transform: translateX(calc(-100% - 72px));
-  transition: transform 0.24s ease;
+  /* No transition until .nav-anim-ready is added (post first paint), so the
+     initial desktop→compact flip doesn't animate the panel across the screen. */
+  transition: none;
   box-shadow: 2px 0 20px rgba(31,34,41,0.22);
   z-index: 120;
 }
+.app.nav-anim-ready[data-layout="compact"] .tree-nav { transition: transform 0.24s ease; }
 .app[data-layout="compact"].nav-drawer-open .tree-nav { transform: translateX(0); }
 /* compact ignores the desktop collapse + resize affordances */
 .app[data-layout="compact"] .tree-nav.is-collapsed {
@@ -1384,8 +1387,9 @@ tbody tr.rec-diff-row-unchanged .diff-dot { background: var(--black-30); }
 /* compact: scrim behind the open drawer */
 .app[data-layout="compact"] .nav-scrim {
   display: block; position: fixed; inset: 0; background: rgba(31,34,41,0.42);
-  z-index: 110; opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+  z-index: 110; opacity: 0; pointer-events: none; transition: none;
 }
+.app.nav-anim-ready[data-layout="compact"] .nav-scrim { transition: opacity 0.2s ease; }
 .app[data-layout="compact"].nav-drawer-open .nav-scrim { opacity: 1; pointer-events: auto; }
 
 /* compact: workload picker (accordion) at the top of the drawer */
@@ -16176,6 +16180,14 @@ document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape' && _appEl() && _appEl().classList.contains('nav-drawer-open')) closeNavDrawer();
 });
 applyLayoutMode();
+// Enable drawer/scrim transitions only AFTER the initial compact flip has
+// painted, so the first desktop→compact application is instant (no panel
+// sliding across the screen on load). Double-rAF guarantees a paint between.
+requestAnimationFrame(function () {
+  requestAnimationFrame(function () {
+    var a = _appEl(); if (a) a.classList.add('nav-anim-ready');
+  });
+});
 
 // ─────────────────────────────────────────────────────────────────────────
 (function initTreeNavSize() {
