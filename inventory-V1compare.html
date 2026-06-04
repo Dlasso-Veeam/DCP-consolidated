@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compare — inline field diff (Accounts)</title>
+<style>
+@font-face { font-family:'Circular Pro'; src:url('./fonts/CircularPro-Book.otf') format('opentype'); font-weight:450; font-style:normal; font-display:swap; }
+@font-face { font-family:'Circular Pro'; src:url('./fonts/CircularPro-Medium.otf') format('opentype'); font-weight:500; font-style:normal; font-display:swap; }
+@font-face { font-family:'Circular Pro'; src:url('./fonts/CircularPro-Bold.otf') format('opentype'); font-weight:700; font-style:normal; font-display:swap; }
+@font-face { font-family:'ITC Avant Garde Gothic Std'; src:url('./fonts/ITCAvantGardeStdBk.otf') format('opentype'); font-weight:450; font-style:normal; font-display:swap; }
+:root {
+  --blue:#1ca8dd; --blue-light:#f3fafd; --blue-30:#bbe5f5; --blue-10:#e8f6fc; --blue-dark:#0779a5;
+  --black-100:#1f2229; --black-60:#626469; --black-30:#bcbdbf; --black-10:#e9e9ea; --black-5:#f4f6f8; --black-3:#f8f8f9;
+  --white:#fff; --green:#86b62c; --green-10:#eff6ea; --green-30:#add395;
+  --orange:#f6772c; --orange-10:#fef1ea; --orange-30:#fbc9ab;
+  --red:#d96758; --red-10:#fbeeec; --red-30:#f1c0b7;
+  --form-bg:#f4f6f8; --layout-bg:#edf0f0; --yellow:#f0b400; --yellow-10:#fff8e0; --yellow-dark:#946700;
+  --border:#d2d3d4; --border-light:#e9e9ea;
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--layout-bg); color:var(--black-100);
+  font-family:'Circular Pro','Helvetica Neue',Arial,sans-serif; font-size:14px; font-weight:450; line-height:1.45; }
+h1 { font-family:'ITC Avant Garde Gothic Std','Helvetica Neue',Arial,sans-serif; margin:0; font-size:22px; }
+.page { max-width:1180px; margin:0 auto; padding:28px 24px 80px; }
+.lead { color:var(--black-60); margin:8px 0 0; max-width:780px; }
+
+/* comparison header — maps before/after ↔ dates ↔ anchor */
+.cmp-head { background:var(--white); border:1px solid var(--border-light); border-radius:8px; padding:16px 20px; margin:20px 0 12px; }
+.cmp-flow { display:flex; align-items:stretch; gap:0; flex-wrap:wrap; }
+.snap { flex:1; min-width:220px; padding:12px 16px; border:1px solid var(--border-light); border-radius:8px; background:var(--black-3); position:relative; }
+.snap .role { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--black-60); }
+.snap .date { font-size:16px; font-weight:500; color:var(--black-100); margin-top:2px; }
+.snap.is-anchor { background:var(--blue-10); border-color:var(--blue-30); }
+.snap.is-anchor .role { color:var(--blue-dark); }
+.anchor-badge { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; color:var(--blue-dark);
+  background:var(--white); border:1px solid var(--blue-30); border-radius:10px; padding:1px 8px; margin-left:8px; vertical-align:1px; }
+.flow-arrow { display:flex; align-items:center; padding:0 14px; color:var(--black-30); }
+.cmp-controls { display:flex; align-items:center; gap:12px; margin-top:14px; flex-wrap:wrap; }
+.swap-btn { height:32px; padding:0 14px; display:inline-flex; align-items:center; gap:8px; background:var(--white);
+  border:1px solid var(--border); border-radius:4px; color:var(--black-100); font-family:inherit; font-size:13px; font-weight:500; cursor:pointer; }
+.swap-btn:hover { background:var(--black-3); border-color:var(--blue); }
+.cmp-controls .legend { display:flex; align-items:center; gap:14px; font-size:12px; color:var(--black-60); margin-left:auto; }
+.cmp-controls .lg { display:inline-flex; align-items:center; gap:6px; }
+.cmp-controls .sw { width:12px; height:12px; border-radius:3px; border:1px solid; }
+.sw.mod { background:var(--yellow-10); border-color:var(--yellow); } .sw.add { background:var(--green-10); border-color:var(--green-30); } .sw.rem { background:var(--red-10); border-color:var(--red-30); }
+.cellkey { font-size:12px; color:var(--black-60); margin:0 0 14px; padding:10px 14px; background:var(--white); border:1px dashed var(--border); border-radius:8px; }
+.cellkey b { color:var(--black-100); font-weight:500; }
+
+/* table */
+.tbl-wrap { background:var(--white); border:1px solid var(--border-light); border-radius:8px; overflow:auto; }
+table { width:100%; border-collapse:collapse; }
+thead th { text-align:left; font-size:12px; font-weight:500; color:var(--black-60); padding:10px 14px;
+  border-bottom:1px solid var(--border-light); background:var(--black-3); white-space:nowrap; vertical-align:bottom; }
+thead th .fname { text-transform:uppercase; letter-spacing:.03em; }
+.col-freq { display:inline-block; min-width:16px; text-align:center; font-size:10px; font-weight:600; color:var(--blue-dark);
+  background:var(--blue-10); border-radius:8px; padding:0 5px; margin-left:6px; }
+.col-sub { display:block; font-size:10px; font-weight:450; color:var(--black-30); text-transform:none; letter-spacing:0; margin-top:3px; }
+tbody td { padding:10px 14px; border-bottom:1px solid var(--border-light); vertical-align:top; }
+.rec-name { font-weight:500; color:var(--black-100); }
+.rec-sub { font-size:12px; color:var(--black-60); margin-top:1px; }
+
+/* the diff cell: stacked before (older, small) over after (newer, large) */
+.dc { display:flex; flex-direction:column; gap:3px; }
+.dc .line { display:flex; flex-direction:column; }
+.dc .before .v { font-size:12px; color:var(--black-60); text-decoration:line-through; text-decoration-color:var(--black-30); }
+.dc .after  .v { font-size:15px; font-weight:500; color:var(--black-100); line-height:1.25; }
+.dc .cap { font-size:10px; color:var(--black-30); margin-top:1px; }
+.dc .cap .anc { color:var(--blue-dark); font-weight:600; }
+.dc.add .before .v { text-decoration:none; color:var(--black-30); font-style:italic; }
+.dc.add .after .v { color:#4a7919; }
+.dc.rem .after .v { color:var(--red); }
+td.cell-mod { background:var(--yellow-10); } td.cell-add { background:var(--green-10); } td.cell-rem { background:var(--red-10); }
+.unchanged-v { font-size:14px; color:var(--black-60); }
+.unchanged-na { font-size:13px; color:var(--black-30); }
+.other-link { font-size:12px; color:var(--blue); cursor:pointer; white-space:nowrap; }
+.other-link:hover { text-decoration:underline; }
+.other-none { font-size:12px; color:var(--black-30); }
+
+/* overflow detail */
+.detail-wrap { padding:0 14px 12px 14px; background:var(--black-3); }
+.detail { width:100%; border:1px solid var(--border-light); border-radius:6px; background:var(--white); border-collapse:collapse; }
+.detail td { padding:7px 12px; border-bottom:1px solid var(--black-3); font-size:13px; }
+.detail tr:last-child td { border-bottom:none; }
+.detail .fn { font-weight:500; width:34%; }
+.d-before { color:var(--black-60); text-decoration:line-through; text-decoration-color:var(--black-30); }
+.d-arrow { color:var(--black-30); padding:0 6px; } .d-after { font-weight:500; }
+.row-mod { box-shadow:inset 3px 0 0 var(--yellow); } .row-add { box-shadow:inset 3px 0 0 var(--green); } .row-rem { box-shadow:inset 3px 0 0 var(--red); }
+.tag-mini { font-size:10px; font-weight:600; text-transform:uppercase; padding:1px 6px; border-radius:3px; margin-left:8px; }
+.tag-mini.mod { background:var(--yellow-10); color:var(--yellow-dark); } .tag-mini.add { background:var(--green-10); color:#4a7919; } .tag-mini.rem { background:var(--red-10); color:var(--red); }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Compare mode — inline field diff</h1>
+  <p class="lead">Changed fields become before/after columns, ordered by how many records changed them. Each cell stacks the two snapshots <b>by time</b>: older value on top (smaller), newer below (larger). The <b>anchor</b> is badged on whichever date it is — so it stays clear which value belongs to which point, whether the anchor is the older or the newer snapshot.</p>
+
+  <div class="cmp-head">
+    <div class="cmp-flow" id="cmpFlow"></div>
+    <div class="cmp-controls">
+      <button class="swap-btn" id="swapBtn" type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        Make anchor the other snapshot
+      </button>
+      <div class="legend">
+        <span class="lg"><span class="sw mod"></span>Modified</span>
+        <span class="lg"><span class="sw add"></span>Added</span>
+        <span class="lg"><span class="sw rem"></span>Removed</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="cellkey" id="cellKey"></p>
+
+  <div class="tbl-wrap">
+    <table id="tbl"><thead><tr></tr></thead><tbody></tbody></table>
+  </div>
+</div>
+
+<script>
+// ── Data: D365 Accounts. Each change is stored time-truthfully: `older` is the
+// value at the earlier snapshot, `newer` at the later snapshot. ───────────────
+var DATE_OLDER = 'Jun 1, 2026 · 9:00 AM';
+var DATE_NEWER = 'Jun 4, 2026 · 3:45 PM';
+// Which snapshot is the anchor (the locked reference, default = latest backup).
+var anchorIsNewer = true;
+
+var SCHEMA = ['Account name','Account number','Owner','Status','Industry','Annual revenue','Employees',
+  'Phone','Email','Website','Billing city','Billing state','Billing country','Primary contact',
+  'Account type','Credit limit','Payment terms','Rating','Territory','Parent account','Created on','Modified on'];
+function base(over){ var b={'Owner':'J. Smith','Status':'Active','Industry':'Technology','Annual revenue':'$2.4M',
+  'Employees':'1,200','Phone':'+1 415 555 0100','Website':'acme.com','Primary contact':'A. Patel',
+  'Credit limit':'$50,000','Payment terms':'Net 30','Rating':'Warm','Territory':'West'};
+  for (var k in over) b[k]=over[k]; return b; }
+// changes: field -> {type:'mod'|'add'|'rem', older, newer}
+var RECORDS = [
+  { name:'Contoso Ltd', sub:'ACC-1042', fields:base({}),
+    changes:{ 'Status':{type:'mod',older:'Active',newer:'On hold'}, 'Owner':{type:'mod',older:'J. Smith',newer:'A. Lee'},
+      'Credit limit':{type:'mod',older:'$50,000',newer:'$75,000'} } },
+  { name:'Fabrikam Inc', sub:'ACC-2087', fields:base({'Annual revenue':'$2.9M'}),
+    changes:{ 'Annual revenue':{type:'mod',older:'$2.4M',newer:'$2.9M'} } },
+  { name:'Adventure Works', sub:'ACC-3310', fields:base({}), changes:{} },
+  { name:'Northwind Traders', sub:'ACC-4521', fields:base({}),
+    changes:{ 'Status':{type:'mod',older:'Active',newer:'Prospect'}, 'Owner':{type:'mod',older:'J. Smith',newer:'M. Diaz'},
+      'Industry':{type:'mod',older:'Technology',newer:'Manufacturing'}, 'Employees':{type:'mod',older:'1,200',newer:'1,540'},
+      'Primary contact':{type:'mod',older:'A. Patel',newer:'R. Cole'},
+      'SLA tier':{type:'add',older:null,newer:'Gold'}, 'Fax':{type:'rem',older:'+1 415 555 0190',newer:null} } },
+  { name:'Tailspin Toys', sub:'ACC-5093', fields:base({}),
+    changes:{ 'Status':{type:'mod',older:'Active',newer:'Suspended'}, 'Owner':{type:'mod',older:'J. Smith',newer:'K. Obi'},
+      'Annual revenue':{type:'mod',older:'$2.4M',newer:'$1.8M'}, 'Employees':{type:'mod',older:'1,200',newer:'860'},
+      'Industry':{type:'mod',older:'Technology',newer:'Retail'}, 'Credit limit':{type:'mod',older:'$50,000',newer:'$20,000'},
+      'Payment terms':{type:'mod',older:'Net 30',newer:'Prepaid'}, 'Rating':{type:'mod',older:'Warm',newer:'Cold'},
+      'Territory':{type:'mod',older:'West',newer:'Central'}, 'Primary contact':{type:'mod',older:'A. Patel',newer:'D. Vance'},
+      'Risk flag':{type:'add',older:null,newer:'Past due'}, 'Loyalty program':{type:'rem',older:'Tier 2',newer:null} } },
+  { name:'Wingtip Toys', sub:'ACC-6614', fields:base({}),
+    changes:{ 'Phone':{type:'mod',older:'+1 415 555 0100',newer:'+1 415 555 0247'}, 'Website':{type:'mod',older:'acme.com',newer:'wingtip.com'} } },
+  { name:'Litware Inc', sub:'ACC-7788', fields:base({}),
+    changes:{ 'Status':{type:'mod',older:'Active',newer:'Active (renewed)'}, 'Annual revenue':{type:'mod',older:'$2.4M',newer:'$3.1M'},
+      'Account manager':{type:'add',older:null,newer:'S. Yang'}, 'Legacy ID':{type:'rem',older:'LW-09',newer:null} } }
+];
+
+function esc(s){ return String(s==null?'—':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function changedFields(rec){ return Object.keys(rec.changes); }
+// Rank changed fields by how many records changed them (desc); tie-break by schema order.
+function rankedColumns(){
+  var freq={}; RECORDS.forEach(function(r){ changedFields(r).forEach(function(f){ freq[f]=(freq[f]||0)+1; }); });
+  var keys=Object.keys(freq).sort(function(a,b){ return freq[b]-freq[a] || (SCHEMA.indexOf(a)) - (SCHEMA.indexOf(b)); });
+  return { cols: keys.slice(0,4), freq: freq };
+}
+
+// ── Header: maps before/after ↔ dates ↔ anchor ──────────────────────────────
+function renderHead(){
+  // before is always the OLDER snapshot; after the NEWER. anchor badge floats.
+  var beforeAnchor = !anchorIsNewer, afterAnchor = anchorIsNewer;
+  function snap(role, date, isAnchor){
+    return '<div class="snap'+(isAnchor?' is-anchor':'')+'">'+
+      '<div class="role">'+role+(isAnchor?'<span class="anchor-badge">⚓ Anchor · latest backup</span>':'')+'</div>'+
+      '<div class="date">'+date+'</div></div>';
+  }
+  document.getElementById('cmpFlow').innerHTML =
+    snap('Before · older snapshot', DATE_OLDER, beforeAnchor)+
+    '<div class="flow-arrow"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>'+
+    snap('After · newer snapshot', DATE_NEWER, afterAnchor);
+  document.getElementById('cellKey').innerHTML =
+    'Each changed cell stacks <b>top = '+DATE_OLDER+'</b> (before) over <b>bottom = '+DATE_NEWER+'</b> (after, emphasized). '+
+    'The anchor (⚓) is currently the <b>'+(anchorIsNewer?'newer':'older')+'</b> snapshot — before/after stay in time order regardless.';
+}
+
+// ── Cell ─────────────────────────────────────────────────────────────────────
+function diffCell(rec, field){
+  var c = rec.changes[field];
+  if (!c){
+    var v = rec.fields[field];
+    return '<td>'+(v!==undefined ? '<span class="unchanged-v">'+esc(v)+'</span>' : '<span class="unchanged-na">—</span>')+'</td>';
+  }
+  var beforeAnc = !anchorIsNewer, afterAnc = anchorIsNewer;
+  var beforeVal = c.type==='add' ? 'not present' : c.older;
+  var afterVal  = c.type==='rem' ? 'removed' : c.newer;
+  return '<td class="cell-'+c.type+'"><div class="dc '+c.type+'">'+
+      '<div class="line before"><span class="v">'+esc(beforeVal)+'</span>'+
+        '<span class="cap">'+DATE_OLDER.split(' · ')[0]+(beforeAnc?' · <span class="anc">⚓ anchor</span>':'')+'</span></div>'+
+      '<div class="line after"><span class="v">'+esc(afterVal)+'</span>'+
+        '<span class="cap">'+DATE_NEWER.split(' · ')[0]+(afterAnc?' · <span class="anc">⚓ anchor</span>':'')+'</span></div>'+
+    '</div></td>';
+}
+
+function render(){
+  renderHead();
+  var rc = rankedColumns(), COLS = rc.cols;
+  var thr = document.querySelector('#tbl thead tr');
+  thr.innerHTML = '<th style="width:18%">Record</th>'+
+    COLS.map(function(f){ return '<th><span class="fname">'+esc(f)+'</span><span class="col-freq">'+rc.freq[f]+'</span><span class="col-sub">changed in '+rc.freq[f]+' records</span></th>'; }).join('')+
+    '<th style="width:12%">Other</th>';
+  var tb = document.querySelector('#tbl tbody'); tb.innerHTML='';
+  RECORDS.forEach(function(rec,i){
+    var cells = COLS.map(function(f){ return diffCell(rec,f); }).join('');
+    var others = changedFields(rec).filter(function(f){ return COLS.indexOf(f)<0; });
+    var otherCell = others.length ? '<span class="other-link" data-idx="'+i+'">+'+others.length+' more</span>'
+      : (changedFields(rec).length ? '<span class="other-none">—</span>' : '<span class="other-none">no change</span>');
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td><div class="rec-name">'+esc(rec.name)+'</div><div class="rec-sub">'+esc(rec.sub)+'</div></td>'+cells+'<td>'+otherCell+'</td>';
+    tb.appendChild(tr);
+    var dr = document.createElement('tr'); dr.className='detail-row'; dr.style.display='none';
+    dr.innerHTML = '<td colspan="'+(COLS.length+2)+'" style="padding:0"><div class="detail-wrap"></div></td>';
+    tb.appendChild(dr);
+  });
+  tb.querySelectorAll('.other-link').forEach(function(lnk){
+    lnk.onclick=function(){
+      var idx=+this.dataset.idx, dr=this.closest('tr').nextElementSibling, open=dr.style.display!=='none';
+      if(open){ dr.style.display='none'; this.textContent='+'+changedFields(RECORDS[idx]).filter(function(f){return COLS.indexOf(f)<0;}).length+' more'; return; }
+      var others=changedFields(RECORDS[idx]).filter(function(f){ return COLS.indexOf(f)<0; });
+      var rows=others.map(function(f){ var c=RECORDS[idx].changes[f];
+        var b=c.type==='add'?'not present':esc(c.older), a=c.type==='rem'?'removed':esc(c.newer);
+        return '<tr class="row-'+c.type+'"><td class="fn">'+esc(f)+'<span class="tag-mini '+c.type+'">'+(c.type==='add'?'added':c.type==='rem'?'removed':'modified')+'</span></td>'+
+          '<td><span class="d-before">'+b+'</span><span class="d-arrow">→</span><span class="d-after">'+a+'</span></td></tr>'; }).join('');
+      dr.querySelector('.detail-wrap').innerHTML='<table class="detail"><tbody>'+rows+'</tbody></table>';
+      dr.style.display=''; this.textContent='Show less';
+    };
+  });
+}
+document.getElementById('swapBtn').addEventListener('click', function(){ anchorIsNewer=!anchorIsNewer; render(); });
+render();
+</script>
+</body>
+</html>
