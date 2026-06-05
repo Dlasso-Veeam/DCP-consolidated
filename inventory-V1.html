@@ -10628,6 +10628,10 @@ function renderChildFolderCell(folder, key, ctx) {
   }
   if (key === 'meta' || key === 'contents') {
     var fSafe = String((ctx && ctx.safeId) || folder.id).replace(/'/g, "\\'");
+    // Compare mode: report how many items in this folder changed (same chip as
+    // the inventory + drill rows) instead of the plain count.
+    var _fcc = (typeof _folderCompareChangeRollup === 'function') ? _folderCompareChangeRollup(folder) : null;
+    if (_fcc) return '<td style="font-size: 14px">' + _invContentsChip(_fcc, null, 'changed') + '</td>';
     return '<td style="font-size: 14px">' + _invContentsChip(ctx.metaLabel, "openChildFolder('" + fSafe + "')") + '</td>';
   }
   if (key === 'type') {
@@ -18123,7 +18127,9 @@ function _invContentsChip(text, clickHandler, matched) {
   // Compare-mode variant: amber "N changed children" chip — the change analogue
   // of the blue search-match chip below. A diff glyph + title carry the meaning.
   if (matched === 'changed') {
-    var diffG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;flex-shrink:0" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>';
+    // Before/after compare glyph (two opposing arrows) — denotes "changed
+    // between the two restore points," not "edit."
+    var diffG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;flex-shrink:0" aria-hidden="true"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>';
     return '<span class="contents-chip changed" title="' + wsEscape(text) + ' changed in this comparison">' + diffG + wsEscape(text) + '</span>';
   }
   // Contents chips are STATIC informational Labels — never interactive.
@@ -18572,6 +18578,25 @@ function _invCompareChangeRollup(r) {
     return n + ' ' + (n === 1 ? 'record' : 'records');
   }
   return null;
+}
+// Compare-change rollup for a pseudo-folder card (e.g. the env-drill's
+// "Records & Objects" group). Counts the current parent's children whose type
+// is in the folder, that changed — the folder-level analogue of
+// _invCompareChangeRollup. Noun comes from the folder's single type.
+function _folderCompareChangeRollup(folder) {
+  var cmp = state.recCompareDate || state.invCompareDate;
+  if (!cmp || !folder || !folder.types || !childState || !childState.parentId) return null;
+  var items = (typeof RESOURCES !== 'undefined')
+    ? RESOURCES.filter(function(x){ return x.parentId === childState.parentId && x.existence !== 'deleted-in-live' && folder.types.indexOf(x.type) >= 0; })
+    : [];
+  if (!items.length || items[0].wl !== 'Dynamics 365') return null;
+  var changed = items.filter(function(k){ return _resourceHasCompareChange(k, cmp); });
+  if (!changed.length) return null;
+  var oneType = folder.types.length === 1 ? folder.types[0] : null;
+  var noun = oneType
+    ? (changed.length === 1 ? _invItemCategoryLabelSingular(oneType) : _invItemCategoryLabel(oneType))
+    : (changed.length === 1 ? 'item' : 'items');
+  return changed.length + ' ' + noun;
 }
 // Pulls the first numeric "·"-separated chunk from a meta string.
 // Replaces the old extractContents which kept ALL numeric pieces
