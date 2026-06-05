@@ -19776,13 +19776,7 @@ function openMatchesDrawer(resourceId, resourceShim) {
   // from any of the visible drill-down search inputs — whichever the
   // user just typed in. This makes match snippets and highlighting
   // work consistently across inventory + every drill-down level.
-  var query = '';
-  ['invSearch','childSearch','recSearch','gwsSearch','wsTableSearch'].some(function(inputId){
-    var el = document.getElementById(inputId);
-    if (el && el.value && el.value.trim()) { query = el.value; return true; }
-    return false;
-  });
-  query = (query || '').toLowerCase().trim();
+  var query = _activeDrawerSearchQuery();
   var matchedRps;
   if (query) {
     var rps = generateRps(resourceId);
@@ -29843,6 +29837,21 @@ function rpClosestAtOrBefore(rps, asOfDate) {
   }
   return rps[0];
 }
+// Resolve the active search query from whichever search input the user is
+// using (inventory or any drill level). Shared by the restore-point
+// (matches) drawer AND the preview/comparison drawer so both highlight the
+// matched metadata consistently — the preview drawer previously left
+// rdState.matchQuery untouched, so it only highlighted if a matches-drawer
+// open happened to set it first.
+function _activeDrawerSearchQuery() {
+  var q = '';
+  ['invSearch','childSearch','recSearch','gwsSearch','wsTableSearch'].some(function(id){
+    var el = document.getElementById(id);
+    if (el && el.value && el.value.trim()) { q = el.value.trim(); return true; }
+    return false;
+  });
+  return q.toLowerCase();
+}
 function openRecordDrawer(id, nameOverride, subOverride, asOfDate, ctxOverride) {
   var ctx = ctxOverride || {};
   var r = RESOURCES.find(function(x){return x.id === id;}) || {
@@ -29867,6 +29876,12 @@ function openRecordDrawer(id, nameOverride, subOverride, asOfDate, ctxOverride) 
   // and edits to the cart entry don't mutate the view's mask.
   rdState.restoreMask = (ctx.restoreMask && ctx.restoreMask.length) ? ctx.restoreMask.slice() : null;
   rdState.restoreMaskType = ctx.restoreMaskType || null;
+  // Highlight query — same set-or-clear-on-every-open contract as fieldScope
+  // above. When opened from an active search, the matched metadata in the
+  // drawer body gets the <mark> highlight (_hlVal); when there's no search,
+  // it clears so a stale highlight from a prior matches-drawer open doesn't
+  // leak into an unrelated preview.
+  rdState.matchQuery = _activeDrawerSearchQuery();
   rdState.title = r.name || nameOverride;
   rdState.workload = r.wl || '';
   rdState.meta = (r.type || 'Record') + ' · ' + (r.tenant || '');
