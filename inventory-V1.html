@@ -13094,7 +13094,7 @@ function _childRenderRecords() {
     if (!pool){ pool = []; for (var _i=0; _i<schemaRows.length; _i++){ var _pv = getRecCellValue(schemaRows[_i], col, _i); if (_pv != null){ _pv = String(_pv); if (_pv && pool.indexOf(_pv) < 0) pool.push(_pv); } } _cmpPools[col] = pool; }
     var cands = pool.filter(function(x){ return x !== String(afterVal); });
     if (!cands.length) return null;
-    var seed = 0, s = schemaKey + '|' + (state.recCompareDate || '') + '|' + idx + '|' + col;
+    var seed = 0, s = schemaKey + '|' + (state.invDate || '') + '|' + (state.recCompareDate || '') + '|' + idx + '|' + col;
     for (var _k=0; _k<s.length; _k++) seed = (seed * 31 + s.charCodeAt(_k)) >>> 0;
     return cands[seed % cands.length];
   }
@@ -29208,9 +29208,13 @@ function genRecDiff(schemaKey, compareDateStr) {
   var cols = schema.cols;
   var extCols = schema.extendedCols || [];
   var rows = schema.rows;
-  // Seed a tiny PRNG from schemaKey + compareDate so results are stable.
+  // Seed a tiny PRNG from schemaKey + BOTH compare points (anchor as-of +
+  // compareDate) so the diff is a true two-point comparison: changing either
+  // date yields a different changed-field set, column order, and values —
+  // while any given pair stays stable across re-renders.
+  var _anchorKey = (typeof state !== 'undefined' && state.invDate) ? state.invDate : 'today';
   var seed = 0;
-  var s = schemaKey + '|' + compareDateStr;
+  var s = schemaKey + '|' + _anchorKey + '|' + compareDateStr;
   for (var i = 0; i < s.length; i++) seed = (seed * 31 + s.charCodeAt(i)) >>> 0;
   function rnd() { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
   // Pool of fields the diff can touch: non-name default cols + all extended cols.
