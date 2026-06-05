@@ -12101,6 +12101,20 @@ function _activeRecordsColumns() {
     visible = state.recVisibleCols.filter(function(c){ return allKnown.indexOf(c) >= 0; });
     if (visible.indexOf(cols[0]) < 0) visible.unshift(cols[0]);
   }
+  // Search mode: order the visible columns by how many records match the
+  // active query in each field (most-matched first), Name pinned — the same
+  // most-relevant-first reshape compare mode does below, driven by search.
+  // Takes precedence over compare ordering when a query is active, since the
+  // user's current intent is the search.
+  var _recQ = ((typeof document !== 'undefined' && document.getElementById('childSearch')) ? document.getElementById('childSearch').value : '') || '';
+  _recQ = _recQ.toLowerCase().trim();
+  if (_recQ) {
+    var _sc = _recSearchFieldCounts(schemaKey, _recQ).fieldCounts;
+    var _sname = cols[0];
+    var _srest = visible.filter(function(c){ return c !== _sname; });
+    _srest.sort(function(a, b){ return (_sc[b] || 0) - (_sc[a] || 0); });
+    return [_sname].concat(_srest).map(function(c){ return { key: c, label: c }; });
+  }
   // V1 compare mode: order the visible columns by how many records changed
   // each field (most-changed first), keeping the Name column pinned. Outside
   // compare mode the order is untouched. Reuses genRecDiff's fieldCounts.
@@ -12115,6 +12129,37 @@ function _activeRecordsColumns() {
     }
   }
   return visible.map(function(c){ return { key: c, label: c }; });
+}
+// Per-field literal match counts for the active record search — the search
+// analogue of genRecDiff().fieldCounts. Drives the search column ordering
+// (_activeRecordsColumns) and the per-column "N matching" header badge.
+// colMembers maps each field to the record IDs (schemaKey-idx) that match in
+// it, so the header badge can bulk-select exactly those rows (mirrors how
+// toggleSelectByDiffCol uses genRecDiff.modifiedByIdx).
+function _recSearchFieldCounts(schemaKey, q) {
+  var out = { fieldCounts: {}, colMembers: {}, nameCount: 0 };
+  q = String(q || '').toLowerCase().trim();
+  if (!q) return out;
+  var schema = (typeof D365_SCHEMAS !== 'undefined')
+    ? (D365_SCHEMAS[schemaKey] || D365_SCHEMAS['default'] || D365_SCHEMAS.accounts) : null;
+  if (!schema || !schema.rows || !schema.cols) return out;
+  var cols = schema.cols;
+  var nameKey = cols[0];
+  var allCols = cols.concat(schema.extendedCols || []);
+  schema.rows.forEach(function(rec, i){
+    var recId = schemaKey + '-' + i;
+    var nv = getRecCellValue(rec, nameKey, i);
+    if (nv != null && String(nv).toLowerCase().indexOf(q) >= 0) out.nameCount++;
+    allCols.forEach(function(c){
+      if (c === nameKey) return;
+      var v = getRecCellValue(rec, c, i);
+      if (v != null && String(v).toLowerCase().indexOf(q) >= 0) {
+        out.fieldCounts[c] = (out.fieldCounts[c] || 0) + 1;
+        (out.colMembers[c] = out.colMembers[c] || []).push(recId);
+      }
+    });
+  });
+  return out;
 }
 function getChildSortValue(r, key) {
   // Drive mode — keep the legacy gws sort comparator semantics.
@@ -12242,6 +12287,10 @@ function renderChildThead() {
     var parent = RESOURCES.find(function(r){ return r.id === childState.parentId; });
     var schemaKey = parent ? d365SchemaFor(parent) : 'accounts';
     var diff = state.recCompareDate ? genRecDiff(schemaKey, state.recCompareDate) : null;
+    // Search-mode per-column match counts — drives the "N matching" header
+    // badge, the search analogue of the compare "N changed" badge.
+    var _theadQ = (document.getElementById('childSearch') && document.getElementById('childSearch').value || '').toLowerCase().trim();
+    var _sCounts = _theadQ ? _recSearchFieldCounts(schemaKey, _theadQ) : null;
     var visibleCols = _activeChildColumns();
     if (!state.childSort.key || !visibleCols.find(function(c){ return c.key === state.childSort.key; })) {
       state.childSort.key = visibleCols[0] && visibleCols[0].key;
@@ -12255,19 +12304,33 @@ function renderChildThead() {
       var sortArrow = sortArrowSvg(sortActive ? state.childSort.dir : 'asc');
       var changeCount = (diff && diff.fieldCounts[c]) || 0;
       var diffActive = state.recDiffActiveCols && state.recDiffActiveCols.indexOf(c) >= 0;
+      var searchActive = !!(_sCounts && state.recSearchActiveCols && state.recSearchActiveCols.indexOf(c) >= 0);
+      var addIcon = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+      var checkIcon = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
       var badge = '';
-      if (diff && ci > 0 && changeCount > 0) {
+      if (_sCounts && ci > 0) {
+        // Search mode: per-column "N matching" badge — same affordance as the
+        // compare "N changed" badge, selecting the records that match the
+        // query in this column. Flips to green "✓ N added" when active.
+        var matchCount = _sCounts.fieldCounts[c] || 0;
+        if (matchCount > 0) {
+          var sBadgeCls = 'rec-diff-col-count rec-diff-col-badge' + (searchActive ? ' active' : '');
+          var sIcon = searchActive ? checkIcon : addIcon;
+          var sLabel = matchCount + (searchActive ? ' added' : ' matching');
+          var sVerb = searchActive ? 'Remove from restore' : 'Add';
+          badge = '<span class="' + sBadgeCls + '" onclick="event.stopPropagation();toggleSelectBySearchCol(\'' + c.replace(/\'/g,"\\'") + '\')" title="' + sVerb + ' the ' + matchCount + ' record' + (matchCount === 1 ? '' : 's') + ' matching in ' + c + '">' + sIcon + sLabel + '</span>';
+        }
+      } else if (diff && ci > 0 && changeCount > 0) {
         var badgeCls = 'rec-diff-col-count rec-diff-col-badge' + (diffActive ? ' active' : '');
         // Mirror the row +Restore buttons: when active (selected), flip to a
         // green checkmark + "N added"; otherwise a "+" + "N changed".
-        var addIcon = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
-        var checkIcon = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
         var icon = diffActive ? checkIcon : addIcon;
         var labelTxt = changeCount + (diffActive ? ' added' : ' changed');
         var titleVerb = diffActive ? 'Remove from restore' : 'Add';
         badge = '<span class="' + badgeCls + '" onclick="event.stopPropagation();toggleSelectByDiffCol(\'' + c.replace(/\'/g,"\\'") + '\')" title="' + titleVerb + ' the ' + changeCount + ' row' + (changeCount === 1 ? '' : 's') + ' where ' + c + ' changed">' + icon + labelTxt + '</span>';
       }
-      html += '<th class="' + sortCls + (ci === 0 ? ' name-col' : '') + (diffActive ? ' rec-diff-col-active' : '') + '"' + _colResizeStyle(c) + ' onclick="setChildSort(\'' + c.replace(/\'/g,"\\'") + '\')">' + c + sortArrow + badge + _colResizeHandle('childTable', c) + '</th>';
+      var colActive = _sCounts ? searchActive : diffActive;
+      html += '<th class="' + sortCls + (ci === 0 ? ' name-col' : '') + (colActive ? ' rec-diff-col-active' : '') + '"' + _colResizeStyle(c) + ' onclick="setChildSort(\'' + c.replace(/\'/g,"\\'") + '\')">' + c + sortArrow + badge + _colResizeHandle('childTable', c) + '</th>';
     });
     // Phase 4: col-toggle is now the user's manual column-visibility
     // control. The auto-reshape that used to fire in compare mode is
@@ -12991,6 +13054,15 @@ function _childRenderRecords() {
   // Read the unified drill search input.
   var searchEl = document.getElementById('childSearch');
   var q = (searchEl && searchEl.value || '').toLowerCase();
+  // Reset the per-column search selections when the query itself changes, so
+  // a column's "matching" member set from a prior query doesn't carry over
+  // into a different one. (Clicking a badge re-renders with the SAME query,
+  // so the selection persists across that.)
+  var _qTrim = q.trim();
+  if (state._recSearchActiveColsQ !== _qTrim) {
+    state.recSearchActiveCols = [];
+    state._recSearchActiveColsQ = _qTrim;
+  }
 
   // Resolve the schema for the drilled-into Table.
   var schemaKey = d365SchemaFor(parent);
@@ -14512,6 +14584,8 @@ var state = {
   recCompareDate: null,         // when set (YYYY-MM-DD), records drill-down enters diff mode
   recDiffView: 'changes',       // 'changes' = only changed/added/removed rows; 'all' = full table with diff annotations
   recDiffActiveCols: [],        // column names whose header has been clicked to bulk-select rows; visual highlight + member set used by toggleSelectByDiffCol
+  recSearchActiveCols: [],      // search analogue of recDiffActiveCols — columns whose "N matching" header badge was clicked to bulk-select matching rows (toggleSelectBySearchCol)
+  _recSearchActiveColsQ: null,  // last query the above was scoped to; changing the query resets the active set
   fieldsDiffActive: false,      // fields-drill analog: tracks whether the Value-column "N changed" badge has been activated (single boolean since fields drill only has one such badge)
   // Phase 4: user-controlled records-table column visibility. null =
   // use the schema's default `cols`. When the user opens the col-toggle
@@ -14691,6 +14765,8 @@ function openRecordsDrill(parentId) {
   // Same logic for the active column-header selection list.
   state.recVisibleCols = null;
   state.recDiffActiveCols = [];
+  state.recSearchActiveCols = [];
+  state._recSearchActiveColsQ = null;
   childState.entryId = parentId;
   childState.parentId = parentId;
   childState.folder = null;
@@ -29564,6 +29640,33 @@ function toggleSelectByDiffCol(col) {
   // Drive cart membership via the unified drill registry. setRow keeps
   // both the restorePlan and the legacy per-table Set in sync.
   matchingIds.forEach(function(id){
+    if (typeof drill !== 'undefined' && drill && drill.setRow) {
+      drill.setRow('rec', id, activating);
+    }
+  });
+  if (typeof childRender === 'function') childRender();
+}
+// Search analogue of toggleSelectByDiffCol: clicking a column's "N matching"
+// header badge bulk-(de)selects the records that match the active query in
+// that column. Recomputes the member set from the live query (same approach
+// toggleSelectByDiffCol takes with genRecDiff) so it stays correct as the
+// query changes.
+function toggleSelectBySearchCol(col) {
+  var parent = RESOURCES.find(function(x){ return x.id === childState.parentId; });
+  if (!parent) return;
+  var schemaKey = d365SchemaFor(parent);
+  var q = (document.getElementById('childSearch') && document.getElementById('childSearch').value || '').toLowerCase().trim();
+  if (!q) return;
+  var members = _recSearchFieldCounts(schemaKey, q).colMembers[col] || [];
+  if (!state.recSearchActiveCols) state.recSearchActiveCols = [];
+  var idx = state.recSearchActiveCols.indexOf(col);
+  var activating = idx < 0;
+  if (activating) {
+    state.recSearchActiveCols.push(col);
+  } else {
+    state.recSearchActiveCols.splice(idx, 1);
+  }
+  members.forEach(function(id){
     if (typeof drill !== 'undefined' && drill && drill.setRow) {
       drill.setRow('rec', id, activating);
     }
