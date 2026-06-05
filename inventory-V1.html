@@ -12262,6 +12262,41 @@ function setChildSort(key) {
   // header inside the drill view.
   if (typeof renderTreeNav === 'function') renderTreeNav();
 }
+// Singular entity noun for the rows currently shown, so the first ("name")
+// column header reads precisely at each level — Environment / Table / Record /
+// Field (and Repository / Organization / etc. for other workloads) instead of
+// a generic "Resource". Derived from the rows' own .type; falls back to the
+// static label when the rows are mixed-type or indeterminate.
+function _firstColEntityLabel(fallback) {
+  function dominantType(rows) {
+    // Only name the column after the entity when the rows are ALL one type.
+    // If the set is mixed, "Resource" is the honest header — naming it after
+    // the majority would misrepresent the other rows.
+    if (!rows || !rows.length) return null;
+    var ty = rows[0].type;
+    if (!ty) return null;
+    for (var i = 1; i < rows.length; i++) { if (rows[i].type !== ty) return null; }
+    return ty;
+  }
+  var app = document.querySelector('.app');
+  var inDrill = app && app.getAttribute('data-inv-mode') === 'drill';
+  if (inDrill && typeof _drillType === 'function') {
+    var dt = _drillType();
+    if (dt === 'fields') return 'Field';
+    if (dt === 'records') return 'Record';
+    var kids = (typeof RESOURCES !== 'undefined' && childState && childState.parentId)
+      ? RESOURCES.filter(function(x){ return x.parentId === childState.parentId && x.type !== 'Folder'; }) : [];
+    return dominantType(kids) || fallback;
+  }
+  if (typeof RESOURCES !== 'undefined' && typeof resourcePassesFilters === 'function') {
+    var rows = RESOURCES.filter(function(r){
+      return r.type !== 'Folder' && resourcePassesFilters(r)
+        && (typeof _isPrimaryAtCat !== 'function' || _isPrimaryAtCat(r));
+    });
+    return dominantType(rows) || fallback;
+  }
+  return fallback;
+}
 function renderChildThead() {
   var head = document.querySelector('#childTable thead');
   if (!head) return;
@@ -12360,7 +12395,10 @@ function renderChildThead() {
         badge = '<span class="' + badgeCls + '" onclick="event.stopPropagation();toggleSelectByDiffCol(\'' + c.replace(/\'/g,"\\'") + '\')" title="' + titleVerb + ' the ' + changeCount + ' row' + (changeCount === 1 ? '' : 's') + ' where ' + c + ' changed">' + icon + labelTxt + '</span>';
       }
       var colActive = _sCounts ? searchActive : diffActive;
-      html += '<th class="' + sortCls + (ci === 0 ? ' name-col' : '') + (colActive ? ' rec-diff-col-active' : '') + '"' + _colResizeStyle(c) + ' onclick="setChildSort(\'' + c.replace(/\'/g,"\\'") + '\')">' + c + sortArrow + badge + _colResizeHandle('childTable', c) + '</th>';
+      // First column identifies the row entity ("Record") rather than echoing
+      // the name field's own label; remaining columns keep their field names.
+      var hdrLabel = (ci === 0) ? 'Record' : c;
+      html += '<th class="' + sortCls + (ci === 0 ? ' name-col' : '') + (colActive ? ' rec-diff-col-active' : '') + '"' + _colResizeStyle(c) + ' onclick="setChildSort(\'' + c.replace(/\'/g,"\\'") + '\')">' + hdrLabel + sortArrow + badge + _colResizeHandle('childTable', c) + '</th>';
     });
     // Phase 4: col-toggle is now the user's manual column-visibility
     // control. The auto-reshape that used to fire in compare mode is
@@ -12379,6 +12417,7 @@ function renderChildThead() {
     // anchors the same column on head + body in the drill view.
     var extraCls = col.key === 'name' ? ' name-col' : '';
     var label = (col.wlLabels && col.wlLabels[state.wl]) || col.label;
+    if (col.key === 'name') label = _firstColEntityLabel(label);
     html += '<th class="sort-th' + extraCls + (active ? ' sort-active' : '') + '"' + _colResizeStyle(col.key) + ' onclick="setChildSort(\'' + col.key + '\')">' +
               label + arrow + _colResizeHandle('childTable', col.key) +
             '</th>';
@@ -18750,6 +18789,9 @@ function renderInvThead() {
     // sticky-right Actions column pattern.
     var extraCls = col.key === 'name' ? ' name-col' : '';
     var label = (col.wlLabels && col.wlLabels[state.wl]) || col.label;
+    // First ("name") column header names the actual entity at this level
+    // (Environment / Table / Repository / …) instead of a generic "Resource".
+    if (col.key === 'name') label = _firstColEntityLabel(label);
     html += '<th class="sort-th' + extraCls + (active ? ' sort-active' : '') + '"' + _colResizeStyle(col.key) + ' onclick="setInvSort(\'' + col.key + '\')">' +
               label + arrow + _colResizeHandle('invTable', col.key) +
             '</th>';
