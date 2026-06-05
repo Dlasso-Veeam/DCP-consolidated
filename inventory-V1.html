@@ -1073,9 +1073,12 @@ tbody tr.rec-diff-row-unchanged .diff-dot { background: var(--black-30); }
    Sits inside the existing .rec-diff-cell-changed tint — before = older
    compare value (small, struck), after = current/anchor value (emphasized). */
 .rec-ba { line-height: 1.2; }
-.rec-ba .rec-ba-before { display: block; font-size: 10px; color: var(--black-60); text-decoration: line-through; text-decoration-color: var(--black-30); }
+/* Before/after values both at 14px so each clearly outsizes its 10px date
+   label (no blend); old vs new is carried by muted-vs-dark colour + weight,
+   not strikethrough (which hurt legibility). */
+.rec-ba .rec-ba-before { display: block; font-size: 14px; font-weight: 450; color: var(--black-60); }
 .rec-ba .rec-ba-after  { display: block; font-size: 14px; font-weight: 500; color: var(--black-100); }
-.rec-ba .rec-ba-date   { display: block; font-size: 10px; color: var(--black-30); line-height: 1.2; margin-bottom: 3px; }
+.rec-ba .rec-ba-date   { display: block; font-size: 10px; font-weight: 450; color: var(--black-30); line-height: 1.2; margin-bottom: 4px; }
 
 /* Compare-mode diff variants — extend ex-badge with two extra color schemes
    so Added and Modified badges are visually identical to the existing
