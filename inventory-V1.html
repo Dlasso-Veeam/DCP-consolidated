@@ -13461,14 +13461,13 @@ function _childRenderFields() {
     { name: 'statuscode',    type: 'Status Reason',   value: record['Status'] || record['Stage'] || 'Active' }
   ];
 
-  // Drill search — across field name + value.
+  // Drill search — the query carried in from the drill is HIGHLIGHT-ONLY at
+  // the field level. The user drilled into one specific record to inspect it,
+  // so show the WHOLE record and just mark where the term appears (see the
+  // _hlText calls in the row renderer) rather than filtering its fields down.
   var searchEl = document.getElementById('childSearch');
   var q = (searchEl && searchEl.value || '').toLowerCase().trim();
-  function rowMatches(name, value) {
-    if (!q) return true;
-    return (name || '').toLowerCase().indexOf(q) >= 0 ||
-           String(value || '').toLowerCase().indexOf(q) >= 0;
-  }
+  function rowMatches() { return true; }
   // Per-field deterministic "Modified" date — seeded from the record
   // index + the field name's char codes so the same field on the
   // same record always shows the same date. Audit-table-derived in
@@ -13599,9 +13598,11 @@ function _childRenderFields() {
     // any leaf elsewhere in the platform). Wraps cell-name + diff badge
     // in a flex container so the badge wraps onto its own line on narrow
     // viewports — same shape as records-drill name cell at line 11722.
-    var nameCell = '<td class="name-col"><div style="display:flex;align-items:center;column-gap:8px;row-gap:4px;flex-wrap:wrap;overflow:visible"><span class="diff-dot" aria-hidden="true"></span><span class="cell-name"' + nameStyle + ' onclick="openFieldPreview(\'' + safeForJs + '\')">' + wsEscape(f.name) + '</span>' + '</div></td>';
+    var _fName = q ? _hlText(f.name, q) : wsEscape(f.name);
+    var _fVal = q ? _hlText(String(f.value == null ? '—' : f.value), q) : wsEscape(String(f.value == null ? '—' : f.value));
+    var nameCell = '<td class="name-col"><div style="display:flex;align-items:center;column-gap:8px;row-gap:4px;flex-wrap:wrap;overflow:visible"><span class="diff-dot" aria-hidden="true"></span><span class="cell-name"' + nameStyle + ' onclick="openFieldPreview(\'' + safeForJs + '\')">' + _fName + '</span>' + '</div></td>';
     var typeCell = '<td style="font-size: 14px;color:var(--black-60)">' + wsEscape(f.type) + '</td>';
-    var valueCell = '<td class="' + _valueChangedCls.trim() + '" style="font-size:14px">' + wsEscape(String(f.value == null ? '—' : f.value)) + '</td>';
+    var valueCell = '<td class="' + _valueChangedCls.trim() + '" style="font-size:14px">' + _fVal + '</td>';
     var modifiedCell = '<td style="font-size:14px;color:var(--black-60);white-space:nowrap">' + wsEscape(modified) + '</td>';
     var actions =
       '<td><div class="row-actions">' +
@@ -14837,7 +14838,10 @@ function openFieldsDrill(recordId) {
   // Keep entryId pointing at the topmost drill anchor (the Table) so
   // breadcrumbs and tree-sync still resolve the original entry point.
   if (!childState.entryId) childState.entryId = recordId;
-  var s = document.getElementById('childSearch'); if (s) s.value = '';
+  // Drill-with-intent: keep the active query as we descend into the record's
+  // fields so the matched values stay highlighted at the leaf. At this level
+  // the query is highlight-only (the fields view shows the whole record — see
+  // _childRenderFields), not a filter.
   state.searchIncludeSubfolders = false;
   state.childSelectedIds = state.childSelectedIds || new Set();
   state.fieldsPage = 1;
