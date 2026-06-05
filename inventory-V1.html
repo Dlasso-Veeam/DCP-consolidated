@@ -12903,6 +12903,21 @@ function _childRenderDrive() {
 //   • Selection IDs are 'rec-<schemaKey>-<idx>'; the row id is
 //     stored as data-id without the rec- prefix so existing
 //     toggleRecRow / openRecordDrawer handlers keep working.
+// Skeleton tbody shown for the D365 records compare table while a compare-date
+// change "fetches" the new diff. Reuses the .rd-skel-bar shimmer.
+function _recCompareSkeletonRows(nCols) {
+  var out = '';
+  for (var r = 0; r < 8; r++) {
+    var cells = '<td class="cb-col"></td>';
+    for (var c = 0; c < nCols; c++) {
+      var w = 45 + ((r * 7 + c * 13) % 45); // 45–90%, deterministic
+      cells += '<td><span class="rd-skel-bar" style="width:' + w + '%"></span></td>';
+    }
+    cells += '<td class="actions-col"></td>';
+    out += '<tr class="rec-skel-row" aria-hidden="true">' + cells + '</tr>';
+  }
+  return out;
+}
 function _childRenderRecords() {
   var parent = RESOURCES.find(function(r){ return r.id === childState.parentId; });
   if (!parent) return;
@@ -12913,6 +12928,14 @@ function _childRenderRecords() {
 
   var tbody = document.getElementById('childTbody');
   if (!tbody) return;
+  // Compare-date change: header/columns above are already repainted; show a
+  // skeleton body while the "fetch" runs, then _refreshAfterCompareChange's
+  // timer re-renders with the updated values + date labels.
+  if (state._recCompareLoading) {
+    var _skelCols = (typeof _activeRecordsColumns === 'function') ? _activeRecordsColumns().length : 4;
+    tbody.innerHTML = _recCompareSkeletonRows(_skelCols);
+    return;
+  }
 
   // Covered-by-ancestor banner (the table's parent is in plan).
   // Use childCoveredByAncestor — the modern function that reads
@@ -13060,14 +13083,18 @@ function _childRenderRecords() {
   var _cmpPools = {};
   // Per-cell snapshot dates (smallest DS label). 'after' = current/anchor
   // (latest backup); 'before' = the compared point (state.recCompareDate).
-  var _baAfterDate  = (parent && parent.lastBackup && parent.lastBackup !== '—') ? parent.lastBackup : 'Latest';
+  // 'after' date = the anchor (main as-of). Latest → the table's last backup;
+  // otherwise the chosen anchor date, so it updates when the anchor picker changes.
+  var _baAfterDate = (!state.invDate || state.invDate === 'today')
+    ? ((parent && parent.lastBackup && parent.lastBackup !== '—') ? parent.lastBackup : 'Latest')
+    : ((typeof fmtCompareDate === 'function') ? fmtCompareDate(state.invDate) : state.invDate);
   var _baBeforeDate = (typeof fmtCompareDate === 'function') ? fmtCompareDate(state.recCompareDate) : (state.recCompareDate || '');
   function _beforeVal(col, idx, afterVal){
     var pool = _cmpPools[col];
     if (!pool){ pool = []; for (var _i=0; _i<schemaRows.length; _i++){ var _pv = getRecCellValue(schemaRows[_i], col, _i); if (_pv != null){ _pv = String(_pv); if (_pv && pool.indexOf(_pv) < 0) pool.push(_pv); } } _cmpPools[col] = pool; }
     var cands = pool.filter(function(x){ return x !== String(afterVal); });
     if (!cands.length) return null;
-    var seed = 0, s = schemaKey + '|' + idx + '|' + col;
+    var seed = 0, s = schemaKey + '|' + (state.recCompareDate || '') + '|' + idx + '|' + col;
     for (var _k=0; _k<s.length; _k++) seed = (seed * 31 + s.charCodeAt(_k)) >>> 0;
     return cands[seed % cands.length];
   }
@@ -34322,7 +34349,10 @@ function _setInvDateImpl(val) {
   // not which rows show up (see resourcePassesFilters).
   if (typeof renderCatRail === 'function') renderCatRail();
   state.invPage = 1;
-  renderTable();
+  // Drill-aware refresh: in a records drill with compare active this triggers
+  // the skeleton + updated before/after; in list mode it falls through to
+  // renderTable(). So changing the ANCHOR date refreshes the compare table too.
+  _refreshAfterCompareChange();
   // Refresh the asof-bar's cumulative-state summary (clickable counts).
   if (typeof renderAsofSummary === 'function') renderAsofSummary();
 }
@@ -34369,7 +34399,10 @@ function _setInvAsOfRpImpl(rpId) {
   _v1RepinCartToGlobal();
   if (typeof renderCatRail === 'function') renderCatRail();
   state.invPage = 1;
-  renderTable();
+  // Drill-aware refresh (records + compare → skeleton fetch; else list).
+  // Changing the ANCHOR RP refreshes the compare table the same as the
+  // compared date does.
+  _refreshAfterCompareChange();
   if (typeof renderAsofSummary === 'function') renderAsofSummary();
 }
 // Reset the browse-as-of date back to "Latest" — invoked by the × chip
@@ -34592,6 +34625,23 @@ function _syncActionsColW() {
 // the user is currently in a drill or at the inventory list level.
 function _refreshAfterCompareChange() {
   if (state.invMode === 'drill' && typeof childRender === 'function') {
+    // D365 records compare table: simulate a fetch. Paint the header/columns/
+    // chips immediately, swap the body to a skeleton, then re-render with the
+    // updated values + date labels after a short delay. Other drills are
+    // unaffected (no skeleton, immediate render).
+    // Records table + compare active: simulate a fetch (skeleton → updated
+    // values + date labels). Fires for EITHER date picker — anchor or compare
+    // — since both route through here. No compare = plain re-render.
+    if (typeof _drillType === 'function' && _drillType() === 'records' && state.recCompareDate) {
+      state._recCompareLoading = true;
+      childRender();
+      if (state._recCompareLoadTimer) clearTimeout(state._recCompareLoadTimer);
+      state._recCompareLoadTimer = setTimeout(function(){
+        state._recCompareLoading = false;
+        if (typeof childRender === 'function') childRender();
+      }, 2000);
+      return;
+    }
     childRender();
   } else if (typeof renderTable === 'function') {
     renderTable();
