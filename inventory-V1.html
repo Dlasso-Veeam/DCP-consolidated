@@ -192,11 +192,11 @@ body { font-family: 'Circular Pro', -apple-system, sans-serif; background: var(-
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 4px; font-size: 16px; font-weight: 500; font-family: inherit; cursor: pointer; background: var(--white); color: var(--black-100); border: 1px solid var(--border); transition: background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s; }
 .btn:hover { background: var(--black-3); }
 .btn-blue { background: var(--blue); color: var(--white); border-color: var(--blue); }
-.btn-blue:hover { background: var(--dark-blue); }
+.btn-blue:hover { background: var(--blue-dark); }
 .btn-outline { background: var(--white); border: 1px solid var(--border); color: var(--black-100); }
 .btn-outline:hover { background: var(--black-3); }
 .btn-text { background: none; border: none; color: var(--blue); padding: 0 8px; }
-.btn-text:hover { color: var(--dark-blue); background: none; }
+.btn-text:hover { color: var(--blue-dark); background: none; }
 .btn-danger { background: var(--red); color: var(--white); border-color: var(--red); }
 .btn-danger:hover { background: var(--red-dark, #b84b3c); }
 .btn-sm { height: 28px; padding: 0 12px; font-size: 16px; }
@@ -1580,7 +1580,7 @@ tbody tr.rec-diff-row-unchanged .diff-dot { background: var(--black-30); }
   cursor: pointer;
   font-family: inherit;
 }
-.conn-health-popover-cta:hover { background: var(--dark-blue); }
+.conn-health-popover-cta:hover { background: var(--blue-dark); }
 /* Resource-type tile (shown next to the inv-header title to anchor the category
    visually — matches the design system's rounded tinted-tile pattern). */
 .res-icon-tile { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -1654,9 +1654,9 @@ tbody tr.rec-diff-row-unchanged .diff-dot { background: var(--black-30); }
    Badge appears when any facet narrows results. */
 .search-facets-btn { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 0; background: var(--white); border: 1px solid var(--border); border-radius: 4px; color: var(--black-60); cursor: pointer; flex-shrink: 0; position: relative; }
 .search-facets-btn:hover { background: var(--black-5); color: var(--black-100); border-color: var(--black-30); }
-.search-facets-btn.active { background: var(--blue-10, #e8f6fc); color: var(--blue-100); border-color: var(--blue-30, #bbe5f5); }
+.search-facets-btn.active { background: var(--blue-10, #e8f6fc); color: var(--blue); border-color: var(--blue-30, #bbe5f5); }
 .search-facets-btn svg { width: 16px; height: 16px; display: block; margin: 0; color: inherit; }
-.search-facets-badge { position: absolute; top: -3px; right: -3px; width: 9px; height: 9px; border-radius: 50%; background: var(--blue-100); border: 2px solid var(--white); }
+.search-facets-badge { position: absolute; top: -3px; right: -3px; width: 9px; height: 9px; border-radius: 50%; background: var(--blue); border: 2px solid var(--white); }
 /* Popover uses position:fixed (not absolute) so it escapes the sticky
    .inv-sticky-head stacking context — that ancestor has z-index:30
    which would otherwise cap the popover's effective z-index at 30,
@@ -1676,12 +1676,12 @@ tbody tr.rec-diff-row-unchanged .diff-dot { background: var(--black-30); }
 .search-facets-opt input[type="radio"] { margin: 0; cursor: pointer; }
 .search-facets-opt .search-facets-opt-count { margin-left: auto; font-size: 14px; color: var(--black-60); font-variant-numeric: tabular-nums; }
 .search-facets-select { width: 100%; height: 32px; padding: 0 8px; font-size: 14px; font-family: inherit; color: var(--black-100); background: var(--white); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; outline: none; }
-.search-facets-select:focus { border-color: var(--blue-100); box-shadow: inset 0 0 0 1px var(--blue-100); }
+.search-facets-select:focus { border-color: var(--blue); box-shadow: inset 0 0 0 1px var(--blue); }
 .search-facets-popover-footer { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-top: 1px solid var(--border-light); background: var(--black-3); }
-.search-facets-clear { background: none; border: none; color: var(--blue-100); cursor: pointer; font-size: 14px; font-family: inherit; padding: 4px 0; }
+.search-facets-clear { background: none; border: none; color: var(--blue); cursor: pointer; font-size: 14px; font-family: inherit; padding: 4px 0; }
 .search-facets-clear:disabled { color: var(--black-30); cursor: not-allowed; }
-.search-facets-done { background: var(--blue-100); border: none; color: var(--white); cursor: pointer; font-size: 16px; font-weight: 500; font-family: inherit; padding: 6px 14px; border-radius: 4px; }
-.search-facets-done:hover { background: var(--dark-blue); }
+.search-facets-done { background: var(--blue); border: none; color: var(--white); cursor: pointer; font-size: 16px; font-weight: 500; font-family: inherit; padding: 6px 14px; border-radius: 4px; }
+.search-facets-done:hover { background: var(--blue-dark); }
 .inv-search-inner input:placeholder-shown ~ .search-clear-btn,
 .ws-search input:placeholder-shown ~ .search-clear-btn { display: none; }
 
@@ -3122,6 +3122,10 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--blue); c
 .contents-chip { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 4px; font-size: 14px; font-weight: 450; line-height: 1; background: var(--blue-light); color: var(--blue); border: 1px solid var(--blue-30); white-space: nowrap; vertical-align: middle; }
 .contents-chip-click { cursor: pointer; transition: box-shadow 0.12s ease, border-color 0.12s ease; }
 .contents-chip-click:hover { border-color: var(--blue); box-shadow: inset 0 0 0 1px var(--blue); }
+/* Active treatment when the chip reports a search match-count
+   ("4 matching tables") rather than a plain rollup — stronger fill +
+   border + weight so it reads as the reason the parent row surfaced. */
+.contents-chip.matched { background: var(--blue-10); border-color: var(--blue); color: var(--blue); font-weight: 500; }
 .cell-meta { font-size: 14px; color: var(--black-60); margin-top: 2px; }
 /* Policy column: tight truncation so the column isn't the widest
    in the table. 160px fits "Default Policy — Bronze" and similar
@@ -3839,7 +3843,12 @@ body.pol-drawer-open { overflow: hidden; }
 .rp-card-meta { font-size: 14px; color: var(--black-30); }
 .rp-card-actions { display: flex; gap: 6px; flex-shrink: 0; }
 /* Search term highlight — used in both cards and compare table */
-.rd-match-hl { background: #fff3c0; color: var(--black-100); font-style: normal; border-radius: 2px; padding: 0 2px; }
+/* Search-match highlight — inline mark wrapped around the matched text
+   (the existing preview-drawer pattern). Kept yellow, but with a 1px amber
+   outline (--yellow-dark) so it stays a distinct marked span even when it
+   sits inside a compare-mode change cell, whose pale --yellow-10 fill would
+   otherwise blend with the mark's fill. */
+.rd-match-hl { background: #fff3c0; color: var(--black-100); font-style: normal; border-radius: 2px; padding: 0 2px; box-shadow: inset 0 0 0 1px var(--yellow-dark); }
 /* Back-to-matches strip rendered above the compare table when the
    user drilled into compare mode from the matches list. Lets them
    return to the list without closing and re-searching. */
@@ -9200,7 +9209,12 @@ function openChildrenDrill(parentId) {
   childState.history = historyChain.map(function(id){
     return { parentId: id, folder: null };
   });
-  var s = document.getElementById('childSearch'); if (s) s.value = '';
+  // Drill-with-intent: carry the inventory search query into the drill so
+  // a user who searched, saw matching children bubble up at the parent,
+  // and clicked in keeps seeing only the matches. Empty when no inventory
+  // search is active (tree-nav / direct drill) → same as before.
+  var _invQ = (document.getElementById('invSearch') || {}).value || '';
+  var s = document.getElementById('childSearch'); if (s) s.value = _invQ.trim();
   state.searchIncludeSubfolders = false;
   state.childSelectedIds = new Set();
   // INLINE-DRILL: the drill is now a sub-mode of the inventory screen,
@@ -9250,7 +9264,10 @@ function drillChildDeeper(parentId) {
   });
   childState.parentId = parentId;
   childState.folder = null;
-  if (s) s.value = '';
+  // Drill-with-intent: keep the current search query as we go deeper (the
+  // prior value is already stashed on the history frame above for the Back
+  // button), so a user narrowing into matching children keeps the filter.
+  // Recursive scope still resets — going deeper means searching THIS level.
   state.searchIncludeSubfolders = false;
   state.childSelectedIds = new Set();
   childRender();
@@ -10822,7 +10839,7 @@ function renderChildCell(r, key, ctx) {
     // diff-row tints and the per-cell yellow highlights already convey
     // "this row changed"; the count pill was redundant chrome.
     return '<td class="name-col"><div style="display:flex;align-items:center;column-gap:8px;row-gap:4px;flex-wrap:wrap;overflow:visible"><span class="diff-dot" aria-hidden="true"></span>'
-         + '<span class="' + ctx.nameClass + '" style="' + ctx.nameStyle + '" onclick="' + ctx.clickHandler + '">' + r.name + '</span>'
+         + '<span class="' + ctx.nameClass + '" style="' + ctx.nameStyle + '" onclick="' + ctx.clickHandler + '">' + (ctx.hlQuery ? _hlText(r.name, ctx.hlQuery) : r.name) + '</span>'
          + ctx.existenceHtml
          + '' /* diff badge retired — see .inv-diff-tooltip hover */
          + '</div>' + (ctx.folderMeta || '') + '</td>';
@@ -10848,7 +10865,13 @@ function renderChildCell(r, key, ctx) {
   if (key === 'members')    return '<td style="font-size:14px;color:var(--black-60)">' + _invOrgMembers(r) + '</td>';
   // Power Platform cells (shared helpers with the inv-list dispatcher).
   if (key === 'tenantDomain')    return '<td style="font-size:14px;color:var(--black-60)">' + _invTenantDomain(r) + '</td>';
-  if (key === 'contents')        return '<td style="font-size: 14px">' + _invContentsChip(_invContentsRollup(r), ctx && ctx.clickHandler) + '</td>';
+  if (key === 'contents') {
+    // Drill rows mirror the inventory list: under an active drill search,
+    // Contents reports matching children ("8 records") with the active
+    // chip treatment instead of the total rollup.
+    if (ctx && ctx.searchMatchContents) return '<td style="font-size: 14px">' + _invContentsChip(ctx.searchMatchContents, null, true) + '</td>';
+    return '<td style="font-size: 14px">' + _invContentsChip(_invContentsRollup(r), ctx && ctx.clickHandler) + '</td>';
+  }
   if (key === 'spaceContents')   return '<td style="font-size: 14px">' + _invContentsChip(_invSpaceContents(r), ctx && ctx.clickHandler) + '</td>';
   if (key === 'policiesApplied') {
     // Dead branch — the column schemas now use 'policy' instead, so
@@ -10982,6 +11005,9 @@ function childRenderLeafRow(r, showFolder, folderLabel, diffStatus, matchCount) 
   // drill scopes get their cat-specific columns (visibility, size,
   // fork, etc. for repos; repo count + member count for orgs); every
   // other scope falls back to the generic CHILD_COLUMNS set.
+  // Active drill query (if any) drives the matching-Contents chip + the
+  // name-cell highlight — same treatment as the inventory search rows.
+  var _childQ = ((document.getElementById('childSearch') || {}).value || '').trim();
   var _childCtx = {
     nameClass: nameClass,
     nameStyle: nameStyle,
@@ -10990,7 +11016,9 @@ function childRenderLeafRow(r, showFolder, folderLabel, diffStatus, matchCount) 
     folderMeta: folderMeta,
     badgeCls: badgeCls,
     badgeText: badgeText,
-    diffBadge: _childDiffBadge
+    diffBadge: _childDiffBadge,
+    hlQuery: _childQ || null,
+    searchMatchContents: (_childQ && typeof _invSearchMatchRollup === 'function') ? _invSearchMatchRollup(r, _childQ) : null
   };
   var _childCellsHtml = _activeChildColumns().map(function(col){ return renderChildCell(r, col.key, _childCtx); }).join('');
   // Merge any pre-existing rowTitle (added/removed diff state) with
@@ -11845,30 +11873,24 @@ function _walkD365RecordsAndFields(tableResource, q) {
     var recordName = (nameKey && rec[nameKey] != null) ? String(rec[nameKey]) : ('Record #' + idx);
     var recId = 'rec-' + schemaKey + '-' + idx;
     var literalNameHit = recordName.toLowerCase().indexOf(qLower) >= 0;
-    // Mirror simResourceRpHit: any record whose literal data doesn't
-    // contain the query still gets a ~1/12 chance of surfacing as a
-    // hash-based "content match" hit, simulating the case where the
-    // query string appears somewhere in the record's stored content
-    // that the schema cols don't expose. Without this, recursive
-    // search produces a near-zero increase on a demo with sparse
-    // seed data — the resource-level simulation makes 45 fake hits
-    // appear at the Table level, so the record level should produce
-    // proportional fake hits too. Literal matches always win and
-    // skip the hash check so the user's actual matches surface first.
-    var hashFakeHit = false;
-    if (!literalNameHit && typeof _hashSeed === 'function') {
-      hashFakeHit = (_hashSeed(recId + '|' + qLower) % 12) === 0;
-    }
+    // D365 record/field search is LITERAL-ONLY. An earlier build sprinkled
+    // ~1-in-12 hash-based "content match" hits here to pad sparse demos,
+    // but that made every query match nearly every record (e.g. "zebra"
+    // returned 200+ phantom hits) and pushed the Contents match-count
+    // above the actual child total — directly undermining the accurate,
+    // query-responsive counts this search is meant to demonstrate. D365's
+    // seed schemas are rich enough that literal matches alone produce a
+    // believable result set, so the padding is gone.
     // Record-name match: the record's primary identifier matches the
-    // query (or qualifies as a hash-fake content match). Surface as a
+    // query. Surface as a
     // Record row; drillable when the parent table is itself drillable
     // (clicking navigates into the fields-drill view).
-    if (literalNameHit || hashFakeHit) {
+    if (literalNameHit) {
       hits.push(Object.assign({
         _synthetic: true,
         _hitKind: 'record',
         _hitField: null,
-        _hitContext: literalNameHit ? 'literal' : 'content',
+        _hitContext: 'literal',
         id: recId,
         name: recordName,
         type: 'Record',
@@ -11878,26 +11900,19 @@ function _walkD365RecordsAndFields(tableResource, q) {
         _tableName: tableResource.name
       }, inherit));
     }
-    // Field-value matches: every non-name column whose value contains
-    // the query string. Each match becomes its own leaf row so users
-    // can act on the field directly (preview / add-to-cart). The name
-    // column is skipped because the record-name match above already
-    // covers it. As with records, fields that DON'T literally match
-    // still get a hash-based "content match" chance (~1/12) so the
-    // recursive search produces a believable count of field-level
-    // hits even on sparse seed data — same trick simResourceRpHit
-    // uses at the resource level.
+    // Field-value matches: every non-name column whose value literally
+    // contains the query string. Each match becomes its own leaf row so
+    // users can act on the field directly (preview / add-to-cart). The
+    // name column is skipped because the record-name match above already
+    // covers it. Literal-only (see the record block above) — no hash-fake
+    // padding, so field-value counts reflect actual data.
     schema.cols.forEach(function(col){
       if (col === nameKey) return;
       var val = rec[col];
       if (val == null) return;
       var strVal = String(val);
       var fieldLiteralHit = strVal.toLowerCase().indexOf(qLower) >= 0;
-      var fieldHashFakeHit = false;
-      if (!fieldLiteralHit && typeof _hashSeed === 'function') {
-        fieldHashFakeHit = (_hashSeed('field|' + schemaKey + '|' + idx + '|' + col + '|' + qLower) % 12) === 0;
-      }
-      if (!fieldLiteralHit && !fieldHashFakeHit) return;
+      if (!fieldLiteralHit) return;
       var fieldId = 'field-' + schemaKey + '~' + idx + '~' + encodeURIComponent(col);
       // Compose a name that surfaces BOTH the matched field and its
       // value — without this, the result row reads "Industry" with no
@@ -11910,7 +11925,7 @@ function _walkD365RecordsAndFields(tableResource, q) {
         _hitKind: 'field',
         _hitField: col,
         _hitValue: strVal,
-        _hitContext: fieldLiteralHit ? 'literal' : 'content',
+        _hitContext: 'literal',
         _recordId: recId,
         _recordName: recordName,
         _tableName: tableResource.name,
@@ -11963,7 +11978,12 @@ function _buildDrillSearchResults(query, skipFacetFilter) {
   var results = pool.filter(function(r){
     if (searchTypesInScope && searchTypesInScope.indexOf(r.type) < 0) return false;
     if (r.type === 'Folder' && !searchIncludeSub) return false;
-    if (r.name.toLowerCase().indexOf(q) < 0 && r.type.toLowerCase().indexOf(q) < 0) return false;
+    // Mirror childRender's inline filter: D365 containers match on content
+    // (records/fields), everything else on name/type only.
+    var _ntHit = r.name.toLowerCase().indexOf(q) >= 0 || r.type.toLowerCase().indexOf(q) >= 0;
+    var _contentHit = !_ntHit && r.wl === 'Dynamics 365'
+      && typeof _resourceHasSearchMatch === 'function' && _resourceHasSearchMatch(r, q);
+    if (!_ntHit && !_contentHit) return false;
     return true;
   });
   // Synthesized record + field hits (D365 only). Always include when
@@ -12476,7 +12496,14 @@ function childRender() {
       if (searchTypesInScope && searchTypesInScope.indexOf(r.type) < 0) return false;
       if (!passesChildFilters(r)) return false;
       if (!passesDiffView(r)) return false;
-      if (r.name.toLowerCase().indexOf(q) < 0 && r.type.toLowerCase().indexOf(q) < 0) return false;
+      var _ntHit = r.name.toLowerCase().indexOf(q) >= 0 || r.type.toLowerCase().indexOf(q) >= 0;
+      // D365 containers (Tables) are empty vessels — their searchable value
+      // is their records/fields. So a table matches when its CONTENT does,
+      // letting a user drill a matched env and still see only the matching
+      // tables. Non-D365 rows keep the name/type-only behavior.
+      var _contentHit = !_ntHit && r.wl === 'Dynamics 365'
+        && typeof _resourceHasSearchMatch === 'function' && _resourceHasSearchMatch(r, q);
+      if (!_ntHit && !_contentHit) return false;
       return true;
     });
     // Recursive search must continue into the synthesized levels that
@@ -13155,14 +13182,14 @@ function _childRenderRecords() {
         var _recCmpLbl = state.recCompareDate === 'today' ? 'Today' : (state.recCompareDate || '');
         var _recDiffBadge = _diffBadgeHtml(r._diffStatus, _recCmpLbl);
         if (r._phantom) {
-          return '<td class="' + nameCls + '"><div style="display:flex;align-items:center;column-gap:8px;row-gap:4px;flex-wrap:wrap;overflow:visible"><span class="diff-dot" aria-hidden="true"></span><span class="cell-name" style="color:var(--black-60)">' + v + '</span>' + '</div></td>';
+          return '<td class="' + nameCls + '"><div style="display:flex;align-items:center;column-gap:8px;row-gap:4px;flex-wrap:wrap;overflow:visible"><span class="diff-dot" aria-hidden="true"></span><span class="cell-name" style="color:var(--black-60)">' + (q ? _hlText(v, q) : v) + '</span>' + '</div></td>';
         }
         // Record name click drills one level deeper into the fields
         // view — the drill chain is workload → env → table → records →
         // fields. The drill view paints one row per field; yellow
         // highlights mark fields whose values differ from the compare-
         // date snapshot, and each field row carries its own +Restore.
-        return '<td class="' + nameCls + '"><div style="display:flex;align-items:center;column-gap:8px;row-gap:4px;flex-wrap:wrap;overflow:visible"><span class="diff-dot" aria-hidden="true"></span><span class="cell-name drillable" ' + (r._diffStatus === 'added' ? '' : 'onclick="openFieldsDrill(\'rec-' + r._id + '\')"') + '>' + v + '</span>' + '</div></td>';
+        return '<td class="' + nameCls + '"><div style="display:flex;align-items:center;column-gap:8px;row-gap:4px;flex-wrap:wrap;overflow:visible"><span class="diff-dot" aria-hidden="true"></span><span class="cell-name drillable" ' + (r._diffStatus === 'added' ? '' : 'onclick="openFieldsDrill(\'rec-' + r._id + '\')"') + '>' + (q ? _hlText(v, q) : v) + '</span>' + '</div></td>';
       }
       // Compare mode: changed non-name cells show the compared (before) value
       // stacked above the current (after) value, inside the existing highlight.
@@ -13172,14 +13199,14 @@ function _childRenderRecords() {
           // Top = anchor/as-of (v, muted) with its date; bottom = the
           // compared-to value (_bef, showcased) with its date.
           return '<td class="rec-diff-cell-changed rec-ba" style="font-size:14px">'
-            + '<span class="rec-ba-top">' + v + '</span>'
+            + '<span class="rec-ba-top">' + (q ? _hlText(v, q) : v) + '</span>'
             + '<span class="rec-ba-date">' + _baAfterDate + '</span>'
-            + '<span class="rec-ba-bottom">' + _bef + '</span>'
+            + '<span class="rec-ba-bottom">' + (q ? _hlText(_bef, q) : _bef) + '</span>'
             + '<span class="rec-ba-date">' + _baBeforeDate + '</span></td>';
         }
-        return '<td class="rec-diff-cell-changed" style="font-size:14px">' + v + '</td>';
+        return '<td class="rec-diff-cell-changed" style="font-size:14px">' + (q ? _hlText(v, q) : v) + '</td>';
       }
-      return '<td style="font-size:14px">' + v + '</td>';
+      return '<td style="font-size:14px">' + (q ? _hlText(v, q) : v) + '</td>';
     }).join('');
     var rowSelected = isCovered ? true : isInPlan('rec-' + r._id);
     var rowClasses = [];
@@ -14668,7 +14695,11 @@ function openRecordsDrill(parentId) {
   childState.parentId = parentId;
   childState.folder = null;
   childState.history = [];
-  var s = document.getElementById('childSearch'); if (s) s.value = '';
+  // Drill-with-intent: inherit the inventory search query (see
+  // openChildrenDrill) so drilling a matched table lands pre-filtered to
+  // the matching records. Empty for direct/tree-nav drills.
+  var _invQ = (document.getElementById('invSearch') || {}).value || '';
+  var s = document.getElementById('childSearch'); if (s) s.value = _invQ.trim();
   state.searchIncludeSubfolders = false;
   state.childSelectedIds = state.childSelectedIds || new Set();
   setInvMode('drill');
@@ -17841,12 +17872,20 @@ function _invRepoLastPush(r) {
 // the chip is clickable and drills into the row's contents — the same action
 // as clicking the (blue) name — so the count both signals "there's stuff
 // inside" and is a way in. Empty/"—" stays plain.
-function _invContentsChip(text, clickHandler) {
+function _invContentsChip(text, clickHandler, matched) {
   if (text == null || text === '' || text === '—') return '<span style="color:var(--black-30)">—</span>';
   // Contents chips are STATIC informational Labels — never interactive.
   // Drilling into a resource is owned by the row name (and other affordances),
   // so the count chip doesn't double as a nav control. The clickHandler arg is
   // intentionally ignored (kept for call-site compatibility). See DS §5a.
+  // `matched` flag gives the chip the active treatment when it's reporting
+  // a search match-count. A magnifier glyph + title tooltip carry the
+  // "these matched the current search" meaning while keeping the label
+  // compact ("🔍 5 tables") so it fits the Contents column.
+  if (matched) {
+    var mag = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;flex-shrink:0" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>';
+    return '<span class="contents-chip matched" title="' + wsEscape(text) + ' match the current search">' + mag + wsEscape(text) + '</span>';
+  }
   return '<span class="contents-chip">' + text + '</span>';
 }
 // Org/group contents as a count chip. The column header is "Contents" for
@@ -18126,6 +18165,87 @@ function _invContentsRollup(r) {
   var top = entries[0];
   return top.n + ' ' + (top.n === 1 ? top.label.replace(/s$/, '') : top.label);
 }
+// ── Search-aware Contents rollup ─────────────────────────────────────
+// When a query is active, the Contents column stops reporting the
+// resource's total child count and instead reports how many of its
+// immediate children are on the match path — "4 matching tables",
+// "12 matching records". This makes a content-aware parent hit
+// self-explanatory: a container is an "empty vessel" whose searchable
+// value IS its contents, so a parent matched because N of the things
+// inside it contain the term. Recursion mirrors buildSearchGroups'
+// content model (name/type literal OR D365 record/field value OR any
+// descendant). D365-only: it's the only workload with the synthesized
+// record/field content layer, so other workloads keep the plain count.
+// Wrap the matched substring of `str` in <mark class="rd-match-hl"> so a
+// search result shows exactly which metadata/value matched. Operates on
+// the raw string and escapes each segment (same pattern as the RP-card
+// and comparison-drawer highlighters) so it's HTML-safe.
+function _hlText(str, q) {
+  var raw = String(str == null ? '' : str);
+  q = (q || '').trim();
+  if (!q) return wsEscape(raw);
+  var qi = raw.toLowerCase().indexOf(q.toLowerCase());
+  if (qi < 0) return wsEscape(raw);
+  return wsEscape(raw.slice(0, qi))
+    + '<mark class="rd-match-hl">' + wsEscape(raw.slice(qi, qi + q.length)) + '</mark>'
+    + wsEscape(raw.slice(qi + q.length));
+}
+function _resourceHasSearchMatch(r, q) {
+  if (!r || !q) return false;
+  var lit = (r.name + ' ' + (r.meta || '') + ' ' + (r.type || '')).toLowerCase();
+  if (lit.indexOf(q) >= 0) return true;
+  if (r.wl === 'Dynamics 365' && typeof _walkD365RecordsAndFields === 'function') {
+    if (_walkD365RecordsAndFields(r, q).length > 0) return true;
+  }
+  var kids = (typeof RESOURCES !== 'undefined')
+    ? RESOURCES.filter(function(x){ return x.parentId === r.id; }) : [];
+  return kids.some(function(k){ return _resourceHasSearchMatch(k, q); });
+}
+function _invSearchMatchRollup(r, q) {
+  q = String(q || '').toLowerCase().trim();
+  if (!q || !r) return null;
+  // D365-scoped — other workloads have no record/field content layer,
+  // so "matching contents" would be meaningless there.
+  if (r.wl !== 'Dynamics 365') return null;
+  var kids = (typeof RESOURCES !== 'undefined')
+    ? RESOURCES.filter(function(x){ return x.parentId === r.id && x.existence !== 'deleted-in-live'; })
+    : [];
+  if (kids.length) {
+    // Container with real child resources (Environment → Tables): count
+    // immediate children on a match path, labelled by their dominant
+    // category so the noun matches the snapshot Contents view.
+    var matched = kids.filter(function(k){ return _resourceHasSearchMatch(k, q); });
+    if (!matched.length) return null;
+    var groups = {};
+    matched.forEach(function(k){
+      var label = (typeof _invItemCategoryLabel === 'function') ? _invItemCategoryLabel(k.type) : (k.type + 's');
+      groups[label] = (groups[label] || 0) + 1;
+    });
+    var entries = Object.keys(groups).map(function(l){ return { label: l, n: groups[l] }; });
+    entries.sort(function(a, b){ return b.n - a.n; });
+    var top = entries[0], total = matched.length;
+    var noun = total === 1 ? top.label.replace(/s$/, '') : top.label;
+    // Short noun phrase only ("5 tables") — the magnifier glyph + active
+    // chip styling added by _invContentsChip(matched) carries the
+    // "these matched the search" meaning, keeping the chip compact enough
+    // to fit the Contents column without clipping.
+    return total + ' ' + noun;
+  }
+  // Leaf container backed by a D365 schema (a Table with no RESOURCES
+  // children): count unique records on the match path — a field hit
+  // rolls up to its parent record (_recordId), so "matches a record OR
+  // a field inside a record" both count as one matching record.
+  if (typeof _walkD365RecordsAndFields === 'function') {
+    var hits = _walkD365RecordsAndFields(r, q);
+    if (!hits.length) return null;
+    var recIds = {};
+    hits.forEach(function(h){ recIds[h._hitKind === 'field' ? h._recordId : h.id] = true; });
+    var n = Object.keys(recIds).length;
+    if (!n) return null;
+    return n + ' ' + (n === 1 ? 'record' : 'records');
+  }
+  return null;
+}
 // Pulls the first numeric "·"-separated chunk from a meta string.
 // Replaces the old extractContents which kept ALL numeric pieces
 // joined back together; the Contents column is tighter now, so we
@@ -18258,7 +18378,7 @@ function _invItemSubType(r) {
 function renderInvCell(r, key, ctx) {
   if (key === 'name') {
     return '<td class="name-col"><div style="display:flex;align-items:center;column-gap:8px;row-gap:4px;flex-wrap:wrap;overflow:visible"><span class="diff-dot" aria-hidden="true"></span>'
-         + '<span class="' + ctx.nameClass + '" style="' + ctx.nameStyle + '" onclick="' + ctx.clickHandler + '">' + r.name + '</span>'
+         + '<span class="' + ctx.nameClass + '" style="' + ctx.nameStyle + '" onclick="' + ctx.clickHandler + '">' + (ctx.hlQuery ? _hlText(r.name, ctx.hlQuery) : r.name) + '</span>'
          + ctx.existenceHtml
          + '' /* diff badge retired — see .inv-diff-tooltip hover */
          + '</div>'
@@ -18300,7 +18420,14 @@ function renderInvCell(r, key, ctx) {
   if (key === 'members')    return '<td style="font-size:14px;color:var(--black-60)">' + _invOrgMembers(r) + '</td>';
   // Power Platform cells (also reused by the drill renderer)
   if (key === 'tenantDomain')    return '<td style="font-size:14px;color:var(--black-60)">' + _invTenantDomain(r) + '</td>';
-  if (key === 'contents')        return '<td style="font-size: 14px">' + _invContentsChip(_invContentsRollup(r), ctx && ctx.clickHandler) + '</td>';
+  if (key === 'contents') {
+    // Under an active search, the Contents column reports matching
+    // children ("4 matching tables") instead of the total rollup, so a
+    // content-aware parent hit reads as self-explanatory. ctx.searchMatchContents
+    // is precomputed by the search renderer (null when no query / no match).
+    if (ctx && ctx.searchMatchContents) return '<td style="font-size: 14px">' + _invContentsChip(ctx.searchMatchContents, null, true) + '</td>';
+    return '<td style="font-size: 14px">' + _invContentsChip(_invContentsRollup(r), ctx && ctx.clickHandler) + '</td>';
+  }
   if (key === 'spaceContents')   return '<td style="font-size: 14px">' + _invContentsChip(_invSpaceContents(r), ctx && ctx.clickHandler) + '</td>';
   if (key === 'policiesApplied') {
     // Dead branch — the column schemas now use 'policy' instead, so
@@ -18687,8 +18814,22 @@ function buildSearchGroups(query) {
     if (!_isPrimaryAtCat(r)) return;
     var rps = generateRps(r.id);
     if (!rps || !rps.length) return;
+    // D365 surfaces on a REAL literal content match (name/type/meta or a
+    // matching record/field below), so the results — and the Contents
+    // match-count — reflect actual data, not the hash-fake RP padding
+    // other workloads still rely on for sparse demos. Without this gate,
+    // an environment with zero literal matches could still surface via a
+    // simResourceRpHit hash collision and then show "no matching contents".
+    var isD365 = r.wl === 'Dynamics 365';
     var matchedRps = rps.filter(function(rp){ return simResourceRpHit(r, rp, queryKey); });
-    if (!matchedRps.length) return;
+    if (isD365) {
+      if (!_resourceHasSearchMatch(r, queryKey)) return;
+      // Ensure the RP-count badge still renders even if the hash-based
+      // simResourceRpHit happened to return nothing for this resource.
+      if (!matchedRps.length) matchedRps = rps.slice();
+    } else if (!matchedRps.length) {
+      return;
+    }
     matchedRps.sort(function(a, b){ return b.ts - a.ts; });
     groups.push({
       resource: r,
@@ -20567,6 +20708,14 @@ function renderSearchResults(query) {
       badgeCls: badgeCls,
       badgeText: badgeText,
       lastBackupText: lastBackupText,
+      // Contents column reports matching children under an active query
+      // ("4 matching tables" / "12 matching records") so a content-aware
+      // parent hit explains itself. Null for non-D365 / no match → the
+      // cell falls back to the plain contents rollup.
+      searchMatchContents: (typeof _invSearchMatchRollup === 'function') ? _invSearchMatchRollup(r, query) : null,
+      // Highlight the matched term in the name cell (record name / field
+      // "Field: value") so the user sees exactly what matched.
+      hlQuery: query || null,
       diffBadge: _searchDiffStatus === 'removed' ? '' : _diffBadgeHtml(_v1BadgeStatus(r, _searchDiffStatus) || (state.invCompareDate ? 'unchanged' : null), _searchCmpLabel)
     };
     var _searchCellsHtml = getInvColumnsVisible().map(function(col){ return renderInvCell(r, col.key, _searchRowCtx); }).join('');
