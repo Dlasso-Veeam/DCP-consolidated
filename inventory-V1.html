@@ -4999,7 +4999,7 @@ body.drawer-open { overflow: hidden; }
                 <div class="inv-search-row">
                   <div class="inv-search-inner">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                    <input id="childSearch" placeholder="Search sub-resources by name or type…" oninput="childRender()">
+                    <input id="childSearch" placeholder="Search sub-resources by name or type…" oninput="filterChild()">
                     <button type="button" class="search-clear-btn" onclick="clearSearchInput('childSearch')" aria-label="Clear search">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
                     </button>
@@ -12500,6 +12500,14 @@ function childRender() {
   var tbody = document.getElementById('childTbody');
   var banner = document.getElementById('childSearchBanner');
   if (!tbody) return;
+  // Drill-search loading beat (env → contents etc.): show the skeleton while
+  // filterChild's timer runs, then re-render with real rows + the chip-reveal
+  // shimmer on the matched-contents chips.
+  if (state._childSearchLoading) {
+    var _gSkelN = (typeof _activeChildColumns === 'function') ? _activeChildColumns().length : 4;
+    tbody.innerHTML = _recCompareSkeletonRows(_gSkelN);
+    return;
+  }
   var cur = RESOURCES.find(function(r){ return r.id === childState.parentId; });
   if (!cur) { tbody.innerHTML = ''; return; }
 
@@ -13107,7 +13115,7 @@ function _childRenderRecords() {
   // Compare-date change: header/columns above are already repainted; show a
   // skeleton body while the "fetch" runs, then _refreshAfterCompareChange's
   // timer re-renders with the updated values + date labels.
-  if (state._recCompareLoading) {
+  if (state._recCompareLoading || state._childSearchLoading) {
     var _skelCols = (typeof _activeRecordsColumns === 'function') ? _activeRecordsColumns().length : 4;
     tbody.innerHTML = _recCompareSkeletonRows(_skelCols);
     return;
@@ -13498,6 +13506,14 @@ function _childRenderFields() {
   // Single source for the column set so the body cells always align.
   renderChildThead();
   if (typeof renderTopActionBar === 'function') renderTopActionBar();
+
+  // Drill-search loading beat: paint the skeleton while filterChild's timer
+  // runs, then it clears the flag and re-renders the real fields.
+  if (state._childSearchLoading) {
+    var _fSkelTb = document.getElementById('childTbody');
+    if (_fSkelTb) _fSkelTb.innerHTML = _recCompareSkeletonRows(4); // Field/Type/Value/Modified
+    return;
+  }
 
   var schema = D365_SCHEMAS[resolved.schemaKey] || {};
   var record = resolved.record || {};
@@ -18055,8 +18071,9 @@ function _invContentsChip(text, clickHandler, matched) {
   if (matched) {
     var mag = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;flex-shrink:0" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>';
     // One-shot attention shimmer on the first render right after a search
-    // "loads" (state._invSearchJustLoaded), then it settles.
-    var reveal = (typeof state !== 'undefined' && state._invSearchJustLoaded) ? ' chip-reveal' : '';
+    // "loads" — at the inventory level (_invSearchJustLoaded) OR a drill level
+    // (_childSearchJustLoaded) — then it settles.
+    var reveal = (typeof state !== 'undefined' && (state._invSearchJustLoaded || state._childSearchJustLoaded)) ? ' chip-reveal' : '';
     return '<span class="contents-chip matched' + reveal + '" title="' + wsEscape(text) + ' match the current search">' + mag + wsEscape(text) + '</span>';
   }
   return '<span class="contents-chip">' + text + '</span>';
@@ -21371,6 +21388,31 @@ function filterTable() {
   } else {
     state._invSearchLoading = false;
     filterTable._timer = setTimeout(function() { renderTable(); }, 120);
+  }
+}
+// Drill-level search handler — same skeleton-then-results loading beat as
+// filterTable, so a search initiated at ANY level (env→tables, table→records,
+// record→fields) reads as "retrieving" and the matched-contents chips get the
+// one-shot reveal shimmer. Each child renderer paints the skeleton while
+// state._childSearchLoading is set (see childRender's branches).
+function filterChild() {
+  var el = document.getElementById('childSearch');
+  var q = (el && el.value || '').trim();
+  if (filterChild._timer) clearTimeout(filterChild._timer);
+  if (filterChild._loadTimer) clearTimeout(filterChild._loadTimer);
+  if (q) {
+    state._childSearchLoading = true;
+    state._childSearchJustLoaded = false;
+    childRender();
+    filterChild._loadTimer = setTimeout(function() {
+      state._childSearchLoading = false;
+      state._childSearchJustLoaded = true;
+      childRender();
+      state._childSearchJustLoaded = false;
+    }, 480);
+  } else {
+    state._childSearchLoading = false;
+    filterChild._timer = setTimeout(function() { childRender(); }, 120);
   }
 }
 function changeInvPage(delta) {
