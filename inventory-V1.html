@@ -9324,8 +9324,11 @@ function childGoBack() {
   // dive lands them right back in their prior search results, with
   // the same toggle state.
   var s = document.getElementById('childSearch');
-  if (s) s.value = prev.search || '';
-  state.searchIncludeSubfolders = !!prev.searchRecursive;
+  // Only override the search when this frame explicitly recorded one. Frames
+  // from drill entries that don't stash a query leave the active search
+  // untouched, so navigating back up the breadcrumb doesn't cancel it.
+  if (s && typeof prev.search === 'string') s.value = prev.search;
+  if (typeof prev.searchRecursive !== 'undefined') state.searchIncludeSubfolders = !!prev.searchRecursive;
   childRender();
   _scrollAppToTop();
 }
@@ -10161,8 +10164,10 @@ function childJumpToHistory(parentId) {
       // jumping back to a breadcrumb segment that the user reached
       // via a search should land them back in their results.
       var s = document.getElementById('childSearch');
-      if (s) s.value = target.search || '';
-      state.searchIncludeSubfolders = !!target.searchRecursive;
+      // Only override the search when this frame explicitly recorded one;
+      // otherwise keep the active query so breadcrumb-back doesn't cancel it.
+      if (s && typeof target.search === 'string') s.value = target.search;
+      if (typeof target.searchRecursive !== 'undefined') state.searchIncludeSubfolders = !!target.searchRecursive;
       childRender();
       return;
     }
@@ -14945,10 +14950,15 @@ function openFieldsDrill(recordId) {
   // setInvMode('list').
   if (childState.parentId && childState.parentId !== recordId) {
     childState.history = childState.history || [];
+    var _ofsEl = document.getElementById('childSearch');
     childState.history.push({
       parentId: childState.parentId,
       folder: childState.folder,
-      entryId: childState.entryId
+      entryId: childState.entryId,
+      // Stash the active search so Back / breadcrumb to the records list
+      // restores it (drill-with-intent persists the query both ways).
+      search: _ofsEl ? (_ofsEl.value || '') : '',
+      searchRecursive: !!state.searchIncludeSubfolders
     });
   }
   childState.parentId = recordId;
