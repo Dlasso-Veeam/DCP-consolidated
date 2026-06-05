@@ -32390,9 +32390,9 @@ function renderRdBody() {
       var rCls = ((ch ? 'cell-diff-prod ' : '') + (_rCommitCls ? 'rw-col-committed' : '')).trim();
       return '<tr' + (ch ? ' class="row-diff"' : '') + '>'
         + (_hasMask ? '<td></td>' : '')
-        + '<td>' + wsEscape(String(f)) + '</td>'
-        + '<td' + (lCls ? ' class="' + lCls + '"' : '') + '>' + wsEscape(String(lv == null || lv === '' ? '—' : lv)) + '</td>'
-        + '<td' + (rCls ? ' class="' + rCls + '"' : '') + '>' + wsEscape(String(rv == null || rv === '' ? '—' : rv)) + '</td>'
+        + '<td>' + _hlVal(f) + '</td>'
+        + '<td' + (lCls ? ' class="' + lCls + '"' : '') + '>' + _hlVal(lv == null || lv === '' ? '—' : lv) + '</td>'
+        + '<td' + (rCls ? ' class="' + rCls + '"' : '') + '>' + _hlVal(rv == null || rv === '' ? '—' : rv) + '</td>'
       + '</tr>';
     }
     // Block array for lazy render — each entry is a record (or phantom
