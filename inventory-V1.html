@@ -1073,8 +1073,9 @@ tbody tr.rec-diff-row-unchanged .diff-dot { background: var(--black-30); }
    Sits inside the existing .rec-diff-cell-changed tint — before = older
    compare value (small, struck), after = current/anchor value (emphasized). */
 .rec-ba { line-height: 1.2; }
-.rec-ba .rec-ba-before { display: block; font-size: 11px; color: var(--black-60); text-decoration: line-through; text-decoration-color: var(--black-30); }
+.rec-ba .rec-ba-before { display: block; font-size: 10px; color: var(--black-60); text-decoration: line-through; text-decoration-color: var(--black-30); }
 .rec-ba .rec-ba-after  { display: block; font-size: 14px; font-weight: 500; color: var(--black-100); }
+.rec-ba .rec-ba-date   { display: block; font-size: 10px; color: var(--black-30); line-height: 1.2; margin-bottom: 3px; }
 
 /* Compare-mode diff variants — extend ex-badge with two extra color schemes
    so Added and Modified badges are visually identical to the existing
@@ -13054,6 +13055,10 @@ function _childRenderRecords() {
   // render; reuses getRecCellValue + the schema rows. genRecDiff only tells us
   // WHICH cells changed — this supplies a believable prior value to show.
   var _cmpPools = {};
+  // Per-cell snapshot dates (smallest DS label). 'after' = current/anchor
+  // (latest backup); 'before' = the compared point (state.recCompareDate).
+  var _baAfterDate  = (parent && parent.lastBackup && parent.lastBackup !== '—') ? parent.lastBackup : 'Latest';
+  var _baBeforeDate = (typeof fmtCompareDate === 'function') ? fmtCompareDate(state.recCompareDate) : (state.recCompareDate || '');
   function _beforeVal(col, idx, afterVal){
     var pool = _cmpPools[col];
     if (!pool){ pool = []; for (var _i=0; _i<schemaRows.length; _i++){ var _pv = getRecCellValue(schemaRows[_i], col, _i); if (_pv != null){ _pv = String(_pv); if (_pv && pool.indexOf(_pv) < 0) pool.push(_pv); } } _cmpPools[col] = pool; }
@@ -13092,7 +13097,9 @@ function _childRenderRecords() {
         if (_bef != null) {
           return '<td class="rec-diff-cell-changed rec-ba" style="font-size:14px">'
             + '<span class="rec-ba-before">' + _bef + '</span>'
-            + '<span class="rec-ba-after">' + v + '</span></td>';
+            + '<span class="rec-ba-date">' + _baBeforeDate + '</span>'
+            + '<span class="rec-ba-after">' + v + '</span>'
+            + '<span class="rec-ba-date">' + _baAfterDate + '</span></td>';
         }
         return '<td class="rec-diff-cell-changed" style="font-size:14px">' + v + '</td>';
       }
