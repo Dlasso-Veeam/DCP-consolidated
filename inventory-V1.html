@@ -30435,7 +30435,11 @@ function openRecordDrawer(id, nameOverride, subOverride, asOfDate, ctxOverride) 
     rdState.rightSel = 'prod';
   } else if (state.invCompareDate) {
     if (openedFromRecords) {
-      rdState.leftSel  = 'prod';
+      // Anchor (left) = the inventory as-of restore point (latest backup or
+      // the chosen RP), NOT live production — matches the records table's
+      // before/after anchor so the preview reads "<as-of> vs <compare date>"
+      // instead of "Production (now) vs <compare date>".
+      rdState.leftSel  = state.invAsOfRpId || (rps[0] ? rps[0].id : 'prod');
       rdState.rightSel = 'snap';
     } else {
       // Resolve LEFT side from invAsOfRpId (specific RP) or invDate
@@ -30470,13 +30474,14 @@ function openRecordDrawer(id, nameOverride, subOverride, asOfDate, ctxOverride) 
     rdState.leftSel  = leftRp ? leftRp.id : 'prod';
     rdState.rightSel = 'prod';
   }
-  // Single-snapshot mode — the RESTING inventory preview (no wizard, no
+  // Single-snapshot mode — the RESTING inventory/drill preview (no wizard, no
   // compare) collapses the redundant "Production (now)" column into one
-  // "latest backup" snapshot. Explicitly NEVER in the wizard (the basket
-  // preview keeps RP-vs-production) or in compare mode. The D365 dense
-  // records path is untouched — it runs through its own table, not the
-  // generic field table this flag gates.
-  rdState.singleSnap = !pinnedRpId && !state.invCompareDate
+  // anchored snapshot, including the record-level preview which previewResource
+  // opens with the anchor RP pinned (ctx.rpId). Gated on the WIZARD + compare
+  // only: the basket preview (ws.isOpen) keeps RP-vs-production, and compare
+  // mode keeps the two chosen restore points. (Pinning an anchor RP no longer
+  // forces the "vs Production (now)" two-column view in the resting preview.)
+  rdState.singleSnap = !state.invCompareDate
     && !(typeof ws !== 'undefined' && ws.isOpen);
   rdState.leftDropOpen = false;
   rdState.rightDropOpen = false;
