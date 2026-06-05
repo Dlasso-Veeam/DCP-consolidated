@@ -11578,8 +11578,47 @@ function _diffTipText(status, dateLabel) {
   window.addEventListener('scroll', _dtipHide, true);
 })();
 
+// ── Canonical record diff status ─────────────────────────────────────
+// SINGLE source of truth for a D365 record's compare verdict, decoded
+// straight from genRecDiff — the SAME generator the records TABLE reads
+// (see _childRenderRecords / buildRecordLevelDrawerFields). Returns
+// 'added' | 'modified' | 'unchanged' | null (no compare / not a record /
+// schema miss). Every record-aware surface (table tints, preview-drawer
+// existence banner via _v1ResourceDiffStatus, contents rollups) must go
+// through this so they can never disagree. This is what fixes the
+// "table says modified, drawer says added" split — the drawer used to
+// hash records into a synthetic added/removed bucket below; now it
+// defers here. 'removed' rows from genRecDiff are phantom (no real row
+// index), so a real rec-* id is only ever added/modified/unchanged.
+function _recDiffStatus(resourceId) {
+  if (!resourceId || resourceId.indexOf('rec-') !== 0) return null;
+  var cmp = (state && (state.recCompareDate || state.invCompareDate)) || null;
+  if (!cmp || typeof genRecDiff !== 'function') return null;
+  var rest = resourceId.slice(4);
+  var lastDash = rest.lastIndexOf('-');
+  if (lastDash < 0) return null;
+  var schemaKey = rest.slice(0, lastDash);
+  var rowIdx = parseInt(rest.slice(lastDash + 1), 10);
+  if (isNaN(rowIdx)) return null;
+  var diff = genRecDiff(schemaKey, cmp);
+  if (!diff) return null;
+  if (diff.addedIdx && diff.addedIdx.has && diff.addedIdx.has(rowIdx)) return 'added';
+  if (diff.modifiedByIdx && diff.modifiedByIdx[rowIdx]) return 'modified';
+  return 'unchanged';
+}
+
 function _v1ResourceDiffStatus(resource) {
   if (!state.invCompareDate || !resource || !resource.id) return null;
+  // D365 records defer to genRecDiff (the records table's source) so the
+  // preview drawer's existence banner can't contradict the table. We map
+  // here before the cache/hash machinery below so a record never lands in
+  // the synthetic added/removed bucket. 'unchanged' → null to honor this
+  // function's contract (null = no OWN change; the subtree rollup that
+  // follows for containers doesn't apply to leaf records anyway).
+  if (resource.id.indexOf('rec-') === 0) {
+    var _rs = _recDiffStatus(resource.id);
+    return (_rs === 'added' || _rs === 'removed' || _rs === 'modified') ? _rs : null;
+  }
   // Cache key includes both inventory dates + both RP id pins so the
   // status invalidates when any one of those four inputs changes (e.g.
   // user picks a different specific RP within the same day).
