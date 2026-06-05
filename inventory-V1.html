@@ -3523,6 +3523,10 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--blue); c
   font-weight: 450;
 }
 .rd-mask-banner-icon { width: 16px; height: 16px; color: var(--blue); flex-shrink: 0; }
+/* "Changed records" summary variant — amber, matching the .ex-badge.diff-modified
+   styling so the consolidated top alert reads like the per-record badges did. */
+.rd-mask-banner.changed { background: var(--yellow-10); border-color: var(--yellow); color: var(--yellow-dark); }
+.rd-mask-banner.changed .rd-mask-banner-icon { color: var(--yellow-dark); }
 /* V1: existence-delta banner row in the drawer's compare table.
    Anchors the visual on which side is missing — the column for the
    absent date gets a red-tinted background + bold copy, and the
@@ -32765,7 +32769,12 @@ function renderRdBody() {
       var inR = !!_maskRecSet[rid];
       if (_hasMask) { if (!status && !inR) return; }
       else { if (!status) return; }
-      var badge = (status && typeof _diffBadgeHtml === 'function') ? _diffBadgeHtml(status, _cmpLbl) : '';
+      // Per-record "Modified since" badge is dropped — the consolidated amber
+      // banner at the top of the drawer already states the changed-record
+      // count + date, so repeating it on every row is redundant. Existence
+      // deltas (added/removed) keep their badge — they're a distinct signal
+      // (a new/gone record) the cell values alone don't convey.
+      var badge = (status && status !== 'modified' && typeof _diffBadgeHtml === 'function') ? _diffBadgeHtml(status, _cmpLbl) : '';
       var _hdrRow = _tblSectionRowHtml(name, badge, _hasMask ? !!_maskRecSet[rid] : true);
       if (!status) {
         // Masked-but-unchanged record (only reachable with _hasMask) —
@@ -32844,11 +32853,10 @@ function renderRdBody() {
       var _remCt = (_diff.removed && _diff.removed.length) ? _diff.removed.length : 0;
       var _chgTotal = _modCt + _addCt + _remCt;
       if (_chgTotal > 0) {
-        _branchBanner = '<div class="rd-mask-banner">'
-          + '<svg class="rd-mask-banner-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>'
+        _branchBanner = '<div class="rd-mask-banner changed">'
+          + '<svg class="rd-mask-banner-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>'
           + _chgTotal + ' changed ' + (_chgTotal === 1 ? 'record' : 'records')
           + ' since ' + (_cmpLbl || 'snapshot')
-          + ' — all included in restore'
           + '</div>';
       }
     }
