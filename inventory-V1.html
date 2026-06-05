@@ -1076,8 +1076,11 @@ tbody tr.rec-diff-row-unchanged .diff-dot { background: var(--black-30); }
 /* Before/after values both at 14px so each clearly outsizes its 10px date
    label (no blend); old vs new is carried by muted-vs-dark colour + weight,
    not strikethrough (which hurt legibility). */
-.rec-ba .rec-ba-before { display: block; font-size: 14px; font-weight: 450; color: var(--black-60); }
-.rec-ba .rec-ba-after  { display: block; font-size: 14px; font-weight: 500; color: var(--black-100); }
+/* Top = the as-of/anchor (reference, muted); bottom = the compared-to value
+   (showcased). The compared-to always sits in the showcased bottom slot so the
+   slot's meaning is stable regardless of which date is older. */
+.rec-ba .rec-ba-top    { display: block; font-size: 14px; font-weight: 450; color: var(--black-60); }
+.rec-ba .rec-ba-bottom { display: block; font-size: 14px; font-weight: 500; color: var(--black-100); }
 .rec-ba .rec-ba-date   { display: block; font-size: 10px; font-weight: 450; color: var(--black-30); line-height: 1.2; margin-bottom: 4px; }
 
 /* Compare-mode diff variants — extend ex-badge with two extra color schemes
@@ -13125,11 +13128,13 @@ function _childRenderRecords() {
       if (diff && changedSet[c]) {
         var _bef = _beforeVal(c, rowIdx, v);
         if (_bef != null) {
+          // Top = anchor/as-of (v, muted) with its date; bottom = the
+          // compared-to value (_bef, showcased) with its date.
           return '<td class="rec-diff-cell-changed rec-ba" style="font-size:14px">'
-            + '<span class="rec-ba-before">' + _bef + '</span>'
-            + '<span class="rec-ba-date">' + _baBeforeDate + '</span>'
-            + '<span class="rec-ba-after">' + v + '</span>'
-            + '<span class="rec-ba-date">' + _baAfterDate + '</span></td>';
+            + '<span class="rec-ba-top">' + v + '</span>'
+            + '<span class="rec-ba-date">' + _baAfterDate + '</span>'
+            + '<span class="rec-ba-bottom">' + _bef + '</span>'
+            + '<span class="rec-ba-date">' + _baBeforeDate + '</span></td>';
         }
         return '<td class="rec-diff-cell-changed" style="font-size:14px">' + v + '</td>';
       }

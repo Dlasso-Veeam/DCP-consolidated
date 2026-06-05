@@ -56,8 +56,10 @@ tbody td { padding:10px 14px; border-bottom:1px solid var(--border-light); verti
 /* the diff cell: stacked before (older, small) over after (newer, large) */
 .dc { display:flex; flex-direction:column; gap:3px; }
 .dc .line { display:flex; flex-direction:column; }
-.dc .before .v { font-size:12px; color:var(--black-60); text-decoration:line-through; text-decoration-color:var(--black-30); }
-.dc .after  .v { font-size:15px; font-weight:500; color:var(--black-100); line-height:1.25; }
+/* Match inventory-V1: both values 14px (on-scale), no strikethrough; old vs
+   new carried by muted (top) vs dark (bottom, showcased) colour + weight. */
+.dc .before .v { font-size:14px; color:var(--black-60); }
+.dc .after  .v { font-size:14px; font-weight:500; color:var(--black-100); line-height:1.25; }
 .dc .cap { font-size:10px; color:var(--black-30); margin-top:1px; }
 .dc.add .before .v { text-decoration:none; color:var(--black-30); font-style:italic; }
 .dc.add .after .v { color:#4a7919; }
