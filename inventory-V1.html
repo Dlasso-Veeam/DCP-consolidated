@@ -1068,6 +1068,12 @@ tbody tr.rec-diff-row-unchanged .diff-dot { background: var(--black-30); }
 /* Cell tints for modified cells (yellow corner triangle as a scan affordance) */
 .rec-diff-cell-changed { background: var(--yellow-10) !important; position: relative; }
 .rec-diff-cell-changed::after { content: ''; position: absolute; top: 0; right: 0; border: 6px solid transparent; border-top-color: var(--yellow); border-right-color: var(--yellow); }
+/* D365 records compare: in-cell before/after stack (changed cells only).
+   Sits inside the existing .rec-diff-cell-changed tint — before = older
+   compare value (small, struck), after = current/anchor value (emphasized). */
+.rec-ba { line-height: 1.2; }
+.rec-ba .rec-ba-before { display: block; font-size: 11px; color: var(--black-60); text-decoration: line-through; text-decoration-color: var(--black-30); }
+.rec-ba .rec-ba-after  { display: block; font-size: 14px; font-weight: 500; color: var(--black-100); }
 
 /* Compare-mode diff variants — extend ex-badge with two extra color schemes
    so Added and Modified badges are visually identical to the existing
@@ -12067,6 +12073,19 @@ function _activeRecordsColumns() {
     visible = state.recVisibleCols.filter(function(c){ return allKnown.indexOf(c) >= 0; });
     if (visible.indexOf(cols[0]) < 0) visible.unshift(cols[0]);
   }
+  // V1 compare mode: order the visible columns by how many records changed
+  // each field (most-changed first), keeping the Name column pinned. Outside
+  // compare mode the order is untouched. Reuses genRecDiff's fieldCounts.
+  var _cmpDate = state.recCompareDate || state.invCompareDate;
+  if (_cmpDate) {
+    var _diff = genRecDiff(schemaKey, _cmpDate);
+    if (_diff && _diff.fieldCounts) {
+      var _name = cols[0];
+      var _rest = visible.filter(function(c){ return c !== _name; });
+      _rest.sort(function(a, b){ return (_diff.fieldCounts[b] || 0) - (_diff.fieldCounts[a] || 0); });
+      visible = [_name].concat(_rest);
+    }
+  }
   return visible.map(function(c){ return { key: c, label: c }; });
 }
 function getChildSortValue(r, key) {
@@ -13024,6 +13043,21 @@ function _childRenderRecords() {
   // Render the rows. Same shape as renderRecords' tbody pass, but
   // checkboxes route through toggleRecRow and writes target #childTbody.
   var isCovered = !!covered;
+  // V1 compare: deterministic "before" (compare-date) value for a changed cell.
+  // Drawn from the column's own real value space (a different in-column value),
+  // so it reads in-domain without inventing value formats. Pools built once per
+  // render; reuses getRecCellValue + the schema rows. genRecDiff only tells us
+  // WHICH cells changed — this supplies a believable prior value to show.
+  var _cmpPools = {};
+  function _beforeVal(col, idx, afterVal){
+    var pool = _cmpPools[col];
+    if (!pool){ pool = []; for (var _i=0; _i<schemaRows.length; _i++){ var _pv = getRecCellValue(schemaRows[_i], col, _i); if (_pv != null){ _pv = String(_pv); if (_pv && pool.indexOf(_pv) < 0) pool.push(_pv); } } _cmpPools[col] = pool; }
+    var cands = pool.filter(function(x){ return x !== String(afterVal); });
+    if (!cands.length) return null;
+    var seed = 0, s = schemaKey + '|' + idx + '|' + col;
+    for (var _k=0; _k<s.length; _k++) seed = (seed * 31 + s.charCodeAt(_k)) >>> 0;
+    return cands[seed % cands.length];
+  }
   tbody.innerHTML = pageRows.length ? pageRows.map(function(r){
     var changedSet = (r._changedCols || []).reduce(function(o,c){o[c]=true;return o;}, {});
     var rowIdx = (r._id && r._id.indexOf('-removed-') < 0)
@@ -13032,7 +13066,6 @@ function _childRenderRecords() {
     var cells = visibleCols.map(function(c, i){
       var v = getRecCellValue(r, c, rowIdx);
       if (v == null) v = '';
-      var changedCls = (diff && changedSet[c]) ? ' class="rec-diff-cell-changed"' : '';
       if (i === 0) {
         var nameCls = 'name-col' + (diff && changedSet[c] ? ' rec-diff-cell-changed' : '');
         var _recCmpLbl = state.recCompareDate === 'today' ? 'Today' : (state.recCompareDate || '');
@@ -13047,7 +13080,18 @@ function _childRenderRecords() {
         // date snapshot, and each field row carries its own +Restore.
         return '<td class="' + nameCls + '"><div style="display:flex;align-items:center;column-gap:8px;row-gap:4px;flex-wrap:wrap;overflow:visible"><span class="diff-dot" aria-hidden="true"></span><span class="cell-name drillable" ' + (r._diffStatus === 'added' ? '' : 'onclick="openFieldsDrill(\'rec-' + r._id + '\')"') + '>' + v + '</span>' + '</div></td>';
       }
-      return '<td' + changedCls + ' style="font-size:14px">' + v + '</td>';
+      // Compare mode: changed non-name cells show the compared (before) value
+      // stacked above the current (after) value, inside the existing highlight.
+      if (diff && changedSet[c]) {
+        var _bef = _beforeVal(c, rowIdx, v);
+        if (_bef != null) {
+          return '<td class="rec-diff-cell-changed rec-ba" style="font-size:14px">'
+            + '<span class="rec-ba-before">' + _bef + '</span>'
+            + '<span class="rec-ba-after">' + v + '</span></td>';
+        }
+        return '<td class="rec-diff-cell-changed" style="font-size:14px">' + v + '</td>';
+      }
+      return '<td style="font-size:14px">' + v + '</td>';
     }).join('');
     var rowSelected = isCovered ? true : isInPlan('rec-' + r._id);
     var rowClasses = [];
