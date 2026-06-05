@@ -19106,49 +19106,74 @@ function setCompareDiffFilter(key, checked) {
   }
   if (typeof _refreshAfterCompareChange === 'function') _refreshAfterCompareChange();
 }
-function _classifyHitKind(item) {
-  // Accept either a search-group { resource } (inventory level) or a
-  // raw resource (drill level). Both shapes get classified the same:
-  //   'resource' — normal RESOURCES entry (Tables, Environments, etc.)
-  //   'record'   — synthetic D365 record hit (rec-…)
-  //   'field'    — synthetic D365 field hit (field-…)
+// Hit-type uses a "why did this surface" (match-reason) model — a result is
+// classified by WHERE the query literally appears, bubbling child matches up
+// to the parent so the facet stays meaningful at every level:
+//   resource — query is in a resource's own name/type/metadata (this row's
+//              or a descendant resource's name)
+//   record   — query is in a record's NAME somewhere inside
+//   field    — query is in a non-name FIELD VALUE somewhere inside
+// Unlike the old object-type model these are NOT mutually exclusive: an
+// environment can match in both a record name and a field value, so it counts
+// toward — and is kept by — either filter. (Consistent with the records drill,
+// which already classifies record-name vs field-value hits.)
+function _facetActiveQuery() {
+  var aid = state.searchFacetsAnchorId || 'invSearchFacetsBtn';
+  var el = document.getElementById(aid === 'childSearchFacetsBtn' ? 'childSearch' : 'invSearch');
+  return ((el && el.value) || '').toLowerCase().trim();
+}
+function _resourceMatchReasons(r, q) {
+  var out = { resource: false, record: false, field: false, fields: {} };
+  if (!r || !q) return out;
+  var lit = (r.name + ' ' + (r.meta || '') + ' ' + (r.type || '')).toLowerCase();
+  if (lit.indexOf(q) >= 0) out.resource = true;
+  if (r.wl === 'Dynamics 365' && typeof _walkD365RecordsAndFields === 'function') {
+    _walkD365RecordsAndFields(r, q).forEach(function(h){
+      if (h._hitKind === 'record') out.record = true;
+      else if (h._hitKind === 'field') { out.field = true; if (h._hitField) out.fields[h._hitField] = true; }
+    });
+  }
+  var kids = (typeof RESOURCES !== 'undefined') ? RESOURCES.filter(function(x){ return x.parentId === r.id; }) : [];
+  kids.forEach(function(k){
+    var sub = _resourceMatchReasons(k, q);
+    if (sub.resource) out.resource = true;
+    if (sub.record) out.record = true;
+    if (sub.field) { out.field = true; Object.keys(sub.fields).forEach(function(fk){ out.fields[fk] = true; }); }
+  });
+  return out;
+}
+// Reason-set for a single result item (search-group {resource} or raw row).
+// A synthetic record/field hit IS its own reason; a real resource is scanned.
+function _itemReasons(item) {
   var r = (item && item.resource) ? item.resource : item;
-  if (!r) return 'resource';
-  if (r._hitKind === 'record') return 'record';
-  if (r._hitKind === 'field') return 'field';
-  return 'resource';
+  if (!r) return { resource: false, record: false, field: false, fields: {} };
+  if (r._hitKind === 'record') return { resource: false, record: true, field: false, fields: {} };
+  if (r._hitKind === 'field') { var ff = {}; if (r._hitField) ff[r._hitField] = true; return { resource: false, record: false, field: true, fields: ff }; }
+  return _resourceMatchReasons(r, _facetActiveQuery());
 }
 function _computeSearchFacetCounts(groups) {
   var counts = {
     hitKind: { all: groups.length, resource: 0, record: 0, field: 0 },
-    field:   {}   // { 'Industry': 24, 'Status': 5, ... } — field hits only
+    field:   {}   // { 'Industry': 24, ... } — fields the query matched in
   };
   groups.forEach(function(g){
-    var kind = _classifyHitKind(g);
-    counts.hitKind[kind] += 1;
-    if (kind === 'field' && g.resource && g.resource._hitField) {
-      var f = g.resource._hitField;
-      counts.field[f] = (counts.field[f] || 0) + 1;
-    }
+    var re = _itemReasons(g);
+    if (re.resource) counts.hitKind.resource += 1;
+    if (re.record)   counts.hitKind.record   += 1;
+    if (re.field)    counts.hitKind.field    += 1;
+    Object.keys(re.fields || {}).forEach(function(fk){ counts.field[fk] = (counts.field[fk] || 0) + 1; });
   });
   return counts;
 }
 function _filterSearchGroupsByFacets(items) {
-  // Generic: accepts either an array of search-groups ({resource}) or
-  // an array of raw resources. Each item is classified via
-  // _classifyHitKind (which already handles both shapes) and filtered
-  // against state.searchFacets. Returns a copy so callers can render
-  // without mutating the unfiltered source.
+  // Accepts search-groups ({resource}) or raw resources. Keeps items whose
+  // match-reason set includes the selected hit type (and field, if pinned).
   var f = state.searchFacets || {};
   if (!_searchFacetsActive()) return items.slice();
   return items.filter(function(item){
-    var kind = _classifyHitKind(item);
-    if (f.hitKind && f.hitKind !== 'all' && kind !== f.hitKind) return false;
-    if (f.field) {
-      if (kind !== 'field') return false;
-      var r = (item && item.resource) ? item.resource : item;
-      if (!r || r._hitField !== f.field) return false;
-    }
+    var re = _itemReasons(item);
+    if (f.hitKind && f.hitKind !== 'all' && !re[f.hitKind]) return false;
+    if (f.field && !(re.fields && re.fields[f.field])) return false;
     return true;
   });
 }
@@ -19681,9 +19706,9 @@ function renderInvSearchFacetsPopover() {
   html += '<div class="search-facets-popover-label">Hit type</div>';
   var kinds = [
     { key: 'all',      label: 'All hits',      count: counts.hitKind.all },
-    { key: 'resource', label: 'Resources only', count: counts.hitKind.resource },
-    { key: 'record',   label: 'Records only',   count: counts.hitKind.record },
-    { key: 'field',    label: 'Fields only',    count: counts.hitKind.field }
+    { key: 'resource', label: 'Resource name', count: counts.hitKind.resource },
+    { key: 'record',   label: 'Record name',   count: counts.hitKind.record },
+    { key: 'field',    label: 'Field value',   count: counts.hitKind.field }
   ];
   kinds.forEach(function(k){
     var checked = (f.hitKind || 'all') === k.key ? ' checked' : '';
