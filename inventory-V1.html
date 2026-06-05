@@ -12324,10 +12324,24 @@ function renderChildThead() {
     }
     var _fldBadge = '';
     var _fldValueThCls = 'sort-th';
-    if (_fldChangedCount > 0) {
+    var _fldAddIcon = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+    var _fldChkIcon = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    // Search-mode "N matching" badge — selects every field whose value matches
+    // the query (analogue of the records-level column badge / the compare
+    // "N changed" badge). Takes precedence over the compare badge when a query
+    // is active.
+    var _fldQ = (document.getElementById('childSearch') && document.getElementById('childSearch').value || '').toLowerCase().trim();
+    var _fldMatchNames = (_fldQ && _fldResolved) ? _fieldsSearchMatchNames(_fldResolved, _fldQ) : [];
+    if (_fldMatchNames.length > 0) {
+      var _fsActive = !!state.fieldsSearchActive;
+      var _fsCls = 'rec-diff-col-count rec-diff-col-badge' + (_fsActive ? ' active' : '');
+      var _fsN = _fldMatchNames.length;
+      var _fsVerb = _fsActive ? 'Remove from restore' : 'Add';
+      _fldBadge = '<span class="' + _fsCls + '" onclick="event.stopPropagation();toggleSelectMatchingFields()" title="' + _fsVerb + ' the ' + _fsN + ' field' + (_fsN === 1 ? '' : 's') + ' matching the search">' + (_fsActive ? _fldChkIcon : _fldAddIcon) + _fsN + (_fsActive ? ' added' : ' matching') + '</span>';
+      if (_fsActive) _fldValueThCls += ' rec-diff-col-active';
+    } else if (_fldChangedCount > 0) {
       var _fldActive = !!state.fieldsDiffActive;
       var _fldBadgeCls = 'rec-diff-col-count rec-diff-col-badge' + (_fldActive ? ' active' : '');
-      var _fldAddIcon = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
       var _fldVerb = _fldActive ? 'Remove from selection' : 'Select';
       var _fldNoun = _fldChangedCount + ' field' + (_fldChangedCount === 1 ? '' : 's');
       _fldBadge = '<span class="' + _fldBadgeCls + '" onclick="event.stopPropagation();toggleSelectChangedFields()" title="' + _fldVerb + ' the ' + _fldNoun + ' whose value changed">' + _fldAddIcon + _fldChangedCount + ' changed</span>';
@@ -13506,6 +13520,9 @@ function _childRenderFields() {
   // _hlText calls in the row renderer) rather than filtering its fields down.
   var searchEl = document.getElementById('childSearch');
   var q = (searchEl && searchEl.value || '').toLowerCase().trim();
+  // Reset the Value-column "N matching" badge state when the query changes
+  // (clicking the badge re-renders with the same query, so it persists then).
+  if (state._fieldsSearchActiveQ !== q) { state.fieldsSearchActive = false; state._fieldsSearchActiveQ = q; }
   function rowMatches() { return true; }
   // Per-field deterministic "Modified" date — seeded from the record
   // index + the field name's char codes so the same field on the
@@ -14657,6 +14674,8 @@ var state = {
   recSearchActiveCols: [],      // search analogue of recDiffActiveCols — columns whose "N matching" header badge was clicked to bulk-select matching rows (toggleSelectBySearchCol)
   _recSearchActiveColsQ: null,  // last query the above was scoped to; changing the query resets the active set
   fieldsDiffActive: false,      // fields-drill analog: tracks whether the Value-column "N changed" badge has been activated (single boolean since fields drill only has one such badge)
+  fieldsSearchActive: false,    // fields-drill search analog: the Value-column "N matching" badge state
+  _fieldsSearchActiveQ: null,   // last query the above was scoped to; changing the query resets it
   // Phase 4: user-controlled records-table column visibility. null =
   // use the schema's default `cols`. When the user opens the col-toggle
   // menu and checks/unchecks columns, this becomes an explicit array
@@ -14888,6 +14907,8 @@ function openFieldsDrill(recordId) {
   // doesn't show a stale "active" highlight from a prior drill where
   // the user had bulk-selected changed fields.
   state.fieldsDiffActive = false;
+  state.fieldsSearchActive = false;
+  state._fieldsSearchActiveQ = null;
   setInvMode('drill');
 }
 // ═══════════════════════════════════════════════════════════════════
@@ -29761,6 +29782,40 @@ function toggleSelectChangedFields() {
   if (typeof childRender === 'function') childRender();
 }
 
+// Field names (cols + extended) on the resolved record whose VALUE matches the
+// active query — the search analogue of a record's changedCols. Matches the
+// values the fields view actually shows (record[name]), so the count and the
+// bulk-select agree with the highlighted rows.
+function _fieldsSearchMatchNames(resolved, q) {
+  q = String(q || '').toLowerCase().trim();
+  var out = [];
+  if (!q || !resolved) return out;
+  var schema = (typeof D365_SCHEMAS !== 'undefined') ? (D365_SCHEMAS[resolved.schemaKey] || {}) : {};
+  var record = resolved.record || {};
+  (schema.cols || []).concat(schema.extendedCols || []).forEach(function(name){
+    var v = record[name];
+    if (v != null && String(v).toLowerCase().indexOf(q) >= 0) out.push(name);
+  });
+  return out;
+}
+// Value-column "N matching" header badge handler — bulk add/remove every field
+// whose value matches the search (search analogue of toggleSelectChangedFields).
+function toggleSelectMatchingFields() {
+  var resolved = (typeof _resolveD365Record === 'function') ? _resolveD365Record(childState.parentId) : null;
+  if (!resolved) return;
+  var q = (document.getElementById('childSearch') && document.getElementById('childSearch').value || '').toLowerCase().trim();
+  if (!q) return;
+  var names = _fieldsSearchMatchNames(resolved, q);
+  if (!names.length) return;
+  var activating = !state.fieldsSearchActive;
+  state.fieldsSearchActive = activating;
+  names.forEach(function(fname){
+    var planKey = 'field-' + _fieldRowId(resolved.schemaKey, resolved.idx, fname);
+    if (activating) { if (typeof addToPlan === 'function') addToPlan(planKey, { isPinned: false, source: 'bulk' }); }
+    else { if (typeof removeFromPlan === 'function') removeFromPlan(planKey); }
+  });
+  if (typeof childRender === 'function') childRender();
+}
 function toggleSelectByDiffCol(col) {
   var parent = RESOURCES.find(function(x){ return x.id === childState.parentId; });
   if (!parent) return;
