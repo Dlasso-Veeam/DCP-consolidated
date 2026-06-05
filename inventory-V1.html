@@ -13087,6 +13087,32 @@ function _childRenderDrive() {
 //   • Selection IDs are 'rec-<schemaKey>-<idx>'; the row id is
 //     stored as data-id without the rec- prefix so existing
 //     toggleRecRow / openRecordDrawer handlers keep working.
+// Deterministic synthetic "before" (compared-to) value for a (schema, record,
+// field) cell — the value shown on the BOTTOM of a before/after compare cell.
+// Picked from the column's own value pool (≠ the current value), seeded by
+// schema + both compare points + record idx + column so it's stable per render
+// and IDENTICAL whether rendered in the records table or the fields drill (so
+// drilling into a record shows the same before/after the table showed).
+var _recBeforeValPools = {};
+function _recBeforeVal(schemaKey, idx, col, afterVal) {
+  var schema = (typeof D365_SCHEMAS !== 'undefined') ? D365_SCHEMAS[schemaKey] : null;
+  if (!schema || !schema.rows) return null;
+  var key = schemaKey + '||' + col;
+  var pool = _recBeforeValPools[key];
+  if (!pool) {
+    pool = [];
+    for (var i = 0; i < schema.rows.length; i++) {
+      var pv = getRecCellValue(schema.rows[i], col, i);
+      if (pv != null) { pv = String(pv); if (pv && pool.indexOf(pv) < 0) pool.push(pv); }
+    }
+    _recBeforeValPools[key] = pool;
+  }
+  var cands = pool.filter(function(x){ return x !== String(afterVal); });
+  if (!cands.length) return null;
+  var seed = 0, s = schemaKey + '|' + (state.invDate || '') + '|' + (state.recCompareDate || '') + '|' + idx + '|' + col;
+  for (var k = 0; k < s.length; k++) seed = (seed * 31 + s.charCodeAt(k)) >>> 0;
+  return cands[seed % cands.length];
+}
 // Skeleton tbody shown for the D365 records compare table while a compare-date
 // change "fetches" the new diff. Reuses the .rd-skel-bar shimmer.
 function _recCompareSkeletonRows(nCols) {
@@ -13323,15 +13349,7 @@ function _childRenderRecords() {
     ? ((parent && parent.lastBackup && parent.lastBackup !== '—') ? parent.lastBackup : 'Latest')
     : ((typeof fmtCompareDate === 'function') ? fmtCompareDate(state.invDate) : state.invDate);
   var _baBeforeDate = (typeof fmtCompareDate === 'function') ? fmtCompareDate(state.recCompareDate) : (state.recCompareDate || '');
-  function _beforeVal(col, idx, afterVal){
-    var pool = _cmpPools[col];
-    if (!pool){ pool = []; for (var _i=0; _i<schemaRows.length; _i++){ var _pv = getRecCellValue(schemaRows[_i], col, _i); if (_pv != null){ _pv = String(_pv); if (_pv && pool.indexOf(_pv) < 0) pool.push(_pv); } } _cmpPools[col] = pool; }
-    var cands = pool.filter(function(x){ return x !== String(afterVal); });
-    if (!cands.length) return null;
-    var seed = 0, s = schemaKey + '|' + (state.invDate || '') + '|' + (state.recCompareDate || '') + '|' + idx + '|' + col;
-    for (var _k=0; _k<s.length; _k++) seed = (seed * 31 + s.charCodeAt(_k)) >>> 0;
-    return cands[seed % cands.length];
-  }
+  function _beforeVal(col, idx, afterVal){ return _recBeforeVal(schemaKey, idx, col, afterVal); }
   tbody.innerHTML = pageRows.length ? pageRows.map(function(r){
     var changedSet = (r._changedCols || []).reduce(function(o,c){o[c]=true;return o;}, {});
     var rowIdx = (r._id && r._id.indexOf('-removed-') < 0)
@@ -13625,6 +13643,16 @@ function _childRenderFields() {
   // drill label-formatting at line 11712 so the two views render identical
   // badge copy. 'today' shorthand → "Today"; otherwise raw date string.
   var _fieldsCmpLbl = _fieldsCompareDate === 'today' ? 'Today' : (_fieldsCompareDate || '');
+  // Per-cell before/after dates — identical computation to the records table
+  // (_baAfterDate / _baBeforeDate) so a changed field's Value cell stacks the
+  // anchor value (top) over the compared-to value (bottom) with matching date
+  // labels. 'after' = the anchor as-of (latest backup of the parent Table when
+  // browsing live); 'before' = the compare point.
+  var _fldTbl = (typeof RESOURCES !== 'undefined') ? RESOURCES.find(function(x){ return x.id === childState.entryId; }) : null;
+  var _baAfterDate = (!state.invDate || state.invDate === 'today')
+    ? ((_fldTbl && _fldTbl.lastBackup && _fldTbl.lastBackup !== '—') ? _fldTbl.lastBackup : 'Latest')
+    : ((typeof fmtCompareDate === 'function') ? fmtCompareDate(state.invDate) : state.invDate);
+  var _baBeforeDate = (typeof fmtCompareDate === 'function') ? fmtCompareDate(_fieldsCompareDate) : (_fieldsCompareDate || '');
 
   // Covered-by-ancestor: when the parent record (or any ancestor up the
   // chain) is in the cart, every field row should render locked +
@@ -13674,7 +13702,23 @@ function _childRenderFields() {
     var _fVal = q ? _hlText(String(f.value == null ? '—' : f.value), q) : wsEscape(String(f.value == null ? '—' : f.value));
     var nameCell = '<td class="name-col"><div style="display:flex;align-items:center;column-gap:8px;row-gap:4px;flex-wrap:wrap;overflow:visible"><span class="diff-dot" aria-hidden="true"></span><span class="cell-name"' + nameStyle + ' onclick="openFieldPreview(\'' + safeForJs + '\')">' + _fName + '</span>' + '</div></td>';
     var typeCell = '<td style="font-size: 14px;color:var(--black-60)">' + wsEscape(f.type) + '</td>';
-    var valueCell = '<td class="' + _valueChangedCls.trim() + '" style="font-size:14px">' + _fVal + '</td>';
+    // Compare mode: a changed field stacks the anchor value (top, muted) over
+    // the compared-to value (bottom, showcased) with date labels — the same
+    // before/after cell the records table uses. The "before" value is the
+    // deterministic _recBeforeVal for this (record, field), so it matches what
+    // the table showed for the same cell. Non-changed cells render plainly.
+    var valueCell;
+    var _fldBef = _isChanged ? _recBeforeVal(resolved.schemaKey, resolved.idx, f.name, f.value) : null;
+    if (_isChanged && _fldBef != null) {
+      var _fBefHl = q ? _hlText(String(_fldBef), q) : wsEscape(String(_fldBef));
+      valueCell = '<td class="rec-diff-cell-changed rec-ba" style="font-size:14px">'
+        + '<span class="rec-ba-top">' + _fVal + '</span>'
+        + '<span class="rec-ba-date">' + _baAfterDate + '</span>'
+        + '<span class="rec-ba-bottom">' + _fBefHl + '</span>'
+        + '<span class="rec-ba-date">' + _baBeforeDate + '</span></td>';
+    } else {
+      valueCell = '<td class="' + _valueChangedCls.trim() + '" style="font-size:14px">' + _fVal + '</td>';
+    }
     var modifiedCell = '<td style="font-size:14px;color:var(--black-60);white-space:nowrap">' + wsEscape(modified) + '</td>';
     var actions =
       '<td><div class="row-actions">' +
