@@ -19125,8 +19125,16 @@ function _facetActiveQuery() {
 function _resourceMatchReasons(r, q) {
   var out = { resource: false, record: false, field: false, fields: {} };
   if (!r || !q) return out;
-  var lit = (r.name + ' ' + (r.meta || '') + ' ' + (r.type || '')).toLowerCase();
-  if (lit.indexOf(q) >= 0) out.resource = true;
+  // The top tier ('resource' key) = a TABLE whose name matched — the useful
+  // container level for D365 (a tenant has few environments but many tables).
+  // Environment / other container own-name matches are intentionally NOT
+  // bucketed: searching environment names is low value, and lumping env +
+  // table names under one option read as ambiguous. A descendant table's name
+  // still bubbles up here via the recursion below.
+  if (r.type === 'Table') {
+    var lit = (r.name + ' ' + (r.meta || '')).toLowerCase();
+    if (lit.indexOf(q) >= 0) out.resource = true;
+  }
   if (r.wl === 'Dynamics 365' && typeof _walkD365RecordsAndFields === 'function') {
     _walkD365RecordsAndFields(r, q).forEach(function(h){
       if (h._hitKind === 'record') out.record = true;
@@ -19706,7 +19714,7 @@ function renderInvSearchFacetsPopover() {
   html += '<div class="search-facets-popover-label">Hit type</div>';
   var kinds = [
     { key: 'all',      label: 'All hits',      count: counts.hitKind.all },
-    { key: 'resource', label: 'Resource name', count: counts.hitKind.resource },
+    { key: 'resource', label: 'Table name',    count: counts.hitKind.resource },
     { key: 'record',   label: 'Record name',   count: counts.hitKind.record },
     { key: 'field',    label: 'Field value',   count: counts.hitKind.field }
   ];
