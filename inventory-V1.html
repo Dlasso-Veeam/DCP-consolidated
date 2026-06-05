@@ -18280,6 +18280,12 @@ function _resourceHasSearchMatch(r, q) {
 function _invSearchMatchRollup(r, q) {
   q = String(q || '').toLowerCase().trim();
   if (!q || !r) return null;
+  // Synthetic record/field hits (from _walkD365RecordsAndFields, surfaced in
+  // recursive search results) are LEAVES — a field has no "matching records"
+  // contents. Only genuine container resources (environments → tables,
+  // tables → records) get a match-count rollup. Without this guard a Field
+  // row would run the records-walk below and nonsensically report "N records".
+  if (r._synthetic || r.type === 'Field' || r.type === 'Record') return null;
   // D365-scoped — other workloads have no record/field content layer,
   // so "matching contents" would be meaningless there.
   if (r.wl !== 'Dynamics 365') return null;
