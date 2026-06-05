@@ -4804,12 +4804,19 @@ body.drawer-open { overflow: hidden; }
                        initial render before any JS workload-handler
                        has had a chance to run. -->
                   <button type="button" id="invSearchFacetsBtn" class="search-facets-btn" onclick="toggleSearchFacets(event)" aria-label="Filter search results" title="Filter search results" style="display:none">
-                    <!-- Lucide-style filter funnel — purpose-built for
-                         "narrow these results." Replaced the generic
-                         cog (which read as page/section settings, not
-                         feature-scoped). -->
+                    <!-- Sliders/configure glyph — matched to the compare
+                         legend's Configure button (#invCompareCfgBtn) so the
+                         two "configure this view" affordances read the same. -->
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                      <line x1="21" y1="4" x2="14" y2="4"/>
+                      <line x1="10" y1="4" x2="3" y2="4"/>
+                      <line x1="21" y1="12" x2="12" y2="12"/>
+                      <line x1="8" y1="12" x2="3" y2="12"/>
+                      <line x1="21" y1="20" x2="16" y2="20"/>
+                      <line x1="12" y1="20" x2="3" y2="20"/>
+                      <line x1="14" y1="2" x2="14" y2="6"/>
+                      <line x1="8" y1="10" x2="8" y2="14"/>
+                      <line x1="16" y1="18" x2="16" y2="22"/>
                     </svg>
                     <span class="search-facets-badge" id="invSearchFacetsBadge" style="display:none"></span>
                   </button>
@@ -4990,10 +4997,18 @@ body.drawer-open { overflow: hidden; }
                        syncSearchFacetsBtns(). Anchor for the popover is
                        whichever gear was clicked. -->
                   <button type="button" id="childSearchFacetsBtn" class="search-facets-btn" onclick="toggleSearchFacets(event)" aria-label="Filter search results" title="Filter search results" style="display:none">
-                    <!-- Same filter-funnel icon as the inventory-level
-                         search-facets gear above. -->
+                    <!-- Same sliders/configure glyph as the inventory-level
+                         search-facets gear above (matched to the compare cfg button). -->
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                      <line x1="21" y1="4" x2="14" y2="4"/>
+                      <line x1="10" y1="4" x2="3" y2="4"/>
+                      <line x1="21" y1="12" x2="12" y2="12"/>
+                      <line x1="8" y1="12" x2="3" y2="12"/>
+                      <line x1="21" y1="20" x2="16" y2="20"/>
+                      <line x1="12" y1="20" x2="3" y2="20"/>
+                      <line x1="14" y1="2" x2="14" y2="6"/>
+                      <line x1="8" y1="10" x2="8" y2="14"/>
+                      <line x1="16" y1="18" x2="16" y2="22"/>
                     </svg>
                     <span class="search-facets-badge" id="childSearchFacetsBadge" style="display:none"></span>
                   </button>
