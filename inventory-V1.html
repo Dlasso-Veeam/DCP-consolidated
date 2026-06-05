@@ -13012,19 +13012,35 @@ function _childRenderRecords() {
     state._childSearchScopeName = null;
   }
 
-  // Filter rows: search (across all searchable cols), recFilters, diff-view.
+  // Filter rows: search + recFilters + diff-view. When a query is active each
+  // matching record is classified for the search-facets "Hit type" control:
+  //   • record hit — the query matched the record's NAME (cols[0])
+  //   • field  hit — the query matched a non-name FIELD value (tracks which)
+  // (Resource hits don't exist at the record level — those live one level up.)
+  // This drives both the popover counts and Records-only / Fields-only /
+  // match-in-field narrowing, so the facet genuinely filters what's shown.
   var allSearchableCols = cols.concat((schema && schema.extendedCols) || []);
-  var rows = rowsAll.filter(function(r){
+  var _nameKey = cols[0];
+  var _facet = state.searchFacets || { hitKind: 'all', field: null };
+  function _classifyRecHit(r) {
+    var rowIdx = (r._id && r._id.indexOf('-removed-') < 0) ? parseInt(r._id.split('-').pop(), 10) : 0;
+    var nameVal = getRecCellValue(r, _nameKey, rowIdx);
+    var nameHit = nameVal != null && String(nameVal).toLowerCase().indexOf(q) >= 0;
+    var fields = [];
+    for (var ci = 0; ci < allSearchableCols.length; ci++) {
+      var c = allSearchableCols[ci]; if (c === _nameKey) continue;
+      var v = getRecCellValue(r, c, rowIdx);
+      if (v != null && String(v).toLowerCase().indexOf(q) >= 0) fields.push(c);
+    }
+    return { name: nameHit, field: fields.length > 0, fields: fields };
+  }
+  // Pass 1 — candidate set: query match (name|field) + recFilters + diff,
+  // independent of the hit-type facet, so the counts reflect the true pool.
+  var matchedRows = rowsAll.filter(function(r){
     if (q) {
-      var match = false;
-      var rowIdx = (r._id && r._id.indexOf('-removed-') < 0)
-        ? parseInt(r._id.split('-').pop(), 10)
-        : 0;
-      for (var ci = 0; ci < allSearchableCols.length; ci++) {
-        var v = getRecCellValue(r, allSearchableCols[ci], rowIdx);
-        if (v != null && String(v).toLowerCase().indexOf(q) >= 0) { match = true; break; }
-      }
-      if (!match) return false;
+      var k = _classifyRecHit(r);
+      if (!k.name && !k.field) return false;
+      r._hk = k;
     }
     for (var i = 0; i < state.recFilters.length; i++) {
       var f = state.recFilters[i];
@@ -13040,6 +13056,31 @@ function _childRenderRecords() {
     if (diff && typeof _compareDiffFiltersApply === 'function' && !_compareDiffFiltersApply(r)) return false;
     return true;
   });
+  // Per-kind counts for the search-facets popover (only while searching).
+  if (q) {
+    var fc = { all: 0, resource: 0, record: 0, field: 0, fields: {} };
+    matchedRows.forEach(function(r){
+      var k = r._hk; if (!k) return; fc.all++;
+      if (k.name) fc.record++;
+      if (k.field) { fc.field++; k.fields.forEach(function(c){ fc.fields[c] = (fc.fields[c] || 0) + 1; }); }
+    });
+    state._recSearchFacetCounts = fc;
+  } else {
+    state._recSearchFacetCounts = null;
+  }
+  // Pass 2 — apply the hit-type facet to what's shown.
+  var rows = matchedRows;
+  if (q && typeof _searchFacetsActive === 'function' && _searchFacetsActive()) {
+    var hk = _facet.hitKind || 'all';
+    rows = matchedRows.filter(function(r){
+      var k = r._hk || { name: false, field: false, fields: [] };
+      if (hk === 'record' && !k.name) return false;
+      if (hk === 'field' && !k.field) return false;
+      if (hk === 'resource') return false; // no resource-level hits among records
+      if (_facet.field && k.fields.indexOf(_facet.field) < 0) return false;
+      return true;
+    });
+  }
   _sortRows(rows, state.childSort, getChildSortValue);
 
   if (q) {
@@ -19370,20 +19411,29 @@ function renderInvSearchFacetsPopover() {
   // (built by the same logic childRender uses); the inventory gear
   // sources from buildSearchGroups. Same shape returned either way.
   var anchorId = state.searchFacetsAnchorId || 'invSearchFacetsBtn';
-  var groups = [];
-  if (anchorId === 'childSearchFacetsBtn') {
-    var cq = (document.getElementById('childSearch').value || '').trim();
-    if (cq && typeof _buildDrillSearchResults === 'function') {
-      // Wrap each raw resource in a group-shaped item for the count
-      // helper, which expects { resource } at the top level.
-      groups = _buildDrillSearchResults(cq, /* skipFacetFilter */ true)
-        .map(function(r){ return { resource: r }; });
-    }
+  var counts;
+  // Records drill: the records renderer classified each match into record-name
+  // vs field-value hits and stashed the tallies in state._recSearchFacetCounts.
+  // Use those so the popover counts exactly match the rows the table shows.
+  if (anchorId === 'childSearchFacetsBtn' && typeof _drillType === 'function' && _drillType() === 'records' && state._recSearchFacetCounts) {
+    var rc = state._recSearchFacetCounts;
+    counts = { hitKind: { all: rc.all, resource: rc.resource, record: rc.record, field: rc.field }, field: rc.fields || {} };
   } else {
-    var iq = (document.getElementById('invSearch').value || '').trim();
-    if (iq && typeof buildSearchGroups === 'function') groups = buildSearchGroups(iq);
+    var groups = [];
+    if (anchorId === 'childSearchFacetsBtn') {
+      var cq = (document.getElementById('childSearch').value || '').trim();
+      if (cq && typeof _buildDrillSearchResults === 'function') {
+        // Wrap each raw resource in a group-shaped item for the count
+        // helper, which expects { resource } at the top level.
+        groups = _buildDrillSearchResults(cq, /* skipFacetFilter */ true)
+          .map(function(r){ return { resource: r }; });
+      }
+    } else {
+      var iq = (document.getElementById('invSearch').value || '').trim();
+      if (iq && typeof buildSearchGroups === 'function') groups = buildSearchGroups(iq);
+    }
+    counts = _computeSearchFacetCounts(groups);
   }
-  var counts = _computeSearchFacetCounts(groups);
   var f = state.searchFacets || { hitKind: 'all', field: null };
   function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
   var html = '';
