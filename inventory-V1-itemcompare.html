@@ -3981,7 +3981,7 @@ body.pol-drawer-open { overflow: hidden; }
 /* Production = the live environment, set apart from the dated restore points:
    its own slot above the "Restore points" label, divided off so it never
    reads as a per-day restore point. */
-.rw-rp-menu-cal .cal-prod-slot { padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--border-light); }
+.rw-rp-menu-cal .cal-prod-slot { display: flex; flex-direction: column; gap: 6px; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--border-light); }
 .rw-rp-menu-cal .cal-prod-chip { width: 100%; height: auto; padding: 8px 10px; align-items: flex-start; }
 .rw-rp-menu-cal .cal-time-chip-sub { display: block; font-size: 12px; font-weight: 450; color: var(--black-60); margin-top: 1px; }
 .rw-rp-menu-cal .cal-time-chip.current .cal-time-chip-sub { color: var(--white); }
@@ -31432,6 +31432,24 @@ function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
     '<span>Production<span class="cal-time-chip-sub">Live environment</span></span>' +
     '<span class="cal-time-chip-type">now</span>' +
   '</button>';
+  // "Latest backup" quick-pick — parity with the Production pin: a one-click
+  // jump to the most recent restore point from any month/day in the calendar.
+  // Shows the concrete date+time as its sub-label (no squishy "Latest" as the
+  // committed value — the header still reads the precise point).
+  var _latestId = (typeof _v1LatestRpId === 'function') ? _v1LatestRpId() : (allRps[0] ? allRps[0].id : null);
+  var latestChip = '';
+  if (_latestId) {
+    var latestCurrent  = (sel === _latestId);
+    var latestDisabled = (otherSel === _latestId);
+    var latestSub = (typeof _v1FormatRpId === 'function') ? (_v1FormatRpId(_latestId) || '') : '';
+    latestChip = '<button class="cal-time-chip cal-prod-chip' + (latestCurrent ? ' current' : '') + (latestDisabled ? ' is-disabled' : '') + '"' +
+      (latestDisabled
+        ? ' type="button" disabled aria-disabled="true" title="The latest backup is already selected on the other side — choose a different point to compare"'
+        : ' onclick="rdSelectSide(\'' + side + '\', \'' + _latestId + '\')"') + '>' +
+      '<span>Latest backup<span class="cal-time-chip-sub">' + latestSub + '</span></span>' +
+      '<span class="cal-time-chip-type">newest</span>' +
+    '</button>';
+  }
   var dayRps = allRps.filter(function(rp){
     var d = new Date(rp.ts);
     var ds = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
@@ -31462,7 +31480,7 @@ function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
     });
   }
   var rightPane = '<div class="cal-right">' +
-    '<div class="cal-prod-slot">' + prodChip + '</div>' +
+    '<div class="cal-prod-slot">' + prodChip + latestChip + '</div>' +
     '<div class="cal-times-label">Restore points</div>' +
     '<div class="cal-times">' + chipsHtml + '</div>' +
   '</div>';
