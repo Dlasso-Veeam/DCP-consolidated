@@ -3988,7 +3988,13 @@ body.pol-drawer-open { overflow: hidden; }
 /* Orange "differs from other side" dot (bottom-right) — complements the
    global green has-match dot (top-right) on the circular day cells. */
 .rw-rp-menu-cal .cal-day.has-diff::before { content: ''; position: absolute; bottom: 4px; right: 4px; width: 5px; height: 5px; border-radius: 50%; background: var(--orange-dark); }
-.rw-rp-menu-cal .cal-day.selected.has-diff::before { background: var(--white); }
+/* On the selected (solid-blue) day, the change + match dots must KEEP their
+   legend colors (orange / green) — never invert to white — so they always
+   read against the legend. A 1px white ring keeps them legible on the blue
+   fill without changing their identity color. (Overrides the global
+   .cal-day.selected.has-* white-dot rules via the .rw-rp-menu-cal prefix.) */
+.rw-rp-menu-cal .cal-day.selected.has-diff::before { background: var(--orange-dark); box-shadow: 0 0 0 1px var(--white); }
+.rw-rp-menu-cal .cal-day.selected.has-match::after { background: var(--green); box-shadow: 0 0 0 1px var(--white); }
 .cal-legend-swatch.is-diff { width: 7px; height: 7px; border-radius: 50%; background: var(--orange-dark); }
 .rw-rp-opt { display: flex; align-items: center; gap: 8px; padding: 8px 12px; cursor: pointer; font-size: 14px; color: var(--black-100); border: none; background: transparent; width: 100%; text-align: left; font-family: inherit; }
 .rw-rp-opt:hover { background: var(--black-3); }
