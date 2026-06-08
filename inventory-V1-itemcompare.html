@@ -23185,6 +23185,54 @@ function _enqueuePlanDedupeToast(parentName, descendants) {
     showToast(msg, { body: body });
   }, 50);
 }
+// ── V1 single-RP cart helpers ───────────────────────────────────────
+// The restore cart can hold items at ONE restore point only. That point
+// is DERIVED from the cart's items — the shared manualRpId among pinned
+// items, or null when the cart is empty / all-flexible ("Latest"). No
+// separate state field, so it can never drift out of sync with the plan.
+function _cartPinnedRpId() {
+  if (!state.restorePlan || !state.restorePlan.size) return null;
+  var rp = null;
+  state.restorePlan.forEach(function(item){
+    if (item && item.isPinned && item.manualRpId) rp = item.manualRpId;
+  });
+  return rp;
+}
+function _cartHasFlexibleItems() {
+  if (!state.restorePlan || !state.restorePlan.size) return false;
+  var flex = false;
+  state.restorePlan.forEach(function(item){
+    if (item && (!item.isPinned || !item.manualRpId)) flex = true;
+  });
+  return flex;
+}
+// Human label for the cart's restore point ("Latest backup" when flexible).
+function _cartRpLabel(rpId) {
+  if (!rpId) return 'Latest backup';
+  if (typeof _v1FormatRpId === 'function') { var l = _v1FormatRpId(rpId); if (l) return l; }
+  var rps = (typeof _v1GlobalRps === 'function') ? _v1GlobalRps() : [];
+  var rp = rps.find(function(p){ return p.id === rpId; });
+  if (rp) {
+    var d = new Date(rp.ts);
+    var dLbl = (typeof fmtLabel === 'function') ? fmtLabel(d) : d.toLocaleDateString('en-US');
+    return dLbl + ' · ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  }
+  return rpId;
+}
+// Pin (or unpin) the WHOLE cart to one shared restore point. rpId === null
+// → flexible/Latest (clear every override). Re-pins every item so the cart
+// stays single-RP, then refreshes the surfaces that show the pin.
+function _setCartRp(rpId) {
+  if (!state.restorePlan) return;
+  state.restorePlan.forEach(function(item, key){
+    if (!item) return;
+    if (rpId) { item.isPinned = true; item.manualRpId = rpId; state.selectedRpOverrides[key] = rpId; }
+    else { item.isPinned = false; item.manualRpId = null; delete state.selectedRpOverrides[key]; }
+  });
+  if (typeof renderTopActionBar === 'function') renderTopActionBar();
+  if (typeof rdRefreshActiveTable === 'function') rdRefreshActiveTable();
+  if (typeof renderTreeNav === 'function') renderTreeNav();
+}
 function addToPlan(resourceId, opts) {
   if (!resourceId) return;
   opts = opts || {};
@@ -23310,6 +23358,13 @@ function addToPlan(resourceId, opts) {
     } else if (!existingHasRecordMask && nextRecordMask) {
       nextRecordMask = null;
     }
+  }
+  // V1 single-RP cart: a flexible add (no deliberate RP) inherits the cart's
+  // existing pinned restore point, so the whole cart stays on one point. The
+  // cart is read BEFORE this item is set, so it reflects the prior items only.
+  if (!isPinned && !manualRpId && typeof _cartPinnedRpId === 'function') {
+    var _inheritRp = _cartPinnedRpId();
+    if (_inheritRp) { isPinned = true; manualRpId = _inheritRp; }
   }
   state.restorePlan.set(resourceId, {
     resourceId: resourceId,
@@ -23724,21 +23779,22 @@ function renderTopActionBar() {
     // _v1PickRestoreTarget); wrapping it in a .seg-btn lets the toggle
     // resolve THIS bar's own .seg-btn-menu sibling, so the inventory and
     // drill bars don't collide on a shared id.
-    var asofHtml = '';
-    if (state.invCompareDate) {
-      var _tgt = (typeof _v1ActiveRestoreTarget === 'function') ? _v1ActiveRestoreTarget() : null;
-      if (_tgt && _tgt.compactLabel) {
-        asofHtml = '<span class="tab-asof-label">Restore point</span>'
-          + '<span class="seg-btn tab-target-picker">'
-            + '<button class="seg-btn-chevron" onclick="event.stopPropagation();_v1ToggleRestoreTargetMenu(this)" title="' + (_tgt.fullLabel || '') + '" aria-haspopup="true">'
-              + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-right:5px"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 1.5"/></svg>'
-              + '<span class="seg-btn-target-label">' + _tgt.compactLabel + '</span>'
-              + '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" style="margin-left:4px"><polyline points="6 9 12 15 18 9"/></svg>'
-            + '</button>'
-            + '<div class="seg-btn-menu">' + _v1RestoreTargetMenuItems() + '</div>'
-          + '</span>';
-      }
-    }
+    // V1 single-RP cart: the cart's restore point. Shown whenever the cart
+    // has items. The label reads "Latest backup" while the cart is flexible
+    // and flips to the concrete date+time once a deliberate pick pins it.
+    // The trigger opens the shared calendar (#calPicker 'cart' mode); picking
+    // a point re-pins the WHOLE cart to it. Replaces the old anchor/compare
+    // toggle, which belonged to the removed global compare axis.
+    var _cartRp = (typeof _cartPinnedRpId === 'function') ? _cartPinnedRpId() : null;
+    var _cartRpLbl = (typeof _cartRpLabel === 'function') ? _cartRpLabel(_cartRp) : 'Latest backup';
+    var asofHtml = '<span class="tab-asof-label">Restore point</span>'
+      + '<span class="seg-btn tab-target-picker">'
+        + '<button class="seg-btn-chevron" onclick="event.stopPropagation();openCalPicker(event,\'cart\')" title="Every item in this restore job recovers from this point" aria-haspopup="true">'
+          + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-right:5px"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 1.5"/></svg>'
+          + '<span class="seg-btn-target-label">' + _cartRpLbl + '</span>'
+          + '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" style="margin-left:4px"><polyline points="6 9 12 15 18 9"/></svg>'
+        + '</button>'
+      + '</span>';
     rightHtml = asofHtml
       + '<button class="tab-right-clear" onclick="clearPlanFromDock()">Clear</button>'
       + '<button class="tab-right-primary" onclick="openWorkspace()">Restore ' + noun
@@ -32289,13 +32345,27 @@ function rdAddToRestore(side) {
     if (typeof ws !== 'undefined' && ws.isOpen && typeof wsRenderAll === 'function') wsRenderAll();
     if (typeof showToast === 'function') showToast('Added to restore selection');
   };
-  // Only gate behind the modal when the global target actually changes —
-  // picking the side that's already the active target (or adding outside
-  // compare mode) is a plain add with no re-anchor to warn about.
-  if (_tgt && _tgt !== state.invRestoreTarget && typeof _v1MaybeWarnBeforeChange === 'function') {
-    _v1MaybeWarnBeforeChange(_commit);
-  } else {
+  // V1 single-RP cart reconcile. This is a DELIBERATE add at the chosen
+  // restore point `sel`. Compare it to the cart's existing point:
+  //   • cart empty / all-flexible / already on `sel` → commit, then pin the
+  //     whole cart to `sel` so flexible items adopt the deliberate point
+  //     (light toast, no modal — there's no conflicting intent).
+  //   • cart already pinned to a DIFFERENT point → genuine deliberate↔
+  //     deliberate conflict → reuse the compare-cart warning modal
+  //     (Switch anyway re-pins all / Restore now / Cancel).
+  var _cartRp = (typeof _cartPinnedRpId === 'function') ? _cartPinnedRpId() : null;
+  var _commitAndUnify = function() {
+    var _hadFlex = (typeof _cartHasFlexibleItems === 'function') && _cartHasFlexibleItems();
     _commit();
+    if (typeof _setCartRp === 'function') _setCartRp(sel);
+    if (_hadFlex && typeof showToast === 'function') {
+      showToast('All items will restore from ' + (typeof _cartRpLabel === 'function' ? _cartRpLabel(sel) : 'the selected point'));
+    }
+  };
+  if (_cartRp && _cartRp !== sel && !isRecCompareSnap && typeof _cartWarnRepin === 'function') {
+    _cartWarnRepin(sel, _commitAndUnify);
+  } else {
+    _commitAndUnify();
   }
 }
 function rdRemoveFromRestore() {
@@ -34821,6 +34891,10 @@ function openCalPicker(e, mode) {
     calState.selectedDate = _resolveDay(state.invCompareAsOfRpId, state.invCompareDate);
   } else if (mode === 'ws') {
     calState.selectedDate = _resolveDay(state.invAsOfRpId, state.invDate);
+  } else if (mode === 'cart') {
+    // Cart restore-point picker: seed on the cart's current pin (or today
+    // when the cart is flexible / Latest).
+    calState.selectedDate = _resolveDay((typeof _cartPinnedRpId === 'function') ? _cartPinnedRpId() : null, null);
   }
   // Capture the anchor button so scroll/resize repositioning has a
   // reference to re-measure against. Walk up from the click target in
@@ -35020,7 +35094,7 @@ function renderCal() {
   //   'ws'     — wizard Restoring-as-of picker (inherits global axis)
   //   'invCmp' — Compare-to chip (comparison axis, equally precise)
   // Day-commit modes (rec / drive / child / …) render calendar-only.
-  var isGlobalMode = (calState.mode === 'inv' || calState.mode === 'ws' || calState.mode === 'invCmp');
+  var isGlobalMode = (calState.mode === 'inv' || calState.mode === 'ws' || calState.mode === 'invCmp' || calState.mode === 'cart');
   if (rightEl) rightEl.style.display = isGlobalMode ? 'flex' : 'none';
   if (!isGlobalMode) { timesEl.innerHTML = ''; return; }
   if (!calState.selectedDate) {
@@ -35045,9 +35119,11 @@ function renderCal() {
   // and would falsely imply commitment. The chip label already names
   // the implied RP separately; the time-strip stays neutral until the
   // user actively clicks a chip.
-  var currentRpId = calState.mode === 'invCmp'
-    ? (state.invCompareAsOfRpId || null)
-    : (state.invAsOfRpId || null);
+  var currentRpId = calState.mode === 'cart'
+    ? ((typeof _cartPinnedRpId === 'function') ? _cartPinnedRpId() : null)
+    : (calState.mode === 'invCmp'
+        ? (state.invCompareAsOfRpId || null)
+        : (state.invAsOfRpId || null));
   if (dayRps.length === 0) {
     timesEl.innerHTML = '<div class="cal-times-empty">No restore points on this day.</div>';
     return;
@@ -35091,6 +35167,12 @@ function onCalSelect(e, dateStr) {
     if (calState.mode === 'childCmp') setChildCompareDate('today');
     if (calState.mode === 'child') setChildDate('today');
     if (calState.mode === 'ws') wsApplyDayToAll('latest');
+    if (calState.mode === 'cart' && typeof _setCartRp === 'function') {
+      // "Latest" = flexible cart (unpin every item). The restore date is then
+      // resolved at restore time, not fixed now.
+      _setCartRp(null);
+      if (typeof showToast === 'function') showToast('Restore point set to Latest backup');
+    }
     _closeCalPicker();
     return;
   }
@@ -35103,7 +35185,7 @@ function onCalSelect(e, dateStr) {
   // (onCalRpSelect) or "Return to latest" (the latest branch above).
   // Other modes keep day-level commit semantics — no behavior change
   // there.
-  if (calState.mode === 'inv' || calState.mode === 'ws' || calState.mode === 'invCmp') {
+  if (calState.mode === 'inv' || calState.mode === 'ws' || calState.mode === 'invCmp' || calState.mode === 'cart') {
     calState.selectedDate = dateStr;
     renderCal();
     return;
@@ -35130,6 +35212,16 @@ function onCalSelect(e, dateStr) {
 // different chip-label format (date + time vs. just date).
 function onCalRpSelect(e, rpId) {
   if (e && e.stopPropagation) e.stopPropagation();
+  // V1 single-RP cart: the cart restore-point picker. This control IS the
+  // whole-cart restore point, so picking a point re-pins every item to it
+  // directly (no conflict modal — the user is explicitly resetting the cart's
+  // point; the modal is reserved for adding a NEW item at a conflicting RP).
+  if (calState.mode === 'cart') {
+    if (typeof _setCartRp === 'function') _setCartRp(rpId);
+    if (typeof showToast === 'function') showToast('All items will restore from ' + (typeof _cartRpLabel === 'function' ? _cartRpLabel(rpId) : 'the selected point'));
+    _closeCalPicker();
+    return;
+  }
   // Cross-axis guard (defense in depth — the chip is also rendered disabled):
   // never let the two compare sides land on the same restore point.
   if ((calState.mode === 'inv' || calState.mode === 'invCmp')
@@ -35189,6 +35281,28 @@ function _v1HasCompareModeCart() {
 // the modal opens. The user's Continue commits + clears the flags;
 // Cancel drops the pending action and closes the modal.
 var _v1PendingCompareChange = null;
+// V1 single-RP cart: deliberate↔deliberate conflict guard. The cart already
+// restores from one point; the user is adding an item from a DIFFERENT point.
+// Reuses the existing compare-cart warning modal + its three paths (Switch
+// anyway → performChange re-pins the whole cart; Restore now → commit the
+// current cart as-is; Cancel → abort the add).
+function _cartWarnRepin(newRpId, performChange) {
+  _v1PendingCompareChange = performChange;
+  var n = (typeof planSize === 'function') ? planSize() : 0;
+  var itemWord = n === 1 ? 'item' : 'items';
+  var curLabel = (typeof _cartRpLabel === 'function') ? _cartRpLabel(_cartPinnedRpId()) : '';
+  var newLabel = (typeof _cartRpLabel === 'function') ? _cartRpLabel(newRpId) : '';
+  var bodyEl = document.getElementById('v1CmpWarnBody');
+  if (bodyEl) {
+    bodyEl.innerHTML =
+      'Your restore cart has <strong>' + n + ' ' + itemWord + '</strong> set to restore from <strong>' + curLabel + '</strong>. ' +
+      'All items in one restore must share the same restore point — adding this item from <strong>' + newLabel + '</strong> will move every item to that point.';
+  }
+  var modal = document.getElementById('v1CmpWarnModal');
+  var bd = document.getElementById('v1CmpWarnBackdrop');
+  if (modal) modal.style.display = 'flex';
+  if (bd) bd.style.display = 'block';
+}
 function _v1MaybeWarnBeforeChange(performChange) {
   // Skip the warning entirely when triggered from the wizard's own
   // Restoring-as-of picker — that surface is itself the confirmation
@@ -35298,6 +35412,13 @@ function _v1CancelCompareModeChange() {
 // the chip claims is "the" as-of point — breaking the V1 promise
 // that all items restore from the same snapshot.
 function _v1RepinCartToGlobal() {
+  // Item-compare model: there is no global as-of/compare anchor to re-pin to.
+  // The cart's restore point is owned by _setCartRp / derived per item, so a
+  // "re-pin to global" would wrongly stomp it back to latest. Neutralized —
+  // callers (the warning-modal confirm, the removed global setters) become
+  // no-ops here.
+  return;
+  // eslint-disable-next-line no-unreachable
   if (!state.restorePlan || state.restorePlan.size === 0) return;
   // V1 promise: every cart item shares ONE restore point. Resolve a
   // single concrete global RP via the SAME resolver the seg-btn uses
