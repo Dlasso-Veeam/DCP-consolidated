@@ -4321,12 +4321,7 @@ body.drawer-open { overflow: hidden; }
   }
 }
 
-/* ════════ Coming-soon roadmap: low-key entry pill + on-demand modal ════════ */
-/* Anecdotal context, not a CTA — a quiet pill, never a full-width banner. */
-.cs-announce { margin: 0 0 12px; }
-.cs-link { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border: 1px solid var(--border); border-radius: 100px; background: var(--white); color: var(--black-60); font-family: inherit; font-size: 14px; font-weight: 450; cursor: pointer; }
-.cs-link svg { color: var(--blue); flex-shrink: 0; }
-.cs-link:hover { background: var(--blue-10); border-color: var(--blue-30); color: var(--blue); }
+/* ════════ Roadmap: on-demand modal (entry lives in the topbar action group) ════════ */
 
 .cs-modal-backdrop { position: fixed; inset: 0; background: rgba(31, 34, 41, 0.45); z-index: 9998; }
 .cs-modal { position: fixed; z-index: 9999; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 560px; max-width: 92vw; max-height: 88vh; background: var(--white); border-radius: 8px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25); display: flex; flex-direction: column; overflow: hidden; }
@@ -4594,6 +4589,12 @@ body.drawer-open { overflow: hidden; }
       <div class="topbar-row">
         <div class="page-title" id="pageTitle">Protected Data</div>
         <div class="topbar-actions">
+          <!-- Roadmap entry — quiet peer in the action group; opens the
+               multi-page "what's coming" modal. Rocket = upcoming/launch. -->
+          <button class="btn btn-outline btn-sm" onclick="csOpen()" id="csRoadmapBtn" title="What's on our roadmap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+            Roadmap
+          </button>
           <button class="btn btn-outline btn-sm" onclick="window.location.href='activity.html'" id="btnActivity">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             View Activity
@@ -4752,16 +4753,6 @@ body.drawer-open { overflow: hidden; }
 
     <!-- ========== SCREEN: INVENTORY ========== -->
     <div class="screen active" id="screen-inventory">
-      <!-- ══ Coming-soon roadmap entry ══
-           Low-key, persistent "What's coming" pill (NOT a full-width banner —
-           this is anecdotal context, not a call to action). Opens the
-           multi-page roadmap modal on demand. -->
-      <div class="cs-announce" id="csAnnounce">
-        <button class="cs-link" id="csLink" onclick="csOpen()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l1.9 5.1L19 9l-5.1 1.9L12 16l-1.9-5.1L5 9l5.1-1.9L12 2z"/></svg>
-          Coming soon
-        </button>
-      </div>
       <!-- Roadmap modal (on-demand, opened from the banner/link above) -->
       <div class="cs-modal-backdrop" id="csBackdrop" style="display:none" onclick="csClose()"></div>
       <div class="cs-modal" id="csModal" style="display:none" role="dialog" aria-modal="true" aria-label="What's coming to restore">
