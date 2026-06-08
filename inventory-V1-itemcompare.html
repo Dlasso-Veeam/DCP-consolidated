@@ -30651,7 +30651,7 @@ function closeRecordDrawer() {
   document.removeEventListener('click', _recordDrawerOutsideClick, true);
   rdState.leftDropOpen = false;
   rdState.rightDropOpen = false;
-  document.removeEventListener('click', rdClosePickerOutside);
+  document.removeEventListener('click', rdClosePickerOutside, true);
   // Tear down the compare-table lazy-scroll observer so it can't fire
   // against a detached sentinel after the drawer closes.
   if (rdCmpScrollObserver) { rdCmpScrollObserver.disconnect(); rdCmpScrollObserver = null; }
@@ -30661,7 +30661,7 @@ function closeRecordDrawer() {
 function rdSelectSide(side, sel) {
   if (side === 'left')  { rdState.leftSel  = sel; rdState.leftDropOpen  = false; }
   if (side === 'right') { rdState.rightSel = sel; rdState.rightDropOpen = false; }
-  document.removeEventListener('click', rdClosePickerOutside);
+  document.removeEventListener('click', rdClosePickerOutside, true);
   renderRdBody();
 }
 // Position the open two-pane RP picker popover (position:fixed) under its
@@ -30706,9 +30706,9 @@ function rdToggleSideDrop(side, e) {
   if (willOpen) {
     rdState[openKey] = true;
     if (typeof rdSeedSidePickerView === 'function') rdSeedSidePickerView(side);
-    setTimeout(function(){ document.addEventListener('click', rdClosePickerOutside); }, 0);
+    setTimeout(function(){ document.addEventListener('click', rdClosePickerOutside, true); }, 0);
   } else {
-    document.removeEventListener('click', rdClosePickerOutside);
+    document.removeEventListener('click', rdClosePickerOutside, true);
   }
   renderRdBody();
   _rdPositionOpenPicker();
@@ -30772,7 +30772,7 @@ function rdClosePickerOutside(e) {
   }
   rdState.leftDropOpen = false;
   rdState.rightDropOpen = false;
-  document.removeEventListener('click', rdClosePickerOutside);
+  document.removeEventListener('click', rdClosePickerOutside, true);
   renderRdBody();
 }
 // Build the drawer's base fields for a record-level entry (rec-{schema}-{idx}).
