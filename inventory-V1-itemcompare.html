@@ -31299,7 +31299,7 @@ function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
     if (isToday) ariaParts.push('today');
     ariaParts.push(hasRp ? 'restore point available' : 'no restore point');
     if (hasMatch) ariaParts.push('matches your search');
-    if (hasDiff) ariaParts.push('has changes vs other side');
+    if (hasDiff) ariaParts.push('changed data');
     if (isFocused) ariaParts.push('selected');
     var ariaLabel = ariaParts.join(', ');
     var roleAttr = hasRp ? ' role="button" tabindex="0"' : ' role="gridcell"';
@@ -31317,7 +31317,7 @@ function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
   // Inline legend below the grid — only surfaces markers present this month.
   var legendBits = [];
   if (anyMatchInMonth) legendBits.push('<span class="cal-legend-item"><span class="cal-legend-swatch is-match" aria-hidden="true"></span>matches search</span>');
-  if (anyDiffInMonth)  legendBits.push('<span class="cal-legend-item"><span class="cal-legend-swatch is-diff" aria-hidden="true"></span>differs from other side</span>');
+  if (anyDiffInMonth)  legendBits.push('<span class="cal-legend-item"><span class="cal-legend-swatch is-diff" aria-hidden="true"></span>changed data</span>');
   var legendHtml = legendBits.length ? '<div class="cal-legend">' + legendBits.join('') + '</div>' : '';
   var leftPane = '<div class="cal-left"><div class="cal-body">' +
     '<div class="cal-nav">' +
