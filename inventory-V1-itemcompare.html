@@ -4321,6 +4321,11 @@ body.drawer-open { overflow: hidden; }
   }
 }
 
+/* ════════ Reusable tooltip — promotes native title= to a styled bubble ════════ */
+/* Attach via data-tooltip="…" on any element; positioned by the JS handler. */
+.app-tooltip { position: fixed; z-index: 10000; pointer-events: none; background: var(--black-100); color: var(--white); font-size: 12px; line-height: 1.35; font-weight: 450; padding: 6px 9px; border-radius: 4px; box-shadow: 0 4px 14px rgba(0,0,0,0.22); max-width: 260px; opacity: 0; transition: opacity 0.12s ease; }
+.app-tooltip.show { opacity: 1; }
+
 /* ════════ Roadmap: topbar entry + on-demand modal ════════ */
 /* Distinct from the grey action buttons — a quiet blue accent so it reads as
    "something new", plus a one-shot shimmer on load to draw the eye once.
@@ -18495,7 +18500,7 @@ function _invContentsChip(text, clickHandler, matched) {
     // "loads" — at the inventory level (_invSearchJustLoaded) OR a drill level
     // (_childSearchJustLoaded) — then it settles.
     var reveal = (typeof state !== 'undefined' && (state._invSearchJustLoaded || state._childSearchJustLoaded)) ? ' chip-reveal' : '';
-    return '<span class="contents-chip matched' + reveal + '" title="' + wsEscape(text) + ' match the current search">' + mag + wsEscape(text) + '</span>';
+    return '<span class="contents-chip matched' + reveal + '" data-tooltip="' + wsEscape(text) + ' match the current search">' + mag + wsEscape(text) + '</span>';
   }
   return '<span class="contents-chip">' + text + '</span>';
 }
@@ -37469,6 +37474,48 @@ window.__devJumpResolve = function(h) {
      finds window.__SECURITI_ICONS already populated. -->
 <script src="securiti-icons-data.js"></script>
 <script src="securiti-icons.js"></script>
+
+<!-- Reusable tooltip: shows a styled bubble for any [data-tooltip] element
+     (a proper replacement for native title= popups). One delegated handler. -->
+<script>
+(function(){
+  var tip = null, cur = null;
+  function tipEl(){
+    if (!tip){ tip = document.createElement('div'); tip.className = 'app-tooltip'; tip.setAttribute('role','tooltip'); document.body.appendChild(tip); }
+    return tip;
+  }
+  function show(target){
+    var txt = target.getAttribute('data-tooltip'); if (!txt) return;
+    var t = tipEl(); t.textContent = txt; t.classList.add('show');
+    var r = target.getBoundingClientRect();
+    var tw = t.offsetWidth, th = t.offsetHeight, pad = 8, gap = 8;
+    var left = r.left + r.width / 2 - tw / 2;
+    left = Math.max(pad, Math.min(left, window.innerWidth - tw - pad));
+    var top = r.top - th - gap;
+    if (top < pad) top = r.bottom + gap;        // flip below if no room above
+    t.style.left = Math.round(left) + 'px';
+    t.style.top = Math.round(top) + 'px';
+    cur = target;
+  }
+  function hide(){ if (tip) tip.classList.remove('show'); cur = null; }
+  document.addEventListener('mouseover', function(e){
+    var tgt = e.target.closest && e.target.closest('[data-tooltip]');
+    if (tgt && tgt !== cur) show(tgt);
+  });
+  document.addEventListener('mouseout', function(e){
+    var tgt = e.target.closest && e.target.closest('[data-tooltip]');
+    if (!tgt) return;
+    var to = e.relatedTarget;
+    if (!to || !to.closest || !to.closest('[data-tooltip]')) hide();
+  });
+  document.addEventListener('focusin', function(e){
+    var tgt = e.target.closest && e.target.closest('[data-tooltip]');
+    if (tgt) show(tgt);
+  });
+  document.addEventListener('focusout', hide);
+  window.addEventListener('scroll', hide, true);
+})();
+</script>
 
 <!-- Coming-soon roadmap: banner state + multi-page modal navigation -->
 <script>
