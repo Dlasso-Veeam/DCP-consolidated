@@ -4775,11 +4775,23 @@ body.drawer-open { overflow: hidden; }
           <!-- Page 1 — framing -->
           <div class="cs-page active" data-page="0">
             <div class="cs-art" aria-hidden="true">
-              <svg width="180" height="150" viewBox="0 0 180 150" fill="none">
-                <rect x="46" y="86" width="88" height="26" rx="6" fill="currentColor" opacity="0.14"/>
-                <rect x="40" y="66" width="100" height="28" rx="6" fill="currentColor" opacity="0.30"/>
-                <rect x="34" y="44" width="112" height="32" rx="8" fill="currentColor"/>
-                <path d="M58 60l7 7 14-15" stroke="var(--white)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              <svg width="248" height="164" viewBox="0 0 248 164" fill="none">
+                <defs>
+                  <linearGradient id="csG1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="var(--blue)"/>
+                    <stop offset="1" stop-color="var(--blue-dark)"/>
+                  </linearGradient>
+                </defs>
+                <ellipse cx="124" cy="140" rx="86" ry="11" fill="currentColor" opacity="0.08"/>
+                <rect x="66" y="96" width="116" height="34" rx="8" fill="currentColor" opacity="0.12"/>
+                <rect x="58" y="76" width="132" height="34" rx="8" fill="currentColor" opacity="0.26"/>
+                <rect x="50" y="48" width="148" height="42" rx="10" fill="url(#csG1)"/>
+                <circle cx="80" cy="69" r="13" fill="var(--white)" opacity="0.22"/>
+                <path d="M74 69l5 5 9-10" stroke="var(--white)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <rect x="102" y="63" width="78" height="5" rx="2.5" fill="var(--white)" opacity="0.9"/>
+                <rect x="102" y="74" width="52" height="5" rx="2.5" fill="var(--white)" opacity="0.5"/>
+                <path d="M214 40l2 5.4 5.4 2-5.4 2-2 5.4-2-5.4-5.4-2 5.4-2z" fill="currentColor" opacity="0.7"/>
+                <path d="M30 32l1.6 4.2 4.2 1.6-4.2 1.6L30 45l-1.6-4.2L24.2 39.4l4.2-1.6z" fill="currentColor" opacity="0.5"/>
               </svg>
             </div>
             <div class="cs-eyebrow">The road ahead</div>
@@ -4789,17 +4801,36 @@ body.drawer-open { overflow: hidden; }
           <!-- Page 2 — multi-point restore -->
           <div class="cs-page" data-page="1">
             <div class="cs-art" aria-hidden="true">
-              <svg width="220" height="150" viewBox="0 0 220 150" fill="none" stroke="currentColor">
-                <rect x="26" y="22" width="44" height="20" rx="5" fill="currentColor" opacity="0.16" stroke="none"/>
-                <rect x="92" y="22" width="44" height="20" rx="5" fill="currentColor" opacity="0.16" stroke="none"/>
-                <rect x="158" y="22" width="44" height="20" rx="5" fill="currentColor" opacity="0.16" stroke="none"/>
-                <path d="M48 42v40M114 42v62M180 42v22" stroke-width="2" stroke-dasharray="3 3" opacity="0.5"/>
-                <line x1="20" y1="118" x2="200" y2="118" stroke-width="2" opacity="0.35"/>
-                <circle cx="48" cy="118" r="7" fill="currentColor"/>
-                <circle cx="114" cy="118" r="7" fill="currentColor"/>
-                <circle cx="180" cy="118" r="7" fill="currentColor"/>
-                <circle cx="81" cy="118" r="4" fill="currentColor" opacity="0.35" stroke="none"/>
-                <circle cx="147" cy="118" r="4" fill="currentColor" opacity="0.35" stroke="none"/>
+              <svg width="280" height="164" viewBox="0 0 280 164" fill="none">
+                <defs>
+                  <linearGradient id="csG2" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stop-color="var(--blue-30)"/>
+                    <stop offset="0.5" stop-color="var(--blue)"/>
+                    <stop offset="1" stop-color="var(--blue-30)"/>
+                  </linearGradient>
+                </defs>
+                <!-- floating item cards, each tethered to a different point -->
+                <g>
+                  <rect x="32" y="26" width="60" height="38" rx="8" fill="var(--white)" stroke="currentColor" stroke-opacity="0.22"/>
+                  <rect x="40" y="35" width="22" height="6" rx="3" fill="currentColor" opacity="0.55"/>
+                  <rect x="40" y="47" width="38" height="6" rx="3" fill="currentColor" opacity="0.22"/>
+                  <rect x="110" y="26" width="60" height="38" rx="8" fill="var(--white)" stroke="currentColor" stroke-opacity="0.22"/>
+                  <rect x="118" y="35" width="22" height="6" rx="3" fill="currentColor" opacity="0.55"/>
+                  <rect x="118" y="47" width="38" height="6" rx="3" fill="currentColor" opacity="0.22"/>
+                  <rect x="188" y="26" width="60" height="38" rx="8" fill="var(--white)" stroke="currentColor" stroke-opacity="0.22"/>
+                  <rect x="196" y="35" width="22" height="6" rx="3" fill="currentColor" opacity="0.55"/>
+                  <rect x="196" y="47" width="38" height="6" rx="3" fill="currentColor" opacity="0.22"/>
+                </g>
+                <path d="M62 64v54M140 64v70M218 64v34" stroke="currentColor" stroke-width="2" stroke-dasharray="3 4" opacity="0.45"/>
+                <line x1="26" y1="130" x2="254" y2="130" stroke="url(#csG2)" stroke-width="3" stroke-linecap="round"/>
+                <circle cx="101" cy="130" r="3" fill="currentColor" opacity="0.3"/>
+                <circle cx="179" cy="130" r="3" fill="currentColor" opacity="0.3"/>
+                <circle cx="62" cy="130" r="11" fill="currentColor" opacity="0.14"/>
+                <circle cx="62" cy="130" r="6" fill="currentColor"/>
+                <circle cx="140" cy="130" r="11" fill="currentColor" opacity="0.14"/>
+                <circle cx="140" cy="130" r="6" fill="currentColor"/>
+                <circle cx="218" cy="130" r="11" fill="currentColor" opacity="0.14"/>
+                <circle cx="218" cy="130" r="6" fill="currentColor"/>
               </svg>
             </div>
             <div class="cs-eyebrow">Coming soon</div>
@@ -4809,20 +4840,41 @@ body.drawer-open { overflow: hidden; }
           <!-- Page 3 — global comparison -->
           <div class="cs-page" data-page="2">
             <div class="cs-art" aria-hidden="true">
-              <svg width="220" height="150" viewBox="0 0 220 150" fill="none">
-                <rect x="26" y="30" width="72" height="90" rx="8" fill="currentColor" opacity="0.10"/>
-                <rect x="122" y="30" width="72" height="90" rx="8" fill="currentColor" opacity="0.10"/>
-                <rect x="36" y="42" width="52" height="12" rx="3" fill="currentColor" opacity="0.45"/>
-                <rect x="132" y="42" width="52" height="12" rx="3" fill="currentColor" opacity="0.45"/>
-                <rect x="36" y="64" width="52" height="12" rx="3" fill="currentColor"/>
-                <rect x="132" y="64" width="52" height="12" rx="3" fill="currentColor"/>
-                <rect x="36" y="86" width="52" height="12" rx="3" fill="currentColor" opacity="0.45"/>
-                <rect x="132" y="86" width="52" height="12" rx="3" fill="currentColor" opacity="0.45"/>
-                <rect x="36" y="108" width="52" height="8" rx="3" fill="currentColor" opacity="0.25"/>
-                <rect x="132" y="108" width="52" height="8" rx="3" fill="currentColor" opacity="0.25"/>
-                <g stroke="var(--white)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="110" cy="70" r="13" fill="currentColor" stroke="none"/>
-                  <path d="M105 67l4 4 6-7"/>
+              <svg width="280" height="164" viewBox="0 0 280 164" fill="none">
+                <defs>
+                  <linearGradient id="csG3" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="var(--blue)"/>
+                    <stop offset="1" stop-color="var(--blue-dark)"/>
+                  </linearGradient>
+                </defs>
+                <!-- two environment panels, scanned between two points -->
+                <rect x="24" y="24" width="96" height="116" rx="11" fill="currentColor" opacity="0.07"/>
+                <rect x="24" y="24" width="96" height="116" rx="11" fill="none" stroke="currentColor" stroke-opacity="0.18"/>
+                <rect x="160" y="24" width="96" height="116" rx="11" fill="currentColor" opacity="0.07"/>
+                <rect x="160" y="24" width="96" height="116" rx="11" fill="none" stroke="currentColor" stroke-opacity="0.18"/>
+                <!-- left rows -->
+                <rect x="36" y="40" width="58" height="10" rx="3" fill="currentColor" opacity="0.4"/>
+                <rect x="36" y="60" width="58" height="10" rx="3" fill="currentColor"/>
+                <rect x="36" y="80" width="58" height="10" rx="3" fill="currentColor" opacity="0.4"/>
+                <rect x="36" y="100" width="58" height="10" rx="3" fill="currentColor"/>
+                <rect x="36" y="120" width="40" height="8" rx="3" fill="currentColor" opacity="0.25"/>
+                <!-- right rows (mirror) -->
+                <rect x="186" y="40" width="58" height="10" rx="3" fill="currentColor" opacity="0.4"/>
+                <rect x="186" y="60" width="58" height="10" rx="3" fill="currentColor"/>
+                <rect x="186" y="80" width="58" height="10" rx="3" fill="currentColor" opacity="0.4"/>
+                <rect x="186" y="100" width="58" height="10" rx="3" fill="currentColor"/>
+                <rect x="186" y="120" width="40" height="8" rx="3" fill="currentColor" opacity="0.25"/>
+                <!-- changed-row dots -->
+                <circle cx="100" cy="65" r="3.5" fill="var(--orange-dark)"/>
+                <circle cx="250" cy="65" r="3.5" fill="var(--orange-dark)"/>
+                <circle cx="100" cy="105" r="3.5" fill="var(--orange-dark)"/>
+                <circle cx="250" cy="105" r="3.5" fill="var(--orange-dark)"/>
+                <!-- center compare badge -->
+                <circle cx="140" cy="82" r="20" fill="currentColor" opacity="0.12"/>
+                <circle cx="140" cy="82" r="15" fill="url(#csG3)"/>
+                <g stroke="var(--white)" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M134 76h9l-3-3"/>
+                  <path d="M146 88h-9l3 3"/>
                 </g>
               </svg>
             </div>
@@ -4833,12 +4885,44 @@ body.drawer-open { overflow: hidden; }
           <!-- Page 4 — closing -->
           <div class="cs-page" data-page="3">
             <div class="cs-art" aria-hidden="true">
-              <svg width="180" height="150" viewBox="0 0 180 150" fill="none" stroke="currentColor">
-                <path d="M90 118V52" stroke-width="3" stroke-linecap="round"/>
-                <path d="M66 78l24-26 24 26" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                <path d="M40 40l1.6 4.3L46 46l-4.4 1.7L40 52l-1.6-4.3L34 46l4.4-1.7L40 40z" fill="currentColor" stroke="none"/>
-                <path d="M138 34l2 5.4L145 41l-5 1.9L138 48l-2-5.1L131 41l5-1.6L138 34z" fill="currentColor" stroke="none" opacity="0.7"/>
-                <path d="M150 86l1.4 3.8L155 91l-3.6 1.4L150 96l-1.4-3.6L145 91l3.6-1.2L150 86z" fill="currentColor" stroke="none" opacity="0.5"/>
+              <svg width="220" height="168" viewBox="0 0 220 168" fill="none">
+                <defs>
+                  <linearGradient id="csRkBody" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stop-color="var(--blue-dark)"/>
+                    <stop offset="0.45" stop-color="var(--blue)"/>
+                    <stop offset="1" stop-color="var(--blue-dark)"/>
+                  </linearGradient>
+                  <linearGradient id="csRkFlame" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="var(--orange-dark)"/>
+                    <stop offset="1" stop-color="var(--orange-dark)" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <!-- stars -->
+                <path d="M44 36l1.8 4.8 4.8 1.8-4.8 1.8L44 49l-1.8-4.8L37.4 42.4l4.8-1.8z" fill="currentColor" opacity="0.6"/>
+                <path d="M176 28l1.5 4 4 1.5-4 1.5L176 40l-1.5-4-4-1.5 4-1.5z" fill="currentColor" opacity="0.8"/>
+                <path d="M186 96l1.2 3.2 3.2 1.2-3.2 1.2L186 106l-1.2-3.2-3.2-1.2 3.2-1.2z" fill="currentColor" opacity="0.45"/>
+                <circle cx="58" cy="98" r="2.5" fill="currentColor" opacity="0.4"/>
+                <circle cx="160" cy="62" r="2.5" fill="currentColor" opacity="0.45"/>
+                <!-- motion / speed lines -->
+                <g stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity="0.32">
+                  <path d="M150 72h16"/><path d="M156 86h12"/><path d="M70 72H54"/><path d="M64 86H52"/>
+                </g>
+                <!-- exhaust trail -->
+                <path d="M96 118C100 138 104 150 110 164C116 150 120 138 124 118Z" fill="url(#csRkFlame)" opacity="0.55"/>
+                <!-- fins -->
+                <path d="M92 98L70 122L92 114Z" fill="var(--blue-dark)"/>
+                <path d="M128 98L150 122L128 114Z" fill="var(--blue-dark)"/>
+                <!-- body -->
+                <path d="M110 26C128 26 132 50 132 76L132 112L88 112L88 76C88 50 92 26 110 26Z" fill="url(#csRkBody)"/>
+                <!-- left highlight -->
+                <path d="M101 34C95 46 94 64 94 80L94 108L99 108L99 80C99 60 100 46 104 36Z" fill="var(--white)" opacity="0.18"/>
+                <!-- window -->
+                <circle cx="110" cy="64" r="12" fill="var(--white)"/>
+                <circle cx="110" cy="64" r="7.5" fill="var(--blue-30)"/>
+                <circle cx="107" cy="61" r="2.4" fill="var(--white)"/>
+                <!-- flame -->
+                <path d="M100 112C103 132 110 144 110 144C110 144 117 132 120 112Z" fill="var(--orange-dark)"/>
+                <path d="M105 112C107 126 110 134 110 134C110 134 113 126 115 112Z" fill="var(--white)" opacity="0.75"/>
               </svg>
             </div>
             <div class="cs-eyebrow">And more</div>
