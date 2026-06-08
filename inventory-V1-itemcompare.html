@@ -30503,24 +30503,12 @@ function previewResource(resourceId) {
       subOverride = resolvedRec.schemaKey;
     }
   }
-  var asOfDate = null;
-  if (state.invDate && state.invDate !== 'today') {
-    asOfDate = state.invDate;
-  } else {
-    var r = (typeof RESOURCES !== 'undefined') ? RESOURCES.find(function(x){ return x.id === resourceId; }) : null;
-    if (r && r.lastBackup && r.lastBackup !== '—') {
-      var t = Date.parse(r.lastBackup);
-      if (!isNaN(t)) {
-        var d = new Date(t);
-        var y = d.getFullYear();
-        var m = String(d.getMonth() + 1);
-        if (m.length === 1) m = '0' + m;
-        var dd = String(d.getDate());
-        if (dd.length === 1) dd = '0' + dd;
-        asOfDate = y + '-' + m + '-' + dd;
-      }
-    }
-  }
+  // Item-compare model: the drawer's source side is the CART's restore point
+  // (resolved in openRecordDrawer), NOT a per-item browse date. Don't derive
+  // an asOfDate from the resource's static lastBackup — that legacy seed made
+  // the preview open on the item's own last-backup day (e.g. Jun 7) instead of
+  // the cart's point (e.g. Jun 8), disagreeing with the action-bar picker.
+  var asOfDate = (state.invDate && state.invDate !== 'today') ? state.invDate : null;
   // Default behavior: "selected restore point vs production." When the
   // user has explicitly anchored the inventory to a specific RP (the
   // dropdown selection in the asof-bar), pass that exact RP id so the
