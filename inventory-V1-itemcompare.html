@@ -4321,7 +4321,21 @@ body.drawer-open { overflow: hidden; }
   }
 }
 
-/* ════════ Roadmap: on-demand modal (entry lives in the topbar action group) ════════ */
+/* ════════ Roadmap: topbar entry + on-demand modal ════════ */
+/* Distinct from the grey action buttons — a quiet blue accent so it reads as
+   "something new", plus a one-shot shimmer on load to draw the eye once.
+   (The reduced-motion block above disables the shimmer automatically.) */
+.btn.cs-roadmap-btn { position: relative; overflow: hidden; border-color: var(--blue-30); background: var(--blue-10); color: var(--blue); }
+.btn.cs-roadmap-btn svg { color: var(--blue); }
+.btn.cs-roadmap-btn:hover { background: var(--blue-30); border-color: var(--blue); color: var(--blue-dark); }
+.btn.cs-roadmap-btn::after {
+  content: ''; position: absolute; top: 0; left: -75%; width: 55%; height: 100%;
+  background: linear-gradient(100deg, transparent 0%, rgba(255,255,255,0.7) 50%, transparent 100%);
+  transform: skewX(-18deg);
+  pointer-events: none;
+  animation: csRoadmapShimmer 1.5s ease-in-out 0.9s 2;
+}
+@keyframes csRoadmapShimmer { 0% { left: -75%; } 55%, 100% { left: 135%; } }
 
 .cs-modal-backdrop { position: fixed; inset: 0; background: rgba(31, 34, 41, 0.45); z-index: 9998; }
 .cs-modal { position: fixed; z-index: 9999; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 560px; max-width: 92vw; max-height: 88vh; background: var(--white); border-radius: 8px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25); display: flex; flex-direction: column; overflow: hidden; }
@@ -4591,7 +4605,7 @@ body.drawer-open { overflow: hidden; }
         <div class="topbar-actions">
           <!-- Roadmap entry — quiet peer in the action group; opens the
                multi-page "what's coming" modal. Rocket = upcoming/launch. -->
-          <button class="btn btn-outline btn-sm" onclick="csOpen()" id="csRoadmapBtn" title="What's on our roadmap">
+          <button class="btn btn-outline btn-sm cs-roadmap-btn" onclick="csOpen()" id="csRoadmapBtn" title="What's on our roadmap">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
             Roadmap
           </button>
