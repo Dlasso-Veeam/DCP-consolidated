@@ -3978,6 +3978,13 @@ body.pol-drawer-open { overflow: hidden; }
 .rw-rp-menu-cal .cal-left  { flex: 0 0 290px; }          /* keep the 290px calendar */
 .rw-rp-menu-cal .cal-right { display: flex; flex: 0 0 208px; }   /* restore-point column; global default is none until JS shows it */
 .rw-rp-menu-cal .cal-time-chip { white-space: nowrap; }
+/* Production = the live environment, set apart from the dated restore points:
+   its own slot above the "Restore points" label, divided off so it never
+   reads as a per-day restore point. */
+.rw-rp-menu-cal .cal-prod-slot { padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--border-light); }
+.rw-rp-menu-cal .cal-prod-chip { height: auto; padding: 8px 10px; align-items: flex-start; }
+.rw-rp-menu-cal .cal-time-chip-sub { display: block; font-size: 12px; font-weight: 450; color: var(--black-60); margin-top: 1px; }
+.rw-rp-menu-cal .cal-time-chip.current .cal-time-chip-sub { color: var(--white); }
 /* Orange "differs from other side" dot (bottom-right) — complements the
    global green has-match dot (top-right) on the circular day cells. */
 .rw-rp-menu-cal .cal-day.has-diff::before { content: ''; position: absolute; bottom: 4px; right: 4px; width: 5px; height: 5px; border-radius: 50%; background: var(--orange-dark); }
@@ -31300,14 +31307,16 @@ function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
     '<div class="cal-grid">' + cellsHtml + '</div>' +
     legendHtml +
   '</div></div>';
-  // ── Restore-points (right pane) — exact global #calPicker chip grammar:
-  // a "Production (now)" quick-pick, then one .cal-time-chip per restore
-  // point on the focused day (time + RP type). Matching RPs (active search)
-  // carry a green dot; the diff signal lives on the calendar day dots. ──
+  // ── Right pane. Production (now) is the LIVE environment, NOT a restore
+  // point — so it sits in its own slot above the day-scoped list, separated
+  // by the "Restore points" label, rather than appearing as a fake daily RP.
+  // Below it: one .cal-time-chip per restore point on the focused day (time +
+  // RP type). Matching RPs (active search) carry a green dot; the diff signal
+  // lives on the calendar day dots. ──
   var prodCurrent = (sel === 'prod' || !sel || sel === 'snap');
-  var prodChip = '<button class="cal-time-chip' + (prodCurrent ? ' current' : '') + '" onclick="rdSelectSide(\'' + side + '\', \'prod\')">' +
-    '<span>Production (now)</span>' +
-    '<span class="cal-time-chip-type">Live</span>' +
+  var prodChip = '<button class="cal-time-chip cal-prod-chip' + (prodCurrent ? ' current' : '') + '" onclick="rdSelectSide(\'' + side + '\', \'prod\')">' +
+    '<span>Production<span class="cal-time-chip-sub">Live environment</span></span>' +
+    '<span class="cal-time-chip-type">now</span>' +
   '</button>';
   var dayRps = allRps.filter(function(rp){
     var d = new Date(rp.ts);
@@ -31333,8 +31342,9 @@ function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
     });
   }
   var rightPane = '<div class="cal-right">' +
+    '<div class="cal-prod-slot">' + prodChip + '</div>' +
     '<div class="cal-times-label">Restore points</div>' +
-    '<div class="cal-times">' + prodChip + chipsHtml + '</div>' +
+    '<div class="cal-times">' + chipsHtml + '</div>' +
   '</div>';
   // Hero band — year + focused-date label, identical to the global picker.
   var heroDate = pickerDay ? new Date(pickerDay + 'T00:00:00') : null;
