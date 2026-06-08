@@ -30611,14 +30611,42 @@ function openRecordDrawer(id, nameOverride, subOverride, asOfDate, ctxOverride) 
     }
   } else {
     // Item-compare model: there's no global compare/as-of axis, so the
-    // preview drawer IS the comparison surface. It defaults to the most
-    // recent restore point (left) vs Production (now) (right) — both sides
-    // are user-repickable via the per-side RP calendar dropdowns. (asOfDate
-    // is honored when a caller still passes one, otherwise we anchor left to
-    // the latest backup so the default never collapses to prod-vs-prod.)
-    var leftRp = (asOfDate && asOfDate !== 'today') ? rpClosestAtOrBefore(rps, asOfDate) : null;
-    rdState.leftSel  = leftRp ? leftRp.id : (state.invAsOfRpId || (rps[0] ? rps[0].id : 'prod'));
-    rdState.rightSel = 'prod';
+    // preview drawer IS the comparison surface.
+    //
+    // V1 CART CONSTRAINT: the restore cart can only hold items at a single
+    // comparison axis. So once the user has set a pair of restore points on
+    // any item (state.cartComparePair), every newly previewed item defaults
+    // to that SAME pair — keeping the whole cart on one axis. RP day-slots
+    // are shared across items (rp-d{N}a/b), but a given resource may not have
+    // a particular slot, so each carried side is validated and falls back per
+    // side. The very first preview (no remembered pair) defaults to the most
+    // recent restore point vs Production (now).
+    var _latest = rps[0] ? rps[0].id : 'prod';
+    var _carry = function(selKey) {
+      if (selKey === 'prod') return 'prod';
+      if (selKey && rps.find(function(p){ return p.id === selKey; })) return selKey;
+      return null; // carried point doesn't exist for this resource
+    };
+    var _pair = state.cartComparePair;
+    if (_pair) {
+      var L = _carry(_pair.left);
+      var R = _carry(_pair.right);
+      if (!L) L = (R === _latest) ? 'prod' : _latest;
+      if (!R) R = (L === 'prod') ? _latest : 'prod';
+      if (L === R) R = (L === 'prod') ? _latest : 'prod';
+      rdState.leftSel = L;
+      rdState.rightSel = R;
+    } else {
+      var leftRp = (asOfDate && asOfDate !== 'today') ? rpClosestAtOrBefore(rps, asOfDate) : null;
+      rdState.leftSel  = leftRp ? leftRp.id : (state.invAsOfRpId || _latest);
+      rdState.rightSel = (rdState.leftSel === 'prod') ? _latest : 'prod';
+    }
+  }
+  // Remember the comparison axis for the NEXT item previewed (V1 single-axis
+  // cart). Only for the default preview path — the wizard/basket (ctx.rpId,
+  // ws.isOpen) collapses to one committed RP and must not redefine the axis.
+  if (!pinnedRpId && !(typeof ws !== 'undefined' && ws.isOpen)) {
+    state.cartComparePair = { left: rdState.leftSel, right: rdState.rightSel };
   }
   // Item-compare model: the preview drawer always shows the two-column
   // comparison (most recent RP vs Production by default), never the
@@ -30691,6 +30719,9 @@ function rdSelectSide(side, sel) {
   if (sel === otherSel) return;
   if (side === 'left')  { rdState.leftSel  = sel; rdState.leftDropOpen  = false; }
   if (side === 'right') { rdState.rightSel = sel; rdState.rightDropOpen = false; }
+  // V1 single-axis cart: remember this comparison pair so the next item the
+  // user previews/adds defaults to the same two restore points.
+  state.cartComparePair = { left: rdState.leftSel, right: rdState.rightSel };
   document.removeEventListener('click', rdClosePickerOutside, true);
   renderRdBody();
 }
