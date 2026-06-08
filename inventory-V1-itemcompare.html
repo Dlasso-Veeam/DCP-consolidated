@@ -32509,7 +32509,12 @@ function rdPreviewCommittedSides() {
     };
   }
   if (!id || !state.selectedIds.has(id)) return { left: false, right: false };
-  var c = state.selectedRpOverrides[id];
+  // Effective committed restore point: the item's explicit override, or — for
+  // a flexible cart item (added with no deliberate RP) — the latest backup it
+  // implicitly restores from. Mirrors rdBuildSideAction's "Added" logic so the
+  // committed-column blue outline lights up on the same column the header pill
+  // marks as added.
+  var c = state.selectedRpOverrides[id] || (typeof _v1LatestRpId === 'function' ? _v1LatestRpId() : null);
   if (!c) return { left: false, right: false };
   return {
     left:  rdState.leftSel  && rdState.leftSel  !== 'prod' && rdState.leftSel  !== 'snap' && rdState.leftSel  === c,
