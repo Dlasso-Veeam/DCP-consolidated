@@ -23206,9 +23206,14 @@ function _cartHasFlexibleItems() {
   });
   return flex;
 }
-// Human label for the cart's restore point ("Latest backup" when flexible).
+// Human label for the cart's restore point. Always a precise date+time —
+// even for a flexible cart, where we resolve "the most recent backup" to its
+// concrete restore point rather than showing the squishy word "Latest".
 function _cartRpLabel(rpId) {
-  if (!rpId) return 'Latest backup';
+  if (!rpId) {
+    rpId = (typeof _v1LatestRpId === 'function') ? _v1LatestRpId() : null;
+    if (!rpId) return '—';
+  }
   if (typeof _v1FormatRpId === 'function') { var l = _v1FormatRpId(rpId); if (l) return l; }
   var rps = (typeof _v1GlobalRps === 'function') ? _v1GlobalRps() : [];
   var rp = rps.find(function(p){ return p.id === rpId; });
@@ -35171,7 +35176,7 @@ function onCalSelect(e, dateStr) {
       // "Latest" = flexible cart (unpin every item). The restore date is then
       // resolved at restore time, not fixed now.
       _setCartRp(null);
-      if (typeof showToast === 'function') showToast('Restore point set to Latest backup');
+      if (typeof showToast === 'function') showToast('Restore point set to ' + (typeof _cartRpLabel === 'function' ? _cartRpLabel(null) : 'the most recent backup'));
     }
     _closeCalPicker();
     return;
