@@ -30682,6 +30682,13 @@ function closeRecordDrawer() {
 
 // ── Two-picker handlers (mirror rwSelectPreviewSide / rwTogglePreviewSideDrop)
 function rdSelectSide(side, sel) {
+  // Guard: the two columns must compare DIFFERENT points in time. Reject a
+  // pick that equals the other side's current selection (e.g. Production vs
+  // Production) so the diff is never a point against itself. The picker also
+  // disables that option visually (see rdBuildSidePicker); this is the
+  // belt-and-suspenders state guard.
+  var otherSel = side === 'left' ? rdState.rightSel : rdState.leftSel;
+  if (sel === otherSel) return;
   if (side === 'left')  { rdState.leftSel  = sel; rdState.leftDropOpen  = false; }
   if (side === 'right') { rdState.rightSel = sel; rdState.rightDropOpen = false; }
   document.removeEventListener('click', rdClosePickerOutside, true);
@@ -31339,7 +31346,13 @@ function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
   // RP type). Matching RPs (active search) carry a green dot; the diff signal
   // lives on the calendar day dots. ──
   var prodCurrent = (sel === 'prod' || !sel || sel === 'snap');
-  var prodChip = '<button class="cal-time-chip cal-prod-chip' + (prodCurrent ? ' current' : '') + '" onclick="rdSelectSide(\'' + side + '\', \'prod\')">' +
+  // Can't compare a point to itself — disable the option already chosen on
+  // the OTHER side (otherSel computed above).
+  var prodDisabled = (otherSel === 'prod');
+  var prodChip = '<button class="cal-time-chip cal-prod-chip' + (prodCurrent ? ' current' : '') + (prodDisabled ? ' is-disabled' : '') + '"' +
+    (prodDisabled
+      ? ' type="button" disabled aria-disabled="true" title="Production is already selected on the other side — choose a different point to compare"'
+      : ' onclick="rdSelectSide(\'' + side + '\', \'prod\')"') + '>' +
     '<span>Production<span class="cal-time-chip-sub">Live environment</span></span>' +
     '<span class="cal-time-chip-type">now</span>' +
   '</button>';
@@ -31359,7 +31372,13 @@ function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
       var isCurrent = rp.id === sel;
       var isMatch = !!matchedRpIdSet[rp.id];
       var typeLbl = rp.typeLabel || rp.type || '';
-      chipsHtml += '<button class="cal-time-chip' + (isCurrent ? ' current' : '') + (isMatch ? ' is-match' : '') + '" onclick="rdSelectSide(\'' + side + '\', \'' + rp.id + '\')">' +
+      // Disable the restore point already selected on the other side — the
+      // two columns must compare different points in time.
+      var rpDisabled = (rp.id === otherSel);
+      chipsHtml += '<button class="cal-time-chip' + (isCurrent ? ' current' : '') + (isMatch ? ' is-match' : '') + (rpDisabled ? ' is-disabled' : '') + '"' +
+        (rpDisabled
+          ? ' type="button" disabled aria-disabled="true" title="Already selected on the other side — choose a different point to compare"'
+          : ' onclick="rdSelectSide(\'' + side + '\', \'' + rp.id + '\')"') + '>' +
         (isMatch ? '<span class="rw-rp-time-match-dot" title="Matches your search"></span>' : '') +
         '<span>' + t + '</span>' +
         '<span class="cal-time-chip-type">' + typeLbl + '</span>' +
