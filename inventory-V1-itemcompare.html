@@ -31432,13 +31432,15 @@ function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
     '<span>Production<span class="cal-time-chip-sub">Live environment</span></span>' +
     '<span class="cal-time-chip-type">now</span>' +
   '</button>';
-  // "Latest backup" quick-pick — parity with the Production pin: a one-click
-  // jump to the most recent restore point from any month/day in the calendar.
-  // Shows the concrete date+time as its sub-label (no squishy "Latest" as the
-  // committed value — the header still reads the precise point).
-  var _latestId = (typeof _v1LatestRpId === 'function') ? _v1LatestRpId() : (allRps[0] ? allRps[0].id : null);
+  // "Latest backup" quick-pick — a one-click jump back to the most recent
+  // restore point. Only shown when the calendar is focused on a DIFFERENT day
+  // than the latest backup's: on the latest day the day's restore-point list
+  // already surfaces it, so the chip would just duplicate that selection.
+  var _latestRpObj = (typeof _v1LatestRp === 'function') ? _v1LatestRp() : (allRps[0] || null);
+  var _latestId = _latestRpObj ? _latestRpObj.id : null;
+  var _latestDay = _latestRpObj ? fmtDate(new Date(_latestRpObj.ts)) : null;
   var latestChip = '';
-  if (_latestId) {
+  if (_latestId && _latestDay !== pickerDay) {
     var latestCurrent  = (sel === _latestId);
     var latestDisabled = (otherSel === _latestId);
     var latestSub = (typeof _v1FormatRpId === 'function') ? (_v1FormatRpId(_latestId) || '') : '';
