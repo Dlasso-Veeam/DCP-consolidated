@@ -30682,32 +30682,28 @@ function openRecordDrawer(id, nameOverride, subOverride, asOfDate, ctxOverride) 
     // a particular slot, so each carried side is validated and falls back per
     // side. The very first preview (no remembered pair) defaults to the most
     // recent restore point vs Production (now).
+    // Item-compare model: the drawer's SOURCE side (left) mirrors the CART's
+    // single restore point, so the preview always agrees with the action-bar
+    // picker.
+    //   • item already in cart → its committed point: its own override, else
+    //     the cart's pinned point, else the latest backup (flexible cart)
+    //   • item not in cart → the cart's current point (pinned, else latest),
+    //     so a fresh preview opens on the same axis the cart will use
+    // Right side defaults to Production (now); the user can repoint it freely
+    // (comparison is read-only). A caller-supplied asOfDate still wins on left.
     var _latest = rps[0] ? rps[0].id : 'prod';
-    var _carry = function(selKey) {
-      if (selKey === 'prod') return 'prod';
-      if (selKey && rps.find(function(p){ return p.id === selKey; })) return selKey;
-      return null; // carried point doesn't exist for this resource
-    };
-    var _pair = state.cartComparePair;
-    if (_pair) {
-      var L = _carry(_pair.left);
-      var R = _carry(_pair.right);
-      if (!L) L = (R === _latest) ? 'prod' : _latest;
-      if (!R) R = (L === 'prod') ? _latest : 'prod';
-      if (L === R) R = (L === 'prod') ? _latest : 'prod';
-      rdState.leftSel = L;
-      rdState.rightSel = R;
-    } else {
-      var leftRp = (asOfDate && asOfDate !== 'today') ? rpClosestAtOrBefore(rps, asOfDate) : null;
-      rdState.leftSel  = leftRp ? leftRp.id : (state.invAsOfRpId || _latest);
-      rdState.rightSel = (rdState.leftSel === 'prod') ? _latest : 'prod';
+    var _cartRp = (typeof _cartPinnedRpId === 'function') ? _cartPinnedRpId() : null;
+    var _inCart = !!(id && ((typeof isInPlan === 'function' && isInPlan(id)) || (state.selectedIds && state.selectedIds.has(id))));
+    var _src = null;
+    if (asOfDate && asOfDate !== 'today') {
+      var _aRp = rpClosestAtOrBefore(rps, asOfDate);
+      if (_aRp) _src = _aRp.id;
     }
-  }
-  // Remember the comparison axis for the NEXT item previewed (V1 single-axis
-  // cart). Only for the default preview path — the wizard/basket (ctx.rpId,
-  // ws.isOpen) collapses to one committed RP and must not redefine the axis.
-  if (!pinnedRpId && !(typeof ws !== 'undefined' && ws.isOpen)) {
-    state.cartComparePair = { left: rdState.leftSel, right: rdState.rightSel };
+    if (!_src) _src = _inCart ? (state.selectedRpOverrides[id] || _cartRp || _latest) : (_cartRp || _latest);
+    // Validate against this resource's RP list; fall back to latest.
+    if (_src !== 'prod' && !rps.find(function(p){ return p.id === _src; })) _src = _latest;
+    rdState.leftSel  = _src;
+    rdState.rightSel = (_src === 'prod') ? _latest : 'prod';
   }
   // Item-compare model: the preview drawer always shows the two-column
   // comparison (most recent RP vs Production by default), never the
@@ -30780,9 +30776,9 @@ function rdSelectSide(side, sel) {
   if (sel === otherSel) return;
   if (side === 'left')  { rdState.leftSel  = sel; rdState.leftDropOpen  = false; }
   if (side === 'right') { rdState.rightSel = sel; rdState.rightDropOpen = false; }
-  // V1 single-axis cart: remember this comparison pair so the next item the
-  // user previews/adds defaults to the same two restore points.
-  state.cartComparePair = { left: rdState.leftSel, right: rdState.rightSel };
+  // (No cross-item carry here — the drawer seeds its source side from the
+  // cart's restore point on open, so the cart pin is the single source of
+  // truth; a transient compare pick on one item doesn't redefine the cart.)
   document.removeEventListener('click', rdClosePickerOutside, true);
   renderRdBody();
 }
@@ -32441,7 +32437,14 @@ function rdBuildSideAction(side, sel, resource) {
     '</button>';
   }
   if (sel === 'snap') return '';
-  var currentOverride = (id && state.selectedIds.has(id)) ? state.selectedRpOverrides[id] : null;
+  // The item's effective committed restore point: its explicit override, or —
+  // for a flexible cart item (added with no deliberate RP) — the latest backup
+  // it implicitly restores from. So "Added" shows on the latest-RP column for a
+  // flexibly-added item, keeping the drawer in sync with the action-bar pin.
+  var _inCartHere = !!(id && ((typeof isInPlan === 'function' && isInPlan(id)) || state.selectedIds.has(id)));
+  var currentOverride = _inCartHere
+    ? (state.selectedRpOverrides[id] || (typeof _v1LatestRpId === 'function' ? _v1LatestRpId() : null))
+    : null;
   var isAdded = currentOverride && currentOverride === sel;
   if (isAdded) {
     return '<span class="' + _tagCls + '" title="' + _tagTitle + '">' +
