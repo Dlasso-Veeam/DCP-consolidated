@@ -31447,7 +31447,6 @@ function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
         ? ' type="button" disabled aria-disabled="true" title="The latest backup is already selected on the other side — choose a different point to compare"'
         : ' onclick="rdSelectSide(\'' + side + '\', \'' + _latestId + '\')"') + '>' +
       '<span>Latest backup<span class="cal-time-chip-sub">' + latestSub + '</span></span>' +
-      '<span class="cal-time-chip-type">newest</span>' +
     '</button>';
   }
   var dayRps = allRps.filter(function(rp){
