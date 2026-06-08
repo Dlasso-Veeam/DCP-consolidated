@@ -31433,14 +31433,13 @@ function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
     '<span class="cal-time-chip-type">now</span>' +
   '</button>';
   // "Latest backup" quick-pick — a one-click jump back to the most recent
-  // restore point. Only shown when the calendar is focused on a DIFFERENT day
-  // than the latest backup's: on the latest day the day's restore-point list
-  // already surfaces it, so the chip would just duplicate that selection.
+  // restore point. Only shown once this side is actually COMMITTED to an
+  // older restore point (sel is a non-latest RP) — not while merely browsing
+  // the calendar. On the latest point (or Production) it would be redundant.
   var _latestRpObj = (typeof _v1LatestRp === 'function') ? _v1LatestRp() : (allRps[0] || null);
   var _latestId = _latestRpObj ? _latestRpObj.id : null;
-  var _latestDay = _latestRpObj ? fmtDate(new Date(_latestRpObj.ts)) : null;
   var latestChip = '';
-  if (_latestId && _latestDay !== pickerDay) {
+  if (_latestId && sel && sel !== 'prod' && sel !== 'snap' && sel !== _latestId) {
     var latestCurrent  = (sel === _latestId);
     var latestDisabled = (otherSel === _latestId);
     var latestSub = (typeof _v1FormatRpId === 'function') ? (_v1FormatRpId(_latestId) || '') : '';
