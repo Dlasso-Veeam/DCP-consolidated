@@ -4320,6 +4320,43 @@ body.drawer-open { overflow: hidden; }
     scroll-behavior: auto !important;
   }
 }
+
+/* ════════ Coming-soon roadmap: banner + on-demand modal ════════ */
+.cs-announce { margin: 0 0 16px; }
+.cs-banner { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--blue-30); background: var(--blue-10); border-radius: 8px; }
+.cs-spark { color: var(--blue); display: inline-flex; flex-shrink: 0; }
+.cs-banner-text { display: flex; flex-direction: column; gap: 2px; line-height: 1.35; min-width: 0; }
+.cs-banner-text strong { font-size: 14px; font-weight: 500; color: var(--black-100); }
+.cs-banner-text span { font-size: 14px; color: var(--black-60); }
+.cs-banner-cta { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border: none; border-radius: 4px; background: var(--blue); color: var(--white); font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; flex-shrink: 0; white-space: nowrap; }
+.cs-banner-cta:hover { background: var(--blue-dark); }
+.cs-banner-x { background: transparent; border: none; color: var(--black-30); cursor: pointer; font-size: 14px; width: 28px; height: 28px; border-radius: 4px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
+.cs-banner-x:hover { background: var(--blue-30); color: var(--black-60); }
+.cs-link { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border: 1px solid var(--blue-30); border-radius: 100px; background: var(--blue-10); color: var(--blue); font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }
+.cs-link:hover { background: var(--blue-30); }
+
+.cs-modal-backdrop { position: fixed; inset: 0; background: rgba(31, 34, 41, 0.45); z-index: 9998; }
+.cs-modal { position: fixed; z-index: 9999; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 560px; max-width: 92vw; max-height: 88vh; background: var(--white); border-radius: 8px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25); display: flex; flex-direction: column; overflow: hidden; }
+.cs-modal-x { position: absolute; top: 12px; right: 12px; z-index: 2; background: transparent; border: none; color: var(--black-30); font-size: 16px; width: 32px; height: 32px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.cs-modal-x:hover { background: var(--black-5); color: var(--black-100); }
+.cs-pages { flex: 1; min-height: 0; overflow-y: auto; }
+.cs-page { display: none; flex-direction: column; align-items: center; text-align: center; padding: 40px 40px 8px; }
+.cs-page.active { display: flex; }
+.cs-art { width: 100%; height: 196px; display: flex; align-items: center; justify-content: center; background: var(--blue-light); border-radius: 8px; margin-bottom: 24px; color: var(--blue); }
+.cs-eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--blue); margin-bottom: 10px; }
+.cs-eyebrow.is-now { color: var(--black-30); }
+.cs-page h2 { font-size: 22px; font-weight: 500; color: var(--black-100); margin: 0 0 10px; line-height: 1.25; }
+.cs-page p { font-size: 14px; line-height: 1.55; color: var(--black-60); margin: 0; max-width: 44ch; }
+.cs-page p .cs-soon { color: var(--black-100); font-weight: 500; }
+.cs-footer { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-top: 1px solid var(--border-light); }
+.cs-dots { display: flex; gap: 8px; }
+.cs-dot { width: 7px; height: 7px; border-radius: 50%; border: none; background: var(--border); padding: 0; cursor: pointer; }
+.cs-dot.on { background: var(--blue); }
+.cs-nav { display: flex; gap: 8px; align-items: center; }
+.cs-back { background: transparent; border: none; color: var(--black-60); font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; padding: 0 12px; height: 36px; }
+.cs-back:hover { color: var(--black-100); }
+.cs-next { background: var(--blue); color: var(--white); border: none; border-radius: 4px; font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; padding: 0 18px; height: 36px; }
+.cs-next:hover { background: var(--blue-dark); }
 </style>
 
 <!-- ============================================================== -->
@@ -4722,6 +4759,114 @@ body.drawer-open { overflow: hidden; }
 
     <!-- ========== SCREEN: INVENTORY ========== -->
     <div class="screen active" id="screen-inventory">
+      <!-- ══ Coming-soon roadmap: dismissible banner → on-demand modal ══
+           Sets expectations that this is V1; multi-point restore + global
+           compare are on the way. Non-blocking + revisitable (collapses to a
+           small "What's coming" link on dismiss; localStorage-remembered). -->
+      <div class="cs-announce" id="csAnnounce">
+        <div class="cs-banner" id="csBanner">
+          <span class="cs-spark" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.9 5.1L19 9l-5.1 1.9L12 16l-1.9-5.1L5 9l5.1-1.9L12 2z"/><path d="M19 14l.9 2.4L22 17l-2.1.6L19 20l-.9-2.4L16 17l2.1-.6L19 14z" opacity="0.6"/></svg></span>
+          <div class="cs-banner-text">
+            <strong>This is version one — and we're just getting started.</strong>
+            <span>Multi-point restore and full-environment comparison are on the way.</span>
+          </div>
+          <button class="cs-banner-cta" onclick="csOpen()">See what's coming
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+          <button class="cs-banner-x" onclick="csDismiss()" aria-label="Dismiss">✕</button>
+        </div>
+        <button class="cs-link" id="csLink" onclick="csOpen()" style="display:none">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l1.9 5.1L19 9l-5.1 1.9L12 16l-1.9-5.1L5 9l5.1-1.9L12 2z"/></svg>
+          What's coming
+        </button>
+      </div>
+      <!-- Roadmap modal (on-demand, opened from the banner/link above) -->
+      <div class="cs-modal-backdrop" id="csBackdrop" style="display:none" onclick="csClose()"></div>
+      <div class="cs-modal" id="csModal" style="display:none" role="dialog" aria-modal="true" aria-label="What's coming to restore">
+        <button class="cs-modal-x" onclick="csClose()" aria-label="Close">✕</button>
+        <div class="cs-pages" id="csPages">
+          <!-- Page 1 — framing -->
+          <div class="cs-page active" data-page="0">
+            <div class="cs-art" aria-hidden="true">
+              <svg width="180" height="150" viewBox="0 0 180 150" fill="none">
+                <rect x="46" y="86" width="88" height="26" rx="6" fill="currentColor" opacity="0.14"/>
+                <rect x="40" y="66" width="100" height="28" rx="6" fill="currentColor" opacity="0.30"/>
+                <rect x="34" y="44" width="112" height="32" rx="8" fill="currentColor"/>
+                <path d="M58 60l7 7 14-15" stroke="var(--white)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              </svg>
+            </div>
+            <div class="cs-eyebrow">The road ahead</div>
+            <h2>You're looking at version one</h2>
+            <p>We shipped the essentials first — fast, focused restore you can trust today. Here's a preview of what's landing next.</p>
+          </div>
+          <!-- Page 2 — multi-point restore -->
+          <div class="cs-page" data-page="1">
+            <div class="cs-art" aria-hidden="true">
+              <svg width="220" height="150" viewBox="0 0 220 150" fill="none" stroke="currentColor">
+                <rect x="26" y="22" width="44" height="20" rx="5" fill="currentColor" opacity="0.16" stroke="none"/>
+                <rect x="92" y="22" width="44" height="20" rx="5" fill="currentColor" opacity="0.16" stroke="none"/>
+                <rect x="158" y="22" width="44" height="20" rx="5" fill="currentColor" opacity="0.16" stroke="none"/>
+                <path d="M48 42v40M114 42v62M180 42v22" stroke-width="2" stroke-dasharray="3 3" opacity="0.5"/>
+                <line x1="20" y1="118" x2="200" y2="118" stroke-width="2" opacity="0.35"/>
+                <circle cx="48" cy="118" r="7" fill="currentColor"/>
+                <circle cx="114" cy="118" r="7" fill="currentColor"/>
+                <circle cx="180" cy="118" r="7" fill="currentColor"/>
+                <circle cx="81" cy="118" r="4" fill="currentColor" opacity="0.35" stroke="none"/>
+                <circle cx="147" cy="118" r="4" fill="currentColor" opacity="0.35" stroke="none"/>
+              </svg>
+            </div>
+            <div class="cs-eyebrow">Coming soon</div>
+            <h2>Restore from multiple points at once</h2>
+            <p>Today, every item in a restore shares a single restore point. Soon you'll <span class="cs-soon">mix points in one job</span> — recover each item from the exact moment it was healthy.</p>
+          </div>
+          <!-- Page 3 — global comparison -->
+          <div class="cs-page" data-page="2">
+            <div class="cs-art" aria-hidden="true">
+              <svg width="220" height="150" viewBox="0 0 220 150" fill="none">
+                <rect x="26" y="30" width="72" height="90" rx="8" fill="currentColor" opacity="0.10"/>
+                <rect x="122" y="30" width="72" height="90" rx="8" fill="currentColor" opacity="0.10"/>
+                <rect x="36" y="42" width="52" height="12" rx="3" fill="currentColor" opacity="0.45"/>
+                <rect x="132" y="42" width="52" height="12" rx="3" fill="currentColor" opacity="0.45"/>
+                <rect x="36" y="64" width="52" height="12" rx="3" fill="currentColor"/>
+                <rect x="132" y="64" width="52" height="12" rx="3" fill="currentColor"/>
+                <rect x="36" y="86" width="52" height="12" rx="3" fill="currentColor" opacity="0.45"/>
+                <rect x="132" y="86" width="52" height="12" rx="3" fill="currentColor" opacity="0.45"/>
+                <rect x="36" y="108" width="52" height="8" rx="3" fill="currentColor" opacity="0.25"/>
+                <rect x="132" y="108" width="52" height="8" rx="3" fill="currentColor" opacity="0.25"/>
+                <g stroke="var(--white)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="110" cy="70" r="13" fill="currentColor" stroke="none"/>
+                  <path d="M105 67l4 4 6-7"/>
+                </g>
+              </svg>
+            </div>
+            <div class="cs-eyebrow">Coming soon</div>
+            <h2>Compare your whole environment over time</h2>
+            <p>Per-item comparison is here today. Next: <span class="cs-soon">scan an entire workload between two points</span> — every change, everywhere, in a single view.</p>
+          </div>
+          <!-- Page 4 — closing -->
+          <div class="cs-page" data-page="3">
+            <div class="cs-art" aria-hidden="true">
+              <svg width="180" height="150" viewBox="0 0 180 150" fill="none" stroke="currentColor">
+                <path d="M90 118V52" stroke-width="3" stroke-linecap="round"/>
+                <path d="M66 78l24-26 24 26" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <path d="M40 40l1.6 4.3L46 46l-4.4 1.7L40 52l-1.6-4.3L34 46l4.4-1.7L40 40z" fill="currentColor" stroke="none"/>
+                <path d="M138 34l2 5.4L145 41l-5 1.9L138 48l-2-5.1L131 41l5-1.6L138 34z" fill="currentColor" stroke="none" opacity="0.7"/>
+                <path d="M150 86l1.4 3.8L155 91l-3.6 1.4L150 96l-1.4-3.6L145 91l3.6-1.2L150 86z" fill="currentColor" stroke="none" opacity="0.5"/>
+              </svg>
+            </div>
+            <div class="cs-eyebrow">And more</div>
+            <h2>We're just getting started</h2>
+            <p>Smarter search, bulk actions, and cross-workload restore are all in flight. Reopen this anytime from <span class="cs-soon">What's coming</span>.</p>
+          </div>
+        </div>
+        <div class="cs-footer">
+          <div class="cs-dots" id="csDots"></div>
+          <div class="cs-nav">
+            <button class="cs-back" id="csBack" onclick="csNav(-1)" style="visibility:hidden">Back</button>
+            <button class="cs-next" id="csNext" onclick="csNav(1)">Next</button>
+          </div>
+        </div>
+      </div>
       <!-- One content-container card holds the entire inventory in
            the original stacking order: filter bar → KPI band → body-
            row (cat-rail + inv-panel). The two filter bars and two
@@ -37253,5 +37398,71 @@ window.__devJumpResolve = function(h) {
      finds window.__SECURITI_ICONS already populated. -->
 <script src="securiti-icons-data.js"></script>
 <script src="securiti-icons.js"></script>
+
+<!-- Coming-soon roadmap: banner state + multi-page modal navigation -->
+<script>
+(function(){
+  var CS_KEY = 'vdc_cs_dismissed';
+  var csPage = 0;
+  function csTotal(){ return document.querySelectorAll('#csPages .cs-page').length; }
+  function csRenderDots(){
+    var host = document.getElementById('csDots'); if (!host) return;
+    var total = csTotal(), h = '';
+    for (var i = 0; i < total; i++) h += '<button class="cs-dot' + (i === csPage ? ' on' : '') + '" onclick="csGoto(' + i + ')" aria-label="Page ' + (i+1) + ' of ' + total + '"></button>';
+    host.innerHTML = h;
+  }
+  function csShowPage(){
+    var total = csTotal();
+    var pages = document.querySelectorAll('#csPages .cs-page');
+    for (var i = 0; i < pages.length; i++) pages[i].classList.toggle('active', i === csPage);
+    csRenderDots();
+    var back = document.getElementById('csBack'), next = document.getElementById('csNext');
+    if (back) back.style.visibility = (csPage === 0) ? 'hidden' : 'visible';
+    if (next) next.textContent = (csPage === total - 1) ? 'Got it' : 'Next';
+    var scroller = document.getElementById('csPages'); if (scroller) scroller.scrollTop = 0;
+  }
+  window.csOpen = function(){
+    csPage = 0; csShowPage();
+    var bd = document.getElementById('csBackdrop'), m = document.getElementById('csModal');
+    if (bd) bd.style.display = 'block';
+    if (m)  m.style.display = 'flex';
+  };
+  window.csClose = function(){
+    var bd = document.getElementById('csBackdrop'), m = document.getElementById('csModal');
+    if (bd) bd.style.display = 'none';
+    if (m)  m.style.display = 'none';
+  };
+  window.csNav = function(dir){
+    var total = csTotal();
+    if (dir > 0 && csPage === total - 1) { csClose(); return; }   // "Got it" on last page
+    csPage = Math.max(0, Math.min(total - 1, csPage + dir));
+    csShowPage();
+  };
+  window.csGoto = function(n){ csPage = n; csShowPage(); };
+  window.csDismiss = function(){
+    try { localStorage.setItem(CS_KEY, '1'); } catch(e){}
+    var b = document.getElementById('csBanner'), l = document.getElementById('csLink');
+    if (b) b.style.display = 'none';
+    if (l) l.style.display = 'inline-flex';
+  };
+  function csInit(){
+    var dismissed = false;
+    try { dismissed = localStorage.getItem(CS_KEY) === '1'; } catch(e){}
+    var b = document.getElementById('csBanner'), l = document.getElementById('csLink');
+    if (b) b.style.display = dismissed ? 'none' : '';
+    if (l) l.style.display = dismissed ? 'inline-flex' : 'none';
+    csRenderDots();
+  }
+  // Esc closes the modal when it's open.
+  document.addEventListener('keydown', function(e){
+    if (e.key !== 'Escape') return;
+    var m = document.getElementById('csModal');
+    if (m && m.style.display !== 'none' && m.style.display !== '') { /* flex when open */ }
+    if (m && getComputedStyle(m).display !== 'none') csClose();
+  });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', csInit);
+  else csInit();
+})();
+</script>
 </body>
 </html>
