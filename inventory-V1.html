@@ -1083,6 +1083,23 @@ tbody tr.rec-diff-row-unchanged .diff-dot { background: var(--black-30); }
 .rec-ba .rec-ba-bottom { display: block; font-size: 14px; font-weight: 500; color: var(--black-100); }
 .rec-ba .rec-ba-date   { display: block; font-size: 10px; font-weight: 450; color: var(--black-30); line-height: 1.2; margin-bottom: 4px; }
 
+/* Long-text columns (e.g. Description) — aggressively truncate to ~2 lines in
+   the dense table cell; the full value is on hover (title=) and in the preview
+   drawer. The td caps its width so the clamp has a bounded box to wrap within;
+   .rec-cell-clamp does the 2-line ellipsis. Wraps the rendered inner HTML so
+   search <mark> highlights + the before/after stack are preserved. */
+td.rec-cell-lt { max-width: 340px; min-width: 220px; vertical-align: top; }
+.rec-cell-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+  white-space: normal;
+  word-break: break-word;
+}
+
 /* Compare-mode diff variants — extend ex-badge with two extra color schemes
    so Added and Modified badges are visually identical to the existing
    deleted/added-after-backup existence badges (same shape, same icon size). */
@@ -7129,37 +7146,43 @@ var D365_ACCOUNTS = [
 // count". d365SchemaFor() picks the right schema from the resource name/type.
 var D365_SCHEMAS = {
   accounts: {
-    cols: ['Name','Industry','Revenue','Owner','Modified'],
+    // 'Description' is a long-text (Multiple Lines of Text) column — it
+    // demonstrates the truncate-in-table / full-in-drawer pattern: the
+    // records table clamps it to ~2 lines (see _isLongTextField + the
+    // .rec-cell-clamp wrapper), while the preview drawer shows the whole
+    // block. It's a real first-class field so compare mode can flag it
+    // changed and show a clamped before/after stack like any other column.
+    cols: ['Name','Industry','Revenue','Owner','Modified','Description'],
     // Hidden fields available in compare mode — demonstrates the "wider columns"
     // scenario described by the user: a record can have many attributes that
     // aren't in the default view, but become visible when they change.
     extendedCols: ['Phone','Website','EmployeeCount','BillingCity','ParentAccount','Tier','AccountManager','LastContactDate'],
     rows: [
-      {Name:'Acme Manufacturing Inc.', Industry:'Manufacturing', Revenue:'$12.4M', Owner:'Sarah Chen', Modified:'Mar 22, 2026'},
-      {Name:'Contoso Global LLC', Industry:'Technology', Revenue:'$45.2M', Owner:'James Park', Modified:'Mar 21, 2026'},
-      {Name:'Northwind Traders', Industry:'Retail', Revenue:'$8.7M', Owner:'Maria Gonzalez', Modified:'Mar 18, 2026'},
-      {Name:'Fabrikam Industries', Industry:'Manufacturing', Revenue:'$22.1M', Owner:'Sarah Chen', Modified:'Mar 23, 2026'},
-      {Name:'Litware Inc.', Industry:'Technology', Revenue:'$18.9M', Owner:'James Park', Modified:'Mar 22, 2026'},
-      {Name:'Proseware Solutions', Industry:'Professional Services', Revenue:'$6.4M', Owner:'Sarah Chen', Modified:'Mar 19, 2026'},
-      {Name:'Humongous Insurance', Industry:'Insurance', Revenue:'$87.4M', Owner:'James Park', Modified:'Mar 24, 2026'},
-      {Name:'Blue Yonder Airlines', Industry:'Transportation', Revenue:'$156.2M', Owner:'Sarah Chen', Modified:'Mar 23, 2026'},
-      {Name:'Adventure Works Cycles', Industry:'Manufacturing', Revenue:'$34.6M', Owner:'Maria Gonzalez', Modified:'Mar 17, 2026'},
-      {Name:'Tailspin Toys', Industry:'Retail', Revenue:'$9.8M', Owner:'James Park', Modified:'Mar 16, 2026'},
-      {Name:'Wingtip Toys', Industry:'Retail', Revenue:'$5.2M', Owner:'Sarah Chen', Modified:'Mar 15, 2026'},
-      {Name:'Wide World Importers', Industry:'Distribution', Revenue:'$67.3M', Owner:'Maria Gonzalez', Modified:'Mar 14, 2026'},
-      {Name:'Coho Vineyard', Industry:'Food & Beverage', Revenue:'$3.1M', Owner:'James Park', Modified:'Mar 13, 2026'},
-      {Name:'Lucerne Publishing', Industry:'Media', Revenue:'$28.5M', Owner:'Sarah Chen', Modified:'Mar 12, 2026'},
-      {Name:'Margie’s Travel', Industry:'Travel', Revenue:'$11.7M', Owner:'Maria Gonzalez', Modified:'Mar 11, 2026'},
-      {Name:'School of Fine Art', Industry:'Education', Revenue:'$2.3M', Owner:'James Park', Modified:'Mar 10, 2026'},
-      {Name:'Trey Research', Industry:'Professional Services', Revenue:'$15.4M', Owner:'Sarah Chen', Modified:'Mar 9, 2026'},
-      {Name:'Woodgrove Bank', Industry:'Financial Services', Revenue:'$112.8M', Owner:'James Park', Modified:'Mar 8, 2026'},
-      {Name:'Graphic Design Institute', Industry:'Education', Revenue:'$4.6M', Owner:'Maria Gonzalez', Modified:'Mar 7, 2026'},
-      {Name:'Alpine Ski House', Industry:'Hospitality', Revenue:'$19.2M', Owner:'Sarah Chen', Modified:'Mar 6, 2026'},
-      {Name:'A. Datum Corporation', Industry:'Technology', Revenue:'$52.4M', Owner:'James Park', Modified:'Mar 5, 2026'},
-      {Name:'City Power & Light', Industry:'Utilities', Revenue:'$203.7M', Owner:'Maria Gonzalez', Modified:'Mar 4, 2026'},
-      {Name:'Consolidated Messenger', Industry:'Logistics', Revenue:'$41.9M', Owner:'Sarah Chen', Modified:'Mar 3, 2026'},
-      {Name:'Fourth Coffee', Industry:'Food & Beverage', Revenue:'$8.3M', Owner:'James Park', Modified:'Mar 2, 2026'},
-      {Name:'Lamna Healthcare Co.', Industry:'Healthcare', Revenue:'$78.6M', Owner:'Maria Gonzalez', Modified:'Mar 1, 2026'}
+      {Name:'Acme Manufacturing Inc.', Industry:'Manufacturing', Revenue:'$12.4M', Owner:'Sarah Chen', Modified:'Mar 22, 2026', Description:'Tier-1 contract manufacturer of industrial automation components and the primary account for the Central region. Currently renegotiating their master supply agreement ahead of a planned plant expansion in Q3.'},
+      {Name:'Contoso Global LLC', Industry:'Technology', Revenue:'$45.2M', Owner:'James Park', Modified:'Mar 21, 2026', Description:'Global technology holding company spanning cloud infrastructure and developer tooling. Strategic enterprise account under an active multi-year platform agreement managed by the named-accounts team.'},
+      {Name:'Northwind Traders', Industry:'Retail', Revenue:'$8.7M', Owner:'Maria Gonzalez', Modified:'Mar 18, 2026', Description:'Regional retail distributor operating 40+ storefronts across the Pacific Northwest. Expanding into e-commerce fulfillment, which is driving renewed interest in the inventory and order-management modules.'},
+      {Name:'Fabrikam Industries', Industry:'Manufacturing', Revenue:'$22.1M', Owner:'Sarah Chen', Modified:'Mar 23, 2026', Description:'Precision parts manufacturer serving aerospace and defense supply chains. Piloting a connected-shop-floor initiative that ties MES production data back into the CRM for the first time.'},
+      {Name:'Litware Inc.', Industry:'Technology', Revenue:'$18.9M', Owner:'James Park', Modified:'Mar 22, 2026', Description:'Mid-market software vendor focused on vertical ERP for the construction trades. Signed a multi-year contract last quarter and is now in the onboarding and adoption phase.'},
+      {Name:'Proseware Solutions', Industry:'Professional Services', Revenue:'$6.4M', Owner:'Sarah Chen', Modified:'Mar 19, 2026', Description:'Boutique consulting firm specializing in regulatory compliance for financial institutions. Engagements are project-based and seasonal, peaking sharply around fiscal year-end.'},
+      {Name:'Humongous Insurance', Industry:'Insurance', Revenue:'$87.4M', Owner:'James Park', Modified:'Mar 24, 2026', Description:'National property and casualty insurer with a large captive agent network. Compliance and data-residency requirements make this one of the most heavily governed accounts in the book.'},
+      {Name:'Blue Yonder Airlines', Industry:'Transportation', Revenue:'$156.2M', Owner:'Sarah Chen', Modified:'Mar 23, 2026', Description:'Regional carrier operating short-haul routes out of three hub airports. An open fleet-analytics opportunity is championed by their VP of Operations.'},
+      {Name:'Adventure Works Cycles', Industry:'Manufacturing', Revenue:'$34.6M', Owner:'Maria Gonzalez', Modified:'Mar 17, 2026', Description:'Designs and assembles premium bicycles sold through specialty dealers and direct to consumers. Pronounced demand seasonality makes accurate forecasting a recurring conversation.'},
+      {Name:'Tailspin Toys', Industry:'Retail', Revenue:'$9.8M', Owner:'James Park', Modified:'Mar 16, 2026', Description:'Mass-market toy retailer with strong holiday-season volume and a fast-growing online presence. Price sensitivity keeps margins tight and renewals competitive.'},
+      {Name:'Wingtip Toys', Industry:'Retail', Revenue:'$5.2M', Owner:'Sarah Chen', Modified:'Mar 15, 2026', Description:'Specialty toy and hobby retailer serving a loyal niche customer base. Smaller footprint, but a high repeat-purchase rate and unusually strong brand affinity.'},
+      {Name:'Wide World Importers', Industry:'Distribution', Revenue:'$67.3M', Owner:'Maria Gonzalez', Modified:'Mar 14, 2026', Description:'Wholesale distributor moving goods across North American and EMEA corridors. Complex logistics needs span warehousing, customs clearance, and multi-currency invoicing.'},
+      {Name:'Coho Vineyard', Industry:'Food & Beverage', Revenue:'$3.1M', Owner:'James Park', Modified:'Mar 13, 2026', Description:'Family-owned winery with a direct-to-consumer club and selective wholesale distribution. A very small IT team means they lean heavily on managed onboarding and support.'},
+      {Name:'Lucerne Publishing', Industry:'Media', Revenue:'$28.5M', Owner:'Sarah Chen', Modified:'Mar 12, 2026', Description:'Independent publisher of trade and educational titles transitioning toward digital-first distribution. Rights management and royalty tracking sit at the center of their workflows.'},
+      {Name:'Margie’s Travel', Industry:'Travel', Revenue:'$11.7M', Owner:'Maria Gonzalez', Modified:'Mar 11, 2026', Description:'Full-service travel agency serving corporate and luxury-leisure clients. Recovering booking volume post-disruption and reinvesting in customer-experience tooling.'},
+      {Name:'School of Fine Art', Industry:'Education', Revenue:'$2.3M', Owner:'James Park', Modified:'Mar 10, 2026', Description:'Private arts institution with a small administrative team and grant-dependent funding. Budget cycles are tied tightly to the academic calendar and donor commitments.'},
+      {Name:'Trey Research', Industry:'Professional Services', Revenue:'$15.4M', Owner:'Sarah Chen', Modified:'Mar 9, 2026', Description:'Market-research firm running large panel studies for consumer-goods clients. Strict data-handling and privacy obligations shape most of their procurement decisions.'},
+      {Name:'Woodgrove Bank', Industry:'Financial Services', Revenue:'$112.8M', Owner:'James Park', Modified:'Mar 8, 2026', Description:'Regional commercial bank with stringent audit and retention requirements. Every change to this account is reviewed under the heaviest governance tier in the portfolio.'},
+      {Name:'Graphic Design Institute', Industry:'Education', Revenue:'$4.6M', Owner:'Maria Gonzalez', Modified:'Mar 7, 2026', Description:'Vocational design school offering certificate and continuing-education programs. Enrollment swings seasonally and drives the bulk of their support volume.'},
+      {Name:'Alpine Ski House', Industry:'Hospitality', Revenue:'$19.2M', Owner:'Sarah Chen', Modified:'Mar 6, 2026', Description:'Mountain resort operator running lodging, lift, and dining operations under one brand. Concentrated peak-season demand makes uptime and rapid recovery a top priority.'},
+      {Name:'A. Datum Corporation', Industry:'Technology', Revenue:'$52.4M', Owner:'James Park', Modified:'Mar 5, 2026', Description:'Enterprise data-platform vendor expanding into adjacent analytics markets. A long-standing reference account that frequently participates in product betas.'},
+      {Name:'City Power & Light', Industry:'Utilities', Revenue:'$203.7M', Owner:'Maria Gonzalez', Modified:'Mar 4, 2026', Description:'Investor-owned utility serving a major metropolitan grid. Regulatory reporting and outage-management integrations dominate the relationship.'},
+      {Name:'Consolidated Messenger', Industry:'Logistics', Revenue:'$41.9M', Owner:'Sarah Chen', Modified:'Mar 3, 2026', Description:'Last-mile delivery network operating across dense urban markets. Real-time tracking and very high transaction volume are the defining characteristics of the account.'},
+      {Name:'Fourth Coffee', Industry:'Food & Beverage', Revenue:'$8.3M', Owner:'James Park', Modified:'Mar 2, 2026', Description:'Specialty coffee roaster and café chain scaling from a regional to a national footprint. Rapid store growth is straining their existing back-office systems.'},
+      {Name:'Lamna Healthcare Co.', Industry:'Healthcare', Revenue:'$78.6M', Owner:'Maria Gonzalez', Modified:'Mar 1, 2026', Description:'Integrated healthcare provider operating clinics and an affiliated laboratory network. HIPAA obligations and clinical-system integrations make this a high-touch, high-governance account.'}
     ]
   },
   contacts: {
@@ -7202,16 +7225,18 @@ var D365_SCHEMAS = {
     ]
   },
   cases: {
-    cols: ['Case #','Subject','Priority','Status','Owner'],
+    // 'Description' here is the long-text case narrative — same
+    // truncate-in-table / full-in-drawer treatment as accounts.Description.
+    cols: ['Case #','Subject','Priority','Status','Owner','Description'],
     rows: [
-      {'Case #':'CAS-48120', Subject:'Login SSO failing after policy change', Priority:'High', Status:'In progress', Owner:'Tier-2 · M. Reyes'},
-      {'Case #':'CAS-48119', Subject:'Invoice PDF export blank', Priority:'Medium', Status:'Awaiting customer', Owner:'Tier-1 · J. Patel'},
-      {'Case #':'CAS-48117', Subject:'Data sync stuck at 94%', Priority:'Critical', Status:'Escalated', Owner:'Tier-3 · L. Okonkwo'},
-      {'Case #':'CAS-48115', Subject:'Dashboard widget renders empty', Priority:'Low', Status:'Resolved', Owner:'Tier-1 · J. Patel'},
-      {'Case #':'CAS-48112', Subject:'API rate-limit errors under load', Priority:'High', Status:'In progress', Owner:'Tier-3 · L. Okonkwo'},
-      {'Case #':'CAS-48110', Subject:'Email notifications not sending', Priority:'Medium', Status:'Resolved', Owner:'Tier-2 · M. Reyes'},
-      {'Case #':'CAS-48108', Subject:'User provisioning stuck', Priority:'High', Status:'In progress', Owner:'Tier-2 · M. Reyes'},
-      {'Case #':'CAS-48105', Subject:'Report schedule off by 1 hour (DST)', Priority:'Low', Status:'Awaiting customer', Owner:'Tier-1 · J. Patel'}
+      {'Case #':'CAS-48120', Subject:'Login SSO failing after policy change', Priority:'High', Status:'In progress', Owner:'Tier-2 · M. Reyes', Description:'Users are redirected to an error page immediately after the identity provider’s conditional-access policy was updated. The issue started at 09:14 UTC and affects roughly 40% of SSO sign-ins; a workaround using the legacy login URL is in place while the policy is reviewed.'},
+      {'Case #':'CAS-48119', Subject:'Invoice PDF export blank', Priority:'Medium', Status:'Awaiting customer', Owner:'Tier-1 · J. Patel', Description:'Exporting an invoice to PDF produces a document with the correct page count but no rendered content. It only reproduces for invoices that include line-item discounts, which points at the templating layer rather than the underlying data.'},
+      {'Case #':'CAS-48117', Subject:'Data sync stuck at 94%', Priority:'Critical', Status:'Escalated', Owner:'Tier-3 · L. Okonkwo', Description:'The nightly synchronization job consistently stalls at 94% and never completes, leaving downstream reports a full day behind. Logs show a timeout on a single large partition, and the customer has paused dependent automations until this is resolved.'},
+      {'Case #':'CAS-48115', Subject:'Dashboard widget renders empty', Priority:'Low', Status:'Resolved', Owner:'Tier-1 · J. Patel', Description:'A specific analytics widget renders an empty container on first load but populates correctly after a manual refresh. The behavior suggests a race condition between the data fetch and the widget’s mount lifecycle.'},
+      {'Case #':'CAS-48112', Subject:'API rate-limit errors under load', Priority:'High', Status:'In progress', Owner:'Tier-3 · L. Okonkwo', Description:'During peak hours the customer’s integration receives a high volume of 429 responses, causing partial data loss in their pipeline. They have requested a temporary quota increase while we evaluate a longer-term burst-handling change.'},
+      {'Case #':'CAS-48110', Subject:'Email notifications not sending', Priority:'Medium', Status:'Resolved', Owner:'Tier-2 · M. Reyes', Description:'Transactional email notifications stopped delivering after a recent domain-authentication change. Messages are accepted by the service but never reach recipients, indicating an SPF/DKIM misalignment rather than a send failure.'},
+      {'Case #':'CAS-48108', Subject:'User provisioning stuck', Priority:'High', Status:'In progress', Owner:'Tier-2 · M. Reyes', Description:'New-hire accounts created through the HR connector remain in a pending state and never finish provisioning. The customer’s onboarding is blocked for several employees, so this has been flagged as a high-priority operational impact.'},
+      {'Case #':'CAS-48105', Subject:'Report schedule off by 1 hour (DST)', Priority:'Low', Status:'Awaiting customer', Owner:'Tier-1 · J. Patel', Description:'A scheduled report consistently arrives an hour later than configured following the daylight-saving transition. The root cause appears to be a timezone offset that is being applied twice in the scheduling layer.'}
     ]
   },
   campaigns: {
@@ -13416,6 +13441,18 @@ function _childRenderRecords() {
     var cells = visibleCols.map(function(c, i){
       var v = getRecCellValue(r, c, rowIdx);
       if (v == null) v = '';
+      // Long-text columns (e.g. Description) clamp to ~2 lines in the dense
+      // table cell; the full value is on hover (title=) and in the preview
+      // drawer. _clampLT wraps the already-rendered inner HTML so search
+      // <mark>s and the before/after stack survive intact. _ltCls adds the
+      // width-constraining td class so the clamp has a box to wrap within.
+      var _isLT = _isLongTextField(c);
+      var _ltCls = _isLT ? ' rec-cell-lt' : '';
+      function _clampLT(innerHtml, rawVal) {
+        if (!_isLT) return innerHtml;
+        var t = String(rawVal == null ? '' : rawVal).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+        return '<span class="rec-cell-clamp" title="' + t + '">' + innerHtml + '</span>';
+      }
       if (i === 0) {
         var nameCls = 'name-col' + (diff && changedSet[c] ? ' rec-diff-cell-changed' : '');
         var _recCmpLbl = state.recCompareDate === 'today' ? 'Today' : (state.recCompareDate || '');
@@ -13436,16 +13473,17 @@ function _childRenderRecords() {
         var _bef = _beforeVal(c, rowIdx, v);
         if (_bef != null) {
           // Top = anchor/as-of (v, muted) with its date; bottom = the
-          // compared-to value (_bef, showcased) with its date.
-          return '<td class="rec-diff-cell-changed rec-ba" style="font-size:14px">'
-            + '<span class="rec-ba-top">' + (q ? _hlText(v, q) : v) + '</span>'
+          // compared-to value (_bef, showcased) with its date. Each value
+          // clamps independently for long-text columns.
+          return '<td class="rec-diff-cell-changed rec-ba' + _ltCls + '" style="font-size:14px">'
+            + '<span class="rec-ba-top">' + _clampLT(q ? _hlText(v, q) : v, v) + '</span>'
             + '<span class="rec-ba-date">' + _baAfterDate + '</span>'
-            + '<span class="rec-ba-bottom">' + (q ? _hlText(_bef, q) : _bef) + '</span>'
+            + '<span class="rec-ba-bottom">' + _clampLT(q ? _hlText(_bef, q) : _bef, _bef) + '</span>'
             + '<span class="rec-ba-date">' + _baBeforeDate + '</span></td>';
         }
-        return '<td class="rec-diff-cell-changed" style="font-size:14px">' + (q ? _hlText(v, q) : v) + '</td>';
+        return '<td class="rec-diff-cell-changed' + _ltCls + '" style="font-size:14px">' + _clampLT(q ? _hlText(v, q) : v, v) + '</td>';
       }
-      return '<td style="font-size:14px">' + (q ? _hlText(v, q) : v) + '</td>';
+      return '<td' + (_ltCls ? ' class="' + _ltCls.trim() + '"' : '') + ' style="font-size:14px">' + _clampLT(q ? _hlText(v, q) : v, v) + '</td>';
     }).join('');
     var rowSelected = isCovered ? true : isInPlan('rec-' + r._id);
     var rowClasses = [];
@@ -13521,6 +13559,7 @@ function _childRenderRecords() {
 var D365_FIELD_TYPES = {
   // accounts
   'Name':            'Single Line of Text',
+  'Description':     'Multiple Lines of Text',
   'Industry':        'Choice',
   'Revenue':         'Currency',
   'Owner':           'Owner Lookup',
@@ -29878,6 +29917,15 @@ function genExtendedValue(col, idx) {
 }
 // Returns the value of a column for a row — checks the row's own
 // fields first (default cols), falls back to genExtendedValue (extended cols).
+// Long-text (Multiple Lines of Text) D365 fields. SINGLE source both render
+// paths consult so they agree on which columns get the truncate-in-table /
+// full-in-drawer treatment: the records table clamps these to ~2 lines (with
+// the full value on hover via title=), while the preview drawer + fields
+// drill show the entire block. Keyed by field name — the same name-based
+// contract D365_FIELD_TYPES uses — so any schema reusing the name inherits it.
+var D365_LONGTEXT_FIELDS = { 'Description': true };
+function _isLongTextField(col) { return !!(col && D365_LONGTEXT_FIELDS[col]); }
+
 function getRecCellValue(row, col, idx) {
   if (row[col] != null) return row[col];
   return genExtendedValue(col, idx);
