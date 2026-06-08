@@ -4321,19 +4321,12 @@ body.drawer-open { overflow: hidden; }
   }
 }
 
-/* ════════ Coming-soon roadmap: banner + on-demand modal ════════ */
-.cs-announce { margin: 0 0 16px; }
-.cs-banner { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--blue-30); background: var(--blue-10); border-radius: 8px; }
-.cs-spark { color: var(--blue); display: inline-flex; flex-shrink: 0; }
-.cs-banner-text { display: flex; flex-direction: column; gap: 2px; line-height: 1.35; min-width: 0; }
-.cs-banner-text strong { font-size: 14px; font-weight: 500; color: var(--black-100); }
-.cs-banner-text span { font-size: 14px; color: var(--black-60); }
-.cs-banner-cta { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border: none; border-radius: 4px; background: var(--blue); color: var(--white); font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; flex-shrink: 0; white-space: nowrap; }
-.cs-banner-cta:hover { background: var(--blue-dark); }
-.cs-banner-x { background: transparent; border: none; color: var(--black-30); cursor: pointer; font-size: 14px; width: 28px; height: 28px; border-radius: 4px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
-.cs-banner-x:hover { background: var(--blue-30); color: var(--black-60); }
-.cs-link { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border: 1px solid var(--blue-30); border-radius: 100px; background: var(--blue-10); color: var(--blue); font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }
-.cs-link:hover { background: var(--blue-30); }
+/* ════════ Coming-soon roadmap: low-key entry pill + on-demand modal ════════ */
+/* Anecdotal context, not a CTA — a quiet pill, never a full-width banner. */
+.cs-announce { margin: 0 0 12px; }
+.cs-link { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border: 1px solid var(--border); border-radius: 100px; background: var(--white); color: var(--black-60); font-family: inherit; font-size: 14px; font-weight: 450; cursor: pointer; }
+.cs-link svg { color: var(--blue); flex-shrink: 0; }
+.cs-link:hover { background: var(--blue-10); border-color: var(--blue-30); color: var(--blue); }
 
 .cs-modal-backdrop { position: fixed; inset: 0; background: rgba(31, 34, 41, 0.45); z-index: 9998; }
 .cs-modal { position: fixed; z-index: 9999; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 560px; max-width: 92vw; max-height: 88vh; background: var(--white); border-radius: 8px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25); display: flex; flex-direction: column; overflow: hidden; }
@@ -4759,25 +4752,14 @@ body.drawer-open { overflow: hidden; }
 
     <!-- ========== SCREEN: INVENTORY ========== -->
     <div class="screen active" id="screen-inventory">
-      <!-- ══ Coming-soon roadmap: dismissible banner → on-demand modal ══
-           Sets expectations that this is V1; multi-point restore + global
-           compare are on the way. Non-blocking + revisitable (collapses to a
-           small "What's coming" link on dismiss; localStorage-remembered). -->
+      <!-- ══ Coming-soon roadmap entry ══
+           Low-key, persistent "What's coming" pill (NOT a full-width banner —
+           this is anecdotal context, not a call to action). Opens the
+           multi-page roadmap modal on demand. -->
       <div class="cs-announce" id="csAnnounce">
-        <div class="cs-banner" id="csBanner">
-          <span class="cs-spark" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.9 5.1L19 9l-5.1 1.9L12 16l-1.9-5.1L5 9l5.1-1.9L12 2z"/><path d="M19 14l.9 2.4L22 17l-2.1.6L19 20l-.9-2.4L16 17l2.1-.6L19 14z" opacity="0.6"/></svg></span>
-          <div class="cs-banner-text">
-            <strong>This is version one — and we're just getting started.</strong>
-            <span>Multi-point restore and full-environment comparison are on the way.</span>
-          </div>
-          <button class="cs-banner-cta" onclick="csOpen()">See what's coming
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </button>
-          <button class="cs-banner-x" onclick="csDismiss()" aria-label="Dismiss">✕</button>
-        </div>
-        <button class="cs-link" id="csLink" onclick="csOpen()" style="display:none">
+        <button class="cs-link" id="csLink" onclick="csOpen()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l1.9 5.1L19 9l-5.1 1.9L12 16l-1.9-5.1L5 9l5.1-1.9L12 2z"/></svg>
-          What's coming
+          What's coming to restore
         </button>
       </div>
       <!-- Roadmap modal (on-demand, opened from the banner/link above) -->
@@ -37402,7 +37384,6 @@ window.__devJumpResolve = function(h) {
 <!-- Coming-soon roadmap: banner state + multi-page modal navigation -->
 <script>
 (function(){
-  var CS_KEY = 'vdc_cs_dismissed';
   var csPage = 0;
   function csTotal(){ return document.querySelectorAll('#csPages .cs-page').length; }
   function csRenderDots(){
@@ -37439,20 +37420,7 @@ window.__devJumpResolve = function(h) {
     csShowPage();
   };
   window.csGoto = function(n){ csPage = n; csShowPage(); };
-  window.csDismiss = function(){
-    try { localStorage.setItem(CS_KEY, '1'); } catch(e){}
-    var b = document.getElementById('csBanner'), l = document.getElementById('csLink');
-    if (b) b.style.display = 'none';
-    if (l) l.style.display = 'inline-flex';
-  };
-  function csInit(){
-    var dismissed = false;
-    try { dismissed = localStorage.getItem(CS_KEY) === '1'; } catch(e){}
-    var b = document.getElementById('csBanner'), l = document.getElementById('csLink');
-    if (b) b.style.display = dismissed ? 'none' : '';
-    if (l) l.style.display = dismissed ? 'inline-flex' : 'none';
-    csRenderDots();
-  }
+  function csInit(){ csRenderDots(); }
   // Esc closes the modal when it's open.
   document.addEventListener('keydown', function(e){
     if (e.key !== 'Escape') return;
