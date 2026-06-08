@@ -3965,6 +3965,24 @@ body.pol-drawer-open { overflow: hidden; }
 .rw-rp-type-pill.unchanged { background: var(--green-10); color: var(--green); }
 .rw-rp-menu { position: absolute; top: calc(100% + 4px); left: 0; z-index: 20; min-width: 280px; max-height: 320px; overflow-y: auto; background: var(--white); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); padding: 4px 0; display: none; }
 .rw-rp-menu.open { display: block; }
+/* Item-compare model: the side picker popover hosts the global two-pane
+   calendar (.cal-layout). Drop the single-column menu's width cap + inner
+   scroll so the calendar + restore-point column lay out at their native
+   size (each pane manages its own overflow). */
+/* The two-pane calendar popover is ~500px — too wide to live as a column-
+   anchored dropdown inside the narrow drawer. Float it like the global
+   picker (position:fixed, JS-positioned by _rdPositionOpenPicker, clamped
+   to the viewport) so it never clips at the drawer edge. */
+.rw-rp-menu-cal { position: fixed; top: auto; left: auto; right: auto; z-index: 9000; min-width: 0; width: max-content; max-width: 92vw; max-height: none; overflow: visible; padding: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+.rw-rp-menu-cal .cal-hero { display: block; }
+.rw-rp-menu-cal .cal-left  { flex: 0 0 290px; }          /* keep the 290px calendar */
+.rw-rp-menu-cal .cal-right { display: flex; flex: 0 0 208px; }   /* restore-point column; global default is none until JS shows it */
+.rw-rp-menu-cal .cal-time-chip { white-space: nowrap; }
+/* Orange "differs from other side" dot (bottom-right) — complements the
+   global green has-match dot (top-right) on the circular day cells. */
+.rw-rp-menu-cal .cal-day.has-diff::before { content: ''; position: absolute; bottom: 4px; right: 4px; width: 5px; height: 5px; border-radius: 50%; background: var(--orange-dark); }
+.rw-rp-menu-cal .cal-day.selected.has-diff::before { background: var(--white); }
+.cal-legend-swatch.is-diff { width: 7px; height: 7px; border-radius: 50%; background: var(--orange-dark); }
 .rw-rp-opt { display: flex; align-items: center; gap: 8px; padding: 8px 12px; cursor: pointer; font-size: 14px; color: var(--black-100); border: none; background: transparent; width: 100%; text-align: left; font-family: inherit; }
 .rw-rp-opt:hover { background: var(--black-3); }
 .rw-rp-opt.current { background: var(--blue-10); color: var(--blue); font-weight: 500; }
@@ -3994,7 +4012,10 @@ body.pol-drawer-open { overflow: hidden; }
      [ Time chips for the focused day ]
    Shares the unified calendar grammar (blue-light bg on days with
    RPs; selected day flips to solid blue + white). */
-.rw-rp-menu-cal { width: 320px; min-width: 320px; max-height: none; padding: 0; overflow: visible; }
+/* (Width/layout for .rw-rp-menu-cal now lives with the two-pane rule above —
+   this legacy single-column 320px cap was overriding it. The .rw-rp-cal-*
+   rules below are retained but unused since the picker adopted the global
+   .cal-* two-pane design.) */
 .rw-rp-opt-prod { border-bottom: 1px solid var(--border-light); padding: 10px 14px; }
 .rw-rp-cal { padding: 10px 12px 6px; }
 .rw-rp-cal-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
@@ -30643,6 +30664,34 @@ function rdSelectSide(side, sel) {
   document.removeEventListener('click', rdClosePickerOutside);
   renderRdBody();
 }
+// Position the open two-pane RP picker popover (position:fixed) under its
+// trigger, clamped to the viewport — mirrors the global picker so the wide
+// calendar never clips at the drawer edge. Called after every re-render
+// while a picker is open.
+function _rdPositionOpenPicker() {
+  var openSide = rdState.leftDropOpen ? 'left' : (rdState.rightDropOpen ? 'right' : null);
+  if (!openSide) return;
+  var picker = document.querySelector('#recordDrawer .rw-rp-picker[data-side="' + openSide + '"]');
+  if (!picker) return;
+  var trigger = picker.querySelector('.rw-rp-picker-btn-hdr');
+  var menu = picker.querySelector('.rw-rp-menu-cal.open');
+  if (!trigger || !menu) return;
+  var tr = trigger.getBoundingClientRect();
+  var mw = menu.offsetWidth || 500;
+  var mh = menu.offsetHeight || 360;
+  var pad = 8;
+  var left = tr.left;
+  if (left + mw > window.innerWidth - pad) left = window.innerWidth - mw - pad;
+  if (left < pad) left = pad;
+  var top = tr.bottom + 4;
+  if (top + mh > window.innerHeight - pad) {
+    var above = tr.top - 4 - mh;          // flip above the trigger if it overflows the bottom
+    top = above >= pad ? above : Math.max(pad, window.innerHeight - mh - pad);
+  }
+  menu.style.left = Math.round(left) + 'px';
+  menu.style.top = Math.round(top) + 'px';
+  menu.style.right = 'auto';
+}
 function rdToggleSideDrop(side, e) {
   if (e) e.stopPropagation();
   // Item-compare model: the preview drawer IS the comparison surface, so
@@ -30662,6 +30711,7 @@ function rdToggleSideDrop(side, e) {
     document.removeEventListener('click', rdClosePickerOutside);
   }
   renderRdBody();
+  _rdPositionOpenPicker();
 }
 // Seed the side picker's calendar view from the currently selected
 // RP, or today when Production is selected. Called when the popover
@@ -30703,6 +30753,7 @@ function rdSidePickerNav(side, dir, e) {
   if (side === 'left') { rdState.leftPickerYear = y; rdState.leftPickerMonth = m; }
   else { rdState.rightPickerYear = y; rdState.rightPickerMonth = m; }
   renderRdBody();
+  _rdPositionOpenPicker();
 }
 // Select a day in the side picker — populates the time strip below
 // with that day's RPs but does NOT commit a selection until the user
@@ -30712,6 +30763,7 @@ function rdSidePickerSelectDay(side, dateStr, e) {
   if (side === 'left') rdState.leftPickerDay = dateStr;
   else rdState.rightPickerDay = dateStr;
   renderRdBody();
+  _rdPositionOpenPicker();
 }
 function rdClosePickerOutside(e) {
   var pickers = document.querySelectorAll('#recordDrawer .rw-rp-picker');
@@ -31163,24 +31215,23 @@ function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
     var d = new Date(rp.ts);
     rpDaySet[d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0')] = true;
   });
-  // Match-day set — populated when the user drilled in from a search
-  // result (rdState.matchedRps carries over from the matches drawer
-  // along with the query). Days with at least one matching snapshot
-  // get a green dot overlay on top of the blue clickable cell so the
-  // user can navigate to their matches inside the compare drawer too.
+  // Match-day + match-RP sets — when a search is active, surface restore
+  // points whose content matches the query with a green dot (same affordance
+  // as the global picker). Computed LIVE via simResourceRpHit so it works on
+  // any drawer open with an active query, not just the matches-drawer path.
   var matchedDaySet = {};
-  if (rdState.matchQuery) {
-    (rdState.matchedRps || []).forEach(function(rp){
+  var matchedRpIdSet = {};
+  if (rdState.matchQuery && typeof simResourceRpHit === 'function' && resource) {
+    allRps.forEach(function(rp){
+      if (!simResourceRpHit(resource, rp, rdState.matchQuery)) return;
+      matchedRpIdSet[rp.id] = true;
       var d = new Date(rp.ts);
       matchedDaySet[d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0')] = true;
     });
   }
-  // Diff-day set — days where at least one RP would produce a
-  // non-zero diff vs the OTHER side's current selection. Helps the
-  // admin spot which days have changed content vs the comparison
-  // target without clicking through every RP. Rendered as an orange
-  // dot in the bottom-right corner; coexists with the green match
-  // dot in the top-right.
+  // Diff-day set — days where at least one RP differs from the OTHER side's
+  // current selection (orange dot, bottom-right), so the user can spot
+  // changed days without opening every RP. Coexists with the green match dot.
   var diffDaySet = {};
   var otherSel = side === 'left' ? rdState.rightSel : rdState.leftSel;
   if (otherSel && resource && typeof rdBuildStateForSel === 'function') {
@@ -31189,121 +31240,120 @@ function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
     allRps.forEach(function(rp){
       if (rp.id === otherSel) return; // same RP — no diff to surface
       var thisState = rdBuildStateForSel(resource, rp.id, baseFields).state || {};
-      var has = false;
       for (var di = 0; di < otherKeys.length; di++) {
-        var k = otherKeys[di];
-        if (otherState[k] !== thisState[k]) { has = true; break; }
-      }
-      if (has) {
-        var dd = new Date(rp.ts);
-        diffDaySet[dd.getFullYear() + '-' + String(dd.getMonth()+1).padStart(2,'0') + '-' + String(dd.getDate()).padStart(2,'0')] = true;
+        if (otherState[otherKeys[di]] !== thisState[otherKeys[di]]) {
+          var dd = new Date(rp.ts);
+          diffDaySet[dd.getFullYear() + '-' + String(dd.getMonth()+1).padStart(2,'0') + '-' + String(dd.getDate()).padStart(2,'0')] = true;
+          break;
+        }
       }
     });
   }
+  // ── Calendar (left pane) — global .cal-* grammar, DS-aligned ─────────
+  // Mirrors the global as-of picker (#calPicker / renderCal): circular day
+  // cells, calendar on the left, restore-points in a column on the right.
   var MONTHS_LONG = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var DOWS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  var DOWS = ['S','M','T','W','T','F','S'];
   var firstDow = new Date(year, month, 1).getDay();
   var daysInMonth = new Date(year, month + 1, 0).getDate();
   var todayStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
-  var canStepBack = true;
   var canStepFwd = !(year === now.getFullYear() && month === now.getMonth());
-  var dowsHtml = DOWS.map(function(d){ return '<div class="rw-rp-cal-dow">' + d + '</div>'; }).join('');
+  var dowsHtml = DOWS.map(function(d){ return '<span>' + d + '</span>'; }).join('');
   var cellsHtml = '';
-  for (var i = 0; i < firstDow; i++) cellsHtml += '<div></div>';
+  for (var i = 0; i < firstDow; i++) cellsHtml += '<div class="cal-day"></div>';
   var anyMatchInMonth = false, anyDiffInMonth = false;
   for (var day = 1; day <= daysInMonth; day++) {
     var dateStr = year + '-' + String(month+1).padStart(2,'0') + '-' + String(day).padStart(2,'0');
-    var hasRp = !!rpDaySet[dateStr];
+    var isFuture = new Date(year, month, day) > now;
+    var hasRp = !!rpDaySet[dateStr] && !isFuture;
     var hasMatch = hasRp && !!matchedDaySet[dateStr];
     var hasDiff = hasRp && !!diffDaySet[dateStr];
     if (hasMatch) anyMatchInMonth = true;
     if (hasDiff) anyDiffInMonth = true;
     var isToday = dateStr === todayStr;
     var isFocused = dateStr === pickerDay;
-    var isFuture = new Date(year, month, day) > now;
-    var cellCls = 'rw-rp-cal-day' + (isFuture ? ' out-of-range' : (hasRp ? ' clickable' : '')) + (hasMatch ? ' has-match' : '') + (hasDiff ? ' has-diff' : '') + (isToday ? ' today' : '') + (isFocused ? ' selected' : '');
-    var click = (!isFuture && hasRp) ? ' onclick="rdSidePickerSelectDay(\'' + side + '\', \'' + dateStr + '\', event)"' : '';
-    // Verbal state for screen readers + tooltips so the dot
-    // semantics aren't conveyed by color alone.
+    var cellCls = 'cal-day in-month' + (hasRp ? ' has-rp' : '') + (hasMatch ? ' has-match' : '') + (hasDiff ? ' has-diff' : '') + (isToday ? ' today' : '') + (isFocused ? ' selected' : '');
+    var click = hasRp ? ' onclick="rdSidePickerSelectDay(\'' + side + '\', \'' + dateStr + '\', event)"' : '';
     var dayLabel = new Date(year, month, day).toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
     var ariaParts = [dayLabel];
     if (isToday) ariaParts.push('today');
-    if (hasRp) ariaParts.push('restore point available'); else ariaParts.push('no restore point');
+    ariaParts.push(hasRp ? 'restore point available' : 'no restore point');
     if (hasMatch) ariaParts.push('matches your search');
     if (hasDiff) ariaParts.push('has changes vs other side');
-    if (isFocused) ariaParts.push('currently focused');
+    if (isFocused) ariaParts.push('selected');
     var ariaLabel = ariaParts.join(', ');
-    var roleAttr = hasRp && !isFuture ? ' role="button" tabindex="0"' : ' role="gridcell"';
+    var roleAttr = hasRp ? ' role="button" tabindex="0"' : ' role="gridcell"';
     cellsHtml += '<div class="' + cellCls + '"' + click + ' aria-label="' + ariaLabel + '" title="' + ariaLabel + '"' + roleAttr + '>' + day + '</div>';
   }
-  // Tiny inline legend below the grid — only surfaces items whose
-  // visual marker is actually present in the current month. Keeps
-  // the chrome quiet when nothing special is going on.
+  // Inline legend below the grid — only surfaces markers present this month.
   var legendBits = [];
-  if (anyMatchInMonth) legendBits.push('<span class="rw-rp-cal-legend-item"><span class="rw-rp-cal-legend-swatch is-match" aria-hidden="true"></span>matches search</span>');
-  if (anyDiffInMonth)  legendBits.push('<span class="rw-rp-cal-legend-item"><span class="rw-rp-cal-legend-swatch is-diff" aria-hidden="true"></span>differs from other side</span>');
-  var legendHtml = legendBits.length ? '<div class="rw-rp-cal-legend">' + legendBits.join('') + '</div>' : '';
-  var calHtml = '<div class="rw-rp-cal">' +
-    '<div class="rw-rp-cal-hdr">' +
-      '<button class="rw-rp-cal-nav" ' + (canStepBack ? 'onclick="rdSidePickerNav(\'' + side + '\', -1, event)"' : 'disabled') + ' aria-label="Previous month">' +
-        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>' +
-      '</button>' +
-      '<span class="rw-rp-cal-month-lbl">' + MONTHS_LONG[month] + ' ' + year + '</span>' +
-      '<button class="rw-rp-cal-nav" ' + (canStepFwd ? 'onclick="rdSidePickerNav(\'' + side + '\', 1, event)"' : 'disabled') + ' aria-label="Next month">' +
-        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>' +
-      '</button>' +
+  if (anyMatchInMonth) legendBits.push('<span class="cal-legend-item"><span class="cal-legend-swatch is-match" aria-hidden="true"></span>matches search</span>');
+  if (anyDiffInMonth)  legendBits.push('<span class="cal-legend-item"><span class="cal-legend-swatch is-diff" aria-hidden="true"></span>differs from other side</span>');
+  var legendHtml = legendBits.length ? '<div class="cal-legend">' + legendBits.join('') + '</div>' : '';
+  var leftPane = '<div class="cal-left"><div class="cal-body">' +
+    '<div class="cal-nav">' +
+      '<button class="cal-nav-btn" onclick="rdSidePickerNav(\'' + side + '\', -1, event)" aria-label="Previous month">‹</button>' +
+      '<span class="cal-month-lbl">' + MONTHS_LONG[month] + ' ' + year + '</span>' +
+      '<button class="cal-nav-btn" ' + (canStepFwd ? 'onclick="rdSidePickerNav(\'' + side + '\', 1, event)"' : 'disabled') + ' aria-label="Next month">›</button>' +
     '</div>' +
-    '<div class="rw-rp-cal-grid">' + dowsHtml + cellsHtml + '</div>' +
+    '<div class="cal-dow">' + dowsHtml + '</div>' +
+    '<div class="cal-grid">' + cellsHtml + '</div>' +
     legendHtml +
-  '</div>';
-  // Time strip — chips for each RP on the focused day. Each chip
-  // shows the time + an inline diff-count pill. When the user
-  // drilled in from a search, RPs that are in rdState.matchedRps
-  // get a green match dot next to their time so the matching
-  // snapshots stand out from the rest of the day's chips.
+  '</div></div>';
+  // ── Restore-points (right pane) — exact global #calPicker chip grammar:
+  // a "Production (now)" quick-pick, then one .cal-time-chip per restore
+  // point on the focused day (time + RP type). Matching RPs (active search)
+  // carry a green dot; the diff signal lives on the calendar day dots. ──
+  var prodCurrent = (sel === 'prod' || !sel || sel === 'snap');
+  var prodChip = '<button class="cal-time-chip' + (prodCurrent ? ' current' : '') + '" onclick="rdSelectSide(\'' + side + '\', \'prod\')">' +
+    '<span>Production (now)</span>' +
+    '<span class="cal-time-chip-type">Live</span>' +
+  '</button>';
   var dayRps = allRps.filter(function(rp){
     var d = new Date(rp.ts);
     var ds = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
     return ds === pickerDay;
-  });
-  var matchedRpIdSet = {};
-  if (rdState.matchQuery) {
-    (rdState.matchedRps || []).forEach(function(rp){ matchedRpIdSet[rp.id] = true; });
-  }
-  var timesHtml;
-  if (dayRps.length === 0) {
-    timesHtml = '<div class="rw-rp-cal-times-empty">No restore points on this day. Pick a highlighted day above.</div>';
+  }).sort(function(a, b){ return b.ts - a.ts; });
+  var chipsHtml = '';
+  if (!pickerDay) {
+    chipsHtml = '<div class="cal-times-empty">Select a day to see its restore points.</div>';
+  } else if (dayRps.length === 0) {
+    chipsHtml = '<div class="cal-times-empty">No restore points on this day.</div>';
   } else {
-    timesHtml = '<div class="rw-rp-cal-times">';
     dayRps.forEach(function(rp){
       var t = new Date(rp.ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
       var isCurrent = rp.id === sel;
       var isMatch = !!matchedRpIdSet[rp.id];
-      var n = countDiffsForRp(rp.id);
-      var pillCls = 'rw-rp-time-pill ' + (n === 0 ? 'unchanged' : 'changed');
-      var pillLabel = n === 0 ? 'No changes' : (n + ' change' + (n === 1 ? '' : 's'));
-      var matchDot = isMatch ? '<span class="rw-rp-time-match-dot" title="Matches your search"></span>' : '';
-      timesHtml += '<button class="rw-rp-time-chip' + (isCurrent ? ' current' : '') + (isMatch ? ' is-match' : '') + '" onclick="rdSelectSide(\'' + side + '\', \'' + rp.id + '\')">' +
-        matchDot +
-        '<span class="rw-rp-time-label">' + t + '</span>' +
-        '<span class="' + pillCls + '">' + pillLabel + '</span>' +
+      var typeLbl = rp.typeLabel || rp.type || '';
+      chipsHtml += '<button class="cal-time-chip' + (isCurrent ? ' current' : '') + (isMatch ? ' is-match' : '') + '" onclick="rdSelectSide(\'' + side + '\', \'' + rp.id + '\')">' +
+        (isMatch ? '<span class="rw-rp-time-match-dot" title="Matches your search"></span>' : '') +
+        '<span>' + t + '</span>' +
+        '<span class="cal-time-chip-type">' + typeLbl + '</span>' +
       '</button>';
     });
-    timesHtml += '</div>';
   }
+  var rightPane = '<div class="cal-right">' +
+    '<div class="cal-times-label">Restore points</div>' +
+    '<div class="cal-times">' + prodChip + chipsHtml + '</div>' +
+  '</div>';
+  // Hero band — year + focused-date label, identical to the global picker.
+  var heroDate = pickerDay ? new Date(pickerDay + 'T00:00:00') : null;
+  var heroYear = heroDate ? heroDate.getFullYear() : year;
+  var heroLbl  = heroDate ? heroDate.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }) : 'Select a date';
+  var heroHtml = '<div class="cal-hero"><div class="cal-hero-year">' + heroYear + '</div><div class="cal-hero-date">' + heroLbl + '</div></div>';
   var menuAlign = side === 'right' ? ' rw-rp-menu-right' : '';
-  // Item-compare model: render the side picker as a live dropdown — a
-  // labeled trigger (with chevron) that toggles a calendar+time-strip
-  // popover so the user can repoint either column at any restore point or
-  // Production. Both columns are independently repickable; this is the only
-  // comparison surface now that the global compare axis is gone.
+  // Item-compare model: the side picker is a live dropdown whose popover IS
+  // the global picker component (hero band + two-pane cal-layout: calendar
+  // left, restore-points column right). Both columns are independently
+  // repickable — the only comparison surface now that global compare is gone.
   return '<div class="rw-rp-picker rw-rp-picker-hdr" data-side="' + side + '">' +
     '<button type="button" class="rw-rp-picker-btn rw-rp-picker-btn-hdr" aria-haspopup="true" aria-expanded="' + (isOpen ? 'true' : 'false') + '" onclick="rdToggleSideDrop(\'' + side + '\', event)">' +
       '<span class="rw-rp-picker-btn-label">' + info.label + '</span>' +
       '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>' +
     '</button>' +
-    '<div class="rw-rp-menu' + menuAlign + (isOpen ? ' open' : '') + '" onclick="event.stopPropagation()">' +
-      menu + calHtml + timesHtml +
+    '<div class="rw-rp-menu rw-rp-menu-cal' + menuAlign + (isOpen ? ' open' : '') + '" onclick="event.stopPropagation()">' +
+      heroHtml +
+      '<div class="cal-layout">' + leftPane + rightPane + '</div>' +
     '</div>' +
   '</div>';
 }
