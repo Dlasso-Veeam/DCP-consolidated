@@ -3987,14 +3987,21 @@ body.pol-drawer-open { overflow: hidden; }
 .rw-rp-menu-cal .cal-time-chip.current .cal-time-chip-sub { color: var(--white); }
 /* Orange "differs from other side" dot (bottom-right) — complements the
    global green has-match dot (top-right) on the circular day cells. */
-.rw-rp-menu-cal .cal-day.has-diff::before { content: ''; position: absolute; bottom: 4px; right: 4px; width: 5px; height: 5px; border-radius: 50%; background: var(--orange-dark); }
-/* On the selected (solid-blue) day, the change + match dots must KEEP their
-   legend colors (orange / green) — never invert to white — so they always
-   read against the legend. A 1px white ring keeps them legible on the blue
-   fill without changing their identity color. (Overrides the global
-   .cal-day.selected.has-* white-dot rules via the .rw-rp-menu-cal prefix.) */
-.rw-rp-menu-cal .cal-day.selected.has-diff::before { background: var(--orange-dark); box-shadow: 0 0 0 1px var(--white); }
-.rw-rp-menu-cal .cal-day.selected.has-match::after { background: var(--green); box-shadow: 0 0 0 1px var(--white); }
+/* Change/match indicators render as a centered row of dots BELOW the date
+   number (real child elements), not corner pseudo-elements — so they stay
+   centered for one or two dots and never touch the selected day's blue
+   circle edge. Suppress the global/legacy corner pseudo-dots in the drawer. */
+.rw-rp-menu-cal .cal-day.has-match::after,
+.rw-rp-menu-cal .cal-day.has-diff::before { content: none; display: none; }
+.rw-rp-menu-cal .cal-day { flex-direction: column; gap: 0; }
+.rw-rp-menu-cal .cal-day-num { line-height: 1; }
+.rw-rp-menu-cal .cal-day-dots { position: absolute; left: 0; right: 0; bottom: 3px; display: flex; justify-content: center; gap: 3px; pointer-events: none; }
+.rw-rp-menu-cal .cal-day-dots i { width: 5px; height: 5px; border-radius: 50%; }
+.rw-rp-menu-cal .cal-dot-match { background: var(--green); }
+.rw-rp-menu-cal .cal-dot-diff  { background: var(--orange-dark); }
+/* On the selected (solid-blue) day the dots KEEP their legend colors — never
+   invert to white — with a 1px white ring so they stay legible on the blue. */
+.rw-rp-menu-cal .cal-day.selected .cal-day-dots i { box-shadow: 0 0 0 1px var(--white); }
 .cal-legend-swatch.is-diff { width: 7px; height: 7px; border-radius: 50%; background: var(--orange-dark); }
 .rw-rp-opt { display: flex; align-items: center; gap: 8px; padding: 8px 12px; cursor: pointer; font-size: 14px; color: var(--black-100); border: none; background: transparent; width: 100%; text-align: left; font-family: inherit; }
 .rw-rp-opt:hover { background: var(--black-3); }
@@ -31296,7 +31303,16 @@ function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
     if (isFocused) ariaParts.push('selected');
     var ariaLabel = ariaParts.join(', ');
     var roleAttr = hasRp ? ' role="button" tabindex="0"' : ' role="gridcell"';
-    cellsHtml += '<div class="' + cellCls + '"' + click + ' aria-label="' + ariaLabel + '" title="' + ariaLabel + '"' + roleAttr + '>' + day + '</div>';
+    // Dots render as a centered row of real child elements BELOW the date
+    // number (not corner pseudo-elements) so one or two dots stay centered
+    // and never collide with the selected day's blue circle edge.
+    var dotsHtml = (hasMatch || hasDiff)
+      ? '<span class="cal-day-dots" aria-hidden="true">'
+          + (hasDiff  ? '<i class="cal-dot-diff"></i>'  : '')
+          + (hasMatch ? '<i class="cal-dot-match"></i>' : '')
+        + '</span>'
+      : '';
+    cellsHtml += '<div class="' + cellCls + '"' + click + ' aria-label="' + ariaLabel + '" title="' + ariaLabel + '"' + roleAttr + '><span class="cal-day-num">' + day + '</span>' + dotsHtml + '</div>';
   }
   // Inline legend below the grid — only surfaces markers present this month.
   var legendBits = [];
