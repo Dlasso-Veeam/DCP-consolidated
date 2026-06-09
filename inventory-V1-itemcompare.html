@@ -20447,6 +20447,10 @@ function renderInvSearchFacetsPopover() {
     counts = _computeSearchFacetCounts(groups);
   }
   var f = state.searchFacets || { hitKind: 'all', field: null };
+  // Hit-type counts are only meaningful while a search is active. With no
+  // query, suppress the "(0)" suffixes and leave the count slot blank.
+  var _facetSearchEl = document.getElementById(anchorId === 'childSearchFacetsBtn' ? 'childSearch' : 'invSearch');
+  var _searchActive = !!(_facetSearchEl && _facetSearchEl.value && _facetSearchEl.value.trim());
   function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
   var html = '';
   html += '<div class="search-facets-popover-header">Filter search results</div>';
@@ -20464,7 +20468,7 @@ function renderInvSearchFacetsPopover() {
     html += '<label class="search-facets-opt">'
       + '<input type="radio" name="invSearchFacetHitKind" value="' + k.key + '"' + checked + ' onchange="setSearchFacetHitKind(\'' + k.key + '\')">'
       + '<span>' + esc(k.label) + '</span>'
-      + '<span class="search-facets-opt-count">(' + k.count + ')</span>'
+      + (_searchActive ? '<span class="search-facets-opt-count">(' + k.count + ')</span>' : '')
       + '</label>';
   });
   html += '</div>';
