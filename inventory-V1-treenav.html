@@ -3376,6 +3376,11 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--blue); c
 .seg-btn-main.seg-btn-solo { border-radius: 4px; }
 .seg-btn-main:hover:not(:disabled) { filter: brightness(0.93); }
 .seg-btn-main:disabled { opacity: 0.45; cursor: not-allowed; }
+/* When the disabled primary lives in a tooltip-bearing seg-btn (export-only
+   rows), let hover fall through to the wrapper so its data-tooltip fires —
+   disabled buttons otherwise swallow the hover and the tooltip never shows. */
+.seg-btn[data-tooltip] { cursor: not-allowed; }
+.seg-btn[data-tooltip] .seg-btn-main:disabled { pointer-events: none; }
 .seg-btn-main.added { background: var(--green); }
 .seg-btn-divider { width: 1px; background: rgba(255,255,255,0.3); flex-shrink: 0; align-self: stretch; pointer-events: none; }
 /* When the chevron is a secondary RP-selector, the divider becomes the border color */
@@ -23024,9 +23029,16 @@ function renderUnavailableSegBtn(availability, r) {
     + '</div>';
   }
   if (availability === 'export') {
-    var safeId = r && r.id ? String(r.id).replace(/'/g, "\\'") : '';
-    return '<div class="seg-btn">'
-      + '<button class="seg-btn-main seg-btn-solo" onclick="exportResource(\'' + safeId + '\')">Export</button>'
+    // Security & audit data is export-only. Rather than swapping the primary
+    // to "Export" (which duplicated the row's download icon and hid the
+    // restore affordance entirely), keep a disabled "Restore" with a tooltip
+    // explaining why — the download icon beside it is the export path.
+    var tip = 'Security & audit data is export-only — it can be downloaded but not restored. Use the export (download) button.';
+    return '<div class="seg-btn" data-tooltip="' + tip.replace(/"/g, '&quot;') + '">'
+      + '<button class="seg-btn-main seg-btn-solo" disabled>'
+        + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
+        + 'Restore'
+      + '</button>'
     + '</div>';
   }
   return '';
