@@ -2629,6 +2629,36 @@ td.rec-cell-lt { max-width: 340px; min-width: 220px; vertical-align: top; }
    right-side action button. Click the row body to expand and show
    the per-item progress list. */
 .ws-sum-card { background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; overflow: hidden; }
+/* ── Dry run (optional pre-commit preview) — DRAFT ── */
+.ws-dryrun { background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; padding: 20px 24px; margin-top: 16px; }
+.ws-dryrun-title { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 500; color: var(--black-100); }
+.ws-dryrun-title svg { width: 16px; height: 16px; color: var(--blue); flex-shrink: 0; }
+.ws-dryrun-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--blue-dark); background: var(--blue-10); border: 1px solid var(--blue-30); border-radius: 10px; padding: 2px 7px; }
+.ws-dryrun-sub { font-size: 14px; color: var(--black-60); line-height: 1.55; margin: 6px 0 14px; max-width: 64ch; }
+.ws-dryrun-running { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--blue-dark); }
+.ws-dryrun-rollup { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.ws-dr-stat { display: inline-flex; align-items: baseline; gap: 6px; height: 28px; padding: 0 12px; border-radius: 4px; font-size: 14px; border: 1px solid var(--border-light); }
+.ws-dr-stat b { font-weight: 600; }
+.ws-dr-stat.create { color: var(--blue-dark); background: var(--blue-10); border-color: var(--blue-30); }
+.ws-dr-stat.overwrite { color: var(--orange-dark); background: var(--orange-10); border-color: var(--orange-30); }
+.ws-dr-stat.unchanged { color: var(--black-60); background: var(--black-5); }
+.ws-dr-stat.blocked { color: var(--red); background: var(--red-10); border-color: var(--red); }
+.ws-dr-stat.zero { opacity: 0.45; }
+.ws-dryrun-toggle { display: inline-flex; align-items: center; gap: 6px; background: none; border: none; padding: 0; font-family: inherit; font-size: 13px; font-weight: 500; color: var(--blue); cursor: pointer; }
+.ws-dryrun-toggle .chev { transition: transform 0.18s ease; }
+.ws-dryrun-toggle .chev.is-open { transform: rotate(90deg); }
+.ws-dryrun-list { margin-top: 12px; border: 1px solid var(--border-light); border-radius: 8px; max-height: 280px; overflow-y: auto; }
+.ws-dr-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--black-5); }
+.ws-dr-row:last-child { border-bottom: none; }
+.ws-dr-row-name { flex: 1; min-width: 0; font-size: 14px; color: var(--black-100); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ws-dr-row-type { font-size: 12px; color: var(--black-30); flex-shrink: 0; }
+.ws-dr-pill { flex-shrink: 0; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+.ws-dr-pill.create { color: var(--blue-dark); background: var(--blue-10); }
+.ws-dr-pill.overwrite { color: var(--orange-dark); background: var(--orange-10); }
+.ws-dr-pill.unchanged { color: var(--black-60); background: var(--black-5); }
+.ws-dr-pill.blocked { color: var(--red); background: var(--red-10); }
+.ws-dryrun-rerun { margin-left: 10px; font-size: 13px; color: var(--black-60); }
+.ws-dryrun-rerun a { color: var(--blue); text-decoration: none; cursor: pointer; }
 .ws-sum-row { display: flex; align-items: flex-start; gap: 12px; padding: 20px 24px; cursor: pointer; transition: background 0.12s ease; }
 .ws-sum-row:hover { background: var(--black-3); }
 .ws-sum-icon { width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; margin-top: 2px; }
@@ -24552,6 +24582,11 @@ function showWorkspace() {
   ws.preExecutionChecks = null;
   ws.preExecutionCheckIndex = 0;
   ws.preExecutionFailure = null;
+  // Dry-run preview resets too — re-opening the wizard starts from idle so a
+  // stale simulation (e.g. against a different cart) never lingers.
+  ws.dryRunPhase = 'idle';
+  ws.dryRun = null;
+  ws.dryRunExpanded = false;
   ws.helpDrawerOpen = false;
   if (ws.progressTimer) { clearInterval(ws.progressTimer); ws.progressTimer = null; }
   // Carry over pinned RP timestamps the user already set from the
@@ -27635,6 +27670,10 @@ function wsRenderProgress() {
   }
   html += '</div>';   // close ws-sum-card
 
+  // Optional dry-run preview — only in the pre-initiation "ready" state, so it
+  // sits above the footer Restore CTA as a confidence gate (not a wizard step).
+  html += wsRenderDryRunBlock(jobState);
+
   // Post-restore manual actions — workload-aware list sourced from
   // the GitHub doc's "Post-restore manual actions required" section.
   // Only items relevant to the items in the plan are surfaced.
@@ -27777,6 +27816,103 @@ function wsBuildPostRestoreChecklist() {
 function wsToggleSummaryExpanded() {
   ws.summaryExpanded = !ws.summaryExpanded;
   wsRenderAll();
+}
+// ── Dry-run preview (DRAFT) ───────────────────────────────────────────────
+// Optional, read-only simulation of the restore over the cart's selected
+// restore point: classify each item by what the restore would do to it
+// (Create / Overwrite / No change / Blocked), surface a rollup, and list the
+// per-item disposition. Leans on existence + the Okta dependency-gap signal;
+// falls back to a stable per-id hash so the demo reads consistently. Nothing
+// is written — this is the "terraform plan" of the restore.
+var _WS_DR_META = {
+  create:    { label: 'Create',    desc: 'Recreated — missing in production' },
+  overwrite: { label: 'Overwrite', desc: 'Updated — differs from production' },
+  unchanged: { label: 'No change', desc: 'Identical — skipped' },
+  blocked:   { label: 'Blocked',   desc: "Can't link — dependency or scope gap" }
+};
+function _wsDryRunDisp(key, r) {
+  var ex = (r && r.existence) || 'exists';
+  if (ex === 'deleted-in-live') return 'create';      // deleted in prod → recreate
+  if (ex === 'audit-only') return 'blocked';          // backup-only, not restorable
+  var h = 0, s = String(key);
+  for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  var m = h % 12;
+  if (m === 0) return 'blocked';                       // ~8%  can't link
+  if (m <= 5) return 'overwrite';                      // ~42% differs
+  return 'unchanged';                                  // ~50% identical
+}
+function _wsComputeDryRun() {
+  var items = [], roll = { create: 0, overwrite: 0, unchanged: 0, blocked: 0 };
+  state.restorePlan.forEach(function(_, key){
+    var r = (typeof RESOURCES !== 'undefined') ? RESOURCES.find(function(x){ return x.id === key; }) : null;
+    var disp = _wsDryRunDisp(key, r);
+    roll[disp]++;
+    items.push({ key: key, name: (r && r.name) || key, type: (r && r.type) || 'Item', disp: disp });
+  });
+  // Stable order: blocked → create → overwrite → unchanged (most-actionable first).
+  var rank = { blocked: 0, create: 1, overwrite: 2, unchanged: 3 };
+  items.sort(function(a, b){ return (rank[a.disp] - rank[b.disp]) || a.name.localeCompare(b.name); });
+  return { items: items, roll: roll };
+}
+function wsRunDryRun() {
+  ws.dryRunPhase = 'running';
+  wsRenderAll();
+  setTimeout(function(){
+    if (ws.dryRunPhase !== 'running') return;   // cancelled by step change
+    ws.dryRun = _wsComputeDryRun();
+    ws.dryRunPhase = 'done';
+    wsRenderAll();
+  }, 850);
+}
+function wsToggleDryRunExpanded() { ws.dryRunExpanded = !ws.dryRunExpanded; wsRenderAll(); }
+function wsRenderDryRunBlock(jobState) {
+  if (jobState !== 'ready') return '';
+  var playIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>';
+  var head = '<div class="ws-dryrun-title">' + playIcon + 'Preview changes <span class="ws-dryrun-tag">Dry run</span></div>'
+    + '<div class="ws-dryrun-sub">Optional. Simulate this restore against the selected restore point to see what would be created, overwritten, or skipped — before you commit. Nothing is written.</div>';
+  var phase = ws.dryRunPhase || 'idle';
+  if (phase === 'idle') {
+    return '<div class="ws-dryrun">' + head
+      + '<button class="btn btn-outline" type="button" onclick="wsRunDryRun()" style="height:36px;padding:0 14px;font-size:14px;border-radius:4px">' + playIcon + 'Run dry run</button>'
+    + '</div>';
+  }
+  if (phase === 'running') {
+    return '<div class="ws-dryrun">' + head
+      + '<div class="ws-dryrun-running"><span class="disc-spinner" style="width:16px;height:16px"></span> Simulating restore…</div>'
+    + '</div>';
+  }
+  // done
+  var dr = ws.dryRun || { items: [], roll: {} };
+  var roll = dr.roll || {};
+  var order = ['create', 'overwrite', 'unchanged', 'blocked'];
+  var stats = order.map(function(k){
+    var n = roll[k] || 0;
+    return '<span class="ws-dr-stat ' + k + (n === 0 ? ' zero' : '') + '"><b>' + n + '</b> ' + _WS_DR_META[k].label + '</span>';
+  }).join('');
+  var open = !!ws.dryRunExpanded;
+  var chev = '<svg class="chev' + (open ? ' is-open' : '') + '" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+  var listHtml = '';
+  if (open) {
+    listHtml = '<div class="ws-dryrun-list">' + dr.items.map(function(it){
+      var meta = _WS_DR_META[it.disp];
+      return '<div class="ws-dr-row">'
+        + '<span class="ws-dr-row-name" title="' + wsEscape(meta.desc) + '">' + wsEscape(it.name) + '</span>'
+        + '<span class="ws-dr-row-type">' + wsEscape(it.type) + '</span>'
+        + '<span class="ws-dr-pill ' + it.disp + '" title="' + wsEscape(meta.desc) + '">' + meta.label + '</span>'
+      + '</div>';
+    }).join('') + '</div>';
+  }
+  var blocked = roll.blocked || 0;
+  var blockedNote = blocked > 0
+    ? ' <span class="ws-dryrun-rerun">' + blocked + ' item' + (blocked === 1 ? '' : 's') + ' can\'t be linked and would be skipped.</span>'
+    : '';
+  return '<div class="ws-dryrun">' + head
+    + '<div class="ws-dryrun-rollup">' + stats + '</div>'
+    + '<button class="ws-dryrun-toggle" type="button" onclick="wsToggleDryRunExpanded()" aria-expanded="' + (open ? 'true' : 'false') + '">' + chev + (open ? 'Hide details' : 'View per-item changes') + '</button>'
+    + blockedNote
+    + listHtml
+    + '<div style="margin-top:12px;font-size:13px;color:var(--black-60)">Looks right? Run the restore below. <a style="color:var(--blue);text-decoration:none;cursor:pointer" onclick="wsRunDryRun()">Re-run dry run</a></div>'
+    + '</div>';
 }
 function wsToggleSummaryType(t) {
   if (!ws.summaryTypeExpanded) ws.summaryTypeExpanded = {};
