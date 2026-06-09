@@ -12881,6 +12881,12 @@ function childRender() {
     requestAnimationFrame(function(){
       _autoSizeColumns(document.getElementById('childTable'));
       _autoSizeColumns(document.getElementById('gwsTable'));
+      // Re-measure scroll shadows AFTER auto-sizing — column sizing changes
+      // the table's scrollWidth, so the earlier (pre-autosize) refresh on
+      // line ~12884 can leave a stale has-h-scroll-* class (the actions
+      // shadow then only corrected itself on a window resize). Recomputing
+      // here makes the depth cue paint on the initial drill render.
+      if (typeof refreshAllTableScrollShadows === 'function') refreshAllTableScrollShadows();
     });
   }
   // Drill-level search-facets gear visibility — same workload-gate as
