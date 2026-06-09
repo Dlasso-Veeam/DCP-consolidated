@@ -1386,7 +1386,7 @@ td.rec-cell-lt { max-width: 340px; min-width: 220px; vertical-align: top; }
    the desktop three-pane layout is byte-for-byte unchanged. The mode flips
    via a matchMedia listener (see applyLayoutMode()). */
 .nav-drawer-btn { display: none; }
-.tree-nav-wl-picker { display: none; }
+.tree-nav-wl-picker { display: none; position: relative; }
 .nav-scrim { display: none; }
 
 /* compact: hide the desktop workload panel + the collapse pills */
@@ -1454,7 +1454,9 @@ td.rec-cell-lt { max-width: 340px; min-width: 220px; vertical-align: top; }
 .tnwl-btn .tnwl-cur { display: flex; align-items: center; gap: 8px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tnwl-btn .tnwl-chev { flex-shrink: 0; color: var(--black-60); transition: transform 0.18s ease; }
 .tree-nav-wl-picker.is-open .tnwl-btn .tnwl-chev { transform: rotate(180deg); }
-.tnwl-panel { display: none; margin-top: 8px; border: 1px solid var(--border-light); border-radius: 4px; overflow: hidden; background: var(--white); }
+/* Float the dropdown as an overlay over the tree content instead of reflowing
+   it inline (the inline behavior was a holdover from the mobile drawer). */
+.tnwl-panel { display: none; position: absolute; top: calc(100% - 6px); left: 12px; right: 12px; z-index: 70; border: 1px solid var(--border-light); border-radius: 4px; overflow: hidden; background: var(--white); box-shadow: 0 8px 24px rgba(31,34,41,0.16); }
 .tree-nav-wl-picker.is-open .tnwl-panel { display: block; }
 .tnwl-search { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px; border-bottom: 1px solid var(--border-light); color: var(--black-60); }
 .tnwl-search svg { flex-shrink: 0; }

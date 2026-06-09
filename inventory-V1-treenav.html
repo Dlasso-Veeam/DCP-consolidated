@@ -1391,7 +1391,7 @@ td.rec-cell-lt { max-width: 340px; min-width: 220px; vertical-align: top; }
    standalone wl-nav rail is hidden (kept in the DOM so the dropdown can still
    source its workload list + drive selection), and the tree renders category
    roots at all widths (see renderTreeNav). */
-.tree-nav-wl-picker { display: block; flex-shrink: 0; padding: 10px 12px; border-bottom: 1px solid var(--border-light); }
+.tree-nav-wl-picker { display: block; position: relative; flex-shrink: 0; padding: 10px 12px; border-bottom: 1px solid var(--border-light); }
 .wl-nav { display: none !important; }
 .wl-nav-toggle { display: none !important; }
 .nav-scrim { display: none; }
@@ -1464,7 +1464,9 @@ td.rec-cell-lt { max-width: 340px; min-width: 220px; vertical-align: top; }
 .tnwl-btn .tnwl-cur-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tnwl-btn .tnwl-chev { flex-shrink: 0; color: var(--black-60); transition: transform 0.18s ease; }
 .tree-nav-wl-picker.is-open .tnwl-btn .tnwl-chev { transform: rotate(180deg); }
-.tnwl-panel { display: none; margin-top: 8px; border: 1px solid var(--border-light); border-radius: 4px; overflow: hidden; background: var(--white); }
+/* Float the dropdown as an overlay over the tree content instead of reflowing
+   it inline (the inline behavior was a holdover from the mobile drawer). */
+.tnwl-panel { display: none; position: absolute; top: calc(100% - 6px); left: 12px; right: 12px; z-index: 70; border: 1px solid var(--border-light); border-radius: 4px; overflow: hidden; background: var(--white); box-shadow: 0 8px 24px rgba(31,34,41,0.16); }
 .tree-nav-wl-picker.is-open .tnwl-panel { display: block; }
 .tnwl-search { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px; border-bottom: 1px solid var(--border-light); color: var(--black-60); }
 .tnwl-search svg { flex-shrink: 0; }
