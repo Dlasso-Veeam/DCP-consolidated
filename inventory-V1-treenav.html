@@ -1464,8 +1464,14 @@ td.rec-cell-lt { max-width: 340px; min-width: 220px; vertical-align: top; }
 .tnwl-btn .tnwl-cur-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tnwl-btn .tnwl-chev { flex-shrink: 0; color: var(--black-60); transition: transform 0.18s ease; }
 .tree-nav-wl-picker.is-open .tnwl-btn .tnwl-chev { transform: rotate(180deg); }
-.tnwl-list { display: none; margin-top: 8px; max-height: 46vh; overflow-y: auto; border: 1px solid var(--border-light); border-radius: 4px; }
-.tree-nav-wl-picker.is-open .tnwl-list { display: block; }
+.tnwl-panel { display: none; margin-top: 8px; border: 1px solid var(--border-light); border-radius: 4px; overflow: hidden; background: var(--white); }
+.tree-nav-wl-picker.is-open .tnwl-panel { display: block; }
+.tnwl-search { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px; border-bottom: 1px solid var(--border-light); color: var(--black-60); }
+.tnwl-search svg { flex-shrink: 0; }
+.tnwl-search input { flex: 1; min-width: 0; height: 100%; border: none; outline: none; background: transparent; font-family: inherit; font-size: 14px; color: var(--black-100); }
+.tnwl-search input::placeholder { color: var(--black-30); }
+.tnwl-list { max-height: 46vh; overflow-y: auto; }
+.tnwl-empty { padding: 12px; font-size: 14px; color: var(--black-60); text-align: center; }
 .tnwl-item {
   display: flex; align-items: center; gap: 10px; width: 100%; height: 40px; padding: 0 12px;
   background: transparent; border: none; border-bottom: 1px solid var(--black-3);
@@ -5096,7 +5102,14 @@ body.drawer-open { overflow: hidden; }
                 <span class="tnwl-cur"><span class="tnwl-cur-icon" id="tnwlCurIcon" aria-hidden="true"></span><span class="tnwl-cur-label" id="tnwlCur">Workload</span></span>
                 <span class="tnwl-chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></span>
               </button>
-              <div class="tnwl-list" id="tnwlList" role="menu"></div>
+              <div class="tnwl-panel">
+                <div class="tnwl-search">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                  <input type="text" id="tnwlSearch" placeholder="Search workloads" autocomplete="off" oninput="filterNavWlList(this.value)" onclick="event.stopPropagation()">
+                </div>
+                <div class="tnwl-list" id="tnwlList" role="menu"></div>
+                <div class="tnwl-empty" id="tnwlEmpty" style="display:none">No workloads match</div>
+              </div>
             </div>
             <div class="tree-nav-search">
               <div class="tree-nav-search-inner">
@@ -16981,11 +16994,32 @@ function buildNavWlList() {
       + '<span class="tnwl-item-icon">' + icon + '</span><span>' + name + '</span></button>';
   }).join('');
 }
+// Filter the workload list by name as the user types. Helps the picker scale
+// when there are many workloads. Toggles a "no match" empty state.
+function filterNavWlList(q) {
+  var list = document.getElementById('tnwlList'); if (!list) return;
+  var term = (q || '').trim().toLowerCase();
+  var items = list.querySelectorAll('.tnwl-item');
+  var shown = 0;
+  Array.prototype.forEach.call(items, function (it) {
+    var name = (it.getAttribute('data-name') || '').toLowerCase();
+    var match = !term || name.indexOf(term) !== -1;
+    it.style.display = match ? '' : 'none';
+    if (match) shown++;
+  });
+  var empty = document.getElementById('tnwlEmpty');
+  if (empty) empty.style.display = shown ? 'none' : 'block';
+}
 function toggleNavWlPicker() {
   var p = document.getElementById('treeNavWlPicker'); if (!p) return;
   var open = p.classList.toggle('is-open');
   var btn = document.getElementById('tnwlBtn'); if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-  if (open) buildNavWlList();
+  if (open) {
+    buildNavWlList();
+    // Reset any prior filter and focus the search so typing is immediate.
+    var s = document.getElementById('tnwlSearch');
+    if (s) { s.value = ''; filterNavWlList(''); setTimeout(function () { try { s.focus(); } catch (e) {} }, 0); }
+  }
 }
 function closeNavWlPicker() {
   var p = document.getElementById('treeNavWlPicker'); if (p) p.classList.remove('is-open');
