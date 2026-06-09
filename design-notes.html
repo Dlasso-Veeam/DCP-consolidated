@@ -182,6 +182,16 @@
   .link-chip svg { width: 13px; height: 13px; flex-shrink: 0; }
   .link-chip.figma { border-color: var(--s-blue-30); background: var(--s-blue-5); color: var(--s-blue-dark); }
   .link-chip.figma:hover { background: var(--s-blue-10); }
+  .link-chip.doc { border-style: dashed; color: var(--s-black-70); }
+
+  /* ── Resource hub (page head) ── */
+  .hub-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--s-black-30); margin: 28px 0 10px; }
+  .resource-hub { display: flex; flex-wrap: wrap; gap: 8px; }
+  .resource-hub .link-chip { height: 34px; padding: 0 14px; font-size: 13.5px; }
+
+  /* ── Per-section references row ── */
+  .section-refs { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px; margin: 0 0 24px; padding: 12px 16px; background: var(--s-black-5); border-radius: 8px; }
+  .section-refs-label { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--s-black-30); margin-right: 4px; }
 
   /* ── Stub / outline ── */
   .outline { background: var(--s-white); border: 1px dashed var(--s-black-30); border-radius: 8px; padding: 20px 24px; }
@@ -232,7 +242,9 @@
       <div class="page-head">
         <div class="page-eyebrow">Design Rationale</div>
         <h1 class="page-title">Why the Data Backup experience works the way it does</h1>
-        <p class="page-sub">A companion to the PRDs and engineering docs. The PRDs say <em>what</em> to build and the architecture doc says <em>how</em> it's wired — this site captures the <em>why</em>: the reasoning behind each major pattern, and the alternatives we considered and set aside. Organized by feature area, with links to the live prototype and Figma.</p>
+        <p class="page-sub">A companion to the PRDs and engineering docs. The PRDs say <em>what</em> to build and the architecture doc says <em>how</em> it's wired — this site captures the <em>why</em>: the reasoning behind each major pattern, and the alternatives we considered and set aside. Organized by feature area, with links to the live prototype, Figma, and the architecture doc.</p>
+        <div class="hub-label">Jump to</div>
+        <div class="resource-hub" id="resourceHub"></div>
       </div>
       <div id="sections"></div>
     </main>
@@ -249,13 +261,25 @@ var FIGMA_FILE = 'https://www.figma.com/design/s6xht9xThChTzDr2SxMxIz/Data-Backu
 var PROTO_NAV = 'inventory-V1-nav.html';
 var PROTO_ITEMCOMPARE = 'inventory-V1-itemcompare.html';
 var PROTO_ONBOARD = 'index.html';
+var ARCH = 'ARCHITECTURE.md';
 
 function L(label, href, kind){ return { label: label, href: href, kind: kind || '' }; }
+
+// Everything this hub connects: the three prototype entry points, the
+// engineering architecture doc, and the Figma source file.
+var RESOURCE_HUB = [
+  L('Onboarding wizard', PROTO_ONBOARD),
+  L('Inventory browsing', PROTO_NAV),
+  L('Restore & preview', PROTO_ITEMCOMPARE),
+  L('ARCHITECTURE.md — how it\'s wired', ARCH, 'doc'),
+  L('Figma — Data Backup, Rapid SaaS (Phase 1)', FIGMA_FILE, 'figma')
+];
 
 var SECTIONS = [
   {
     id: 'overview', num: '00', label: 'Overview & principles', status: 'live',
     intro: { lead: 'A handful of principles run underneath every screen.', body: 'When a specific decision looks surprising, it usually traces back to one of these. They are the through-line that keeps the experience coherent across workloads.' },
+    docs: [ L('ARCHITECTURE.md §0 — read this first', ARCH, 'doc'), L('ARCHITECTURE.md §9 — cross-cutting rules', ARCH, 'doc') ],
     principles: [
       { icon: 'shapes', title: 'Replicate, never invent', body: 'New views reuse existing components and interaction patterns. If a filter bar, search box, or restore button already exists, the new surface clones it exactly rather than introducing a sibling pattern. This is the single biggest driver of consistency — and the rule we most often correct against.' },
       { icon: 'box', title: 'V1 is deliberately narrow', body: 'V1 assumes one backup schedule per workload, one restore point per restore job, and no global compare mode. These are not gaps — they are scoping choices that keep the mental model simple. What is intentionally deferred is communicated through the in-product Roadmap.' },
@@ -267,6 +291,7 @@ var SECTIONS = [
   {
     id: 'onboarding', num: '01', label: 'Onboarding', status: 'draft',
     intro: { lead: 'Connecting a workload is a short, workload-aware wizard.', body: 'A shared 4-step shell (Basic info → Connect → Configure → Summary) is parameterised per workload rather than forked per connector. This section is an outline pending its full write-up.' },
+    docs: [ L('Onboarding wizard (live)', PROTO_ONBOARD), L('ARCHITECTURE.md §2 — wizard flow', ARCH, 'doc'), L('ARCHITECTURE.md §3 — WORKLOADS API', ARCH, 'doc'), L('ARCHITECTURE.md §4 — auth screen', ARCH, 'doc'), L('ARCHITECTURE.md §5 — test connection', ARCH, 'doc') ],
     outline: [
       ['Shared wizard shell, workload-parameterised', 'one shell + a WORKLOADS config table drives copy, auth model, pickers, and checks — not a fork per connector.'],
       ['Express vs Manual auth as accordion cards', 'mutually-exclusive panels, not radio buttons; Express is the recommended default and Manual is the escape hatch.'],
@@ -280,6 +305,7 @@ var SECTIONS = [
   {
     id: 'inventory', num: '02', label: 'Inventory browsing', status: 'live',
     intro: { lead: 'Inventory is the home base — a navigable, searchable map of everything protected.', body: 'The guiding question is "what do I have, and how do I get to the exact thing I want to restore?" Every decision below serves fast, confident navigation down to the right granularity.' },
+    docs: [ L('Inventory browsing (live)', PROTO_NAV), L('ARCHITECTURE.md §7 — inventory architecture', ARCH, 'doc'), L('Figma — Phase 1', FIGMA_FILE + '?node-id=5024-12776', 'figma') ],
     blocks: [
       {
         title: 'Tree-nav is the primary navigation', tag: 'Navigation',
@@ -329,6 +355,7 @@ var SECTIONS = [
   {
     id: 'search', num: '03', label: 'Search', status: 'draft',
     intro: { lead: 'Search reaches into the data, not just the resource names.', body: 'The differentiator is that a query descends into records and matches field values, then lets you narrow by where the match landed. One block is seeded below; the rest of this section is pending.' },
+    docs: [ L('Search (live)', PROTO_NAV), L('ARCHITECTURE.md §7 — inventory architecture', ARCH, 'doc') ],
     blocks: [
       {
         title: 'Search descends into records and field values', tag: 'Depth',
@@ -350,6 +377,7 @@ var SECTIONS = [
   {
     id: 'restore', num: '04', label: 'Restore', status: 'live',
     intro: { lead: 'Restore is built around inspecting an item over time, then assembling a job.', body: 'Two ideas anchor it: the preview drawer is where you compare an item across restore points, and the cart is a single-restore-point assembly surface. Everything else follows from keeping those two models clean.' },
+    docs: [ L('Restore & preview (live)', PROTO_ITEMCOMPARE), L('ARCHITECTURE.md §8 — restore architecture', ARCH, 'doc'), L('Figma — Phase 1', FIGMA_FILE, 'figma') ],
     blocks: [
       {
         title: 'The preview drawer is the comparison surface', tag: 'Compare model',
@@ -392,6 +420,7 @@ var SECTIONS = [
   {
     id: 'cross', num: '05', label: 'Cross-cutting', status: 'draft',
     intro: { lead: 'A few mechanisms span every feature area.', body: 'These keep the workloads consistent and the codebase honest. Outline pending full write-up.' },
+    docs: [ L('ARCHITECTURE.md §3 — WORKLOADS API', ARCH, 'doc'), L('ARCHITECTURE.md §9 — cross-cutting rules', ARCH, 'doc'), L('ARCHITECTURE.md §10 — design system', ARCH, 'doc'), L('ARCHITECTURE.md §11 — add a workload', ARCH, 'doc') ],
     outline: [
       ['Workload-dynamic configuration', 'one config table per workload drives catalog copy, auth model, inventory categories, columns, and pre-execution checks — features branch on a workload key, never on a copy-paste fork.'],
       ['Workload archetypes', 'connectors cluster into a few shapes (identity, source-control, records-platform, content) that share inventory + restore treatments.'],
@@ -417,9 +446,10 @@ function renderLinks(links){
   if (!links || !links.length) return '';
   var figmaSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5.5A3.5 3.5 0 0 1 8.5 2H12v7H8.5A3.5 3.5 0 0 1 5 5.5z"/><path d="M12 2h3.5a3.5 3.5 0 1 1 0 7H12z"/><path d="M12 12.5a3.5 3.5 0 1 1 7 0 3.5 3.5 0 1 1-7 0z"/><path d="M5 19.5A3.5 3.5 0 0 1 8.5 16H12v3.5a3.5 3.5 0 1 1-7 0z"/><path d="M5 12.5A3.5 3.5 0 0 1 8.5 9H12v7H8.5A3.5 3.5 0 0 1 5 12.5z"/></svg>';
   var extSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+  var docSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>';
   return '<div class="links">' + links.map(function(l){
-    var isFigma = l.kind === 'figma';
-    return '<a class="link-chip' + (isFigma ? ' figma' : '') + '" href="' + l.href + '" target="_blank" rel="noopener">' + (isFigma ? figmaSvg : extSvg) + esc(l.label) + '</a>';
+    var glyph = l.kind === 'figma' ? figmaSvg : (l.kind === 'doc' ? docSvg : extSvg);
+    return '<a class="link-chip' + (l.kind ? ' ' + l.kind : '') + '" href="' + l.href + '" target="_blank" rel="noopener">' + glyph + esc(l.label) + '</a>';
   }).join('') + '</div>';
 }
 
@@ -458,6 +488,8 @@ function renderOutline(items){
     var secStatus = s.status === 'draft' ? '<span class="section-status draft">Draft</span>' : '<span class="section-status live">Written</span>';
     var body = '';
     var intro = s.intro ? '<p class="section-intro"><span class="lead">' + esc(s.intro.lead) + '</span> ' + esc(s.intro.body) + '</p>' : '';
+    var refs = (s.docs && s.docs.length) ? '<div class="section-refs"><span class="section-refs-label">References</span>' + renderLinks(s.docs).replace(/^<div class="links">/, '').replace(/<\/div>$/, '') + '</div>' : '';
+    intro = intro + refs;
     if (s.principles) body = renderPrinciples(s.principles);
     else if (s.blocks) body = s.blocks.map(renderBlock).join('');
     else if (s.outline) body = renderOutline(s.outline);
@@ -467,6 +499,7 @@ function renderOutline(items){
   });
   document.getElementById('sidenav').innerHTML = navHtml;
   document.getElementById('sections').innerHTML = secHtml;
+  document.getElementById('resourceHub').innerHTML = renderLinks(RESOURCE_HUB).replace(/^<div class="links">/, '').replace(/<\/div>$/, '');
   document.getElementById('topbarMeta').textContent = 'V1 · ' + new Date().toISOString().slice(0,10);
 
   // Scroll-spy: highlight the section in view.
