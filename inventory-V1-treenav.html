@@ -1446,7 +1446,10 @@ td.rec-cell-lt { max-width: 340px; min-width: 220px; vertical-align: top; }
   height: 36px; padding: 0 12px; background: var(--form-bg); border: 1px solid var(--border-light);
   border-radius: 4px; font-family: inherit; font-size: 14px; font-weight: 500; color: var(--black-100); cursor: pointer;
 }
-.tnwl-btn .tnwl-cur { display: flex; align-items: center; gap: 8px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tnwl-btn .tnwl-cur { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.tnwl-btn .tnwl-cur-icon { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; flex-shrink: 0; }
+.tnwl-btn .tnwl-cur-icon svg { width: 18px; height: 18px; }
+.tnwl-btn .tnwl-cur-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tnwl-btn .tnwl-chev { flex-shrink: 0; color: var(--black-60); transition: transform 0.18s ease; }
 .tree-nav-wl-picker.is-open .tnwl-btn .tnwl-chev { transform: rotate(180deg); }
 .tnwl-list { display: none; margin-top: 8px; max-height: 46vh; overflow-y: auto; border: 1px solid var(--border-light); border-radius: 4px; }
@@ -5078,7 +5081,7 @@ body.drawer-open { overflow: hidden; }
                  standalone .wl-nav panel covers this on wide layouts. -->
             <div class="tree-nav-wl-picker" id="treeNavWlPicker">
               <button class="tnwl-btn" id="tnwlBtn" type="button" aria-expanded="false" aria-haspopup="true" onclick="toggleNavWlPicker()">
-                <span class="tnwl-cur" id="tnwlCur">Workload</span>
+                <span class="tnwl-cur"><span class="tnwl-cur-icon" id="tnwlCurIcon" aria-hidden="true"></span><span class="tnwl-cur-label" id="tnwlCur">Workload</span></span>
                 <span class="tnwl-chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></span>
               </button>
               <div class="tnwl-list" id="tnwlList" role="menu"></div>
@@ -16941,9 +16944,16 @@ function toggleNavDrawer() {
 // Workload picker (accordion at the top of the drawer). Reuses the existing
 // .wl-nav workload list as the single source of truth — no duplicate data.
 function updateNavDrawerWlLabel() {
-  var cur = document.querySelector('.wl-nav .wl-nav-item.is-active .wl-nav-label');
+  var active = document.querySelector('.wl-nav .wl-nav-item.is-active');
+  var cur = active ? active.querySelector('.wl-nav-label') : null;
   var el = document.getElementById('tnwlCur');
   if (el) el.textContent = cur ? cur.textContent.trim() : 'Workload';
+  var iconEl = document.getElementById('tnwlCurIcon');
+  if (iconEl) {
+    var iconSrc = active ? active.querySelector('.wl-nav-icon') : null;
+    iconEl.innerHTML = iconSrc ? iconSrc.innerHTML : '';
+    iconEl.style.display = iconSrc ? 'inline-flex' : 'none';
+  }
 }
 function buildNavWlList() {
   var list = document.getElementById('tnwlList'); if (!list) return;
@@ -17193,6 +17203,7 @@ function renderTreeNav() {
   // the active workload + selected category (the category nav now lives
   // there, not in this tree).
   if (typeof renderWlNavCats === 'function') renderWlNavCats();
+  if (typeof updateNavDrawerWlLabel === 'function') updateNavDrawerWlLabel();
 
   // Auto-scroll the active node to the top of the tree-nav viewport so
   // users don't lose track of where they are as they drill into deeper
