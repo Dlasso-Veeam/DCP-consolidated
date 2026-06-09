@@ -1646,6 +1646,10 @@ td.rec-cell-lt { max-width: 340px; min-width: 220px; vertical-align: top; }
   min-width: 0;
 }
 .panel-strip:empty { display: none; }
+/* Parent-action kebab in the drill header — vertically centered, pinned to the
+   right edge after the info strip; fixed width so it never steals breadcrumb
+   space. */
+.drill-parent-kebab { align-self: center; flex-shrink: 0; margin-left: 8px; }
 .panel-strip-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--black-60); min-width: 0; max-width: 100%; }
 .panel-strip-chip .panel-strip-chip-icon { display: inline-flex; align-items: center; color: var(--black-60); flex-shrink: 0; }
 .panel-strip-chip .panel-strip-chip-icon svg { width: 13px; height: 13px; }
@@ -5322,6 +5326,22 @@ body.drawer-open { overflow: hidden; }
                      the strip carries only Status / Policies / Last
                      Backup chips. -->
                 <div class="panel-strip" id="childPanelStrip"></div>
+                <!-- Parent-scoped actions: restore/preview the resource the
+                     user has drilled INTO (not its children). Reuses the row
+                     kebab machinery (toggleRowKebab → #rk-drillParent). Kept as
+                     an overflow ⋮ so it never competes with the breadcrumb or
+                     info chips for header width. Shown only in drill mode on a
+                     concrete parent (hidden in pseudo-folder views) — see
+                     applyChildHeader. -->
+                <div class="row-kebab-wrap drill-parent-kebab" id="childParentKebabWrap" style="display:none">
+                  <button class="btn-icon btn-icon-sm" type="button" title="More actions for this item" aria-label="More actions for this item" onclick="toggleRowKebab(event,'drillParent')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+                  </button>
+                  <div class="row-kebab-menu" id="rk-drillParent">
+                    <div class="row-kebab-item" id="childParentRestoreItem" onclick="closeAllRowKebabs();drillParentRestore()">Restore</div>
+                    <div class="row-kebab-item" onclick="closeAllRowKebabs();drillParentPreview()">Preview</div>
+                  </div>
+                </div>
               </div>
               <div class="inv-search" style="position:relative">
                 <div class="inv-search-row">
@@ -10032,6 +10052,18 @@ function applyChildHeader() {
   // Phase 4 — populate the summary strip with Type / Status / Policies
   // Applied / Last Backup chips for the current drill scope.
   if (typeof renderChildPanelStrip === 'function') renderChildPanelStrip(cur);
+  // Parent-action kebab: label its Restore item with the concrete parent name
+  // and reveal it only on a real resource (not a pseudo-folder view, where
+  // there's no single restorable subject).
+  var _pkWrap = document.getElementById('childParentKebabWrap');
+  if (_pkWrap) {
+    var _showPk = !childState.folder;
+    _pkWrap.style.display = _showPk ? '' : 'none';
+    if (_showPk) {
+      var _pkItem = document.getElementById('childParentRestoreItem');
+      if (_pkItem) _pkItem.textContent = 'Restore ' + (cur.name || 'this item');
+    }
+  }
   // Back button is always visible in drill mode. childGoBack handles
   // both states:
   //   • history non-empty → pop the latest frame (restores prior
@@ -33685,6 +33717,17 @@ function closeAllRowKebabs() {
   document.querySelectorAll('.row-kebab-menu.show').forEach(function(m){
     m.classList.remove('show');
   });
+}
+// Parent-scoped actions for the drill header kebab. Both target the resource
+// the user has drilled INTO (childState.parentId) and reuse the same row-level
+// handlers, so the parent behaves exactly like a row would.
+function drillParentRestore() {
+  if (!childState || !childState.parentId || childState.folder) return;
+  if (typeof addToRestoreRow === 'function') addToRestoreRow(childState.parentId);
+}
+function drillParentPreview() {
+  if (!childState || !childState.parentId || childState.folder) return;
+  if (typeof previewResource === 'function') previewResource(childState.parentId);
 }
 
 // ═══════════════════════════════════════════════════════════════════
