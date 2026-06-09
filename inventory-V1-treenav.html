@@ -17031,10 +17031,21 @@ function pickWorkloadFromDrawer(name, wl) {
   updateNavDrawerWlLabel();
   // Drawer stays open so the user can drill the tree for the new workload.
 }
+// Collapse the workload picker when clicking anywhere outside it. The button +
+// dropdown both live inside #treeNavWlPicker, so interacting with them is ignored.
+document.addEventListener('click', function (e) {
+  var p = document.getElementById('treeNavWlPicker');
+  if (!p || !p.classList.contains('is-open')) return;
+  if (p.contains(e.target)) return;
+  closeNavWlPicker();
+});
 if (NAV_COMPACT_MQ.addEventListener) NAV_COMPACT_MQ.addEventListener('change', applyLayoutMode);
 else if (NAV_COMPACT_MQ.addListener) NAV_COMPACT_MQ.addListener(applyLayoutMode);
 document.addEventListener('keydown', function (e) {
-  if (e.key === 'Escape' && _appEl() && _appEl().classList.contains('nav-drawer-open')) closeNavDrawer();
+  if (e.key !== 'Escape') return;
+  var p = document.getElementById('treeNavWlPicker');
+  if (p && p.classList.contains('is-open')) { closeNavWlPicker(); return; }
+  if (_appEl() && _appEl().classList.contains('nav-drawer-open')) closeNavDrawer();
 });
 // First run: applyLayoutMode() sets the initial mode with transitions disabled
 // (no attribute yet → treated as a change) and re-enables them a paint later,
