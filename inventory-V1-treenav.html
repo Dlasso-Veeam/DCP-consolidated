@@ -1429,9 +1429,14 @@ td.rec-cell-lt { max-width: 340px; min-width: 220px; vertical-align: top; }
 .app[data-layout="compact"] .tree-nav.is-collapsed .tree-nav-body { display: flex; }
 .app[data-layout="compact"] .tree-nav-resize { display: none; }
 
-/* compact: scrim behind the open drawer */
+/* compact: keep the product nav rail ABOVE the drawer + scrim so the drawer
+   slides in underneath it (rather than over/darkening it). */
+.app[data-layout="compact"] .sidenav { z-index: 130; }
+
+/* compact: scrim behind the open drawer. Starts at the 64px rail edge so the
+   product navigation strip stays bright and interactive. */
 .app[data-layout="compact"] .nav-scrim {
-  display: block; position: fixed; inset: 0; background: rgba(31,34,41,0.42);
+  display: block; position: fixed; top: 0; right: 0; bottom: 0; left: 64px; background: rgba(31,34,41,0.42);
   z-index: 110; opacity: 0; pointer-events: none; transition: none;
 }
 .app.nav-anim-ready[data-layout="compact"] .nav-scrim { transition: opacity 0.2s ease; }
