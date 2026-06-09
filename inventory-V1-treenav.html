@@ -185,11 +185,12 @@ body { font-family: 'Circular Pro', -apple-system, sans-serif; background: var(-
 .drill-crumb-menu-item .dcm-count.zero { background: var(--black-5); color: var(--black-60); }
 .drill-crumb-menu-empty { padding: 12px; font-size: 16px; color: var(--black-60); text-align: center; }
 .topbar-row { display: flex; align-items: center; justify-content: space-between; }
-.page-title { font-family: 'ITC Avant Garde Gothic Std',sans-serif; letter-spacing:-0.02em; font-size: 24px; font-weight: 500; color: var(--black-100); display: flex; align-items: center; gap: 10px; }
+.page-title { font-family: 'ITC Avant Garde Gothic Std',sans-serif; letter-spacing:-0.02em; font-size: 24px; font-weight: 500; color: var(--black-100); display: flex; align-items: center; gap: 10px; white-space: nowrap; }
 .topbar-actions { display: flex; align-items: center; gap: 8px; }
 /* Narrow screens: stack the page title above the action buttons so neither
-   gets cramped; let the buttons wrap onto multiple rows. */
-@media (max-width: 640px) {
+   gets cramped; let the buttons wrap onto multiple rows. The breakpoint is set
+   wide enough that the row stacks BEFORE the inline title is forced to wrap. */
+@media (max-width: 880px) {
   .topbar-row { flex-direction: column; align-items: flex-start; gap: 12px; }
   .topbar-actions { flex-wrap: wrap; }
 }
