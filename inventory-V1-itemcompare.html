@@ -17138,14 +17138,28 @@ function renderTreeNav() {
     return html;
   }
 
-  // Tree roots = the ACTIVE category's resources, rendered at the top
-  // level directly. Category SELECTION moved to the workload panel
-  // (renderWlNavCats), so the tree no longer shows the "All [Cat]" /
-  // "Deleted in prod" wrapper rows — it shows the contents of whichever
-  // category is selected on the left. Build the active category's node
-  // and expand it one level to get its resource roots.
+  // Tree roots depend on layout:
+  //   • DESKTOP (wide): the left wl-nav rail owns category SELECTION
+  //     (renderWlNavCats), so the tree shows the CONTENTS of the active
+  //     category directly — no "All [Cat]" / "Deleted in prod" wrapper rows.
+  //   • COMPACT / mobile drawer (≤1024px): the wl-nav rail is hidden, so the
+  //     tree owns the full hierarchy — category roots (All environments,
+  //     Deleted from prod, …) at the top, each drilling into its resources.
+  //     Workload still switches via the drawer's compact picker. The active
+  //     category auto-expands so its resources show without an extra tap.
+  // (The category-roots-as-tree pattern will become the desktop model too in
+  // a follow-up variant; for now it's scoped to the drawer.)
+  var _treeCompact = (typeof window !== 'undefined' && window.matchMedia
+    && window.matchMedia('(max-width: 1024px)').matches);
   var roots = [];
-  if (state.cat) {
+  if (_treeCompact) {
+    roots = (typeof _treeCategoryRoots === 'function') ? _treeCategoryRoots() : [];
+    // First-time auto-expand of the active category (respects later
+    // user collapse — only seeds when the key has never been set).
+    if (state.cat && state.treeExpanded['cat:' + state.cat] === undefined) {
+      state.treeExpanded['cat:' + state.cat] = true;
+    }
+  } else if (state.cat) {
     var _activeCatItem = null;
     for (var _si = 0; _si < CATEGORIES.length && !_activeCatItem; _si++) {
       for (var _ii = 0; _ii < CATEGORIES[_si].items.length; _ii++) {
@@ -37483,6 +37497,19 @@ window.__devJumpResolve = function(h) {
      finds window.__SECURITI_ICONS already populated. -->
 <script src="securiti-icons-data.js"></script>
 <script src="securiti-icons.js"></script>
+
+<!-- Re-render the tree-nav when crossing the compact (≤1024px) breakpoint, so
+     the drawer's category-root structure vs. the desktop category-contents
+     structure swaps correctly on resize. -->
+<script>
+(function(){
+  if (!window.matchMedia) return;
+  var mq = window.matchMedia('(max-width: 1024px)');
+  var on = function(){ if (typeof renderTreeNav === 'function') renderTreeNav(); };
+  if (mq.addEventListener) mq.addEventListener('change', on);
+  else if (mq.addListener) mq.addListener(on);
+})();
+</script>
 
 <!-- Reusable tooltip: shows a styled bubble for any [data-tooltip] element
      (a proper replacement for native title= popups). One delegated handler. -->
