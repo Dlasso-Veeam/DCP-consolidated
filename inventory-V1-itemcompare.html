@@ -15432,14 +15432,20 @@ function updateTogglePills() {
   // be wrong before the user scrolls past the dev-jump bar.
   var wlRect   = wlNav.getBoundingClientRect();
   var treeRect = treeNav.getBoundingClientRect();
-  var TOP      = wlRect.top + 28;
+  // Anchor each pill to its OWN panel's current top. The wl-nav may be hidden
+  // (e.g. the tree-nav-primary layout sets display:none on it), which collapses
+  // its rect to (0,0) — deriving a shared TOP from it would float the tree pill
+  // up to the very top of the page, detached from the panel it controls.
+  var wlHidden = getComputedStyle(wlNav).display === 'none';
+  var wlTop    = wlRect.top + 28;
+  var treeTopBase = treeRect.top + 28;
   var wlRight   = wlRect.right;
   var treeRight = treeRect.right;
 
   // ── wl-nav pill ──
   wlPill.style.left    = wlRight + 'px';
-  wlPill.style.top     = TOP + 'px';
-  wlPill.style.display = bothCollapsed ? 'none' : 'inline-flex';
+  wlPill.style.top     = wlTop + 'px';
+  wlPill.style.display = (bothCollapsed || wlHidden) ? 'none' : 'inline-flex';
   wlPill.querySelector('svg').style.transform = wlCollapsed ? 'rotate(180deg)' : '';
   wlPill.setAttribute('aria-expanded', wlCollapsed ? 'false' : 'true');
   wlPill.title = wlPill.setAttribute('aria-label',
@@ -15450,9 +15456,9 @@ function updateTogglePills() {
   // When tree-nav is collapsed while wl-nav is expanded the two panels share
   // the same right-edge x — offset the tree pill slightly down so both
   // remain individually reachable without overlapping.
-  var treeTop = TOP;
-  if (treeCollapsed && !wlCollapsed && Math.abs(treeRight - wlRight) < 4) {
-    treeTop = TOP + 32;
+  var treeTop = treeTopBase;
+  if (treeCollapsed && !wlCollapsed && !wlHidden && Math.abs(treeRight - wlRight) < 4) {
+    treeTop = treeTopBase + 32;
   }
   treePill.style.left    = treeRight + 'px';
   treePill.style.top     = treeTop + 'px';
@@ -15464,7 +15470,7 @@ function updateTogglePills() {
 
   // ── combined expand pill (both collapsed) ──
   bothPill.style.left    = treeRight + 'px';
-  bothPill.style.top     = TOP + 'px';
+  bothPill.style.top     = treeTopBase + 'px';
   bothPill.style.display = bothCollapsed ? 'inline-flex' : 'none';
 }
 
