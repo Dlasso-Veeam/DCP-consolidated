@@ -15491,7 +15491,14 @@ function updateTogglePills() {
   // up to the very top of the page, detached from the panel it controls.
   var wlHidden = getComputedStyle(wlNav).display === 'none';
   var wlTop    = wlRect.top + 28;
-  var treeTopBase = treeRect.top + 28;
+  // Center the collapse pill vertically within the picker/header band (its
+  // bottom border lines up with the table header), rather than a fixed 28px
+  // offset that assumed the old shorter band.
+  var _pillH = treePill.getBoundingClientRect().height || 24;
+  var _pickerEl = treeNav.querySelector('.tree-nav-wl-picker');
+  var _bandH = (_pickerEl && getComputedStyle(_pickerEl).display !== 'none')
+    ? _pickerEl.getBoundingClientRect().height : 56;
+  var treeTopBase = treeRect.top + Math.max(0, Math.round((_bandH - _pillH) / 2));
   var wlRight   = wlRect.right;
   var treeRight = treeRect.right;
 
