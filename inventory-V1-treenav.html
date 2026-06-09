@@ -17435,7 +17435,10 @@ function treeNavSelect(key) {
 // Toggle expand/collapse on a node (chevron click). Stops the click
 // from propagating so it doesn't double-fire as a row select.
 function treeNavToggle(key) {
-  if (state.treeExpanded[key]) delete state.treeExpanded[key];
+  // Collapse stores an explicit `false` (not delete) so renderTreeNav's
+  // first-time auto-expand seed (which fires on `=== undefined`) doesn't
+  // immediately re-expand a node the user just collapsed.
+  if (state.treeExpanded[key]) state.treeExpanded[key] = false;
   else {
     state.treeExpanded[key] = true;
     // Expanding a node in a different category collapses the others —
