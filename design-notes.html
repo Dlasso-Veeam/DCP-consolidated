@@ -315,10 +315,10 @@ var SECTIONS = [
         links: [ L('Tree-nav (live)', PROTO_NAV), L('Figma — Phase 1', FIGMA_FILE + '?node-id=5024-12776', 'figma') ]
       },
       {
-        title: 'Inventory is cumulative, not date-filtered', tag: 'Temporal model',
-        pattern: 'The table shows every item that exists in the backup set. The "Browse as of" / restore-point context changes which restore points are considered current and what counts as "deleted from prod" — it does not add or remove rows from the inventory.',
-        why: [ 'Users reason about "what do I have," not "what existed at 3pm last Tuesday." Rows appearing and vanishing as you scrub a date is disorienting and erodes trust that the inventory is complete.', 'Keeping membership stable means search, counts, and the tree stay steady while you explore time — only the per-item temporal detail changes.' ],
-        rejected: [ 'Filtering rows by the as-of date — items silently disappeared, and users couldn\'t tell "not backed up yet" from "filtered out."' ],
+        title: 'Inventory is cumulative; no global "as of" date control', tag: 'Temporal model',
+        pattern: 'The table shows every item in the backup set, each presented as of its most recent restore point. There is no global "as of" date scrubber on the inventory — time travel is per-item, inside the preview drawer. Browsing never adds or removes rows.',
+        why: [ 'Users reason about "what do I have," not "what existed at 3pm last Tuesday." Rows appearing and vanishing as you scrub a global date is disorienting and erodes trust that the inventory is complete.', 'Time questions are almost always about one item ("what changed in this account?"), so that exploration belongs in the item\'s drawer — not a tenant-wide control that desyncs search, counts, and the tree.' ],
+        rejected: [ 'A global "Browse as of" date picker that re-scoped the whole table (an earlier V1 iteration). Filtering rows by a global date made items silently disappear, blurred "not backed up yet" vs "filtered out," and competed with the per-item drawer. It was removed; per-item time travel in the drawer replaced it.' ],
         links: [ L('Inventory (live)', PROTO_NAV) ]
       },
       {
@@ -330,9 +330,9 @@ var SECTIONS = [
       },
       {
         title: '"Last backup" is unconditional', tag: 'Honesty',
-        pattern: 'The Last Backup column states when the item was last captured. It does not shift when you move the "Browse as of" pin; for deleted items it freezes at the pre-deletion value.',
-        why: [ 'It is a fact about the item, not a function of what you are currently viewing. Making it move with the pin implied the pin was rewriting history, which is exactly the wrong mental model for a backup product.' ],
-        rejected: [ 'Recomputing Last Backup against the active pin — read as "your backup time changed because you looked at a date," a recurring source of confusion.' ],
+        pattern: 'The Last Backup column states when the item was last captured. It does not shift based on which restore point you preview or compare; for deleted items it freezes at the pre-deletion value.',
+        why: [ 'It is a fact about the item, not a function of what you are currently inspecting. Making it move with the restore point you happen to be viewing implied the product was rewriting history, which is exactly the wrong mental model for a backup tool.' ],
+        rejected: [ 'Recomputing Last Backup against the restore point being viewed — read as "your backup time changed because you looked at a date," a recurring source of confusion.' ],
         links: [ L('Inventory (live)', PROTO_NAV) ]
       },
       {
