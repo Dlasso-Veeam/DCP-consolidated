@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Rationale — Veeam Data Cloud × Securiti</title>
+<style>
+  /* ── Securiti Design System tokens (declared once; never raw hex below) ── */
+  :root {
+    --s-blue-100: #1ca8dd;
+    --s-blue-dark: #0779a5;
+    --s-blue-30: #bbe5f5;
+    --s-blue-10: #e8f6fc;
+    --s-blue-5: #f4fbfe;
+    --s-black-100: #1f2229;
+    --s-black-70: #4b4e56;
+    --s-black-60: #6b6e76;
+    --s-black-30: #a9abb1;
+    --s-black-10: #e3e4e7;
+    --s-black-5: #f4f5f6;
+    --s-white: #ffffff;
+    --s-layout-bg: #edf0f0;
+    --s-form-bg: #f4f6f7;
+    --s-green: #2faa6a;
+    --s-green-10: #e7f6ee;
+    --s-orange: #e8833a;
+    --s-orange-10: #fef1ea;
+    --s-orange-30: #fcd6c0;
+    --s-error: #d64242;
+    --s-nav-dark: #1f2229;
+    --font-body: 'Circular Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-head: 'ITC Avant Garde Gothic Std', 'Circular Pro', -apple-system, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--s-layout-bg);
+    color: var(--s-black-100);
+    font-size: 14px;
+    font-weight: 450;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    background: var(--s-nav-dark);
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-badge {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--s-white);
+    border: 1.5px solid rgba(255,255,255,0.28);
+    padding: 4px 9px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .topbar-sep { width: 1px; height: 22px; background: rgba(255,255,255,0.16); }
+  .topbar-title { font-size: 14px; color: rgba(255,255,255,0.72); }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+  .topbar-link { font-size: 13px; color: rgba(255,255,255,0.6); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+  .topbar-link:hover { color: var(--s-white); }
+  .topbar-meta { font-size: 12px; color: rgba(255,255,255,0.4); }
+
+  /* ── Shell: sticky nav + content ── */
+  .shell { display: flex; align-items: flex-start; max-width: 1180px; margin: 0 auto; }
+
+  .sidenav {
+    width: 248px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 56px;
+    height: calc(100vh - 56px);
+    overflow-y: auto;
+    padding: 28px 16px 40px 24px;
+  }
+  .sidenav-group + .sidenav-group { margin-top: 8px; }
+  .sidenav-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 450;
+    color: var(--s-black-60);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.12s ease, color 0.12s ease;
+  }
+  .sidenav-link:hover { background: var(--s-black-5); color: var(--s-black-100); }
+  .sidenav-link.is-active {
+    color: var(--s-blue-dark);
+    font-weight: 500;
+    background: var(--s-blue-10);
+    box-shadow: inset 2px 0 0 var(--s-blue-100);
+  }
+  .sidenav-link .num { font-size: 12px; color: var(--s-black-30); width: 16px; flex-shrink: 0; }
+  .sidenav-link.is-active .num { color: var(--s-blue-100); }
+  .sidenav-status {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 10px;
+  }
+  .sidenav-status.draft { background: var(--s-orange-10); color: var(--s-orange); }
+
+  /* ── Content ── */
+  .content { flex: 1; min-width: 0; padding: 36px 40px 120px; max-width: 860px; }
+
+  .page-head { margin-bottom: 40px; }
+  .page-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--s-black-30); margin-bottom: 10px; }
+  .page-title { font-family: var(--font-head); font-size: 30px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.18; margin-bottom: 14px; }
+  .page-sub { font-size: 15px; color: var(--s-black-70); max-width: 640px; line-height: 1.7; }
+
+  .section { scroll-margin-top: 72px; padding-top: 8px; margin-bottom: 56px; }
+  .section-head { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--s-black-10); padding-bottom: 12px; margin-bottom: 8px; }
+  .section-num { font-family: var(--font-head); font-size: 13px; font-weight: 500; color: var(--s-blue-100); }
+  .section-title { font-family: var(--font-head); font-size: 22px; font-weight: 500; letter-spacing: -0.01em; }
+  .section-status {
+    margin-left: auto; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 10px;
+  }
+  .section-status.draft { background: var(--s-orange-10); color: var(--s-orange); }
+  .section-status.live { background: var(--s-green-10); color: var(--s-green); }
+  .section-intro { font-size: 15px; color: var(--s-black-70); line-height: 1.7; margin: 16px 0 28px; }
+  .section-intro .lead { color: var(--s-black-100); }
+
+  /* ── Rationale block card ── */
+  .block {
+    background: var(--s-white);
+    border: 1px solid var(--s-black-10);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .block-title { font-size: 16px; font-weight: 500; color: var(--s-black-100); margin-bottom: 4px; }
+  .block-tag { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--s-blue-100); margin-bottom: 12px; }
+
+  .rrow { display: flex; gap: 12px; padding: 12px 0; border-top: 1px solid var(--s-black-5); }
+  .rrow:first-of-type { border-top: none; padding-top: 4px; }
+  .rrow-label {
+    flex-shrink: 0; width: 124px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+    color: var(--s-black-30); padding-top: 2px;
+  }
+  .rrow-body { flex: 1; min-width: 0; font-size: 14px; color: var(--s-black-70); line-height: 1.65; }
+  .rrow-body strong { color: var(--s-black-100); font-weight: 500; }
+  .rrow-body p + p { margin-top: 8px; }
+  .rrow-body ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .rrow-body ul li { position: relative; padding-left: 18px; }
+  .rrow-body ul li::before {
+    content: ''; position: absolute; left: 2px; top: 8px; width: 6px; height: 6px;
+    border-radius: 50%; background: var(--s-black-30);
+  }
+  .rrow.rejected .rrow-body ul li::before { background: var(--s-orange-30); }
+
+  .links { display: flex; flex-wrap: wrap; gap: 8px; }
+  .link-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 28px; padding: 0 12px; border-radius: 4px;
+    font-size: 13px; font-weight: 500; text-decoration: none;
+    border: 1px solid var(--s-black-10); background: var(--s-white); color: var(--s-black-100);
+    transition: background-color 0.12s ease, border-color 0.12s ease;
+  }
+  .link-chip:hover { background: var(--s-black-5); }
+  .link-chip svg { width: 13px; height: 13px; flex-shrink: 0; }
+  .link-chip.figma { border-color: var(--s-blue-30); background: var(--s-blue-5); color: var(--s-blue-dark); }
+  .link-chip.figma:hover { background: var(--s-blue-10); }
+
+  /* ── Stub / outline ── */
+  .outline { background: var(--s-white); border: 1px dashed var(--s-black-30); border-radius: 8px; padding: 20px 24px; }
+  .outline-note {
+    display: flex; gap: 8px; align-items: flex-start;
+    background: var(--s-orange-10); border: 1px solid var(--s-orange-30); border-radius: 8px;
+    padding: 12px 14px; margin-bottom: 16px; font-size: 13px; color: var(--s-black-100);
+  }
+  .outline-note svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--s-orange); margin-top: 1px; }
+  .outline ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .outline li { padding-left: 16px; position: relative; }
+  .outline li::before { content: '›'; position: absolute; left: 0; top: 0; color: var(--s-blue-100); font-weight: 700; }
+  .outline li b { font-weight: 500; color: var(--s-black-100); }
+  .outline li span { color: var(--s-black-60); }
+
+  .principles { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .principle { background: var(--s-white); border: 1px solid var(--s-black-10); border-radius: 8px; padding: 20px; }
+  .principle h4 { font-size: 15px; font-weight: 500; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .principle h4 svg { width: 16px; height: 16px; color: var(--s-blue-100); }
+  .principle p { font-size: 13.5px; color: var(--s-black-70); line-height: 1.6; }
+
+  @media (max-width: 880px) {
+    .sidenav { display: none; }
+    .content { padding: 28px 20px 80px; }
+    .principles { grid-template-columns: 1fr; }
+    .rrow { flex-direction: column; gap: 4px; }
+    .rrow-label { width: auto; }
+  }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <span class="topbar-badge">Veeam × Securiti</span>
+    <span class="topbar-sep"></span>
+    <span class="topbar-title">Data Backup — Design Rationale</span>
+    <div class="topbar-right">
+      <a class="topbar-link" href="inventory-V1-nav.html" target="_blank" rel="noopener">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Open prototype
+      </a>
+      <span class="topbar-meta" id="topbarMeta"></span>
+    </div>
+  </div>
+
+  <div class="shell">
+    <nav class="sidenav" id="sidenav"></nav>
+    <main class="content">
+      <div class="page-head">
+        <div class="page-eyebrow">Design Rationale</div>
+        <h1 class="page-title">Why the Data Backup experience works the way it does</h1>
+        <p class="page-sub">A companion to the PRDs and engineering docs. The PRDs say <em>what</em> to build and the architecture doc says <em>how</em> it's wired — this site captures the <em>why</em>: the reasoning behind each major pattern, and the alternatives we considered and set aside. Organized by feature area, with links to the live prototype and Figma.</p>
+      </div>
+      <div id="sections"></div>
+    </main>
+  </div>
+
+<script>
+// ──────────────────────────────────────────────────────────────────────────
+// CONTENT MODEL
+// Each section = { id, label, num, status: 'live'|'draft', intro, blocks[] | outline }
+// Each block   = { title, tag, why, pattern, rejected[], links[] }
+// Adding rationale = append a block. Adding a section = append to SECTIONS.
+// ──────────────────────────────────────────────────────────────────────────
+var FIGMA_FILE = 'https://www.figma.com/design/s6xht9xThChTzDr2SxMxIz/Data-Backup----Rapid-SaaS---Phase-1';
+var PROTO_NAV = 'inventory-V1-nav.html';
+var PROTO_ITEMCOMPARE = 'inventory-V1-itemcompare.html';
+var PROTO_ONBOARD = 'index.html';
+
+function L(label, href, kind){ return { label: label, href: href, kind: kind || '' }; }
+
+var SECTIONS = [
+  {
+    id: 'overview', num: '00', label: 'Overview & principles', status: 'live',
+    intro: { lead: 'A handful of principles run underneath every screen.', body: 'When a specific decision looks surprising, it usually traces back to one of these. They are the through-line that keeps the experience coherent across workloads.' },
+    principles: [
+      { icon: 'shapes', title: 'Replicate, never invent', body: 'New views reuse existing components and interaction patterns. If a filter bar, search box, or restore button already exists, the new surface clones it exactly rather than introducing a sibling pattern. This is the single biggest driver of consistency — and the rule we most often correct against.' },
+      { icon: 'box', title: 'V1 is deliberately narrow', body: 'V1 assumes one backup schedule per workload, one restore point per restore job, and no global compare mode. These are not gaps — they are scoping choices that keep the mental model simple. What is intentionally deferred is communicated through the in-product Roadmap.' },
+      { icon: 'eye', title: 'The UI tells the truth', body: 'Counts reflect real results, "Last backup" states a fact that does not shift when you browse history, and export-only data is shown as a disabled restore with an explanation rather than hidden. We would rather show an honest constraint than a convenient fiction.' },
+      { icon: 'layers', title: 'One surface, several modes', body: 'Rather than spawn a new drawer or page per task, a single surface takes a mode (compare / restore-points / field-scoped). Fewer components to learn, consistent chrome, and no drift between near-identical variants.' }
+    ]
+  },
+
+  {
+    id: 'onboarding', num: '01', label: 'Onboarding', status: 'draft',
+    intro: { lead: 'Connecting a workload is a short, workload-aware wizard.', body: 'A shared 4-step shell (Basic info → Connect → Configure → Summary) is parameterised per workload rather than forked per connector. This section is an outline pending its full write-up.' },
+    outline: [
+      ['Shared wizard shell, workload-parameterised', 'one shell + a WORKLOADS config table drives copy, auth model, pickers, and checks — not a fork per connector.'],
+      ['Express vs Manual auth as accordion cards', 'mutually-exclusive panels, not radio buttons; Express is the recommended default and Manual is the escape hatch.'],
+      ['Auth state machine', 'Default → Waiting → Connected → Testing → Permissions checking → Confirmed; Test connection stays disabled until auth succeeds.'],
+      ['Permission/feature rows grouped by category', 'the long per-stream scope list collapses into a handful of human-readable feature rows with a coverage count.'],
+      ['Configure = Region & Storage then Protection', 'policy toggles default ON; no scope picker at onboarding — customers retune after connecting.'],
+      ['Third-party brand rules', 'never use a partner wordmark/logo; use a neutral Veeam-styled glyph.']
+    ]
+  },
+
+  {
+    id: 'inventory', num: '02', label: 'Inventory browsing', status: 'live',
+    intro: { lead: 'Inventory is the home base — a navigable, searchable map of everything protected.', body: 'The guiding question is "what do I have, and how do I get to the exact thing I want to restore?" Every decision below serves fast, confident navigation down to the right granularity.' },
+    blocks: [
+      {
+        title: 'Tree-nav is the primary navigation', tag: 'Navigation',
+        pattern: 'A persistent left panel leads with a workload dropdown (+ search) and below it a category-root tree (e.g. All Environments, Deleted from Prod) that expands into the hierarchy. This is the same panel at every width — it was promoted from the mobile drawer to the primary desktop nav.',
+        why: [ 'One spatial model the user learns once and reuses across every workload. The dropdown answers "which workload," the tree answers "where in it" — two questions, two controls, no overlap.', 'Scales as workloads multiply: adding a workload adds a dropdown entry and a category set, not another nav rail.' ],
+        rejected: [ 'A separate workload rail beside a category tree — two competing vertical navs that fought for width and didn\'t scale past a few workloads.', 'Category roots living only inside the workload switch — buried the hierarchy one level too deep.' ],
+        links: [ L('Tree-nav (live)', PROTO_NAV), L('Figma — Phase 1', FIGMA_FILE + '?node-id=5024-12776', 'figma') ]
+      },
+      {
+        title: 'Inventory is cumulative, not date-filtered', tag: 'Temporal model',
+        pattern: 'The table shows every item that exists in the backup set. The "Browse as of" / restore-point context changes which restore points are considered current and what counts as "deleted from prod" — it does not add or remove rows from the inventory.',
+        why: [ 'Users reason about "what do I have," not "what existed at 3pm last Tuesday." Rows appearing and vanishing as you scrub a date is disorienting and erodes trust that the inventory is complete.', 'Keeping membership stable means search, counts, and the tree stay steady while you explore time — only the per-item temporal detail changes.' ],
+        rejected: [ 'Filtering rows by the as-of date — items silently disappeared, and users couldn\'t tell "not backed up yet" from "filtered out."' ],
+        links: [ L('Inventory (live)', PROTO_NAV) ]
+      },
+      {
+        title: 'Drill to the exact restore granularity', tag: 'Hierarchy',
+        pattern: 'Browsing descends through real levels to the leaf you would actually restore — for D365: environment → table → record → field. Synthetic levels (records, fields) coexist with real resources via composite IDs so the same table/drawer machinery serves every depth.',
+        why: [ 'Restore intent lives at a specific depth. Letting users navigate to that depth — not just the top-level resource — means the thing they select is the thing they restore, with no guesswork about scope.', 'A uniform drill mechanism keeps every level behaving identically (search, preview, restore), instead of bespoke screens per type.' ],
+        rejected: [ 'Flat lists per type — forced users to mentally reassemble the hierarchy and hid the parent/child relationships restore depends on.' ],
+        links: [ L('Drill into a record (live)', PROTO_NAV) ]
+      },
+      {
+        title: '"Last backup" is unconditional', tag: 'Honesty',
+        pattern: 'The Last Backup column states when the item was last captured. It does not shift when you move the "Browse as of" pin; for deleted items it freezes at the pre-deletion value.',
+        why: [ 'It is a fact about the item, not a function of what you are currently viewing. Making it move with the pin implied the pin was rewriting history, which is exactly the wrong mental model for a backup product.' ],
+        rejected: [ 'Recomputing Last Backup against the active pin — read as "your backup time changed because you looked at a date," a recurring source of confusion.' ],
+        links: [ L('Inventory (live)', PROTO_NAV) ]
+      },
+      {
+        title: 'Deleted-from-prod is its own bucket', tag: 'Findability',
+        pattern: 'Items deleted in the source still live in the backup and surface under a dedicated "Deleted from Prod" root, separate from live inventory.',
+        why: [ 'Deleted items are the high-stakes restore case — they must be findable. But mixing them into the live list would misrepresent the current state of the source. A separate bucket keeps both truths intact.' ],
+        rejected: [ 'Interleaving deleted items into the main table with a badge — muddied "what exists now" and made the live inventory harder to scan.' ],
+        links: [ L('Deleted from Prod (live)', PROTO_NAV) ]
+      },
+      {
+        title: 'Restore the parent from inside it', tag: 'Affordance',
+        pattern: 'While drilled into a container viewing its children, an overflow (⋮) kebab in the table header offers "Restore <this item>" and "Preview" for the container itself.',
+        why: [ 'You sometimes realise mid-drill that you want the whole container, not the children. Forcing a back-navigation to act on the thing you are already inside is friction. The kebab is a fixed-width overflow so it never competes with the breadcrumb or the info chips for header space.', 'It is a secondary path — the primary restore flow stays at the row level — so an overflow menu is the right weight; missing it just falls back to today\'s behaviour.' ],
+        rejected: [ 'An inline Restore + Preview cluster in the header — crowded the breadcrumb (which needs room to scale) and fought the policy/last-backup chips.', 'Putting it on the search row — semantically wrong and added noise.' ],
+        links: [ L('Drill header kebab (live)', PROTO_NAV) ]
+      }
+    ]
+  },
+
+  {
+    id: 'search', num: '03', label: 'Search', status: 'draft',
+    intro: { lead: 'Search reaches into the data, not just the resource names.', body: 'The differentiator is that a query descends into records and matches field values, then lets you narrow by where the match landed. One block is seeded below; the rest of this section is pending.' },
+    blocks: [
+      {
+        title: 'Search descends into records and field values', tag: 'Depth',
+        pattern: 'A query matches table names, record names, and the values inside record fields. Each hit is tagged with what it matched, and matched terms are highlighted in the result row.',
+        why: [ 'Users search for the data they remember — a customer name, an email, an order number — not the table it lives in. Matching only resource names would miss the most common intent.' ],
+        rejected: [],
+        links: [ L('Search (live)', PROTO_NAV) ]
+      },
+      {
+        title: 'Hit-type facets; no per-field sub-filter', tag: 'Faceting',
+        pattern: 'The search gear offers a "Hit type" facet — All hits / Table name / Record name / Field value — to narrow results by where the term matched. Counts only appear while a search is active. An earlier per-column "Match in field" dropdown was removed.',
+        why: [ 'Hit type is the intuitive, high-value cut and the one that was actually requested. Showing "(0)" counts with no active query was noise, so counts are suppressed when idle.' ],
+        rejected: [ 'A "Match in field" dropdown that narrowed field-value hits to a single column — niche, only ever populated for D365, and it duplicated the "Field value" count.' ],
+        links: [ L('Search facets (live)', PROTO_NAV) ]
+      }
+    ]
+  },
+
+  {
+    id: 'restore', num: '04', label: 'Restore', status: 'live',
+    intro: { lead: 'Restore is built around inspecting an item over time, then assembling a job.', body: 'Two ideas anchor it: the preview drawer is where you compare an item across restore points, and the cart is a single-restore-point assembly surface. Everything else follows from keeping those two models clean.' },
+    blocks: [
+      {
+        title: 'The preview drawer is the comparison surface', tag: 'Compare model',
+        pattern: 'Opening an item\'s preview shows a drawer that, by default, compares its most recent restore point against Production (now). Both sides are restore-point calendar pickers, so you can diff any two points in time for that item.',
+        why: [ 'Time-travel is inherently per-item: you ask "what changed in this account," not "show me the whole tenant as of a date." Anchoring comparison inside the item\'s own surface keeps the question and the answer in one place.', 'Defaulting to latest-vs-Production answers the most common question ("what drifted since the last backup?") with zero setup.' ],
+        rejected: [ 'A global "compare mode" toggle that reframed the entire inventory into a two-date diff — heavyweight, easy to leave on by accident, and it conflated "browse" with "compare." It was removed in favour of the per-item drawer.' ],
+        links: [ L('Preview drawer (live)', PROTO_ITEMCOMPARE), L('Figma — Phase 1', FIGMA_FILE, 'figma') ]
+      },
+      {
+        title: 'One drawer, three modes', tag: 'Architecture',
+        pattern: 'A single drawer renders compare (two-side diff), matches (restore-points list), or a field-scoped preview, switched by a mode/state hint — never a separate component per view.',
+        why: [ 'Three near-identical drawers would drift apart in chrome, behaviour, and bugs. One component with branches keeps them in lockstep and makes "add a view" mean "add a mode," not "add a drawer."' ],
+        rejected: [ 'A dedicated field-preview drawer and a separate restore-points drawer — duplicated chrome and a standing source of inconsistency.' ],
+        links: [ L('Restore points + preview (live)', PROTO_ITEMCOMPARE) ]
+      },
+      {
+        title: 'The cart holds a single restore point', tag: 'Cart model',
+        pattern: 'A restore job restores everything in the cart to one point in time. The cart\'s restore point is carried across items as you add them, surfaced persistently in the action bar, and is the single source of truth that seeds the preview drawer.',
+        why: [ 'In V1 every item shares one backup schedule, so a job naturally targets one moment. A single cart RP matches how the backend restores and spares users from reconciling a dozen per-item timestamps.', 'One source of truth (the cart RP → drawer seed) eliminated a class of bugs where the drawer and the action bar disagreed on which date was active.' ],
+        rejected: [ 'Per-item restore points within a single job — real future capability, but V1 complexity users don\'t need. It\'s surfaced in the Roadmap instead of half-built now.' ],
+        links: [ L('Restore cart (live)', PROTO_ITEMCOMPARE) ]
+      },
+      {
+        title: 'Guard against silently mixing time points', tag: 'Safety',
+        pattern: 'Items accumulate in the cart across drills. Flexible "+ Restore" adds and intentional adds from the drawer both respect the cart\'s pinned RP; changing that RP while the cart is non-empty raises a warning modal with three paths: re-anchor everything, restore now at the current point, or cancel.',
+        why: [ 'The single-RP model is only trustworthy if the user can\'t accidentally end up restoring different items from different moments. The modal makes the trade-off explicit at the exact moment of conflict rather than failing silently.' ],
+        rejected: [ 'Browser confirm() popups for as-of changes — jarring and easy to dismiss without reading; replaced by an in-product modal with named choices.' ],
+        links: [ L('Cart RP conflict (live)', PROTO_ITEMCOMPARE) ]
+      },
+      {
+        title: 'Build confidence before executing', tag: 'Pre-flight',
+        pattern: 'The restore summary runs a live ticker of pre-execution checks (connectivity, permissions, capacity, etc.) driven by a per-workload config — not a hardcoded list — plus an optional Restore reason captured for the recap and audit trail.',
+        why: [ 'Restore is destructive-adjacent; users want assurance it will succeed before they commit. A live, workload-specific checklist turns an anxious moment into a visible green path.', 'Checks are connector-specific (Confluence\'s aren\'t GitHub\'s), so they live in config and travel with the workload.' ],
+        rejected: [ 'A single generic check list for all workloads — either too vague to be reassuring or wrong for half the connectors.' ],
+        links: [ L('Restore summary (live)', PROTO_ITEMCOMPARE) ]
+      }
+    ]
+  },
+
+  {
+    id: 'cross', num: '05', label: 'Cross-cutting', status: 'draft',
+    intro: { lead: 'A few mechanisms span every feature area.', body: 'These keep the workloads consistent and the codebase honest. Outline pending full write-up.' },
+    outline: [
+      ['Workload-dynamic configuration', 'one config table per workload drives catalog copy, auth model, inventory categories, columns, and pre-execution checks — features branch on a workload key, never on a copy-paste fork.'],
+      ['Workload archetypes', 'connectors cluster into a few shapes (identity, source-control, records-platform, content) that share inventory + restore treatments.'],
+      ['Design system fidelity', 'CSS tokens only (never raw hex), inline SVG icons, three component heights (44/36/28), the 4/8/12/16/24 spacing scale, and shadow-based selected/active states.'],
+      ['Roadmap as a pressure valve', 'intentional V1 gaps (multi-RP, global compare) are communicated through the in-product Roadmap rather than half-built.']
+    ]
+  }
+];
+
+// ── Render ──
+function icon(name){
+  var p = {
+    shapes: '<rect x="14" y="3" width="7" height="7" rx="1"/><circle cx="6.5" cy="6.5" r="3.5"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M17.5 14 21 21h-7z"/>',
+    box: '<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="m3 8 9 5 9-5"/><path d="M12 13v8"/>',
+    eye: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+    layers: '<path d="m12 2 9 5-9 5-9-5z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/>'
+  };
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (p[name]||'') + '</svg>';
+}
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function renderLinks(links){
+  if (!links || !links.length) return '';
+  var figmaSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5.5A3.5 3.5 0 0 1 8.5 2H12v7H8.5A3.5 3.5 0 0 1 5 5.5z"/><path d="M12 2h3.5a3.5 3.5 0 1 1 0 7H12z"/><path d="M12 12.5a3.5 3.5 0 1 1 7 0 3.5 3.5 0 1 1-7 0z"/><path d="M5 19.5A3.5 3.5 0 0 1 8.5 16H12v3.5a3.5 3.5 0 1 1-7 0z"/><path d="M5 12.5A3.5 3.5 0 0 1 8.5 9H12v7H8.5A3.5 3.5 0 0 1 5 12.5z"/></svg>';
+  var extSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+  return '<div class="links">' + links.map(function(l){
+    var isFigma = l.kind === 'figma';
+    return '<a class="link-chip' + (isFigma ? ' figma' : '') + '" href="' + l.href + '" target="_blank" rel="noopener">' + (isFigma ? figmaSvg : extSvg) + esc(l.label) + '</a>';
+  }).join('') + '</div>';
+}
+
+function renderBlock(b){
+  var rows = '';
+  rows += '<div class="rrow"><div class="rrow-label">Pattern</div><div class="rrow-body"><p>' + esc(b.pattern) + '</p></div></div>';
+  rows += '<div class="rrow"><div class="rrow-label">Why this way</div><div class="rrow-body"><ul>' + b.why.map(function(w){ return '<li>' + esc(w) + '</li>'; }).join('') + '</ul></div></div>';
+  if (b.rejected && b.rejected.length) {
+    rows += '<div class="rrow rejected"><div class="rrow-label">Alternatives rejected</div><div class="rrow-body"><ul>' + b.rejected.map(function(r){ return '<li>' + esc(r) + '</li>'; }).join('') + '</ul></div></div>';
+  }
+  if (b.links && b.links.length) {
+    rows += '<div class="rrow"><div class="rrow-label">Links</div><div class="rrow-body">' + renderLinks(b.links) + '</div></div>';
+  }
+  return '<div class="block"><div class="block-tag">' + esc(b.tag) + '</div><div class="block-title">' + esc(b.title) + '</div>' + rows + '</div>';
+}
+
+function renderPrinciples(list){
+  return '<div class="principles">' + list.map(function(p){
+    return '<div class="principle"><h4>' + icon(p.icon) + esc(p.title) + '</h4><p>' + esc(p.body) + '</p></div>';
+  }).join('') + '</div>';
+}
+
+function renderOutline(items){
+  var note = '<div class="outline-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>Outline only — full rationale write-up pending. The headings below are the intended blocks.</span></div>';
+  return note + '<div class="outline"><ul>' + items.map(function(it){
+    return '<li><b>' + esc(it[0]) + '</b> — <span>' + esc(it[1]) + '</span></li>';
+  }).join('') + '</ul></div>';
+}
+
+(function init(){
+  var navHtml = '', secHtml = '';
+  SECTIONS.forEach(function(s){
+    var statusChip = s.status === 'draft' ? '<span class="sidenav-status draft">Draft</span>' : '';
+    navHtml += '<a class="sidenav-link" href="#' + s.id + '" data-sec="' + s.id + '"><span class="num">' + s.num + '</span><span>' + esc(s.label) + '</span>' + statusChip + '</a>';
+
+    var secStatus = s.status === 'draft' ? '<span class="section-status draft">Draft</span>' : '<span class="section-status live">Written</span>';
+    var body = '';
+    var intro = s.intro ? '<p class="section-intro"><span class="lead">' + esc(s.intro.lead) + '</span> ' + esc(s.intro.body) + '</p>' : '';
+    if (s.principles) body = renderPrinciples(s.principles);
+    else if (s.blocks) body = s.blocks.map(renderBlock).join('');
+    else if (s.outline) body = renderOutline(s.outline);
+    secHtml += '<section class="section" id="' + s.id + '">'
+      + '<div class="section-head"><span class="section-num">' + s.num + '</span><span class="section-title">' + esc(s.label) + '</span>' + secStatus + '</div>'
+      + intro + body + '</section>';
+  });
+  document.getElementById('sidenav').innerHTML = navHtml;
+  document.getElementById('sections').innerHTML = secHtml;
+  document.getElementById('topbarMeta').textContent = 'V1 · ' + new Date().toISOString().slice(0,10);
+
+  // Scroll-spy: highlight the section in view.
+  var links = Array.prototype.slice.call(document.querySelectorAll('.sidenav-link'));
+  var secs = SECTIONS.map(function(s){ return document.getElementById(s.id); });
+  function spy(){
+    var y = window.scrollY + 120, active = secs[0].id;
+    secs.forEach(function(el){ if (el.offsetTop <= y) active = el.id; });
+    links.forEach(function(a){ a.classList.toggle('is-active', a.getAttribute('data-sec') === active); });
+  }
+  window.addEventListener('scroll', spy, { passive: true });
+  links.forEach(function(a){ a.addEventListener('click', function(e){
+    e.preventDefault();
+    var el = document.getElementById(a.getAttribute('data-sec'));
+    window.scrollTo({ top: el.offsetTop - 64, behavior: 'smooth' });
+  }); });
+  spy();
+})();
+</script>
+</body>
+</html>
