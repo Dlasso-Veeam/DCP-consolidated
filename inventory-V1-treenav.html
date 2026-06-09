@@ -187,6 +187,12 @@ body { font-family: 'Circular Pro', -apple-system, sans-serif; background: var(-
 .topbar-row { display: flex; align-items: center; justify-content: space-between; }
 .page-title { font-family: 'ITC Avant Garde Gothic Std',sans-serif; letter-spacing:-0.02em; font-size: 24px; font-weight: 500; color: var(--black-100); display: flex; align-items: center; gap: 10px; }
 .topbar-actions { display: flex; align-items: center; gap: 8px; }
+/* Narrow screens: stack the page title above the action buttons so neither
+   gets cramped; let the buttons wrap onto multiple rows. */
+@media (max-width: 640px) {
+  .topbar-row { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .topbar-actions { flex-wrap: wrap; }
+}
 
 /* === BUTTONS === */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 4px; font-size: 16px; font-weight: 500; font-family: inherit; cursor: pointer; background: var(--white); color: var(--black-100); border: 1px solid var(--border); transition: background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s; }
