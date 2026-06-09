@@ -1392,7 +1392,10 @@ td.rec-cell-lt { max-width: 340px; min-width: 220px; vertical-align: top; }
    standalone wl-nav rail is hidden (kept in the DOM so the dropdown can still
    source its workload list + drive selection), and the tree renders category
    roots at all widths (see renderTreeNav). */
-.tree-nav-wl-picker { display: block; position: relative; flex-shrink: 0; padding: 10px 12px; border-bottom: 1px solid var(--border-light); }
+/* Padding tuned so this section's total height (12 + 44px button + 11 + 1px
+   border = 68px) matches the inventory/drill table header, making their bottom
+   borders read as one continuous line across the tree-nav ↔ table divider. */
+.tree-nav-wl-picker { display: block; position: relative; flex-shrink: 0; padding: 12px 12px 11px; border-bottom: 1px solid var(--border-light); }
 .wl-nav { display: none !important; }
 .wl-nav-toggle { display: none !important; }
 .nav-scrim { display: none; }
@@ -1456,7 +1459,7 @@ td.rec-cell-lt { max-width: 340px; min-width: 220px; vertical-align: top; }
 }
 .tnwl-btn {
   display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%;
-  height: 36px; padding: 0 12px; background: var(--form-bg); border: 1px solid var(--border-light);
+  height: 44px; padding: 0 12px; background: var(--form-bg); border: 1px solid var(--border-light);
   border-radius: 4px; font-family: inherit; font-size: 14px; font-weight: 500; color: var(--black-100); cursor: pointer;
 }
 .tnwl-btn .tnwl-cur { display: flex; align-items: center; gap: 8px; min-width: 0; }
