@@ -2619,7 +2619,7 @@ td.rec-cell-lt { max-width: 340px; min-width: 220px; vertical-align: top; }
 /* ── Dry run (optional pre-commit preview) — DRAFT ── */
 /* Dry-run / restore disposition surfaces — one summary card serves both modes.
    Categorical rollup band (inside the summary card) + per-item pills. */
-.ws-sum-rollup { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 14px 24px; border-top: 1px solid var(--black-5); }
+.ws-sum-rollup { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
 .ws-sum-rollup-label { font-size: 12px; font-weight: 500; color: var(--black-60); margin-right: 4px; }
 .ws-sum-rollup-calc { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--blue-dark); }
 .ws-dr-stat { display: inline-flex; align-items: baseline; gap: 6px; height: 26px; padding: 0 10px; border-radius: 4px; font-size: 13px; border: 1px solid var(--border-light); }
@@ -27549,26 +27549,15 @@ function wsRenderProgress() {
   var viewActivityTitle = (jobState === 'ready')
     ? 'Activity log will be available once the job starts'
     : 'View this restore job in the Activity log (placeholder)';
-  html += '<div class="ws-sum-card">'
-    + '<div class="ws-sum-row" onclick="wsToggleSummaryExpanded()">'
-      + statusIcon
-      + '<div class="ws-sum-row-text">'
-        + '<div class="ws-sum-row-title">' + wsEscape(title) + chevSvg + '</div>'
-        + '<div class="ws-sum-row-sub">' + subLine + '</div>'
-      + '</div>'
-      + '<div class="ws-sum-row-actions">'
-        + '<button class="btn btn-outline" type="button" onclick="event.stopPropagation()"' + viewActivityDisabled + ' title="' + viewActivityTitle + '" style="height:36px;padding:0 12px;font-size:14px;border-radius:4px">View Activity</button>'
-      + '</div>'
-    + '</div>';
-  // Categorical change rollup — one band, three states:
-  //   • calculating (dry run computing, or the real job pending/in-flight) →
-  //     a loading line; the prior projection is cleared so we never imply the
-  //     committed numbers are final before they've been re-derived.
-  //   • ready + dry run done → "Projected changes" chips (preview).
-  //   • completed → "Changes applied" chips (the real result).
+  // Categorical change rollup — lives INSIDE the clickable summary row (below the
+  // sub-line), so the chips sit with the card content and clicking them toggles
+  // the card open. Three states: calculating (dry run computing, or the real job
+  // pending/in-flight) → loading line with the projection cleared; ready + dry
+  // run done → "Projected changes" chips; completed → "Changes applied" chips.
   var _changesCalculating = (ws.dryRunPhase === 'running') || jobState === 'pending' || jobState === 'in-progress';
+  var _rollupHtml = '';
   if (_changesCalculating) {
-    html += '<div class="ws-sum-rollup">'
+    _rollupHtml = '<div class="ws-sum-rollup">'
       + '<span class="ws-sum-rollup-label">Changes</span>'
       + '<span class="ws-sum-rollup-calc"><span class="disc-spinner" style="width:14px;height:14px"></span> Calculating changes…</span>'
     + '</div>';
@@ -27579,8 +27568,20 @@ function wsRenderProgress() {
       return '<span class="ws-dr-stat ' + k + (nn === 0 ? ' zero' : '') + '"><b>' + nn + '</b> ' + _WS_DR_META[k].label + '</span>';
     }).join('');
     var _lbl = (jobState === 'completed') ? 'Changes applied' : 'Projected changes';
-    html += '<div class="ws-sum-rollup"><span class="ws-sum-rollup-label">' + _lbl + '</span>' + _chips + '</div>';
+    _rollupHtml = '<div class="ws-sum-rollup"><span class="ws-sum-rollup-label">' + _lbl + '</span>' + _chips + '</div>';
   }
+  html += '<div class="ws-sum-card">'
+    + '<div class="ws-sum-row" onclick="wsToggleSummaryExpanded()">'
+      + statusIcon
+      + '<div class="ws-sum-row-text">'
+        + '<div class="ws-sum-row-title">' + wsEscape(title) + chevSvg + '</div>'
+        + '<div class="ws-sum-row-sub">' + subLine + '</div>'
+        + _rollupHtml
+      + '</div>'
+      + '<div class="ws-sum-row-actions">'
+        + '<button class="btn btn-outline" type="button" onclick="event.stopPropagation()"' + viewActivityDisabled + ' title="' + viewActivityTitle + '" style="height:36px;padding:0 12px;font-size:14px;border-radius:4px">View Activity</button>'
+      + '</div>'
+    + '</div>';
   if (ws.summaryExpanded) {
     // Expanded body: config rows flow at top, then a scrollable items
     // list below. No section headings — the layout itself (key/value
