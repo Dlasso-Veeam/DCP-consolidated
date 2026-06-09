@@ -1462,7 +1462,8 @@ td.rec-cell-lt { max-width: 340px; min-width: 220px; vertical-align: top; }
 .tnwl-btn .tnwl-cur-icon { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; flex-shrink: 0; }
 .tnwl-btn .tnwl-cur-icon svg { width: 18px; height: 18px; }
 .tnwl-btn .tnwl-cur-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tnwl-btn .tnwl-chev { flex-shrink: 0; color: var(--black-60); transition: transform 0.18s ease; }
+.tnwl-btn .tnwl-chev { display: inline-flex; align-items: center; flex-shrink: 0; color: var(--black-60); transition: transform 0.18s ease; }
+.tnwl-btn .tnwl-chev svg { display: block; }
 .tree-nav-wl-picker.is-open .tnwl-btn .tnwl-chev { transform: rotate(180deg); }
 /* Float the dropdown as an overlay over the tree content instead of reflowing
    it inline (the inline behavior was a holdover from the mobile drawer). */
