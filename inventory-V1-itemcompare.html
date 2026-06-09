@@ -1730,6 +1730,11 @@ td.rec-cell-lt { max-width: 340px; min-width: 220px; vertical-align: top; }
    RIGHT actions pinned to the edge even when the context is empty. */
 .tab-center { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 10px; }
 .tab-left svg, .tab-center svg { flex-shrink: 0; }
+/* Keep the search/context line to a single row so it never wraps under and
+   crowds the restore-point chip — the result text ellipsizes if needed while
+   the toggle link (Include children / Limit to parent) stays put. */
+.tab-center .tab-left-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.tab-center .tab-left-link { flex-shrink: 0; white-space: nowrap; }
 /* "as of" lead-in before the restore-point picker in the RIGHT cluster. */
 .tab-asof-label { font-size: 14px; opacity: 0.9; white-space: nowrap; }
 /* Compact cart badge — icon + count only (no "items" word, no
@@ -24013,7 +24018,11 @@ function renderTopActionBar() {
     // toggle, which belonged to the removed global compare axis.
     var _cartRp = (typeof _cartPinnedRpId === 'function') ? _cartPinnedRpId() : null;
     var _cartRpLbl = (typeof _cartRpLabel === 'function') ? _cartRpLabel(_cartRp) : 'Latest backup';
-    var asofHtml = '<span class="tab-asof-label">Restore point</span>'
+    // Drop the "Restore point" text label when the CENTER zone is occupied
+    // (active search / select-all / lock context) so the bar doesn't crowd —
+    // the clock-icon chip already reads as a restore point, and its tooltip
+    // ("Every item in this restore job recovers from this point") explains it.
+    var asofHtml = (leftHtml ? '' : '<span class="tab-asof-label">Restore point</span>')
       + '<span class="seg-btn tab-target-picker">'
         + '<button class="seg-btn-chevron" onclick="event.stopPropagation();openCalPicker(event,\'cart\')" title="Every item in this restore job recovers from this point" aria-haspopup="true">'
           + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-right:5px"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 1.5"/></svg>'
