@@ -1738,6 +1738,11 @@ td.rec-cell-lt { max-width: 340px; min-width: 220px; vertical-align: top; }
 .search-facets-popover-section:first-of-type { border-top: none; }
 .search-facets-popover-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--black-60); margin-bottom: 6px; text-transform: none; letter-spacing: 0; }
 .search-facets-opt { display: flex; align-items: center; gap: 8px; padding: 5px 4px; border-radius: 4px; cursor: pointer; font-size: 14px; color: var(--black-100); }
+/* Nested sub-choice under a hit-type option (e.g. Field value → show as
+   fields / containing records). The indent + left rule states the dependency
+   structurally: this refines its parent option, it isn't an independent facet. */
+.search-facets-subopts { margin: 2px 0 4px 24px; padding-left: 8px; border-left: 2px solid var(--black-5); }
+.search-facets-subopts .search-facets-opt { font-size: 13px; padding: 4px 4px; }
 .search-facets-opt:hover { background: var(--black-5); }
 .search-facets-opt input[type="radio"] { margin: 0; cursor: pointer; }
 .search-facets-opt .search-facets-opt-count { margin-left: auto; font-size: 14px; color: var(--black-60); font-variant-numeric: tabular-nums; }
@@ -20557,21 +20562,37 @@ function _refreshSurfaceAfterFacetChange() {
     if (typeof renderTable === 'function') renderTable();
   }
 }
+// Record/field-level hit types only exist when the search descends into
+// sub-resources. Asking for them IS asking for recursive search, so the
+// system resolves the prerequisite instead of presenting a dead control:
+// flip the real action-bar toggle (visibly) and say so. Switching back to
+// All/Table name does NOT auto-disable — depth may have been user-set.
+function _ensureSearchDepthForDeepHits() {
+  if (state.searchIncludeSubfolders) return;
+  if (typeof toggleSearchIncludeSubfolders === 'function') {
+    toggleSearchIncludeSubfolders();
+    if (typeof showToast === 'function') showToast('Include sub-resources enabled — searching inside records');
+  }
+}
 function setSearchFacetHitKind(kind) {
   state.searchFacets.hitKind = kind || 'all';
+  if (kind === 'record' || kind === 'field') _ensureSearchDepthForDeepHits();
   renderInvSearchFacetsPopover();
   syncSearchFacetsBtns();
   _refreshSurfaceAfterFacetChange();
 }
-// "Show results as" — controls the GRANULARITY of field-value results:
+// "Show as" — nested refinement of the Field value hit type:
 //   'fields'  (default) → one leaf row per matched field (surgical,
 //              field-level restore)
 //   'records' → roll matched fields up to their containing RECORD —
 //              one Record row per record, record-level restore,
 //              annotated with which field(s) matched.
-// Separates "where did it match?" (Hit type) from "what do I act on?".
+// Choosing the sub-option implies its parent: it also selects the
+// Field value hit type and enables recursive depth.
 function setSearchFacetShowAs(v) {
   state.searchFacets.showAs = (v === 'records') ? 'records' : 'fields';
+  state.searchFacets.hitKind = 'field';
+  _ensureSearchDepthForDeepHits();
   renderInvSearchFacetsPopover();
   syncSearchFacetsBtns();
   _refreshSurfaceAfterFacetChange();
@@ -20662,27 +20683,27 @@ function renderInvSearchFacetsPopover() {
       + '<span>' + esc(k.label) + '</span>'
       + (_searchActive ? '<span class="search-facets-opt-count">(' + k.count + ')</span>' : '')
       + '</label>';
+    // "Show as" — a NESTED refinement of the Field value option (not an
+    // independent facet): when the term matched inside a field, should the
+    // result row be the matched field itself (surgical field-level restore)
+    // or the record containing it (record-level restore, annotated with the
+    // matched field)? Nesting states the dependency structurally and removes
+    // incoherent combos like Record name + containing-records. Inventory
+    // level only — the drill's records view already operates at its level.
+    if (k.key === 'field' && anchorId !== 'childSearchFacetsBtn') {
+      html += '<div class="search-facets-subopts">';
+      [ { key: 'fields',  label: 'Show matched fields' },
+        { key: 'records', label: 'Show containing records' } ].forEach(function(o){
+        var checked2 = (f.showAs || 'fields') === o.key ? ' checked' : '';
+        html += '<label class="search-facets-opt">'
+          + '<input type="radio" name="invSearchFacetShowAs" value="' + o.key + '"' + checked2 + ' onchange="setSearchFacetShowAs(\'' + o.key + '\')">'
+          + '<span>' + esc(o.label) + '</span>'
+          + '</label>';
+      });
+      html += '</div>';
+    }
   });
   html += '</div>';
-  // "Show results as" — granularity of field-value results. Hit type answers
-  // "where did the term match?"; this answers "what should the result rows
-  // BE?" — the matched fields themselves (surgical field-level restore) or
-  // the records containing them (record-level restore, annotated with the
-  // matched field). Inventory-level only (the drill's records view already
-  // operates at its natural level), and only when field hits exist.
-  if (anchorId !== 'childSearchFacetsBtn' && _searchActive && (counts.hitKind.field > 0)) {
-    html += '<div class="search-facets-popover-section">';
-    html += '<div class="search-facets-popover-label">Show results as</div>';
-    [ { key: 'fields',  label: 'Matched fields' },
-      { key: 'records', label: 'Containing records' } ].forEach(function(o){
-      var checked2 = (f.showAs || 'fields') === o.key ? ' checked' : '';
-      html += '<label class="search-facets-opt">'
-        + '<input type="radio" name="invSearchFacetShowAs" value="' + o.key + '"' + checked2 + ' onchange="setSearchFacetShowAs(\'' + o.key + '\')">'
-        + '<span>' + esc(o.label) + '</span>'
-        + '</label>';
-    });
-    html += '</div>';
-  }
   // (The per-field "Match in field" sub-filter was removed — Hit type is the
   // requested, intuitive facet; narrowing field-value hits to a single column
   // was niche and duplicated the "Field value" count.)
@@ -38179,10 +38200,11 @@ function aiBuildSteps(){
         // only surfaces primary rows, never records/fields), then the
         // hit-type facet = Field value.
         var inp=document.getElementById('invSearch'); if(inp){ inp.value='Manufacturing'; }
-        if(!state.searchIncludeSubfolders && typeof toggleSearchIncludeSubfolders==='function') toggleSearchIncludeSubfolders();
-        if(typeof setSearchFacetHitKind==='function') setSearchFacetHitKind('field');
-        // The ask is record-level, so flip results to "Containing records" —
-        // field matches roll up to one Record row each (record-level restore).
+        // One intent call: "field-value matches, shown as containing records".
+        // setSearchFacetShowAs resolves its own prerequisites — it selects the
+        // Field value hit type and auto-enables Include sub-resources (the
+        // action-bar toggle visibly flips), so the agent drives exactly what a
+        // user would: one choice, system connects the dependent controls.
         if(typeof setSearchFacetShowAs==='function') setSearchFacetShowAs('records');
         if(typeof filterTable==='function') filterTable();
       },
