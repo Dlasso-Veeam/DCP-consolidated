@@ -1992,6 +1992,73 @@ td.rec-cell-lt { max-width: 340px; min-width: 220px; vertical-align: top; }
 .ws-main > .ws-footer { flex-shrink: 0; }
 .ws-body-split { display: flex; flex: 1 1 0; overflow: hidden; min-height: 0; }
 .ws-main { flex: 1 1 0; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+
+/* ── AI assistant panel — pushes the page (not an overlay) ──────────────────
+   High-z fixed right rail; the "push" is done by offsetting .app + the wizard
+   overlay/modal by var(--ai-w) when body.ai-open. */
+:root { --ai-w: 0px; }
+body.ai-open { --ai-w: 420px; }
+.app { transition: padding-right 0.24s ease; }
+body.ai-open .app { padding-right: var(--ai-w); }
+body.ai-open .ws-overlay, body.ai-open .ws-modal { right: var(--ai-w); }
+.ai-panel {
+  position: fixed; top: var(--devjump-h, 0px); right: 0; bottom: 0;
+  width: var(--ai-w); z-index: 950; overflow: hidden;
+  background: var(--white); border-left: 1px solid var(--border-light);
+  box-shadow: -8px 0 24px rgba(31,34,41,0.08);
+  display: flex; flex-direction: column; transition: width 0.24s ease;
+}
+.ai-head { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border-light); flex-shrink: 0; }
+.ai-head-glyph { width: 30px; height: 30px; border-radius: 6px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+  background: conic-gradient(from 90deg,#5bbc7b 0deg,#119ee7 57.6deg,#d83dcf 153deg,#ee6b36 234deg,#8fd131 320.4deg,#5bbc7b 360deg); }
+.ai-head-glyph svg { width: 20px; height: 20px; }
+.ai-head-text { flex: 1; min-width: 0; }
+.ai-head-title { font-size: 15px; font-weight: 500; color: var(--black-100); }
+.ai-head-sub { font-size: 12px; color: var(--black-60); }
+.ai-head-close { width: 28px; height: 28px; border: none; background: none; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ai-head-close:hover { background: var(--black-5); color: var(--black-100); }
+.ai-body { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; background: var(--black-3); }
+.ai-msg { display: flex; }
+.ai-msg.user { justify-content: flex-end; }
+.ai-bubble { max-width: 88%; font-size: 14px; line-height: 1.55; border-radius: 10px; padding: 10px 13px; }
+.ai-msg.agent .ai-bubble { background: var(--white); border: 1px solid var(--border-light); color: var(--black-100); border-top-left-radius: 4px; }
+.ai-msg.user .ai-bubble { background: var(--blue); color: var(--white); border-top-right-radius: 4px; }
+.ai-bubble strong { font-weight: 600; }
+.ai-bubble p + p { margin-top: 8px; }
+.ai-action { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; color: var(--black-60); }
+.ai-action .ai-action-ic { width: 16px; height: 16px; flex-shrink: 0; color: var(--green); display: inline-flex; }
+.ai-action.run { color: var(--blue-dark); }
+.ai-action.run .ai-action-ic { color: var(--blue); }
+.ai-gate { margin-top: 10px; border-top: 1px solid var(--black-5); padding-top: 10px; }
+.ai-gate-q { font-size: 13.5px; color: var(--black-100); margin-bottom: 10px; }
+.ai-gate-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.ai-gate-btn { height: 32px; padding: 0 14px; border-radius: 4px; font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; border: 1px solid var(--border); background: var(--white); color: var(--black-100); }
+.ai-gate-btn:hover { background: var(--black-5); }
+.ai-gate-btn.primary { background: var(--blue); border-color: var(--blue); color: var(--white); }
+.ai-gate-btn.primary:hover { filter: brightness(0.95); background: var(--blue); }
+.ai-gate.resolved .ai-gate-btns { display: none; }
+.ai-gate-done { font-size: 12px; color: var(--green); font-weight: 500; display: none; }
+.ai-gate.resolved .ai-gate-done { display: block; }
+.ai-thinking { align-self: flex-start; display: inline-flex; gap: 4px; align-items: center; padding: 12px 14px; background: var(--white); border: 1px solid var(--border-light); border-radius: 10px; border-top-left-radius: 4px; }
+.ai-thinking span { width: 6px; height: 6px; border-radius: 50%; background: var(--black-30); animation: aiPulse 1.2s infinite ease-in-out; }
+.ai-thinking span:nth-child(2) { animation-delay: 0.18s; }
+.ai-thinking span:nth-child(3) { animation-delay: 0.36s; }
+@keyframes aiPulse { 0%, 60%, 100% { opacity: 0.3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
+.ai-foot { flex-shrink: 0; border-top: 1px solid var(--border-light); padding: 12px 16px; background: var(--white); }
+.ai-chips { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.ai-chips:empty { display: none; }
+.ai-chip { font-size: 13px; text-align: left; border: 1px solid var(--blue-30); background: var(--blue-10); color: var(--blue-dark); border-radius: 8px; padding: 8px 12px; cursor: pointer; font-family: inherit; line-height: 1.4; }
+.ai-chip:hover { background: var(--blue-30); }
+.ai-input-row { display: flex; align-items: center; gap: 8px; }
+.ai-input { flex: 1; min-width: 0; height: 40px; border: 1px solid var(--border); border-radius: 8px; padding: 0 12px; font-family: inherit; font-size: 14px; color: var(--black-100); outline: none; }
+.ai-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-10); }
+.ai-send { width: 40px; height: 40px; flex-shrink: 0; border: none; border-radius: 8px; background: var(--blue); color: var(--white); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.ai-send:hover { filter: brightness(0.95); }
+.ai-send:disabled { opacity: 0.45; cursor: not-allowed; }
+@media (max-width: 860px) {
+  body.ai-open { --ai-w: 100vw; }
+  body.ai-open .app { padding-right: 0; }
+}
 .ws-body { flex: 1 1 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; min-height: 0; }
 /* Onboarding sidebar pattern — same class names so the visual is
    1:1 with the Connect / Configure / Summary rail in index.html.
@@ -5026,7 +5093,7 @@ body.drawer-open { overflow: hidden; }
           <button class="nav-drawer-btn" type="button" aria-expanded="false" aria-controls="treeNav" onclick="toggleNavDrawer()" title="Browse workloads & items" aria-label="Open navigation">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           </button>
-          <button class="filter-ai" type="button" title="Filter with AI" aria-label="Filter with AI">
+          <button class="filter-ai" type="button" onclick="aiOpen()" title="Ask the assistant" aria-label="Ask the assistant">
             <svg viewBox="0 0 36 36" aria-hidden="true">
               <path fill="#fff" d="M18 9.75C18.5502 9.75 19.0272 10.1307 19.1492 10.6672L19.8013 13.5349C20.1029 14.8613 21.1387 15.8971 22.4651 16.1987L25.3328 16.8508C25.8693 16.9728 26.25 17.4498 26.25 18C26.25 18.5502 25.8693 19.0272 25.3328 19.1492L22.4651 19.8013C21.1387 20.1029 20.1029 21.1387 19.8013 22.4651L19.1492 25.3328C19.0272 25.8693 18.5502 26.25 18 26.25C17.4498 26.25 16.9728 25.8693 16.8508 25.3328L16.1987 22.4651C15.8971 21.1387 14.8613 20.1029 13.5349 19.8013L10.6672 19.1492C10.1307 19.0272 9.75 18.5502 9.75 18C9.75 17.4498 10.1307 16.9728 10.6672 16.8508L13.5349 16.1987C14.8613 15.8971 15.8971 14.8613 16.1987 13.5349L16.8508 10.6672C16.9728 10.1307 17.4498 9.75 18 9.75Z"/>
             </svg>
@@ -5038,7 +5105,7 @@ body.drawer-open { overflow: hidden; }
           <button class="nav-drawer-btn" type="button" aria-expanded="false" aria-controls="treeNav" onclick="toggleNavDrawer()" title="Browse workloads & items" aria-label="Open navigation">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           </button>
-          <button class="filter-ai" type="button" title="Filter with AI" aria-label="Filter with AI">
+          <button class="filter-ai" type="button" onclick="aiOpen()" title="Ask the assistant" aria-label="Ask the assistant">
             <svg viewBox="0 0 36 36" aria-hidden="true">
               <path fill="#fff" d="M18 9.75C18.5502 9.75 19.0272 10.1307 19.1492 10.6672L19.8013 13.5349C20.1029 14.8613 21.1387 15.8971 22.4651 16.1987L25.3328 16.8508C25.8693 16.9728 26.25 17.4498 26.25 18C26.25 18.5502 25.8693 19.0272 25.3328 19.1492L22.4651 19.8013C21.1387 20.1029 20.1029 21.1387 19.8013 22.4651L19.1492 25.3328C19.0272 25.8693 18.5502 26.25 18 26.25C17.4498 26.25 16.9728 25.8693 16.8508 25.3328L16.1987 22.4651C15.8971 21.1387 14.8613 20.1029 13.5349 19.8013L10.6672 19.1492C10.1307 19.0272 9.75 18.5502 9.75 18C9.75 17.4498 10.1307 16.9728 10.6672 16.8508L13.5349 16.1987C14.8613 15.8971 15.8971 14.8613 16.1987 13.5349L16.8508 10.6672C16.9728 10.1307 17.4498 9.75 18 9.75Z"/>
             </svg>
@@ -27431,6 +27498,12 @@ function wsBeginExecute() {
   // Run the pre-execution check ticker before the restore animation —
   // it'll call wsBeginRestoreAnimation() once every check passes.
   wsKickOffPreExecutionTicker();
+  // AI assistant hook — if the user committed the restore via the real footer
+  // button while the assistant was waiting, let it pick up the narration.
+  if (window.aiAgent && aiAgent.awaitingRealRestore && typeof aiOnRestoreStarted === 'function') {
+    aiAgent.awaitingRealRestore = false;
+    aiOnRestoreStarted();
+  }
 }
 // Restore-animation kick-off — split out from wsBeginExecute so the
 // pre-execution ticker can call it once every check has cleared.
@@ -37754,6 +37827,38 @@ window.__devJumpResolve = function(h) {
   </div><!-- /.ws-modal -->
 </div><!-- /.ws-overlay -->
 
+<!-- ── AI assistant panel ─────────────────────────────────────────────────
+     A right-edge conversational panel that PUSHES the page (not an overlay).
+     It's a high-z fixed rail; the push is done by offsetting .app + the ws
+     overlay/modal by var(--ai-w) when body.ai-open. The agent narrates +
+     gates here while DRIVING the real on-screen UI (search, select, cart,
+     wizard) — we don't rebuild restore inside the chat. -->
+<aside class="ai-panel" id="aiPanel" aria-label="Veeam assistant" aria-hidden="true">
+  <div class="ai-head">
+    <span class="ai-head-glyph" aria-hidden="true">
+      <svg viewBox="0 0 36 36"><path fill="#fff" d="M18 9.75c.55 3.69 3.31 6.45 7 7-3.69.55-6.45 3.31-7 7-.55-3.69-3.31-6.45-7-7 3.69-.55 6.45-3.31 7-7z"/></svg>
+    </span>
+    <div class="ai-head-text">
+      <div class="ai-head-title">Veeam Assistant</div>
+      <div class="ai-head-sub">Guided restore</div>
+    </div>
+    <button class="ai-head-close" type="button" onclick="aiClose()" title="Close" aria-label="Close assistant">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="ai-body" id="aiBody"></div>
+  <div class="ai-foot">
+    <div class="ai-chips" id="aiChips"></div>
+    <div class="ai-input-row">
+      <input type="text" id="aiInput" class="ai-input" placeholder="Ask the assistant to restore something…" autocomplete="off"
+             onkeydown="if(event.key==='Enter'){event.preventDefault();aiSendFromInput();}">
+      <button class="ai-send" type="button" id="aiSend" onclick="aiSendFromInput()" title="Send" aria-label="Send">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
 <!-- Securiti DS icon runtime — swaps inline SVGs into the Securiti
      glyph set at load time. Data file MUST load first so the runtime
      finds window.__SECURITI_ICONS already populated. -->
@@ -37865,6 +37970,193 @@ window.__devJumpResolve = function(h) {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', csInit);
   else csInit();
 })();
+</script>
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   AI ASSISTANT (scripted agentic demo) — see inventory-V1-itemcompare.html for
+   the authoritative copy. Drives the existing UI; risk-scaled approval gates.
+   ══════════════════════════════════════════════════════════════════════════ */
+var aiAgent = { greeted:false, started:false, busy:false, thinking:false, msgs:[], steps:[], idx:0, awaitingRealRestore:false, restoreNarrated:false };
+var AI_PROMPT = 'Restore all Dynamics 365 records where Industry = Manufacturing';
+
+function aiOpen(){
+  document.body.classList.add('ai-open');
+  var p = document.getElementById('aiPanel'); if (p) p.setAttribute('aria-hidden','false');
+  if (!aiAgent.greeted){
+    aiAgent.greeted = true;
+    aiAgent.msgs.push({ role:'agent', html: "Hi — I'm your restore assistant. Tell me what you'd like to recover and I'll do it right here in the console, checking in with you at each step." });
+    aiRenderChips([ AI_PROMPT ]);
+    aiRender();
+  }
+  setTimeout(function(){ var i=document.getElementById('aiInput'); if(i && !aiAgent.busy) i.focus(); }, 280);
+}
+function aiClose(){
+  document.body.classList.remove('ai-open');
+  var p = document.getElementById('aiPanel'); if (p) p.setAttribute('aria-hidden','true');
+}
+function aiSetBusy(b){
+  aiAgent.busy = b;
+  var s=document.getElementById('aiSend'), i=document.getElementById('aiInput');
+  if(s) s.disabled = b; if(i) i.disabled = b;
+}
+function aiRenderChips(list){
+  var el=document.getElementById('aiChips'); if(!el) return;
+  el.innerHTML = (list||[]).map(function(t){ return '<button type="button" class="ai-chip" onclick="aiSend(this.getAttribute(\'data-q\'))" data-q="'+t.replace(/"/g,'&quot;')+'">'+t+'</button>'; }).join('');
+}
+function _aiEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function aiRender(){
+  var body=document.getElementById('aiBody'); if(!body) return;
+  var html = aiAgent.msgs.map(function(m){
+    if(m.role==='user') return '<div class="ai-msg user"><div class="ai-bubble">'+_aiEsc(m.html)+'</div></div>';
+    var gate='';
+    if(m.gate){
+      var btns = m.gate.resolved
+        ? ''
+        : '<div class="ai-gate-btns">'+m.gate.buttons.map(function(b,i){ return '<button type="button" class="ai-gate-btn'+(b.primary?' primary':'')+'" onclick="aiGateClick('+i+')">'+_aiEsc(b.label)+'</button>'; }).join('')+'</div>';
+      gate = '<div class="ai-gate'+(m.gate.resolved?' resolved':'')+'">'
+        + '<div class="ai-gate-q">'+m.gate.q+'</div>'
+        + btns
+        + '<div class="ai-gate-done">✓ '+_aiEsc(m.gate.choice||'Approved')+'</div>'
+        + '</div>';
+    }
+    return '<div class="ai-msg agent"><div class="ai-bubble">'+m.html+gate+'</div></div>';
+  }).join('');
+  if(aiAgent.thinking) html += '<div class="ai-thinking"><span></span><span></span><span></span></div>';
+  body.innerHTML = html;
+  body.scrollTop = body.scrollHeight;
+}
+function aiPushAgent(html, gate){
+  var m = { role:'agent', html: html };
+  if(gate){ m.gate = { q:gate.q, buttons:gate.buttons, resolved:false, choice:null }; aiAgent.activeGate = m; }
+  aiAgent.msgs.push(m); aiRender();
+}
+function aiGateClick(i){
+  var m = aiAgent.activeGate; if(!m || !m.gate || m.gate.resolved) return;
+  var btn = m.gate.buttons[i]; if(!btn) return;
+  m.gate.resolved = true; m.gate.choice = btn.choice || btn.label;
+  aiAgent.activeGate = null; aiRender();
+  if(typeof btn.fn === 'function') btn.fn();
+}
+function aiAction(label, running){
+  var ic = running
+    ? '<span class="ai-action-ic"><span class="disc-spinner" style="width:14px;height:14px"></span></span>'
+    : '<span class="ai-action-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>';
+  return '<div class="ai-action'+(running?' run':'')+'">'+ic+'<span>'+_aiEsc(label)+'</span></div>';
+}
+function aiManufacturingMatches(){
+  var rows = (window.D365_SCHEMAS && D365_SCHEMAS.accounts && D365_SCHEMAS.accounts.rows) || [];
+  var ids=[], names=[];
+  rows.forEach(function(rec, idx){ if(rec.Industry==='Manufacturing'){ ids.push('rec-accounts-'+idx); names.push(rec.Name); } });
+  return { ids:ids, names:names, n:ids.length };
+}
+function aiSendFromInput(){
+  var i=document.getElementById('aiInput'); if(!i) return;
+  var t=(i.value||'').trim(); if(!t || aiAgent.busy) return;
+  i.value=''; aiSend(t);
+}
+function aiSend(text){
+  if(aiAgent.busy) return;
+  aiAgent.msgs.push({ role:'user', html: text }); aiRenderChips([]); aiRender();
+  if(!aiAgent.started){ aiAgent.started = true; aiAgent.steps = aiBuildSteps(); aiAgent.idx = 0; aiNext(); }
+  else { aiPushAgent("For this demo I'm wired to the Manufacturing restore scenario — open a fresh session to run it again."); }
+}
+function aiNext(){
+  if(aiAgent.idx >= aiAgent.steps.length){ aiSetBusy(false); return; }
+  var step = aiAgent.steps[aiAgent.idx++];
+  aiSetBusy(true); aiAgent.thinking = true; aiRender();
+  setTimeout(function(){
+    aiAgent.thinking = false;
+    if(step.run){ try{ step.run(); }catch(e){ console.error('[ai step]', e); } }
+    aiPushAgent(step.say(), step.gate);
+    if(step.gate){ aiSetBusy(false); }
+    else aiNext();
+  }, step.delay || 800);
+}
+function aiBuildSteps(){
+  var m = aiManufacturingMatches();
+  var nounN = m.n + (m.n===1?' record':' records');
+  return [
+    { say: function(){ return "<p>Got it — restore every Dynamics 365 <strong>account record</strong> where <strong>Industry = Manufacturing</strong>.</p><p>Here's how I'll work, right here in your console:</p><p>1 · search &amp; filter → 2 · select the matches → 3 · you review → 4 · configure &amp; dry-run → 5 · you approve the restore.</p>"; } },
+    { run: function(){
+        var inp=document.getElementById('invSearch'); if(inp){ inp.value='Manufacturing'; }
+        if(typeof setSearchFacetHitKind==='function') setSearchFacetHitKind('field');
+        if(typeof filterTable==='function') filterTable();
+      },
+      say: function(){ return "I searched your Dynamics inventory for <strong>Manufacturing</strong> and filtered to records that matched on a <strong>field value</strong> — watch the table on the left update." + aiAction('Searched inventory · filtered to field-value matches'); },
+      gate: { q: "A couple of these matched a company <strong>name</strong> (like “Acme Manufacturing”), not the Industry field. Want me to keep just the <strong>"+nounN+"</strong> where <strong>Industry = Manufacturing</strong>?",
+        buttons: [
+          { label:'Yes, select those', primary:true, choice:'Approved', fn: aiNext },
+          { label:'Let me adjust', choice:'Adjusting', fn: function(){ aiPushAgent("No problem — tell me how you'd like to narrow it (e.g. a specific owner or revenue band)."); aiSetBusy(false); } }
+        ] } },
+    { run: function(){
+        m.ids.forEach(function(id){ if(typeof addToPlan==='function') addToPlan(id, { isPinned:false, source:'bulk' }); });
+        if(typeof renderTable==='function') renderTable();
+        if(typeof updatePlanDock==='function') updatePlanDock();
+        if(typeof updateBulkBar==='function') updateBulkBar();
+      },
+      say: function(){ return "Selected the "+nounN+" and added them to your restore cart, all targeting the <strong>latest restore point</strong>:<br>"+ m.names.map(_aiEsc).join(' · ') + aiAction('Selected '+m.n+' · added to restore cart'); },
+      gate: { q: "Review them on the left — remove any you don't want. Ready to set up the restore?",
+        buttons: [
+          { label:'Set up the restore', primary:true, choice:'Approved', fn: aiNext },
+          { label:'Wait, let me review', choice:'Reviewing', fn: function(){ aiPushAgent("Take your time — the cart's on the left. Say “go ahead” when you're ready."); aiSetBusy(false); } }
+        ] } },
+    { run: function(){
+        if(typeof openWorkspace==='function') openWorkspace();
+        var cfgStep = (typeof wsIsD365Cart==='function' && wsIsD365Cart()) ? 3 : 2;
+        if(typeof wsGotoStep==='function') wsGotoStep(cfgStep);
+      },
+      say: function(){ return "Opened the restore on the left and set it to write back to your <strong>source Dynamics org</strong>, <strong>skipping</strong> records that already exist." + aiAction('Opened restore · destination = source org · conflicts = skip'); },
+      gate: { q: "Want me to run a <strong>dry run</strong> first, so you can see exactly what would change before anything is written?",
+        buttons: [
+          { label:'Run a dry run', primary:true, choice:'Approved', fn: aiNext },
+          { label:'Skip to restore', choice:'Skipped dry run', fn: function(){ aiAgent.skipDry=true; aiNext(); } }
+        ] } },
+    { run: function(){
+        if(aiAgent.skipDry) return;
+        var sumStep = (typeof wsIsD365Cart==='function' && wsIsD365Cart()) ? 4 : 3;
+        if(typeof wsGotoStep==='function') wsGotoStep(sumStep);
+        if(typeof wsRunDryRun==='function') wsRunDryRun();
+      },
+      say: function(){ return aiAgent.skipDry ? "Skipping the dry run." : "Running a dry run — nothing is written. You'll see the projected changes populate in the summary card on the left."; },
+      delay: 700 },
+    { run: function(){
+        if(aiAgent.skipDry){ var sumStep=(typeof wsIsD365Cart==='function'&&wsIsD365Cart())?4:3; if(typeof wsGotoStep==='function') wsGotoStep(sumStep); }
+      },
+      say: function(){
+        var roll = (window.ws && ws.dryRun && ws.dryRun.roll) || null; var line;
+        if(roll){ line = "Dry run complete: <strong>"+(roll.create||0)+" recreated</strong>, "+(roll.overwrite||0)+" overwritten, "+(roll.unchanged||0)+" unchanged"+((roll.blocked||0)?", <strong>"+roll.blocked+" skipped</strong>":"")+"."; if(roll.blocked) line += " The skipped one(s) couldn't be linked — a dependency isn't in this restore."; }
+        else { line = "Here's the projected outcome in the summary card on the left."; }
+        return line + aiAction('Dry run');
+      },
+      delay: 1300,
+      gate: { q: "This will restore <strong>"+nounN+"</strong> to your <strong>production</strong> Dynamics org. You can approve here, or click <strong>Restore "+nounN+"</strong> in the summary yourself.",
+        buttons: [
+          { label:'Approve & restore', primary:true, choice:'Approved restore', fn: function(){ if(typeof wsBeginExecute==='function') wsBeginExecute(); aiOnRestoreStarted(); } },
+          { label:"I'll click Restore myself", choice:'Hand-off to user', fn: function(){ aiAgent.awaitingRealRestore = true; aiPushAgent("Sounds good — click <strong>Restore "+nounN+"</strong> in the summary when you're ready. I'll recap once the job finishes."); } }
+        ] } }
+  ];
+}
+function aiOnRestoreStarted(){
+  if(aiAgent.restoreNarrated) return; aiAgent.restoreNarrated = true;
+  aiPushAgent("Running the restore now — applying changes in dependency order so prerequisites land first." + aiAction('Restore in progress', true));
+  var ticks=0;
+  var t=setInterval(function(){
+    ticks++;
+    var done = (typeof wsOverallJobState==='function' && wsOverallJobState()==='completed');
+    if(done || ticks>40){ clearInterval(t); aiPostSummary(); }
+  }, 600);
+}
+function aiPostSummary(){
+  var roll = (window.ws && ws.dryRun && ws.dryRun.roll) || {};
+  var n = (window.ws && ws.dryRun && ws.dryRun.items && ws.dryRun.items.length) || ((typeof planSize==='function')?planSize():0);
+  var parts=[];
+  if(roll.create) parts.push(roll.create+' recreated');
+  if(roll.overwrite) parts.push(roll.overwrite+' overwritten');
+  if(roll.unchanged) parts.push(roll.unchanged+' unchanged');
+  var skip = roll.blocked ? (' · '+roll.blocked+' skipped (dependency gaps)') : '';
+  aiPushAgent("<p><strong>Restore complete.</strong> "+n+" records restored to your source Dynamics org"+(parts.length?" — "+parts.join(', '):'')+skip+".</p><p>You can track the job in <strong>Activity</strong>. Anything else you'd like to recover?</p>");
+  aiSetBusy(false);
+}
 </script>
 </body>
 </html>
