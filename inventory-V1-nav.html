@@ -20094,6 +20094,21 @@ function _itemReasons(item) {
     return { resource: false, record: true, field: hasF, fields: rf };
   }
   if (r._hitKind === 'field') { var ff = {}; if (r._hitField) ff[r._hitField] = true; return { resource: false, record: false, field: true, fields: ff }; }
+  // Real (non-synthetic) resource. When recursive search is ON, descendant
+  // record/field matches surface as their OWN rows — so a parent container
+  // must not inherit those reasons, or it duplicates them in narrowed views
+  // (e.g. environments passing the Field value facet alongside the very
+  // record rows that represent the matches). Own-name reason only. When
+  // depth is OFF, parents are the only representation of deep matches, so
+  // the inherited rollup remains the meaningful classification.
+  if (state.searchIncludeSubfolders) {
+    var ownResource = false;
+    if (r.type === 'Table') {
+      var lit = (r.name + ' ' + (r.meta || '')).toLowerCase();
+      ownResource = lit.indexOf(_facetActiveQuery()) >= 0;
+    }
+    return { resource: ownResource, record: false, field: false, fields: {} };
+  }
   return _resourceMatchReasons(r, _facetActiveQuery());
 }
 function _computeSearchFacetCounts(groups) {
