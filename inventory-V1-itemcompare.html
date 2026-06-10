@@ -38065,12 +38065,20 @@ function aiBuildSteps(){
     },
     { // 1 — search + filter (read-only) → Gate 1 (result-set scope)
       run: function(){
+        // Drive the REAL narrowing controls, in order:
+        //   1. query text → #invSearch
+        //   2. recursive scope ON (the "Include sub-resources" action-bar
+        //      toggle) — without this, search only surfaces primary rows
+        //      (environments); records/fields never appear as rows.
+        //   3. hit-type facet = Field value, so the results narrow to rows
+        //      that matched INSIDE a field (e.g. Industry), not by name.
         var inp=document.getElementById('invSearch'); if(inp){ inp.value='Manufacturing'; }
+        if(!state.searchIncludeSubfolders && typeof toggleSearchIncludeSubfolders==='function') toggleSearchIncludeSubfolders();
         if(typeof setSearchFacetHitKind==='function') setSearchFacetHitKind('field');
         if(typeof filterTable==='function') filterTable();
       },
-      say: function(){ return "I searched your Dynamics inventory for <strong>Manufacturing</strong> and filtered to records that matched on a <strong>field value</strong> — watch the table on the left update."
-        + aiAction('Searched inventory · filtered to field-value matches'); },
+      say: function(){ return "I searched your Dynamics inventory for <strong>Manufacturing</strong>, expanded the search to include <strong>sub-resources</strong> (so individual records show as rows), and narrowed to matches on a <strong>field value</strong> — watch the table on the left update."
+        + aiAction('Searched inventory · included sub-resources · hit type = field value'); },
       gate: { q: "A couple of these matched a company <strong>name</strong> (like “Acme Manufacturing”), not the Industry field. Want me to keep just the <strong>"+nounN+"</strong> where <strong>Industry = Manufacturing</strong>?",
         buttons: [
           { label:'Yes, select those', primary:true, choice:'Approved', fn: aiNext },

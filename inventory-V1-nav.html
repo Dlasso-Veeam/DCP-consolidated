@@ -38078,11 +38078,16 @@ function aiBuildSteps(){
   return [
     { say: function(){ return "<p>Got it — restore every Dynamics 365 <strong>account record</strong> where <strong>Industry = Manufacturing</strong>.</p><p>Here's how I'll work, right here in your console:</p><p>1 · search &amp; filter → 2 · select the matches → 3 · you review → 4 · configure &amp; dry-run → 5 · you approve the restore.</p>"; } },
     { run: function(){
+        // Drive the REAL narrowing controls: query text, recursive scope ON
+        // (the "Include sub-resources" action-bar toggle — without it search
+        // only surfaces primary rows, never records/fields), then the
+        // hit-type facet = Field value.
         var inp=document.getElementById('invSearch'); if(inp){ inp.value='Manufacturing'; }
+        if(!state.searchIncludeSubfolders && typeof toggleSearchIncludeSubfolders==='function') toggleSearchIncludeSubfolders();
         if(typeof setSearchFacetHitKind==='function') setSearchFacetHitKind('field');
         if(typeof filterTable==='function') filterTable();
       },
-      say: function(){ return "I searched your Dynamics inventory for <strong>Manufacturing</strong> and filtered to records that matched on a <strong>field value</strong> — watch the table on the left update." + aiAction('Searched inventory · filtered to field-value matches'); },
+      say: function(){ return "I searched your Dynamics inventory for <strong>Manufacturing</strong>, expanded the search to include <strong>sub-resources</strong> (so individual records show as rows), and narrowed to matches on a <strong>field value</strong> — watch the table on the left update." + aiAction('Searched inventory · included sub-resources · hit type = field value'); },
       gate: { q: "A couple of these matched a company <strong>name</strong> (like “Acme Manufacturing”), not the Industry field. Want me to keep just the <strong>"+nounN+"</strong> where <strong>Industry = Manufacturing</strong>?",
         buttons: [
           { label:'Yes, select those', primary:true, choice:'Approved', fn: aiNext },
