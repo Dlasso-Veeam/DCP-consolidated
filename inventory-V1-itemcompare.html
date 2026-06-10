@@ -20660,10 +20660,13 @@ function renderInvSearchFacetsPopover() {
     // matched field)? Nesting states the dependency structurally and removes
     // incoherent combos like Record name + containing-records. Inventory
     // level only — the drill's records view already operates at its level.
-    if (k.key === 'field' && anchorId !== 'childSearchFacetsBtn') {
+    // Progressive disclosure: the refinement only appears once Field value is
+    // the selected hit type — offering it earlier reads as an independent
+    // control again.
+    if (k.key === 'field' && anchorId !== 'childSearchFacetsBtn' && (f.hitKind === 'field')) {
       html += '<div class="search-facets-subopts">';
       [ { key: 'fields',  label: 'Show matched fields' },
-        { key: 'records', label: 'Show containing records' } ].forEach(function(o){
+        { key: 'records', label: 'Show records with matched fields' } ].forEach(function(o){
         var checked2 = (f.showAs || 'fields') === o.key ? ' checked' : '';
         html += '<label class="search-facets-opt">'
           + '<input type="radio" name="invSearchFacetShowAs" value="' + o.key + '"' + checked2 + ' onchange="setSearchFacetShowAs(\'' + o.key + '\')">'
