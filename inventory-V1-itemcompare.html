@@ -15209,7 +15209,7 @@ var state = {
   // applies as a delta on the unfiltered result set — the popover
   // surfaces counts for every option from the unfiltered groups.
   // searchFacetsOpen: whether the popover is currently anchored open.
-  searchFacets: { hitKind: 'all' },
+  searchFacets: { hitKind: 'all', showAs: 'fields' },
   searchFacetsOpen: false,
   // Per-state filters for D365 Compare Mode. Each key gates a class
   // of diff rows; "unchanged" defaults off so the user lands on a
@@ -15646,7 +15646,7 @@ function selectWl(label, id) {
   // Reset inventory-search facets — facet support and the available
   // facet options depend on the workload, so a workload switch must
   // clear any active filters and re-evaluate gear-button visibility.
-  if (state.searchFacets) state.searchFacets = { hitKind: 'all' };
+  if (state.searchFacets) state.searchFacets = { hitKind: 'all', showAs: 'fields' };
   if (typeof _closeInvSearchFacetsPopover === 'function') _closeInvSearchFacetsPopover();
   if (typeof syncInvSearchFacetsBtn === 'function') setTimeout(syncInvSearchFacetsBtn, 0);
   // Sync active state in the workload panel
@@ -19838,7 +19838,64 @@ function buildSearchGroups(query) {
         if (!sk || sk === 'default') return;
         if (d365SchemasDescended[sk]) return;
         d365SchemasDescended[sk] = true;
+        // "Show results as" (search-facets gear): in 'records' mode, field
+        // hits are ROLLED UP to their containing record — one Record row per
+        // record (record-level restore), annotated with which field(s)
+        // matched — instead of one leaf row per matched field. The match
+        // still counts as a field hit for the Hit-type facet (_hitKind stays
+        // 'field'); only the representation/action granularity changes.
+        var rollToRecords = !!(state.searchFacets && state.searchFacets.showAs === 'records');
+        var rolledByRec = {};
         _walkD365RecordsAndFields(r, queryKey).forEach(function(hit){
+          if (rollToRecords && hit._hitKind === 'field') {
+            var recKey = hit._recordId;
+            if (seenIds[recKey]) {
+              // Record row already present — either an earlier field roll OR a
+              // record-NAME hit (e.g. "Acme Manufacturing Inc."). Merge this
+              // field match into it: extend the annotation and stamp _hitFields
+              // on the resource so the row also passes the Field-value facet
+              // (it matched both ways; dropping it from a field-faceted view
+              // would silently lose a true Industry match).
+              var g = rolledByRec[recKey];
+              if (!g) {
+                g = null;
+                for (var gi = 0; gi < groups.length; gi++) {
+                  if (groups[gi].resource && groups[gi].resource.id === recKey) { g = groups[gi]; break; }
+                }
+                if (g) { g._fields = g._fields || []; rolledByRec[recKey] = g; }
+              }
+              if (g && g._fields.indexOf(hit._hitField) < 0) {
+                g._fields.push(hit._hitField);
+                g.resource._hitFields = g._fields;
+                var fieldsTxt = (g._fields.length === 1)
+                  ? (g._fields[0] + ' field')
+                  : (g._fields.length + ' fields (' + g._fields.join(', ') + ')');
+                g.sampleSnippet = (g.resource._hitKind === 'record')
+                  ? ('Matched in record name + ' + fieldsTxt)
+                  : ('Matched in ' + fieldsTxt);
+              }
+              return;
+            }
+            var recRow = Object.assign({}, hit, {
+              id: recKey,
+              name: hit._recordName,
+              type: 'Record',
+              parentId: r.id,
+              drillable: (r.drillTarget === 'records'),
+              drillTarget: (r.drillTarget === 'records') ? 'fields' : undefined
+            });
+            var recGroup = {
+              resource: recRow,
+              rps: generateRps(recKey) || [],
+              sampleSnippet: 'Matched in ' + hit._hitField + ' field',
+              parentPath: _invParentBreadcrumb(recRow) || r.name,
+              _fields: [hit._hitField]
+            };
+            groups.push(recGroup);
+            rolledByRec[recKey] = recGroup;
+            seenIds[recKey] = true;
+            return;
+          }
           if (seenIds[hit.id]) return;
           var hitRps = generateRps(hit.id) || [];
           groups.push({
@@ -19882,7 +19939,7 @@ function _searchFacetsActive() {
   // tracked separately via _compareDiffFiltersActive on the sliders
   // button's badge — the two affordances no longer share signaling.
   var f = state.searchFacets;
-  return !!(f && f.hitKind && f.hitKind !== 'all');
+  return !!(f && ((f.hitKind && f.hitKind !== 'all') || f.showAs === 'records'));
 }
 // Returns true iff state.compareDiffFilters deviates from the
 // canonical default. V1 default is "everything on" (every state
@@ -19993,7 +20050,14 @@ function _resourceMatchReasons(r, q) {
 function _itemReasons(item) {
   var r = (item && item.resource) ? item.resource : item;
   if (!r) return { resource: false, record: false, field: false, fields: {} };
-  if (r._hitKind === 'record') return { resource: false, record: true, field: false, fields: {} };
+  if (r._hitKind === 'record') {
+    // Roll-up ("Show results as: Containing records") can merge field matches
+    // into a record-name hit row — _hitFields carries them so the row passes
+    // the Field-value facet too (it matched BOTH ways).
+    var rf = {}; var hasF = !!(r._hitFields && r._hitFields.length);
+    if (hasF) r._hitFields.forEach(function(fn){ rf[fn] = true; });
+    return { resource: false, record: true, field: hasF, fields: rf };
+  }
   if (r._hitKind === 'field') { var ff = {}; if (r._hitField) ff[r._hitField] = true; return { resource: false, record: false, field: true, fields: ff }; }
   return _resourceMatchReasons(r, _facetActiveQuery());
 }
@@ -20469,10 +20533,23 @@ function setSearchFacetHitKind(kind) {
   syncSearchFacetsBtns();
   _refreshSurfaceAfterFacetChange();
 }
+// "Show results as" — controls the GRANULARITY of field-value results:
+//   'fields'  (default) → one leaf row per matched field (surgical,
+//              field-level restore)
+//   'records' → roll matched fields up to their containing RECORD —
+//              one Record row per record, record-level restore,
+//              annotated with which field(s) matched.
+// Separates "where did it match?" (Hit type) from "what do I act on?".
+function setSearchFacetShowAs(v) {
+  state.searchFacets.showAs = (v === 'records') ? 'records' : 'fields';
+  renderInvSearchFacetsPopover();
+  syncSearchFacetsBtns();
+  _refreshSurfaceAfterFacetChange();
+}
 function clearSearchFacets() {
   // Scoped strictly to the search popover now. Compare-diff filters
   // have their own "Reset filters" inside their own popover.
-  state.searchFacets = { hitKind: 'all' };
+  state.searchFacets = { hitKind: 'all', showAs: 'fields' };
   renderInvSearchFacetsPopover();
   syncSearchFacetsBtns();
   _refreshSurfaceAfterFacetChange();
@@ -20557,6 +20634,25 @@ function renderInvSearchFacetsPopover() {
       + '</label>';
   });
   html += '</div>';
+  // "Show results as" — granularity of field-value results. Hit type answers
+  // "where did the term match?"; this answers "what should the result rows
+  // BE?" — the matched fields themselves (surgical field-level restore) or
+  // the records containing them (record-level restore, annotated with the
+  // matched field). Inventory-level only (the drill's records view already
+  // operates at its natural level), and only when field hits exist.
+  if (anchorId !== 'childSearchFacetsBtn' && _searchActive && (counts.hitKind.field > 0)) {
+    html += '<div class="search-facets-popover-section">';
+    html += '<div class="search-facets-popover-label">Show results as</div>';
+    [ { key: 'fields',  label: 'Matched fields' },
+      { key: 'records', label: 'Containing records' } ].forEach(function(o){
+      var checked2 = (f.showAs || 'fields') === o.key ? ' checked' : '';
+      html += '<label class="search-facets-opt">'
+        + '<input type="radio" name="invSearchFacetShowAs" value="' + o.key + '"' + checked2 + ' onchange="setSearchFacetShowAs(\'' + o.key + '\')">'
+        + '<span>' + esc(o.label) + '</span>'
+        + '</label>';
+    });
+    html += '</div>';
+  }
   // (The per-field "Match in field" sub-filter was removed — Hit type is the
   // requested, intuitive facet; narrowing field-value hits to a single column
   // was niche and duplicated the "Field value" count.)
@@ -38075,10 +38171,15 @@ function aiBuildSteps(){
         var inp=document.getElementById('invSearch'); if(inp){ inp.value='Manufacturing'; }
         if(!state.searchIncludeSubfolders && typeof toggleSearchIncludeSubfolders==='function') toggleSearchIncludeSubfolders();
         if(typeof setSearchFacetHitKind==='function') setSearchFacetHitKind('field');
+        // The ask is record-level ("restore the RECORDS where Industry =
+        // Manufacturing"), so flip the results to "Containing records" —
+        // field matches roll up to one Record row each, with record-level
+        // restore, instead of per-field leaf rows.
+        if(typeof setSearchFacetShowAs==='function') setSearchFacetShowAs('records');
         if(typeof filterTable==='function') filterTable();
       },
-      say: function(){ return "I searched your Dynamics inventory for <strong>Manufacturing</strong>, expanded the search to include <strong>sub-resources</strong> (so individual records show as rows), and narrowed to matches on a <strong>field value</strong> — watch the table on the left update."
-        + aiAction('Searched inventory · included sub-resources · hit type = field value'); },
+      say: function(){ return "I searched your Dynamics inventory for <strong>Manufacturing</strong>, expanded the search to include <strong>sub-resources</strong>, narrowed to matches on a <strong>field value</strong>, and set results to show the <strong>records containing</strong> those matches — watch the table on the left update."
+        + aiAction('Searched · sub-resources on · field-value hits · shown as records'); },
       gate: { q: "A couple of these matched a company <strong>name</strong> (like “Acme Manufacturing”), not the Industry field. Want me to keep just the <strong>"+nounN+"</strong> where <strong>Industry = Manufacturing</strong>?",
         buttons: [
           { label:'Yes, select those', primary:true, choice:'Approved', fn: aiNext },
