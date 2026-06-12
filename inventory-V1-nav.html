@@ -1528,6 +1528,15 @@ td.rec-cell-lt { max-width: 340px; min-width: 220px; vertical-align: top; }
   flex-shrink: 0; margin-right: 6px;
 }
 .tree-cart-badge svg { width: 13px; height: 13px; }
+/* Count pill on the "Items in cart" tree root — how many items are staged.
+   Quiet blue pill (DS radius 100px), pushed to the row's right edge. */
+.tree-node-count {
+  margin-left: auto; flex-shrink: 0;
+  min-width: 18px; height: 18px; padding: 0 6px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--blue-light, #e8f6fc); color: var(--blue);
+  border-radius: 100px; font-size: 12px; font-weight: 500;
+}
 
 /* === INVENTORY === */
 .inv-panel { flex: 1; display: flex; flex-direction: column; min-width: 0; }
@@ -1723,6 +1732,53 @@ td.rec-cell-lt { max-width: 340px; min-width: 220px; vertical-align: top; }
 .search-facets-btn.active { background: var(--blue-10, #e8f6fc); color: var(--blue); border-color: var(--blue-30, #bbe5f5); }
 .search-facets-btn svg { width: 16px; height: 16px; display: block; margin: 0; color: inherit; }
 .search-facets-badge { position: absolute; top: -3px; right: -3px; width: 9px; height: 9px; border-radius: 50%; background: var(--blue); border: 2px solid var(--white); }
+/* ── Search options split button (inventory level, D365) ─────────────
+   Ported from search-pattern-lab.html v5. The inventory gear grows a
+   text label ("Search options" — names the popover it opens), an
+   INLINE count pill (number of Match-on narrowings; Show-as never
+   counts), and a split ↺ reset segment that returns the reach to
+   Everything in one click without opening the popover. The drill gear
+   keeps the icon-only treatment — these classes only apply via the
+   --labeled modifier / wrapper, never to .search-facets-btn alone. */
+/* Lab-port v8: in: tokens + suggestions panel (D365 search input).
+   Tokens declare WHERE the term must match (reach); they live inside
+   the input like recipient chips. The suggestions panel is the only
+   way to add one — discoverable on focus, zero new chrome elsewhere. */
+.search-tokens { display: inline-flex; gap: 4px; flex-shrink: 0; align-items: center; margin-right: 8px; }
+.search-tokens:empty { display: none; }
+.search-token { display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 4px 0 8px; border-radius: 4px; background: var(--blue-10); color: var(--blue-dark); font-size: 12px; font-weight: 500; white-space: nowrap; }
+.search-token-in { color: var(--black-60); font-weight: 400; }
+.search-token-ghost { padding-right: 8px; }
+.search-token-x { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border: none; background: none; color: var(--blue-dark); font-size: 10px; cursor: pointer; border-radius: 4px; padding: 0; }
+.search-token-x:hover { background: var(--blue-30); }
+.inv-search-inner { position: relative; }
+.search-suggest { position: absolute; top: calc(100% + 4px); left: 0; min-width: 340px; background: var(--white, #fff); border: 1px solid var(--black-10); border-radius: 8px; box-shadow: 0 4px 16px rgba(31,34,41,.12); padding: 8px; z-index: 60; }
+.search-suggest-hd { font-size: 12px; color: var(--black-60); padding: 4px 8px 8px; }
+.search-suggest-opt { display: flex; width: 100%; border: none; background: none; padding: 6px 8px; border-radius: 4px; cursor: pointer; text-align: left; }
+.search-suggest-opt:hover { background: var(--black-3); }
+/* v8: match-context line — matched content under the resource name */
+.inv-match-ctx { font-size: 12px; color: var(--black-60); margin-top: 2px; }
+/* v9: search-scope line — the intentional pivot between "this level"
+   and "all contents", living right under the search bar. */
+.search-scope-line { font-size: 12px; color: var(--black-60); margin-top: 4px; }
+.search-scope-link { border: none; background: none; padding: 0; font-size: 12px; color: var(--blue); cursor: pointer; font-weight: 500; }
+.search-scope-link:hover { text-decoration: underline; }
+
+.search-options-split { display: inline-flex; align-items: stretch; flex-shrink: 0; }
+.search-facets-btn--labeled { width: auto; gap: 8px; padding: 0 12px; font-family: inherit; font-size: 14px; font-weight: 450; color: var(--black-60); white-space: nowrap; }
+.search-facets-btn--labeled:hover { color: var(--black-100); }
+.search-facets-btn--labeled.active { color: var(--blue-dark); }
+.search-options-split.has-reset .search-facets-btn--labeled { border-top-right-radius: 0; border-bottom-right-radius: 0; border-right: none; }
+.search-facets-count-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 100px; background: var(--blue); color: var(--white); font-size: 11px; font-weight: 700; line-height: 1; }
+.search-facets-reset { display: none; align-items: center; justify-content: center; width: 30px; border: 1px solid var(--blue-30); border-radius: 0 4px 4px 0; background: var(--blue-10); color: var(--blue-dark); cursor: pointer; padding: 0; }
+.search-options-split.has-reset .search-facets-reset { display: inline-flex; }
+.search-facets-reset:hover { background: var(--blue-30); }
+.search-facets-reset svg { width: 14px; height: 14px; display: block; }
+/* Show-as picker — search-gated display-mode control on the search row.
+   Reuses the del-window trigger/menu anatomy (same row, same DS shapes).
+   The is-default row annotation mirrors the lab's positional copy. */
+.inv-showas-label { color: var(--black-60); margin-right: 2px; }
+.del-window-opt .showas-scope { color: var(--black-60); font-size: 12px; margin-left: 6px; }
 /* Popover uses position:fixed (not absolute) so it escapes the sticky
    .inv-sticky-head stacking context — that ancestor has z-index:30
    which would otherwise cap the popover's effective z-index at 30,
@@ -1787,7 +1843,8 @@ td.rec-cell-lt { max-width: 340px; min-width: 220px; vertical-align: top; }
 /* Compact cart badge — icon + count only (no "items" word, no
    composition/workload text, which move to the title tooltip). Keeps the
    LEFT zone narrow so the CENTER context has room. */
-.tab-cart-badge { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 11px 0 9px; background: rgba(255,255,255,0.18); border-radius: 100px; font-size: 14px; font-weight: 500; white-space: nowrap; }
+.tab-cart-badge { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 11px 0 9px; background: rgba(255,255,255,0.18); border-radius: 100px; font-size: 14px; font-weight: 500; white-space: nowrap; cursor: pointer; transition: background 0.12s ease; }
+.tab-cart-badge:hover { background: rgba(255,255,255,0.30); }
 .tab-cart-badge svg { width: 16px; height: 16px; }
 .tab-left-text { font-weight: 450; }
 .tab-left-text strong { font-weight: 500; }
@@ -5305,35 +5362,67 @@ body.drawer-open { overflow: hidden; }
                 <div class="inv-search-row">
                   <div class="inv-search-inner">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                    <input id="invSearch" placeholder="Search your inventory" oninput="filterTable()">
+                    <span class="search-tokens" id="invSearchTokens"></span>
+                    <input id="invSearch" placeholder="Search your inventory" oninput="filterTable();invSearchSuggestSync()" onfocus="invSearchSuggestFocus()" onkeydown="invSearchKeydown(event)">
                     <button type="button" class="search-clear-btn" onclick="clearSearchInput('invSearch')" aria-label="Clear search">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
                     </button>
+                    <!-- Lab-port v8: in: token suggestions — opens on focus
+                         (D365 only). Absolutely positioned against the input
+                         wrapper so it drops immediately below the field,
+                         overlapping whatever sits underneath. -->
+                    <div class="search-suggest" id="invSearchSuggest" style="display:none"></div>
                   </div>
                   <!-- Default-hidden in markup. syncInvSearchFacetsBtn
-                       reveals it only when the active workload supports
-                       the facet popover (D365 today, via
+                       reveals the WRAPPER only when the active workload
+                       supports the facet popover (D365 today, via
                        _invSearchFacetsApply). Defensive default keeps
-                       the gear from flashing on non-D365 workloads at
+                       the control from flashing on non-D365 workloads at
                        initial render before any JS workload-handler
-                       has had a chance to run. -->
-                  <button type="button" id="invSearchFacetsBtn" class="search-facets-btn" onclick="toggleSearchFacets(event)" aria-label="Filter search results" title="Filter search results" style="display:none">
-                    <!-- Sliders/configure glyph — matched to the compare
-                         legend's Configure button (#invCompareCfgBtn) so the
-                         two "configure this view" affordances read the same. -->
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <line x1="21" y1="4" x2="14" y2="4"/>
-                      <line x1="10" y1="4" x2="3" y2="4"/>
-                      <line x1="21" y1="12" x2="12" y2="12"/>
-                      <line x1="8" y1="12" x2="3" y2="12"/>
-                      <line x1="21" y1="20" x2="16" y2="20"/>
-                      <line x1="12" y1="20" x2="3" y2="20"/>
-                      <line x1="14" y1="2" x2="14" y2="6"/>
-                      <line x1="8" y1="10" x2="8" y2="14"/>
-                      <line x1="16" y1="18" x2="16" y2="22"/>
-                    </svg>
-                    <span class="search-facets-badge" id="invSearchFacetsBadge" style="display:none"></span>
-                  </button>
+                       has had a chance to run.
+                       Lab-port v5: labeled split button — "Search
+                       options" + inline count pill (Match-on narrowings
+                       only) + ↺ reset segment (returns reach to
+                       Everything without opening the popover). -->
+                  <span class="search-options-split" id="invSearchOptionsWrap" style="display:none">
+                    <button type="button" id="invSearchFacetsBtn" class="search-facets-btn search-facets-btn--labeled" onclick="toggleSearchFacets(event)" aria-label="Search options" title="Search options">
+                      <!-- Sliders/configure glyph — matched to the compare
+                           legend's Configure button (#invCompareCfgBtn) so the
+                           two "configure this view" affordances read the same. -->
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="21" y1="4" x2="14" y2="4"/>
+                        <line x1="10" y1="4" x2="3" y2="4"/>
+                        <line x1="21" y1="12" x2="12" y2="12"/>
+                        <line x1="8" y1="12" x2="3" y2="12"/>
+                        <line x1="21" y1="20" x2="16" y2="20"/>
+                        <line x1="12" y1="20" x2="3" y2="20"/>
+                        <line x1="14" y1="2" x2="14" y2="6"/>
+                        <line x1="8" y1="10" x2="8" y2="14"/>
+                        <line x1="16" y1="18" x2="16" y2="22"/>
+                      </svg>
+                      <span>Search options</span>
+                      <span class="search-facets-count-pill" id="invSearchFacetsPill" style="display:none"></span>
+                      <span class="search-facets-badge" id="invSearchFacetsBadge" style="display:none"></span>
+                    </button>
+                    <button type="button" class="search-facets-reset" id="invSearchFacetsReset" onclick="event.stopPropagation();resetSearchScope()" title="Search everything (reset)" aria-label="Search everything (reset)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                    </button>
+                  </span>
+                  <!-- Show as — display-mode picker (lab-port v5). Search-
+                       gated: appears only while a query is active, because
+                       it acts on results. Reuses the del-window trigger/menu
+                       anatomy. Rungs map onto EXISTING state: Environments
+                       (this level · default) = searchIncludeSubfolders OFF;
+                       Containing records = depth ON + showAs 'records';
+                       Matched items = depth ON + showAs 'fields'. -->
+                  <div class="del-window" id="invShowAsWrap" style="display:none">
+                    <button type="button" class="del-window-btn" id="invShowAsBtn" onclick="toggleInvShowAsMenu(event)" aria-haspopup="true" title="How search results are displayed">
+                      <span class="inv-showas-label">Show as:</span>
+                      <span id="invShowAsValue">Environments</span>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="del-window-menu" id="invShowAsMenu" style="display:none"></div>
+                  </div>
                   <!-- Deleted-from-Prod temporal window — same row as search,
                        anchored right. Shown only in the Recovery bucket
                        (syncDeletedWindowPicker). Filters by deletion date. -->
@@ -5351,6 +5440,13 @@ body.drawer-open { overflow: hidden; }
                     </div>
                   </div>
                 </div>
+                <!-- v9: search-scope line — states what the results list
+                     contains and offers the one-click pivot to the full
+                     bubble-up ("Search all contents"). D365 + active
+                     query only; synced by syncSearchScopeLines(). -->
+                <div class="search-scope-line" id="invSearchScopeLine" style="display:none"></div>
+                <!-- (token-suggestions panel lives inside .inv-search-row,
+                     anchored to the input — see markup above.) -->
                 <!-- (Popover element moved out of the list-mode subtree
                      so the drill-level gear can also open it — see the
                      #invSearchFacetsPopover element near the end of the
@@ -5514,10 +5610,14 @@ body.drawer-open { overflow: hidden; }
                 <div class="inv-search-row">
                   <div class="inv-search-inner">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                    <input id="childSearch" placeholder="Search sub-resources by name or type…" oninput="filterChild()">
+                    <span class="search-tokens" id="childSearchTokens"></span>
+                    <input id="childSearch" placeholder="Search sub-resources by name or type…" oninput="filterChild();searchSuggestSync('child')" onfocus="searchSuggestFocus('child')" onkeydown="searchTokenKeydown('child', event)">
                     <button type="button" class="search-clear-btn" onclick="clearSearchInput('childSearch')" aria-label="Clear search">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
                     </button>
+                    <!-- v9.3: same in: token suggestions as the inventory
+                         search — anchored to the drill input. -->
+                    <div class="search-suggest" id="childSearchSuggest" style="display:none"></div>
                   </div>
                   <!-- Drill-level facet gear. Same affordance as the
                        inventory-level gear (next to #invSearch), same
@@ -5526,23 +5626,45 @@ body.drawer-open { overflow: hidden; }
                        _invSearchFacetsApply() and synced through
                        syncSearchFacetsBtns(). Anchor for the popover is
                        whichever gear was clicked. -->
-                  <button type="button" id="childSearchFacetsBtn" class="search-facets-btn" onclick="toggleSearchFacets(event)" aria-label="Filter search results" title="Filter search results" style="display:none">
-                    <!-- Same sliders/configure glyph as the inventory-level
-                         search-facets gear above (matched to the compare cfg button). -->
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <line x1="21" y1="4" x2="14" y2="4"/>
-                      <line x1="10" y1="4" x2="3" y2="4"/>
-                      <line x1="21" y1="12" x2="12" y2="12"/>
-                      <line x1="8" y1="12" x2="3" y2="12"/>
-                      <line x1="21" y1="20" x2="16" y2="20"/>
-                      <line x1="12" y1="20" x2="3" y2="20"/>
-                      <line x1="14" y1="2" x2="14" y2="6"/>
-                      <line x1="8" y1="10" x2="8" y2="14"/>
-                      <line x1="16" y1="18" x2="16" y2="22"/>
-                    </svg>
-                    <span class="search-facets-badge" id="childSearchFacetsBadge" style="display:none"></span>
-                  </button>
+                  <span class="search-options-split" id="childSearchOptionsWrap" style="display:none">
+                    <button type="button" id="childSearchFacetsBtn" class="search-facets-btn search-facets-btn--labeled" onclick="toggleSearchFacets(event)" aria-label="Search options" title="Search options">
+                      <!-- Same sliders/configure glyph as the inventory-level
+                           search-facets gear above (matched to the compare cfg button). -->
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="21" y1="4" x2="14" y2="4"/>
+                        <line x1="10" y1="4" x2="3" y2="4"/>
+                        <line x1="21" y1="12" x2="12" y2="12"/>
+                        <line x1="8" y1="12" x2="3" y2="12"/>
+                        <line x1="21" y1="20" x2="16" y2="20"/>
+                        <line x1="12" y1="20" x2="3" y2="20"/>
+                        <line x1="14" y1="2" x2="14" y2="6"/>
+                        <line x1="8" y1="10" x2="8" y2="14"/>
+                        <line x1="16" y1="18" x2="16" y2="22"/>
+                      </svg>
+                      <span>Search options</span>
+                      <span class="search-facets-count-pill" id="childSearchFacetsPill" style="display:none"></span>
+                      <span class="search-facets-badge" id="childSearchFacetsBadge" style="display:none"></span>
+                    </button>
+                    <button type="button" class="search-facets-reset" id="childSearchFacetsReset" onclick="event.stopPropagation();resetSearchScope()" title="Search everything (reset)" aria-label="Search everything (reset)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                    </button>
+                  </span>
+                  <!-- Drill-level Show-as picker — same positional ladder as
+                       the inventory one, with rungs derived from the drill
+                       context (Tables at an Environment drill; hidden at the
+                       records/fields drills where only one display level
+                       exists). Search-gated like its inventory sibling. -->
+                  <div class="del-window" id="childShowAsWrap" style="display:none">
+                    <button type="button" class="del-window-btn" id="childShowAsBtn" onclick="toggleShowAsMenu('child', event)" aria-haspopup="true" title="How search results are displayed">
+                      <span class="inv-showas-label">Show as:</span>
+                      <span id="childShowAsValue">Tables</span>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="del-window-menu" id="childShowAsMenu" style="display:none"></div>
+                  </div>
                 </div>
+                <!-- v9: drill-level search-scope line (see inventory twin). -->
+                <div class="search-scope-line" id="childSearchScopeLine" style="display:none"></div>
               </div>
 
               <!-- Drill-mode search-results banner. Uses the same blue
@@ -10861,6 +10983,10 @@ function _driveResourceItemCount(driveId) {
 // at the same list the user originally drilled in from (Organizations,
 // Repositories, etc.) without losing their workload scope.
 function drillReturnToCat() {
+  // Search continuity: a live drill query follows the user back to the
+  // root list (the inventory search picks it up and re-runs).
+  var _cs = document.getElementById('childSearch');
+  var _liveQ = _cs ? (_cs.value || '').trim() : '';
   childState.entryId = null;
   childState.parentId = null;
   childState.folder = null;
@@ -10870,6 +10996,13 @@ function drillReturnToCat() {
   // INLINE-DRILL: leave drill mode in place; cat-rail + workload scope
   // already reflect the active cat, so the user lands on the full list.
   setInvMode('list');
+  if (_liveQ) {
+    var _is = document.getElementById('invSearch');
+    if (_is && _is.value !== _liveQ) {
+      _is.value = _liveQ;
+      if (typeof filterTable === 'function') filterTable();
+    }
+  }
 }
 
 function drillJumpToSegment(parentId) {
@@ -10890,8 +11023,9 @@ function drillJumpToSegment(parentId) {
     childState.parentId = childState.entryId;
     childState.folder = null;
     childState.history = [];
-    var s = document.getElementById('childSearch'); if (s) s.value = '';
-  state.searchIncludeSubfolders = false;
+    // Search continuity: jumping back to the entry segment keeps the
+    // live query (and its scope) — same drill-with-intent contract as
+    // descending. Clearing here read as "breadcrumbs cancel my search".
     childRender();
     _scrollAppToTop && _scrollAppToTop();
     return;
@@ -11051,14 +11185,17 @@ function childJumpToHistory(parentId) {
       childState.parentId = target.parentId;
       childState.folder = target.folder;
       childState.history = childState.history.slice(0, i);
-      // Restore the search context captured at this history frame —
-      // jumping back to a breadcrumb segment that the user reached
-      // via a search should land them back in their results.
+      // Search continuity: the ACTIVE query follows the user up the
+      // hierarchy, exactly like it follows them down (drill-with-intent).
+      // The stashed frame search only applies when there's no live query
+      // to preserve — restoring an older (often empty) stash over an
+      // active search read as "breadcrumbs cancel my search".
       var s = document.getElementById('childSearch');
-      // Only override the search when this frame explicitly recorded one;
-      // otherwise keep the active query so breadcrumb-back doesn't cancel it.
-      if (s && typeof target.search === 'string') s.value = target.search;
-      if (typeof target.searchRecursive !== 'undefined') state.searchIncludeSubfolders = !!target.searchRecursive;
+      var liveQ = s ? (s.value || '').trim() : '';
+      if (!liveQ) {
+        if (s && typeof target.search === 'string') s.value = target.search;
+        if (typeof target.searchRecursive !== 'undefined') state.searchIncludeSubfolders = !!target.searchRecursive;
+      }
       childRender();
       return;
     }
@@ -11817,7 +11954,7 @@ function renderChildCell(r, key, ctx) {
          + '<span class="' + ctx.nameClass + '" style="' + ctx.nameStyle + '" onclick="' + ctx.clickHandler + '">' + (ctx.hlQuery ? _hlText(r.name, ctx.hlQuery) : r.name) + '</span>'
          + ctx.existenceHtml
          + '' /* diff badge retired — see .inv-diff-tooltip hover */
-         + '</div>' + (ctx.folderMeta || '') + '</td>';
+         + '</div>' + (ctx.matchCtx || '') + (ctx.folderMeta || '') + '</td>';
   }
   if (key === 'meta') {
     // Contents as a chip (matching the inventory-list + 'contents' path) so
@@ -12007,6 +12144,18 @@ function childRenderLeafRow(r, showFolder, folderLabel, diffStatus, matchCount) 
   // Active drill query (if any) drives the matching-Contents chip + the
   // name-cell highlight — same treatment as the inventory search rows.
   var _childQ = ((document.getElementById('childSearch') || {}).value || '').trim();
+  // v8: matched-content context under the name — same treatment as the
+  // inventory search rows. Containers (tables) sample their matching
+  // records/fields; synthetic record rows sample their matching fields.
+  // Field rows skip it (their name IS the matched content).
+  var _childMatchCtx = '';
+  if (_childQ && r.wl === 'Dynamics 365' && typeof _matchCtxHtml === 'function'
+      && !(typeof r.id === 'string' && r.id.indexOf('field-') === 0)) {
+    var _cmc = (typeof r.id === 'string' && r.id.indexOf('rec-') === 0)
+      ? _d365RecordMatchCtx(r, _childQ.toLowerCase())
+      : _d365ResourceMatchCtx(r, _childQ.toLowerCase());
+    _childMatchCtx = _matchCtxHtml(_cmc, _childQ);
+  }
   var _childCtx = {
     nameClass: nameClass,
     nameStyle: nameStyle,
@@ -12017,6 +12166,7 @@ function childRenderLeafRow(r, showFolder, folderLabel, diffStatus, matchCount) 
     badgeText: badgeText,
     diffBadge: _childDiffBadge,
     hlQuery: _childQ || null,
+    matchCtx: _childMatchCtx,
     searchMatchContents: (_childQ && typeof _invSearchMatchRollup === 'function') ? _invSearchMatchRollup(r, _childQ) : null
   };
   var _childCellsHtml = _activeChildColumns().map(function(col){ return renderChildCell(r, col.key, _childCtx); }).join('');
@@ -13135,7 +13285,7 @@ function _walkD365RecordsAndFields(tableResource, q) {
   schema.rows.forEach(function(rec, idx){
     var recordName = (nameKey && rec[nameKey] != null) ? String(rec[nameKey]) : ('Record #' + idx);
     var recId = 'rec-' + schemaKey + '-' + idx;
-    var literalNameHit = recordName.toLowerCase().indexOf(qLower) >= 0;
+    var literalNameHit = _qMatch(recordName, qLower);
     // D365 record/field search is LITERAL-ONLY. An earlier build sprinkled
     // ~1-in-12 hash-based "content match" hits here to pad sparse demos,
     // but that made every query match nearly every record (e.g. "zebra"
@@ -13174,7 +13324,7 @@ function _walkD365RecordsAndFields(tableResource, q) {
       var val = rec[col];
       if (val == null) return;
       var strVal = String(val);
-      var fieldLiteralHit = strVal.toLowerCase().indexOf(qLower) >= 0;
+      var fieldLiteralHit = _qMatch(strVal, qLower);
       if (!fieldLiteralHit) return;
       var fieldId = 'field-' + schemaKey + '~' + idx + '~' + encodeURIComponent(col);
       // Compose a name that surfaces BOTH the matched field and its
@@ -13243,7 +13393,7 @@ function _buildDrillSearchResults(query, skipFacetFilter) {
     if (r.type === 'Folder' && !searchIncludeSub) return false;
     // Mirror childRender's inline filter: D365 containers match on content
     // (records/fields), everything else on name/type only.
-    var _ntHit = r.name.toLowerCase().indexOf(q) >= 0 || r.type.toLowerCase().indexOf(q) >= 0;
+    var _ntHit = _qMatch(r.name, q) || _qMatch(r.type, q);
     var _contentHit = !_ntHit && r.wl === 'Dynamics 365'
       && typeof _resourceHasSearchMatch === 'function' && _resourceHasSearchMatch(r, q);
     if (!_ntHit && !_contentHit) return false;
@@ -13254,8 +13404,12 @@ function _buildDrillSearchResults(query, skipFacetFilter) {
   // popover's counts need to reflect what the table would show.
   if (searchIncludeSub && typeof _walkD365RecordsAndFields === 'function') {
     var syntheticHits = [];
+    var _skSeen2 = {};
     pool.forEach(function(p){
       if (p && p.wl === 'Dynamics 365' && p.type === 'Table') {
+        // Same shared-schema dedup as the renderer's pass — see childRender.
+        var sk2 = (typeof d365SchemaFor === 'function') ? d365SchemaFor(p) : null;
+        if (sk2 && sk2 !== 'default') { if (_skSeen2[sk2]) return; _skSeen2[sk2] = true; }
         syntheticHits = syntheticHits.concat(_walkD365RecordsAndFields(p, q));
       }
     });
@@ -13263,6 +13417,43 @@ function _buildDrillSearchResults(query, skipFacetFilter) {
       syntheticHits = syntheticHits.filter(function(h){ return searchTypesInScope.indexOf(h.type) >= 0; });
     }
     results = results.concat(syntheticHits);
+    if (typeof _d365SupersetOn === 'function' && _d365SupersetOn()
+        && typeof _d365AugmentRolledRecords === 'function') {
+      results = _d365AugmentRolledRecords(results);
+    }
+    // Lab-port v5 — "Show as: Containing records" at the drill level:
+    // collapse field hits into ONE row per containing record, annotated
+    // with the matched fields, mirroring the inventory's records roll-up.
+    // A record-name hit of the same record merges naturally (same
+    // _recordId), so a name+field conjunction reads on one row. The
+    // rolled row keeps _hitKind 'field' so Match-on narrowing still
+    // classifies it as a field match.
+    if (state.searchFacets && state.searchFacets.showAs === 'records') {
+      var _fieldHits = [], _rolled = [], _byRec = {};
+      results.forEach(function(h){
+        if (h && h._hitKind === 'field' && h._recordId) { _fieldHits.push(h); return; }
+        _rolled.push(h);
+        if (h && h._recordId && (h._hitKind === 'record' || h.type === 'Record')) _byRec[h._recordId] = h;
+      });
+      _fieldHits.forEach(function(h){
+        var ex = _byRec[h._recordId];
+        if (ex) {
+          ex._hitFields = ex._hitFields || [];
+          if (h._hitField && ex._hitFields.indexOf(h._hitField) < 0) ex._hitFields.push(h._hitField);
+          var ftxt = ex._hitFields.length === 1 ? (ex._hitFields[0] + ' field') : (ex._hitFields.length + ' fields (' + ex._hitFields.join(', ') + ')');
+          ex.meta = (ex._hitKind === 'record' ? 'Matched in record name + ' : 'Matched in ') + ftxt;
+          return;
+        }
+        var recRow = Object.assign({}, h, {
+          id: h._recordId, name: h._recordName, type: 'Record',
+          _hitFields: h._hitField ? [h._hitField] : [],
+          meta: 'Matched in ' + (h._hitField ? h._hitField + ' field' : 'a field')
+        });
+        _byRec[h._recordId] = recRow;
+        _rolled.push(recRow);
+      });
+      results = _rolled;
+    }
   }
   if (!skipFacetFilter && typeof _filterSearchGroupsByFacets === 'function') {
     results = _filterSearchGroupsByFacets(results);
@@ -13485,11 +13676,11 @@ function _recSearchFieldCounts(schemaKey, q) {
   schema.rows.forEach(function(rec, i){
     var recId = schemaKey + '-' + i;
     var nv = getRecCellValue(rec, nameKey, i);
-    if (nv != null && String(nv).toLowerCase().indexOf(q) >= 0) out.nameCount++;
+    if (nv != null && _qMatch(nv, q)) out.nameCount++;
     allCols.forEach(function(c){
       if (c === nameKey) return;
       var v = getRecCellValue(rec, c, i);
-      if (v != null && String(v).toLowerCase().indexOf(q) >= 0) {
+      if (v != null && _qMatch(v, q)) {
         out.fieldCounts[c] = (out.fieldCounts[c] || 0) + 1;
         (out.colMembers[c] = out.colMembers[c] || []).push(recId);
       }
@@ -13749,6 +13940,11 @@ function renderChildThead() {
 
 function childRender() {
   if (!state.childSelectedIds) state.childSelectedIds = new Set();
+  // v9: the search-scope line must track the drill level the instant the
+  // user lands on it (a preserved query means the line's "Searching
+  // tables in X" copy is already wrong the moment the drill renders).
+  // Synced here — the one dispatcher every drill render passes through.
+  if (typeof syncSearchScopeLines === 'function') syncSearchScopeLines();
   // Queue a deferred shadow refresh for whichever sub-renderer ends up
   // painting the drill table. childRender() dispatches via early
   // return to _childRenderDrive / _childRenderRecords OR falls through
@@ -13958,7 +14154,7 @@ function childRender() {
       if (searchTypesInScope && searchTypesInScope.indexOf(r.type) < 0) return false;
       if (!passesChildFilters(r)) return false;
       if (!passesDiffView(r)) return false;
-      var _ntHit = r.name.toLowerCase().indexOf(q) >= 0 || r.type.toLowerCase().indexOf(q) >= 0;
+      var _ntHit = _qMatch(r.name, q) || _qMatch(r.type, q);
       // D365 containers (Tables) are empty vessels — their searchable value
       // is their records/fields. So a table matches when its CONTENT does,
       // letting a user drill a matched env and still see only the matching
@@ -13980,8 +14176,14 @@ function childRender() {
     // search stays scoped to the current level by design.
     if (searchIncludeSub) {
       var syntheticHits = [];
+      var _skSeen = {};
       searchPool.forEach(function(p){
         if (p && p.wl === 'Dynamics 365' && p.type === 'Table') {
+          // Tables sharing a schema (Accounts / Key Accounts / Prospect
+          // Accounts) produce IDENTICAL record/field hits — walk each
+          // unique schema once or every shared record surfaces N times.
+          var sk = (typeof d365SchemaFor === 'function') ? d365SchemaFor(p) : null;
+          if (sk && sk !== 'default') { if (_skSeen[sk]) return; _skSeen[sk] = true; }
           syntheticHits = syntheticHits.concat(_walkD365RecordsAndFields(p, q));
         }
       });
@@ -13990,10 +14192,17 @@ function childRender() {
       // helper already applied the value match.
       syntheticHits = syntheticHits.filter(function(h){
         if (searchTypesInScope && searchTypesInScope.indexOf(h.type) < 0) return false;
-        if (!passesChildFilters(h)) return false;
         if (!passesDiffView(h)) return false;
         return true;
       });
+      // v9.3 superset parity: records containing matching field values
+      // surface as Record rows too. Roll BEFORE the chip filters —
+      // otherwise an active Type: Record chip deletes the field hits
+      // before they can roll up into their containing records.
+      if (typeof _d365SupersetOn === 'function' && _d365SupersetOn()) {
+        syntheticHits = _d365AugmentRolledRecords(syntheticHits);
+      }
+      syntheticHits = syntheticHits.filter(function(h){ return passesChildFilters(h); });
       results = results.concat(syntheticHits);
     }
     // Apply the D365 search facets (gear popover) to the drill-level
@@ -14641,12 +14850,12 @@ function _childRenderRecords() {
   function _classifyRecHit(r) {
     var rowIdx = (r._id && r._id.indexOf('-removed-') < 0) ? parseInt(r._id.split('-').pop(), 10) : 0;
     var nameVal = getRecCellValue(r, _nameKey, rowIdx);
-    var nameHit = nameVal != null && String(nameVal).toLowerCase().indexOf(q) >= 0;
+    var nameHit = nameVal != null && _qMatch(nameVal, q);
     var fields = [];
     for (var ci = 0; ci < allSearchableCols.length; ci++) {
       var c = allSearchableCols[ci]; if (c === _nameKey) continue;
       var v = getRecCellValue(r, c, rowIdx);
-      if (v != null && String(v).toLowerCase().indexOf(q) >= 0) fields.push(c);
+      if (v != null && _qMatch(v, q)) fields.push(c);
     }
     return { name: nameHit, field: fields.length > 0, fields: fields };
   }
@@ -14688,11 +14897,22 @@ function _childRenderRecords() {
   var rows = matchedRows;
   if (q && typeof _searchFacetsActive === 'function' && _searchFacetsActive()) {
     var hk = _facet.hitKind || 'all';
+    // v5 multi-kind reach (Match on… checkboxes): a row passes when ANY
+    // checked kind applies. 'resource' can never apply here — the rows
+    // are records — so a resource-only selection yields zero (the popover
+    // hides that option at this drill, but state can arrive from above).
+    var _recKinds = (_facet.mode === 'specific' && _facet.kinds && _facet.kinds.length) ? _facet.kinds : null;
     rows = matchedRows.filter(function(r){
       var k = r._hk || { name: false, field: false, fields: [] };
-      if (hk === 'record' && !k.name) return false;
-      if (hk === 'field' && !k.field) return false;
-      if (hk === 'resource') return false; // no resource-level hits among records
+      if (_recKinds) {
+        var ok = (_recKinds.indexOf('record') >= 0 && k.name)
+              || (_recKinds.indexOf('field') >= 0 && k.field);
+        if (!ok) return false;
+      } else {
+        if (hk === 'record' && !k.name) return false;
+        if (hk === 'field' && !k.field) return false;
+        if (hk === 'resource') return false; // no resource-level hits among records
+      }
       if (_facet.field && k.fields.indexOf(_facet.field) < 0) return false;
       return true;
     });
@@ -14782,7 +15002,20 @@ function _childRenderRecords() {
         // fields. The drill view paints one row per field; yellow
         // highlights mark fields whose values differ from the compare-
         // date snapshot, and each field row carries its own +Restore.
-        return '<td class="' + nameCls + '"><div style="display:flex;align-items:center;column-gap:8px;row-gap:4px;flex-wrap:wrap;overflow:visible"><span class="diff-dot" aria-hidden="true"></span><span class="cell-name drillable" ' + (r._diffStatus === 'added' ? '' : 'onclick="openFieldsDrill(\'rec-' + r._id + '\')"') + '>' + (q ? _hlText(v, q) : v) + '</span>' + '</div></td>';
+        // v8: matched-field context under the record name — the actual
+        // matching values ("Industry: Manufacturing"), term highlighted.
+        // Derived from the pass-1 hit classification (r._hk.fields).
+        var _recCtxHtml = '';
+        if (q && r._hk && r._hk.fields && r._hk.fields.length && typeof _matchCtxHtml === 'function') {
+          var _rcSamples = r._hk.fields.slice(0, 2).map(function(c2){
+            var v2 = getRecCellValue(r, c2, rowIdx);
+            var v2s = String(v2 == null ? '' : v2);
+            if (v2s.length > 60) v2s = v2s.slice(0, 57) + '…';
+            return c2 + ': ' + v2s;
+          });
+          _recCtxHtml = _matchCtxHtml({ samples: _rcSamples, more: Math.max(0, r._hk.fields.length - 2) }, q);
+        }
+        return '<td class="' + nameCls + '"><div style="display:flex;align-items:center;column-gap:8px;row-gap:4px;flex-wrap:wrap;overflow:visible"><span class="diff-dot" aria-hidden="true"></span><span class="cell-name drillable" ' + (r._diffStatus === 'added' ? '' : 'onclick="openFieldsDrill(\'rec-' + r._id + '\')"') + '>' + (q ? _hlText(v, q) : v) + '</span>' + '</div>' + _recCtxHtml + '</td>';
       }
       // Compare mode: changed non-name cells show the compared (before) value
       // stacked above the current (after) value, inside the existing highlight.
@@ -16087,7 +16320,11 @@ var state = {
   // applies as a delta on the unfiltered result set — the popover
   // surfaces counts for every option from the unfiltered groups.
   // searchFacetsOpen: whether the popover is currently anchored open.
-  searchFacets: { hitKind: 'all', showAs: 'fields' },
+  // Lab-port v5: mode ('all'|'specific') + kinds (multi-select reach
+  // checkboxes) are the new first-class shape. hitKind is kept MIRRORED
+  // (kinds.length===1 ? kinds[0] : 'all') for the drill gear's legacy
+  // radio pipeline, which still reads it.
+  searchFacets: { hitKind: 'all', showAs: 'fields', mode: 'all', kinds: [] },
   searchFacetsOpen: false,
   // Per-state filters for D365 Compare Mode. Each key gates a class
   // of diff rows; "unchanged" defaults off so the user lands on a
@@ -16531,7 +16768,7 @@ function selectWl(label, id) {
   // Reset inventory-search facets — facet support and the available
   // facet options depend on the workload, so a workload switch must
   // clear any active filters and re-evaluate gear-button visibility.
-  if (state.searchFacets) state.searchFacets = { hitKind: 'all', showAs: 'fields' };
+  if (state.searchFacets) state.searchFacets = { hitKind: 'all', showAs: 'fields', mode: 'all', kinds: [] };
   if (typeof _closeInvSearchFacetsPopover === 'function') _closeInvSearchFacetsPopover();
   if (typeof syncInvSearchFacetsBtn === 'function') setTimeout(syncInvSearchFacetsBtn, 0);
   // Sync active state in the workload panel
@@ -16683,6 +16920,9 @@ var WL_MAP = {
 // panel header and the drive-drill panel header so the current category has a
 // consistent visual anchor matching the design system's resource-type tiles.
 var CAT_ICONS = {
+  // 'cart' is the derived "Items in cart" pseudo-bucket (cross-folder view
+  // of state.restorePlan). Blue tint matches the cart-accent used elsewhere.
+  'cart':               { tint:'#e8f6fc', color:'#1ca8dd', svg:'<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>' },
   'workspaces':         { tint:'#e8f6fc', color:'#1ca8dd', svg:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>' },
   'drives':             { tint:'#e8f6fc', color:'#1ca8dd', svg:'<path d="M3 8l2-4h14l2 4v12a1 1 0 01-1 1H4a1 1 0 01-1-1V8z"/><path d="M3 8h18"/><circle cx="7" cy="14" r="1" fill="currentColor" stroke="none"/>' },
   'sites':              { tint:'#e9f4dc', color:'#86b62c', svg:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 010 18"/><path d="M12 3a14 14 0 000 18"/>' },
@@ -16968,7 +17208,7 @@ function resourcePassesFilters(r, opts) {
   // visibility. asOfTs / isHistorical are still used downstream by
   // renderTable to resolve each row's effective restore point.
 
-  if (q && r.name.toLowerCase().indexOf(q) < 0 && r.type.toLowerCase().indexOf(q) < 0) return false;
+  if (q && !_qMatch(r.name, q) && !_qMatch(r.type, q)) return false;
 
   for (var i = 0; i < state.filters.length; i++) {
     var f = state.filters[i];
@@ -18228,6 +18468,11 @@ function renderTreeNav() {
     }
     html += '<span class="tree-node-icon"' + (iconStyle ? ' style="' + iconStyle + '"' : '') + '>' + iconSvg + '</span>';
     html += '<span class="tree-node-name">' + (node.label || '(unnamed)') + '</span>';
+    // "Items in cart" root carries a live count pill so the user sees how
+    // many items are staged without opening the view.
+    if (node.key === 'cart' && node._cartCount) {
+      html += '<span class="tree-node-count">' + node._cartCount + '</span>';
+    }
     // Cart badge — quiet cart icon next to nodes the user has added
     // directly to the restore plan. No count, no ancestor signals.
     if (cartKeys.has(node.key)) {
@@ -18278,6 +18523,18 @@ function renderTreeNav() {
     }
   }
   var visibleRoots = q ? roots.filter(function(n){ return _treeMatchesQuery(n, q); }) : roots;
+
+  // "Items in cart" root — a cross-folder view of everything added to the
+  // restore plan. Only appears when the cart has items, only in normal
+  // browsing (not while a tree search is active), and ONLY on the workload
+  // the cart belongs to (carts are single-workload, so the affordance is
+  // meaningless on any other workload's tree). Rendered as a category-kind
+  // node (its own cart icon + blue tint) but with key 'cart' so treeNavSelect
+  // routes it to openCartView rather than the CATEGORIES path. hasKids is
+  // false (no cat==='cart' resources), so it draws as a single clickable row.
+  if (!q && typeof planSize === 'function' && planSize() > 0 && _cartIsActiveWorkload()) {
+    visibleRoots = [{ kind: 'category', key: 'cart', catId: 'cart', label: 'Items in cart', _cartCount: planSize() }].concat(visibleRoots);
+  }
 
   var html = '';
   if (!visibleRoots.length) {
@@ -18369,6 +18626,136 @@ function treeNavSelectCategory(catId) {
   _treeCollapseOtherCategoryRoots(catId);
   if (typeof filterTable === 'function') filterTable();
 }
+// "Items in cart" pseudo-view (cross-cutting). The cart spans folders —
+// and categories — within a single workload, so it gets its own DERIVED
+// bucket (state.cat === 'cart'), like 'deleted', rather than a CATEGORIES
+// entry. Opening it scopes the right pane to every resource currently in
+// state.restorePlan, each shown with its folder location beneath the name
+// (same treatment as the Deleted-from-Prod recovery view). Reached from the
+// tree-nav "Items in cart" root and from the action-bar cart badge.
+// The cart is single-workload. True when the workload the cart belongs to
+// is the one currently being viewed — gates the tree-nav "Items in cart"
+// row (it's meaningless on any other workload).
+function _cartIsActiveWorkload() {
+  if (typeof planActiveWorkload !== 'function') return true;
+  var cw = planActiveWorkload();
+  if (!cw) return false;
+  var activeName = (typeof WL_MAP !== 'undefined') ? WL_MAP[state.wl] : null;
+  return cw === activeName;
+}
+// Resolve the wl id (e.g. 'github') for a workload display name (e.g.
+// 'GitHub') by reversing WL_MAP.
+function _wlIdForName(name) {
+  if (typeof WL_MAP === 'undefined' || !name) return null;
+  var keys = Object.keys(WL_MAP);
+  for (var i = 0; i < keys.length; i++) { if (WL_MAP[keys[i]] === name) return keys[i]; }
+  return null;
+}
+function openCartView() {
+  if (typeof planSize === 'function' && planSize() === 0) return;
+  state._suppressScrollToTop = true;
+  try {
+    // Carts are single-workload. If the user triggers this from a DIFFERENT
+    // workload (e.g. the action-bar cart badge, which is global), switch to
+    // the cart's workload first so the cart view renders in its own context.
+    var _cartWlName = (typeof planActiveWorkload === 'function') ? planActiveWorkload() : null;
+    var _activeName = (typeof WL_MAP !== 'undefined') ? WL_MAP[state.wl] : null;
+    if (_cartWlName && _cartWlName !== _activeName) {
+      var _targetId = _wlIdForName(_cartWlName);
+      if (_targetId && typeof selectWl === 'function') selectWl(_cartWlName, _targetId);
+    }
+    state.cat = 'cart';
+    state.catLabel = 'Items in cart';
+    state.catWlScope = null;
+    state.invPage = 1;
+    // Mirror treeNavSelectCategory's drill-state reset so opening the cart
+    // from inside a drill returns the right pane to the list.
+    if (state.invMode === 'drill') {
+      if (typeof childState !== 'undefined') {
+        childState.entryId = null; childState.parentId = null; childState.folder = null;
+        childState.history = []; childState.drivePath = '/'; childState.driveHistory = [];
+      }
+      if (typeof setInvMode === 'function') setInvMode('list');
+    }
+    var invTitle = document.getElementById('invTitle');
+    if (invTitle) invTitle.textContent = 'Items in cart';
+    if (typeof updateInvTitleIcon === 'function') updateInvTitleIcon();
+    state.treeSelectedId = 'cart';
+    // Clear any active inventory search so renderTable shows the cart rows
+    // (a live query would otherwise short-circuit into search results).
+    var _invSearch = document.getElementById('invSearch');
+    if (_invSearch && _invSearch.value) _invSearch.value = '';
+    // Render the cart table SYNCHRONOUSLY — not via filterTable(), whose
+    // 120ms debounce would leave the previous view (or, when we just
+    // switched workloads, that workload's default category) painted for a
+    // beat before the cart appears. A direct renderTable() keeps the whole
+    // transition in one synchronous frame, so the user never sees a flash.
+    renderTable();
+    renderTreeNav();
+  } finally { state._suppressScrollToTop = false; }
+}
+// Resolve the resources currently in the cart. Real RESOURCES only —
+// synthetic D365 record/field picks (rec-… / field-… ids) aren't
+// standalone inventory rows, so they're represented by their parent
+// record/table which is what carries the folder location anyway.
+function _cartViewRows() {
+  var seen = {};
+  var out = [];
+  state.restorePlan.forEach(function(item, id){
+    if (seen[id]) return;
+    var r = RESOURCES.find(function(x){ return x.id === id; });
+    // Synthetic D365 cart entries (records / field values from the search
+    // flow) aren't in RESOURCES — rebuild a display shim from the schema
+    // so the cart view lists them instead of silently dropping them.
+    if (!r && typeof _isD365RecordId === 'function' && _isD365RecordId(id)
+        && typeof _resolveD365Record === 'function') {
+      var rr = _resolveD365Record(id);
+      if (rr) {
+        var tbl = rr.tableResource;
+        r = {
+          id: id, name: rr.name, type: 'Record',
+          parentId: tbl ? tbl.id : null,
+          drillable: !!(tbl && tbl.drillTarget === 'records'),
+          drillTarget: (tbl && tbl.drillTarget === 'records') ? 'fields' : undefined,
+          _synthetic: true,
+          wl: tbl ? tbl.wl : 'Dynamics 365',
+          tenant: tbl ? tbl.tenant : null,
+          cat: tbl ? tbl.cat : 'records',
+          status: (tbl && tbl.status) || 'protected',
+          policy: (tbl && tbl.policy) || 'Default Policy',
+          lastBackup: (tbl && tbl.lastBackup) || '—',
+          existence: (tbl && tbl.existence) || 'exists',
+          meta: ''
+        };
+      }
+    }
+    if (!r && typeof id === 'string' && id.indexOf('field-') === 0 && typeof D365_SCHEMAS !== 'undefined') {
+      var fm = id.match(/^field-(.+)~(\d+)~(.+)$/);
+      var sch = fm ? D365_SCHEMAS[fm[1]] : null;
+      var rec = (sch && sch.rows) ? sch.rows[parseInt(fm[2], 10)] : null;
+      if (rec) {
+        var col = decodeURIComponent(fm[3]);
+        var val = rec[col] != null ? String(rec[col]) : '';
+        if (val.length > 60) val = val.slice(0, 57) + '…';
+        var nameKey = sch.cols && sch.cols[0];
+        var tbl2 = RESOURCES.find(function(c){
+          return c.drillTarget === 'records' && typeof d365SchemaFor === 'function' && d365SchemaFor(c) === fm[1];
+        });
+        r = {
+          id: id, name: col + ': ' + val, type: 'Field',
+          parentId: tbl2 ? tbl2.id : null, drillable: false, _synthetic: true,
+          _recordName: (nameKey && rec[nameKey]) || '', _tableName: tbl2 ? tbl2.name : '',
+          wl: 'Dynamics 365', tenant: tbl2 ? tbl2.tenant : null,
+          cat: tbl2 ? tbl2.cat : 'records',
+          status: 'protected', policy: (tbl2 && tbl2.policy) || 'Default Policy',
+          lastBackup: (tbl2 && tbl2.lastBackup) || '—', existence: 'exists', meta: ''
+        };
+      }
+    }
+    if (r) { seen[id] = 1; out.push(r); }
+  });
+  return out;
+}
 // Click on a node body — selects it (highlights + paints the right
 // pane). Tree-internal navigation only; doesn't replace the existing
 // drill flow. Resource keys route through openChildrenDrill, pseudo-
@@ -18382,6 +18769,8 @@ function treeNavSelect(key) {
   // throw doesn't leave the app permanently un-scrollable on drill.
   state._suppressScrollToTop = true;
   try {
+    // "Items in cart" derived bucket — its own view, not a CATEGORIES entry.
+    if (key === 'cart') { openCartView(); return; }
     // Category root branch.
     if (typeof key === 'string' && key.indexOf('cat:') === 0) {
       var catId = key.substring(4);
@@ -19944,6 +20333,19 @@ function _invSpaceContents(r) {
 
 function _invContentsRollup(r) {
   if (!r) return '—';
+  // Synthetic D365 rows: records contain fields, fields contain a value.
+  // Resolve the schema from the rec-<schemaKey>-<idx> id so the count
+  // reflects the actual column set (default + extended).
+  if (r.type === 'Record' && typeof r.id === 'string' && r.id.indexOf('rec-') === 0) {
+    var _rm = r.id.match(/^rec-(.+)-(\d+)$/);
+    var _rsch = (_rm && typeof D365_SCHEMAS !== 'undefined') ? D365_SCHEMAS[_rm[1]] : null;
+    if (_rsch && _rsch.cols) {
+      var _nf = Math.max(0, _rsch.cols.length - 1 + ((_rsch.extendedCols || []).length));
+      return _nf + ' field' + (_nf === 1 ? '' : 's');
+    }
+    return '—';
+  }
+  if (r.type === 'Field') return '1 value';
   var kids = RESOURCES.filter(function(x){ return x.parentId === r.id; });
   if (!kids.length) {
     // No direct children — fall back to the first numeric piece of
@@ -19990,20 +20392,46 @@ function _invContentsRollup(r) {
 // search result shows exactly which metadata/value matched. Operates on
 // the raw string and escapes each segment (same pattern as the RP-card
 // and comparison-drawer highlighters) so it's HTML-safe.
+// ── Quote-aware term matching (lab parseQuery semantics) ────────────
+// '"term"' (straight or curly quotes) = WHOLE-WORD exact match;
+// bare term = substring. One matcher so every search surface — the
+// inventory walk, drill predicates, records drill, highlights —
+// interprets quotes identically.
+function _qTerm(q) {
+  var t = String(q == null ? '' : q).trim();
+  var m = t.match(/^["\u201C\u201D](.*)["\u201C\u201D]$/);
+  return m
+    ? { term: m[1].toLowerCase().trim(), exact: true }
+    : { term: t.toLowerCase(), exact: false };
+}
+function _qMatch(text, q) {
+  var p = _qTerm(q);
+  if (!p.term) return false;
+  var hay = String(text == null ? '' : text).toLowerCase();
+  if (!p.exact) return hay.indexOf(p.term) >= 0;
+  var idx = hay.indexOf(p.term);
+  while (idx >= 0) {
+    var before = idx === 0 ? '' : hay.charAt(idx - 1);
+    var after = hay.charAt(idx + p.term.length);
+    if (!/[a-z0-9]/.test(before) && !/[a-z0-9]/.test(after)) return true;
+    idx = hay.indexOf(p.term, idx + 1);
+  }
+  return false;
+}
 function _hlText(str, q) {
   var raw = String(str == null ? '' : str);
-  q = (q || '').trim();
-  if (!q) return wsEscape(raw);
-  var qi = raw.toLowerCase().indexOf(q.toLowerCase());
+  var p = _qTerm(q);
+  if (!p.term) return wsEscape(raw);
+  var qi = raw.toLowerCase().indexOf(p.term);
   if (qi < 0) return wsEscape(raw);
   return wsEscape(raw.slice(0, qi))
-    + '<mark class="rd-match-hl">' + wsEscape(raw.slice(qi, qi + q.length)) + '</mark>'
-    + wsEscape(raw.slice(qi + q.length));
+    + '<mark class="rd-match-hl">' + wsEscape(raw.slice(qi, qi + p.term.length)) + '</mark>'
+    + wsEscape(raw.slice(qi + p.term.length));
 }
 function _resourceHasSearchMatch(r, q) {
   if (!r || !q) return false;
-  var lit = (r.name + ' ' + (r.meta || '') + ' ' + (r.type || '')).toLowerCase();
-  if (lit.indexOf(q) >= 0) return true;
+  var lit = (r.name + ' ' + (r.meta || '') + ' ' + (r.type || ''));
+  if (_qMatch(lit, q)) return true;
   if (r.wl === 'Dynamics 365' && typeof _walkD365RecordsAndFields === 'function') {
     if (_walkD365RecordsAndFields(r, q).length > 0) return true;
   }
@@ -20014,12 +20442,25 @@ function _resourceHasSearchMatch(r, q) {
 function _invSearchMatchRollup(r, q) {
   q = String(q || '').toLowerCase().trim();
   if (!q || !r) return null;
-  // Synthetic record/field hits (from _walkD365RecordsAndFields, surfaced in
-  // recursive search results) are LEAVES — a field has no "matching records"
-  // contents. Only genuine container resources (environments → tables,
-  // tables → records) get a match-count rollup. Without this guard a Field
-  // row would run the records-walk below and nonsensically report "N records".
-  if (r._synthetic || r.type === 'Field' || r.type === 'Record') return null;
+  // Records ARE containers one level down — they hold fields. Report how
+  // many of THIS record's fields match the query; a name-only match falls
+  // through to the plain field-count rollup (return null → fallback).
+  if (r.type === 'Record') {
+    var _pt = (typeof RESOURCES !== 'undefined')
+      ? RESOURCES.find(function(x){ return x.id === r.parentId; }) : null;
+    if (_pt && typeof _walkD365RecordsAndFields === 'function') {
+      var _fh = _walkD365RecordsAndFields(_pt, q).filter(function(h){
+        return h._hitKind === 'field' && h._recordId === r.id;
+      });
+      if (_fh.length) return _fh.length + ' field' + (_fh.length === 1 ? '' : 's');
+    }
+    return null;
+  }
+  // Field hits: a surfaced field row IS a match — its matching contents
+  // is its single value, shown with the same search-chip treatment as
+  // every other tier (records "1 field", tables "N records", …).
+  if (r.type === 'Field') return '1 value';
+  if (r._synthetic) return null;
   // D365-scoped — other workloads have no record/field content layer,
   // so "matching contents" would be meaningless there.
   if (r.wl !== 'Dynamics 365') return null;
@@ -20730,7 +21171,11 @@ function buildSearchGroups(query) {
   // Jira: always descend so an inventory search surfaces matching objects
   // across the hierarchy (Projects/Boards/Issues/…), which the object-type
   // gear then narrows — mirroring the drill behaviour.
-  var includeSub = !!state.searchIncludeSubfolders || (state.wl === 'jira');
+  // v8 (D365): the bubble-up superset ALWAYS descends — depth is no
+  // longer a user-facing toggle there; the pinned Type filter decides
+  // which tier of the superset the list shows.
+  var d365Super = (typeof _d365SupersetOn === 'function') && _d365SupersetOn();
+  var includeSub = !!state.searchIncludeSubfolders || (state.wl === 'jira') || d365Super;
   var seenIds = {};
   RESOURCES.forEach(function(r){
     if (r.type === 'Folder') return;
@@ -20759,7 +21204,11 @@ function buildSearchGroups(query) {
       resource: r,
       rps: matchedRps,
       sampleSnippet: searchMatchSnippet(r, matchedRps[0], queryKey),
-      parentPath: _invParentBreadcrumbScoped(r)
+      parentPath: _invParentBreadcrumbScoped(r),
+      // v8 superset tagging: tier of this row + matched-content samples
+      // for the under-name context line.
+      _objType: isD365 ? _d365ObjTypeFor(r) : undefined,
+      _matchCtx: isD365 ? _d365ResourceMatchCtx(r, queryKey) : null
     });
     seenIds[r.id] = true;
   });
@@ -20786,15 +21235,15 @@ function buildSearchGroups(query) {
         RESOURCES.forEach(function(d){
           if (d.parentId !== pid) return;
           if (d.type !== 'Folder' && !seenIds[d.id]) {
-            var nm = (d.name || '').toLowerCase();
-            var tp = (d.type || '').toLowerCase();
-            if (nm.indexOf(queryKey) >= 0 || tp.indexOf(queryKey) >= 0) {
+            if (_qMatch(d.name, queryKey) || _qMatch(d.type, queryKey)) {
               var dRps = generateRps(d.id) || [];
               groups.push({
                 resource: d,
                 rps: dRps,
                 sampleSnippet: '',
-                parentPath: _invParentBreadcrumb(d)
+                parentPath: _invParentBreadcrumb(d),
+                _objType: d.wl === 'Dynamics 365' ? _d365ObjTypeFor(d) : undefined,
+                _matchCtx: d.wl === 'Dynamics 365' ? _d365ResourceMatchCtx(d, queryKey) : null
               });
               seenIds[d.id] = true;
             }
@@ -20833,9 +21282,14 @@ function buildSearchGroups(query) {
         // matched — instead of one leaf row per matched field. The match
         // still counts as a field hit for the Hit-type facet (_hitKind stays
         // 'field'); only the representation/action granularity changes.
-        var rollToRecords = !!(state.searchFacets && state.searchFacets.showAs === 'records');
+        // v8 superset: field hits surface BOTH ways simultaneously —
+        // rolled into their containing record (record-granularity restore)
+        // AND as raw field rows (field-granularity restore). The Type
+        // filter picks which tier the user sees; nothing is pre-collapsed.
+        var rollToRecords = !!(state.searchFacets && state.searchFacets.showAs === 'records') || d365Super;
         var rolledByRec = {};
-        _walkD365RecordsAndFields(r, queryKey).forEach(function(hit){
+        var schemaHits = _walkD365RecordsAndFields(r, queryKey);
+        schemaHits.forEach(function(hit){
           if (rollToRecords && hit._hitKind === 'field') {
             var recKey = hit._recordId;
             if (seenIds[recKey]) {
@@ -20862,9 +21316,12 @@ function buildSearchGroups(query) {
                 g.sampleSnippet = (g.resource._hitKind === 'record')
                   ? ('Matched in record name + ' + fieldsTxt)
                   : ('Matched in ' + fieldsTxt);
+                g._matchCtx = g._matchCtx || { samples: [], more: 0 };
+                if (g._matchCtx.samples.length < 2) g._matchCtx.samples.push(hit._hitField + ': ' + String(hit._hitValue));
+                else g._matchCtx.more++;
               }
-              return;
-            }
+              if (!d365Super) return;
+            } else {
             var recRow = Object.assign({}, hit, {
               id: recKey,
               name: hit._recordName,
@@ -20878,12 +21335,15 @@ function buildSearchGroups(query) {
               rps: generateRps(recKey) || [],
               sampleSnippet: 'Matched in ' + hit._hitField + ' field',
               parentPath: _invParentBreadcrumb(recRow) || r.name,
-              _fields: [hit._hitField]
+              _fields: [hit._hitField],
+              _objType: 'record',
+              _matchCtx: { samples: [hit._hitField + ': ' + String(hit._hitValue)], more: 0 }
             };
             groups.push(recGroup);
             rolledByRec[recKey] = recGroup;
             seenIds[recKey] = true;
-            return;
+            if (!d365Super) return;
+            }
           }
           if (seenIds[hit.id]) return;
           var hitRps = generateRps(hit.id) || [];
@@ -20893,16 +21353,38 @@ function buildSearchGroups(query) {
             sampleSnippet: hit._hitKind === 'field'
               ? ('Matched in ' + hit._hitField + ' field')
               : 'Matched in record name',
-            parentPath: _invParentBreadcrumb(hit) || r.name
+            parentPath: _invParentBreadcrumb(hit) || r.name,
+            _objType: hit._hitKind === 'field' ? 'field' : 'record'
           });
           seenIds[hit.id] = true;
         });
+        // v8 superset: the CONTAINING TABLE is itself a selectable row
+        // whenever anything inside it matched (the descendant walk above
+        // only catches tables whose own NAME matched).
+        if (d365Super && schemaHits.length && !seenIds[r.id]) {
+          groups.push({
+            resource: r,
+            rps: generateRps(r.id) || [],
+            sampleSnippet: '',
+            parentPath: _invParentBreadcrumb(r),
+            _objType: _d365ObjTypeFor(r),
+            _matchCtx: _d365MatchCtxFromHits(schemaHits, _activeSearchKinds())
+          });
+          seenIds[r.id] = true;
+        }
       });
     }
   }
   // Sort groups: more matches first, then by most-recent matched RP.
   // Descendant rows with empty rps[] sort last (no recent activity).
   groups.sort(function(a, b){
+    // v8 superset: order broad → fine (environments, tables, records,
+    // field values) so the bubble-up reads as a hierarchy walk.
+    if (d365Super) {
+      var ar = (typeof SEARCH_TYPE_RANK !== 'undefined' && SEARCH_TYPE_RANK[a._objType] != null) ? SEARCH_TYPE_RANK[a._objType] : 9;
+      var br = (typeof SEARCH_TYPE_RANK !== 'undefined' && SEARCH_TYPE_RANK[b._objType] != null) ? SEARCH_TYPE_RANK[b._objType] : 9;
+      if (ar !== br) return ar - br;
+    }
     var aLen = a.rps ? a.rps.length : 0;
     var bLen = b.rps ? b.rps.length : 0;
     if (bLen !== aLen) return bLen - aLen;
@@ -20931,6 +21413,9 @@ function _searchFacetsActive() {
   // Jira object-type narrowing counts as active too (it flows through the
   // same gear + _filterSearchGroupsByFacets pipeline).
   if (f && f.jiraTypes && f.jiraTypes.length && state.wl === 'jira') return true;
+  // v5 multi-kind reach (inventory split button). Zero checked kinds in
+  // Specific mode = no narrowing (behaves like Everything).
+  if (f && f.mode === 'specific' && f.kinds && f.kinds.length) return true;
   return !!(f && ((f.hitKind && f.hitKind !== 'all') || f.showAs === 'records'));
 }
 // Returns true iff state.compareDiffFilters deviates from the
@@ -21095,8 +21580,13 @@ function _filterSearchGroupsByFacets(items) {
       return f.jiraTypes.indexOf(_jiraTypeFacetLabel(r.type)) >= 0;
     });
   }
+  // v5 multi-kind reach: keep items whose reason set includes ANY checked
+  // kind (OR within the group). Falls back to the legacy single hitKind
+  // when no kinds array is in play (drill gear radios).
+  var kinds = (f.mode === 'specific' && f.kinds && f.kinds.length) ? f.kinds : null;
   return items.filter(function(item){
     var re = _itemReasons(item);
+    if (kinds) return kinds.some(function(k){ return re[k]; });
     if (f.hitKind && f.hitKind !== 'all' && !re[f.hitKind]) return false;
     return true;
   });
@@ -21109,6 +21599,384 @@ function _invSearchFacetsApply() {
   var wlScope = state.catWlScope;
   return wl === 'd365' || wlScope === 'd365';
 }
+// ─── Lab-port v8: token reach + bubble-up superset (D365, inventory) ──
+// Replaces the v5 "Search options" popover + "Show as" picker at the
+// inventory level. Two orthogonal axes, both on EXISTING surfaces:
+//   • in: tokens (inside the search input) — WHERE the term must match
+//     (table names / record names / field values). No token = match
+//     everything; tokens OR together. Rides state.searchFacets.kinds,
+//     so the whole reach pipeline (_itemReasons / facet filter) is reused.
+//   • pinned "Type" filter (filter bar) — WHAT unit of the hierarchy the
+//     result list shows/selects. Search bubbles up EVERY implicated
+//     object (environments → tables → records → field values); the Type
+//     chip picks the restore granularity. Defaults to the CURRENT LEVEL
+//     so the resting view equals the old strict default — removing or
+//     widening the chip reveals the superset.
+function _d365SupersetOn() {
+  return state.wl === 'd365' || state.catWlScope === 'd365';
+}
+var SEARCH_TOKEN_KINDS = [
+  { key: 'resource', label: 'Table names' },
+  { key: 'record',   label: 'Record names' },
+  { key: 'field',    label: 'Field values' }
+];
+var SEARCH_TYPE_LABELS = { env: 'Environments', table: 'Tables', record: 'Records', field: 'Field values' };
+var SEARCH_TYPE_RANK = { env: 0, table: 1, record: 2, field: 3 };
+function _d365ObjTypeFor(r) {
+  if (!r) return 'table';
+  if (r.type === 'Environment') return 'env';
+  if (r.type === 'Record') return 'record';
+  if (r.type === 'Field') return 'field';
+  return 'table';
+}
+function _activeSearchKinds() {
+  var f = state.searchFacets || {};
+  return (f.mode === 'specific' && f.kinds && f.kinds.length) ? f.kinds.slice() : [];
+}
+function _searchTokenLabel(kind) {
+  var d = SEARCH_TOKEN_KINDS.filter(function(k){ return k.key === kind; })[0];
+  return d ? d.label : kind;
+}
+// ── v9.3: token UI is surface-generic — the SAME reach tokens render on
+// both the inventory search and the drill search (state.searchFacets.kinds
+// is one global reach, so the chips must read identically everywhere).
+function _tokenSurfaceIds(surface) {
+  return surface === 'child'
+    ? { input: 'childSearch', tokens: 'childSearchTokens', panel: 'childSearchSuggest' }
+    : { input: 'invSearch',   tokens: 'invSearchTokens',   panel: 'invSearchSuggest' };
+}
+function renderSearchTokensFor(surface) {
+  var ids = _tokenSurfaceIds(surface);
+  var wrap = document.getElementById(ids.tokens);
+  if (!wrap) return;
+  var on = _d365SupersetOn();
+  if (surface === 'inv') {
+    var input = document.getElementById(ids.input);
+    if (input) input.placeholder = on ? 'Search everything in Dynamics 365' : 'Search your inventory';
+  }
+  if (!on) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = _activeSearchKinds().map(function(k){
+    return '<span class="search-token"><span class="search-token-in">in:</span>' + _searchTokenLabel(k)
+      + '<button type="button" class="search-token-x" onclick="removeSearchToken(\'' + k + '\',\'' + surface + '\')" aria-label="Remove ' + _searchTokenLabel(k) + ' token">✕</button></span>';
+  }).join('');
+}
+function renderInvSearchTokens() { renderSearchTokensFor('inv'); renderSearchTokensFor('child'); }
+function addSearchToken(kind, surface) {
+  surface = surface || 'inv';
+  if (_activeSearchKinds().indexOf(kind) < 0) toggleSearchFacetKind(kind);
+  renderInvSearchTokens();
+  if (state._suggestOpenSurface) renderSearchSuggestFor(state._suggestOpenSurface);
+  var input = document.getElementById(_tokenSurfaceIds(surface).input);
+  if (input) input.focus();
+}
+function removeSearchToken(kind, surface) {
+  if (_activeSearchKinds().indexOf(kind) >= 0) toggleSearchFacetKind(kind);
+  renderInvSearchTokens();
+  if (state._suggestOpenSurface) renderSearchSuggestFor(state._suggestOpenSurface);
+}
+function renderSearchSuggestFor(surface) {
+  var panel = document.getElementById(_tokenSurfaceIds(surface).panel);
+  if (!panel) return;
+  var kinds = _activeSearchKinds();
+  var remaining = SEARCH_TOKEN_KINDS.filter(function(k){ return kinds.indexOf(k.key) < 0; });
+  // The header states the CURRENT reach honestly both ways — "no token =
+  // everything" is said here and via the input placeholder (the lab
+  // exploration showed it needs saying twice).
+  var header = kinds.length
+    ? 'Narrowing to matches in ' + kinds.map(_searchTokenLabel).join(' or ').toLowerCase() + ' — add another, or remove a token to widen.'
+    : 'Searching everything — narrow to matches in…';
+  panel.innerHTML = '<div class="search-suggest-hd">' + header + '</div>'
+    + remaining.map(function(k){
+        return '<button type="button" class="search-suggest-opt" onclick="addSearchToken(\'' + k.key + '\',\'' + surface + '\')">'
+          + '<span class="search-token search-token-ghost"><span class="search-token-in">in:</span>' + k.label + '</span>'
+          + '</button>';
+      }).join('');
+}
+function searchSuggestOpenFor(surface) {
+  if (!_d365SupersetOn()) return;
+  var panel = document.getElementById(_tokenSurfaceIds(surface).panel);
+  if (!panel) return;
+  searchSuggestCloseAll();
+  renderSearchSuggestFor(surface);
+  panel.style.display = 'block';
+  state._suggestOpenSurface = surface;
+  setTimeout(function(){ document.addEventListener('click', _searchSuggestOutside, true); }, 0);
+}
+function _searchSuggestOutside(e) {
+  var surface = state._suggestOpenSurface;
+  if (!surface) return;
+  var panel = document.getElementById(_tokenSurfaceIds(surface).panel);
+  var input = document.getElementById(_tokenSurfaceIds(surface).input);
+  var inner = input ? input.closest('.inv-search-inner') : null;
+  if ((panel && panel.contains(e.target)) || (inner && inner.contains(e.target))) return;
+  searchSuggestCloseAll();
+}
+function searchSuggestCloseAll() {
+  ['inv', 'child'].forEach(function(sf){
+    var panel = document.getElementById(_tokenSurfaceIds(sf).panel);
+    if (panel) panel.style.display = 'none';
+  });
+  state._suggestOpenSurface = null;
+  document.removeEventListener('click', _searchSuggestOutside, true);
+}
+// Back-compat wrappers — agent + inv markup call the inv-named forms.
+function invSearchSuggestClose() { searchSuggestCloseAll(); }
+// The panel only appears once the user has TYPED something — on a bare
+// focus it has nothing to narrow yet and would just shout over the
+// placeholder. A dismissal via Enter / Escape squelches reopening until
+// the field is refocused or emptied.
+function searchSuggestSync(surface) {
+  if (!_d365SupersetOn()) return;
+  var input = document.getElementById(_tokenSurfaceIds(surface).input);
+  var hasText = !!(input && input.value && input.value.trim());
+  if (!hasText) {
+    state._suggestSquelch = false;
+    if (state._suggestOpenSurface === surface) searchSuggestCloseAll();
+    return;
+  }
+  if (state._suggestOpenSurface !== surface && !state._suggestSquelch) searchSuggestOpenFor(surface);
+}
+function searchSuggestFocus(surface) {
+  state._suggestSquelch = false;
+  var input = document.getElementById(_tokenSurfaceIds(surface).input);
+  if (input && input.value && input.value.trim()) searchSuggestOpenFor(surface);
+}
+function searchTokenKeydown(surface, e) {
+  if (!_d365SupersetOn()) return;
+  var input = document.getElementById(_tokenSurfaceIds(surface).input);
+  // Backspace on an empty input removes the last token — standard
+  // recipient-chip behavior.
+  if (e.key === 'Backspace' && input && !input.value) {
+    var kinds = _activeSearchKinds();
+    if (kinds.length) { removeSearchToken(kinds[kinds.length - 1], surface); e.preventDefault(); }
+  }
+  if (e.key === 'Escape' || e.key === 'Enter') {
+    state._suggestSquelch = true;
+    searchSuggestCloseAll();
+  }
+}
+function invSearchSuggestSync() { searchSuggestSync('inv'); }
+function invSearchSuggestFocus() { searchSuggestFocus('inv'); }
+function invSearchKeydown(e) { searchTokenKeydown('inv', e); }
+// ── pinned Type filter (search-scoped) ──
+function _searchTypeFilterValues() {
+  // v9.2: the unified Type filter — plain r.type values ('Environment',
+  // 'Table', 'Record', 'Field', 'Campaign', …).
+  var f = (state.filters || []).filter(function(x){ return x.attr === 'type'; })[0];
+  return (f && f.values && f.values.length) ? f.values : null;
+}
+function _buildSearchGroupsTypeLifted(query) {
+  // The D365 superset must be built with the Type filter LIFTED —
+  // resourcePassesFilters would otherwise drop container rows during
+  // pass 1 and skew the "X of Y" totals + picker counts. The Type
+  // narrowing is applied post-hoc against g.resource.type.
+  if (!(typeof _d365SupersetOn === 'function' && _d365SupersetOn())) return buildSearchGroups(query);
+  var saved = state.filters;
+  state.filters = (state.filters || []).filter(function(f){ return f.attr !== 'type'; });
+  try { return buildSearchGroups(query); } finally { state.filters = saved; }
+}
+function _stripSearchOnlyTypeValues(stateKey) {
+  // Record / Field only exist as search objects — outside a search (or
+  // back at narrow scope) those selections are meaningless. Real
+  // resource types persist as ordinary browse filters.
+  stateKey = stateKey || 'filters';
+  var changed = false;
+  state[stateKey] = (state[stateKey] || []).map(function(f){
+    if (f.attr !== 'type') return f;
+    var kept = f.values.filter(function(v){ return v !== 'Record' && v !== 'Field'; });
+    if (kept.length !== f.values.length) { changed = true; return { attr: 'type', values: kept }; }
+    return f;
+  }).filter(function(f){ return !(f.attr === 'type' && f.values.length === 0); });
+  return changed;
+}
+function _d365CurrentLevelTypeLabel() {
+  // "Current level" = the primary type at the active cat. D365 root cats
+  // are Environment-rooted; a Tables-rooted cat defaults to Tables.
+  var prim = (typeof CAT_PRIMARY_TYPES !== 'undefined' && state.cat && CAT_PRIMARY_TYPES[state.cat]) || null;
+  if (prim && prim.indexOf('Environment') < 0) return 'Tables';
+  return 'Environments';
+}
+function _syncSearchTypeFilter(q) {
+  // v9.2: cleanup when a D365 search ends — Record / Field selections
+  // (search-only objects) drop out of the Type filter, and the scope
+  // snaps back to narrow so the next search starts from the classic view.
+  state.filters = state.filters || [];
+  var d365 = _d365SupersetOn();
+  if (q && d365) return;
+  var changed = _stripSearchOnlyTypeValues();
+  if (d365) state.searchIncludeSubfolders = false;
+  if (changed && typeof renderFilterBar === 'function') renderFilterBar('inv');
+  if (typeof syncSearchScopeLines === 'function') syncSearchScopeLines();
+}
+function clearSearchTypeFilter() {
+  state.filters = (state.filters || []).filter(function(f){ return f.attr !== 'type'; });
+  if (typeof renderFilterBar === 'function') renderFilterBar('inv');
+  renderTable();
+}
+// ── match-context annotations ──
+function _d365MatchCtxFromHits(hits, kinds) {
+  // Up to two "where it matched" samples for the under-name context line —
+  // actual content ("Industry: Manufacturing"), not just the field name.
+  // Honors the active in: tokens so the annotation never cites a hit kind
+  // the reach excludes.
+  var useKinds = (kinds && kinds.length) ? kinds : null;
+  var samples = [], total = 0;
+  (hits || []).forEach(function(h){
+    var k = h._hitKind === 'field' ? 'field' : 'record';
+    if (useKinds && useKinds.indexOf(k) < 0) return;
+    total++;
+    if (samples.length >= 2) return;
+    samples.push(h._hitKind === 'field' ? (h._hitField + ': ' + String(h._hitValue)) : h.name);
+  });
+  return { samples: samples, more: Math.max(0, total - samples.length) };
+}
+function _d365ResourceMatchCtx(r, q) {
+  // Context for a CONTAINER row (environment / table): walk its own schema
+  // plus descendant tables' schemas, sampling matched content. Capped — the
+  // annotation needs two samples and a count, not the full hit list.
+  var kinds = _activeSearchKinds();
+  var hits = [];
+  function collect(res) {
+    if (hits.length >= 12) return;
+    if (typeof _walkD365RecordsAndFields === 'function') {
+      hits = hits.concat(_walkD365RecordsAndFields(res, q));
+    }
+    (typeof RESOURCES !== 'undefined' ? RESOURCES : []).forEach(function(k){
+      if (k.parentId === res.id) collect(k);
+    });
+  }
+  collect(r);
+  return _d365MatchCtxFromHits(hits, kinds);
+}
+// v9.3: drill parity with the inventory superset — every record that
+// contains matching FIELD VALUES is itself a selectable Record row,
+// alongside the raw field rows (record-name hits merge into one row).
+// The rolled row resolves its parent TABLE id from the schema key so
+// breadcrumbs + match-context keep working.
+function _d365AugmentRolledRecords(results) {
+  var byRec = {};
+  results.forEach(function(h){ if (h && h.type === 'Record' && h.id) byRec[h.id] = h; });
+  var added = [];
+  results.forEach(function(h){
+    if (!h || h._hitKind !== 'field' || !h._recordId) return;
+    var ex = byRec[h._recordId];
+    if (ex) {
+      ex._hitFields = ex._hitFields || [];
+      if (h._hitField && ex._hitFields.indexOf(h._hitField) < 0) ex._hitFields.push(h._hitField);
+      return;
+    }
+    var m = String(h._recordId).match(/^rec-(.+)-(\d+)$/);
+    var tbl = (m && typeof RESOURCES !== 'undefined' && typeof d365SchemaFor === 'function')
+      ? RESOURCES.find(function(x){ return x.wl === 'Dynamics 365' && d365SchemaFor(x) === m[1]; })
+      : null;
+    var recRow = Object.assign({}, h, {
+      id: h._recordId,
+      name: h._recordName,
+      type: 'Record',
+      parentId: tbl ? tbl.id : h.parentId,
+      drillable: !!(tbl && tbl.drillTarget === 'records'),
+      drillTarget: (tbl && tbl.drillTarget === 'records') ? 'fields' : undefined,
+      _hitKind: 'field',
+      _hitFields: h._hitField ? [h._hitField] : []
+    });
+    byRec[h._recordId] = recRow;
+    added.push(recRow);
+  });
+  return results.concat(added);
+}
+function _d365RecordMatchCtx(recRow, q) {
+  // Matched non-name fields for ONE synthetic record row — derived from
+  // its parent table's schema walk, filtered to this record id.
+  var parent = (typeof RESOURCES !== 'undefined')
+    ? RESOURCES.find(function(x){ return x.id === recRow.parentId; }) : null;
+  if (!parent || typeof _walkD365RecordsAndFields !== 'function') return { samples: [], more: 0 };
+  var hits = _walkD365RecordsAndFields(parent, q).filter(function(h){
+    return h._hitKind === 'field' && h._recordId === recRow.id;
+  });
+  return _d365MatchCtxFromHits(hits, _activeSearchKinds());
+}
+// Shared renderer: {samples, more} → the under-name context line.
+// One implementation so inventory search, env drill, and records drill
+// all show the identical treatment.
+function _matchCtxHtml(ctx, q) {
+  if (!ctx || !ctx.samples || !ctx.samples.length) return '';
+  return '<div class="cell-meta inv-match-ctx">'
+    + ctx.samples.map(function(sm){ return _hlText(sm, q); }).join(' · ')
+    + (ctx.more > 0 ? ' · +' + ctx.more + ' more' : '')
+    + '</div>';
+}
+// ── v9: search-scope pivot ──
+// The default search shows CURRENT-LEVEL rows only (the classic strict
+// view — content matches still roll up into each row's annotation). The
+// scope line under the search bar pivots to "all contents" = the full
+// bubble-up superset, where the pinned Type filter becomes available as
+// a deliberate narrowing tool (no more force-applied default chip).
+// Scope state reuses state.searchIncludeSubfolders — the same flag the
+// pre-v8 depth toggle owned, so every existing reset path (drill
+// changes, workload switches) already clears it.
+function toggleSearchScopeAll(surface) {
+  state.searchIncludeSubfolders = !state.searchIncludeSubfolders;
+  if (!state.searchIncludeSubfolders && typeof _stripSearchOnlyTypeValues === 'function') {
+    // Narrow scope owns the tier again — search-only Type values
+    // (Record / Field) are moot there; real resource types persist.
+    _stripSearchOnlyTypeValues('filters');
+    if (_stripSearchOnlyTypeValues('childFilters') && typeof renderFilterBar === 'function') renderFilterBar('child');
+  }
+  if (typeof renderFilterBar === 'function') renderFilterBar('inv');
+  if (surface === 'child') { if (typeof childRender === 'function') childRender(); }
+  else { if (typeof renderTable === 'function') renderTable(); }
+  syncSearchScopeLines();
+}
+function syncSearchScopeLines() {
+  var on = (typeof _d365SupersetOn === 'function') && _d365SupersetOn();
+  var all = !!state.searchIncludeSubfolders;
+  var line = document.getElementById('invSearchScopeLine');
+  if (line) {
+    var q = ((document.getElementById('invSearch') || {}).value || '').trim();
+    if (!on || !q || state.invMode !== 'list') {
+      line.style.display = 'none';
+    } else {
+      var noun = _d365CurrentLevelTypeLabel().toLowerCase();
+      line.innerHTML = all
+        ? 'Searching all contents for “' + wsEscape(q) + '” · <button type="button" class="search-scope-link" onclick="toggleSearchScopeAll(\'inv\')">' + cap(noun) + ' only</button>'
+        : 'Searching ' + noun + ' for “' + wsEscape(q) + '” · <button type="button" class="search-scope-link" onclick="toggleSearchScopeAll(\'inv\')">Search all contents</button>';
+      line.style.display = '';
+    }
+  }
+  var cline = document.getElementById('childSearchScopeLine');
+  if (cline) {
+    var cq = ((document.getElementById('childSearch') || {}).value || '').trim();
+    var dType = (typeof _drillType === 'function') ? _drillType() : null;
+    if (!on || !cq || state.invMode !== 'drill') {
+      cline.style.display = 'none';
+    } else {
+      var parent = (typeof RESOURCES !== 'undefined' && childState)
+        ? RESOURCES.find(function(r){ return r.id === childState.parentId; }) : null;
+      var pn = parent ? parent.name : 'this folder';
+      if (dType === 'records') {
+        // Records drill: field values already classify into the record
+        // rows, so there's no deeper tier to pivot to — descriptive only.
+        cline.innerHTML = 'Searching records in <strong>' + wsEscape(pn) + '</strong> for “' + wsEscape(cq) + '” — field-value matches included.';
+      } else if (dType === 'fields') {
+        // Fields drill: the parent is a SYNTHETIC record (rec-<schema>-<idx>)
+        // that doesn't live in RESOURCES — resolve its name from the schema.
+        if (!parent && typeof childState.parentId === 'string' && childState.parentId.indexOf('rec-') === 0) {
+          var _m = childState.parentId.match(/^rec-(.+)-(\d+)$/);
+          var _sch = (_m && typeof D365_SCHEMAS !== 'undefined') ? D365_SCHEMAS[_m[1]] : null;
+          var _row = (_sch && _sch.rows) ? _sch.rows[parseInt(_m[2], 10)] : null;
+          if (_row && _sch.cols && _row[_sch.cols[0]] != null) pn = String(_row[_sch.cols[0]]);
+        }
+        cline.innerHTML = 'Searching fields of <strong>' + wsEscape(pn) + '</strong> for “' + wsEscape(cq) + '”.';
+      } else {
+        cline.innerHTML = all
+          ? 'Searching all contents of <strong>' + wsEscape(pn) + '</strong> for “' + wsEscape(cq) + '” · <button type="button" class="search-scope-link" onclick="toggleSearchScopeAll(\'child\')">Tables only</button>'
+          : 'Searching tables in <strong>' + wsEscape(pn) + '</strong> for “' + wsEscape(cq) + '” · <button type="button" class="search-scope-link" onclick="toggleSearchScopeAll(\'child\')">Search all contents</button>';
+      }
+      cline.style.display = '';
+    }
+  }
+}
+function cap(str) { return str ? str.charAt(0).toUpperCase() + str.slice(1) : str; }
 // Unified facet-popover toggle. Called from both gear buttons
 // (#invSearchFacetsBtn and #childSearchFacetsBtn). Records which
 // button was clicked in state.searchFacetsAnchorId so the popover can
@@ -21556,11 +22424,198 @@ function _ensureSearchDepthForDeepHits() {
 }
 function setSearchFacetHitKind(kind) {
   state.searchFacets.hitKind = kind || 'all';
+  // Mirror into the v5 mode/kinds shape so the inventory split-button
+  // pill and the drill radios never disagree about the active reach.
+  state.searchFacets.kinds = (kind && kind !== 'all') ? [kind] : [];
+  state.searchFacets.mode  = state.searchFacets.kinds.length ? 'specific' : 'all';
   if (kind === 'record' || kind === 'field') _ensureSearchDepthForDeepHits();
   renderInvSearchFacetsPopover();
   syncSearchFacetsBtns();
   _refreshSurfaceAfterFacetChange();
 }
+/* ── Lab-port v5 — "Match on…" reach setters (inventory popover) ─────
+   mode 'all' (default: everything matches) | 'specific' (narrow to the
+   checked kinds, OR-combined). kinds ⊆ ['resource','record','field']
+   — D365's Table name / Record name / Field value. hitKind stays
+   mirrored for the drill gear's legacy single-select pipeline.
+   Reach is ORTHOGONAL to display: checking a deep kind does NOT flip
+   the depth toggle — with depth OFF the environment rows are simply
+   narrowed to those whose CONTENTS matched that way (the inherited-
+   reasons classification _itemReasons already implements). */
+function _syncLegacyHitKind() {
+  var f = state.searchFacets;
+  f.hitKind = (f.kinds && f.kinds.length === 1) ? f.kinds[0] : 'all';
+}
+function setSearchFacetMode(mode) {
+  var f = state.searchFacets;
+  f.mode = (mode === 'specific') ? 'specific' : 'all';
+  if (f.mode === 'all') f.kinds = [];
+  _syncLegacyHitKind();
+  renderInvSearchFacetsPopover();
+  syncSearchFacetsBtns();
+  _refreshSurfaceAfterFacetChange();
+}
+function toggleSearchFacetKind(kind) {
+  var f = state.searchFacets;
+  f.kinds = f.kinds || [];
+  var i = f.kinds.indexOf(kind);
+  if (i >= 0) f.kinds.splice(i, 1); else f.kinds.push(kind);
+  // Stay in Specific even at zero checks (the checkboxes shouldn't
+  // collapse mid-interaction); zero checked behaves like Everything
+  // (_searchFacetsActive requires kinds.length, so no narrowing applies).
+  f.mode = 'specific';
+  _syncLegacyHitKind();
+  renderInvSearchFacetsPopover();
+  syncSearchFacetsBtns();
+  _refreshSurfaceAfterFacetChange();
+}
+// ↺ split segment — one-click return to "match on everything". Never
+// touches the Show-as display mode (lens discipline: reach and display
+// are separate instruments).
+function resetSearchScope() {
+  var f = state.searchFacets;
+  f.mode = 'all'; f.kinds = [];
+  // Jira shares the inventory gear — its object-type narrowing is the
+  // pill's count there, so ↺ clears it too.
+  if (state.wl === 'jira' && f.jiraTypes) f.jiraTypes = [];
+  _syncLegacyHitKind();
+  if (state.searchFacetsOpen) renderInvSearchFacetsPopover();
+  syncSearchFacetsBtns();
+  _refreshSurfaceAfterFacetChange();
+}
+/* ── Lab-port v5 — "Show as" display picker (inventory, D365) ────────
+   The three rungs map onto EXISTING state with zero new render paths:
+     'env'     → searchIncludeSubfolders OFF            (this level · default)
+     'records' → depth ON + searchFacets.showAs 'records' (roll fields → records)
+     'items'   → depth ON + searchFacets.showAs 'fields'  (every matched item)
+   The blue bar's old Include children / Limit to parent level link is
+   subsumed by this picker for D365 (it keeps working elsewhere). */
+// Current rung, derived from the SAME two state flags both surfaces
+// share: depth OFF = the current level ('level'); depth ON splits on
+// the records roll-up.
+function _showAsRung() {
+  if (!state.searchIncludeSubfolders) return 'level';
+  return (state.searchFacets && state.searchFacets.showAs === 'records') ? 'records' : 'items';
+}
+// Per-surface config. The ladder is POSITIONAL — the top rung is
+// whatever list you're standing in (Environments at the inventory
+// root, Tables inside an Environment drill), per the lab's v5 rule.
+// Surfaces where only one display shape exists (records drill — rows
+// are always records; fields drill) return null rungs → picker hidden.
+function _showAsSurface(surface) {
+  if (surface === 'child') {
+    var rungs = null;
+    if (state.invMode === 'drill' && typeof _drillType === 'function' && _drillType() === 'standard') {
+      var p = RESOURCES.find(function(r){ return r.id === childState.parentId; });
+      if (p && p.wl === 'Dynamics 365') {
+        var lvlLabel = p.type === 'Environment' ? 'Tables' : 'This level';
+        rungs = [
+          { key: 'items',   label: 'Matched items',      scope: 'entire hierarchy' },
+          { key: 'records', label: 'Containing records', scope: '' },
+          { key: 'level',   label: lvlLabel,             scope: 'this level · default' }
+        ];
+      }
+    }
+    return {
+      wrapId: 'childShowAsWrap', valId: 'childShowAsValue', menuId: 'childShowAsMenu',
+      searchId: 'childSearch', rungs: rungs,
+      rerender: function(){ if (typeof childRender === 'function') childRender(); }
+    };
+  }
+  return {
+    wrapId: 'invShowAsWrap', valId: 'invShowAsValue', menuId: 'invShowAsMenu',
+    searchId: 'invSearch',
+    rungs: (state.invMode === 'list' && state.cat !== 'deleted') ? [
+      { key: 'items',   label: 'Matched items',      scope: 'entire hierarchy' },
+      { key: 'records', label: 'Containing records', scope: '' },
+      { key: 'level',   label: 'Environments',       scope: 'this level · default' }
+    ] : null,
+    rerender: function(){ if (typeof filterTable === 'function') filterTable(); }
+  };
+}
+function setShowAsRung(surface, rung) {
+  if (rung === 'level' || rung === 'env') { // 'env' kept as back-compat alias
+    state.searchIncludeSubfolders = false;
+    state.searchFacets.showAs = 'fields';
+  } else if (rung === 'records') {
+    state.searchIncludeSubfolders = true;
+    state.searchFacets.showAs = 'records';
+  } else {
+    state.searchIncludeSubfolders = true;
+    state.searchFacets.showAs = 'fields';
+  }
+  _closeShowAsMenus();
+  _showAsSurface(surface).rerender();
+  syncShowAs(surface);
+}
+function renderShowAsMenu(surface) {
+  var cfg = _showAsSurface(surface);
+  var menu = document.getElementById(cfg.menuId);
+  if (!menu || !cfg.rungs) return;
+  var cur = _showAsRung();
+  menu.innerHTML = cfg.rungs.map(function(r){
+    return '<button type="button" class="del-window-opt' + (r.key === cur ? ' is-active' : '') + '" onclick="setShowAsRung(\'' + surface + '\',\'' + r.key + '\')">'
+      + r.label + (r.scope ? '<span class="showas-scope">' + r.scope + '</span>' : '')
+      + '</button>';
+  }).join('');
+}
+function toggleShowAsMenu(surface, e) {
+  if (e && e.stopPropagation) e.stopPropagation();
+  var cfg = _showAsSurface(surface);
+  var menu = document.getElementById(cfg.menuId);
+  if (!menu) return;
+  var open = menu.style.display !== 'none';
+  _closeShowAsMenus();
+  if (open) return;
+  renderShowAsMenu(surface);
+  menu.style.display = 'block';
+  _showAsOpenSurface = surface;
+  setTimeout(function(){ document.addEventListener('click', _showAsOutside, true); }, 0);
+}
+var _showAsOpenSurface = null;
+function _showAsOutside(ev) {
+  if (!_showAsOpenSurface) return;
+  var wrap = document.getElementById(_showAsSurface(_showAsOpenSurface).wrapId);
+  if (wrap && !wrap.contains(ev.target)) _closeShowAsMenus();
+}
+function _closeShowAsMenus() {
+  ['invShowAsMenu', 'childShowAsMenu'].forEach(function(id){
+    var m = document.getElementById(id);
+    if (m) m.style.display = 'none';
+  });
+  _showAsOpenSurface = null;
+  document.removeEventListener('click', _showAsOutside, true);
+}
+// Visibility + trigger label. Search-gated: the picker acts on results,
+// so it only exists while a query is active (the Search options button,
+// which configures the NEXT search, stays persistent — anchor rule).
+function syncShowAs(surface) {
+  var cfg = _showAsSurface(surface);
+  var wrap = document.getElementById(cfg.wrapId);
+  if (!wrap) return;
+  // v9: the Show-as picker is superseded on BOTH surfaces for D365 —
+  // the search-scope line under the search bar now owns the same flag
+  // (searchIncludeSubfolders) the drill picker manipulated; leaving both
+  // visible would be two controls fighting over one state.
+  if (typeof _d365SupersetOn === 'function' && _d365SupersetOn()) {
+    wrap.style.display = 'none';
+    return;
+  }
+  var searchEl = document.getElementById(cfg.searchId);
+  var hasQuery = !!(searchEl && searchEl.value && searchEl.value.trim());
+  var show = _invSearchFacetsApply() && !!cfg.rungs && hasQuery;
+  wrap.style.display = show ? 'inline-flex' : 'none';
+  if (!show) return;
+  var cur = _showAsRung();
+  var def = cfg.rungs.filter(function(r){ return r.key === cur; })[0];
+  var val = document.getElementById(cfg.valId);
+  if (val && def) val.textContent = def.label;
+}
+// Back-compat wrappers — static inventory markup + the AI agent's
+// scripted scenario call the inv-named forms.
+function setInvShowAs(rung) { return setShowAsRung('inv', rung); }
+function toggleInvShowAsMenu(e) { return toggleShowAsMenu('inv', e); }
+function syncInvShowAs() { syncShowAs('inv'); syncShowAs('child'); }
 // "Show as" — nested refinement of the Field value hit type:
 //   'fields'  (default) → one leaf row per matched field (surgical,
 //              field-level restore)
@@ -21572,6 +22627,9 @@ function setSearchFacetHitKind(kind) {
 function setSearchFacetShowAs(v) {
   state.searchFacets.showAs = (v === 'records') ? 'records' : 'fields';
   state.searchFacets.hitKind = 'field';
+  // Mirror into the v5 shape (this legacy setter implies Field value).
+  state.searchFacets.kinds = ['field'];
+  state.searchFacets.mode = 'specific';
   _ensureSearchDepthForDeepHits();
   renderInvSearchFacetsPopover();
   syncSearchFacetsBtns();
@@ -21612,13 +22670,33 @@ function syncSearchFacetsBtns() {
     var btn = document.getElementById(id);
     if (!btn) return;
     var isChild = id === 'childSearchFacetsBtn';
-    var show = isChild ? (apply || jiraDrill) : (apply || jiraList);
+    // v9.4: the split button is fully retired. The search pattern work is
+    // scoped to D365 (where the in: tokens + Type filter replaced it), and
+    // Jira deliberately does NOT get the new pattern — so no workload has
+    // a reason to show this control anymore.
+    var show = false;
     var act  = (active || jiraActive);
-    btn.style.display = show ? 'inline-flex' : 'none';
-    btn.classList.toggle('active', act);
-    var badge = document.getElementById(isChild ? 'childSearchFacetsBadge' : 'invSearchFacetsBadge');
-    if (badge) badge.style.display = act ? 'block' : 'none';
+    // BOTH surfaces: labeled split button (lab-port v5). Visibility lives
+    // on the WRAPPER; the count pill shows how many Match-on kinds narrow
+    // the reach (Show-as never counts), and the ↺ segment appears with it.
+    var wrap = document.getElementById(isChild ? 'childSearchOptionsWrap' : 'invSearchOptionsWrap');
+    if (wrap) wrap.style.display = show ? 'inline-flex' : 'none';
+    var f = state.searchFacets || {};
+    var nKinds = (f.mode === 'specific' && f.kinds) ? f.kinds.length : 0;
+    // Jira shares both gears — its object-type narrowing counts on the
+    // pill too so the state stays visible.
+    var onJira = state.wl === 'jira' || (isChild && jiraDrill);
+    if (onJira && f.jiraTypes) nKinds = f.jiraTypes.length;
+    btn.classList.toggle('active', nKinds > 0);
+    var pill = document.getElementById(isChild ? 'childSearchFacetsPill' : 'invSearchFacetsPill');
+    if (pill) { pill.style.display = nKinds > 0 ? 'inline-flex' : 'none'; pill.textContent = nKinds; }
+    if (wrap) wrap.classList.toggle('has-reset', nKinds > 0);
+    // Legacy dot stays hidden on the labeled buttons (pill replaces it).
+    var dot = document.getElementById(isChild ? 'childSearchFacetsBadge' : 'invSearchFacetsBadge');
+    if (dot) dot.style.display = 'none';
   });
+  if (typeof syncInvShowAs === 'function') syncInvShowAs();
+  if (typeof renderInvSearchTokens === 'function') renderInvSearchTokens();
 }
 // Back-compat alias — older callers still reference the singular name.
 function syncInvSearchFacetsBtn() { return syncSearchFacetsBtns(); }
@@ -21669,69 +22747,61 @@ function renderInvSearchFacetsPopover() {
   var _facetSearchEl = document.getElementById(anchorId === 'childSearchFacetsBtn' ? 'childSearch' : 'invSearch');
   var _searchActive = !!(_facetSearchEl && _facetSearchEl.value && _facetSearchEl.value.trim());
   function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
-  var html = '';
-  html += '<div class="search-facets-popover-header">Filter search results</div>';
-  // Hit-type section.
-  html += '<div class="search-facets-popover-section">';
-  html += '<div class="search-facets-popover-label">Hit type</div>';
-  var kinds = [
-    { key: 'all',      label: 'All hits',      count: counts.hitKind.all },
-    { key: 'resource', label: 'Table name',    count: counts.hitKind.resource },
-    { key: 'record',   label: 'Record name',   count: counts.hitKind.record },
-    { key: 'field',    label: 'Field value',   count: counts.hitKind.field }
-  ];
-  kinds.forEach(function(k){
-    var checked = (f.hitKind || 'all') === k.key ? ' checked' : '';
-    html += '<label class="search-facets-opt">'
-      + '<input type="radio" name="invSearchFacetHitKind" value="' + k.key + '"' + checked + ' onchange="setSearchFacetHitKind(\'' + k.key + '\')">'
-      + '<span>' + esc(k.label) + '</span>'
-      + (_searchActive ? '<span class="search-facets-opt-count">(' + k.count + ')</span>' : '')
+  // ── Lab-port v5 — INVENTORY anchor gets the "Match on…" reach body:
+  // Everything (default) / Specific types… (multi-select checkboxes,
+  // OR-combined, counts from the same groups the table renders). The
+  // DRILL anchor keeps the legacy Hit-type radio body below, so the
+  // records-drill pipeline is untouched this round. Display mode lives
+  // in the separate Show-as picker, not here — footer is just Done.
+  // BOTH anchors share the Match-on body (the legacy Hit-type radio body
+  // is gone). The kind list adapts to drill context: the records drill
+  // has no table-level hits — its rows ARE records — so it offers
+  // Record name / Field value only.
+  {
+    var fv = state.searchFacets || {};
+    var vKinds = fv.kinds || [];
+    var vSpecific = fv.mode === 'specific';
+    var _recDrillAnchor = anchorId === 'childSearchFacetsBtn'
+      && typeof _drillType === 'function' && _drillType() === 'records';
+    var KIND_DEFS = _recDrillAnchor
+      ? [ { key: 'record',   label: 'Record name' },
+          { key: 'field',    label: 'Field value' } ]
+      : [ { key: 'resource', label: 'Table name' },
+          { key: 'record',   label: 'Record name' },
+          { key: 'field',    label: 'Field value' } ];
+    var vhtml = '';
+    vhtml += '<div class="search-facets-popover-header">Search options</div>';
+    vhtml += '<div class="search-facets-popover-section">';
+    vhtml += '<div class="search-facets-popover-label">Match on…</div>';
+    vhtml += '<label class="search-facets-opt">'
+      + '<input type="radio" name="invSearchFacetMode"' + (!vSpecific ? ' checked' : '') + ' onchange="setSearchFacetMode(\'all\')">'
+      + '<span>Everything <span style="color:var(--black-60);font-size:12px">(default)</span></span>'
+      + (_searchActive ? '<span class="search-facets-opt-count">(' + counts.hitKind.all + ')</span>' : '')
       + '</label>';
-    // "Show as" — a NESTED refinement of the Field value option (not an
-    // independent facet): when the term matched inside a field, should the
-    // result row be the matched field itself (surgical field-level restore)
-    // or the record containing it (record-level restore, annotated with the
-    // matched field)? Nesting states the dependency structurally and removes
-    // incoherent combos like Record name + containing-records. Inventory
-    // level only — the drill's records view already operates at its level.
-    // Progressive disclosure: the refinement only appears once Field value is
-    // the selected hit type — offering it earlier reads as an independent
-    // control again.
-    if (k.key === 'field' && anchorId !== 'childSearchFacetsBtn' && (f.hitKind === 'field')) {
-      html += '<div class="search-facets-subopts">';
-      [ { key: 'fields',  label: 'Show matched fields' },
-        { key: 'records', label: 'Show records with matched fields' } ].forEach(function(o){
-        var checked2 = (f.showAs || 'fields') === o.key ? ' checked' : '';
-        html += '<label class="search-facets-opt">'
-          + '<input type="radio" name="invSearchFacetShowAs" value="' + o.key + '"' + checked2 + ' onchange="setSearchFacetShowAs(\'' + o.key + '\')">'
-          + '<span>' + esc(o.label) + '</span>'
+    vhtml += '<label class="search-facets-opt">'
+      + '<input type="radio" name="invSearchFacetMode"' + (vSpecific ? ' checked' : '') + ' onchange="setSearchFacetMode(\'specific\')">'
+      + '<span>Specific types…</span>'
+      + '</label>';
+    if (vSpecific) {
+      vhtml += '<div class="search-facets-subopts">';
+      KIND_DEFS.forEach(function(k){
+        vhtml += '<label class="search-facets-opt">'
+          + '<input type="checkbox"' + (vKinds.indexOf(k.key) >= 0 ? ' checked' : '') + ' onchange="toggleSearchFacetKind(\'' + k.key + '\')">'
+          + '<span>' + esc(k.label) + '</span>'
+          + (_searchActive ? '<span class="search-facets-opt-count">(' + (counts.hitKind[k.key] || 0) + ')</span>' : '')
           + '</label>';
       });
-      html += '</div>';
+      vhtml += '<div style="padding:4px 4px 0;font-size:12px;color:var(--black-60)">Nothing checked = everything. Checking several combines them (or).</div>';
+      vhtml += '</div>';
     }
-  });
-  html += '</div>';
-  // (The per-field "Match in field" sub-filter was removed — Hit type is the
-  // requested, intuitive facet; narrowing field-value hits to a single column
-  // was niche and duplicated the "Field value" count.)
-  // (Compare-mode diff filters moved to their own popover anchored to
-  // the sliders button next to the compare chip — see
-  // renderInvCompareFiltersPopover. The search-facets gear is now
-  // scoped strictly to search-result narrowing: hit type + match-in-
-  // field. This split fixes the conflation between search settings
-  // and compare-view config that lived behind the same icon.)
-  // Footer. "Reset filters" reverts both facets (hit type + field)
-  // to their defaults; only enabled when at least one facet is
-  // narrowing. Previously labelled "Clear all" — replaced because
-  // the phrasing didn't say WHAT was being cleared (results?
-  // selections? the query?). "Reset filters" makes the scope
-  // explicit: it's the controls in this popover.
-  var anyActive = _searchFacetsActive();
-  html += '<div class="search-facets-popover-footer">';
-  html += '<button type="button" class="search-facets-clear" onclick="clearSearchFacets()"' + (anyActive ? '' : ' disabled') + '>Reset filters</button>';
-  html += '<button type="button" class="search-facets-done" onclick="_closeInvSearchFacetsPopover()">Done</button>';
-  html += '</div>';
-  pop.innerHTML = html;
+    vhtml += '</div>';
+    vhtml += '<div class="search-facets-popover-footer">'
+      + '<span></span>'
+      + '<button type="button" class="search-facets-done" onclick="_closeInvSearchFacetsPopover()">Done</button>'
+      + '</div>';
+    pop.innerHTML = vhtml;
+    return;
+  }
 }
 // ─── Jira drill facets popover (object-type narrowing) ───────────────
 // Same popover element + visual treatment as D365's gear. Lists the
@@ -22708,7 +23778,9 @@ function renderSearchResults(query) {
     if (_subL) _subL.textContent = 'Searching…';
     return;
   }
-  var unfilteredGroups = buildSearchGroups(query);
+  var unfilteredGroups = (typeof _buildSearchGroupsTypeLifted === 'function')
+    ? _buildSearchGroupsTypeLifted(query)
+    : buildSearchGroups(query);
   // Jira: tally the unfiltered groups by object-type bucket so the gear
   // popover can show "(N)" per type (parallel to the drill path).
   if (state.wl === 'jira') {
@@ -22727,6 +23799,41 @@ function renderSearchResults(query) {
   var groups = (typeof _filterSearchGroupsByFacets === 'function')
     ? _filterSearchGroupsByFacets(unfilteredGroups)
     : unfilteredGroups;
+  // v9 (D365): scope decides the default view. Narrow scope (default) =
+  // current-level rows only — the classic strict list, content matches
+  // rolled into each row's annotation. "All contents" = the full bubble-
+  // up superset, where the pinned Type filter is the user's deliberate
+  // narrowing tool. Counts always come from the post-token superset so
+  // the Type picker and the scope line both know what's out there.
+  var _typeNarrowed = false;
+  var _stTotal = 0;
+  var _scopeAllInv = !!state.searchIncludeSubfolders;
+  if (typeof _d365SupersetOn === 'function' && _d365SupersetOn()) {
+    var _stCounts = {};
+    groups.forEach(function(g){
+      var t = g.resource.type;
+      _stCounts[t] = (_stCounts[t] || 0) + 1;
+    });
+    state._invSearchTypeCounts = _stCounts;
+    _stTotal = groups.length;
+    var _stVals = _searchTypeFilterValues();
+    if (_stVals && _scopeAllInv) {
+      // v9.2: the unified Type filter narrows by plain resource type —
+      // 'Record' keeps the rolled record rows, 'Field' the raw value
+      // rows, 'Table'/'Campaign'/… the containers.
+      var _preN = groups.length;
+      groups = groups.filter(function(g){ return _stVals.indexOf(g.resource.type) >= 0; });
+      _typeNarrowed = groups.length !== _preN;
+    } else if (!_scopeAllInv) {
+      var _curLbl = _d365CurrentLevelTypeLabel();
+      groups = groups.filter(function(g){ return (SEARCH_TYPE_LABELS[g._objType] || 'Other') === _curLbl; });
+      // A browse-time Type filter (real resource types) still applies
+      // within the narrow tier — e.g. Type: Environment at root is a
+      // no-op, but it must not be silently ignored.
+      if (_stVals) groups = groups.filter(function(g){ return _stVals.indexOf(g.resource.type) >= 0; });
+    }
+    if (typeof syncSearchScopeLines === 'function') syncSearchScopeLines();
+  }
   // Sync the gear button (visibility + active badge) + repopulate the
   // popover body so the counts there match the current query.
   if (typeof syncInvSearchFacetsBtn === 'function') syncInvSearchFacetsBtn();
@@ -22738,16 +23845,55 @@ function renderSearchResults(query) {
   // facets are narrowing, surface "X of Y" so the user knows the
   // result count is partial.
   var subtitleEl = document.getElementById('invSubtitle');
+  var _v5Lens = (typeof _invSearchFacetsApply === 'function') && _invSearchFacetsApply();
   if (subtitleEl) {
     var anyFacet = (typeof _searchFacetsActive === 'function') && _searchFacetsActive();
-    if (anyFacet && unfilteredGroups.length !== groups.length) {
+    if (_typeNarrowed) {
+      // v8 superset: the Type chip is an honest FILTER — say what it
+      // hides ("2 of 17 matching objects").
+      subtitleEl.textContent = groups.length + ' of ' + _stTotal + ' matching object' + (_stTotal === 1 ? '' : 's') + ' for "' + query + '"';
+    } else if (_v5Lens) {
+      // Lab-port v5 lens model: Match-on configures what counts as a
+      // match (like quoting a term does), so the count IS the count —
+      // no "X of Y hidden" framing.
+      subtitleEl.textContent = groups.length + (groups.length === 1 ? ' match' : ' matches') + ' for "' + query + '"';
+    } else if (anyFacet && unfilteredGroups.length !== groups.length) {
       subtitleEl.textContent = groups.length + ' of ' + unfilteredGroups.length + (unfilteredGroups.length === 1 ? ' result' : ' results') + ' for "' + query + '"';
     } else {
       subtitleEl.textContent = groups.length + (groups.length === 1 ? ' result' : ' results') + ' for "' + query + '"';
     }
   }
   if (!groups.length) {
+    // Lab-port v5 rescue: the one place the lens model owes a disclosure
+    // is the FALSE DEAD-END — the configured reach found nothing, but
+    // matches exist outside it. Say so and offer the one-click way out.
+    var _f5 = state.searchFacets || {};
+    var _rescueKinds = (_v5Lens && _f5.mode === 'specific' && _f5.kinds && _f5.kinds.length) ? _f5.kinds : null;
+    // v9: narrow scope found nothing at this level but matches exist
+    // inside — false dead-end, offer the one-click scope widen.
+    var _d365E = (typeof _d365SupersetOn === 'function') && _d365SupersetOn();
+    var _stValsE = (_d365E && _scopeAllInv) ? _searchTypeFilterValues() : null;
+    if (_d365E && !_scopeAllInv && _stTotal > 0) {
+      var _curLblE = _d365CurrentLevelTypeLabel().toLowerCase();
+      tbody.innerHTML = '<tr><td colspan="8" style="padding:48px;text-align:center;color:var(--black-60);font-size:14px">'
+        + 'No ' + wsEscape(_curLblE) + ' match "' + wsEscape(query) + '".'
+        + '<div style="margin-top:6px">' + _stTotal + ' matching object' + (_stTotal === 1 ? '' : 's') + ' inside. '
+        + '<button type="button" class="search-facets-clear" style="font-size:14px" onclick="toggleSearchScopeAll(\'inv\')">Search all contents</button></div></td></tr>';
+    } else if (_stValsE && _stTotal > 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="padding:48px;text-align:center;color:var(--black-60);font-size:14px">'
+        + 'No ' + wsEscape(_stValsE.join(' or ').toLowerCase()) + ' objects match "' + wsEscape(query) + '".'
+        + '<div style="margin-top:6px">' + _stTotal + ' matching object' + (_stTotal === 1 ? '' : 's') + ' of other types. '
+        + '<button type="button" class="search-facets-clear" style="font-size:14px" onclick="clearSearchTypeFilter()">Show all types</button></div></td></tr>';
+    } else if (_rescueKinds && unfilteredGroups.length > 0) {
+      var _kindEcho = { resource: 'table names', record: 'record names', field: 'field values' };
+      var _echo = _rescueKinds.map(function(k){ return _kindEcho[k] || k; }).join(' or ');
+      tbody.innerHTML = '<tr><td colspan="8" style="padding:48px;text-align:center;color:var(--black-60);font-size:14px">'
+        + 'No matches on ' + _echo + ' for "' + wsEscape(query) + '".'
+        + '<div style="margin-top:6px">' + unfilteredGroups.length + (unfilteredGroups.length === 1 ? ' match exists' : ' matches exist') + ' on other types. '
+        + '<button type="button" class="search-facets-clear" style="font-size:14px" onclick="resetSearchScope()">Search everything</button></div></td></tr>';
+    } else {
     tbody.innerHTML = '<tr><td colspan="8" style="padding:48px;text-align:center;color:var(--black-60);font-size:14px">No backed-up resources match "' + query + '" at any restore point.<div style="font-size: 14px;margin-top:6px">Try a different term, or clear the search to see the full inventory.</div></td></tr>';
+    }
     // Reset pagination state for the empty case.
     var pgBarEmpty = document.getElementById('invPgBar');
     if (pgBarEmpty) {
@@ -22861,6 +24007,10 @@ function renderSearchResults(query) {
     var nameMetaHtml = parentPath
       ? '<div class="cell-meta"><button class="gws-path-link" onclick="openChildrenDrill(\'' + wsEscape(r.parentId) + '\')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>in ' + wsEscape(_truncatePathMiddle(parentPath)) + '</span></button></div>'
       : '';
+    // v8: matched-content context — the actual matching content, term
+    // highlighted, directly under the resource name (containers + rolled
+    // records). Field rows skip it (their name IS the matched content).
+    var _ctxHtml = (typeof _matchCtxHtml === 'function') ? _matchCtxHtml(g._matchCtx, query) : '';
     var _searchDiffStatus = state.invCompareDate && typeof _v1ResourceDiffStatus === 'function'
       ? _v1ResourceDiffStatus(r) : null;
     var _searchCmpLabel = state.invCompareDate === 'today' ? 'Today' : (state.invCompareDate || '');
@@ -22869,7 +24019,7 @@ function renderSearchResults(query) {
       nameStyle: nameStyle,
       clickHandler: clickHandler,
       existenceHtml: existenceHtml,
-      nameMeta: nameMetaHtml,
+      nameMeta: _ctxHtml + nameMetaHtml,
       badgeCls: badgeCls,
       badgeText: badgeText,
       lastBackupText: lastBackupText,
@@ -22953,6 +24103,7 @@ function renderTable() {
   // query is active, so the bar needs a re-render whenever the
   // query changes — which is on every renderTable call).
   if (typeof renderTopActionBar === 'function') renderTopActionBar();
+  if (typeof syncSearchScopeLines === 'function') syncSearchScopeLines();
   var q = (document.getElementById('invSearch').value || '').toLowerCase().trim();
   // When the search input has a query, the table morphs into the
   // grouped cross-time results — that's the only search posture now.
@@ -22973,7 +24124,9 @@ function renderTable() {
   renderInvThead();
   var isHistorical = state.invDate !== 'today';
   var asOfTs = getInvAsOfTs();
-  var rows = RESOURCES.filter(function(r){ return resourcePassesFilters(r); });
+  var rows = (state.cat === 'cart')
+    ? _cartViewRows()
+    : RESOURCES.filter(function(r){ return resourcePassesFilters(r); });
   // V1: when Compare-to mode is active, filter rows by their generic
   // diff status using the per-state checkboxes in the sliders gear.
   // _v1ResourceDiffStatus is hash-deterministic so re-renders yield
@@ -23064,9 +24217,16 @@ function renderTable() {
     // name using the exact same "in <parent-path>" pattern the
     // search results renderer uses (see line ~14486) instead of a
     // dedicated Path column.
+    // Both the Deleted-from-Prod recovery bucket and the Items-in-cart view
+    // surface the resource's folder location beneath its name (instead of a
+    // dedicated Path column) so the user can place a cross-folder set at a
+    // glance. The cart view keeps the existence badge (a cart item may be a
+    // live OR a deleted-in-live resource); recovery clears it since every
+    // row there is deleted.
     var _isRecoveryView = state.cat === 'deleted';
-    if (_isRecoveryView) {
-      existenceHtml = '';
+    var _isPathView = _isRecoveryView || state.cat === 'cart';
+    if (_isPathView) {
+      if (_isRecoveryView) existenceHtml = '';
       var _bcRaw = _invParentBreadcrumb(r);
       if (_bcRaw) {
         var _bc = _truncatePathMiddle(_bcRaw);
@@ -23149,6 +24309,19 @@ function renderTable() {
       '</div></td>' +
     '</tr>';
   }).join('');
+
+  // v9.2: Record / Field are searchable objects — they have no resting
+  // rows to browse. Selecting them without a query gets a pointer to
+  // the paths that surface them instead of a silent empty table.
+  if (!rows.length && (typeof _d365SupersetOn === 'function') && _d365SupersetOn()) {
+    var _tFb = (state.filters || []).filter(function(f){ return f.attr === 'type'; })[0];
+    var _soVals = _tFb ? _tFb.values.filter(function(v){ return v === 'Record' || v === 'Field'; }) : [];
+    if (_soVals.length) {
+      tbody.innerHTML = '<tr><td colspan="8" style="padding:48px;text-align:center;color:var(--black-60);font-size:14px">'
+        + wsEscape(_soVals.join(' and ')) + ' objects surface when you search.'
+        + '<div style="margin-top:6px">Type a value in the search box to find the matching ones, or drill into a table to browse its records.</div></td></tr>';
+    }
+  }
 
   // Subtitle = "N resources · workload". The out-of-scope count was
   // surfaced here earlier (Phase 6c, per the brief), but scope is a
@@ -23311,6 +24484,10 @@ function filterTable() {
   if (filterTable._timer) clearTimeout(filterTable._timer);
   if (filterTable._loadTimer) clearTimeout(filterTable._loadTimer);
   state.invPage = 1;
+  // v9: strip the Type chip + reset scope when the search ends (see
+  // _syncSearchTypeFilter); the scope line is synced on every keystroke.
+  if (typeof _syncSearchTypeFilter === 'function') _syncSearchTypeFilter(q);
+  if (typeof syncSearchScopeLines === 'function') syncSearchScopeLines();
   if (q) {
     // Show the skeleton immediately, then swap in real results after a short
     // beat so the search reads as "retrieving." Debounced — rapid typing
@@ -23339,6 +24516,16 @@ function filterChild() {
   var q = (el && el.value || '').trim();
   if (filterChild._timer) clearTimeout(filterChild._timer);
   if (filterChild._loadTimer) clearTimeout(filterChild._loadTimer);
+  // v9.3: when a D365 drill search ends, drop search-only Type values
+  // (Record / Field) and snap the scope back to narrow — same cleanup
+  // contract as the inventory search.
+  if (!q && typeof _d365SupersetOn === 'function' && _d365SupersetOn()) {
+    if (typeof _stripSearchOnlyTypeValues === 'function' && _stripSearchOnlyTypeValues('childFilters')) {
+      if (typeof renderFilterBar === 'function') renderFilterBar('child');
+    }
+    state.searchIncludeSubfolders = false;
+  }
+  if (typeof syncSearchScopeLines === 'function') syncSearchScopeLines();
   if (q) {
     state._childSearchLoading = true;
     state._childSearchJustLoaded = false;
@@ -25358,27 +26545,73 @@ function renderTopActionBar() {
     // the user sees the filtered subset against the unfiltered total
     // — same pattern the inventory-level subtitle uses.
     var anyFacetActive = (typeof _searchFacetsActive === 'function') && _searchFacetsActive();
-    var countCopy = (anyFacetActive && typeof dUnfiltered === 'number' && dUnfiltered !== dCount)
-      ? ('<strong>' + dCount + '</strong> of <strong>' + dUnfiltered + '</strong> result' + (dUnfiltered === 1 ? '' : 's'))
-      : ('<strong>' + dCount + '</strong> result' + (dCount === 1 ? '' : 's'));
-    leftHtml = searchSvg
-      + '<span class="tab-left-text">' + countCopy
-      + ' for "' + wsEscape(childQuery) + '"' + scopeCopy + '</span>'
-      + '<button class="tab-left-link" type="button" onclick="toggleSearchIncludeSubfolders()">' + toggleLabel + '</button>';
+    // Lab-port v5 (D365 drills): the Include children / Limit to parent
+    // level link is subsumed by the drill's Show-as picker, and the lens
+    // model drops the "X of Y" framing — the configured count IS the
+    // count. Other workloads' drills keep the original link + copy.
+    // Right-zone cart actions untouched either way.
+    if (typeof _invSearchFacetsApply === 'function' && _invSearchFacetsApply()) {
+      leftHtml = searchSvg
+        + '<span class="tab-left-text"><strong>' + dCount + '</strong> match' + (dCount === 1 ? '' : 'es')
+        + ' for "' + wsEscape(childQuery) + '"' + scopeCopy + '</span>';
+    } else {
+      var countCopy = (anyFacetActive && typeof dUnfiltered === 'number' && dUnfiltered !== dCount)
+        ? ('<strong>' + dCount + '</strong> of <strong>' + dUnfiltered + '</strong> result' + (dUnfiltered === 1 ? '' : 's'))
+        : ('<strong>' + dCount + '</strong> result' + (dCount === 1 ? '' : 's'));
+      leftHtml = searchSvg
+        + '<span class="tab-left-text">' + countCopy
+        + ' for "' + wsEscape(childQuery) + '"' + scopeCopy + '</span>'
+        + '<button class="tab-left-link" type="button" onclick="toggleSearchIncludeSubfolders()">' + toggleLabel + '</button>';
+    }
   } else if (covered) {
     leftHtml = infoSvg + '<span class="tab-left-text"><strong>' + wsEscape(covered.name) + '</strong> is already in your cart.</span>';
   } else if (selectAllMsg) {
     leftHtml = checkSvg + '<span class="tab-left-text">' + selectAllMsg + '</span>';
   } else if (onInventory && invQuery && typeof buildSearchGroups === 'function') {
-    var groups = buildSearchGroups(invQuery);
+    var groups = (typeof _buildSearchGroupsTypeLifted === 'function')
+      ? _buildSearchGroupsTypeLifted(invQuery)
+      : buildSearchGroups(invQuery);
+    // Lab-port v5 (D365): the Include children / Limit to parent level
+    // link is SUBSUMED by the Show-as picker on the search row — same
+    // state, one owner — so D365 drops the link here. And under the
+    // lens model the banner count IS the configured match count, so a
+    // Match-on narrowing flows into the number rather than reading as
+    // a filter laid over it. Other workloads keep the original link +
+    // unfiltered count. Right-zone cart actions are untouched.
+    var _v5Inv = (typeof _invSearchFacetsApply === 'function') && _invSearchFacetsApply();
+    if (_v5Inv && typeof _searchFacetsActive === 'function' && _searchFacetsActive()
+        && typeof _filterSearchGroupsByFacets === 'function') {
+      groups = _filterSearchGroupsByFacets(groups);
+    }
     var total  = groups.length;
-    var invIncludeSub = !!state.searchIncludeSubfolders;
-    // Toggle label communicates state on its own — no parenthetical
-    // scope qualifier needed alongside the count.
-    var invToggleLabel = invIncludeSub ? 'Limit to parent level' : 'Include children';
-    leftHtml = searchSvg
-      + '<span class="tab-left-text"><strong>' + total + '</strong> result' + (total === 1 ? '' : 's') + ' for "' + wsEscape(invQuery) + '"</span>'
-      + '<button class="tab-left-link" type="button" onclick="toggleSearchIncludeSubfolders()">' + invToggleLabel + '</button>';
+    if (_v5Inv) {
+      // v9: mirror the results list. Narrow scope = current-tier count
+      // (the count IS the count; the scope line explains the lens).
+      // All-contents = superset total, with "X of Y" only when the
+      // user's Type filter narrows it.
+      var shown = total;
+      if (!state.searchIncludeSubfolders) {
+        var _curBl = _d365CurrentLevelTypeLabel();
+        shown = groups.filter(function(g){ return (SEARCH_TYPE_LABELS[g._objType] || 'Other') === _curBl; }).length;
+        leftHtml = searchSvg + '<span class="tab-left-text"><strong>' + shown + '</strong> match' + (shown === 1 ? '' : 'es') + ' for "' + wsEscape(invQuery) + '"</span>';
+      } else {
+        var _stV = (typeof _searchTypeFilterValues === 'function') ? _searchTypeFilterValues() : null;
+        shown = _stV
+          ? groups.filter(function(g){ return _stV.indexOf(g.resource.type) >= 0; }).length
+          : total;
+        leftHtml = searchSvg + (shown !== total
+          ? '<span class="tab-left-text"><strong>' + shown + '</strong> of <strong>' + total + '</strong> matching objects for "' + wsEscape(invQuery) + '"</span>'
+          : '<span class="tab-left-text"><strong>' + total + '</strong> match' + (total === 1 ? '' : 'es') + ' for "' + wsEscape(invQuery) + '"</span>');
+      }
+    } else {
+      var invIncludeSub = !!state.searchIncludeSubfolders;
+      // Toggle label communicates state on its own — no parenthetical
+      // scope qualifier needed alongside the count.
+      var invToggleLabel = invIncludeSub ? 'Limit to parent level' : 'Include children';
+      leftHtml = searchSvg
+        + '<span class="tab-left-text"><strong>' + total + '</strong> result' + (total === 1 ? '' : 's') + ' for "' + wsEscape(invQuery) + '"</span>'
+        + '<button class="tab-left-link" type="button" onclick="toggleSearchIncludeSubfolders()">' + invToggleLabel + '</button>';
+    }
   } else if (lockedWl && onInventory) {
     leftHtml = shieldSvg + '<span class="tab-left-text">Restore job is locked to <strong>' + wsEscape(lockedWl) + '</strong> — clear it to add other workloads.</span>';
   }
@@ -25408,7 +26641,7 @@ function renderTopActionBar() {
     // title tooltip, keeping the badge narrow so the CENTER context has
     // room (e.g. the covered-by-ancestor message). Persistent across all
     // cart scenarios; never yields to the CENTER, so it doesn't move.
-    subjectHtml = '<span class="tab-cart-badge" title="' + label + (wl ? ' · ' + wsEscape(wl) : '') + '">' + cartSvg + '<span>' + n + '</span></span>';
+    subjectHtml = '<span class="tab-cart-badge" role="button" tabindex="0" onclick="openCartView()" title="' + label + (wl ? ' · ' + wsEscape(wl) : '') + ' — view all items in cart">' + cartSvg + '<span>' + n + '</span></span>';
     // RIGHT — the as-of restore-point CONTROL (compare mode only) + the
     // commit actions. The composition/count is intentionally NOT repeated
     // here; it lives in the LEFT subject and the Restore CTA's own count.
@@ -25476,6 +26709,24 @@ function updatePlanDock() {
   // here, so this is the single hook that keeps the per-branch cart
   // counts in lockstep with state.restorePlan.
   if (typeof renderTreeNav === 'function') renderTreeNav();
+  // Keep the "Items in cart" view live as items are added/removed while it's
+  // open. If the cart empties out from under the user, fall back to the first
+  // category root (the "Items in cart" tree row has just disappeared).
+  // RE-ENTRANCY GUARD: renderTable() ends by calling updateBulkBar() →
+  // updatePlanDock(), so calling renderTable() here would recurse infinitely.
+  // The flag lets the inner updatePlanDock (fired from within our own
+  // renderTable) skip this block, so renderTable runs exactly once.
+  if (state.cat === 'cart' && !updatePlanDock._inCartSync) {
+    if (planSize() === 0) {
+      // treeNavSelectCategory changes state.cat away from 'cart' before its
+      // own renderTable runs, so the empty-cart path can't recurse here.
+      var _fallback = (typeof _treeCategoryRoots === 'function') ? _treeCategoryRoots() : [];
+      if (_fallback.length && typeof treeNavSelectCategory === 'function') treeNavSelectCategory(_fallback[0].catId);
+    } else if (typeof renderTable === 'function') {
+      updatePlanDock._inCartSync = true;
+      try { renderTable(); } finally { updatePlanDock._inCartSync = false; }
+    }
+  }
   var dock = document.getElementById('planDock');
   if (!dock) return;
   var n = planSize();
@@ -27954,20 +29205,126 @@ function wsRenderD365Destination() {
       + '</div>'
     + '</div>'
   + '</div>';
-  // Replace owners checkbox
+  // Replace owners checkbox + default-user picker (ported from the
+  // maxim WIP build — toggling on reveals the user dropdown, pre-
+  // selected to the recommended service account).
   html += '<div class="ws-cfg-section">'
     + '<label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">'
       + '<input type="checkbox" class="row-cb" style="margin-top:2px;flex-shrink:0;accent-color:var(--blue)"'
         + (replaceOwners ? ' checked' : '')
-        + ' onchange="ws.config.d365ReplaceOwners=this.checked;wsRenderAll()">'
+        + ' onchange="wsToggleReplaceOwners(this.checked)">'
       + '<span>'
-        + '<span style="display:block;font-size:14px;font-weight:500;color:var(--black-100)">Replace missing owners with default users</span>'
+        + '<span style="display:block;font-size:14px;font-weight:500;color:var(--black-100)">Replace missing record owners with a default user</span>'
         + '<span style="display:block;font-size:14px;color:var(--black-60);margin-top:2px">When a record owner doesn\'t exist at the destination, assign to a default system user instead of failing.</span>'
       + '</span>'
     + '</label>'
+    + (replaceOwners ? wsRenderDefaultOwnerPicker(cfg) : '')
   + '</div>';
   html += '</div>'; // /.ws-step-pad
   return html;
+}
+
+// Default users available to receive orphaned records at the destination
+// when "Replace missing owners" is on. Application/system users that
+// always exist in a Dataverse environment.
+var D365_DEFAULT_USERS = [
+  { id: 'svc-veeam',   name: 'Veeam Service Account', meta: 'svc-veeam@acme.com · Application user',        recommended: true },
+  { id: 'd365-admin',  name: 'Dynamics 365 Admin',    meta: 'd365.admin@acme.com · System Administrator' },
+  { id: 'data-migr',   name: 'Data Migration User',   meta: 'migration@acme.com · Integration user' },
+  { id: 'sys-default', name: 'SYSTEM',                meta: 'Built-in · Dataverse system user' }
+];
+
+// Renders the indented default-user dropdown beneath the replace-owners
+// checkbox. Reuses the cross-org trigger + popover pattern (same visual
+// component) with its own marker classes (ws-owner-trigger /
+// ws-owner-popover) so its outside-click handler doesn't collide with
+// the destination environment picker that can be on screen at the same
+// time.
+function wsRenderDefaultOwnerPicker(cfg) {
+  var users = D365_DEFAULT_USERS;
+  var open = !!ws.defaultOwnerPickerOpen;
+  var selected = cfg.d365DefaultOwner
+    ? users.find(function(u){ return u.name === cfg.d365DefaultOwner; })
+    : null;
+  var checkSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  var html = '<div style="margin-top:12px;padding-left:26px;max-width:380px">'
+    + '<div style="font-size:14px;font-weight:500;color:var(--black-100);margin-bottom:6px">Default user</div>'
+    + '<div style="position:relative">'
+      + '<button class="ws-target-org-trigger ws-owner-trigger' + (open ? ' is-open' : '') + '" type="button"'
+        + ' onclick="event.stopPropagation();wsOpenDefaultOwnerPicker(event)">'
+        + '<span class="ws-target-org-trigger-text">'
+          + '<span class="ws-target-org-trigger-name">' + (selected ? wsEscape(selected.name) : 'Select a default user') + '</span>'
+          + (selected ? '<span class="ws-target-org-trigger-meta">' + wsEscape(selected.meta) + '</span>' : '')
+        + '</span>'
+        + '<svg class="ws-target-org-trigger-chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>'
+      + '</button>'
+      + (open
+        ? '<div class="ws-cross-org-popover ws-owner-popover" role="listbox">'
+          + users.map(function(u){
+              var sel = cfg.d365DefaultOwner === u.name;
+              return '<button class="ws-cross-org-row' + (sel ? ' is-selected' : '') + '" type="button" role="option"'
+                + ' aria-selected="' + (sel ? 'true' : 'false') + '"'
+                + ' onclick="event.stopPropagation();wsPickDefaultOwner(\'' + wsEscape(u.name) + '\')">'
+                + '<span class="ws-cross-org-row-text">'
+                  + '<span class="ws-cross-org-row-name">' + wsEscape(u.name) + (u.recommended ? ' <span class="ws-cfg-choice-badge">Recommended</span>' : '') + '</span>'
+                  + '<span class="ws-cross-org-row-meta">' + wsEscape(u.meta) + '</span>'
+                + '</span>'
+                + (sel ? '<span class="ws-cross-org-row-check">' + checkSvg + '</span>' : '')
+              + '</button>';
+            }).join('')
+        + '</div>'
+        : '')
+    + '</div>'
+  + '</div>';
+  return html;
+}
+// ── D365 "Replace missing owners" default-user picker handlers ───────
+// Toggling the checkbox reveals a dropdown of default users to reassign
+// orphaned records to. Pre-selects the recommended user so the option
+// is complete the moment it's enabled.
+function wsToggleReplaceOwners(checked) {
+  if (!ws.config) ws.config = {};
+  ws.config.d365ReplaceOwners = checked;
+  if (checked) {
+    if (!ws.config.d365DefaultOwner && typeof D365_DEFAULT_USERS !== 'undefined') {
+      var rec = D365_DEFAULT_USERS.find(function(u){ return u.recommended; });
+      ws.config.d365DefaultOwner = (rec || D365_DEFAULT_USERS[0] || {}).name || null;
+    }
+  } else {
+    // Collapsing the section — don't leave the popover or its
+    // outside-click listener hanging around.
+    ws.defaultOwnerPickerOpen = false;
+    document.removeEventListener('click', _wsDefaultOwnerPickerOutside, true);
+  }
+  wsRenderAll();
+}
+function wsOpenDefaultOwnerPicker(e) {
+  if (e && e.stopPropagation) e.stopPropagation();
+  ws.defaultOwnerPickerOpen = !ws.defaultOwnerPickerOpen;
+  wsRenderAll();
+  if (ws.defaultOwnerPickerOpen) {
+    setTimeout(function(){ document.addEventListener('click', _wsDefaultOwnerPickerOutside, true); }, 0);
+  } else {
+    document.removeEventListener('click', _wsDefaultOwnerPickerOutside, true);
+  }
+}
+function _wsDefaultOwnerPickerOutside(e) {
+  // Own marker classes so this doesn't fight the destination-env picker's
+  // outside-click handler when both popovers can be on screen.
+  var pop = document.querySelector('.ws-owner-popover');
+  var trig = document.querySelector('.ws-owner-trigger');
+  if (pop && pop.contains(e.target)) return;
+  if (trig && trig.contains(e.target)) return;
+  ws.defaultOwnerPickerOpen = false;
+  document.removeEventListener('click', _wsDefaultOwnerPickerOutside, true);
+  wsRenderAll();
+}
+function wsPickDefaultOwner(name) {
+  if (!ws.config) ws.config = {};
+  ws.config.d365DefaultOwner = name;
+  ws.defaultOwnerPickerOpen = false;
+  document.removeEventListener('click', _wsDefaultOwnerPickerOutside, true);
+  wsRenderAll();
 }
 function wsSetD365TargetEnv(val) {
   if (!ws.config) ws.config = {};
@@ -31698,7 +33055,13 @@ var FILTER_CONFIG = {
       { id: 'workload',        label: 'Workload' },
       { id: 'status',          label: 'Status' },
       { id: 'existence',       label: 'Existence' },
-      { id: 'type',            label: 'Resource type' },
+      // v9.2: ONE Type picker, one stable option list. For D365 the
+      // options are the workload's resource types PLUS Record + Field,
+      // always — only the COUNTS are contextual (inventory totals while
+      // browsing, match counts while a search is active). Selecting
+      // Record / Field during a search narrows to the matching records /
+      // field values (auto-widening the scope — see applyPendingFilter).
+      { id: 'type',            label: 'Type' },
       { id: 'policy',          label: 'Policy' },
       { id: 'multipleMatchingPolicies', label: 'Multiple matching policies' }
     ],
@@ -31710,8 +33073,54 @@ var FILTER_CONFIG = {
     // applicable-policies ladder length (>1 means multiple match).
     getValues: function(attr) {
       var out = {};
+      // Value pool is scoped to the ACTIVE workload — the user is always
+      // looking at one workload's view, so offering GitHub types (Repo,
+      // Branch…) while browsing D365 is pure noise. All-workloads mode
+      // (rare) keeps the full pool.
+      var wlScope = (state.wl && state.wl !== 'all') ? state.wl : (state.catWlScope || null);
+      var wlLabel = wlScope ? (WL_MAP[wlScope] || null) : null;
+      var pool = wlLabel ? RESOURCES.filter(function(r){ return r.wl === wlLabel; }) : RESOURCES;
+      if (attr === 'type' && wlLabel === 'Dynamics 365') {
+        // v9.2: stable option list — every browsable type + Record +
+        // Field, present in BOTH modes (zero counts included) so the
+        // picker never reshuffles under the user.
+        var stable = {};
+        pool.forEach(function(r){ if (r.type !== 'Folder') stable[r.type] = 0; });
+        stable['Record'] = 0;
+        stable['Field'] = 0;
+        var qEl2 = document.getElementById('invSearch');
+        var q3 = (qEl2 && qEl2.value || '').toLowerCase().trim();
+        if (q3 && typeof _buildSearchGroupsTypeLifted === 'function') {
+          // Searching: counts = matches per type from the post-token
+          // superset, with any current Type narrowing lifted so each
+          // option shows its true size.
+          var gs2 = (typeof _filterSearchGroupsByFacets === 'function')
+            ? _filterSearchGroupsByFacets(_buildSearchGroupsTypeLifted(q3))
+            : _buildSearchGroupsTypeLifted(q3);
+          gs2.forEach(function(g){
+            var t2 = g.resource.type;
+            stable[t2] = (stable[t2] || 0) + 1;
+          });
+        } else {
+          // Browsing: inventory totals. Record / Field totals come from
+          // the seeded schemas (dedup by schema, mirroring the search
+          // walk's attribution).
+          pool.forEach(function(r){ if (r.type !== 'Folder') stable[r.type]++; });
+          var seenSk = {};
+          pool.forEach(function(r){
+            var sk = (typeof d365SchemaFor === 'function') ? d365SchemaFor(r) : null;
+            if (!sk || sk === 'default' || seenSk[sk]) return;
+            seenSk[sk] = true;
+            var sch = (typeof D365_SCHEMAS !== 'undefined') ? D365_SCHEMAS[sk] : null;
+            if (!sch || !sch.rows) return;
+            stable['Record'] += sch.rows.length;
+            stable['Field'] += sch.rows.length * Math.max(0, (sch.cols || []).length - 1);
+          });
+        }
+        return stable;
+      }
       if (attr === 'multipleMatchingPolicies') {
-        RESOURCES.forEach(function(r){
+        pool.forEach(function(r){
           var n = getApplicablePoliciesForResource(r).length;
           var key = n > 1 ? 'Yes' : 'No';
           out[key] = (out[key] || 0) + 1;
@@ -31723,14 +33132,17 @@ var FILTER_CONFIG = {
         // both backup and live — labelled "Active" so users can filter
         // to that majority bucket the same way they filter to a deleted
         // or added-after-backup subset.
-        RESOURCES.forEach(function(r){
+        pool.forEach(function(r){
           var key = EXISTENCE_FILTER_LABELS[r.existence] || EXISTENCE_FILTER_LABELS['exists'];
           out[key] = (out[key] || 0) + 1;
         });
         return out;
       }
       var field = attr === 'workload' ? 'wl' : attr;
-      RESOURCES.forEach(function(r){
+      pool.forEach(function(r){
+        // Folders are navigation chrome, never surfaced as rows — they
+        // don't belong in the Resource type picker either.
+        if (attr === 'type' && r.type === 'Folder') return;
         var v = r[field];
         if (v && v !== '—') out[v] = (out[v] || 0) + 1;
       });
@@ -31787,7 +33199,7 @@ var FILTER_CONFIG = {
   },
   child: {
     attrs: [
-      { id: 'type',            label: 'Resource type' },
+      { id: 'type',            label: 'Type' },
       { id: 'status',          label: 'Status' },
       { id: 'existence',       label: 'Existence' }
     ],
@@ -31804,6 +33216,61 @@ var FILTER_CONFIG = {
       var out = {};
       var rootId = childState.parentId;
       if (!rootId) return out;
+      var rootRes = RESOURCES.find(function(r){ return r.id === rootId; });
+      // v9.2/9.3 unified Type picker at the drill — same contract as the
+      // inventory: one STABLE option list (subtree types + Record +
+      // Field), counts contextual (browse totals vs match counts from
+      // the post-token drill superset).
+      if (attr === 'type' && rootRes && rootRes.wl === 'Dynamics 365') {
+        var stable = {};
+        var subtreeTables = [];
+        (function walkT(pid){
+          RESOURCES.forEach(function(r){
+            if (r.parentId !== pid) return;
+            if (r.type !== 'Folder') stable[r.type] = 0;
+            if (r.type === 'Table') subtreeTables.push(r);
+            if (r.drillable) walkT(r.id);
+          });
+        })(rootId);
+        stable['Record'] = 0;
+        stable['Field'] = 0;
+        var cq = ((document.getElementById('childSearch') || {}).value || '').toLowerCase().trim();
+        if (cq && typeof _buildDrillSearchResults === 'function') {
+          // Force deep scope for the counts — the picker must show what
+          // each tier WOULD yield, regardless of the current scope.
+          var savedSub = state.searchIncludeSubfolders;
+          state.searchIncludeSubfolders = true;
+          var savedCh = state.childFilters;
+          state.childFilters = (state.childFilters || []).filter(function(f){ return f.attr !== 'type'; });
+          try {
+            _buildDrillSearchResults(cq).forEach(function(r){
+              if (r && r.type && r.type !== 'Folder') stable[r.type] = (stable[r.type] || 0) + 1;
+            });
+          } finally {
+            state.searchIncludeSubfolders = savedSub;
+            state.childFilters = savedCh;
+          }
+        } else {
+          (function walkC(pid){
+            RESOURCES.forEach(function(r){
+              if (r.parentId !== pid) return;
+              if (r.type !== 'Folder') stable[r.type] = (stable[r.type] || 0) + 1;
+              if (r.drillable) walkC(r.id);
+            });
+          })(rootId);
+          var seenSk2 = {};
+          subtreeTables.forEach(function(r){
+            var sk = (typeof d365SchemaFor === 'function') ? d365SchemaFor(r) : null;
+            if (!sk || sk === 'default' || seenSk2[sk]) return;
+            seenSk2[sk] = true;
+            var sch = (typeof D365_SCHEMAS !== 'undefined') ? D365_SCHEMAS[sk] : null;
+            if (!sch || !sch.rows) return;
+            stable['Record'] += sch.rows.length;
+            stable['Field'] += sch.rows.length * Math.max(0, (sch.cols || []).length - 1);
+          });
+        }
+        return stable;
+      }
       function walk(pid) {
         RESOURCES.forEach(function(r){
           if (r.parentId !== pid) return;
@@ -31930,9 +33397,38 @@ function fpFilterValues(q) {
 function applyPendingFilter() {
   var cfg = FILTER_CONFIG[fpState.kind];
   var vals = Object.keys(fpState.selected).filter(function(k){return fpState.selected[k];});
+  // Applying an EMPTY selection means "remove this filter" — same result
+  // as the chip's ✕. Without this, unchecking every value and hitting
+  // Apply was a silent no-op and the stale chip stayed on.
+  if (!vals.length) {
+    var hadFilter = state[cfg.stateKey].some(function(f){ return f.attr === fpState.attr; });
+    if (hadFilter) {
+      state[cfg.stateKey] = state[cfg.stateKey].filter(function(f){ return f.attr !== fpState.attr; });
+      renderFilterBar(fpState.kind);
+      cfg.onChange();
+    }
+    closeFilterPicker();
+    return;
+  }
   if (vals.length) {
     state[cfg.stateKey] = state[cfg.stateKey].filter(function(f){return f.attr !== fpState.attr;});
     state[cfg.stateKey].push({attr: fpState.attr, values: vals});
+    // v9.2: choosing a type that lives BELOW the current level during a
+    // search IS the intentional "show me what's inside" act — widen to
+    // all contents so the picked type can actually render.
+    if (fpState.attr === 'type'
+        && !state.searchIncludeSubfolders
+        && (typeof _d365SupersetOn === 'function') && _d365SupersetOn()) {
+      var _qEl2 = document.getElementById(fpState.kind === 'child' ? 'childSearch' : 'invSearch');
+      var _qNow = ((_qEl2 || {}).value || '').trim();
+      var _curT = (fpState.kind === 'child')
+        ? 'Table'
+        : ((typeof _d365CurrentLevelTypeLabel === 'function' && _d365CurrentLevelTypeLabel() === 'Tables') ? 'Table' : 'Environment');
+      if (_qNow && vals.some(function(v){ return v !== _curT; })) {
+        state.searchIncludeSubfolders = true;
+        if (typeof syncSearchScopeLines === 'function') syncSearchScopeLines();
+      }
+    }
     renderFilterBar(fpState.kind);
     cfg.onChange();
   }
@@ -31979,21 +33475,7 @@ function renderFilterBar(kind) {
   }
   if (placeholder) placeholder.style.display = 'none';
 
-  // Render pinned chips first (after the +, before any active filters)
-  // so they read as suggestions on the empty bar.
-  pinnedAttrs.forEach(function(attrId){
-    var label = titleMap[attrId] || attrId;
-    var btn = document.createElement('button');
-    btn.className = 'filter-chip-pinned';
-    btn.type = 'button';
-    btn.title = 'Filter by ' + label;
-    // DS Filter Button (resting): attribute label + trailing chevron.
-    btn.innerHTML = label + '<svg class="fchip-pin-chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>';
-    btn.onclick = function(){ openFilterPicker(kind, btn, attrId); };
-    bar.appendChild(btn);
-  });
-
-  filters.forEach(function(f, idx){
+  function _appendFilterChip(f, idx) {
     var label = titleMap[f.attr] || f.attr;
     var chip = document.createElement('span');
     chip.className = 'filter-chip';
@@ -32008,7 +33490,20 @@ function renderFilterBar(kind) {
     chip.querySelector('.fchip-main').onclick = function(){ openFilterPicker(kind, chip, f.attr); };
     chip.querySelector('.fchip-x').onclick = function(){ removeFilter(kind, idx); };
     bar.appendChild(chip);
+  }
+  // Pinned chips first so they read as suggestions on the empty bar.
+  pinnedAttrs.forEach(function(attrId){
+    var label = titleMap[attrId] || attrId;
+    var btn = document.createElement('button');
+    btn.className = 'filter-chip-pinned';
+    btn.type = 'button';
+    btn.title = 'Filter by ' + label;
+    // DS Filter Button (resting): attribute label + trailing chevron.
+    btn.innerHTML = label + '<svg class="fchip-pin-chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>';
+    btn.onclick = function(){ openFilterPicker(kind, btn, attrId); };
+    bar.appendChild(btn);
   });
+  filters.forEach(function(f, idx){ _appendFilterChip(f, idx); });
   if (filters.length > 0) {
     var clear = document.createElement('button');
     clear.className = 'btn btn-text btn-sm filter-clear';
@@ -39784,20 +41279,25 @@ function aiBuildSteps(){
   return [
     { say: function(){ return "<p>Got it — restore every Dynamics 365 <strong>account record</strong> where <strong>Industry = Manufacturing</strong>.</p><p>Here's how I'll work, right here in your console:</p><p>1 · search &amp; filter → 2 · select the matches → 3 · you review → 4 · configure &amp; dry-run → 5 · you approve the restore.</p>"; } },
     { run: function(){
-        // Drive the REAL narrowing controls: query text, recursive scope ON
-        // (the "Include sub-resources" action-bar toggle — without it search
-        // only surfaces primary rows, never records/fields), then the
-        // hit-type facet = Field value.
+        // Drive the REAL v9 controls, exactly as a user would:
+        //   query text → in: Field values token (search input) →
+        //   "Search all contents" (scope line under the search bar) →
+        //   pinned Type filter → Records (filter bar).
         var inp=document.getElementById('invSearch'); if(inp){ inp.value='Manufacturing'; }
-        // One intent call: "field-value matches, shown as containing records".
-        // setSearchFacetShowAs resolves its own prerequisites — it selects the
-        // Field value hit type and auto-enables Include sub-resources (the
-        // action-bar toggle visibly flips), so the agent drives exactly what a
-        // user would: one choice, system connects the dependent controls.
-        if(typeof setSearchFacetShowAs==='function') setSearchFacetShowAs('records');
         if(typeof filterTable==='function') filterTable();
+        if(typeof addSearchToken==='function' && typeof _activeSearchKinds==='function' && _activeSearchKinds().indexOf('field')<0) {
+          addSearchToken('field');
+        }
+        if(typeof state!=='undefined') state.searchIncludeSubfolders = true;
+        if(typeof state!=='undefined' && Array.isArray(state.filters)) {
+          state.filters = state.filters.filter(function(f){ return f.attr !== 'type'; });
+          state.filters.push({ attr: 'type', values: ['Record'] });
+          if(typeof renderFilterBar==='function') renderFilterBar('inv');
+        }
+        if(typeof syncSearchScopeLines==='function') syncSearchScopeLines();
+        if(typeof invSearchSuggestClose==='function') invSearchSuggestClose();
       },
-      say: function(){ return "I searched your Dynamics inventory for <strong>Manufacturing</strong>, expanded the search to include <strong>sub-resources</strong>, narrowed to matches on a <strong>field value</strong>, and set results to show the <strong>records containing</strong> those matches — watch the table on the left update." + aiAction('Searched · sub-resources on · field-value hits · shown as records'); },
+      say: function(){ return "I searched your Dynamics inventory for <strong>Manufacturing</strong> with an <strong>in: Field values</strong> token (only field-value matches count), widened the scope to <strong>all contents</strong> (the line under the search box), and set the <strong>Type</strong> filter to <strong>Records</strong> — the table now lists the records containing those matching fields, with the matched values under each name." + aiAction('Searched · in: Field values · all contents · Type: Records'); },
       gate: { q: "A couple of these matched a company <strong>name</strong> (like “Acme Manufacturing”), not the Industry field. Want me to keep just the <strong>"+nounN+"</strong> where <strong>Industry = Manufacturing</strong>?",
         buttons: [
           { label:'Yes, select those', primary:true, choice:'Approved', fn: aiNext },
