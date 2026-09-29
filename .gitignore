@@ -7,3 +7,17 @@
 # editor/OS noise
 *.swp
 *~
+
+# internal docs / research (not for public repo)
+*.pdf
+*.docx
+Agent hub/*.txt
+
+# internal design/audit notes (not for public repo)
+*.md
+!README.md
+
+# local backup snapshots
+_backups/
+*.bak-*
+*.bak

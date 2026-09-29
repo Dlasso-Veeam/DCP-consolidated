@@ -1,0 +1,217 @@
+{
+  "inventory-V1.html": {
+    "outlined-chip": 0,
+    "native-title": 83,
+    "eg-in-copy": 0,
+    "raw-hex": 410,
+    "hand-drawn-svg": 376,
+    "uncited-component-family": 130,
+    "undefined-css-var": 0,
+    "inline-styled-pill": 6
+  },
+  "inventory-V1-picker.html": {
+    "outlined-chip": 0,
+    "native-title": 86,
+    "eg-in-copy": 0,
+    "raw-hex": 391,
+    "hand-drawn-svg": 374,
+    "uncited-component-family": 127,
+    "undefined-css-var": 0
+  },
+  "index.html": {
+    "outlined-chip": 0,
+    "native-title": 3,
+    "eg-in-copy": 0,
+    "raw-hex": 389,
+    "hand-drawn-svg": 275,
+    "uncited-component-family": 30,
+    "undefined-css-var": 0,
+    "inline-styled-pill": 9
+  },
+  "activity.html": {
+    "outlined-chip": 0,
+    "native-title": 7,
+    "eg-in-copy": 0,
+    "raw-hex": 182,
+    "hand-drawn-svg": 118,
+    "uncited-component-family": 29,
+    "undefined-css-var": 0,
+    "inline-styled-pill": 5
+  },
+  "inventory.html": {
+    "outlined-chip": 0,
+    "native-title": 104,
+    "eg-in-copy": 2,
+    "raw-hex": 280,
+    "hand-drawn-svg": 227,
+    "uncited-component-family": 80
+  },
+  "Optimal/inventory.html": {
+    "outlined-chip": 0,
+    "native-title": 85,
+    "eg-in-copy": 0,
+    "raw-hex": 408,
+    "hand-drawn-svg": 377,
+    "uncited-component-family": 130,
+    "notes": {
+      "rebaseline-2026-09-08": "Optimal/inventory.html reset to a copy of inventory-V1.html (multi-RP variant, user-approved 2026-09-08); counts inherited verbatim from the inventory-V1.html baseline — no net-new violations."
+    },
+    "undefined-css-var": 0
+  },
+  "securiti-icons-data.js": {
+    "outlined-chip": 0,
+    "native-title": 0,
+    "eg-in-copy": 0,
+    "raw-hex": 92,
+    "hand-drawn-svg": 37
+  },
+  "Optimal/activity.html": {
+    "outlined-chip": 0,
+    "native-title": 7,
+    "eg-in-copy": 0,
+    "raw-hex": 168,
+    "hand-drawn-svg": 113,
+    "uncited-component-family": 29,
+    "undefined-css-var": 0
+  },
+  "backup-policies.html": {
+    "outlined-chip": 0,
+    "native-title": 3,
+    "eg-in-copy": 1,
+    "raw-hex": 136,
+    "hand-drawn-svg": 73,
+    "uncited-component-family": 37,
+    "notes": {
+      "hand-drawn-svg-73": "2026-09-08: +1 = the file's existing select-chevron literal (M0 0l5 6 5-6z) re-emitted for the Email Notification Template dropdown in the new email modal — a clone of the legacy control glyph, not a new drawing.",
+      "raw-hex-134": "2026-09-11: +6 = :root tokens for the carried answer-card grammar (status-blue pair + Chart/Soft ramp), values verbatim from inventory-V1 :root."
+    },
+    "undefined-css-var": 0,
+    "inline-styled-pill": 8
+  },
+  "_notes": [
+    "2026-09-24 index.html Manual step copy affordance (user: \"the copy buttons are meant to be embedded inside input areas\"): hand-drawn-svg 270→275 = the content_copy glyph (×5 fields: Client ID, OAuth scopes, service account, Backup role, Restore role). VERBATIM Figma export — [Product] Unified Icons 'content_copy' component set (componentKey c4e64bc4bde365b974df9bc7b3f0158cce05aea7), State=Outlined, via live use_figma import; also added to securiti-icons-data.js as content-copy-outlined for future reuse.",
+    "2026-09-24 index.html new Google Identity Protection workload: raw-hex 374→389 = brand-color icon data, same precedent as gws's four-color Google G (2026-08-18 note below) — the shield+identity glyph (#4285F4 blue, #5f6368 grey, ×2 sites: catalog card + WORKLOADS.icon) and the reused Google colored-button G on the Express button (WORKLOADS.expressIcon, byte-identical to gws's own expressIcon — 4 brand paths + white chip rect). Brand color data per the GL label-color precedent, not style drift.",
+    "2026-09-24 index.html restored test-step expand capability (buildPermDetailHtml Retry button): hand-drawn-svg 269→270 = the retry-arrow glyph, a byte-identical clone of the already-shipped 'Reconfigure' button's icon (test-connection footer) — pattern replication, not a new drawing.",
+    "index.html raw-hex 361→373 (2026-08-18): official four-color Google G brand fills (4 paths × 3 sites) — brand color data per the GL label-color precedent, not style drift",
+    "index.html raw-hex 373→374 (2026-08-18): white chip rect behind the G on the express button — Google colored-button brand spec",
+    "index.html hand-drawn-svg 265→267 (2026-08-18): GWS manual JSON-key drop zone — byte-identical clones of the frozen cert-drop-zone upload/file glyphs (pattern replication; local icon store has no upload/file names)",
+    "activity.html raw-hex 171→179 (2026-08-19): _ACT_AV_PALETTE — 8 Base-family avatar fills per the DS Avatar spec (Figma 9286:65503, Base/Indigo exemplar) + COLORS library base steps; data-driven brand values per the GL label-color precedent",
+    "activity.html raw-hex 179→180 (2026-08-19): avatar initials pinned to the spec-exact BLUE/S5 #f3fafd (the --blue-light token was remapped to Green/S5 in the Vision sweep)",
+    "uncited-component-family baselines frozen 2026-08-19 at introduction (legacy families grandfathered; rd-relg IS cited — Figma 22270:39494); only NET NEW uncited CSS component families fail from here",
+    "inventory-V1.html raw-hex 396→398 (2026-08-19): :root gains --status-blue/--status-blue-5 — REAL Securiti Blue pinned for per-VALUE chips (total-count chip, Figma 10746:122220), the activity.html --status-blue convention; the page --blue tokens were remapped to green by the Vision sweep",
+    "2026-09-01 inventory-V1 ms365 build: raw-hex 398->400 (CAT_ICONS['ms365-tenant'] tint/color data — dead data, _catTileStyle forces green); hand-drawn-svg 373->377 (+3 = CAT_ICONS entry cloned verbatim from the frozen legacy gws-tenant glyph, +1 = _dsStoreIconSvg's new {d,opacity} path-object branch concat string, not an icon literal). All NEW ms365 glyphs are verbatim Figma 13027-98203 exports in securiti-icons-data.js.",
+    "2026-09-01 inventory-V1-picker re-baseline while bumping cache tags: raw-hex 385->389 = pre-existing var(--em-green,#hex) FALLBACK literals in the Figma-9286-65490-cited .tnwl-item.is-active rule (added 2026-08-18 picker sweep, after the last snapshot; not from the ms365/ping work). uncited-component-family seeded at current counts for picker (127) and inventory.html (80) under the tightened no-self-citation regex — legacy frozen, same treatment as the 2026-09-01 sweep.",
+    "2026-09-01 enriched-trace port: hand-drawn-svg 376->377 = the per-step tick in the ai-tr2 renderer, a VERBATIM clone of the shipped reasoning pill's tick literal (same path data, second occurrence).",
+    "2026-09-01 history-overlay teach-once note: raw-hex 400->401 = :root pin --status-blue-40 #a4dcf1 (REAL Blue S40 for the DS info alert Figma 7220:22946 — theme remaps --blue-40 to green; same pin convention as --status-blue/-5). hand-drawn-svg 377->379 = info-circle glyph (verbatim clone of index.html's shipped onboarding alert glyph) + dismiss X (verbatim clone of the panel close X).",
+    "2026-09-02 thumbs-down follow-up: hand-drawn-svg 377->379 = the card's dismiss X and the sealed-line tick, both VERBATIM clones of shipped panel literals (the header close X and the reasoning pill tick).",
+    "2026-09-02 ai-answer-cards: +1 hand-drawn = CHEV_L back chevron, verbatim clone of the shipped drawer chevron.",
+    "2026-09-02 ai-answer-cards raw-hex 32->34: two NEW :root tokens --btn-grey-hover/--btn-grey-active — the Grey button Hover/Active fills from the New Components/Button full-variant dump (set ae2c047a…, importComponentSetByKeyAsync).",
+    "2026-09-02 answer-card port: raw-hex 401->405 = four NEW :root Chart/Soft series tokens (--chart-soft-green/red/gold/blue, [Product] COLORS Figma JRyhz9vxtopJl2KNtdMuiY 634-169) for the answer-card strips.",
+    "2026-09-22 index.html Co-owner(s) field (Basic Information step, all workloads): hand-drawn-svg 266->268 = the search-field magnifying-glass glyph (byte-identical clone of the already-shipped env-search-input icon) + the chip-close X (byte-identical clone of the shipped toast-close/panel-close X literal). Local icon store has no search or close entries; pattern replication of frozen glyphs, not new drawings.",
+    "2026-09-22 index.html sidebar reorder (Overview category + Connect/Protect restructure): hand-drawn-svg 268->270. sidebarHTML's top-level steps array traded the retired 'configure' icon (-1 <path>) for a new 'protect' top-level icon and a new Overview info-circle icon (+2 <path>, both byte-identical clones of literals already frozen elsewhere in the file — getConfigSubSteps' protect glyph and the legacy screen-test-conn static sidebar's info-circle glyph respectively); getConnectSubSteps also gained its own `infra` (Region & Storage) sub-step entry, a byte-identical clone of getConfigSubSteps' globe glyph (+1 net after accounting for the already-frozen original). Pattern replication throughout, no new drawings; getConfigSubSteps itself is left defined but unused per the disable-over-delete convention.",
+    "2026-09-22 index.html Connect test-status sidebar badge: hand-drawn-svg 270->269 (net -1). The sidebar's in-progress badge (progSvg) swapped its old info-circle glyph (1 <path>) for an animated .spinner-ring built from two <circle> elements only (0 <path>), and the new error-state badge (errorSvg) renders via _dsStoreIconSvg('status-error-outlined', 14) at runtime — a DS-store icon, not a literal <path> in source — so it adds nothing to the static count."
+  ],
+  "relationship-patterns.html": {
+    "outlined-chip": 0,
+    "native-title": 1,
+    "eg-in-copy": 0,
+    "raw-hex": 27,
+    "hand-drawn-svg": 0,
+    "uncited-component-family": 1
+  },
+  "doctrine-probe.html": {
+    "outlined-chip": 0,
+    "native-title": 86,
+    "eg-in-copy": 0,
+    "raw-hex": 396,
+    "hand-drawn-svg": 373,
+    "uncited-component-family": 103
+  },
+  "inventory-V1-nav.html": {
+    "outlined-chip": 0,
+    "native-title": 116,
+    "eg-in-copy": 0,
+    "raw-hex": 329,
+    "hand-drawn-svg": 294,
+    "uncited-component-family": 99
+  },
+  "inventory-V1-picker.html.bak-20260818-picker": {
+    "outlined-chip": 0,
+    "native-title": 86,
+    "eg-in-copy": 0,
+    "raw-hex": 385,
+    "hand-drawn-svg": 375,
+    "uncited-component-family": 128
+  },
+  "ai-history-patterns.html": {
+    "outlined-chip": 0,
+    "native-title": 0,
+    "eg-in-copy": 0,
+    "raw-hex": 32,
+    "hand-drawn-svg": 2,
+    "uncited-component-family": 6
+  },
+  "ai-reasoning-trace.html": {
+    "outlined-chip": 0,
+    "native-title": 0,
+    "eg-in-copy": 0,
+    "raw-hex": 24,
+    "hand-drawn-svg": 2,
+    "uncited-component-family": 1
+  },
+  "ai-answer-cards.html": {
+    "outlined-chip": 0,
+    "native-title": 0,
+    "eg-in-copy": 0,
+    "raw-hex": 34,
+    "hand-drawn-svg": 2,
+    "uncited-component-family": 4
+  },
+  "modal-transition-options.html": {
+    "outlined-chip": 0,
+    "native-title": 0,
+    "eg-in-copy": 0,
+    "raw-hex": 16,
+    "hand-drawn-svg": 0,
+    "uncited-component-family": 0
+  },
+  "agent-studio.html": {
+    "outlined-chip": 0,
+    "native-title": 2,
+    "eg-in-copy": 0,
+    "raw-hex": 126,
+    "hand-drawn-svg": 32,
+    "uncited-component-family": 38,
+    "undefined-css-var": 0,
+    "inline-styled-pill": 1
+  },
+  "Optimal/index.html": {
+    "outlined-chip": 0,
+    "native-title": 3,
+    "eg-in-copy": 0,
+    "raw-hex": 392,
+    "hand-drawn-svg": 277,
+    "undefined-css-var": 2,
+    "uncited-component-family": 28
+  },
+  "agent-badge-explorations.html": {
+    "outlined-chip": 0,
+    "native-title": 0,
+    "eg-in-copy": 0,
+    "raw-hex": 20,
+    "hand-drawn-svg": 2,
+    "inline-styled-pill": 0,
+    "undefined-css-var": 0,
+    "uncited-component-family": 0
+  },
+  "pp-partial-read.html": {
+    "raw-hex": 291,
+    "hand-drawn-svg": 119,
+    "native-title": 28,
+    "inline-styled-pill": 2,
+    "uncited-component-family": 130,
+    "outlined-chip": 0,
+    "eg-in-copy": 0,
+    "undefined-css-var": 0
+  }
+}

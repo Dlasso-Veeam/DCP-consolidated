@@ -4049,16 +4049,16 @@ body.drawer-open { overflow: hidden; }
   </button>
   <div class="devjump-scroll">
     <span class="devjump-section">Onboard</span>
-    <a href="index.html#welcome">Welcome</a>
-    <a href="index.html#catalog">Catalog</a>
-    <a href="index.html#basic-info">Configure</a>
-    <a href="index.html#auth">Connect</a>
-    <a href="index.html#test-conn">Test</a>
-    <a href="index.html#overview">Summary</a>
-    <a href="index.html#protect">Add default protection</a>
+    <a href="../index.html#welcome">Welcome</a>
+    <a href="../index.html#catalog">Catalog</a>
+    <a href="../index.html#basic-info">Configure</a>
+    <a href="../index.html#auth">Connect</a>
+    <a href="../index.html#test-conn">Test</a>
+    <a href="../index.html#overview">Summary</a>
+    <a href="../index.html#protect">Add default protection</a>
     <span class="devjump-divider"></span>
     <span class="devjump-section">Restore</span>
-    <a href="inventory.html#inventory">All resources</a>
+    <a href="../inventory.html#inventory">All resources</a>
     <span class="devjump-divider"></span>
     <span class="devjump-section">Policies</span>
     <a href="backup-policies.html#0">All policies</a>
@@ -4116,7 +4116,7 @@ body.drawer-open { overflow: hidden; }
       <div class="topbar-row">
         <div class="page-title" id="pageTitle">Protected Data</div>
         <div class="topbar-actions">
-          <button class="btn btn-outline btn-sm" onclick="window.location.href='activity.html'" id="btnActivity">
+          <button class="btn btn-outline btn-sm" onclick="window.location.href='../activity.html'" id="btnActivity">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             View Activity
           </button>
@@ -24492,7 +24492,7 @@ function wsBeginRestoreAnimation() {
     var noun = n === 1 ? '1 item' : (n + ' items');
     showToast('Restore job started for ' + noun, {
       type:   'loading',
-      body:   'Track progress in the <a href="activity.html">activity log</a>.',
+      body:   'Track progress in the <a href="../activity.html">activity log</a>.',
       action: null
     });
   }
@@ -26436,7 +26436,7 @@ function wsExecute() {
   closeWorkspace();
   clearPlan();
   if (typeof go === 'function') go('activity');
-  else window.location.href = 'activity.html';
+  else window.location.href = '../activity.html';
 }
 
 // ─── Heatmap helpers ─────────────────────────────────────────

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Paste target</title>
+<style>
+  body { margin: 0; font-family: -apple-system, sans-serif; background: #edf0f0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+  #hint { color: #626469; font-size: 18px; text-align: center; padding: 40px; border: 2px dashed #bcbdbf; border-radius: 8px; background: #fff; max-width: 520px; }
+  #hint b { color: #1f2229; }
+  img { max-width: 90vw; max-height: 80vh; display: block; box-shadow: 0 4px 14px rgba(0,0,0,.15); }
+  #done { display: none; color: #5c8a1b; font-size: 16px; font-weight: 600; }
+</style>
+</head>
+<body>
+<div id="hint">Press <b>⌘V</b> to paste the production screenshot.<br><br><small>It will preview here and save automatically as <b>vdc-nav-reference.png</b> in your Downloads folder, where Claude can read it.</small></div>
+<div id="done">Saved to Downloads as vdc-nav-reference.png ✓ — tell Claude "pasted".</div>
+<script>
+document.addEventListener('paste', function (e) {
+  var items = (e.clipboardData || {}).items || [];
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].type.indexOf('image') === 0) {
+      var file = items[i].getAsFile();
+      var url = URL.createObjectURL(file);
+      var img = document.createElement('img');
+      img.src = url;
+      document.getElementById('hint').replaceWith(img);
+      // auto-save to Downloads so Claude can read the file from disk
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'vdc-nav-reference.png';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      document.getElementById('done').style.display = 'block';
+      document.title = 'PASTED ✓';
+      return;
+    }
+  }
+  document.getElementById('hint').innerHTML = 'That paste had no image — copy a screenshot (⌘⇧⌃4) and try again.';
+});
+</script>
+</body>
+</html>

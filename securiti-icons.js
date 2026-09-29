@@ -21,7 +21,13 @@
   function swapSvg(svg, name) {
     const entry = entryFor(name);
     if (!entry) return false;
-    if (svg.getAttribute('data-securiti-icon') === name) return false;
+    // Don't clobber an icon that's already resolved. Two cases:
+    //  • inlined in the markup with data-securiti-icon set (so the FIRST paint
+    //    is already correct and there's no load-time swap flash), or
+    //  • set by an earlier rule this run. First/explicit assignment wins — this
+    //    also stops the index.html-oriented nth-of-type sidenav rules from
+    //    overriding inventory-V1's title-based (semantically correct) icons.
+    if (svg.getAttribute('data-securiti-icon')) return false;
     svg.setAttribute('viewBox', entry.viewBox);
     svg.setAttribute('fill', 'currentColor');
     svg.removeAttribute('stroke');
@@ -65,23 +71,25 @@
     [/^skip onboarding$/,             null],
   ];
 
-  // ── Sidenav (inventory.html) ────────────────────────────────────
   const SELECTOR_RULES = [
-    { sel: '.sidenav .nav-btn[title="Home"] svg',     icon: 'dashboard-outlined' },
-    { sel: '.sidenav .nav-btn[title="Restore"] svg',  icon: 'backup-plan-filled' },
-    { sel: '.sidenav .nav-btn[title="Policies"] svg', icon: 'policy-outlined' },
-    { sel: '.sidenav .nav-btn[title="Activity"] svg', icon: 'anomalies-activity-outlined' },
-    { sel: '.sidenav .nav-btn[title="Settings"] svg', icon: 'settings-outlined' },
-    // Sidenav (index.html — same .nav-btn but identified by position)
-    // 1=grid (dashboard), 2=shield (security), 3=search (discovery-scan),
-    // 4=document (policy), 5=settings/gear (active), 6=chat bubble, 7=help (?).
-    { sel: '.sidenav .sidenav-body .nav-btn:nth-of-type(1) svg', icon: 'dashboard-outlined' },
-    { sel: '.sidenav .sidenav-body .nav-btn:nth-of-type(2) svg', icon: 'security-outlined' },
-    { sel: '.sidenav .sidenav-body .nav-btn:nth-of-type(3) svg', icon: 'discovery-scan-outlined' },
-    { sel: '.sidenav .sidenav-body .nav-btn:nth-of-type(4) svg', icon: 'policy-outlined' },
-    { sel: '.sidenav .sidenav-body .nav-btn:nth-of-type(5) svg', icon: 'settings-outlined' },
-    { sel: '.sidenav .sidenav-body .nav-btn:nth-of-type(6) svg', icon: 'recommendations-outlined' },
-    { sel: '.sidenav .sidenav-body .nav-btn:nth-of-type(7) svg', icon: 'help-videos-outlined' },
+    // ── Sidenav rules RETIRED 2026-07-13 ──────────────────────────
+    // The VIRO left nav (activity/inventory-V1/index) inlines its own real
+    // Figma assets and renders the rail from JS — these legacy title- and
+    // POSITION-based swaps were overwriting the new icons after render
+    // (user: "i only see it on activity"). Kept dormant for the old
+    // inventory.html rail, gated so they never touch a VIRO rail (#vnStack).
+    // { sel: '.sidenav .nav-btn[title="Home"] svg',     icon: 'dashboard-outlined' },
+    // { sel: '.sidenav .nav-btn[title="Restore"] svg',  icon: 'backup-plan-filled' },
+    // { sel: '.sidenav .nav-btn[title="Policies"] svg', icon: 'policy-outlined' },
+    // { sel: '.sidenav .nav-btn[title="Activity"] svg', icon: 'anomalies-activity-outlined' },
+    // { sel: '.sidenav .nav-btn[title="Settings"] svg', icon: 'settings-outlined' },
+    // { sel: '.sidenav .sidenav-body .nav-btn:nth-of-type(1) svg', icon: 'dashboard-outlined' },
+    // { sel: '.sidenav .sidenav-body .nav-btn:nth-of-type(2) svg', icon: 'security-outlined' },
+    // { sel: '.sidenav .sidenav-body .nav-btn:nth-of-type(3) svg', icon: 'discovery-scan-outlined' },
+    // { sel: '.sidenav .sidenav-body .nav-btn:nth-of-type(4) svg', icon: 'policy-outlined' },
+    // { sel: '.sidenav .sidenav-body .nav-btn:nth-of-type(5) svg', icon: 'settings-outlined' },
+    // { sel: '.sidenav .sidenav-body .nav-btn:nth-of-type(6) svg', icon: 'recommendations-outlined' },
+    // { sel: '.sidenav .sidenav-body .nav-btn:nth-of-type(7) svg', icon: 'help-videos-outlined' },
 
     // Breadcrumb home — use the Securiti filled home glyph.
     { sel: '.breadcrumbs > svg:first-of-type', icon: 'home-filled' },

@@ -116,7 +116,7 @@
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Circular Pro', -apple-system, sans-serif; background: var(--white); min-height: 100vh; font-weight: 450; font-size: 14px; color: var(--black-100); line-height: 1.5; }
-.font-avant { font-family: 'ITC Avant Garde Gothic Std','Circular Pro',sans-serif; letter-spacing: -0.02em; }
+.font-avant { font-family: 'Circular Pro',sans-serif; letter-spacing: -0.02em; }
 
 /* === APP SHELL === */
 .app { display: flex; min-height: 100vh; align-items: flex-start; }
@@ -185,7 +185,7 @@ body { font-family: 'Circular Pro', -apple-system, sans-serif; background: var(-
 .drill-crumb-menu-item .dcm-count.zero { background: var(--black-5); color: var(--black-60); }
 .drill-crumb-menu-empty { padding: 12px; font-size: 16px; color: var(--black-60); text-align: center; }
 .topbar-row { display: flex; align-items: center; justify-content: space-between; }
-.page-title { font-family: 'ITC Avant Garde Gothic Std',sans-serif; letter-spacing:-0.02em; font-size: 24px; font-weight: 500; color: var(--black-100); display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.page-title { font-family: 'Circular Pro',sans-serif; letter-spacing:-0.02em; font-size: 24px; font-weight: 500; color: var(--black-100); display: flex; align-items: center; gap: 10px; white-space: nowrap; }
 .topbar-actions { display: flex; align-items: center; gap: 8px; }
 /* Page title + Roadmap entry grouped on the left so Roadmap reads as
    "the roadmap for this area", not a generic toolbar action. */
@@ -1203,7 +1203,7 @@ td.rec-cell-lt { max-width: 340px; min-width: 220px; vertical-align: top; }
 .v1-cmp-warn-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9001; width: 500px; max-width: calc(100vw - 32px); background: var(--white); border-radius: 8px; box-shadow: 0 16px 48px rgba(0,0,0,0.22); padding: 24px; display: flex; gap: 16px; align-items: flex-start; }
 .v1-cmp-warn-modal-icon { flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; background: var(--orange-10); color: #cc5b14; display: inline-flex; align-items: center; justify-content: center; }
 .v1-cmp-warn-modal-body { flex: 1; min-width: 0; }
-.v1-cmp-warn-modal-title { font-family: 'ITC Avant Garde Gothic Std', sans-serif; font-size: 18px; font-weight: 500; color: var(--black-100); margin-bottom: 6px; }
+.v1-cmp-warn-modal-title { font-family: 'Circular Pro', sans-serif; font-size: 18px; font-weight: 500; color: var(--black-100); margin-bottom: 6px; }
 .v1-cmp-warn-modal-text { font-size: 16px; color: var(--black-60); line-height: 1.5; margin-bottom: 16px; }
 .v1-cmp-warn-modal-text strong { color: var(--black-100); font-weight: 500; }
 .v1-cmp-warn-modal-text p { margin: 0 0 8px 0; }
@@ -2996,7 +2996,7 @@ body.ai-open .ws-overlay, body.ai-open .ws-modal { right: var(--ai-w); }
 .ws-stat { padding: 14px 16px; border-right: 1px solid var(--border-light); }
 .ws-stat:last-child { border-right: none; }
 .ws-stat-label { font-size: 12px; font-weight: 700; color: var(--black-60); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
-.ws-stat-value { font-family: 'ITC Avant Garde Gothic Std',sans-serif; font-size: 24px; font-weight: 500; color: var(--black-100); line-height: 1.1; letter-spacing: -0.02em; }
+.ws-stat-value { font-family: 'Circular Pro',sans-serif; font-size: 24px; font-weight: 500; color: var(--black-100); line-height: 1.1; letter-spacing: -0.02em; }
 .ws-stat-value.warn { color: var(--orange); }
 .ws-stat-value.good { color: var(--green); }
 .ws-stat-sub { font-size: 14px; color: var(--black-60); margin-top: 3px; }
@@ -3568,7 +3568,7 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--blue); c
 .record-drawer-backdrop { position: fixed; inset: 0; background: rgba(31,34,41,0.2); opacity: 0; pointer-events: none; transition: opacity 0.22s ease; z-index: 799; }
 .record-drawer-backdrop.open { opacity: 1; pointer-events: auto; }
 .rd-header { padding: 18px 24px; border-bottom: 1px solid var(--border-light); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-shrink: 0; }
-.rd-title { font-family: 'ITC Avant Garde Gothic Std',sans-serif; font-size: 18px; font-weight: 500; color: var(--black-100); letter-spacing: -0.02em; }
+.rd-title { font-family: 'Circular Pro',sans-serif; font-size: 18px; font-weight: 500; color: var(--black-100); letter-spacing: -0.02em; }
 .rd-meta { font-size: 14px; color: var(--black-60); margin-top: 4px; line-height: 1.5; }
 .rd-close { width: 28px; height: 28px; border-radius: 4px; border: 1px solid var(--border); background: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--black-60); font-size: 16px; font-family: inherit; flex-shrink: 0; }
 .rd-close:hover { background: var(--black-3); color: var(--black-100); }
@@ -3719,7 +3719,7 @@ body.pol-drawer-open { overflow: hidden; }
 .pol-section-label { font-size: 12px; font-weight: 700; color: var(--black-60); text-transform: uppercase; letter-spacing: 0.4px; padding: 8px 2px 4px; display: flex; align-items: center; gap: 8px; }
 .pol-section-label.defaults { border-top: 1px solid var(--border-light); margin-top: 8px; padding-top: 14px; }
 .pol-section-label .lock-ico { display: inline-flex; }
-.pol-wl-hdr { font-family: 'ITC Avant Garde Gothic Std', sans-serif; font-size: 14px; font-weight: 500; color: var(--black-100); padding: 12px 2px 4px; }
+.pol-wl-hdr { font-family: 'Circular Pro', sans-serif; font-size: 14px; font-weight: 500; color: var(--black-100); padding: 12px 2px 4px; }
 .pol-wl-hdr:first-child { padding-top: 2px; }
 .pol-meta-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 2px; }
 .tier-badge { font-size: 14px; font-weight: 450; padding: 2px 8px; border-radius: 4px; }
@@ -3760,7 +3760,7 @@ body.pol-drawer-open { overflow: hidden; }
   z-index: 2;
 }
 .rw-mhdr { padding: 18px 28px; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-.rw-mtitle { font-family: 'ITC Avant Garde Gothic Std',sans-serif; letter-spacing:-0.02em; font-size: 18px; font-weight: 500; color: var(--black-100); }
+.rw-mtitle { font-family: 'Circular Pro',sans-serif; letter-spacing:-0.02em; font-size: 18px; font-weight: 500; color: var(--black-100); }
 .rw-body { flex: 1; display: flex; overflow: hidden; }
 .rw-steps-rail { width: 220px; flex-shrink: 0; border-right: 1px solid var(--border-light); padding: 20px 0; background: var(--black-3); }
 .rw-step { display: flex; align-items: center; gap: 10px; padding: 10px 20px; font-size: 14px; color: var(--black-60); cursor: default; }
@@ -3771,7 +3771,7 @@ body.pol-drawer-open { overflow: hidden; }
 .rw-step.active .rw-step-num { background: var(--blue); border-color: var(--blue); color: var(--white); }
 .rw-step.done .rw-step-num { background: var(--green); border-color: var(--green); color: var(--white); }
 .rw-content { flex: 1; overflow-y: auto; padding: 28px 32px 0; display: flex; flex-direction: column; position: relative; }
-.rw-stitle { font-family: 'ITC Avant Garde Gothic Std',sans-serif; font-size: 24px; font-weight: 500; color: var(--black-100); margin-bottom: 6px; }
+.rw-stitle { font-family: 'Circular Pro',sans-serif; font-size: 24px; font-weight: 500; color: var(--black-100); margin-bottom: 6px; }
 .rw-ssub { font-size: 14px; color: var(--black-60); margin-bottom: 20px; line-height: 1.5; }
 .rw-actions { display: flex; gap: 10px; margin: 20px -32px 0; padding: 14px 32px; border-top: 1px solid var(--border-light); justify-content: flex-end; position: sticky; bottom: 0; background: var(--white); z-index: 2; }
 
@@ -4281,7 +4281,7 @@ body.drawer-open { overflow: hidden; }
 .d365-compare-col.rw-col-committed .d365-compare-hdr { background: var(--blue-light); }
 
 .rw-success-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--green-10); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; color: var(--green); }
-.rw-success-title { font-family: 'ITC Avant Garde Gothic Std',sans-serif; font-size: 24px; font-weight: 500; color: var(--black-100); margin-bottom: 6px; }
+.rw-success-title { font-family: 'Circular Pro',sans-serif; font-size: 24px; font-weight: 500; color: var(--black-100); margin-bottom: 6px; }
 .rw-success-sub { font-size: 14px; color: var(--black-60); margin-bottom: 24px; max-width: 420px; }
 
 /* === SCREENS === */
@@ -4308,7 +4308,7 @@ body.drawer-open { overflow: hidden; }
    "today" circle. */
 .cal-hero { background: var(--blue); color: var(--white); padding: 14px 16px; }
 .cal-hero-year { font-size: 14px; font-weight: 450; opacity: 0.85; line-height: 1.2; }
-.cal-hero-date { font-family: 'ITC Avant Garde Gothic Std','Circular Pro',sans-serif; letter-spacing: -0.02em; font-size: 22px; font-weight: 500; line-height: 1.2; margin-top: 2px; }
+.cal-hero-date { font-family: 'Circular Pro',sans-serif; letter-spacing: -0.02em; font-size: 22px; font-weight: 500; line-height: 1.2; margin-top: 2px; }
 .cal-layout { display: flex; align-items: stretch; }
 .cal-left { width: 290px; }
 .cal-body { padding: 12px 14px; }
@@ -4583,7 +4583,7 @@ body.drawer-open { overflow: hidden; }
   body .metric-num,
   body .dur-num,
   body .perm-count {
-    font-family: 'ITC Avant Garde Gothic Std', 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'Circular Pro', 'Helvetica Neue', Arial, sans-serif;
     letter-spacing: -0.01em;
   }
   body code, body .ds-mono, body pre, body [class*="mono"],
@@ -4608,7 +4608,7 @@ body.drawer-open { overflow: hidden; }
   body .ws-stat-value, body .rd-title, body .pol-wl-hdr,
   body .rw-mtitle, body .rw-stitle, body .rw-success-title,
   body [style*="ITC Avant Garde"] {
-    font-family: 'ITC Avant Garde Gothic Std', 'Helvetica Neue', Arial, sans-serif !important;
+    font-family: 'Circular Pro', 'Helvetica Neue', Arial, sans-serif !important;
     letter-spacing: -0.01em;
   }
   body code, body .ds-mono, body pre, body [class*="mono"],
@@ -4682,8 +4682,8 @@ body.drawer-open { overflow: hidden; }
     <a href="inventory.html#inventory">All resources</a>
     <span class="devjump-divider"></span>
     <span class="devjump-section">Policies</span>
-    <a href="backup-policies.html#0">All policies</a>
-    <a href="backup-policies.html#1">New policy</a>
+    <a href="legacy%20designs/backup-policies.html#0">All policies</a>
+    <a href="legacy%20designs/backup-policies.html#1">New policy</a>
   </div>
   <button class="devjump-close" onclick="hideDevJump()" title="Hide dev bar (re-enable with showDevJump() in console)" aria-label="Hide dev bar">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
@@ -5342,7 +5342,7 @@ body.drawer-open { overflow: hidden; }
                       <span class="pm-sub">Force-include the selection in a policy&rsquo;s scope. Conditions unchanged.</span>
                     </div>
                     <div class="protect-menu-divider"></div>
-                    <div class="protect-menu-item" role="menuitem" onclick="closeProtectMenus();window.location.href='backup-policies.html#new'">
+                    <div class="protect-menu-item" role="menuitem" onclick="closeProtectMenus();window.location.href='legacy%20designs/backup-policies.html#new'">
                       <span class="pm-title">Create a new policy from selection</span>
                       <span class="pm-sub">Opens policy authoring pre-seeded with the selected resources.</span>
                     </div>
@@ -5523,7 +5523,7 @@ body.drawer-open { overflow: hidden; }
                       <span class="pm-sub">Force-include the selection in a policy&rsquo;s scope. Conditions unchanged.</span>
                     </div>
                     <div class="protect-menu-divider"></div>
-                    <div class="protect-menu-item" role="menuitem" onclick="closeProtectMenus();window.location.href='backup-policies.html#new'">
+                    <div class="protect-menu-item" role="menuitem" onclick="closeProtectMenus();window.location.href='legacy%20designs/backup-policies.html#new'">
                       <span class="pm-title">Create a new policy from selection</span>
                       <span class="pm-sub">Opens policy authoring pre-seeded with the selected resources.</span>
                     </div>
@@ -5694,7 +5694,7 @@ body.drawer-open { overflow: hidden; }
 <div class="pol-drawer" id="polDrawer">
   <div class="pol-header">
     <div>
-      <div style="font-family:'ITC Avant Garde Gothic Std',sans-serif;font-size:18px;font-weight:500;color:var(--black-100)">Change Backup Policy</div>
+      <div style="font-family:'Circular Pro',sans-serif;font-size:18px;font-weight:500;color:var(--black-100)">Change Backup Policy</div>
       <div style="font-size:14px;color:var(--black-60);margin-top:4px" id="polSub">0 resources selected</div>
     </div>
     <button class="rd-close" onclick="closePolicyDrawer()">✕</button>
@@ -17834,7 +17834,7 @@ function closePolicyLadderDrawer() {
 // resource's workload pre-selected via the wl/<id> hash branch.
 function goToPolicyLadder() {
   if (!_policyLadderWl) return;
-  window.location.href = 'backup-policies.html#wl/' + encodeURIComponent(_policyLadderWl);
+  window.location.href = 'legacy%20designs/backup-policies.html#wl/' + encodeURIComponent(_policyLadderWl);
 }
 
 function ladderRowHTML(name, rank, isEffective, isOnly) {

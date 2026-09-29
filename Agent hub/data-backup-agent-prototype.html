@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Data Backup Agent — Veeam Data Command Center (prototype)</title>
+<style>
+  :root{
+    --veeam-green:#00b336;
+    --veeam-green-dk:#009a2e;
+    --rail:#0f1729;
+    --rail-2:#1b2740;
+    --panel:#f4f6f9;
+    --line:#e3e8ef;
+    --ink:#1d2733;
+    --ink-2:#5b6b7d;
+    --ink-3:#8a98a8;
+    --bubble:#eef1f5;
+    --user-bubble:#eef6ff;
+    --accent:#1d8cf8;
+    --err:#e0364a;
+    --warn:#f5a623;
+    --ok:#00b336;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink); background:#fff; display:flex; height:100vh; overflow:hidden;
+    font-size:14px;
+  }
+
+  /* ---------- icon rail ---------- */
+  .rail{width:56px;background:var(--rail);display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:6px;flex:0 0 56px;}
+  .rail .logo{width:40px;height:40px;border-radius:9px;background:linear-gradient(135deg,var(--veeam-green),var(--veeam-green-dk));
+    display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:20px;margin-bottom:8px;}
+  .rail .ico{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#8ea0bf;
+    cursor:pointer;font-size:16px;}
+  .rail .ico:hover{background:var(--rail-2);color:#fff;}
+  .rail .ico.active{background:var(--rail-2);color:#fff;}
+  .rail .spacer{flex:1;}
+  .rail .avatar{width:32px;height:32px;border-radius:50%;background:#3b5bdb;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;}
+
+  /* ---------- nav panel ---------- */
+  .nav{width:230px;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;flex:0 0 230px;}
+  .nav .brand{display:flex;align-items:center;gap:8px;padding:16px 16px 10px;font-weight:700;font-size:15px;}
+  .nav .brand .spark{width:22px;height:22px;border-radius:6px;background:conic-gradient(from 0deg,#00b336,#1d8cf8,#8a3ffc,#00b336);}
+  .nav .newchat{margin:4px 14px 12px;padding:9px;border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;
+    justify-content:center;gap:7px;font-weight:600;color:var(--ink);cursor:pointer;font-size:13px;}
+  .nav .newchat:hover{background:var(--panel);}
+  .nav .navitem{display:flex;align-items:center;gap:10px;margin:1px 10px;padding:8px 10px;border-radius:7px;color:var(--ink-2);
+    cursor:pointer;font-weight:600;font-size:13px;}
+  .nav .navitem:hover{background:var(--panel);}
+  .nav .navitem.active{background:#e8f7ed;color:var(--veeam-green-dk);}
+  .nav .navitem .dot{width:16px;text-align:center;}
+  .nav .filter{margin:14px 14px 4px;display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:7px;padding:6px 9px;font-size:12px;color:var(--ink-2);}
+  .nav .grouplabel{padding:14px 18px 4px;font-size:11px;letter-spacing:.04em;color:var(--ink-3);text-transform:none;font-weight:700;}
+  .nav .histlist{overflow:auto;flex:1;}
+  .nav .hist{padding:6px 18px;font-size:12.5px;color:var(--ink-2);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .nav .hist:hover{background:var(--panel);color:var(--ink);}
+  .nav .hist.active{color:var(--veeam-green-dk);font-weight:600;}
+  .nav .help{border-top:1px solid var(--line);padding:12px 18px;color:var(--ink-2);font-size:13px;cursor:pointer;display:flex;gap:8px;align-items:center;}
+
+  /* ---------- main ---------- */
+  .main{flex:1;display:flex;flex-direction:column;min-width:0;background:#fff;}
+  .topbar{height:52px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 22px;}
+  .topbar .title{font-weight:700;font-size:15px;}
+  .topbar .pill{font-size:11px;color:var(--ink-3);border:1px solid var(--line);border-radius:20px;padding:2px 9px;}
+  .content{flex:1;overflow:auto;}
+
+  /* ---------- agents grid ---------- */
+  .agents-wrap{padding:26px 30px;}
+  .agents-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+  .agents-head h1{font-size:22px;margin:0;}
+  .create-btn{background:var(--accent);color:#fff;border:none;border-radius:7px;padding:9px 14px;font-weight:600;cursor:pointer;font-size:13px;}
+  .search{width:100%;border:1px solid var(--line);border-radius:8px;padding:11px 14px;font-size:13px;margin-bottom:22px;color:var(--ink-2);background:var(--panel);}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  .card{padding:22px 22px 26px;border-right:1px solid var(--line);cursor:pointer;transition:background .12s;}
+  .card:last-child{border-right:none;}
+  .card:hover{background:var(--panel);}
+  .card.live{cursor:pointer;}
+  .card .ci{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px;}
+  .ci.blue{background:#e7f1ff;color:var(--accent);}
+  .ci.cyan{background:#e6f7fb;color:#0bb;}
+  .ci.green{background:#e8f7ed;color:var(--veeam-green-dk);}
+  .card h3{margin:0 0 7px;font-size:15px;}
+  .card p{margin:0;color:var(--ink-2);font-size:13px;line-height:1.5;}
+  .card .badge{display:inline-block;margin-top:12px;font-size:11px;font-weight:700;color:var(--veeam-green-dk);background:#e8f7ed;border-radius:20px;padding:3px 10px;}
+
+  /* ---------- chat ---------- */
+  .chat{max-width:880px;margin:0 auto;padding:26px 24px 140px;}
+  .agent-hero{text-align:center;padding:26px 0 6px;}
+  .agent-hero .big{width:58px;height:58px;border-radius:14px;background:#e8f7ed;color:var(--veeam-green-dk);display:inline-flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:12px;}
+  .agent-hero h2{margin:0 0 6px;font-size:20px;}
+  .agent-hero p{margin:0 auto;color:var(--ink-2);max-width:520px;font-size:13.5px;}
+
+  .suggest-label{font-size:12px;color:var(--ink-3);font-weight:700;margin:26px 4px 10px;}
+  .suggest{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .qcard{border:1px solid var(--line);border-radius:10px;padding:15px 16px;cursor:pointer;display:flex;gap:12px;align-items:flex-start;transition:.12s;}
+  .qcard:hover{border-color:var(--veeam-green);background:#f6fcf8;box-shadow:0 2px 10px rgba(0,179,54,.08);}
+  .qcard .qi{font-size:18px;}
+  .qcard .qt{font-weight:600;font-size:13.5px;}
+  .qcard .qs{color:var(--ink-3);font-size:12px;margin-top:3px;}
+
+  .msg{margin:20px 0;}
+  .msg.user{display:flex;justify-content:flex-end;}
+  .msg.user .bub{background:var(--user-bubble);border:1px solid #d9ebff;border-radius:14px 14px 4px 14px;padding:11px 15px;max-width:75%;font-weight:500;}
+
+  /* thinking */
+  .thinking{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:6px;}
+  .thinking .th-head{display:flex;align-items:center;gap:10px;padding:11px 15px;cursor:pointer;background:#fbfcfe;font-weight:600;font-size:13px;}
+  .thinking .th-head .chev{margin-left:auto;color:var(--ink-3);transition:transform .2s;}
+  .thinking.collapsed .chev{transform:rotate(-90deg);}
+  .thinking.collapsed .th-body{display:none;}
+  .spinner{width:14px;height:14px;border:2px solid #cfd8e3;border-top-color:var(--veeam-green);border-radius:50%;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .dot-done{width:14px;height:14px;border-radius:50%;background:var(--veeam-green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;}
+  .th-body{padding:4px 0 8px;}
+  .tstep{display:flex;gap:11px;padding:7px 16px;font-size:12.5px;color:var(--ink-2);align-items:flex-start;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(3px);}to{opacity:1;}}
+  .tstep .tdot{width:8px;height:8px;border-radius:50%;background:var(--veeam-green);margin-top:5px;flex:0 0 8px;}
+  .tstep.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#3a5;background:#f7fbf8;}
+
+  /* answer */
+  .answer{margin-top:14px;animation:fade .3s ease;}
+  .headline{font-size:15px;font-weight:600;line-height:1.5;background:#f6fcf8;border-left:3px solid var(--veeam-green);padding:12px 15px;border-radius:0 8px 8px 0;}
+  .ans-section{margin-top:20px;}
+  .ans-section h4{margin:0 0 10px;font-size:13px;color:var(--ink-2);text-transform:uppercase;letter-spacing:.03em;}
+
+  .stat-row{display:flex;gap:12px;flex-wrap:wrap;}
+  .stat{border:1px solid var(--line);border-radius:9px;padding:12px 16px;min-width:120px;flex:1;}
+  .stat .v{font-size:22px;font-weight:800;}
+  .stat .l{font-size:11.5px;color:var(--ink-3);margin-top:2px;}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  th{background:var(--panel);text-align:left;padding:9px 12px;font-size:11.5px;color:var(--ink-2);text-transform:uppercase;letter-spacing:.02em;}
+  td{padding:9px 12px;border-top:1px solid var(--line);}
+  tr:hover td{background:#fafbfd;}
+
+  .charts{display:flex;gap:22px;flex-wrap:wrap;align-items:center;}
+  .chartbox{border:1px solid var(--line);border-radius:10px;padding:16px 18px;flex:1;min-width:260px;}
+  .chartbox .ctitle{font-size:12px;color:var(--ink-2);font-weight:700;margin-bottom:12px;}
+  .legend{display:flex;flex-direction:column;gap:7px;font-size:12.5px;}
+  .legend .lr{display:flex;align-items:center;gap:8px;}
+  .legend .sw{width:11px;height:11px;border-radius:3px;}
+  .donut-wrap{display:flex;align-items:center;gap:20px;}
+
+  .bar-row{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:12.5px;}
+  .bar-row .blabel{width:130px;text-align:right;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .bar-track{flex:1;background:var(--panel);border-radius:5px;height:18px;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:5px;transition:width .6s ease;}
+  .bar-row .bval{width:34px;font-weight:700;}
+
+  .callout{display:flex;gap:10px;padding:11px 14px;border-radius:8px;margin:8px 0;font-size:13px;line-height:1.45;}
+  .callout .ci2{font-size:15px;}
+  .callout.risk{background:#fdecee;border:1px solid #f6c5cd;}
+  .callout.warning{background:#fff6e6;border:1px solid #f3dca6;}
+  .callout.info{background:#eaf4ff;border:1px solid #c8e0fb;}
+
+  .nextsteps{list-style:none;padding:0;margin:0;}
+  .nextsteps li{padding:8px 0 8px 26px;position:relative;border-top:1px solid var(--line);font-size:13.5px;}
+  .nextsteps li:before{content:"\2192";position:absolute;left:4px;color:var(--veeam-green);font-weight:800;}
+
+  /* composer */
+  .composer{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg,rgba(255,255,255,0),#fff 30%);padding:18px 24px 22px;}
+  .composer .box{max-width:880px;margin:0 auto;border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 18px rgba(20,40,80,.06);}
+  .composer input{flex:1;border:none;outline:none;font-size:14px;color:var(--ink);}
+  .composer .agent-tag{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);border:1px solid var(--line);border-radius:7px;padding:5px 9px;}
+  .composer .send{width:34px;height:34px;border-radius:50%;background:var(--veeam-green);color:#fff;border:none;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;}
+  .composer .send:disabled{background:#cdd6e0;cursor:not-allowed;}
+
+  .hidden{display:none !important;}
+  .relwrap{position:relative;flex:1;display:flex;flex-direction:column;min-height:0;}
+</style>
+</head>
+<body>
+
+  <!-- icon rail -->
+  <div class="rail">
+    <div class="logo">V</div>
+    <div class="ico">▦</div>
+    <div class="ico active" title="Agentic Studio">✦</div>
+    <div class="ico">🗂</div>
+    <div class="ico">⏱</div>
+    <div class="ico">🧭</div>
+    <div class="ico">🔍</div>
+    <div class="ico">🛡</div>
+    <div class="ico">⚙</div>
+    <div class="spacer"></div>
+    <div class="avatar">JC</div>
+  </div>
+
+  <!-- nav -->
+  <div class="nav">
+    <div class="brand"><span class="spark"></span> Agentic Studio</div>
+    <div class="newchat" onclick="goAgents()">✏️ New Chat</div>
+    <div class="navitem active" onclick="goAgents()"><span class="dot">📥</span> Agents</div>
+    <div class="navitem"><span class="dot">▦</span> My Agents</div>
+    <div class="filter">Agent <strong style="margin-left:4px;color:var(--accent)">All</strong> <span style="margin-left:auto">▾</span></div>
+    <div class="grouplabel">Today</div>
+    <div class="histlist">
+      <div class="hist active">Protected vs unprotected VMs</div>
+      <div class="hist">Failed jobs in the last 24 hours</div>
+      <div class="hist">License status and consumption</div>
+      <div class="grouplabel">Past 7 Days</div>
+      <div class="hist">Morning coffee report</div>
+      <div class="hist">3-2-1-1-0 compliance review</div>
+      <div class="hist">Proxy inventory and health</div>
+      <div class="hist">VBR version and build check</div>
+    </div>
+    <div class="help">❓ Help</div>
+  </div>
+
+  <!-- main -->
+  <div class="main">
+    <div class="topbar">
+      <span class="title" id="topTitle">Agents</span>
+      <span class="pill">Private Preview</span>
+    </div>
+
+    <div class="relwrap">
+      <div class="content" id="content">
+
+        <!-- AGENTS VIEW -->
+        <div id="agentsView" class="agents-wrap">
+          <div class="agents-head">
+            <h1>Agents</h1>
+            <button class="create-btn">✧ Create an agent</button>
+          </div>
+          <div class="search">🔍 Search agents</div>
+          <div class="grid">
+            <div class="card">
+              <div class="ci blue">▥</div>
+              <h3>Securiti Dashboard Agent</h3>
+              <p>Assists in creating and customizing widgets for your personalized dashboards.</p>
+            </div>
+            <div class="card">
+              <div class="ci cyan">❀</div>
+              <h3>Securiti Graph Agent</h3>
+              <p>Intelligent assistant specialized in building graph queries for Data Command Center.</p>
+            </div>
+            <div class="card live" onclick="openAgent()">
+              <div class="ci green">🛡</div>
+              <h3>Data Backup Agent</h3>
+              <p>Answers questions about your Veeam Backup &amp; Replication estate — protection coverage, jobs, sessions, alarms, and health.</p>
+              <span class="badge">Click to open ›</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHAT VIEW -->
+        <div id="chatView" class="chat hidden">
+          <div class="agent-hero" id="hero">
+            <div class="big">🛡</div>
+            <h2>Data Backup Agent</h2>
+            <p>I read your Veeam Backup &amp; Replication data through the Data Command Center graph. Ask me about protection coverage, jobs, sessions, alarms, licensing, and infrastructure health.</p>
+          </div>
+
+          <div id="suggestBlock">
+            <div class="suggest-label">SUGGESTED — most common questions</div>
+            <div class="suggest" id="suggest"></div>
+          </div>
+
+          <div id="thread"></div>
+        </div>
+
+      </div>
+
+      <!-- composer -->
+      <div class="composer hidden" id="composer">
+        <div class="box">
+          <input id="composerInput" placeholder="Ask the Data Backup Agent…" />
+          <span class="agent-tag">🛡 Data Backup Agent ▾</span>
+          <button class="send" id="sendBtn" onclick="sendTyped()" disabled>➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ====================== SCENARIO DATA ====================== */
+const SCENARIOS = {
+  "protected-vs-unprotected-vms": {
+    icon:"🖥",
+    title:"Protected vs unprotected VMs",
+    question:"How many VMs are protected vs unprotected?",
+    sub:"Coverage, gaps & 3-2-1 posture",
+    thinking:[
+      {t:"Starting agent execution"},
+      {t:"Thinking — coverage needs the full VM inventory (VEEAM_VM) and the protected set (VEEAM_VM_IN_BACKUP). I'll diff them."},
+      {t:"Generate Graph Query — match VEEAM_VM, traverse 'Belongs to backup job' → VEEAM_JOB; left-join VEEAM_VM_IN_BACKUP on vmUid.",mono:true},
+      {t:"Running Graph Lookup — nodeType:[VEEAM_VM] connection:BELONGS_TO_BACKUP_JOB → [VEEAM_JOB]",mono:true},
+      {t:"Getting Node Details — 142 VEEAM_VM nodes; 118 have a job edge + VEEAM_VM_IN_BACKUP with availableRestorePointsCount > 0."},
+      {t:"Reading lastVMBackupDateUtc per protected VM to flag stale coverage (>48h)."},
+      {t:"Reconciling with VEEAM_BACKUP_SERVER.vmProtectedCount and composing the answer."}
+    ],
+    answer:{
+      headline:"118 of 142 discovered VMs are protected (83%). 24 VMs have no backup, and 6 protected VMs have a stale restore point (older than 48h).",
+      stats:[
+        {v:"142",l:"Discovered VMs"},
+        {v:"118",l:"Protected"},
+        {v:"24",l:"Unprotected"},
+        {v:"83%",l:"Coverage"}
+      ],
+      donut:{title:"VM backup coverage",series:[{label:"Protected",value:118,color:"#00b336"},{label:"Unprotected",value:24,color:"#e0364a"}]},
+      bars:{title:"Unprotected VMs by host",series:[{label:"esx01.tech.local",value:11},{label:"esx02.tech.local",value:7},{label:"esx03.tech.local",value:4},{label:"esx04.tech.local",value:2}]},
+      table:{title:"Unprotected VMs (VEEAM_VM with no job edge)",cols:["VM","Host","Guest OS","Power state","Risk"],rows:[
+        ["sql-prod-03","esx01.tech.local","Windows Server 2022","Powered on","No job edge"],
+        ["app-tier-07","esx01.tech.local","Ubuntu 22.04","Powered on","No job edge"],
+        ["fileserver-archive","esx02.tech.local","Windows Server 2019","Powered on","No job edge"],
+        ["build-runner-02","esx02.tech.local","Ubuntu 20.04","Powered on","No job edge"],
+        ["legacy-dc-01","esx03.tech.local","Windows Server 2012 R2","Powered on","No job edge"]
+      ]},
+      callouts:[
+        {type:"risk",text:"<b>sql-prod-03</b> and <b>fileserver-archive</b> are powered-on production workloads with no VEEAM_JOB edge — zero backup."},
+        {type:"warning",text:"6 protected VMs have <code>lastVMBackupDateUtc</code> older than 48h — review their job sessions."},
+        {type:"info",text:"Reconciled with <code>VEEAM_BACKUP_SERVER.vmProtectedCount</code> = 118."}
+      ],
+      next:[
+        "Add the 24 unprotected VMs to a job or create a new one.",
+        "Investigate the 6 stale VMs in the Failed / last-session view.",
+        "Run the 3-2-1 scenario to check copies and immutability for the protected set."
+      ]
+    }
+  },
+
+  "failed-jobs-last-24h": {
+    icon:"⚠️",
+    title:"Failed jobs in the last 24 hours",
+    question:"Do I have any jobs that failed in the last 24 hours?",
+    sub:"Overnight failures & warnings",
+    thinking:[
+      {t:"Starting agent execution"},
+      {t:"Thinking — failures in the last 24h come from VEEAM_JOB_SESSION filtered on endTimeUtc and result (BpJobSessionResult)."},
+      {t:"Generate Graph Query — VEEAM_JOB_SESSION where endTimeUtc >= now-24h and result in (Failed, Warning).",mono:true},
+      {t:"Running Graph Lookup — nodeType:[VEEAM_JOB_SESSION] propertyFilter:{endTimeUtc:'>24h', result:['Failed','Warning']}",mono:true},
+      {t:"Getting Node Details — 47 sessions: 41 Success, 3 Warning, 3 Failed (BpJobSessionResult)."},
+      {t:"Resolving each failure's repository via job→VEEAM_REPOSITORY; 2 failures share Default Backup Repository within 4 min."},
+      {t:"Composing answer — result breakdown, failure table, common-cause callout, next steps."}
+    ],
+    answer:{
+      headline:"In the last 24 hours: 47 sessions — 41 succeeded, 3 warnings, 3 failed. Two failures share a common cause (Default Backup Repository).",
+      stats:[
+        {v:"47",l:"Sessions (24h)"},
+        {v:"41",l:"Success"},
+        {v:"3",l:"Warnings"},
+        {v:"3",l:"Failed"}
+      ],
+      bars:{title:"Sessions by result (last 24h)",series:[{label:"Success",value:41,color:"#00b336"},{label:"Warning",value:3,color:"#f5a623"},{label:"Failed",value:3,color:"#e0364a"}]},
+      table:{title:"Failed & warning sessions (VEEAM_JOB_SESSION)",cols:["Job (jobName)","Result","Ended","Repository","failureMessage","Retry"],rows:[
+        ["SQL Hourly","Failed","03:14","Default Backup Repository","Repository unavailable (timeout)","Yes"],
+        ["Finance App","Failed","03:18","Default Backup Repository","Repository unavailable (timeout)","Yes"],
+        ["VMware Tier-1","Failed","22:46","Veeam Data Cloud Vault","Guest processing: VSS writer failed","No"],
+        ["Linux backup job","Warning","01:09","Veeam Data Cloud Vault","1 of 12 objects skipped","No"],
+        ["Web Cluster","Warning","23:51","Default Backup Repository","Snapshot removal delayed","No"]
+      ]},
+      callouts:[
+        {type:"risk",text:"<b>SQL Hourly</b> and <b>Finance App</b> both failed within 4 minutes against <b>Default Backup Repository</b> — likely a repository / storage incident. Both have <code>willBeRetried=true</code>."},
+        {type:"warning",text:"VMware Tier-1 is an isolated guest-processing / VSS issue (SESSION_TASK.failureMessage), not retried."}
+      ],
+      next:[
+        "Check Default Backup Repository freeSpace / availability before the retries run.",
+        "Review VSS on the VMware Tier-1 guests, then re-run that job.",
+        "Confirm the two retried sessions succeed on their next attempt."
+      ]
+    }
+  },
+
+  "live-job-states": {
+    icon:"▶️",
+    title:"Live job states & sessions",
+    question:"What's running right now and what just happened?",
+    sub:"Running jobs, loads & next run",
+    thinking:[
+      {t:"Starting agent execution"},
+      {t:"Thinking — live triage. Combine VEEAM_JOB.status, the latest VEEAM_JOB_SESSION (loads) and VEEAM_JOB_STATE.nextRunTimeUtc."},
+      {t:"Generate Graph Query — VEEAM_JOB with latest VEEAM_JOB_SESSION and VEEAM_JOB_STATE.",mono:true},
+      {t:"Running Graph Lookup — nodeType:[VEEAM_JOB] + [VEEAM_JOB_SESSION] + [VEEAM_JOB_STATE]",mono:true},
+      {t:"Getting Node Details — Linux backup job (status idle, last result Success); PostgreSQL backup (session state running)."},
+      {t:"Bottleneck = max(sourceLoad, proxyLoad, networkLoad, targetLoad); next run from VEEAM_JOB_STATE."},
+      {t:"Composing answer — status overview, running list with dominant load, next-run column."}
+    ],
+    answer:{
+      headline:"1 job running, 1 idle. Success rate 100% on completed sessions. The running session's dominant load is Proxy (78%).",
+      stats:[
+        {v:"2",l:"Total jobs"},
+        {v:"1",l:"Running"},
+        {v:"100%",l:"Success rate"},
+        {v:"Proxy",l:"Dominant load"}
+      ],
+      bars:{title:"Jobs by status (BpJobStatus)",series:[{label:"Running",value:1,color:"#1d8cf8"},{label:"Idle / stopped",value:1,color:"#9aa7b8"}]},
+      table:{title:"Job states (latest VEEAM_JOB_SESSION)",cols:["Job","Status","Last result","Dominant load","Repository","Next run (JOB_STATE)"],rows:[
+        ["Linux backup job","Idle","Success","Proxy 64% — 17.2 GB in 00:26:04","Veeam Data Cloud Vault","Jul 30, 19:00"],
+        ["PostgreSQL backup","Running","—","Proxy 78% — 00:03:37","Default Backup Repository","—"]
+      ]},
+      callouts:[
+        {type:"info",text:"Both jobs report <b>Proxy</b> as the dominant load (<code>sourceLoad/proxyLoad/networkLoad/targetLoad</code>). If consistent, the proxy is the constraint — see the Proxy health scenario."},
+        {type:"warning",text:"PostgreSQL backup has run 3m37s with low throughput — not yet a stall, keep watching."},
+        {type:"info",text:"Next run comes from VEEAM_JOB_STATE.nextRunTimeUtc; chaining (VEEAM_LINKED_JOB) is shown when populated."}
+      ],
+      next:[
+        "If Proxy load is consistently dominant, review proxy concurrentJobsMax in the Proxy health scenario.",
+        "No intervention needed on the running job yet."
+      ]
+    }
+  },
+
+  "repository-capacity-planning": {
+    icon:"💾",
+    title:"Repository capacity planning",
+    question:"How much repository capacity is left and what's at risk?",
+    sub:"Used / free / immutability",
+    thinking:[
+      {t:"Starting agent execution"},
+      {t:"Thinking — capacity comes from VEEAM_REPOSITORY.capacity and freeSpace (bytes). I'll compute utilization and flag near-full repos."},
+      {t:"Generate Graph Query — select all VEEAM_REPOSITORY with capacity, freeSpace, isImmutabilityEnabled.",mono:true},
+      {t:"Running Graph Lookup — nodeType:[VEEAM_REPOSITORY]",mono:true},
+      {t:"Getting Node Details — 4 repositories; Default Backup Repository at 92% used (freeSpace < 10%)."},
+      {t:"Computing utilization, immutability coverage and concurrency saturation; no capacity time-series for a true forecast."},
+      {t:"Composing answer — capacity table, utilization chart, immutability posture."}
+    ],
+    answer:{
+      headline:"Total capacity 350 TB, 257 TB free (73%). Default Backup Repository is at 92% used — the likely cause of this morning's failures. 3 of 4 repositories are immutable.",
+      stats:[
+        {v:"4",l:"Repositories"},
+        {v:"350 TB",l:"Total capacity"},
+        {v:"257 TB",l:"Free"},
+        {v:"3 / 4",l:"Immutable"}
+      ],
+      bars:{title:"Repository utilization (% used)",series:[
+        {label:"Default Backup Repository",value:92,color:"#e0364a"},
+        {label:"Scale-out Performance Tier",value:45,color:"#f5a623"},
+        {label:"Veeam Data Cloud Vault",value:36,color:"#00b336"},
+        {label:"Archive (S3)",value:10,color:"#00b336"}
+      ]},
+      donut:{title:"Immutability coverage",series:[{label:"Immutable",value:3,color:"#00b336"},{label:"Not immutable",value:1,color:"#e0364a"}]},
+      table:{title:"Repositories (VEEAM_REPOSITORY)",cols:["Repository","Type","Capacity","Free","Used %","Immutable","Jobs now/max"],rows:[
+        ["Default Backup Repository","Windows (ReFS)","20 TB","1.6 TB","92%","No","5 / 6"],
+        ["Scale-out Performance Tier","SOBR / ReFS","80 TB","44 TB","45%","Yes (7d)","8 / 16"],
+        ["Veeam Data Cloud Vault","Object","50 TB","32 TB","36%","Yes (30d)","2 / 8"],
+        ["Archive (S3)","Object (archive)","200 TB","180 TB","10%","Yes (365d)","0 / 4"]
+      ]},
+      callouts:[
+        {type:"risk",text:"<b>Default Backup Repository</b>: freeSpace 1.6 TB of 20 TB (92% used) and <code>isImmutabilityEnabled=false</code>. Almost certainly why SQL Hourly and Finance App failed overnight."},
+        {type:"warning",text:"It is the only non-immutable target — single-copy backups there do not meet 3-2-1-1-0."},
+        {type:"info",text:"No historical capacity samples are collected, so a precise 'days-to-full' forecast isn't available — extend proactively."}
+      ],
+      next:[
+        "Extend or free Default Backup Repository immediately, then retry the affected jobs.",
+        "Move long-retention backups to an immutable tier or enable immutability.",
+        "Rebalance jobs off the near-full repository (also near its concurrency max)."
+      ]
+    }
+  }
+};
+
+const STARTERS = ["protected-vs-unprotected-vms","failed-jobs-last-24h","live-job-states","repository-capacity-planning"];
+
+/* ====================== VIEW SWITCHING ====================== */
+function goAgents(){
+  document.getElementById('agentsView').classList.remove('hidden');
+  document.getElementById('chatView').classList.add('hidden');
+  document.getElementById('composer').classList.add('hidden');
+  document.getElementById('topTitle').textContent='Agents';
+  resetChat();
+}
+function openAgent(){
+  document.getElementById('agentsView').classList.add('hidden');
+  document.getElementById('chatView').classList.remove('hidden');
+  document.getElementById('composer').classList.remove('hidden');
+  document.getElementById('topTitle').textContent='Data Backup Agent';
+  resetChat();
+}
+function resetChat(){
+  document.getElementById('thread').innerHTML='';
+  document.getElementById('suggestBlock').classList.remove('hidden');
+  document.getElementById('hero').classList.remove('hidden');
+}
+
+/* build suggestion cards */
+function buildSuggestions(){
+  const wrap=document.getElementById('suggest');
+  wrap.innerHTML='';
+  STARTERS.forEach(id=>{
+    const s=SCENARIOS[id];
+    const el=document.createElement('div');
+    el.className='qcard';
+    el.onclick=()=>ask(id);
+    el.innerHTML=`<div class="qi">${s.icon}</div><div><div class="qt">${s.question}</div><div class="qs">${s.sub}</div></div>`;
+    wrap.appendChild(el);
+  });
+}
+buildSuggestions();
+
+/* ====================== ASK FLOW ====================== */
+let busy=false;
+function ask(id){
+  if(busy) return;
+  const s=SCENARIOS[id];
+  if(!s){ askUnknown(); return; }
+  busy=true;
+  document.getElementById('suggestBlock').classList.add('hidden');
+  document.getElementById('hero').classList.add('hidden');
+
+  const thread=document.getElementById('thread');
+
+  // user bubble
+  const u=document.createElement('div');
+  u.className='msg user';
+  u.innerHTML=`<div class="bub">${s.question}</div>`;
+  thread.appendChild(u);
+
+  // thinking block
+  const tk=document.createElement('div');
+  tk.className='thinking';
+  tk.innerHTML=`
+    <div class="th-head" onclick="this.parentNode.classList.toggle('collapsed')">
+      <span class="spinner" id="spin"></span>
+      <span id="thlabel">Thinking…</span>
+      <span class="chev">▾</span>
+    </div>
+    <div class="th-body" id="thbody"></div>`;
+  thread.appendChild(tk);
+  scrollDown();
+
+  const body=tk.querySelector('#thbody');
+  let i=0;
+  const steps=s.thinking;
+  const tick=()=>{
+    if(i<steps.length){
+      const st=steps[i];
+      const row=document.createElement('div');
+      row.className='tstep'+(st.mono?' mono':'');
+      row.innerHTML=`<span class="tdot"></span><span>${st.t}</span>`;
+      body.appendChild(row);
+      i++;
+      scrollDown();
+      setTimeout(tick, st.mono?620:480);
+    } else {
+      // finish thinking
+      tk.querySelector('#spin').outerHTML='<span class="dot-done">✓</span>';
+      tk.querySelector('#thlabel').textContent='Reasoning complete';
+      tk.classList.add('collapsed');
+      renderAnswer(thread,s.answer);
+      busy=false;
+    }
+  };
+  setTimeout(tick,500);
+}
+
+function askUnknown(){
+  busy=true;
+  document.getElementById('suggestBlock').classList.add('hidden');
+  document.getElementById('hero').classList.add('hidden');
+  const thread=document.getElementById('thread');
+  const a=document.createElement('div');
+  a.className='answer';
+  a.innerHTML=`<div class="headline">This is a prototype with four scripted scenarios. Try one of the suggested questions: protected vs unprotected VMs, failed jobs in the last 24 hours, live job states, or repository capacity planning.</div>`;
+  thread.appendChild(a);
+  scrollDown();
+  busy=false;
+}
+
+/* ====================== ANSWER RENDERING ====================== */
+function renderAnswer(thread,a){
+  const wrap=document.createElement('div');
+  wrap.className='answer';
+  let html=`<div class="headline">${a.headline}</div>`;
+
+  if(a.stats){
+    html+=`<div class="ans-section"><div class="stat-row">`;
+    a.stats.forEach(s=>{ html+=`<div class="stat"><div class="v">${s.v}</div><div class="l">${s.l}</div></div>`; });
+    html+=`</div></div>`;
+  }
+
+  if(a.donut||a.bars){
+    html+=`<div class="ans-section"><div class="charts">`;
+    if(a.donut) html+=donutHTML(a.donut);
+    if(a.bars) html+=barsHTML(a.bars);
+    html+=`</div></div>`;
+  }
+
+  if(a.table){
+    html+=`<div class="ans-section"><h4>${a.table.title}</h4><table><thead><tr>`;
+    a.table.cols.forEach(c=>html+=`<th>${c}</th>`);
+    html+=`</tr></thead><tbody>`;
+    a.table.rows.forEach(r=>{
+      html+=`<tr>`;
+      r.forEach((cell,idx)=>{
+        let cls='';
+        if(idx===0||a.table.cols[idx]==='Result'||a.table.cols[idx]==='Severity'){
+          if(/fail|error/i.test(cell)) cls='style="color:var(--err);font-weight:700"';
+          else if(/warn/i.test(cell)) cls='style="color:var(--warn);font-weight:700"';
+          else if(/success/i.test(cell)) cls='style="color:var(--ok);font-weight:700"';
+        }
+        html+=`<td ${cls}>${cell}</td>`;
+      });
+      html+=`</tr>`;
+    });
+    html+=`</tbody></table></div>`;
+  }
+
+  if(a.callouts){
+    html+=`<div class="ans-section"><h4>Insights</h4>`;
+    a.callouts.forEach(c=>{
+      const ic=c.type==='risk'?'⛔':c.type==='warning'?'⚠️':'ℹ️';
+      html+=`<div class="callout ${c.type}"><span class="ci2">${ic}</span><span>${c.text}</span></div>`;
+    });
+    html+=`</div>`;
+  }
+
+  if(a.next){
+    html+=`<div class="ans-section"><h4>Suggested next steps</h4><ul class="nextsteps">`;
+    a.next.forEach(n=>html+=`<li>${n}</li>`);
+    html+=`</ul></div>`;
+  }
+
+  wrap.innerHTML=html;
+  thread.appendChild(wrap);
+  // animate bars
+  setTimeout(()=>{wrap.querySelectorAll('.bar-fill').forEach(b=>{b.style.width=b.dataset.w;});},60);
+  scrollDown();
+}
+
+function donutHTML(d){
+  const total=d.series.reduce((s,x)=>s+x.value,0);
+  let acc=0;const R=52,C=2*Math.PI*R;
+  let segs='';
+  d.series.forEach(s=>{
+    const frac=s.value/total;
+    const len=frac*C;
+    segs+=`<circle r="${R}" cx="70" cy="70" fill="none" stroke="${s.color}" stroke-width="20"
+      stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-acc}" transform="rotate(-90 70 70)"></circle>`;
+    acc+=len;
+  });
+  let leg='';
+  d.series.forEach(s=>{leg+=`<div class="lr"><span class="sw" style="background:${s.color}"></span>${s.label} — <b>${s.value}</b> (${Math.round(s.value/total*100)}%)</div>`;});
+  return `<div class="chartbox"><div class="ctitle">${d.title}</div><div class="donut-wrap">
+    <svg width="140" height="140" viewBox="0 0 140 140">${segs}
+    <text x="70" y="66" text-anchor="middle" font-size="22" font-weight="800" fill="#1d2733">${total}</text>
+    <text x="70" y="84" text-anchor="middle" font-size="10" fill="#8a98a8">total</text></svg>
+    <div class="legend">${leg}</div></div></div>`;
+}
+
+function barsHTML(b){
+  const max=Math.max(...b.series.map(s=>s.value));
+  let rows='';
+  b.series.forEach(s=>{
+    const w=(s.value/max*100).toFixed(1)+'%';
+    const col=s.color||'#00b336';
+    rows+=`<div class="bar-row"><div class="blabel">${s.label}</div>
+      <div class="bar-track"><div class="bar-fill" data-w="${w}" style="width:0;background:${col}"></div></div>
+      <div class="bval">${s.value}</div></div>`;
+  });
+  return `<div class="chartbox"><div class="ctitle">${b.title}</div>${rows}</div>`;
+}
+
+function scrollDown(){
+  const c=document.getElementById('content');
+  setTimeout(()=>{c.scrollTop=c.scrollHeight;},30);
+}
+
+/* composer typing */
+const ci=document.getElementById('composerInput');
+const sb=document.getElementById('sendBtn');
+ci.addEventListener('input',()=>{sb.disabled=ci.value.trim()==='';});
+ci.addEventListener('keydown',e=>{if(e.key==='Enter'&&!sb.disabled)sendTyped();});
+function sendTyped(){
+  const v=ci.value.trim().toLowerCase();
+  ci.value='';sb.disabled=true;
+  // naive intent match
+  let id=null;
+  if(/unprotect|protected|coverage|no backup/.test(v)) id='protected-vs-unprotected-vms';
+  else if(/fail|24|overnight|warning/.test(v)) id='failed-jobs-last-24h';
+  else if(/running|live|state|bottleneck|stall|chain|load/.test(v)) id='live-job-states';
+  else if(/capacity|repositor|free space|storage|full|immutab/.test(v)) id='repository-capacity-planning';
+  if(id) ask(id); else askUnknown();
+}
+</script>
+</body>
+</html>

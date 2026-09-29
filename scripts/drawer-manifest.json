@@ -1,0 +1,603 @@
+{
+ "Feed": [
+  "Name",
+  "Packages",
+  "Permissions",
+  "Retention",
+  "Upstream sources",
+  "Visibility"
+ ],
+ "Artifact Feed": [
+  "Name",
+  "Packages",
+  "Permissions",
+  "Retention",
+  "Upstream sources",
+  "Visibility"
+ ],
+ "Work Item": [
+  "Area path",
+  "Assigned to",
+  "Iteration",
+  "Priority",
+  "State",
+  "Tags",
+  "Title",
+  "Type"
+ ],
+ "Pull Request": [
+  "Draft",
+  "Linked work items",
+  "Ravi Patel",
+  "Source → target",
+  "Status",
+  "Threads",
+  "Title"
+ ],
+ "Pipeline": [
+  "Default branch",
+  "Folder",
+  "Name",
+  "Type"
+ ],
+ "Build Pipeline": [
+  "Default branch",
+  "Folder",
+  "Name",
+  "Type"
+ ],
+ "Release Pipeline": [
+  "Default branch",
+  "Folder",
+  "Name",
+  "Type"
+ ],
+ "YAML Pipeline": [
+  "Default branch",
+  "Folder",
+  "Name",
+  "Type"
+ ],
+ "Variable Group": [
+  "API_TIMEOUT",
+  "BUILD_CONFIGURATION",
+  "DEPLOY_REGION",
+  "NOTIFY_CHANNEL",
+  "Name",
+  "SIGNING_KEY",
+  "Type"
+ ],
+ "Service Connection": [
+  "Auth scheme",
+  "Credentials",
+  "Is shared",
+  "Name",
+  "Type"
+ ],
+ "Service Hook": [
+  "Consumer",
+  "Event",
+  "Name",
+  "Status",
+  "Target URL"
+ ],
+ "Branch Policy": [
+  "Blocking",
+  "Branch (pattern)",
+  "Enabled",
+  "Policy",
+  "Requirement"
+ ],
+ "Query": [
+  "Folder",
+  "Name",
+  "Query type",
+  "Visibility",
+  "WIQL"
+ ],
+ "Code Scanning Alert": [
+  "First seen",
+  "Severity",
+  "State",
+  "Title",
+  "Type"
+ ],
+ "Dependabot Alert": [
+  "First seen",
+  "Severity",
+  "State",
+  "Title",
+  "Type"
+ ],
+ "Secret Scanning Alert": [
+  "First seen",
+  "Severity",
+  "State",
+  "Title",
+  "Type"
+ ],
+ "ACL": [
+  "Build Service (contoso-org)",
+  "Identities",
+  "Inherit permissions",
+  "Namespace",
+  "Project Collection Administrators",
+  "Token",
+  "sarah.chen@contoso.com"
+ ],
+ "Source Bundle": [
+  "Branches",
+  "Bundle size compressed",
+  "Captured",
+  "Code Wikis",
+  "Commits",
+  "Git pack",
+  "Granularity",
+  "HEAD on default branch",
+  "LFS objects",
+  "Restore",
+  "State",
+  "Tags",
+  "Title",
+  "YAML pipelines"
+ ],
+ "Repo": [
+  "Active PRs",
+  "Branches",
+  "Default branch",
+  "Disabled",
+  "Fork",
+  "In maintenance",
+  "Name",
+  "Project",
+  "Project visibility",
+  "Remote URL",
+  "SSH URL",
+  "Size"
+ ],
+ "Project": [
+  "Name",
+  "Process",
+  "Repositories",
+  "Visibility",
+  "Work items"
+ ],
+ "Process Template": [
+  "Default",
+  "Enabled",
+  "Name",
+  "Parent process",
+  "Work item types"
+ ],
+ "Agent Pool": [
+  "Agents",
+  "Auto-provision",
+  "Auto-update",
+  "Created",
+  "Hosted",
+  "Name",
+  "Owner",
+  "Pool type"
+ ],
+ "Deployment Pool": [
+  "Description",
+  "Machines",
+  "Name",
+  "Roles"
+ ],
+ "Deployment Groups": [
+  "Description",
+  "Machines",
+  "Name",
+  "Roles"
+ ],
+ "Deployment Group": [
+  "Description",
+  "Machines",
+  "Name",
+  "Roles"
+ ],
+ "ADO User": [
+  "Access level",
+  "Display name",
+  "Email",
+  "Origin",
+  "Status"
+ ],
+ "Org Policy": [
+  "Applies to",
+  "Policy",
+  "Status"
+ ],
+ "Marketplace Extension": [
+  "Install state",
+  "Name",
+  "Publisher",
+  "Restore",
+  "Version"
+ ],
+ "Project Metadata": [
+  "Description",
+  "Process",
+  "Restore",
+  "Visibility"
+ ],
+ "Area Paths": [
+  "Depth",
+  "Nodes",
+  "Restore"
+ ],
+ "Iteration Paths": [
+  "Depth",
+  "Nodes",
+  "Restore"
+ ],
+ "Teams": [
+  "Board settings",
+  "Count",
+  "Membership",
+  "Origin"
+ ],
+ "Security Groups": [
+  "Board settings",
+  "Count",
+  "Membership",
+  "Origin"
+ ],
+ "Team Membership": [
+  "Identity resolution",
+  "Mappings"
+ ],
+ "Group Membership": [
+  "Identity resolution",
+  "Mappings"
+ ],
+ "Board Settings": [
+  "Card rules",
+  "Columns",
+  "Swimlanes",
+  "WIP limits"
+ ],
+ "Dashboards": [
+  "Dashboards",
+  "On restore",
+  "Refresh interval",
+  "Widgets"
+ ],
+ "Secure File": [
+  "Authorized pipelines",
+  "Content",
+  "Name",
+  "Uploaded"
+ ],
+ "Secure Files": [
+  "Content",
+  "Files",
+  "Properties"
+ ],
+ "Task Group": [
+  "Inputs",
+  "Name",
+  "Steps",
+  "Version"
+ ],
+ "Task Groups": [
+  "Inputs",
+  "Steps",
+  "Task groups",
+  "Version"
+ ],
+ "Pipeline Environment": [
+  "Checks",
+  "Description",
+  "Name",
+  "Resources"
+ ],
+ "Environments": [
+  "Checks",
+  "Environments",
+  "On restore",
+  "Resources"
+ ],
+ "Approval Check": [
+  "Check",
+  "Disabled",
+  "Resource",
+  "Timeout (min)",
+  "Type"
+ ],
+ "Approvals & Checks": [
+  "Checks",
+  "Disabled",
+  "Timeout (min)",
+  "Types"
+ ],
+ "Provisioned Wiki": [
+  "Backing",
+  "Name",
+  "Pages"
+ ],
+ "Test Plan": [
+  "Area / iteration",
+  "Name",
+  "Restore",
+  "State",
+  "Suites"
+ ],
+ "Test Suite": [
+  "Name",
+  "State",
+  "Suite type",
+  "Test cases",
+  "Variables"
+ ],
+ "WI Comments": [
+  "Parent work item",
+  "Restore"
+ ],
+ "WI Attachments": [
+  "Parent work item",
+  "Restore"
+ ],
+ "WI Tags": [
+  "Parent work item",
+  "Restore"
+ ],
+ "Pipeline Variables": [
+  "Sample",
+  "Secrets",
+  "Settable at queue time",
+  "Variables"
+ ],
+ "Feed Config": [
+  "Content",
+  "Feeds",
+  "Visibility"
+ ],
+ "Feed Permission": [
+  "ACL entries",
+  "Roles"
+ ],
+ "Feed Upstream": [
+  "Days to keep",
+  "Policy",
+  "Protocols",
+  "Sources",
+  "Status"
+ ],
+ "Repo Setting": [
+  "Case enforcement",
+  "Default branch",
+  "Forks",
+  "Restore"
+ ],
+ "Repo Permission": [
+  "ACL entries",
+  "Inheritance",
+  "Namespace"
+ ],
+ "Code Wiki": [
+  "Backing",
+  "Pages",
+  "Restore",
+  "Wikis"
+ ],
+ "PR Reviewer": [
+  "Capture",
+  "Covers",
+  "Files",
+  "Gaps",
+  "Integrity",
+  "Name",
+  "Parent PR",
+  "Restore",
+  "Type",
+  "Workload"
+ ],
+ "PR Thread": [
+  "Capture",
+  "Covers",
+  "Files",
+  "Gaps",
+  "Integrity",
+  "Name",
+  "Parent PR",
+  "Restore",
+  "Type",
+  "Workload"
+ ],
+ "PR Attachment": [
+  "Capture",
+  "Covers",
+  "Files",
+  "Gaps",
+  "Integrity",
+  "Name",
+  "Parent PR",
+  "Restore",
+  "Type",
+  "Workload"
+ ],
+ "PR Linked Work Item": [
+  "Capture",
+  "Covers",
+  "Files",
+  "Gaps",
+  "Integrity",
+  "Name",
+  "Parent PR",
+  "Restore",
+  "Type",
+  "Workload"
+ ],
+ "Dependabot Secret": [
+  "created_at",
+  "name",
+  "updated_at",
+  "value",
+  "visibility"
+ ],
+ "Repo Variable": [
+  "created_at",
+  "name",
+  "updated_at",
+  "value",
+  "visibility"
+ ],
+ "Webhook": [
+  "active",
+  "content_type",
+  "created_at",
+  "events[]",
+  "name (url)",
+  "secret"
+ ],
+ "Member": [
+  "2fa",
+  "created_at",
+  "login",
+  "role",
+  "state"
+ ],
+ "Team": [
+  "description",
+  "member_count",
+  "name",
+  "parent_team",
+  "privacy",
+  "repo_count",
+  "slug"
+ ],
+ "Custom Role": [
+  "base_role",
+  "name",
+  "permissions[]"
+ ],
+ "Branch Protection Rule": [
+  "allow_force_pushes",
+  "enforce_admins",
+  "pattern",
+  "required_pull_request_reviews",
+  "required_status_checks",
+  "restrictions"
+ ],
+ "Ruleset": [
+  "enforcement",
+  "name",
+  "rules",
+  "target"
+ ],
+ "Deploy Key": [
+  "created_at",
+  "private_key",
+  "read_only",
+  "title",
+  "verified"
+ ],
+ "Repo Environment": [
+  "deployment_branch_policy",
+  "name",
+  "protection_rules[]",
+  "scoped_secrets"
+ ],
+ "Custom Property": [
+  "property_name",
+  "value"
+ ],
+ "Pages Settings": [
+  "build_type",
+  "cname",
+  "https_enforced",
+  "public",
+  "source"
+ ],
+ "Topic": [
+  "topics[]"
+ ],
+ "Autolink": [
+  "is_alphanumeric",
+  "key_prefix",
+  "url_template"
+ ],
+ "Access Grant": [
+  "login",
+  "permission"
+ ],
+ "Team Permission": [
+  "permission",
+  "team_slug"
+ ],
+ "Label": [
+  "color",
+  "description",
+  "name"
+ ],
+ "Milestone": [
+  "closed_issues",
+  "due_on",
+  "open_issues",
+  "state",
+  "title"
+ ],
+ "Issue": [
+  "assignees[]",
+  "author",
+  "comments_count",
+  "created_at",
+  "labels[]",
+  "milestone",
+  "number",
+  "state",
+  "title"
+ ],
+ "Discussion": [
+  "answered",
+  "author",
+  "category",
+  "comments_count",
+  "created_at",
+  "number",
+  "title"
+ ],
+ "Release": [
+  "assets[]",
+  "draft",
+  "name",
+  "prerelease",
+  "tag_name"
+ ],
+ "Wiki": [
+  "last_revision_at",
+  "path",
+  "size",
+  "title"
+ ],
+ "Code Security Setting": [
+  "code_scanning_default_setup",
+  "dependabot_alerts",
+  "dependency_graph",
+  "name",
+  "secret_scanning"
+ ],
+ "GitHub App": [
+  "app_slug",
+  "credentials",
+  "events[]",
+  "name",
+  "permissions{}"
+ ],
+ "Runner Group": [
+  "allows_public_repositories",
+  "name",
+  "restricted_to_workflows",
+  "runner_instances",
+  "visibility"
+ ],
+ "Project v2": [
+  "closed",
+  "items_count",
+  "number",
+  "public",
+  "title"
+ ]
+}

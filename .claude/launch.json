@@ -2,10 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "inv",
+      "name": "static",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8089"],
-      "port": 8089
+      "runtimeArgs": ["-m", "http.server", "3005"],
+      "port": 3005
     }
   ]
 }
