@@ -2111,7 +2111,7 @@ body.okov-mode .floating-thead { display: none !important; }
 .okov-cat-chev { color: var(--black-30); display: inline-flex; }
 
 /* === INVENTORY === */
-.inv-panel { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.inv-panel { flex: 1; display: flex; flex-direction: column; min-width: 0; container-type: inline-size; }
 /* Sticky wrapper that holds both the panel header and the search bar as a single
    unit — pinning them together is more reliable than sticking each separately
    (which requires fragile pixel offsets). */
@@ -6380,13 +6380,19 @@ body.drawer-open { overflow: hidden; }
 /* Bottom corners follow the card (designer 2026-07-15): the bar's WHITE fill
    sits flush on .content-container's 8px-rounded bottom edge and was painting
    square over the corners. 7px = 8px outer radius minus the 1px border. */
-.pg-bar { display: flex; align-items: center; gap: 16px; padding: 8px 16px; border-top: 1px solid var(--border-light); background: var(--white); font-size: 16px; color: var(--black-60); flex-shrink: 0; border-bottom-left-radius: 7px; border-bottom-right-radius: 7px; }
+/* Responsive pagination bar (2026-09-30, ported from inventory-V1.html):
+   flex-wrap is the fit guarantee at any width; overflow:hidden stops any
+   residual min-content from bleeding past the box (invisible normally, but
+   rendering BEHIND the agent panel when this card sits next to it);
+   justify-content:space-between replaces margin:auto centering on
+   .pgds-pages, which only behaves within a single flex line. */
+.pg-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 8px 16px; border-top: 1px solid var(--border-light); background: var(--white); font-size: 16px; color: var(--black-60); flex-shrink: 0; border-bottom-left-radius: 7px; border-bottom-right-radius: 7px; overflow: hidden; }
 /* Pager is CHROME, not content — pinned to 14px under the 16px body base
    (2026-07-22 type migration); it overflowed narrow panes at 16. */
 .pgds-left, .pgds-pages, .pgds-right { font-size: 14px; }
 .pgds-left { display: flex; align-items: center; gap: 8px; flex-shrink: 0; white-space: nowrap; }
-.pgds-pages { display: flex; align-items: center; gap: 8px; margin: 0 auto; }
-.pgds-right { display: flex; align-items: center; gap: 16px; flex-shrink: 0; white-space: nowrap; }
+.pgds-pages { display: flex; align-items: center; gap: 8px; }
+.pgds-right { display: flex; align-items: center; gap: 16px; flex-shrink: 1; min-width: 0; white-space: nowrap; }
 /* Custom chevron: native select arrows hug the edge — appearance:none +
    an inset dropdown glyph (right 10px) matches the canonical form input. */
 .pgds-select { height: 28px; padding: 0 30px 0 12px; border: 1px solid var(--black-20, #d2d3d4); border-radius: 4px; background: var(--form-bg, #f4f6f8) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23626469'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 10px center; appearance: none; -webkit-appearance: none; font-family: inherit; font-size: 16px; color: var(--black-100); cursor: pointer; }
@@ -6403,6 +6409,18 @@ body.drawer-open { overflow: hidden; }
 .pg-btn { height: 28px; padding: 0 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font-size: 14px; font-family: inherit; cursor: pointer; color: var(--black-100); }
 .pg-btn:hover:not(:disabled) { background: var(--black-3); }
 .pg-btn:disabled { opacity: 0.4; cursor: default; }
+/* Narrow-container collapse (2026-09-30, ported from inventory-V1.html) —
+   keys off .inv-panel's inline-size (not .content-container's, which spans
+   the tree-nav sidebar too and stays wide even when this column is tight). */
+@container (max-width: 620px) {
+  .pgds-txt { display: none; }
+  .pg-bar { gap: 8px; }
+  .pgds-right { gap: 8px; }
+}
+@container (max-width: 520px) {
+  .pgds-goto { min-width: 0; width: 80px; padding-right: 24px; }
+  #invPgInfo, #childPgInfo { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
 
 /* === TOAST ===
    Sourced from index.html:473-482 (Toast in the connector wizard).
@@ -7894,14 +7912,14 @@ input[type="checkbox"] { accent-color: var(--em-green); }
             </div>
             <!-- Pagination -->
             <div class="pg-bar" id="invPgBar" data-jump="changeInvPage">
-              <div class="pgds-left">Showing
+              <div class="pgds-left"><span class="pgds-txt">Showing</span>
                 <select id="invPgSize" class="pgds-select" onchange="setInvPageSize(this.value)">
                   <option value="10" selected>10</option>
                   <option value="25">25</option>
                   <option value="50">50</option>
                   <option value="100">100</option>
                 </select>
-                per page</div>
+                <span class="pgds-txt">per page</span></div>
               <div class="pgds-pages">
                 <button class="pgds-arrow" id="invPgPrev" onclick="changeInvPage(-1)" aria-label="Previous page"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
                 <span class="pgds-chips" id="invPgChips"></span>
@@ -8115,14 +8133,14 @@ input[type="checkbox"] { accent-color: var(--em-green); }
                  display:'' and writes the labels; _childRenderDrive and
                  the standard branch leave it display:none. -->
             <div class="pg-bar" id="childPgBar" data-jump="changeChildPage" style="display:none">
-              <div class="pgds-left">Showing
+              <div class="pgds-left"><span class="pgds-txt">Showing</span>
                 <select id="childPgSize" class="pgds-select" onchange="setChildPageSize(this.value)">
                   <option value="10" selected>10</option>
                   <option value="25">25</option>
                   <option value="50">50</option>
                   <option value="100">100</option>
                 </select>
-                per page</div>
+                <span class="pgds-txt">per page</span></div>
               <div class="pgds-pages">
                 <button class="pgds-arrow" id="childPgPrev" onclick="changeChildPage(-1)" aria-label="Previous page"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
                 <span class="pgds-chips" id="childPgChips"></span>

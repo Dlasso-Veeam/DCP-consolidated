@@ -1172,7 +1172,7 @@ tbody tr:hover .policy-inherited-name { text-decoration: underline; text-decorat
 .tree-cart-badge svg { width: 13px; height: 13px; }
 
 /* === INVENTORY === */
-.inv-panel { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.inv-panel { flex: 1; display: flex; flex-direction: column; min-width: 0; container-type: inline-size; }
 /* Sticky wrapper that holds both the panel header and the search bar as a single
    unit — pinning them together is more reliable than sticking each separately
    (which requires fragile pixel offsets). */
@@ -3516,8 +3516,40 @@ body.drawer-open { overflow: hidden; }
 .cal-empty { padding: 20px; font-size: 14px; color: var(--black-60); text-align: center; }
 
 /* === PAGINATION === */
-.pg-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; border-top: 1px solid var(--border-light); background: var(--black-3); font-size: 14px; color: var(--black-60); flex-shrink: 0; }
-.pg-nav { display: flex; align-items: center; gap: 6px; }
+/* flex-wrap (2026-09-30) is the fit guarantee at any width when this
+   card sits beside the agent panel or tree-nav eats width from the
+   column — the info text drops below the nav controls instead of
+   overflowing or being pushed off past the visible edge. overflow:hidden
+   stops any residual min-content from bleeding past the box. */
+/* === PAGINATION (unified 2026-09-30 with inventory-V1.html, the canonical
+   Protected Data pagination bar) === This page previously ran the retired
+   grey-band "Page X of Y" pager instead of the current DS component. The old
+   PgLabel/PgSize/PgPrev/PgNext ids and their onclick handlers are unchanged
+   — only the surrounding markup and CSS were swapped to match, plus the
+   shared _dsPgWire script (added near </body>) that renders chips +
+   Go-to-Page from PgLabel's text via MutationObserver. */
+.pg-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 8px 16px; border-top: 1px solid var(--border-light); background: var(--white); font-size: 16px; color: var(--black-60); flex-shrink: 0; border-bottom-left-radius: 7px; border-bottom-right-radius: 7px; overflow: hidden; }
+.pgds-left, .pgds-pages, .pgds-right { font-size: 14px; }
+.pgds-left { display: flex; align-items: center; gap: 8px; flex-shrink: 0; white-space: nowrap; }
+.pgds-pages { display: flex; align-items: center; gap: 8px; }
+.pgds-right { display: flex; align-items: center; gap: 16px; flex-shrink: 1; min-width: 0; white-space: nowrap; }
+.pgds-select { height: 28px; padding: 0 30px 0 12px; border: 1px solid var(--black-20, #d2d3d4); border-radius: 4px; background: var(--form-bg, #f4f6f8) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23626469'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 10px center; appearance: none; -webkit-appearance: none; font-family: inherit; font-size: 16px; color: var(--black-100); cursor: pointer; }
+.pgds-goto { color: var(--black-60); min-width: 130px; }
+.pgds-chip { min-width: 24px; height: 24px; padding: 0 6px; border: 1px solid transparent; border-radius: 2px; background: transparent; font-family: inherit; font-size: 14px; font-weight: 450; color: var(--black-100); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.pgds-chip:hover { background: var(--black-5); }
+.pgds-chip.current, .pgds-chip.current:hover { background: var(--blue-light); border-color: var(--blue-50); color: var(--blue); font-weight: 450; }
+.pgds-arrow { width: 24px; height: 24px; border: 0; padding: 0; background: transparent; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.pgds-arrow:hover:not(:disabled) { background: var(--black-5); color: var(--black-100); }
+.pgds-arrow:disabled { opacity: 0.35; cursor: default; }
+@container (max-width: 620px) {
+  .pgds-txt { display: none; }
+  .pg-bar { gap: 8px; }
+  .pgds-right { gap: 8px; }
+}
+@container (max-width: 520px) {
+  .pgds-goto { min-width: 0; width: 80px; padding-right: 24px; }
+  #invPgInfo, #childPgInfo { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
 .pg-btn { height: 28px; padding: 0 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font-size: 14px; font-family: inherit; cursor: pointer; color: var(--black-100); }
 .pg-btn:hover:not(:disabled) { background: var(--black-3); }
 .pg-btn:disabled { opacity: 0.4; cursor: default; }
@@ -4229,23 +4261,24 @@ body.drawer-open { overflow: hidden; }
               </table>
             </div>
             <!-- Pagination -->
-            <div class="pg-bar" id="invPgBar">
-              <div id="invPgInfo">0 resources</div>
-              <div class="pg-nav">
-                <span style="color:var(--black-60);margin-right:8px">Rows per page:</span>
-                <select id="invPgSize" onchange="setInvPageSize(this.value)" style="height:28px;border:1px solid var(--border);border-radius:4px;background:var(--white);font-family:inherit;font-size:14px;padding:0 6px;cursor:pointer;color:var(--black-100)">
+            <div class="pg-bar" id="invPgBar" data-jump="changeInvPage">
+              <div class="pgds-left"><span class="pgds-txt">Showing</span>
+                <select id="invPgSize" class="pgds-select" onchange="setInvPageSize(this.value)">
                   <option value="10" selected>10</option>
                   <option value="25">25</option>
                   <option value="50">50</option>
                   <option value="100">100</option>
                 </select>
-                <button class="pg-btn" id="invPgPrev" onclick="changeInvPage(-1)">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle"><polyline points="15 18 9 12 15 6"/></svg>
-                </button>
-                <span id="invPgLabel" style="min-width:80px;text-align:center;color:var(--black-100)">Page 1 of 1</span>
-                <button class="pg-btn" id="invPgNext" onclick="changeInvPage(1)">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle"><polyline points="9 18 15 12 9 6"/></svg>
-                </button>
+                <span class="pgds-txt">per page</span></div>
+              <div class="pgds-pages">
+                <button class="pgds-arrow" id="invPgPrev" onclick="changeInvPage(-1)" aria-label="Previous page"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+                <span class="pgds-chips" id="invPgChips"></span>
+                <span id="invPgLabel" hidden>Page 1 of 1</span>
+                <button class="pgds-arrow" id="invPgNext" onclick="changeInvPage(1)" aria-label="Next page"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+              </div>
+              <div class="pgds-right">
+                <select class="pgds-select pgds-goto" id="invPgGoto"><option value="">Go to Page</option></select>
+                <span id="invPgInfo">0 resources</span>
               </div>
             </div>
           </div><!-- /.inv-panel (list mode) -->
@@ -4386,23 +4419,24 @@ body.drawer-open { overflow: hidden; }
                  drill branch shows this — _childRenderRecords sets
                  display:'' and writes the labels; _childRenderDrive and
                  the standard branch leave it display:none. -->
-            <div class="pg-bar" id="childPgBar" style="display:none">
-              <div id="childPgInfo">0 records</div>
-              <div class="pg-nav">
-                <span style="color:var(--black-60);margin-right:8px">Rows per page:</span>
-                <select id="childPgSize" onchange="setChildPageSize(this.value)" style="height:28px;border:1px solid var(--border);border-radius:4px;background:var(--white);font-family:inherit;font-size:14px;padding:0 6px;cursor:pointer;color:var(--black-100)">
+            <div class="pg-bar" id="childPgBar" data-jump="changeChildPage" style="display:none">
+              <div class="pgds-left"><span class="pgds-txt">Showing</span>
+                <select id="childPgSize" class="pgds-select" onchange="setChildPageSize(this.value)">
                   <option value="10" selected>10</option>
                   <option value="25">25</option>
                   <option value="50">50</option>
                   <option value="100">100</option>
                 </select>
-                <button class="pg-btn" id="childPgPrev" onclick="changeChildPage(-1)">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle"><polyline points="15 18 9 12 15 6"/></svg>
-                </button>
-                <span id="childPgLabel" style="min-width:80px;text-align:center;color:var(--black-100)">Page 1 of 1</span>
-                <button class="pg-btn" id="childPgNext" onclick="changeChildPage(1)">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle"><polyline points="9 18 15 12 9 6"/></svg>
-                </button>
+                <span class="pgds-txt">per page</span></div>
+              <div class="pgds-pages">
+                <button class="pgds-arrow" id="childPgPrev" onclick="changeChildPage(-1)" aria-label="Previous page"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+                <span class="pgds-chips" id="childPgChips"></span>
+                <span id="childPgLabel" hidden>Page 1 of 1</span>
+                <button class="pgds-arrow" id="childPgNext" onclick="changeChildPage(1)" aria-label="Next page"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+              </div>
+              <div class="pgds-right">
+                <select class="pgds-select pgds-goto" id="childPgGoto"><option value="">Go to Page</option></select>
+                <span id="childPgInfo">0 records</span>
               </div>
             </div>
           </div><!-- /.inv-panel (drill mode) -->
@@ -29302,5 +29336,51 @@ window.__devJumpResolve = function(h) {
      finds window.__SECURITI_ICONS already populated. -->
 <script src="securiti-icons-data.js"></script>
 <script src="securiti-icons.js"></script>
+<script>
+// DS Pagination wire (shared, 2026-07-10; ported 2026-09-30 to unify this
+// page's pagination with inventory-V1.html): the legacy update sites keep
+// writing "Page X of Y" into the (now hidden) PgLabel; a MutationObserver
+// per bar parses it and renders the canonical numbered chips + Go-to-Page,
+// jumping through the same delta function the arrows use (data-jump).
+(function _dsPgWire() {
+  function render(bar) {
+    var jump = bar.getAttribute('data-jump');
+    if (!jump || typeof window[jump] !== 'function') return;
+    var label = bar.querySelector('[id$="PgLabel"]');
+    var chips = bar.querySelector('[id$="PgChips"]');
+    var goto_ = bar.querySelector('[id$="PgGoto"]');
+    if (!label || !chips) return;
+    var m = /Page (\d+) of (\d+)/.exec(label.textContent || '');
+    if (!m) { chips.innerHTML = ''; return; }
+    var cur = +m[1], total = +m[2];
+    var start = Math.max(1, Math.min(cur - 2, total - 4));
+    var end = Math.min(total, start + 4);
+    var h = '';
+    for (var p = start; p <= end; p++) {
+      h += '<button type="button" class="pgds-chip' + (p === cur ? ' current' : '') + '" onclick="window.' + jump + '(' + (p - cur) + ')">' + p + '</button>';
+    }
+    chips.innerHTML = h;
+    if (goto_) {
+      var opts = '<option value="">Go to Page</option>';
+      for (var g = 1; g <= total; g++) opts += '<option value="' + g + '">' + g + '</option>';
+      goto_.innerHTML = opts;
+      goto_.value = '';
+      goto_.onchange = function () { var t = +this.value; if (t && t !== cur) window[jump](t - cur); this.value = ''; };
+    }
+  }
+  function wireAll() {
+    document.querySelectorAll('.pg-bar[data-jump]').forEach(function (bar) {
+      if (bar.dataset.dsWired) return;
+      bar.dataset.dsWired = '1';
+      var label = bar.querySelector('[id$="PgLabel"]');
+      if (!label) return;
+      new MutationObserver(function () { render(bar); }).observe(label, { childList: true, characterData: true, subtree: true });
+      render(bar);
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wireAll);
+  else wireAll();
+})();
+</script>
 </body>
 </html>
