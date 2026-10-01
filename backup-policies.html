@@ -441,12 +441,21 @@ a.vn-fly-link:hover { color: var(--blue); }
 .drag-handle { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 28px; cursor: grab; color: var(--black-30); flex-shrink: 0; border-radius: 4px; }
 .drag-handle:hover { color: var(--black-60); background: var(--black-5); }
 .drag-handle:active { cursor: grabbing; }
-.rank-step-btn { width: 22px; height: 22px; border: 1px solid var(--border-light); background: var(--white); color: var(--black-60); border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; flex-shrink: 0; }
-.rank-step-btn:hover:not(:disabled) { background: var(--black-5); color: var(--black-100); border-color: var(--black-30); }
+/* Segmented rank control (user ref 2026-10-01): [down | rank | up] in one
+   bordered 28px unit. The rank cell reads as a TEXT INPUT — Form BG fill,
+   Black/S20 border, text cursor — and swaps to the Vision Text Input Active
+   state (Green/S5 fill + Green/S80 border) while editing. Text inputs carry
+   no separate hover state in the Vision set, so none is added. */
+.rank-seg { display: inline-flex; align-items: stretch; height: 28px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); flex-shrink: 0; }
+.rank-step-btn { width: 28px; border: none; background: var(--white); color: var(--black-100); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; flex-shrink: 0; }
+.rank-seg .rank-step-btn:first-child { border-radius: 3px 0 0 3px; }
+.rank-seg .rank-step-btn:last-child { border-radius: 0 3px 3px 0; }
+.rank-step-btn:hover:not(:disabled) { background: var(--black-5); }
 .rank-step-btn:disabled, .rank-step-btn[aria-disabled="true"] { opacity: 0.35; cursor: not-allowed; }
-.rank-num { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 22px; padding: 0 4px; font-size: 16px; font-weight: 500; color: var(--black-100); font-variant-numeric: tabular-nums; cursor: pointer; border-radius: 4px; } /* 16 = tabular data (user 2026-08-14) */
-.rank-num:hover { background: var(--black-5); }
-.rank-input { width: 40px; height: 22px; padding: 0 4px; border: 1px solid var(--blue); border-radius: 4px; font-size: 16px; font-weight: 500; color: var(--black-100); font-family: inherit; font-variant-numeric: tabular-nums; text-align: center; outline: none; background: var(--white); }
+.rank-step-btn svg { width: 16px; height: 16px; }
+.rank-step-btn.is-down svg { transform: rotate(180deg); }
+.rank-num { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; padding: 0 4px; border: none; border-left: 1px solid var(--border); border-right: 1px solid var(--border); border-radius: 0; background: var(--form-bg); font-family: inherit; font-size: 16px; font-weight: 500; color: var(--black-100); font-variant-numeric: tabular-nums; cursor: text; } /* 16 = tabular data (user 2026-08-14) */
+.rank-input { width: 36px; align-self: stretch; margin: -1px 0; padding: 0 4px; border: 1px solid var(--em-green); border-radius: 0; background: var(--em-green-tint); font-size: 16px; font-weight: 500; color: var(--black-100); font-family: inherit; font-variant-numeric: tabular-nums; text-align: center; outline: none; }
 .rank-input::-webkit-outer-spin-button, .rank-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
 /* Drag / drop visual states. A dashed outline on the source row (like the
@@ -997,6 +1006,17 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
 /* Vision Button Type=Tertiary, Size=Default (set 228:10477, verified live 2026-10-01):
    fill Green/S5, 1px Green/S50 border, Green/S80 label; hover fill S10;
    active fill S20 + 2px border; disabled keeps fill/border, label goes Green/S30. */
+.plv-combo { display: inline-flex; gap: 0; border-radius: 4px; }
+/* Combo Button per Figma DCP 17087:67259 (Protected Data): NO gap or container fill — each half keeps
+   its own 1px Black/S20 border (so the join reads as a 2px line), outer radius 4 / inner 0, chevron glyph
+   Black/S90. (was: 1px gap over a Black/S20 container, spec page 291:21330) */
+.plv-combo .plv-btn { border-radius: 0; }
+.plv-combo .plv-combo-main { border-radius: 4px 0 0 4px; }
+.plv-combo .plv-combo-chev { border-radius: 0 4px 4px 0; width: 36px; padding: 0; justify-content: center; color: var(--black-90); }
+.plv-btn-flat { background: none; color: var(--black-100); } /* Vision Button Type=Flat: no fill / Black/S100 */
+.plv-btn-flat:hover { color: var(--black-80); }
+.plv-btn-flat:active { background: var(--black-10); }
+.plv-btn-flat:disabled, .plv-btn-flat:disabled:hover { opacity: 1; color: var(--black-30); }
 .plv-btn-tertiary { background: var(--em-green-tint); border: 1px solid var(--green-50); color: var(--em-green); }
 .plv-btn-tertiary:hover { background: var(--green-s10); }
 .plv-btn-tertiary:active { background: var(--green-s20); border-width: 2px; padding: 0 11px; }
@@ -1046,7 +1066,8 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
 .plv-psearch-box.has-text .plv-psearch-clear { display: inline-flex; }
 
 /* Stat strip v2 — Active / Inactive / Total (label over big number). */
-.plv-stats { display: flex; border-bottom: 1px solid var(--border-light); }
+.plv-stats { display: flex; border-bottom: 1px solid var(--border-light); max-height: 120px; overflow: hidden; transition: max-height 0.28s ease, border-bottom-width 0.28s ease; }
+.plv-stats > * { transition: opacity 0.2s ease; } /* same shape as .wl-sidebar > * */
 .plv-stat { flex: 1; padding: 12px 16px; border-left: 1px solid var(--border-light); }
 .plv-stat:first-child { border-left: none; }
 .plv-stat-lbl { font-size: 16px; font-weight: 450; color: var(--black-60); line-height: 24px; }
@@ -1054,7 +1075,8 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
 /* Reorder mode collapses the KPI row (user 2026-10-01) — the ladder is the
    working surface, Active/Inactive/Total are browse-time context. The stat
    elements stay in the DOM so the counters keep updating underneath. */
-.prio-mode .plv-stats { display: none; }
+.prio-mode .plv-stats { max-height: 0; border-bottom-width: 0; }
+.prio-mode .plv-stats > * { opacity: 0; }
 /* Expanded narrowed view: non-matching rows are dimmed and inert (they still
    accept drops). Matches keep full controls. */
 .row-nonmatch { opacity: 0.45; cursor: default; }
@@ -1091,8 +1113,10 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
    tints (id specificity) — mirror them explicitly so the whole row
    highlights, actions column included (user 2026-08-14). */
 #pol-table tbody tr:hover td:last-child { background: var(--blue-light); }
-.prio-mode #pol-table tbody tr.prio-selected td:last-child { background: var(--em-green-tint); }
-.prio-mode #pol-table tbody tr.prio-selected:hover td:last-child { background: var(--em-green-tint); }
+.prio-mode #pol-table tbody tr.prio-selected td:last-child,
+.prio-mode #pol-table tbody tr.prio-checked td:last-child { background: var(--em-green-tint); }
+.prio-mode #pol-table tbody tr.prio-selected:hover td:last-child,
+.prio-mode #pol-table tbody tr.prio-checked:hover td:last-child { background: var(--em-green-tint); }
 /* Box-shadow on a sticky td under border-collapse is clipped by Chrome —
    the gradient paints from a pseudo-element instead (inventory quirk
    note). Hidden until content actually scrolls beneath the column. */
@@ -1114,9 +1138,14 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
    is untouched (its first column isn't Priority). */
 .prio-mode #pol-table thead th:first-child { position: sticky; left: 0; z-index: 29; background: var(--white); }
 .prio-mode #pol-table tbody td:first-child { position: sticky; left: 0; background: var(--white); z-index: 4; }
+/* The sticky first cell is its own stacking context, so a tooltip opening below it
+   would paint UNDER the next row's cell. The hovered row's cell lifts above its siblings. */
+.prio-mode #pol-table tbody tr:hover td:first-child { z-index: 6; }
 .prio-mode #pol-table tbody tr:hover td:first-child { background: var(--blue-light); }
 .prio-mode #pol-table tbody tr.prio-selected td:first-child,
-.prio-mode #pol-table tbody tr.prio-selected:hover td:first-child { background: var(--em-green-tint); }
+.prio-mode #pol-table tbody tr.prio-selected:hover td:first-child,
+.prio-mode #pol-table tbody tr.prio-checked td:first-child,
+.prio-mode #pol-table tbody tr.prio-checked:hover td:first-child { background: var(--em-green-tint); }
 /* Default-policy separator band (user 2026-08-17): segregates the pinned
    default from the reorderable customs. Full-width single cell — opt OUT of
    the sticky first/last-cell machinery and their gradients. */
@@ -1258,6 +1287,13 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
 #pol-table td:last-child [data-plv-tip]:hover::after,
 #pol-table th:last-child [data-plv-tip]:hover::after,
 .plv-modebar [data-plv-tip]:hover::after { left: auto; right: 0; }
+/* Row tooltips that would open UNDER the sticky header open below their anchor
+   instead: the rank cell + drag handle on every row (they sit at the top of the
+   row and the ladder scrolls under the header), and every tooltip in the first
+   row. */
+#pol-tbody .rank-num[data-plv-tip]:hover::after,
+#pol-tbody .drag-handle[data-plv-tip]:hover::after,
+#pol-tbody tr:first-child [data-plv-tip]:hover::after { bottom: auto; top: calc(100% + 6px); }
 
 /* ═══ CANONICAL WORKLOAD PICKER (tnwl, ported verbatim from
    inventory-V1.html's chrome-row variant, user 2026-08-13) ═══
@@ -1327,11 +1363,41 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
 
 /* Action bar below the search — hosts "Update priority ladder" in browse
    mode; morphs into guidance + change summary + Cancel/Save in mode. */
-.plv-modebar { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 12px; border-bottom: 1px solid var(--border-light); background: var(--white); }
+.plv-modebar { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px; padding: 12px; border-bottom: 1px solid var(--border-light); background: var(--white); }
 .plv-modebar-note { margin-right: auto; font-size: 14px; color: var(--black-60); }
-.plv-modebar-summary { font-size: 14px; font-weight: 500; color: var(--black-100); display: none; }
+.plv-modebar-summary { font-size: 14px; font-weight: 500; color: var(--black-100); display: none; white-space: nowrap; }
 .prio-mode .plv-modebar-summary { display: block; }
 .plv-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+/* ── BATCH MOVE (review copy) ── checkbox column-in-cluster + selection bar.
+   Checkbox follows this file's existing native-checkbox precedent
+   (16px, accent-color green). */
+.prio-selall { display: none; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); margin: 0 !important; }
+body.prio-narrowed .prio-selall { display: block; }
+.prio-mode .sort-th .prio-selall { pointer-events: auto; } /* reorder mode switches header sorting off (.prio-mode .sort-th) — the checkbox must stay clickable, in the pinned clone too */
+.pol-floating-thead thead th.order-col { position: relative; } /* anchors the select-all checkbox in the pinned clone */
+.prio-check { width: 16px; height: 16px; margin: 0 4px 0 0; accent-color: var(--green); cursor: pointer; flex-shrink: 0; }
+.prio-mode .data-table th.order-col, .prio-mode .data-table td.order-col { width: 172px; min-width: 172px; }
+.prio-mode .data-table th.order-col { text-align: center; }
+.data-table.prio-mode th.order-col { text-align: center; } /* the pinned clone table carries .prio-mode ON itself, not on an ancestor */
+/* Selection chip cloned from inventory-V1.html .tab-sel-chip (+ its
+   .top-action-bar override): Vision Chip Green Light, 28px, radius 2, Green/S5
+   fill, Green/S80 label, 20px inline-SVG x. The controls beside it are plain
+   buttons, exactly like Protected Data's chip + CTA (no wrapping container). */
+.plv-batchbar { display: inline-flex; align-items: center; gap: 8px; margin-right: 12px; }
+.tab-sel-chip { display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 4px 0 12px; border-radius: 2px; background: var(--em-green-tint); color: var(--em-green); font-size: 16px; font-weight: 500; white-space: nowrap; }
+.tab-sel-chip .tsc-x { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border: none; background: none; border-radius: 2px; color: var(--em-green); cursor: pointer; padding: 0; }
+.tab-sel-chip .tsc-x:hover { background: rgba(31, 34, 41, 0.08); }
+.tab-sel-chip .tsc-x svg { width: 12px; height: 12px; }
+.plv-batchbar-pos { display: inline-flex; align-items: center; gap: 8px; }
+.plv-batchbar-pos input { width: 72px; height: 36px; padding: 0 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font-family: inherit; font-size: 16px; color: var(--black-100); font-variant-numeric: tabular-nums; }
+.plv-batchbar-pos input:focus { outline: none; background: var(--em-green-tint); border-color: var(--em-green); }
+/* Two or more rows checked: arrows and rank editing are paused so a control
+   never has two meanings. Drag stays live on the CHECKED rows only and moves
+   them as one block. Selection, preview and kebab Edit stay live. */
+.pol-card.batch-active #pol-tbody tr:not(.prio-checked) .drag-handle,
+.pol-card.batch-active #pol-tbody .rank-step-btn,
+.pol-card.batch-active #pol-tbody .rank-num,
+.pol-card.batch-active #pol-tbody .row-kebab-item[onclick*="moveTo"] { opacity: 0.35; pointer-events: none; cursor: default; }
 .plv-btn-primary:disabled:hover { background: var(--em-green); }
 
 /* Rail collapse — class-driven (.collapsed) so the edge pill can toggle
@@ -1370,10 +1436,12 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
 /* Rows read as draggable in mode; selected row feeds the preview panel. */
 .prio-mode #pol-tbody tr[draggable="true"] { cursor: grab; }
 .prio-mode #pol-tbody tr[draggable="true"]:active { cursor: grabbing; }
-.prio-mode #pol-tbody tr.prio-selected td { background: var(--em-green-tint); }
+.prio-mode #pol-tbody tr.prio-selected td,
+.prio-mode #pol-tbody tr.prio-checked td { background: var(--em-green-tint); }
 /* Selection indicator on the ROW's left edge only — the inset shadow on
    every cell painted a green bar between each column (user 2026-08-13). */
-.prio-mode #pol-tbody tr.prio-selected td:first-child { box-shadow: inset 2px 0 0 var(--em-green); }
+.prio-mode #pol-tbody tr.prio-selected td:first-child,
+.prio-mode #pol-tbody tr.prio-checked td:first-child { box-shadow: inset 2px 0 0 var(--em-green); }
 .prio-mode .pg-bar { display: none; } /* the full ladder is always visible in mode */
 .prio-mode #pol-edit-footer { display: none !important; } /* mode bar owns Cancel/Save */
 
@@ -1386,16 +1454,16 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
    region that let the rows scroll clean out of view (user 2026-08-13).
    Not needed — the inner's max-height budget (below) bounds page scroll
    so the panel meets its pin right as scrolling runs out. */
-.prio-preview { width: 0; flex-shrink: 0; border-left: 1px solid var(--border-light); background: var(--white); overflow: hidden; opacity: 0; transition: width 0.28s ease, opacity 0.2s ease; }
+.prio-preview { position: relative; width: 0; flex-shrink: 0; border-left: 1px solid var(--border-light); background: var(--white); overflow: hidden; opacity: 0; transition: width 0.28s ease, opacity 0.2s ease; }
 /* overflow must release once open — a hidden-overflow ancestor clips the
    inner's position:sticky against the aside instead of the viewport, so
    the panel scrolled under the pinned header (user 2026-08-13). The
    opacity fade covers the brief open/close transition. */
-.prio-mode .prio-preview { width: 470px; opacity: 1; overflow: visible; } /* was 420 (before that 360) — +50px so scope expressions fit one line (user 2026-08-14) */
+.prio-mode .prio-preview { width: var(--prio-w, 470px); opacity: 1; overflow: visible; } /* was 420 (before that 360) — +50px so scope expressions fit one line (user 2026-08-14) */
 /* max-height budgets for the card's bottom padding + border (~25px)
    below the aside — without it the inner is exactly that much too tall
    to ever pin below the header at full scroll (user 2026-08-13). */
-.prio-preview-inner { width: 470px; /* was 420 — tracks .prio-mode .prio-preview widening (user 2026-08-14) */ position: sticky; top: calc(var(--pol-sticky-bottom, 200px)); max-height: calc(100vh - var(--pol-sticky-bottom, 200px) - 28px); overflow-y: auto; padding: 24px 12px 24px 24px; scrollbar-width: thin; /* was padding: 24px — right gutter absorbs the scrollbar (12px pad + thin bar ≈ 24) so scope expressions get the full one-line budget */ }
+.prio-preview-inner { width: var(--prio-w, 470px); /* was 420 — tracks .prio-mode .prio-preview widening (user 2026-08-14) */ position: sticky; top: calc(var(--pol-sticky-bottom, 200px)); max-height: calc(100vh - var(--pol-sticky-bottom, 200px) - 28px); overflow-y: auto; padding: 24px 12px 24px 24px; scrollbar-width: thin; /* was padding: 24px — right gutter absorbs the scrollbar (12px pad + thin bar ≈ 24) so scope expressions get the full one-line budget */ }
 .prio-preview-title { font-size: 16px; font-weight: 500; color: var(--black-100); line-height: 22px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .prio-preview-sub { font-size: 14px; color: var(--black-60); padding-bottom: 16px; border-bottom: 1px solid var(--border-light); }
 /* was: border-top hairline per section — retired (user 2026-08-13);
@@ -1508,6 +1576,21 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
 .prio-impact-row { display: flex; align-items: baseline; gap: 8px; font-size: 14px; line-height: 20px; padding: 3px 0; color: var(--black-100); }
 .prio-impact-rank { font-variant-numeric: tabular-nums; color: var(--black-60); flex-shrink: 0; min-width: 20px; }
 .prio-impact-none { font-size: 14px; color: var(--black-50); }
+/* RESIZE HANDLE — cloned from Protected Data's .ai-resize / .tree-nav-resize:
+   6px full-height strip, Green/S20 whole-width fill on hover, Green/S80 while
+   dragging, 0.15s background-color transition, col-resize cursor. Straddles the
+   panel's left edge (left:-3px) like .tree-nav-resize, since .prio-preview is
+   overflow:visible in the mode. Width is a preference (localStorage). */
+.prio-resize-wrap { display: none; position: sticky; top: var(--pol-sticky-bottom, 200px); height: 0; z-index: 40; }
+.prio-mode .prio-resize-wrap { display: block; }
+/* Sized and pinned exactly like .prio-preview-inner (same sticky offset, same
+   max-height budget) so the strip only exists along the panel's VISIBLE edge,
+   never up through the page header or past the panel's bottom. */
+.prio-resize { position: absolute; top: 0; left: -3px; width: 6px; height: calc(100vh - var(--pol-sticky-bottom, 200px) - 28px); cursor: col-resize; background: transparent; border: none; padding: 0; transition: background-color 0.15s ease; }
+.prio-resize:hover { background: var(--green-s20); }
+.prio-preview.is-resizing .prio-resize { background: var(--em-green); }
+body.prio-resizing .prio-preview { transition: none; }
+body.prio-resizing { cursor: col-resize; user-select: none; }
 .prio-preview-empty { padding: 24px 8px; font-size: 14px; color: var(--black-60); text-align: center; }
 
 /* Sortable column headers — cloned verbatim from inventory-V1.html's
@@ -2042,6 +2125,7 @@ body.ai-full #aiWorkingGlow { display: none; }
                      Save. Content rendered by renderModeBar(). -->
                 <div class="plv-modebar" id="plvModeBar">
                   <span class="plv-modebar-note" id="plvModeNote"></span>
+                  <span id="plvModeBatch" style="display:contents"></span>
                   <span class="plv-modebar-summary" id="plvModeSummary"></span>
                   <span id="plvModeActions" style="display:inline-flex;gap:8px;align-items:center"></span>
                 </div>
@@ -2086,6 +2170,7 @@ body.ai-full #aiWorkingGlow { display: none; }
                    config mirror + AI impact summary. Anchored beside the
                    table so its top aligns with the first row. -->
               <aside class="prio-preview" id="prioPreview" aria-label="Policy impact preview">
+                <div class="prio-resize-wrap"><button type="button" class="prio-resize" aria-label="Resize panel" aria-orientation="vertical" role="separator" onpointerdown="prioResizeStart(event)"></button></div>
                 <div class="prio-preview-inner" id="prioPreviewInner"></div>
               </aside>
               </div>
@@ -3223,7 +3308,7 @@ body.ai-full #aiWorkingGlow { display: none; }
   </div>
 </aside>
 
-<script src="securiti-icons-data.js?v=20260910a"></script>
+<script src="securiti-icons-data.js?v=20261001a"></script>
 <script src="workload-picker.js?v=20260908b"></script>
 <script>
 // ── DS ICON STORE HELPERS (cloned from inventory-V1.html) ───────────────────
@@ -6513,6 +6598,7 @@ function _prioFollowRow(id) {
 }
 
 function stepRank(id, dir) {
+  if (prioBatchActive()) return;
   const p = POLICIES.find(x => x.id === id);
   if (!p || p.isDefault) return;
   const customs = POLICIES.filter(x => x.workload === p.workload && !x.isDefault).sort((a,b) => a.rank - b.rank);
@@ -6554,6 +6640,7 @@ function moveToBottom(id) {
   movePolicyToPosition(id, customs.length);
 }
 function movePolicyToPosition(id, newRank) {
+  if (prioBatchActive()) return;
   const p = POLICIES.find(x => x.id === id);
   if (!p || p.isDefault) return;
   _prioExpandIfNarrowed(id);
@@ -6702,6 +6789,7 @@ function previewConflicts(policy, candidateRank, opts) {
 // ── HTML5 DRAG AND DROP ──────────────────────────────────────────────────────
 let _dragPid = null;
 function dragRowStart(e, id) {
+  if (prioBatchActive() && !prioChecked.has(id)) { e.preventDefault(); return; }
   // Narrowed list: a drag can't start in place (the rows it would land
   // among aren't there). Cancel it, reveal the full ladder around the row,
   // and let the next drag run against the expanded list.
@@ -6710,6 +6798,8 @@ function dragRowStart(e, id) {
   try { e.dataTransfer.setData('text/plain', id); e.dataTransfer.effectAllowed = 'move'; } catch(_) {}
   var row = e.currentTarget;
   row.classList.add('row-dragging');
+  // Block drag: every checked row dims with the dragged one.
+  if (prioBatchActive()) document.querySelectorAll('#pol-tbody tr.prio-checked').forEach(function(tr){ tr.classList.add('row-dragging'); });
   // Dragging a row selects it (user 2026-08-14) — the preview panel
   // follows the policy being moved so its impact is visible on drop.
   if (typeof prioMode !== 'undefined' && prioMode) prioSelectRow({ target: null }, id);
@@ -6725,6 +6815,13 @@ function dragRowStart(e, id) {
     var tb = document.createElement('tbody');
     var clone = row.cloneNode(true);
     clone.classList.remove('row-dragging');
+    if (prioBatchActive()) {
+      var badge = document.createElement('span');
+      badge.textContent = prioChecked.size + ' policies';
+      badge.style.cssText = 'position:absolute;right:8px;top:50%;transform:translateY(-50%);padding:2px 8px;border-radius:2px;background:var(--em-green);color:var(--white);font-size:12px;font-weight:500;z-index:2';
+      clone.lastElementChild.style.position = 'relative';
+      clone.lastElementChild.appendChild(badge);
+    }
     tb.appendChild(clone);
     ghost.appendChild(tb);
     document.body.appendChild(ghost);
@@ -6747,6 +6844,7 @@ function dragRowOver(e) {
   const src = POLICIES.find(p => p.id === _dragPid);
   const tgt = POLICIES.find(p => p.id === row.dataset.pid);
   if (!src || !tgt || src.id === tgt.id) return;
+  if (prioBatchActive() && prioChecked.has(tgt.id)) return;   // can't drop a block onto itself
   e.preventDefault();
   const rect = row.getBoundingClientRect();
   _dragBefore = e.clientY < rect.top + rect.height / 2;
@@ -6772,6 +6870,7 @@ function dragRowDrop(e) {
   const tgt = POLICIES.find(p => p.id === row.dataset.pid);
   if (!src || !tgt) { dragRowEnd(); return; }
   if (src.id === tgt.id) { dragRowEnd(); return; }
+  if (prioBatchActive() && prioChecked.has(tgt.id)) { dragRowEnd(); return; }
   if (tgt.workload !== src.workload) {
     showToast({ tone: 'info', title: 'Cross-workload reorder not allowed', body: 'Policies only rank against others in the same workload.' });
     dragRowEnd(); return;
@@ -6792,6 +6891,14 @@ function dragRowDrop(e) {
   } else {
     _insIdx = _customsNoSrc.findIndex(x => x.id === tgt.id) + (_dragBefore ? 0 : 1);
   }
+  if (prioBatchActive() && prioChecked.has(src.id)) {
+    // Block drop: insertion index against the customs WITHOUT any selected row.
+    const _rest = POLICIES.filter(x => x.workload === src.workload && !x.isDefault && !prioChecked.has(x.id)).sort((a, b) => a.rank - b.rank);
+    const _bIdx = tgt.isDefault ? _rest.length : _rest.findIndex(x => x.id === tgt.id) + (_dragBefore ? 0 : 1);
+    dragRowEnd();
+    prioBatchMove('idx', _bIdx);
+    return;
+  }
   movePolicyToPosition(src.id, _insIdx + 1);
   dragRowEnd();
 }
@@ -6799,6 +6906,7 @@ function dragRowDrop(e) {
 // ── CLICK-TO-EDIT RANK NUMBER ────────────────────────────────────────────────
 function startRankEdit(e, id) {
   e.stopPropagation();
+  if (prioBatchActive()) return;
   const span = e.currentTarget;
   const p = POLICIES.find(x => x.id === id);
   if (!p || p.isDefault) return;
@@ -6921,8 +7029,11 @@ function renderPolicyRow(p, ctx) {
   // Priority cluster: drag-handle + chevron-down (moves down) + rank +
   // chevron-up \u2014 all three reorder paths in one in-place unit (preserved).
   const dragSvg = '<svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor"><circle cx="2" cy="2" r="1.2"/><circle cx="2" cy="7" r="1.2"/><circle cx="2" cy="12" r="1.2"/><circle cx="8" cy="2" r="1.2"/><circle cx="8" cy="7" r="1.2"/><circle cx="8" cy="12" r="1.2"/></svg>';
-  const chevDown = '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2,4 6,8 10,4"/></svg>';
-  const chevUp   = '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2,8 6,4 10,8"/></svg>';
+  // No arrow-downward glyph in the icon store (sort-arrow-downward is the 12px table-header sort mark);
+  // Material arrow_downward is arrow_upward mirrored, so the down button reuses the store's
+  // arrow-upward-outlined and .rank-step-btn.is-down flips it.
+  const chevDown = _dsStoreIconSvg('arrow-upward-outlined', 16) || '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2,4 6,8 10,4"/></svg>';
+  const chevUp   = _dsStoreIconSvg('arrow-upward-outlined', 16) || '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2,8 6,4 10,8"/></svg>';
 
   // was: per-row "Pending" pill + row tint on staged rows — retired
   // (user 2026-08-13): staged changes are summarized ONLY in the mode
@@ -6940,10 +7051,13 @@ function renderPolicyRow(p, ctx) {
     cluster = '<span class="plv-rank-static">' + p.rank + '</span>' + pendingPill;
   } else {
     cluster = '<div class="order-cell">'
+      + (ctx.prioMode ? '<input type="checkbox" class="prio-check" aria-label="Select ' + escapeHtmlBP(p.name) + '"' + (prioChecked.has(p.id) ? ' checked' : '') + ' onclick="event.stopPropagation()" onchange="prioToggleCheck(this, \'' + p.id + '\')">' : '')
       + '<span class="drag-handle" data-plv-tip="Drag to reorder">' + dragSvg + '</span>'
-      + '<button class="rank-step-btn" ' + (isLastCustom ? 'disabled aria-disabled="true"' : '') + ' onclick="stepRank(\'' + p.id + '\', 1)" aria-label="Move down">' + chevDown + '</button>'
-      + '<span class="rank-num" data-plv-tip="Click to edit" onclick="startRankEdit(event, \'' + p.id + '\')">' + p.rank + '</span>'
+      + '<span class="rank-seg">'
+      + '<button class="rank-step-btn is-down" ' + (isLastCustom ? 'disabled aria-disabled="true"' : '') + ' onclick="stepRank(\'' + p.id + '\', 1)" aria-label="Move down">' + chevDown + '</button>'
+      + '<button type="button" class="rank-num" data-plv-tip="Type a rank to jump" aria-label="Rank ' + p.rank + ', edit" onclick="startRankEdit(event, \'' + p.id + '\')">' + p.rank + '</button>'
       + '<button class="rank-step-btn" ' + (isFirstCustom ? 'disabled aria-disabled="true"' : '') + ' onclick="stepRank(\'' + p.id + '\', -1)" aria-label="Move up">' + chevUp + '</button>'
+      + '</span>'
       + '</div>' + pendingPill;
   }
 
@@ -7050,7 +7164,7 @@ function renderPolicyRow(p, ctx) {
     '<td class="plv-col-actions" style="text-align:right;">' + actionsCell + '</td>'
   ];
   if (ctx.prioMode) cells.unshift(cells.splice(8, 1)[0]); // Priority first (index 8: the browse-only SLA Domain cell now sits just before it at 7)
-  return '<tr data-wl="' + p.workload + '" data-pid="' + p.id + '" class="' + rowClasses + selectedCls + '" ' + draggable + dndAttrs + selectAttr + '>'
+  return '<tr data-wl="' + p.workload + '" data-pid="' + p.id + '" class="' + rowClasses + selectedCls + (ctx.prioMode && prioChecked.has(p.id) ? ' prio-checked' : '') + '" ' + draggable + dndAttrs + selectAttr + '>'
     + cells.join('')
     + '</tr>';
 }
@@ -7165,11 +7279,16 @@ function renderPolicyTable() {
   // see the _prioExpanded notes. Expanded = the whole workload ladder, with
   // only the current matches left interactive.
   const totalInScope = workloads.reduce((n, wl) => n + POLICIES.filter(x => x.workload === wl).length, 0);
+  // Checked rows that the search/filter no longer shows are dropped from the selection.
+  if (!prioMode) prioChecked.clear();
+  else { const _live = new Set(visibleAll.filter(x => !x.isDefault).map(x => x.id)); prioChecked.forEach(function(id){ if (!_live.has(id)) prioChecked.delete(id); }); }
   const narrowed = prioMode && visibleAll.length < totalInScope;
   const matchSig = visibleAll.map(x => x.id).sort().join(',');
   if (matchSig !== _prioMatchSig) { _prioMatchSig = matchSig; _prioExpanded = false; }
   if (!narrowed) _prioExpanded = false;
   _prioNarrowed = narrowed;
+  _prioMatchIds = prioMode ? visibleAll.filter(x => !x.isDefault).map(x => x.id) : [];
+  document.body.classList.toggle('prio-narrowed', !!(prioMode && narrowed));
   const expanded = narrowed && _prioExpanded;
   const matchSet = expanded ? new Set(visibleAll.map(x => x.id)) : null;
   const fullLadder = expanded
@@ -7217,6 +7336,7 @@ function renderPolicyTable() {
   });
 
   tbody.innerHTML = chunks.join('') || '<tr><td colspan="10" style="padding:32px;text-align:center;color:var(--black-50);font-size:14px;">No policies match your filters.</td></tr>';
+  renderBatchBar();
 
   // Briefly highlight the just-saved policy so the admin can locate
   // it in context. Consumed once and cleared so subsequent renders
@@ -7374,8 +7494,14 @@ function syncSortHeaders() {
     var active = !prioMode && polSort.key === key;
     th.classList.toggle('sort-active', active);
     th.setAttribute('aria-sort', active ? (polSort.dir === 'asc' ? 'ascending' : 'descending') : 'none');
-    th.innerHTML = th.getAttribute('data-label') + (active ? sortArrowSvg(polSort.dir) : '');
+    // Priority header carries the select-all-matching checkbox (visible only while a
+    // search/filter narrows the ladder — see body.prio-narrowed).
+    var selAll = th.classList.contains('order-col')
+      ? '<input type="checkbox" class="prio-check prio-selall" aria-label="Select all matching policies" onclick="event.stopPropagation()" onchange="prioSelectAllMatching(this)">'
+      : '';
+    th.innerHTML = selAll + th.getAttribute('data-label') + (active ? sortArrowSvg(polSort.dir) : '');
   });
+  if (typeof _prioSyncSelAll === 'function') _prioSyncSelAll();   // the rewrite above recreates the checkbox
 }
 // Per-column sort values. Dates parse the "Feb 15, 2026" seeds; policies
 // without a date (system defaults) always sort last regardless of
@@ -7419,6 +7545,132 @@ function applyPolSort(list) {
 // (the old sticky reorder footer is suppressed while in mode).
 let prioMode = false;
 let prioSelectedId = null;
+// ── BATCH MOVE (review copy) ────────────────────────────────────────────────
+// Checked rows move as a block, keeping their current relative order. With
+// 2+ checked, per-row movement is paused (CSS + guards) so the bar is the
+// only mover; with 0–1 checked every per-row control behaves as before.
+const prioChecked = new Set();
+let _prioMatchIds = [];   // customs the current search/filter shows — the target of select-all
+let _batchPosOpen = false;
+function prioBatchActive() { return prioMode && prioChecked.size >= 2; }
+function prioToggleCheck(cb, id) {
+  if (cb.checked) prioChecked.add(id); else prioChecked.delete(id);
+  const tr = cb.closest('tr'); if (tr) tr.classList.toggle('prio-checked', cb.checked);
+  renderBatchBar();
+}
+// Select-all-matching: the header checkbox (visible only while a search/filter narrows the
+// ladder) selects/deselects exactly the rows the search shows — never the hidden ones.
+function prioSelectAllMatching(cb) {
+  if (!prioMode) return;
+  _prioMatchIds.forEach(function(id){ if (cb.checked) prioChecked.add(id); else prioChecked.delete(id); });
+  document.querySelectorAll('#pol-tbody tr[data-pid]').forEach(function(tr){
+    var on = prioChecked.has(tr.dataset.pid);
+    tr.classList.toggle('prio-checked', on);
+    var box = tr.querySelector('.prio-check'); if (box) box.checked = on;
+  });
+  renderBatchBar();
+}
+// Header checkbox state: checked = every match selected, indeterminate = some.
+function _prioSyncSelAll(root) {
+  var total = _prioMatchIds.length, n = _prioMatchIds.filter(function(id){ return prioChecked.has(id); }).length;
+  (root || document).querySelectorAll('.prio-selall').forEach(function(cb){
+    cb.checked = total > 0 && n === total;
+    cb.indeterminate = n > 0 && n < total;
+    cb.disabled = total === 0;
+  });
+}
+function prioClearChecks() {
+  prioChecked.clear(); _batchPosOpen = false;
+  document.querySelectorAll('#pol-tbody tr.prio-checked').forEach(function(tr){
+    tr.classList.remove('prio-checked');
+    const cb = tr.querySelector('.prio-check'); if (cb) cb.checked = false;
+  });
+  renderBatchBar();
+}
+// Where the selection already sits decides what the combo offers: a block that is
+// already the top k (ranks 1..k) can only usefully go to the bottom, and vice
+// versa. The face is the one useful move; the chevron stays live only when BOTH
+// moves would change something.
+function _batchCombo() {
+  const customs = POLICIES.filter(x => x.workload === activeWl && !x.isDefault).sort((a, b) => a.rank - b.rank);
+  const ranks = customs.filter(x => prioChecked.has(x.id)).map(x => x.rank);
+  const k = ranks.length, max = customs.length;
+  const atTop = ranks.every((r, i) => r === i + 1);
+  const atBottom = ranks.every((r, i) => r === max - k + 1 + i);
+  const face = (atTop && !atBottom) ? 'bottom' : 'top';
+  const other = face === 'top' ? 'bottom' : 'top';
+  const noop = function(w) { return w === 'top' ? atTop : atBottom; };
+  return { face: face, other: other, faceDisabled: noop(face), otherDisabled: noop(other) };
+}
+function batchBarHtml() {
+  const n = prioChecked.size;
+  const cb = _batchCombo();
+  const lbl = function(w) { return w === 'top' ? 'Move to top' : 'Move to bottom'; };
+  return '<span class="plv-batchbar">'
+    + '<span class="tab-sel-chip"' + (n >= 2 ? ' data-plv-tip="Arrows and rank editing are paused. Drag any selected row to move them together."' : '') + '>' + n + ' selected'
+    +   '<button type="button" class="tsc-x" onclick="prioClearChecks()" data-plv-tip="Deselect all" aria-label="Deselect all">'
+    +   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>'
+    +   '</button></span>'
+    // Vision Combo Button, Secondary / Default (Figma 'Combo Button', node 291:21330):
+    // two Buttons with a 1px gap over a Black/S20 container, outer radius 4, square 36px
+    // chevron half. Main face = Move to top (the common case); the chevron opens
+    // Move to bottom. Menu reuses the row kebab pattern. (was: two tertiary buttons,
+    // then a single "Move to" menu button — user 2026-10-01)
+    + '<div class="row-kebab-wrap"><div class="plv-combo">'
+    +   '<button type="button" class="plv-btn plv-btn-secondary plv-combo-main"' + (cb.faceDisabled ? ' disabled' : '') + ' onclick="prioBatchMove(\'' + cb.face + '\')">' + lbl(cb.face) + '</button>'
+    +   '<button type="button" class="plv-btn plv-btn-secondary plv-combo-chev" aria-haspopup="menu" aria-label="More move options"' + ((cb.faceDisabled || cb.otherDisabled) ? ' disabled' : '') + ' onclick="toggleRowKebab(event, \'batchmove\')">' + (_dsStoreIconSvg('keyboard-arrow-down-outlined', 20) || '') + '</button>'
+    + '</div>'
+    +   '<div class="row-kebab-menu" id="kebab-batchmove" role="menu" style="min-width:160px">'
+    +     '<div class="row-kebab-item" role="menuitem" onclick="prioBatchMove(\'' + cb.other + '\');closeAllRowKebabs();">' + lbl(cb.other) + '</div>'
+    +   '</div>'
+    + '</div>'
+    // "Move to position\u2026" disabled (user): prioBatchMovePos() stays defined but isn't rendered.
+    + '</span>';
+}
+// The selection controls live IN the existing mode bar (they replace its
+// guidance note while rows are checked); Undo / Cancel / Save stay put.
+function renderBatchBar() {
+  _prioSyncSelAll();
+  const card = document.querySelector('.pol-card');
+  if (card) card.classList.toggle('batch-active', prioMode && prioChecked.size >= 2);
+  if (!prioChecked.size) _batchPosOpen = false;
+  renderModeBar();
+  if (_batchPosOpen) { const i = document.getElementById('plvBatchPos'); if (i) i.focus(); }
+}
+function prioBatchMovePos() {
+  const i = document.getElementById('plvBatchPos');
+  const v = i ? parseInt(i.value, 10) : NaN;
+  if (!isFinite(v)) return;
+  prioBatchMove('pos', v);
+}
+function prioBatchMove(where, n) {
+  if (!prioMode || !prioChecked.size) return;
+  const first = POLICIES.filter(x => x.workload === activeWl && !x.isDefault && prioChecked.has(x.id)).sort((a,b) => a.rank - b.rank)[0];
+  if (!first) return;
+  _prioExpandIfNarrowed(first.id);
+  const customs = POLICIES.filter(x => x.workload === activeWl && !x.isDefault).sort((a,b) => a.rank - b.rank);
+  const sel  = customs.filter(x => prioChecked.has(x.id));
+  const rest = customs.filter(x => !prioChecked.has(x.id));
+  let out;
+  if (where === 'top') out = sel.concat(rest);
+  else if (where === 'bottom') out = rest.concat(sel);
+  else if (where === 'idx') {                 // drag-drop: n = insertion index within the unselected rest
+    out = rest.slice(); out.splice.apply(out, [Math.max(0, Math.min(rest.length, n)), 0].concat(sel));
+  } else {
+    const start = Math.max(1, Math.min(customs.length - sel.length + 1, n));
+    out = rest.slice(); out.splice.apply(out, [start - 1, 0].concat(sel));
+  }
+  if (out.every(function(x, i){ return x === customs[i]; })) return;
+  _prioUndoPush();
+  const flip = _ladderFlipBefore();
+  out.forEach(function(x, i){ x.rank = i + 1; });
+  POLICIES.filter(x => x.workload === activeWl && x.isDefault).forEach(function(x, i){ x.rank = out.length + 1 + i; });
+  _batchPosOpen = false;
+  setReorderDirty(true);
+  renderPolicyTable();
+  _ladderFlipPlay(flip);
+  _prioFollowRow(sel[0].id);
+}
 
 // Explainer copy — moved out of the retired #policy-explainer banner into
 // the action bar: a brief line inline, the full text in a styled tooltip.
@@ -7456,6 +7708,8 @@ function _setPolSidebarCollapsed(collapsed) {
 function enterPrioMode() {
   if (activeWl === 'all') return; // ladder is per-workload; button is disabled in All view
   prioMode = true;
+  prioWidthRestore();
+  prioChecked.clear();
   _prioUndoStack = [];
   _setPolSidebarCollapsed(true);
   if (typeof window._polUpdateBackTop === 'function') setTimeout(window._polUpdateBackTop, 0);
@@ -7467,6 +7721,7 @@ function enterPrioMode() {
 }
 function exitPrioMode() {
   prioMode = false;
+  prioChecked.clear();
   _prioExpanded = false;
   prioSelectedId = null;
   _prioUndoStack = [];
@@ -7475,10 +7730,73 @@ function exitPrioMode() {
   const card = document.querySelector('.pol-card');
   if (card) card.classList.remove('prio-mode');
 }
+/* ── DETAIL PANEL RESIZE — same mechanics as Protected Data's aiResizeStart:
+   one custom property (--prio-w) drives the aside AND its sticky inner, the
+   panel is anchored right so dragging its left edge leftwards widens it,
+   bounds are clamped, and the width is a persisted preference. */
+var _PRIO_W_MIN = 360, _PRIO_W_MAX = 720, _PRIO_W_DEFAULT = 470;
+function _prioWCap() { return Math.min(_PRIO_W_MAX, Math.round(window.innerWidth * 0.5)); }
+function _prioWClamp(w) { return Math.max(_PRIO_W_MIN, Math.min(_prioWCap(), Math.round(w))); }
+function _prioWApply(w) { document.body.style.setProperty('--prio-w', _prioWClamp(w) + 'px'); }
+function prioWidthRestore() {
+  var w = null;
+  try { var v = parseInt(localStorage.getItem('vdc-prio-panel-w'), 10); w = v > 0 ? v : null; } catch (e) {}
+  if (w) _prioWApply(w); else document.body.style.removeProperty('--prio-w');
+}
+function prioResizeStart(e) {
+  e.preventDefault();
+  var panel = document.getElementById('prioPreview');
+  var startX = e.clientX, startW = panel.getBoundingClientRect().width, raf = 0;
+  document.body.classList.add('prio-resizing');
+  panel.classList.add('is-resizing');
+  function refit() {
+    var ppi = document.getElementById('prioPreviewInner');
+    if (ppi && typeof _prioFitScopeRows === 'function') _prioFitScopeRows(ppi);
+    var ts = document.querySelector('.table-scroll');
+    if (ts && typeof updateTableScrollShadows === 'function') updateTableScrollShadows(ts);
+  }
+  function move(ev) {
+    _prioWApply(startW + (startX - ev.clientX));
+    if (!raf) raf = requestAnimationFrame(function(){ raf = 0; refit(); });
+  }
+  function up() {
+    document.removeEventListener('pointermove', move);
+    document.removeEventListener('pointerup', up);
+    document.body.classList.remove('prio-resizing');
+    panel.classList.remove('is-resizing');
+    var w = Math.round(panel.getBoundingClientRect().width);
+    try { localStorage.setItem('vdc-prio-panel-w', String(w)); } catch (err) {}
+    refit();
+  }
+  document.addEventListener('pointermove', move);
+  document.addEventListener('pointerup', up);
+}
+window.addEventListener('resize', function(){
+  if (document.body.style.getPropertyValue('--prio-w')) _prioWApply(parseInt(document.body.style.getPropertyValue('--prio-w'), 10) || _PRIO_W_DEFAULT);
+});
+
+// Exit: leaves immediately when nothing is unsaved; otherwise asks first.
+// (Discard-to-checkpoint is just Undo repeated, or the dialog's "Discard and exit".)
+function prioExit() {
+  const n = prioChangeCount();
+  if (n === 0) { prioCancel(); return; }
+  document.getElementById('prio-exit-body').textContent = n + ' polic' + (n === 1 ? 'y' : 'ies') + ' moved since your last save will return to ' + (n === 1 ? 'its' : 'their') + ' saved position' + (n === 1 ? '' : 's') + '.';
+  document.getElementById('prio-exit-confirm').classList.add('show');
+}
+function closePrioExitConfirm(e) {
+  if (e && e.target && !e.target.classList.contains('confirm-backdrop')) return;
+  document.getElementById('prio-exit-confirm').classList.remove('show');
+}
+function prioExitDiscard() {
+  closePrioExitConfirm();
+  prioCancel();
+}
 function prioSave() {
-  commitReorder();          // persists + toast + clears dirty
-  exitPrioMode();
-  renderPolicyTable();
+  // Save is a checkpoint (user): it commits and STAYS in the mode so a bulk
+  // edit can be captured before more edits. Exit / Esc is the way out.
+  commitReorder();          // persists + toast + clears dirty + re-renders
+  _prioUndoStack = [];      // Undo can never reach back past a save
+  renderModeBar();
 }
 function prioCancel() {
   if (reorderDirty) cancelReorder();
@@ -7546,6 +7864,8 @@ function renderModeBar() {
   const actions = document.getElementById('plvModeActions');
   if (!note || !summary || !actions) return;
   const infoSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+  const _batchSlot = document.getElementById('plvModeBatch');
+  if (_batchSlot) _batchSlot.innerHTML = (prioMode && prioChecked.size) ? batchBarHtml() : '';
   note.innerHTML = !prioMode ? PRIO_BROWSE_BRIEF : PRIO_BRIEF + ' <span data-plv-tip="' + PRIO_TIP.replace(/"/g, '&quot;') + '" style="display:inline-flex;vertical-align:-3px;color:var(--black-60);cursor:default">' + infoSvg + '</span>';
   if (!prioMode) {
     summary.textContent = '';
@@ -7555,11 +7875,14 @@ function renderModeBar() {
       + (_dsStoreIconSvg('reorder-outlined', 20) || '') + 'Update priority ladder</button></span>';
   } else {
     const n = prioChangeCount();
-    summary.textContent = n === 0 ? 'No changes yet' : (n + ' polic' + (n === 1 ? 'y' : 'ies') + ' moved');
+    // "N policies moved" retired from the bar (user 2026-10-01): it counted every
+    // policy whose rank shifted (moving 2 rows reads "100 moved"), Save's enabled
+    // state already says there is unsaved work, and the Exit dialog carries the count.
+    summary.textContent = '';  // was: n === 0 ? 'No changes yet' : (n + ' polic' + (n === 1 ? 'y' : 'ies') + ' moved')
     // Undo steps back through your own actions and stays in the mode;
     // Cancel discards everything and exits (user 2026-08-14).
     actions.innerHTML = '<span data-plv-tip="Undo last move"><button type="button" class="plv-btn plv-btn-secondary plv-btn-square" ' + (_prioUndoStack.length === 0 ? 'disabled' : '') + ' onclick="prioUndo()" aria-label="Undo last move">' + (_dsStoreIconSvg('undo-outlined', 20) || 'Undo') + '</button></span>'
-      + '<button type="button" class="plv-btn plv-btn-secondary" onclick="prioCancel()">Cancel</button>'
+      + '<button type="button" class="plv-btn plv-btn-secondary" onclick="prioExit()">Exit</button>'
       + '<button type="button" class="plv-btn plv-btn-primary" ' + (n === 0 ? 'disabled' : '') + ' onclick="prioSave()">Save changes</button>';
   }
 }
@@ -8137,6 +8460,19 @@ document.addEventListener('click', function (e) {
   if (p.contains(e.target)) return;
   closeNavWlPicker();
 });
+// Layered Escape in reorder mode: first clears the row selection; with nothing
+// selected it exits the mode ONLY if nothing is staged (never silently discards).
+document.addEventListener('keydown', function (e) {
+  if (e.key !== 'Escape' || !prioMode) return;
+  var dlg = document.getElementById('prio-exit-confirm');
+  if (dlg && dlg.classList.contains('show')) { closePrioExitConfirm(); return; }
+  var t = e.target;
+  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+  var pk = document.getElementById('treeNavWlPicker');
+  if (pk && pk.classList.contains('is-open')) return;
+  if (prioChecked.size) { prioClearChecks(); }
+  else if (prioChangeCount() === 0) { prioCancel(); }
+});
 document.addEventListener('keydown', function (e) {
   if (e.key !== 'Escape') return;
   var p = document.getElementById('treeNavWlPicker');
@@ -8208,6 +8544,7 @@ function updateTableScrollShadows(wrap) {
         return;
       }
       cloneTable.innerHTML = '<thead>' + origThead.innerHTML + '</thead>';
+      if (typeof _prioSyncSelAll === 'function') _prioSyncSelAll(cloneTable);
       var card = document.querySelector('.pol-card');
       if (card) cloneTable.className = 'data-table' + (card.classList.contains('prio-mode') ? ' prio-mode' : '');
       cloneTable.style.borderCollapse = getComputedStyle(table).borderCollapse;
@@ -8283,7 +8620,7 @@ function updateTableScrollShadows(wrap) {
     // panel (user 2026-08-14). Re-measure when those transitions land.
     document.addEventListener('transitionend', function(e){
       if (e.target && e.target.classList &&
-          (e.target.classList.contains('prio-preview') || e.target.classList.contains('wl-sidebar'))) {
+          (e.target.classList.contains('prio-preview') || e.target.classList.contains('wl-sidebar') || e.target.classList.contains('plv-stats'))) {
         update();
         updateBackTop();
         var ts = document.querySelector('.table-scroll');
@@ -10655,5 +10992,25 @@ function aiacAcceptAll(){
   else wireAll();
 })();
 </script>
+      <!-- Exit reorder mode with unsaved moves (batch review copy). Same
+           .confirm-* family as the activate / run-now dialogs. -->
+      <div class="confirm-backdrop" id="prio-exit-confirm" onclick="closePrioExitConfirm(event)">
+        <div class="confirm-dialog" role="alertdialog" aria-labelledby="prio-exit-title" onclick="event.stopPropagation()">
+          <div class="confirm-hdr">
+            <div class="confirm-hdr-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div class="confirm-title" id="prio-exit-title">Exit without saving?</div>
+          </div>
+          <div class="confirm-body">
+            <p id="prio-exit-body"></p>
+          </div>
+          <div class="confirm-actions">
+            <button class="btn btn-ghost" onclick="prioExitDiscard()">Discard and exit</button>
+            <button class="btn btn-primary" onclick="closePrioExitConfirm()">Keep editing</button>
+          </div>
+        </div>
+      </div>
+
 </body>
 </html>
