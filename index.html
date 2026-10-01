@@ -590,6 +590,7 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
 .sum-env-action { height: 26px; padding: 0 9px; font-size: 16px; border: 1px solid var(--border); background: var(--white); border-radius: 4px; cursor: pointer; color: var(--black-100); font-family: inherit; flex-shrink: 0; white-space: nowrap; }
 .sum-env-action:hover { border-color: var(--green); color: var(--green); } /* was blue */
 #sum-env-chev.expanded { transform: rotate(180deg); }
+#auth-cert-chev.expanded { transform: rotate(180deg); }
 .sum-env-empty { padding: 24px 14px; text-align: center; font-size: 14px; color: var(--black-60); }
 #tc-env-chevron.expanded { transform: rotate(180deg); }
 .tc-perm-chev.expanded { transform: rotate(180deg); }
@@ -2724,13 +2725,18 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
                     </div>
                   </div>
 
-                  <!-- Express CTA / states -->
+                  <!-- Express CTA (2026-09-30: was its own in-card button — user:
+                       "why should we change [the footer] only when express is
+                       selected?" Removed here so there's exactly ONE primary
+                       action per step, always in the footer, consistent with
+                       every other wizard screen — the footer's label/handler
+                       now switches to w.expressLabel / startOAuthFlow() while
+                       this card is the one selected (see
+                       refreshAuthAdvanceBtnLabel + handleAuthAdvanceClick).
+                       This div still carries the context caption, just no
+                       longer a duplicate clickable button. -->
                   <div id="express-cta">
-                    <button class="btn btn-blue btn-full" onclick="event.stopPropagation();startOAuthFlow()" style="gap:8px;height:44px;font-weight:500">
-                      <span id="express-btn-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></span>
-                      <span id="express-btn-label">Authorize with GitHub</span>
-                    </button>
-                    <div id="express-helper" style="font-size: 14px;color:var(--black-60);text-align:center;margin-top:6px">A GitHub authorization window will open. You'll be redirected back automatically.</div>
+                    <div id="express-helper" style="font-size: 14px;color:var(--black-60);text-align:center">A GitHub authorization window will open. You'll be redirected back automatically.</div>
                   </div>
 
                   <!-- Waiting state (hidden) -->
@@ -3563,16 +3569,74 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
               <!-- Status rows -->
               <div style="display:flex;flex-direction:column">
 
-                <!-- Authentication -->
+                <!-- Authentication (2026-09-30: rebuilt to match the
+                     canonical "Checklist" component, Figma node 4686:8515 —
+                     pulled live via get_design_context, not eyeballed from
+                     a screenshot. Corrected from the first pass: the title
+                     is a plain link (no chevron on it — that read as an
+                     odd double duty of nav-link + expand-trigger); "Manual"
+                     is a real pill Chip (radius 88888px / fully rounded,
+                     bg var(--black-3)), not a plain inline label; added the
+                     "View Connector Diagnostics Report" link the canonical
+                     version has and the first pass missed entirely; the
+                     Reconfigure control is a genuine combo/split button
+                     (two merged segments) per spec. User ruling
+                     (2026-09-30): the cert reminder must NOT hang off that
+                     combo button's dropdown — a combo chevron is for a
+                     menu of actions (Rotate key, Update credentials, etc.,
+                     not built out here — no content was specified for it),
+                     not for expanding inline stats. The expand trigger
+                     instead sits on the one specific fact it belongs to —
+                     the "Certificate expires" line itself — via its own
+                     small chevron, not the row title. Cert-support-Manual
+                     -only content, demoed here on the static GitHub example
+                     with Connection type flipped to Manual; this page
+                     isn't wired to WORKLOADS/currentAuthMethod yet. -->
                 <div style="padding:20px 0;border-bottom:1px solid var(--border-light);display:flex;align-items:flex-start;gap:12px">
                   <div style="width:24px;height:24px;border-radius:50%;background:var(--green-10);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
                   <div style="flex:1">
-                    <div style="font-size:16px;font-weight:500;color:var(--blue);cursor:pointer">Authentication</div>
-                    <div style="font-size:14px;color:var(--black-60);margin-top:4px">All apps authenticated. Completed on: April 16, 2026 at 3:15 pm.</div>
-                    <div style="font-size:14px;color:var(--black-60);margin-top:2px">Connection type: <span style="font-weight:500;color:var(--black-100)">Express</span></div>
+                    <div style="display:flex;gap:8px;align-items:center">
+                      <a href="#" onclick="event.preventDefault()" style="font-size:18px;font-weight:500;color:var(--green);text-decoration:underline">Authentication</a>
+                      <span style="background:var(--black-3);border-radius:88888px;padding:4px 8px;font-size:16px;font-weight:500;color:var(--black-100)">Manual</span>
+                    </div>
+                    <div style="font-size:16px;color:var(--black-60);margin-top:12px">
+                      All apps authenticated. Completed on: <span style="font-weight:500;color:var(--black-60)">April 16, 2026 at 3:15 pm.</span><br>
+                      <span style="font-weight:500;color:var(--black-60)">Certificate expires</span> <span style="font-weight:500;color:var(--orange)">Jul 16, 2026</span>
+                      <button type="button" onclick="toggleAuthCertExpanded()" aria-label="Certificate details" style="display:inline-flex;vertical-align:middle;border:none;background:none;padding:0;margin-left:2px;cursor:pointer;color:var(--black-60)"><svg id="auth-cert-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.18s ease"><polyline points="6 9 12 15 18 9"/></svg></button>
+                    </div>
+                    <!-- Expands IN PLACE (2026-09-30, user: "the reminder
+                         card would go above the diagnostics report button")
+                         — sits directly beneath the fact it belongs to,
+                         before the diagnostics link, not after it. -->
+                    <div id="auth-cert-expanded" style="display:none;margin-top:12px;border:1px solid var(--border-light);border-radius:8px;background:var(--black-3);padding:16px">
+                      <div style="display:flex;gap:24px;margin-bottom:16px">
+                        <div><div style="font-size:14px;color:var(--black-60);margin-bottom:2px">Issued</div><div style="font-size:14px;color:var(--black-100)">Apr 17, 2026</div></div>
+                        <div><div style="font-size:14px;color:var(--black-60);margin-bottom:2px">Expires</div><div style="font-size:14px;font-weight:500;color:var(--orange)">Jul 16, 2026</div></div>
+                        <div><div style="font-size:14px;color:var(--black-60);margin-bottom:2px">Valid for</div><div style="font-size:14px;color:var(--black-100)">90 days</div></div>
+                      </div>
+                      <div style="height:1px;background:var(--border-light);margin-bottom:16px"></div>
+                      <div style="display:flex;align-items:center;justify-content:space-between">
+                        <div>
+                          <div style="font-size:14px;font-weight:500;color:var(--black-100)">Remind me when this certificate expires</div>
+                          <div style="font-size:14px;color:var(--black-60);margin-top:2px">Reminders start 30 days before expiry, then every 7 days until rotated</div>
+                        </div>
+                        <label style="position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0;cursor:pointer">
+                          <input type="checkbox" id="auth-cert-reminder-toggle" onchange="toggleAuthCertReminder()" style="opacity:0;width:0;height:0">
+                          <span id="auth-cert-toggle-track" style="position:absolute;inset:0;background:var(--border);border-radius:12px;transition:all 0.2s"></span>
+                          <span id="auth-cert-toggle-thumb" style="position:absolute;top:2px;left:2px;width:20px;height:20px;background:white;border-radius:50%;transition:all 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.15)"></span>
+                        </label>
+                      </div>
+                    </div>
+                    <div style="margin-top:10px"><a href="#" onclick="event.preventDefault()" style="font-size:16px;color:var(--green);text-decoration:underline">View Connector Diagnostics Report</a></div>
                   </div>
-                  <div style="display:flex;gap:8px;flex-shrink:0">
-                    <div style="display:flex"><button class="btn btn-outline" style="height:36px;padding:0 12px;font-size:14px;border-radius:4px" onclick="goTo('auth')">Reconfigure</button></div>
+                  <!-- Combo/split button — visual only for now. The
+                       dropdown's action menu (Rotate key, Update
+                       credentials, etc.) wasn't specified, so it isn't
+                       wired up here; wire _toggleAuthComboMenu() to a real
+                       menu when that content is decided. -->
+                  <div style="display:flex;flex-shrink:0">
+                    <button class="btn btn-outline" style="height:36px;padding:0 12px;font-size:14px;border-radius:4px 0 0 4px;border-right:none" onclick="goTo('auth')">Reconfigure</button>
+                    <button class="btn btn-outline" aria-label="More authentication actions" style="height:36px;width:36px;padding:0;font-size:14px;border-radius:0 4px 4px 0;display:flex;align-items:center;justify-content:center" onclick="_toggleAuthComboMenu()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
                   </div>
                 </div>
 
@@ -4172,13 +4236,27 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
      section below (or parked entirely). */
   .pchoice-grid { display: flex; gap: 16px; align-items: stretch; }
   .pchoice-card {
+    /* was: 1px border + a separate `inset 0 0 0 1px` box-shadow to make
+       the selected state read as 2px. The inset shadow paints INSIDE the
+       border, on the same layer as the card's own background — so
+       .pchoice-head's opaque background (a child element flush against
+       the top/left/right inner edge) paints over it there, while
+       .pchoice-body's transparent background does not, at the bottom.
+       Net effect: the "2px" selected border only ever showed 1px at the
+       top (shadow occluded by the header) and a genuine 2px at the
+       bottom (user 2026-09-30: "not an illusion... the border around the
+       bottom part of the card is twice as big as the top"). Fixed by
+       using a real 2px border throughout — a border box sits outside the
+       area any child's background can ever paint over, so it can't be
+       occluded regardless of what's inside. Base width stays 2px always
+       (not 1px→2px on select) so toggling selected doesn't shift layout. */
     flex: 1 1 0; min-width: 0; display: flex; flex-direction: column;
-    background: var(--white); border: 1px solid var(--border);
+    background: var(--white); border: 2px solid var(--border);
     border-radius: 8px; overflow: hidden; cursor: pointer;
-    transition: border-color 0.12s ease, box-shadow 0.12s ease;
+    transition: border-color 0.12s ease;
   }
   .pchoice-card:hover { border-color: var(--green-30); }
-  .pchoice-card.selected { border-color: var(--green); box-shadow: inset 0 0 0 1px var(--green); }
+  .pchoice-card.selected { border-color: var(--green); }
   .pchoice-head {
     display: flex; align-items: center; gap: 8px;
     padding: 12px 16px; background: var(--black-5);
@@ -6991,6 +7069,23 @@ function runTestConnectionSequence(isRetry) {
   var spinnerSvg = '<svg width="36" height="36" viewBox="0 0 40 40" class="spinner-ring"><circle cx="20" cy="20" r="16" fill="none" stroke="#e9e9ea" stroke-width="2"/><circle cx="20" cy="20" r="16" fill="none" stroke="#1ca8dd" stroke-width="2" stroke-dasharray="33 67" stroke-linecap="round"/></svg>';
 
   var w = WORKLOADS[currentWorkload];
+  // Connected-domain context for the top "Connection test" card (user
+  // 2026-09-30: "couldn't we add the context of which domain is currently
+  // connected to the card at the top of the testing step" — the card
+  // previously only said "Connection successfully established," with no
+  // indication of WHICH account/tenant that was). Reuses the same
+  // connectedTitle-extraction pattern already established elsewhere in
+  // this file (e.g. the Environments screen's tenant greeting) rather
+  // than inventing a new one.
+  var tcConnDomain = '';
+  if (w && w.connectedTitle) {
+    var tcConnDomainMatch = w.connectedTitle.match(/[“"]([^"”]+)[”"]/);
+    if (tcConnDomainMatch) tcConnDomain = tcConnDomainMatch[1];
+  }
+  // Bolded black accent (user 2026-09-30) — same <strong style="color:
+  // var(--black-100)"> convention already used for inline dynamic values
+  // elsewhere in this file (env-tenant-display, csp-site-display, etc.).
+  var tcConnDomainHtml = tcConnDomain ? '<strong style="color:var(--black-100)">' + escapeHtml(tcConnDomain) + '</strong>' : '';
   var isD365Inline = !!(w && w.inlineProvisioning);
   var hasPropagation = !isD365Inline && !!(w && w.requiresPostAuthPropagation);
   var hasEnvRow = !!(w && w.requiresEnvList && !w.inlineProvisioning);
@@ -7151,10 +7246,10 @@ function runTestConnectionSequence(isRetry) {
     if (!document.getElementById('screen-test-conn').classList.contains('active')) return;
     document.getElementById('tc-conn-spinner').style.display = 'none';
     document.getElementById('tc-conn-check').style.display = 'flex';
-    document.getElementById('tc-conn-subtitle').textContent =
+    document.getElementById('tc-conn-subtitle').innerHTML =
       (currentWorkload === 'okta' && currentAuthMethod === 'manual')
-        ? 'Service app and signing key verified.'
-        : 'Connection successfully established.';
+        ? ('Service app and signing key verified' + (tcConnDomainHtml ? ' for ' + tcConnDomainHtml : '') + '.')
+        : ('Connection successfully established' + (tcConnDomainHtml ? ' to ' + tcConnDomainHtml : '') + '.');
 
     // Show permission card, hide pending
     document.getElementById('tc-perm-pending').style.display = 'none';
@@ -7329,24 +7424,25 @@ function runTestConnectionSequence(isRetry) {
     if (completedCount < totalRows) return;
     _tcStatus = anyFailed ? 'failed' : 'success';
     if (typeof refreshSidebar === 'function') refreshSidebar();
+    // The top "Connection test" card and the "Connection checks" card
+    // below it answer two different questions — did we connect at all,
+    // vs. does the connection have the access it needs — and only the
+    // second one can fail here (this function only runs once the
+    // connectivity handshake already succeeded; that's a settled fact by
+    // this point). Previously this branch overwrote the top card's green
+    // check/"successfully established" back to a red X/"completed with
+    // errors" on any permission-check failure, which read as the test
+    // contradicting itself (user 2026-09-30: "isn't it a little strange to
+    // have a connection test show as successful, only to have it change to
+    // failed"). The top card now stays exactly as stage 1 left it in BOTH
+    // branches — only the footer (whose action genuinely does depend on
+    // whether everything passed) still differs.
     if (anyFailed) {
-      // Partial-failure surface: red top-card status + footer
-      // offers Reconfigure (back to env selection) + Retry.
-      var headerCheck = document.getElementById('tc-conn-check');
-      headerCheck.style.background = 'var(--red-10)';
-      headerCheck.style.borderColor = 'var(--red)';
-      headerCheck.style.color = 'var(--red)';
-      headerCheck.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
-      document.getElementById('tc-conn-subtitle').textContent = 'Connection test completed with errors. Resolve the failures below, then retry.';
+      // Footer offers Reconfigure (back to env selection) + Retry; the
+      // failure itself is already fully visible in the checks card below
+      // (3/4 counter, partial red progress bar, red X per failed row).
       footer.innerHTML = '<div style="display:flex;gap:8px;width:100%"><button class="btn btn-outline" onclick="goTo(\'environments\')" style="flex:1;justify-content:center;height:44px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg> Reconfigure</button><button class="btn btn-blue" onclick="runTestConnectionSequence(true)" style="flex:1;justify-content:center;height:44px;font-weight:500">Retry</button></div>';
     } else {
-      // Reset header check to green (in case a previous run failed
-      // and recolored it).
-      var hc = document.getElementById('tc-conn-check');
-      hc.style.background = 'var(--green-10)';
-      hc.style.borderColor = 'var(--green)';
-      hc.style.color = 'var(--green)';
-      hc.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
       footer.innerHTML = '<div style="display:flex;gap:8px;width:100%"><button class="btn btn-outline" onclick="goTo(\'auth\')" style="flex:1;justify-content:center;height:44px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg> Reconfigure</button><button class="btn btn-blue" onclick="goTo(\'protect\')" style="flex:1;justify-content:center;height:44px;font-weight:500">Continue</button></div>';
     }
   }
@@ -7614,6 +7710,17 @@ function removeFailedEnvFromTest(idx) {
   var wRem = WORKLOADS[currentWorkload];
   var suppressDynamicSubRem = !!(wRem && wRem.envRowSubtitle);
   var suppressInlineFailRem = !!(wRem && wRem.envRowSuppressInlineFailureDetail);
+  // Same connected-domain context as the main test sequence (see
+  // runTestConnectionSequence) — this is a separate function (the
+  // per-env retry path), so the extraction is repeated locally rather
+  // than shared, matching how wRem/suppress* above are already scoped
+  // per-function here.
+  var tcConnDomainRem = '';
+  if (wRem && wRem.connectedTitle) {
+    var tcConnDomainRemMatch = wRem.connectedTitle.match(/[“"]([^"”]+)[”"]/);
+    if (tcConnDomainRemMatch) tcConnDomainRem = tcConnDomainRemMatch[1];
+  }
+  var tcConnDomainRemHtml = tcConnDomainRem ? '<strong style="color:var(--black-100)">' + escapeHtml(tcConnDomainRem) + '</strong>' : '';
   if (!stillFailing) {
     _tcStatus = 'success';
     if (typeof refreshSidebar === 'function') refreshSidebar();
@@ -7639,7 +7746,7 @@ function removeFailedEnvFromTest(idx) {
       hc.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
     }
     var st = document.getElementById('tc-conn-subtitle');
-    if (st) st.textContent = 'Connection successfully established.';
+    if (st) st.innerHTML = 'Connection successfully established' + (tcConnDomainRemHtml ? ' to ' + tcConnDomainRemHtml : '') + '.';
     var footer = document.getElementById('tc-footer-area');
     if (footer) {
       footer.innerHTML = '<div style="display:flex;gap:8px;width:100%"><button class="btn btn-outline" onclick="goTo(\'auth\')" style="flex:1;justify-content:center;height:44px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg> Reconfigure</button><button class="btn btn-blue" onclick="goTo(\'protect\')" style="flex:1;justify-content:center;height:44px;font-weight:500">Continue</button></div>';
@@ -8005,9 +8112,22 @@ function renderProtectChoiceCards() {
     '</div>';
 }
 
-// Card click handler. Moves the radio selection, reveals/clears the
-// workload-nuance section, rolls up protectMode (what advanceFromProtect
-// and the summary read) and enables the footer CTA.
+// Card click handler. Moves the radio selection, rolls up protectMode
+// (what advanceFromProtect and the summary read) and enables the footer
+// CTA. SIMPLIFIED 2026-09-30 (user: "all workloads should have the same 2
+// card behavior on the protect step. no additional options") — every
+// workload used to share this same plain two-card behavior EXCEPT D365
+// (per-environment opt-out toggle cards) and Okta (a tenant-config/audit-
+// log scope checklist), both added without a traceable request (no
+// "user 2026-..." attribution on either, unlike the rest of this file).
+// Both nuance branches are removed so every workload, D365 and Okta
+// included, now gets the identical plain two-card behavior. The
+// underlying functions (renderProtectModeCards/_protectModeCardHtml/
+// togglePerEnvPolicy/protectEnvState, renderOktaScopeSection/
+// _oktaScopeRow/oktaProtect) are left defined but unreferenced rather
+// than deleted — nothing downstream (advanceFromProtect, the summary
+// screen) reads protectEnvState or oktaProtect, only the top-level
+// protectMode/policyApplied flags this function still sets.
 function selectProtectChoice(mode) {
   protectSelection = mode;
   ['standard', 'later'].forEach(function(m){
@@ -8016,27 +8136,12 @@ function selectProtectChoice(mode) {
   });
   var nuanceHost = document.getElementById('protect-mode-cards-host');
   var banner = document.getElementById('protect-info-banner');
+  if (nuanceHost) { nuanceHost.style.display = 'none'; nuanceHost.innerHTML = ''; }
   if (mode === 'standard') {
     protectMode = 'standard';
-    if (currentWorkload === 'd365') {
-      if (nuanceHost) nuanceHost.style.display = '';
-      renderProtectModeCards(); // resets every env card to 'later'/off
-      // Under the standard-policy choice the per-env toggles are opt-OUTs:
-      // default every env ON. togglePerEnvPolicy flips 'later'->'standard'
-      // per env AND rolls up protectMode + the info banner for us.
-      Object.keys(protectEnvState).forEach(function(id){ togglePerEnvPolicy(id); });
-    } else if (currentWorkload === 'okta') {
-      if (nuanceHost) nuanceHost.style.display = '';
-      oktaProtect = { on: true, tenantCfg: true, systemLog: true };
-      renderOktaScopeSection();
-      if (banner) banner.style.display = '';
-    } else {
-      if (nuanceHost) { nuanceHost.style.display = 'none'; nuanceHost.innerHTML = ''; }
-      if (banner) banner.style.display = '';
-    }
+    if (banner) banner.style.display = '';
   } else {
     protectMode = 'later';
-    if (nuanceHost) { nuanceHost.style.display = 'none'; nuanceHost.innerHTML = ''; }
     if (banner) banner.style.display = 'none';
   }
   enableProtectBtn();
@@ -8463,6 +8568,40 @@ function toggleSummaryEnvExpanded() {
   panel.style.display = open ? 'none' : 'block';
   if (chev) chev.classList.toggle('expanded', !open);
 }
+
+// Authentication row's cert-expiry expand (2026-09-30) — same
+// toggle-a-sibling-panel mechanism as toggleSummaryEnvExpanded above,
+// applied to the Overview screen's Authentication row instead of the
+// Environment Provisioning one.
+function toggleAuthCertExpanded() {
+  var panel = document.getElementById('auth-cert-expanded');
+  var chev = document.getElementById('auth-cert-chev');
+  if (!panel) return;
+  var open = panel.style.display === 'block';
+  panel.style.display = open ? 'none' : 'block';
+  if (chev) chev.classList.toggle('expanded', !open);
+}
+function toggleAuthCertReminder() {
+  var cb = document.getElementById('auth-cert-reminder-toggle');
+  var track = document.getElementById('auth-cert-toggle-track');
+  var thumb = document.getElementById('auth-cert-toggle-thumb');
+  if (!cb || !track || !thumb) return;
+  if (cb.checked) {
+    track.style.background = 'var(--green)';
+    thumb.style.left = '22px';
+  } else {
+    track.style.background = 'var(--border)';
+    thumb.style.left = '2px';
+  }
+}
+// Placeholder (2026-09-30) — the Authentication row's combo-button chevron
+// per the canonical Figma spec (4686:8515) is a dropdown of actions
+// (Rotate key, Update credentials, etc.), NOT the cert-expiry panel — that
+// hangs off its own chevron on the "Certificate expires" line instead (see
+// toggleAuthCertExpanded above). No menu content was specified yet, so this
+// is a no-op stub rather than an invented menu; wire real items in here
+// once that's decided.
+function _toggleAuthComboMenu() {}
 
 // Search filter — matches against env name + URL. Hides non-matching
 // rows; shows an empty state if nothing matches.
@@ -10080,47 +10219,52 @@ var WORKLOADS = {
     hideScopeStep: true,   // everything in `protected` is backed up by default; no separate Scope substep
     prereqsInHelp: true,   // 'Before you connect' renders in the help panel (user 2026-09-25) — same pattern as okta/github/jira/etc.; Manual's steps are treated as prereqs rather than a separate in-card alert
     defaultInstanceName: 'Google-Identity-connection-1',   // matches the mock's Basic Information field verbatim
-    // Testing-step rows (Figma node 11678:43062, "Configure (Permissions
-    // Failed)"): the mock's 5 categories, in the mock's own order. Row 4
-    // (Workspace Service Policies) is the mock's seeded failure — same
-    // failCapRowIdx mechanism gws already uses, with a fuller fixDetail
-    // (restored expand capability, see buildPermDetailHtml) instead of
-    // just the one-line `fix` sentence.
+    // Testing-step rows (2026-09-30 redesign, Figma node 16174:93181,
+    // "Google Identity Protection — Connect (Permissions Failed)"):
+    // replaced the previous 5 API-scope-category rows with the mock's 4
+    // lifecycle-stage rows — Connector Activation, Backup, Restore,
+    // Discovery Scan — in the mock's own order. Any single row failing
+    // fails the WHOLE test (existing anyFailed/maybeFinalizeFooter
+    // behavior — Continue is blocked, only Reconfigure/Retry are offered;
+    // nothing row-specific needed changing there). Restore is the mock's
+    // seeded failure (failCapRowIdx below): the service account has read
+    // access to Cloud IAM (roles/iam.securityReviewer, granted for Backup)
+    // but not the separate write grant Restore needs
+    // (roles/iam.securityAdmin) — both roles are already documented as
+    // required in this workload's own prereqs/helpContent above, so this
+    // reuses real, established copy rather than inventing a new cause.
+    // Icons: power-outlined and backup-outlined added to
+    // securiti-icons-data.js for this change (harvested live from the
+    // Figma node, no match existed before); restore-point-outlined and
+    // discovery-scan-outlined already matched the mock's glyphs verbatim.
     permissionCheckRows: [
-      { id: 0, title: 'Workspace Directory',
-        icon: 'users-outlined', subtitle: 'Users · OUs · Groups + memberships · Dynamic Groups · Admin roles + assignments',
-        detail: 'GET admin.googleapis.com/admin/directory/v1/users + /groups + /orgunits → 200 OK',
-        fix: 'The consenting account must be a Super Admin and the Domain-Wide Delegation grant must include the admin.directory scopes. Re-authorize as a Super Admin and confirm the scopes were added.' },
-      { id: 1, title: 'Cloud IAM',
-        icon: 'iam-identity-provider-outlined', subtitle: 'GCP IAM policies · Deny policies · Org policies · Custom roles · Service accounts · WIF pools + providers',
-        detail: 'GET cloudresourcemanager.googleapis.com/v3/organizations/{org}:getIamPolicy → 200 OK',
-        fix: 'Grant roles/iam.securityReviewer and roles/iam.securityAdmin to the Veeam service account at your organization node (not a project node) — IAM coverage reads and restores at the org level.' },
-      { id: 2, title: 'Group Settings',
-        icon: 'settings-outlined', subtitle: 'Group Settings',
-        detail: 'GET groupssettings.googleapis.com/groups/v1/groups/{id} → 200 OK',
-        fix: 'Add the https://www.googleapis.com/auth/apps.groups.settings scope to the Domain-Wide Delegation grant.' },
-      { id: 3, title: 'Chrome Management',
-        icon: 'management-outlined', subtitle: 'Chrome user policies · Chrome device policies',
-        detail: 'GET admin.googleapis.com/admin/directory/v1/customer/{id}/policies → 200 OK',
-        fix: 'Add the https://www.googleapis.com/auth/chrome.management.policy.readonly scope to the Domain-Wide Delegation grant.' },
-      { id: 4, title: 'Workspace Service Policies',
-        icon: 'policy-outlined', subtitle: 'Gmail · Drive · Meet · DLP · API Controls',
-        detail: 'GET admin.googleapis.com/admin/directory/v1/customer/{id}/policies?policySchemaFilter=settings/gmail.* → 200 OK',
-        fix: 'Two of the five Workspace Service Policies scopes were not granted in Domain-Wide Delegation: Gmail export controls and Meet recording/DLP policy access. Add the missing scopes and retry.',
-        // RESTORED EXPAND CAPABILITY (2026-09-24): the fuller troubleshooting
-        // content the user asked for — what went wrong, concrete fix steps,
-        // and (via buildPermDetailHtml) a Retry button.
+      { id: 0, title: 'Connector Activation',
+        icon: 'power-outlined', subtitle: 'Authenticate the service account and confirm Domain-Wide Delegation is active',
+        fix: 'Confirm the Veeam service account’s Client ID is authorized for Domain-Wide Delegation in the Admin console (Security → API controls → Domain-wide delegation), then reconnect.' },
+      { id: 1, title: 'Backup',
+        icon: 'backup-outlined', subtitle: 'Read access to the directory, groups, and IAM policies that back up on schedule',
+        fix: 'Grant roles/iam.securityReviewer to the Veeam service account at your organization node in GCP IAM — Backup reads policies at the org level, not a project.' },
+      { id: 2, title: 'Restore',
+        icon: 'restore-point-outlined', subtitle: 'Write access to restore identities, groups, and IAM policies from a backup',
+        fix: 'Grant roles/iam.securityAdmin to the Veeam service account at your organization node in GCP IAM — Restore needs write access, which is a separate grant from the read access Backup uses.',
+        // RESTORED EXPAND CAPABILITY (2026-09-24 mechanism, reused here):
+        // real cause + concrete Admin/GCP Console steps, not placeholder
+        // copy — grounded in the same two IAM roles this workload's own
+        // prereqs and helpContent already document above.
         fixDetail: {
-          summary: 'Two of the five scopes for <strong>Workspace Service Policies</strong> weren’t included in the Domain-Wide Delegation grant. Google requires elevated-risk policy scopes — export controls and recording/DLP access — to be added in a separate pass from the base directory scopes, and that second pass didn’t happen here.',
+          summary: 'Restore needs <strong>write</strong> access to Cloud IAM policies, which is a separate grant from the read access Backup uses. The service account currently only holds <code>roles/iam.securityReviewer</code> (read) — <code>roles/iam.securityAdmin</code> (write) was never granted, so Veeam can read and verify your IAM policies but can’t write restored changes back.',
           steps: [
-            'In the Google Admin console, open <strong>Security → API controls → Domain-wide delegation</strong> and select the Veeam service account’s Client ID.',
-            'Add the two missing scopes: <code>https://www.googleapis.com/auth/gmail.settings.sharing</code> (export controls) and <code>https://www.googleapis.com/auth/apps.licensing</code> (Meet recording + DLP policy access).',
-            'Save the delegation entry — for this tenant, scope changes apply immediately, no 24h propagation wait.',
-            'Click <strong>Retry this check</strong> below to re-verify.'
+            'In the Google Cloud Console, go to <strong>IAM &amp; Admin → IAM</strong> at your <strong>organization</strong> node, not a project — restore needs org-level write access.',
+            'Find the Veeam service account (the one whose Client ID is authorized for Domain-Wide Delegation) and click <strong>Edit principal</strong>.',
+            'Add the role <code>roles/iam.securityAdmin</code> alongside the existing <code>roles/iam.securityReviewer</code>, and save.',
+            'IAM role changes typically apply within a few minutes. Click <strong>Retry this check</strong> below to re-verify.'
           ]
-        } }
+        } },
+      { id: 3, title: 'Discovery Scan',
+        icon: 'discovery-scan-outlined', subtitle: 'Enumerate organizational units, users, groups, and IAM policies across Workspace and GCP',
+        fix: 'Confirm the consenting account is a Super Admin — Discovery Scan requires the admin.directory scopes and cloudresourcemanager.googleapis.com access granted through Domain-Wide Delegation.' }
     ],
-    failCapRowIdx: 4,   // seeds the Workspace Service Policies failure on first run, per the mock; Retry (footer or the row's own button) resolves cleanly
+    failCapRowIdx: 2,   // seeds the Restore failure on first run, per the mock; Retry (footer or the row's own button) resolves cleanly
     expressLabel: 'Install from Google Workspace Marketplace',
     // Google colored-button spec (same as gws): the G sits on a white chip
     // on a filled button, never directly on the fill.
@@ -11531,7 +11675,13 @@ function selectWorkload(wl, skipNav) {
       // modeled on Google's standard service-account + DWD pattern.
       manualDesc.textContent = 'Provide a Google Cloud service account key file (JSON or P12) authorized for domain-wide delegation';
     } else if (wl === 'gip') {
-      manualDesc.textContent = 'Provide a Google Cloud service account key file (JSON or P12) authorized for domain-wide delegation';
+      // Describes what THIS card collects (key file + Organization ID +
+      // Super Admin email — the 3 manual-gip-* fields below), not the
+      // GCP/Admin-console setup that precedes it — that story is already
+      // told once in the shared "Before you connect" prereqs alert
+      // (prereqsInHelp), so it isn't repeated here. Was copy-pasted from
+      // gws's key-file-only line, which only described 1 of the 3 fields.
+      manualDesc.textContent = 'Provide your Google Cloud service account’s key file, Organization ID, and a Super Admin email for delegation';
     } else {
       manualDesc.textContent = w.manualCertSupport ? 'Provide an Entra ID App Client ID and credential' : 'Provide a ' + w.name + ' App Client ID and Client Secret';
     }
@@ -12508,6 +12658,19 @@ function saveManualAuth() {
   if (typeof refreshSidebar === 'function') refreshSidebar();
   refreshAuthAdvanceBtnLabel();
 
+  // Auto-advance (2026-09-30, user: "once I click connect, it needs to go
+  // straight to the testing step" — confirmed to apply to Manual too,
+  // despite the workload-specific success HTML below still carrying real
+  // settings content for some workloads (cert expiry + reminder toggle;
+  // Okta's key fingerprint + Rotate key) that a user will no longer see
+  // at this exact moment). That HTML is still built and written into the
+  // (now-hidden) manual-form-inline below — harmless, and left in place
+  // rather than deleted, in case this screen is reachable again later
+  // (e.g. via Reconfigure) where it's still the right content to show.
+  // advanceFromAuth() reads currentAuthMethod/_manualConnectDone fresh
+  // each time, so calling it here (before the branch below runs) is safe.
+  advanceFromAuth();
+
   // Okta v4: OAuth service app with private_key_jwt — no cert, no token.
   // Show a Key Details card (algorithm + fingerprint, no expiry, since
   // access tokens are short-lived/auto-refreshed and the only persistent
@@ -12970,19 +13133,13 @@ function selectAuthMethod(method) {
     benefits.style.display = 'grid';
     cta.style.display = 'block';
     manualForm.style.display = 'none';
-    // Merged Connect/Test Connection button: switching back to Express
-    // before Manual has connected must not leave the footer button
-    // enabled off a validated-but-unclicked Manual form — Express governs
-    // its own enable/disable via completeOAuthFlow()/resetOAuthFlow(), so
-    // re-disable here unless Express itself already succeeded this session.
-    if (currentAuthMethod !== 'express') {
-      var expressTestBtn = document.getElementById('test-conn-btn');
-      if (expressTestBtn) {
-        expressTestBtn.disabled = true;
-        expressTestBtn.style.cursor = 'not-allowed';
-        expressTestBtn.style.background = 'var(--green-30)';
-      }
-    }
+    // Merged Connect/Test Connection button (2026-09-30): the footer
+    // button IS Express's own action now (see refreshAuthAdvanceBtnLabel,
+    // called at the end of this function) — it label/enables itself from
+    // w.expressLabel, no separate disable step needed here. Was: manually
+    // re-disabling unless Express had already succeeded, back when the
+    // footer was only a "Test Connection"/"Continue" advance trigger and
+    // Express had its own separate in-card button for the actual action.
   } else {
     manual.style.border = '2px solid var(--green)'; // was blue
     express.style.border = '1px solid var(--border-light)';
@@ -13014,6 +13171,27 @@ function selectAuthMethod(method) {
 function refreshAuthAdvanceBtnLabel() {
   var btn = document.getElementById('test-conn-btn');
   if (!btn) return;
+  var w = WORKLOADS[currentWorkload];
+  // One footer CTA for both auth methods (2026-09-30, user: "why should we
+  // change that only when express is selected? users are already
+  // conditioned for there to be a primary CTA at the bottom of the screen
+  // for every step"). Express's own in-card button was removed — while the
+  // Express card is the one selected (and hasn't already succeeded this
+  // session), this pinned button IS the "Authorize with X"/"Install from
+  // Marketplace" action: label it from w.expressLabel and enable it
+  // immediately, since Express has no form fields to validate first.
+  // express-cta's own display (block/none) is the same selected/not-
+  // selected signal selectAuthMethod already toggles, reused here rather
+  // than tracking a second "which card is active" flag.
+  var expressCtaEl = document.getElementById('express-cta');
+  var expressSelected = !!expressCtaEl && expressCtaEl.style.display !== 'none';
+  if (expressSelected && currentAuthMethod !== 'express' && w) {
+    btn.textContent = w.expressLabel;
+    btn.disabled = false;
+    btn.style.cursor = 'pointer';
+    btn.style.background = 'var(--green)';
+    return;
+  }
   // Merged Connect/Test Connection button (user 2026-09-29): while Manual
   // is selected and hasn't connected yet, the pinned footer button IS the
   // Connect action — label it accordingly regardless of what screen comes
@@ -13025,7 +13203,6 @@ function refreshAuthAdvanceBtnLabel() {
     btn.textContent = 'Connect';
     return;
   }
-  var w = WORKLOADS[currentWorkload];
   if (!w) return;
   var skipGroupsForManual = (currentWorkload === 'gitlab' && currentAuthMethod === 'manual');
   var skipSiteForManual = (currentWorkload === 'confluence' && currentAuthMethod === 'manual');
@@ -13043,21 +13220,29 @@ function refreshAuthAdvanceBtnLabel() {
   btn.textContent = hasIntermediateStep ? 'Continue' : 'Test Connection';
 }
 
-// Merged Connect/Test Connection button (user 2026-09-29): the pinned
-// footer button (id="test-conn-btn") is the single click target for BOTH
-// steps now. On its first click, while the Manual card is open and hasn't
-// connected yet, it performs the connect action (same validation + inline
-// success/error feedback + reauthorize option as before — saveManualAuth()
-// itself is unchanged) instead of advancing the wizard. Once connected
-// (_manualConnectDone), or whenever Express is the active path (Express
-// was never gated by an in-form button — see completeOAuthFlow — so it
-// always falls straight through here, unchanged), the click advances the
-// wizard exactly as it always has via advanceFromAuth().
+// Merged Connect/Test Connection button (user 2026-09-29, extended
+// 2026-09-30 to also own Express's own action — see refreshAuthAdvanceBtnLabel):
+// the pinned footer button (id="test-conn-btn") is the single click target
+// for BOTH steps now, whichever card is currently selected. On its first
+// click: while Manual is open and hasn't connected yet, it performs the
+// connect action (same validation + inline success/error feedback +
+// reauthorize option as before — saveManualAuth() itself is unchanged);
+// while Express is selected and hasn't succeeded yet, it starts the OAuth/
+// Marketplace flow (startOAuthFlow() — previously a separate in-card
+// button, now removed so there's exactly one primary action per step).
+// Once either path has succeeded, the click advances the wizard via
+// advanceFromAuth(), same as always.
 function handleAuthAdvanceClick() {
   var manualFormEl = document.getElementById('manual-form-inline');
   var manualCardOpen = !!manualFormEl && manualFormEl.style.display !== 'none';
   if (manualCardOpen && !_manualConnectDone) {
     saveManualAuth();
+    return;
+  }
+  var expressCtaEl = document.getElementById('express-cta');
+  var expressSelected = !!expressCtaEl && expressCtaEl.style.display !== 'none';
+  if (expressSelected && currentAuthMethod !== 'express') {
+    startOAuthFlow();
     return;
   }
   advanceFromAuth();
@@ -13137,6 +13322,15 @@ function startOAuthFlow() {
   var manual = document.getElementById('auth-option-manual');
   manual.style.opacity = '0.4';
   manual.style.pointerEvents = 'none';
+  // The footer button just triggered this (it's now Express's own action
+  // button too — see handleAuthAdvanceClick) — disable it while the OAuth/
+  // Marketplace flow is in flight so a second click can't restart it.
+  var footerBtn = document.getElementById('test-conn-btn');
+  if (footerBtn) {
+    footerBtn.disabled = true;
+    footerBtn.style.cursor = 'not-allowed';
+    footerBtn.style.background = 'var(--green-30)';
+  }
 
   // GitHub (research-fidelity build 2026-07-07): a REAL separate window
   // opens with a 1:1 recreation of GitHub's OAuth pages (sign-in prefilled →
@@ -13145,27 +13339,29 @@ function startOAuthFlow() {
   // if the popup is blocked.
   if (typeof currentWorkload !== 'undefined' && currentWorkload === 'github' && _ghOAuthLaunch()) return;
 
-  // After 2.5s, show connected card and enable test connection.
+  // After 2.5s, jump straight through to the next step.
   setTimeout(completeOAuthFlow, 2500);
 }
-// Connected-state commit — shared by the timed simulation and the GitHub
-// OAuth popup's authorize callback.
+// Auth-succeeded commit — shared by the timed simulation and the GitHub
+// OAuth popup's authorize callback. Used to show a local "Connected to X"
+// confirmation card (with a Change-domain control) and wait for a second,
+// separate click on the footer's Test Connection button. Removed 2026-09-30
+// (user: "once I click connect, it needs to go straight to the testing
+// step" — engineering no longer wants this intermediary state for Express):
+// now advances the wizard immediately, same as Manual already does once its
+// own connect step succeeds. The domain confirmation this card used to
+// carry now lives on the Test Connection screen's own header line instead
+// (see tcConnDomain in runTestConnectionSequence); Reconfigure there still
+// covers "wrong account" recovery.
 function completeOAuthFlow() {
   document.getElementById('auth-status-waiting').style.display = 'none';
-  document.getElementById('auth-connected').style.display = 'flex';
-
-  var testBtn = document.getElementById('test-conn-btn');
-  testBtn.disabled = false;
-  testBtn.style.opacity = '1';
-  testBtn.style.cursor = 'pointer';
-  testBtn.style.background = 'var(--green)'; // was blue — Vision Primary
 
   // Commit the auth method. For D365 this affects sidebar
   // substeps (Manual → no Environments) and post-auth routing,
   // so refresh the sidebar to reflect the committed path.
   currentAuthMethod = 'express';
   if (typeof refreshSidebar === 'function') refreshSidebar();
-  refreshAuthAdvanceBtnLabel();
+  advanceFromAuth();
 }
 // ── GitHub OAuth popup (1:1 recreation for research fidelity) ─────────────
 var _ghOAuthWin = null, _ghOAuthDone = false, _ghOAuthWatch = null;
@@ -13286,23 +13482,24 @@ function _ghOAuthPageHtml() {
 function resetOAuthFlow() {
   // Reset back to initial express state
   document.getElementById('auth-connected').style.display = 'none';
+  document.getElementById('auth-status-waiting').style.display = 'none';
   document.getElementById('express-cta').style.display = 'block';
   document.getElementById('express-benefits').style.display = 'grid';
   var manual = document.getElementById('auth-option-manual');
   manual.style.opacity = '1';
   manual.style.pointerEvents = 'auto';
 
-  var testBtn = document.getElementById('test-conn-btn');
-  testBtn.disabled = true;
-  testBtn.style.opacity = '1'; // was 0.5
-  testBtn.style.cursor = 'not-allowed';
-  testBtn.style.background = 'var(--green-30)'; // was blue-30
-
   // Clear committed auth state so the sidebar / advance logic don't
   // think the user is mid-Express after they reset.
   currentAuthMethod = null;
   d365SelectedEnvs = [];
   if (typeof refreshSidebar === 'function') refreshSidebar();
+  // Footer button (2026-09-30): re-derive its state instead of hardcoding
+  // "disabled" — Express is still the selected card at this point (a
+  // canceled/failed OAuth attempt didn't switch cards), so the correct
+  // state is re-enabled and ready to retry the same action, not stuck
+  // disabled as if nothing had been selected yet.
+  if (typeof refreshAuthAdvanceBtnLabel === 'function') refreshAuthAdvanceBtnLabel();
 }
 
 function showManualModal() {

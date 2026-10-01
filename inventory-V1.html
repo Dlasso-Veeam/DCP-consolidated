@@ -3086,12 +3086,24 @@ body.ai-full #aiWorkingGlow { display: none; }
    specificity than the generic 14px rule above; margin compensates so the
    larger glyph doesn't inflate the button's line-height. */
 .ai-gate-btn svg.ai-gate-btn-play-ic { width: 20px; height: 20px; margin: -3px 0; }
-/* ICON-ONLY APPROVE AT NARROW PANEL WIDTHS (2026-09-24, user: "when [the
-   panel] is resized down to 450 or under, lets update the approve button to
-   a icon-only glyph") — .ai-panel is the container (container-type set on
-   it above); a hover tooltip (data-tooltip, added on the button itself)
-   carries the word once the visible label is gone. Scoped to .primary only. */
-@container ai-panel (max-width: 450px) {
+/* ICON-ONLY APPROVE — two DISTINCT triggers, not one (2026-09-30 fix).
+   Was a single @container rule at 450px — but the panel's default open
+   width is 420px (body.ai-open{--ai-w:420px}), already below that
+   threshold, so the icon-only state was actually the permanent default any
+   time the panel was open, watch mode or not, even with plenty of room to
+   show the label. Split into what was actually meant:
+   1) `.has-scrub` — the button shares its row with the embedded watch
+      scrubber (apEmbedded in the render fn), which needs the space
+      regardless of the panel's own width; collapses unconditionally.
+   2) the @container fallback — for when the panel itself gets dragged
+      genuinely narrow (toward its 360px floor) with NO scrubber present.
+      Threshold moved below the 420px default (380px) so the normal/default
+      state renders the full label, per the reported bug.
+   A hover tooltip (data-tooltip, added on the button itself) carries the
+   word once the visible label is gone. Scoped to .primary only. */
+.ai-gate-btns.has-scrub .ai-gate-btn.primary .ai-gate-btn-label { display: none; }
+.ai-gate-btns.has-scrub .ai-gate-btn.primary { padding: 0 10px; }
+@container ai-panel (max-width: 380px) {
   .ai-gate-btn.primary .ai-gate-btn-label { display: none; }
   .ai-gate-btn.primary { padding: 0 10px; }
 }
