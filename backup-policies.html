@@ -74,6 +74,8 @@
   /* ── Veeam Vision additions (2026-08-14 conformance) ── */
   --green-90: #014c2c;    /* Veeam Green/S90 — primary active/pressed */
   --grey-100: #5f767c;    /* Secondary/Securiti Grey/S100 — Chip Grey text */
+  --gold-soft: #fcf8ea;   /* Chart/Soft Gold T180 — Chip Gold Light bg (verified live 2026-10-01) */
+  --gold-40: #9d7f17;     /* Base Scales/Gold_S40 — Chip Gold Light text (verified live 2026-10-01) */
   --comp-lime: #91f8b2;   /* Secondary/Lime/S30 — rail active tile */
   --vv-focus-ring: 0 0 0 2px #ffffff, 0 0 0 4px #008436; /* Vision "Focused State Shadow" */
   /* ── Figma 9001:43767 Graph Query (prio-panel Data Scope) additions 2026-08-14 ── */
@@ -1220,6 +1222,11 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
 .plv-chip-state-active { background: var(--val-green-bg); color: var(--val-green); }
 .plv-chip-state-inactive { background: var(--black-5); color: var(--black-60); }
 .plv-chip-default { background: var(--val-blue-bg); color: var(--val-blue); }
+/* Health column — Vision Chip, Mode=Light: Green (S5/S80) · Gold (Soft Gold/Gold S40) · Red (Ignis S10/S50) · Grey (Black S5/Grey S100). */
+.plv-chip-health-healthy  { background: var(--val-green-bg); color: var(--val-green); }
+.plv-chip-health-warning  { background: var(--gold-soft); color: var(--gold-40); }
+.plv-chip-health-error    { background: var(--red-10); color: var(--red); }
+.plv-chip-health-inactive { background: var(--black-5); color: var(--grey-100); }
 
 /* Owner avatar — 24px initial circle; System policies get the grey S. */
 .plv-avatar { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; color: var(--white); font-size: 12px; font-weight: 500; }
@@ -2153,7 +2160,7 @@ body.ai-full #aiWorkingGlow { display: none; }
                       <th style="width:72px" class="sort-th plv-col-id" data-sortkey="id" data-label="Policy ID" onclick="polSetSort('id')">Policy ID</th>
                       <th class="sort-th" data-sortkey="name" data-label="Policy Name" onclick="polSetSort('name')">Policy Name</th>
                       <th style="width:104px" class="sort-th" data-sortkey="scope" data-label="Data Scope" onclick="polSetSort('scope')">Data Scope</th>
-                      <th style="width:96px" class="sort-th" data-sortkey="state" data-label="State" onclick="polSetSort('state')">State</th>
+                      <th style="width:120px" class="sort-th" data-sortkey="health" data-label="Health" onclick="polSetSort('health')">Health</th>
                       <th style="width:104px" class="plv-col-sla">SLA Domain</th>
                       <th style="width:148px" class="plv-col-wl sort-th" data-sortkey="wl" data-label="Workload Type" onclick="polSetSort('wl')">Workload Type</th>
                       <th style="width:300px;min-width:300px" class="plv-col-sladom">SLA Domain</th>
@@ -7077,9 +7084,10 @@ function renderPolicyRow(p, ctx) {
   const scopeTip = escapeHtmlBP(p.scopeDesc || '') + (p.tenantSummary && p.tenantSummary.length ? ' \u00b7 ' + escapeHtmlBP(p.tenantSummary.join(', ')) : '');
   const scopeCell = '<span class="plv-chip plv-chip-scope" data-plv-tip="' + scopeTip + '">' + (p.isDefault ? 'Workload' : 'Object') + '</span>';
 
-  const stateCell = p.status === 'active'
-    ? '<span class="plv-chip plv-chip-state-active">Active</span>'
-    : '<span class="plv-chip plv-chip-state-inactive">Inactive</span>';
+  // Health column replaces State (user 2026-10-01). was: Active / Inactive chips
+  // (.plv-chip-state-*, still used by the preview panel title).
+  const _h = policyHealth(p);
+  const stateCell = '<span class="plv-chip plv-chip-health-' + _h + '">' + _h.charAt(0).toUpperCase() + _h.slice(1) + '</span>';
 
   const wlCell = '<span class="plv-wl-cell"><span class="wl-item-logo">' + plvWlGlyph(p.workload, 20) + '</span>' + _tnwlName(p.workload) + '</span>'; // picker display names (mock: "Okta", not "Okta WIC")
 
@@ -7506,9 +7514,20 @@ function syncSortHeaders() {
 // Per-column sort values. Dates parse the "Feb 15, 2026" seeds; policies
 // without a date (system defaults) always sort last regardless of
 // direction.
+// Policy health (prototype data): a deactivated policy is always 'inactive'; an active one
+// carries a stable mock reading derived from its id (≈78% healthy / 14% warning / 8% error),
+// so toggling Status off and back on returns it to the same health.
+function policyHealth(p) {
+  if (p.status !== 'active') return 'inactive';
+  var h = 0, id = String(p.id);
+  for (var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  var m = h % 100;
+  return m < 8 ? 'error' : (m < 22 ? 'warning' : 'healthy');
+}
 function _polSortVal(p, key) {
   switch (key) {
-    case 'status': case 'state': return p.status;
+    case 'status': return p.status;
+    case 'health': return { error: 0, warning: 1, healthy: 2, inactive: 3 }[policyHealth(p)];  // worst first when ascending
     case 'id':     return p.num || 0;
     case 'name':   return (p.name || '').toLowerCase();
     case 'scope':  return p.isDefault ? 'workload' : 'object';
