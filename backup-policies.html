@@ -378,7 +378,9 @@ a.vn-fly-link:hover { color: var(--blue); }
    scrolled past. Background must be opaque so table rows scrolling
    beneath don't bleed through. Sticky top matches .wl-sidebar so they
    pin in lockstep. */
-.pol-sticky-head { position: sticky; top: var(--devjump-h); z-index: 30; background: var(--white); flex-shrink: 0; }
+.pol-sticky-head { display: contents; }   /* SLIM PIN (user 2026-10-02): only the action bar + the column-header row stay pinned; the entity header and
+   search scroll away. display:contents lets .plv-modebar stick on its own against the (tall) list container.
+   was: position: sticky; top: var(--devjump-h); z-index: 30; background: var(--white); — pinned the whole head incl. search. */
 .table-search-bar { padding: 12px 16px; border-bottom: 1px solid var(--border-light); }
 .table-search { width: 100%; max-width: 380px; height: 36px; border: 1px solid var(--border-light); border-radius: 4px; padding: 0 12px; font-size: 14px; background: var(--form-bg); outline: none; color: var(--black-100); font-family: inherit; }
 .table-search:focus { box-shadow: none; border-color: var(--em-green); background: var(--em-green-tint); } /* was inset ring + white — Vision input Active */
@@ -1378,7 +1380,7 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
 
 /* Action bar below the search — hosts "Update priority ladder" in browse
    mode; morphs into guidance + change summary + Cancel/Save in mode. */
-.plv-modebar { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px; padding: 12px; border-bottom: 1px solid var(--border-light); background: var(--white); }
+.plv-modebar { position: sticky; top: var(--devjump-h); z-index: 30; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px; padding: 12px; border-bottom: 1px solid var(--border-light); background: var(--white); }
 .plv-modebar-note { margin-right: auto; font-size: 14px; color: var(--black-60); }
 .plv-modebar-summary { font-size: 14px; font-weight: 500; color: var(--black-100); display: none; white-space: nowrap; }
 .prio-mode .plv-modebar-summary { display: block; }
@@ -9376,14 +9378,15 @@ if (window.location.hash === '#new') go(1);
   // pin offset — sticky head sits at top:var(--devjump-h), thead sits
   // at top:var(--devjump-h) + sticky-head-height.
   function syncPolStickyHeights() {
-    var stickyHead = document.getElementById('pol-sticky-head');
-    var headH = stickyHead ? (stickyHead.offsetHeight || 0) : 100;
+    // Pinned height = the ACTION BAR only (the sticky head is display:contents now).
+    var stickyHead = document.getElementById('plvModeBar');
+    var headH = stickyHead ? (stickyHead.offsetHeight || 0) : 60;
     var devH = bar.classList.contains('hidden') ? 0 : (bar.offsetHeight || 0);
     document.documentElement.style.setProperty('--pol-sticky-bottom', (headH + devH) + 'px');
   }
   syncPolStickyHeights();
   if (typeof ResizeObserver !== 'undefined') {
-    var headEl = document.getElementById('pol-sticky-head');
+    var headEl = document.getElementById('plvModeBar');
     if (headEl) new ResizeObserver(syncPolStickyHeights).observe(headEl);
     new ResizeObserver(syncPolStickyHeights).observe(bar);
   } else {
