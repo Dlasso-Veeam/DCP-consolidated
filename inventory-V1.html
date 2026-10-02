@@ -63086,7 +63086,20 @@ window.__devJumpResolve = function(h) {
   //      records AND environments for D365, etc.
   //   4. Push the policy filter chip and re-render.
   if (h.indexOf('policy/') === 0) {
-    var name = decodeURIComponent(h.slice('policy/'.length));
+    // COLD LOAD (new window from backup-policies' "See all"): the page's own
+    // default-workload init (Okta) lands AFTER this first resolve and would
+    // overwrite the workload we pick. Defer ONCE so the jump applies on top of
+    // the settled initial state. Deliberate in-session navigation is immediate.
+    if (!window.__hashNavIsUserAction && !window.__policyHashDeferred) {
+      window.__policyHashDeferred = true;
+      setTimeout(function(){ window.__devJumpResolve(h); }, 900);
+      return;
+    }
+    // Optional resource suffix: #policy/<name>|<resource> (both URI-encoded, so a literal '|' in
+    // either is %7C). Seeds the inventory search with the resource name after the policy filter lands.
+    var _polRaw = h.slice('policy/'.length), _polBar = _polRaw.indexOf('|');
+    var name = decodeURIComponent(_polBar < 0 ? _polRaw : _polRaw.slice(0, _polBar));
+    var _polQ = _polBar < 0 ? '' : decodeURIComponent(_polRaw.slice(_polBar + 1));
     if (name && typeof state !== 'undefined' && Array.isArray(state.filters)) {
       // Find the workload by inspecting the first resource that carries
       // this policy. Falls back to whatever's already in state if the
@@ -63100,6 +63113,9 @@ window.__devJumpResolve = function(h) {
         // WL_MAP is keyed by id → label. We need id from a label match.
         var wlId = Object.keys(WL_MAP).find(function(k){ return WL_MAP[k] === match.wl; });
         if (wlId) {
+          // selectWl keeps the header picker, rail and breadcrumb in sync (a bare
+          // state.wl write left the picker showing the previous workload).
+          if (typeof selectWl === 'function') { try { selectWl(match.wl, wlId); } catch (e) {} }
           state.wl = wlId;
           state.wlLabel = match.wl;
           state.catWlScope = null;
@@ -63148,6 +63164,13 @@ window.__devJumpResolve = function(h) {
       if (typeof renderFilterBar === 'function') renderFilterBar('inv');
       if (typeof go === 'function') go('inventory');
       if (typeof renderTable === 'function') renderTable();
+      if (_polQ) {
+        var _si = document.getElementById('invSearch');
+        // Include sub-folders: the policy's resources are often nested (Secrets under Organization
+        // Settings), and a category-level search would otherwise report 0 for them.
+        state.searchIncludeSubfolders = true;
+        if (_si) { _si.value = _polQ; if (typeof filterTable === 'function') filterTable(); }
+      }
     }
     return;
   }

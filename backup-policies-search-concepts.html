@@ -74,7 +74,6 @@
   /* ── Veeam Vision additions (2026-08-14 conformance) ── */
   --green-90: #014c2c;    /* Veeam Green/S90 — primary active/pressed */
   --grey-100: #5f767c;    /* Secondary/Securiti Grey/S100 — Chip Grey text */
-  --yellow-40: #ffdfa7;   /* Securiti Yellow/S40 — search-match highlight (Figma DCP 17239:93766, verified live 2026-10-02) */
   --gold-soft: #fcf8ea;   /* Chart/Soft Gold T180 — Chip Gold Light bg (verified live 2026-10-01) */
   --gold-40: #9d7f17;     /* Base Scales/Gold_S40 — Chip Gold Light text (verified live 2026-10-01) */
   --comp-lime: #91f8b2;   /* Secondary/Lime/S30 — rail active tile */
@@ -1016,13 +1015,26 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
 .plv-combo .plv-btn { border-radius: 0; }
 .plv-combo .plv-combo-main { border-radius: 4px 0 0 4px; }
 .plv-combo .plv-combo-chev { border-radius: 0 4px 4px 0; width: 36px; padding: 0; justify-content: center; color: var(--black-90); }
-.plv-hl { background: var(--yellow-40); color: inherit; border-radius: 2px; padding: 2px 2px; margin: 0 -2px; }   /* match highlight, Securiti Yellow/S40 */
-.plv-find { display: inline-flex; align-items: center; gap: 8px; font-size: 16px; line-height: 24px; font-weight: 450; color: var(--black-70); }
-.plv-find svg { width: 20px; height: 20px; flex-shrink: 0; color: var(--em-green); }
-.plv-find-all { color: var(--em-green); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
-.plv-find-all:hover { color: var(--em-green-accent); }
-/* "None Selected" — Vision Chip, Default / Light: Black/S5 fill, Black/S100 label, 28px, radius 2 */
-.plv-none-chip { display: inline-flex; align-items: center; height: 28px; padding: 0 8px; border-radius: 2px; background: var(--black-5); color: var(--black-100); font-size: 16px; font-weight: 500; white-space: nowrap; margin-right: 12px; }
+.prio-gap-row td, .prio-grp-row td { border: none !important; padding: 0 !important; background: var(--white) !important; }
+.prio-gap-btn { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 32px; padding: 4px 16px; border: none; background: none; font-family: inherit; font-size: 14px; color: var(--black-60); cursor: pointer; text-align: left; }
+.prio-gap-btn:hover { background: var(--em-green-tint); color: var(--black-100); }
+.prio-gap-btn svg { width: 16px; height: 16px; flex-shrink: 0; transition: transform 0.15s ease; }
+.prio-gap-btn.is-open svg { transform: rotate(180deg); }
+.prio-gap-btn:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); }
+.prio-gap-r { margin-left: auto; font-variant-numeric: tabular-nums; }
+.prio-grp-row td { padding: 12px 16px 4px !important; }
+.prio-grp-lbl { font-size: 14px; font-weight: 500; color: var(--black-70); }
+.prio-grp-n { margin-left: 8px; font-size: 14px; color: var(--black-60); font-variant-numeric: tabular-nums; }
+.prio-lw { display: flex; flex-direction: column; }
+.prio-lw-row { display: flex; align-items: center; gap: 12px; min-height: 32px; padding: 4px 12px; font-size: 16px; line-height: 22px; color: var(--black-70); }
+.prio-lw-row.is-sel { background: var(--em-green-tint); box-shadow: inset 2px 0 0 var(--em-green); color: var(--em-green); font-weight: 500; }
+.prio-lw-rank { width: 28px; flex-shrink: 0; font-variant-numeric: tabular-nums; color: inherit; }
+.prio-lw-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prio-lw-more { padding: 2px 12px; font-size: 14px; color: var(--black-60); }
+/* prototype-only concept switcher */
+.sc-switch { position: fixed; left: 88px; bottom: 16px; z-index: 900; display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.12); font-size: 14px; color: var(--black-60); }
+.sc-switch button { height: 28px; padding: 0 12px; border-radius: 4px; border: 1px solid var(--border); background: var(--white); font-family: inherit; font-size: 14px; font-weight: 500; color: var(--black-100); cursor: pointer; }
+.sc-switch button[aria-checked="true"] { background: var(--em-green-tint); border-color: var(--green-50); color: var(--em-green); }
 .plv-btn-flat { background: none; color: var(--black-100); } /* Vision Button Type=Flat: no fill / Black/S100 */
 .plv-btn-flat:hover { color: var(--black-80); }
 .plv-btn-flat:active { background: var(--black-10); }
@@ -1406,13 +1418,13 @@ body.prio-narrowed .prio-selall { display: block; }
 .plv-batchbar-pos { display: inline-flex; align-items: center; gap: 8px; }
 .plv-batchbar-pos input { width: 72px; height: 36px; padding: 0 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font-family: inherit; font-size: 16px; color: var(--black-100); font-variant-numeric: tabular-nums; }
 .plv-batchbar-pos input:focus { outline: none; background: var(--em-green-tint); border-color: var(--em-green); }
-/* Two or more rows checked: on the SELECTED rows the arrows / kebab Move are paused —
-   they'd be ambiguous (this row or the group?). The RANK NUMBER stays live: typing a rank on a selected row
-   moves the whole block to start there (a destination isn't ambiguous). Drag on a selected row moves the block.
-   UNSELECTED rows keep every control live: each acts on that row alone (user 2026-10-02).
-   Selection, preview and kebab Edit stay live everywhere. */
-.pol-card.batch-active #pol-tbody tr.prio-checked .rank-step-btn,
-.pol-card.batch-active #pol-tbody tr.prio-checked .row-kebab-item[onclick*="moveTo"] { opacity: 0.35; pointer-events: none; cursor: default; }
+/* Two or more rows checked: arrows and rank editing are paused so a control
+   never has two meanings. Drag stays live on the CHECKED rows only and moves
+   them as one block. Selection, preview and kebab Edit stay live. */
+.pol-card.batch-active #pol-tbody tr:not(.prio-checked) .drag-handle,
+.pol-card.batch-active #pol-tbody .rank-step-btn,
+.pol-card.batch-active #pol-tbody .rank-num,
+.pol-card.batch-active #pol-tbody .row-kebab-item[onclick*="moveTo"] { opacity: 0.35; pointer-events: none; cursor: default; }
 .plv-btn-primary:disabled:hover { background: var(--em-green); }
 
 /* Rail collapse — class-driven (.collapsed) so the edge pill can toggle
@@ -6613,7 +6625,7 @@ function _prioFollowRow(id) {
 }
 
 function stepRank(id, dir) {
-  if (prioRowPaused(id)) return;
+  if (prioBatchActive()) return;
   const p = POLICIES.find(x => x.id === id);
   if (!p || p.isDefault) return;
   const customs = POLICIES.filter(x => x.workload === p.workload && !x.isDefault).sort((a,b) => a.rank - b.rank);
@@ -6635,6 +6647,7 @@ function stepRank(id, dir) {
 // at the same spot in the viewport so the page appears to grow around it.
 // Returns true when it expanded (callers carry on and perform the move).
 function _prioExpandIfNarrowed(id) {
+  if (_searchConcept !== 'current') return false;   // other concepts never expand on first action
   if (!prioMode || !_prioNarrowed || _prioExpanded) return false;
   const sel = '#pol-tbody tr[data-pid="' + id + '"]';
   const before = document.querySelector(sel);
@@ -6655,7 +6668,7 @@ function moveToBottom(id) {
   movePolicyToPosition(id, customs.length);
 }
 function movePolicyToPosition(id, newRank) {
-  if (prioRowPaused(id)) return;
+  if (prioBatchActive()) return;
   const p = POLICIES.find(x => x.id === id);
   if (!p || p.isDefault) return;
   _prioExpandIfNarrowed(id);
@@ -6804,16 +6817,17 @@ function previewConflicts(policy, candidateRank, opts) {
 // ── HTML5 DRAG AND DROP ──────────────────────────────────────────────────────
 let _dragPid = null;
 function dragRowStart(e, id) {
+  if (prioBatchActive() && !prioChecked.has(id)) { e.preventDefault(); return; }
   // Narrowed list: a drag can't start in place (the rows it would land
   // among aren't there). Cancel it, reveal the full ladder around the row,
   // and let the next drag run against the expanded list.
-  if (prioMode && _prioNarrowed && !_prioExpanded) { e.preventDefault(); _prioExpandIfNarrowed(id); return; }
+  if (prioMode && _prioNarrowed && !_prioExpanded && _searchConcept === 'current') { e.preventDefault(); _prioExpandIfNarrowed(id); return; }
   _dragPid = id;
   try { e.dataTransfer.setData('text/plain', id); e.dataTransfer.effectAllowed = 'move'; } catch(_) {}
   var row = e.currentTarget;
   row.classList.add('row-dragging');
   // Block drag: every checked row dims with the dragged one.
-  if (prioRowPaused(id)) document.querySelectorAll('#pol-tbody tr.prio-checked').forEach(function(tr){ tr.classList.add('row-dragging'); });
+  if (prioBatchActive()) document.querySelectorAll('#pol-tbody tr.prio-checked').forEach(function(tr){ tr.classList.add('row-dragging'); });
   // Dragging a row selects it (user 2026-08-14) — the preview panel
   // follows the policy being moved so its impact is visible on drop.
   if (typeof prioMode !== 'undefined' && prioMode) prioSelectRow({ target: null }, id);
@@ -6829,7 +6843,7 @@ function dragRowStart(e, id) {
     var tb = document.createElement('tbody');
     var clone = row.cloneNode(true);
     clone.classList.remove('row-dragging');
-    if (prioRowPaused(id)) {
+    if (prioBatchActive()) {
       var badge = document.createElement('span');
       badge.textContent = prioChecked.size + ' policies';
       badge.style.cssText = 'position:absolute;right:8px;top:50%;transform:translateY(-50%);padding:2px 8px;border-radius:2px;background:var(--em-green);color:var(--white);font-size:12px;font-weight:500;z-index:2';
@@ -6858,7 +6872,7 @@ function dragRowOver(e) {
   const src = POLICIES.find(p => p.id === _dragPid);
   const tgt = POLICIES.find(p => p.id === row.dataset.pid);
   if (!src || !tgt || src.id === tgt.id) return;
-  if (prioRowPaused(_dragPid) && prioChecked.has(tgt.id)) return;   // a block can't be dropped onto itself
+  if (prioBatchActive() && prioChecked.has(tgt.id)) return;   // can't drop a block onto itself
   e.preventDefault();
   const rect = row.getBoundingClientRect();
   _dragBefore = e.clientY < rect.top + rect.height / 2;
@@ -6884,7 +6898,7 @@ function dragRowDrop(e) {
   const tgt = POLICIES.find(p => p.id === row.dataset.pid);
   if (!src || !tgt) { dragRowEnd(); return; }
   if (src.id === tgt.id) { dragRowEnd(); return; }
-  if (prioRowPaused(src.id) && prioChecked.has(tgt.id)) { dragRowEnd(); return; }
+  if (prioBatchActive() && prioChecked.has(tgt.id)) { dragRowEnd(); return; }
   if (tgt.workload !== src.workload) {
     showToast({ tone: 'info', title: 'Cross-workload reorder not allowed', body: 'Policies only rank against others in the same workload.' });
     dragRowEnd(); return;
@@ -6905,7 +6919,7 @@ function dragRowDrop(e) {
   } else {
     _insIdx = _customsNoSrc.findIndex(x => x.id === tgt.id) + (_dragBefore ? 0 : 1);
   }
-  if (prioRowPaused(src.id)) {
+  if (prioBatchActive() && prioChecked.has(src.id)) {
     // Block drop: insertion index against the customs WITHOUT any selected row.
     const _rest = POLICIES.filter(x => x.workload === src.workload && !x.isDefault && !prioChecked.has(x.id)).sort((a, b) => a.rank - b.rank);
     const _bIdx = tgt.isDefault ? _rest.length : _rest.findIndex(x => x.id === tgt.id) + (_dragBefore ? 0 : 1);
@@ -6920,6 +6934,7 @@ function dragRowDrop(e) {
 // ── CLICK-TO-EDIT RANK NUMBER ────────────────────────────────────────────────
 function startRankEdit(e, id) {
   e.stopPropagation();
+  if (prioBatchActive()) return;
   const span = e.currentTarget;
   const p = POLICIES.find(x => x.id === id);
   if (!p || p.isDefault) return;
@@ -6938,15 +6953,7 @@ function startRankEdit(e, id) {
 function commitRankEdit(input, id) {
   if (!input.parentElement) return; // already replaced
   const n = parseInt(input.value, 10);
-  if (isNaN(n)) { renderPolicyTable(); return; }
-  if (prioRowPaused(id)) {
-    // Bulk jump: the selected rows land together, in their current order, STARTING at n (clamped so the
-    // block fits). Same result as dropping the block there. A no-op leaves the input in place, so re-render.
-    prioBatchMove('pos', n);
-    if (input.parentElement) renderPolicyTable();
-  } else {
-    movePolicyToPosition(id, n);
-  }
+  if (!isNaN(n)) movePolicyToPosition(id, n); else renderPolicyTable();
 }
 
 // ── ROW KEBAB MENU ───────────────────────────────────────────────────────────
@@ -7090,7 +7097,7 @@ function renderPolicyRow(p, ctx) {
   // Editing is disabled in this prototype (user 2026-08-14) — the name
   // renders as plain text in BOTH modes (was: browse name opened the
   // editor via __devJumpResolve(editHash)).
-  const nameCell = '<div class="prio-name">' + _plvHl(p.name, ctx.hl) + '</div>';
+  const nameCell = '<div class="prio-name">' + p.name + '</div>';
 
   // Data Scope \u2014 closed-enum chip mirroring the mock's vocabulary:
   // defaults protect the whole workload; customs target object-level
@@ -7291,10 +7298,7 @@ function renderPolicyTable() {
   workloads.forEach(wl => {
     const items = policiesForWorkload(wl);
     if (items.length === 0) return;
-    // FIND, not filter, while reordering (user 2026-10-02, Figma DCP 17266:112517): every policy stays
-    // on screen in rank order so the ladder keeps its context; the query only marks matches (by name,
-    // the same text that gets highlighted). Browse mode still filters.
-    const visible = (q && !prioMode)
+    const visible = q
       ? items.filter(p => (p.name + ' ' + p.scopeDesc + ' ' + p.tenantSummary.join(' ') + ' ' + p.tier).toLowerCase().includes(q))
       : items;
     visible.forEach(p => visibleAll.push(p));
@@ -7304,17 +7308,49 @@ function renderPolicyTable() {
   // see the _prioExpanded notes. Expanded = the whole workload ladder, with
   // only the current matches left interactive.
   const totalInScope = workloads.reduce((n, wl) => n + POLICIES.filter(x => x.workload === wl).length, 0);
-  // Checked rows that the search/filter no longer shows are dropped from the selection.
+  const narrowed = prioMode && visibleAll.length < totalInScope;
+  // Concept sequences (gaps / grouped): the full ladder of this workload, in rank order, with the
+  // matches pulled out. Built BEFORE the selection prune so rows the concept shows (open gaps, the
+  // "rest" group) stay selectable and rows it hides don't linger in the selection.
+  const conceptActive = !!(prioMode && narrowed && (_searchConcept === 'gaps' || _searchConcept === 'grouped') && activeWl !== 'all');
+  let seq = null;
+  if (conceptActive) {
+    const matchIdSet = new Set(visibleAll.map(x => x.id));
+    const ladder = POLICIES.filter(x => x.workload === activeWl).sort((a, b) => a.rank - b.rank);
+    seq = [];
+    if (_searchConcept === 'grouped') {
+      const m = ladder.filter(x => matchIdSet.has(x.id)), rest = ladder.filter(x => !matchIdSet.has(x.id));
+      seq.push({ t: 'hd', label: 'Results', n: m.length });
+      m.forEach(x => seq.push({ t: 'row', p: x }));
+      if (rest.length) { seq.push({ t: 'hd', label: 'Rest of the ladder', n: rest.length }); rest.forEach(x => seq.push({ t: 'row', p: x })); }
+    } else {
+      let run = [], key = 'top';
+      const flush = function() {
+        if (!run.length) return;
+        const open = !!_gapOpen[key];
+        seq.push({ t: 'gap', key: key, n: run.length, from: run[0].rank, to: run[run.length - 1].rank, open: open });
+        if (open) run.forEach(x => seq.push({ t: 'row', p: x }));
+        run = [];
+      };
+      ladder.forEach(x => { if (matchIdSet.has(x.id)) { flush(); seq.push({ t: 'row', p: x }); key = x.id; } else run.push(x); });
+      flush();
+    }
+  }
+  // Checked rows that are no longer on screen are dropped from the selection.
   if (!prioMode) prioChecked.clear();
-  else { const _live = new Set(visibleAll.filter(x => !x.isDefault).map(x => x.id)); prioChecked.forEach(function(id){ if (!_live.has(id)) prioChecked.delete(id); }); }
-  const narrowed = false;   // was: prioMode && visibleAll.length < totalInScope — the narrowed/expand hybrid is retired (kept below, inert)
+  else {
+    const _live = conceptActive
+      ? new Set(seq.filter(i => i.t === 'row' && !i.p.isDefault).map(i => i.p.id))
+      : new Set(visibleAll.filter(x => !x.isDefault).map(x => x.id));
+    prioChecked.forEach(function(id){ if (!_live.has(id)) prioChecked.delete(id); });
+  }
   const matchSig = visibleAll.map(x => x.id).sort().join(',');
   if (matchSig !== _prioMatchSig) { _prioMatchSig = matchSig; _prioExpanded = false; }
   if (!narrowed) _prioExpanded = false;
   _prioNarrowed = narrowed;
-  _prioMatchIds = (prioMode && q) ? visibleAll.filter(x => !x.isDefault && x.name.toLowerCase().includes(q)).map(x => x.id) : [];
-  document.body.classList.toggle('prio-narrowed', false);
-  const expanded = narrowed && _prioExpanded;
+  _prioMatchIds = prioMode ? visibleAll.filter(x => !x.isDefault).map(x => x.id) : [];
+  document.body.classList.toggle('prio-narrowed', !!(prioMode && narrowed));
+  const expanded = narrowed && _prioExpanded && _searchConcept === 'current';
   const matchSet = expanded ? new Set(visibleAll.map(x => x.id)) : null;
   const fullLadder = expanded
     ? workloads.reduce((acc, wl) => acc.concat(POLICIES.filter(x => x.workload === wl).sort((a, b) => a.rank - b.rank)), [])
@@ -7345,8 +7381,25 @@ function renderPolicyTable() {
   // reorderable customs with a full-width band + messaging. (Revives the
   // retired defaultsSeparatorRow concept in the mode where it matters.)
   let _sepEmitted = false;
-  const _hasCustomOnPage = pageRows.some(x => !x.isDefault);
-  pageRows.forEach(p => {
+  const _hasCustomOnPage = conceptActive ? seq.some(i => i.t === 'row' && !i.p.isDefault) : pageRows.some(x => !x.isDefault);
+  if (conceptActive) {
+    seq.forEach(i => {
+      if (i.t === 'hd') {
+        chunks.push('<tr class="prio-grp-row"><td colspan="10"><span class="prio-grp-lbl">' + i.label + '</span><span class="prio-grp-n">' + i.n + '</span></td></tr>');
+      } else if (i.t === 'gap') {
+        chunks.push('<tr class="prio-gap-row"><td colspan="10"><button type="button" class="prio-gap-btn' + (i.open ? ' is-open' : '') + '" aria-expanded="' + i.open + '" onclick="prioToggleGap(\'' + i.key + '\')">'
+          + (_dsStoreIconSvg('keyboard-arrow-down-outlined', 16) || '') + '<span>' + (i.open ? 'Hide ' : '') + i.n + ' other ' + (i.n === 1 ? 'policy' : 'policies') + '</span><span class="prio-gap-r">ranks ' + i.from + (i.to !== i.from ? '\u2013' + i.to : '') + '</span></button></td></tr>');
+      } else {
+        const p = i.p;
+        if (p.isDefault && !_sepEmitted && _hasCustomOnPage) {
+          _sepEmitted = true;
+          chunks.push('<tr class="prio-default-sep" aria-hidden="false"><td colspan="10"><div class="prio-default-sep-inner"><span class="prio-default-sep-label">Default policy scope is always evaluated last and cannot be reprioritized</span></div></td></tr>');
+        }
+        chunks.push(renderPolicyRow(p, { disableReorder, pendingIds, prioMode, dim: false }));
+      }
+    });
+  }
+  (conceptActive ? [] : pageRows).forEach(p => {
     if (prioMode && p.isDefault && !_sepEmitted && _hasCustomOnPage) {
       _sepEmitted = true;
       chunks.push('<tr class="prio-default-sep" aria-hidden="false"><td colspan="10">'
@@ -7357,7 +7410,7 @@ function renderPolicyTable() {
         + '</div>'
       + '</td></tr>');
     }
-    chunks.push(renderPolicyRow(p, { disableReorder, pendingIds, prioMode, dim: expanded && !matchSet.has(p.id), hl: (prioMode && q) ? q : '' }));
+    chunks.push(renderPolicyRow(p, { disableReorder, pendingIds, prioMode, dim: expanded && !matchSet.has(p.id) }));
   });
 
   tbody.innerHTML = chunks.join('') || '<tr><td colspan="10" style="padding:32px;text-align:center;color:var(--black-50);font-size:14px;">No policies match your filters.</td></tr>';
@@ -7460,16 +7513,6 @@ function clearPolSearch(btn) {
   syncPolSearchGlyph(input);
   input.focus();
 }
-// Wrap every case-insensitive occurrence of the query in a highlight (Securiti Yellow/S40).
-function _plvHl(name, q) {
-  if (!q) return name;
-  var lo = name.toLowerCase(), out = '', i = 0, j;
-  while ((j = lo.indexOf(q, i)) >= 0) {
-    out += name.slice(i, j) + '<mark class="plv-hl">' + name.slice(j, j + q.length) + '</mark>';
-    i = j + q.length;
-  }
-  return out + name.slice(i);
-}
 function searchTable(q) {
   policySearch = q || '';
   polPage = 1;
@@ -7531,8 +7574,9 @@ function syncSortHeaders() {
     th.setAttribute('aria-sort', active ? (polSort.dir === 'asc' ? 'ascending' : 'descending') : 'none');
     // Priority header carries the select-all-matching checkbox (visible only while a
     // search/filter narrows the ladder — see body.prio-narrowed).
-    var selAll = '';   // header checkbox retired (user 2026-10-02): "Select all" is a link in the results line (Figma DCP 17266:112517)
-    //   was: th.classList.contains('order-col') ? '<input type="checkbox" class="prio-check prio-selall" ...>' : ''
+    var selAll = th.classList.contains('order-col')
+      ? '<input type="checkbox" class="prio-check prio-selall" aria-label="Select all matching policies" onclick="event.stopPropagation()" onchange="prioSelectAllMatching(this)">'
+      : '';
     th.innerHTML = selAll + th.getAttribute('data-label') + (active ? sortArrowSvg(polSort.dir) : '');
   });
   if (typeof _prioSyncSelAll === 'function') _prioSyncSelAll();   // the rewrite above recreates the checkbox
@@ -7595,11 +7639,19 @@ let prioSelectedId = null;
 // 2+ checked, per-row movement is paused (CSS + guards) so the bar is the
 // only mover; with 0–1 checked every per-row control behaves as before.
 const prioChecked = new Set();
-let _prioMatchIds = [];   // customs the current search/filter shows — the target of select-all
+let _prioMatchIds = [];
+// ── SEARCH CONCEPTS (prototype, user 2026-10-02) ───────────────────────────────────────────
+// How search behaves while REORDERING. Switcher at the bottom-left of the page.
+//   current  — narrowed results; first control action expands to the full ladder (dimmed, inert).
+//   gaps     — results only, but every run of hidden policies collapses to one "N other policies"
+//              row you can open in place. Rank numbers stay true, so position context is visible.
+//   grouped  — "Results (n)" first, then "Rest of the ladder (m)" below it. Everything operable.
+//   peek     — clean results list; the detail panel shows the selected policy's neighbours in the
+//              full ladder ("In the ladder"), live as you move it.
+var _searchConcept = 'current';
+var _gapOpen = {};   // customs the current search/filter shows — the target of select-all
 let _batchPosOpen = false;
 function prioBatchActive() { return prioMode && prioChecked.size >= 2; }
-// A control is ambiguous only on a SELECTED row while 2+ rows are selected (this row or the group?).
-function prioRowPaused(id) { return prioBatchActive() && prioChecked.has(id); }
 function prioToggleCheck(cb, id) {
   if (cb.checked) prioChecked.add(id); else prioChecked.delete(id);
   const tr = cb.closest('tr'); if (tr) tr.classList.toggle('prio-checked', cb.checked);
@@ -7625,16 +7677,6 @@ function _prioSyncSelAll(root) {
     cb.indeterminate = n > 0 && n < total;
     cb.disabled = total === 0;
   });
-}
-function prioSelectMatches() {
-  if (!prioMode) return;
-  _prioMatchIds.forEach(function(id){ prioChecked.add(id); });
-  document.querySelectorAll('#pol-tbody tr[data-pid]').forEach(function(tr){
-    var on = prioChecked.has(tr.dataset.pid);
-    tr.classList.toggle('prio-checked', on);
-    var box = tr.querySelector('.prio-check'); if (box) box.checked = on;
-  });
-  renderBatchBar();
 }
 function prioClearChecks() {
   prioChecked.clear(); _batchPosOpen = false;
@@ -7664,7 +7706,7 @@ function batchBarHtml() {
   const cb = _batchCombo();
   const lbl = function(w) { return w === 'top' ? 'Move to top' : 'Move to bottom'; };
   return '<span class="plv-batchbar">'
-    + '<span class="tab-sel-chip"' + (n >= 2 ? ' data-plv-tip="Arrows and rank editing are paused on selected rows. Drag any selected row to move them together."' : '') + '>' + n + ' selected'
+    + '<span class="tab-sel-chip"' + (n >= 2 ? ' data-plv-tip="Arrows and rank editing are paused. Drag any selected row to move them together."' : '') + '>' + n + ' selected'
     +   '<button type="button" class="tsc-x" onclick="prioClearChecks()" data-plv-tip="Deselect all" aria-label="Deselect all">'
     +   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>'
     +   '</button></span>'
@@ -7688,11 +7730,6 @@ function batchBarHtml() {
 // guidance note while rows are checked); Undo / Cancel / Save stay put.
 function renderBatchBar() {
   _prioSyncSelAll();
-  document.querySelectorAll('#pol-tbody tr[data-pid] .rank-num').forEach(function(b){
-    const tr = b.closest('tr');
-    b.setAttribute('data-plv-tip', (prioBatchActive() && tr.classList.contains('prio-checked'))
-      ? 'Move the ' + prioChecked.size + ' selected policies to start at this rank' : 'Type a rank to jump');
-  });
   const card = document.querySelector('.pol-card');
   if (card) card.classList.toggle('batch-active', prioMode && prioChecked.size >= 2);
   if (!prioChecked.size) _batchPosOpen = false;
@@ -7839,6 +7876,30 @@ window.addEventListener('resize', function(){
 
 // Exit: leaves immediately when nothing is unsaved; otherwise asks first.
 // (Discard-to-checkpoint is just Undo repeated, or the dialog's "Discard and exit".)
+function prioToggleGap(key) {
+  _gapOpen[key] = !_gapOpen[key];
+  renderPolicyTable();
+}
+function setSearchConcept(c) {
+  _searchConcept = c; _prioExpanded = false;
+  document.querySelectorAll('#scSwitch button').forEach(function(b){ b.setAttribute('aria-checked', b.getAttribute('data-c') === c ? 'true' : 'false'); });
+  renderPolicyTable();
+  if (prioMode) renderPrioPreview();
+}
+// peek: the selected policy's neighbours in the FULL ladder (3 above, 3 below), so a clean results
+// list keeps its positional context. Plain rows, no separators; selected = Vision selected-list recipe.
+function _prioLadderWindow(p) {
+  if (p.isDefault) return '';
+  const customs = POLICIES.filter(x => x.workload === p.workload && !x.isDefault).sort((a, b) => a.rank - b.rank);
+  const idx = customs.findIndex(x => x.id === p.id);
+  if (idx < 0) return '';
+  const lo = Math.max(0, idx - 3), hi = Math.min(customs.length, idx + 4);
+  const rows = customs.slice(lo, hi).map(x => '<div class="prio-lw-row' + (x.id === p.id ? ' is-sel' : '') + '"><span class="prio-lw-rank">' + x.rank + '</span><span class="prio-lw-name">' + escapeHtmlBP(x.name) + '</span></div>').join('');
+  return '<div class="prio-sec"><div class="prio-sec-hd">In the ladder</div>'
+    + (lo > 0 ? '<div class="prio-lw-more">' + lo + ' higher</div>' : '')
+    + '<div class="prio-lw">' + rows + '</div>'
+    + (hi < customs.length ? '<div class="prio-lw-more">' + (customs.length - hi) + ' lower</div>' : '') + '</div>';
+}
 function prioExit() {
   const n = prioChangeCount();
   if (n === 0) { prioCancel(); return; }
@@ -7927,18 +7988,7 @@ function renderModeBar() {
   if (!note || !summary || !actions) return;
   const infoSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
   const _batchSlot = document.getElementById('plvModeBatch');
-  const finding = !!(prioMode && policySearch);
-  if (_batchSlot) _batchSlot.innerHTML = (prioMode && prioChecked.size) ? batchBarHtml()
-    : (finding ? '<span class="plv-none-chip">None Selected</span>' : '');
-  if (finding) {
-    // Find state (Figma DCP 17266:112517): results count + "Select all"; once every match is selected
-    // the line reads "N matching policies selected" and the link goes away.
-    const total = _prioMatchIds.length, picked = _prioMatchIds.filter(id => prioChecked.has(id)).length;
-    const q = escapeHtmlBP(policySearch);
-    if (!total) note.innerHTML = '<span class="plv-find">' + (_dsStoreIconSvg('search-outlined', 20) || '') + '<span>No results for \u201c' + q + '\u201d.</span></span>';
-    else if (picked === total) note.innerHTML = '<span class="plv-find is-done"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5"/><polyline points="8 12.5 11 15.5 16 9"/></svg><span>' + total + ' matching ' + (total === 1 ? 'policy' : 'policies') + ' selected</span></span>';
-    else note.innerHTML = '<span class="plv-find">' + (_dsStoreIconSvg('search-outlined', 20) || '') + '<span>' + total + ' result' + (total === 1 ? '' : 's') + ' for \u201c' + q + '\u201d. <a href="#" class="plv-find-all" onclick="event.preventDefault();prioSelectMatches()">Select all</a></span></span>';
-  } else
+  if (_batchSlot) _batchSlot.innerHTML = (prioMode && prioChecked.size) ? batchBarHtml() : '';
   note.innerHTML = !prioMode ? PRIO_BROWSE_BRIEF : PRIO_BRIEF + ' <span data-plv-tip="' + PRIO_TIP.replace(/"/g, '&quot;') + '" style="display:inline-flex;vertical-align:-3px;color:var(--black-60);cursor:default">' + infoSvg + '</span>';
   if (!prioMode) {
     summary.textContent = '';
@@ -8205,6 +8255,7 @@ function renderPrioPreview() {
   host.innerHTML =
       '<div class="prio-preview-title">' + escapeHtmlBP(p.name) + stateChip + '</div>'
     + '<div class="prio-preview-sub">' + rankLbl + ' &middot; ' + _tnwlName(p.workload) + '</div>'
+    + (_searchConcept === 'peek' ? _prioLadderWindow(p) : '')
     + '<div class="prio-sec"><div class="prio-sec-hd">Data Scope</div>' + _prioScopeQuery(p) + '</div>'
     + '<div class="prio-sec"><div class="prio-sec-hd">Actions</div>' + actionsTable + '</div>'
     + '<div class="prio-sec"><div class="prio-ai">'
@@ -11085,5 +11136,12 @@ function aiacAcceptAll(){
         </div>
       </div>
 
+<div class="sc-switch" id="scSwitch" role="radiogroup" aria-label="Search concept (prototype)">
+  <span>Search while reordering:</span>
+  <button type="button" role="radio" aria-checked="true" data-c="current" onclick="setSearchConcept('current')">0 Current</button>
+  <button type="button" role="radio" aria-checked="false" data-c="gaps" onclick="setSearchConcept('gaps')">1 Gaps</button>
+  <button type="button" role="radio" aria-checked="false" data-c="grouped" onclick="setSearchConcept('grouped')">2 Grouped</button>
+  <button type="button" role="radio" aria-checked="false" data-c="peek" onclick="setSearchConcept('peek')">3 Peek</button>
+</div>
 </body>
 </html>
