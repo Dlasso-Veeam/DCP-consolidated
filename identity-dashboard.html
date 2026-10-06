@@ -1039,6 +1039,47 @@ td.idd-chk, th.idd-chk { text-align: center; padding: 0 0 0 12px; }
 </head>
 <body>
 
+<!-- Password gate -->
+<div id="passwordGate" style="position:fixed;inset:0;z-index:9999;background:var(--layout-bg);display:flex;align-items:center;justify-content:center;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;">
+  <div style="background:var(--white);border-radius:8px;box-shadow:0 8px 24px rgba(31,34,41,0.13);padding:48px 40px 40px;width:360px;display:flex;flex-direction:column;align-items:center;gap:8px;">
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" style="margin-bottom:4px">
+      <circle cx="18" cy="18" r="18" fill="#1ca8dd"/>
+      <path d="M10 18c0-4.418 3.582-8 8-8s8 3.582 8 8v2H10v-2z" fill="#fff" opacity=".25"/>
+      <rect x="11" y="19" width="14" height="9" rx="2" fill="#fff"/>
+      <circle cx="18" cy="23.5" r="1.5" fill="#1ca8dd"/>
+    </svg>
+    <div style="font-size: 16px;font-weight:500;color:var(--black-100);margin-bottom:2px;">Identity Resilience</div>
+    <div style="font-size:14px;color:var(--black-60);margin-bottom:20px;">Enter password to continue</div>
+    <input id="pwInput" type="password" placeholder="Password" autocomplete="current-password"
+      onkeydown="if(event.key==='Enter')_bde_auth.check()"
+      style="width:100%;box-sizing:border-box;height:44px;border:none;border-radius:4px;padding:0 14px;font-size:14px;font-weight:450;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;color:var(--black-100);background:var(--form-bg);outline:none;"
+      onfocus="this.style.boxShadow='inset 0 0 0 1px #1ca8dd'"
+      onblur="this.style.boxShadow='none'"/>
+    <div id="pwError" style="font-size: 14px;color:var(--red);min-height:16px;align-self:flex-start;margin-top:2px;"></div>
+    <button id="pwBtn" onclick="_bde_auth.check()" style="width:100%;height:44px;margin-top:4px;background:var(--blue);color:var(--white);border:none;border-radius:4px;font-size:14px;font-weight:450;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;cursor:pointer;"
+      onmouseover="if(!this.disabled)this.style.background='var(--blue-dark)'"
+      onmouseout="if(!this.disabled)this.style.background='#1ca8dd'">Continue</button>
+  </div>
+</div>
+
+<!-- Early session-check: runs synchronously right after the gate markup so an
+     already-authenticated session hides the gate before the rest of the page
+     parses. Without this, the gate flashes for a moment on refresh while the
+     main password-gate IIFE (far below) finishes loading and runs its check. -->
+<script>
+(function(){
+  try {
+    var raw = sessionStorage.getItem('_sw_s');
+    if (!raw) return;
+    var parsed = JSON.parse(raw);
+    if (parsed && parsed.expires && Date.now() < parsed.expires) {
+      var g = document.getElementById('passwordGate');
+      if (g) g.style.display = 'none';
+    }
+  } catch(e) {}
+})();
+</script>
+
 <div class="app">
   <!-- Sidenav (VIRO rail — cloned from backup-policies.html; wired for the Dashboard slot) -->
   <div class="sidenav">
@@ -3281,6 +3322,69 @@ function setIddRange(k) { iddHooks.S.range = { k: k }; document.getElementById('
   });
   document.addEventListener('focusout', hide);
   window.addEventListener('scroll', hide, true);
+})();
+</script>
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// PASSWORD GATE
+// ═══════════════════════════════════════════════════════════════════
+(function() {
+  'use strict';
+  const AUTH_ENABLED = true;
+  if (!AUTH_ENABLED) { document.getElementById('passwordGate').style.display = 'none'; return; }
+  const _H = '550710b486683d01b285474d6bbb84c48c2d3df1231e6dc9bbb853e433cc1b13';
+  const _S = [0x9f,0x4a,0x2c,0x8e,0x1b,0x7d,0x30,0x56,0xa5,0xf2,0xe9,0xc4,0xb8,0xd1,0xf7,0xe3];
+  const _I = 310000;
+  const SESSION_KEY = '_sw_s';
+  const LOCKOUT_KEY = '_sw_l';
+  const SESSION_TTL = 8*60*60*1000;
+  const MIN_DELAY_MS = 1500;
+  const MAX_ATTEMPTS = 5;
+  const LOCKOUT_TIERS = [30000,120000,600000,3600000,86400000];
+  function isAuthenticated() {
+    try {
+      const raw = sessionStorage.getItem(SESSION_KEY);
+      if (!raw) return false;
+      const {token,expires} = JSON.parse(raw);
+      if (Date.now() > expires) { sessionStorage.removeItem(SESSION_KEY); return false; }
+      return token === _H.slice(0,16) + String(expires);
+    } catch(e) { return false; }
+  }
+  function grantSession() {
+    const expires = Date.now() + SESSION_TTL;
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify({token:_H.slice(0,16)+String(expires),expires}));
+  }
+  function getLockout() { try { return JSON.parse(localStorage.getItem(LOCKOUT_KEY)) || {attempts:0,until:0}; } catch(e) { return {attempts:0,until:0}; } }
+  function saveLockout(s) { localStorage.setItem(LOCKOUT_KEY, JSON.stringify(s)); }
+  function recordFailure() { const s = getLockout(); s.attempts++; if (s.attempts >= MAX_ATTEMPTS) { s.until = Date.now() + LOCKOUT_TIERS[Math.min(s.attempts-MAX_ATTEMPTS, LOCKOUT_TIERS.length-1)]; } saveLockout(s); return s; }
+  function recordSuccess() { localStorage.removeItem(LOCKOUT_KEY); }
+  async function deriveHash(pw) {
+    const enc = new TextEncoder();
+    const km = await crypto.subtle.importKey('raw',enc.encode(pw),'PBKDF2',false,['deriveBits']);
+    const bits = await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:new Uint8Array(_S),iterations:_I},km,256);
+    return Array.from(new Uint8Array(bits)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+  function safeEqual(a,b) { if(a.length!==b.length)return false; let d=0; for(let i=0;i<a.length;i++)d|=a.charCodeAt(i)^b.charCodeAt(i); return d===0; }
+  function setError(m) { document.getElementById('pwError').textContent=m; document.getElementById('pwInput').style.boxShadow='inset 0 0 0 1px var(--red)'; }
+  function clearError() { document.getElementById('pwError').textContent=''; document.getElementById('pwInput').style.boxShadow='none'; }
+  function setLoading(on) { const b=document.getElementById('pwBtn'),i=document.getElementById('pwInput'); b.disabled=on; i.disabled=on; b.style.opacity=on?'0.6':'1'; b.style.cursor=on?'not-allowed':'pointer'; b.textContent=on?'Verifying\u2026':'Continue'; }
+  function showLockout(until) {
+    const i=document.getElementById('pwInput'),b=document.getElementById('pwBtn'); i.disabled=true; b.disabled=true; b.style.opacity='0.6'; b.style.cursor='not-allowed';
+    function tick() { const s=Math.ceil((until-Date.now())/1000); if(s<=0){i.disabled=false;b.disabled=false;b.style.opacity='1';b.style.cursor='pointer';b.textContent='Continue';clearError();i.focus();return;} const m=Math.floor(s/60),r=s%60,l=m>0?m+'m '+r+'s':r+'s'; setError('Too many attempts. Try again in '+l+'.'); b.textContent='Locked ('+l+')'; setTimeout(tick,1000); }
+    tick();
+  }
+  async function check() {
+    const lo=getLockout(); if(lo.until>Date.now()){showLockout(lo.until);return;}
+    const val=document.getElementById('pwInput').value; if(!val){setError('Please enter the password.');return;}
+    setLoading(true); clearError(); const t0=Date.now();
+    let hash; try{hash=await deriveHash(val);}catch(e){setLoading(false);setError('Verification failed.');return;}
+    const el=Date.now()-t0; if(el<MIN_DELAY_MS) await new Promise(r=>setTimeout(r,MIN_DELAY_MS-el));
+    if(safeEqual(hash,_H)){recordSuccess();grantSession();hash=null;document.getElementById('pwInput').value='';document.getElementById('passwordGate').style.display='none';}
+    else{hash=null;document.getElementById('pwInput').value='';const st=recordFailure();setLoading(false);if(st.until>Date.now()){showLockout(st.until);}else{const rem=MAX_ATTEMPTS-st.attempts;setError(rem>0?'Incorrect password. '+rem+' attempt'+(rem!==1?'s':'')+' remaining.':'Incorrect password.');document.getElementById('pwInput').focus();}}
+  }
+  if(isAuthenticated()){document.getElementById('passwordGate').style.display='none';}
+  else{const lo=getLockout();if(lo.until>Date.now())showLockout(lo.until);else document.getElementById('pwInput').focus();}
+  window._bde_auth = {check};
 })();
 </script>
 </body>
