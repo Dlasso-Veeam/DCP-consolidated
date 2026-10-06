@@ -697,14 +697,24 @@ table.idd-tbl tr[tabindex]:focus-visible { outline: none; box-shadow: var(--vv-f
 [hidden] { display: none !important; }
 .idd-tsearch .x { border: none; background: none; padding: 0; cursor: pointer; display: inline-flex; color: var(--black-60); } .idd-tsearch .x:hover { color: var(--black-100); }
 .idd-tn { display: flex; align-items: center; gap: 8px; width: 100%; flex-shrink: 0; height: 44px; padding: 0 12px; border: none; background: var(--white); font-family: inherit; font-size: 16px; font-weight: 450; color: var(--black-100); cursor: pointer; text-align: left; }
-.idd-tn.ent { height: 40px; }
 .idd-tn:hover { background: var(--em-green-tint); }
 .idd-tn.on { background: var(--em-green-tint); box-shadow: inset 2px 0 0 var(--em-green); font-weight: 500; color: var(--em-green); }
 .idd-tn .idd-ntile { border-radius: 6px; }
 .idd-tn.on .idd-ntile { background: var(--em-green); color: var(--white); }
 .idd-tn .lbl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.idd-tn .ct { min-width: 24px; height: 20px; padding: 0 6px; border-radius: 10px; background: var(--em-green); color: var(--white); font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; }
-.idd-tn.ent .ct { background: none; color: var(--black-70); font-size: 14px; font-weight: 450; }
+.idd-tn .ct { min-width: 28px; height: 28px; padding: 0 8px; box-sizing: border-box; border-radius: 14px; background: var(--em-green-tint); color: var(--em-green); font-size: 16px; font-weight: 500; line-height: 20px; display: inline-flex; align-items: center; justify-content: center; }   /* Figma entity list count: tint pill, 16/500 brand text */
+.idd-tn.on .ct { background: var(--white); }
+.idd-tn.static .ct { min-width: 24px; height: 20px; padding: 0 6px; font-size: 12px; line-height: normal; border-radius: 2px; }
+/* card title with a view picker (Threat Center pattern: title + chevron → menu of views with a one-line description each) */
+.idd-wt-pick { display: inline-flex; align-items: center; gap: 2px; max-width: 100%; padding: 0; border: none; background: none; font: inherit; color: inherit; cursor: pointer; border-radius: 4px; }
+.idd-wt-pick:hover { color: var(--em-green); } .idd-wt-pick:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); }
+.idd-wt-pick svg { width: 24px; height: 24px; color: var(--black-70); flex-shrink: 0; }
+.idd-menu-item.two { height: auto; min-height: 44px; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px; padding: 6px 12px; text-align: left; }
+.idd-menu-item.two small { font-size: 14px; font-weight: 450; color: var(--black-70); line-height: 18px; }
+/* incidents */
+table.idd-tbl tr[data-incident] { cursor: pointer; }
+.idd-fid.inc { background: var(--status-blue-5); color: var(--status-blue); gap: 4px; padding: 0 6px 0 4px; } .idd-fid.inc svg { width: 14px; height: 14px; }
+.idd-ttile.inc { background: var(--status-blue-5); color: var(--status-blue); }
 .idd-tnav-h { margin: 12px 12px 4px; font-size: 12px; font-weight: 500; letter-spacing: 0.02em; color: var(--black-70); text-transform: uppercase; }
 .idd-tnav-none { margin: 4px 12px; padding: 12px; border-radius: 4px; background: var(--black-5); font-size: 14px; line-height: 20px; color: var(--black-70); }
 .idd-tmain { flex: 1; min-width: 0; background: var(--white); overflow-y: auto; scrollbar-gutter: stable; display: flex; flex-direction: column; }
@@ -716,14 +726,15 @@ table.idd-tbl tr[tabindex]:focus-visible { outline: none; box-shadow: var(--vv-f
 .idd-gcanvas svg { width: 100%; height: 100%; display: block; }
 .idd-gcanvas text { font-family: 'Circular Pro', sans-serif; font-size: 14px; fill: var(--black-100); }
 .idd-gcanvas .gn { cursor: pointer; } .idd-gcanvas .gn:hover circle:first-child { filter: brightness(0.92); } .idd-gcanvas .gn:hover text:not(.k) { text-decoration: underline; } .idd-gcanvas .gn:focus-visible { outline: none; } .idd-gcanvas .gn:focus-visible circle:first-child { stroke: var(--em-green); stroke-width: 3; }
-.idd-gcanvas text.k { fill: var(--black-70); } .idd-gcanvas text.b { font-size: 12px; }
+.idd-gcanvas text.k { fill: var(--black-100); } .idd-gcanvas .gn text:not(.k):not(.b) { fill: var(--em-green); } .idd-gcanvas text.b { font-size: 12px; fill: var(--black-100); }
 .idd-gcanvas .edge { stroke: var(--black-30); stroke-width: 1; fill: none; }
 .idd-gbtn { position: absolute; top: 12px; left: 16px; z-index: 2; }
-.idd-gzoom { position: absolute; right: 16px; bottom: 16px; z-index: 2; display: flex; flex-direction: column; background: var(--white); border: 1px solid var(--black-20); border-radius: 4px; overflow: hidden; }
-.idd-gzoom button { width: 36px; height: 36px; border: none; background: var(--white); color: var(--black-100); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
-.idd-gzoom button + button { border-top: 1px solid var(--black-10); }
-.idd-gzoom button:hover { background: var(--em-green-tint); }
-.idd-gzoom svg { width: 20px; height: 20px; }
+.idd-gctl { position: absolute; left: 16px; bottom: 16px; z-index: 2; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.idd-gstack { display: flex; flex-direction: column; }
+.idd-gctl button { width: 32px; height: 32px; padding: 0; border: 1px solid var(--black-20); border-radius: 4px; background: var(--white); color: var(--black-100); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.idd-gstack button:first-child { border-bottom-left-radius: 0; border-bottom-right-radius: 0; margin-bottom: -1px; } .idd-gstack button:last-child { border-top-left-radius: 0; border-top-right-radius: 0; }
+.idd-gctl button:hover { background: var(--em-green-tint); }
+.idd-gctl svg { width: 16px; height: 16px; }
 .idd-gbar { height: 56px; flex-shrink: 0; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid var(--black-10); }
 /* overview columns */
 .idd-cols { display: flex; flex: 1 0 auto; }
@@ -741,7 +752,7 @@ table.idd-tbl tr[tabindex]:focus-visible { outline: none; box-shadow: var(--vv-f
 .idd-nsteps li { display: flex; gap: 12px; font-size: 16px; line-height: 22px; }
 .idd-nsteps .n { width: 24px; height: 24px; border-radius: 50%; background: var(--black-5); color: var(--black-70); font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .idd-nsteps .b { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; min-width: 0; }
-.idd-pr { display: flex; align-items: center; gap: 12px; min-height: 40px; font-size: 16px; line-height: 22px; border-bottom: 1px solid var(--black-5); }
+.idd-pr { display: flex; align-items: center; gap: 12px; min-height: 40px; font-size: 16px; line-height: 22px; }
 .idd-pr .k { width: 150px; flex-shrink: 0; color: var(--black-70); }
 .idd-pr .v { flex: 1; min-width: 0; color: var(--black-100); display: flex; align-items: center; flex-wrap: wrap; gap: 8px; overflow-wrap: anywhere; }
 .idd-pr .v .idd-conf::before { height: 16px; }
@@ -1023,7 +1034,7 @@ td.idd-chk, th.idd-chk { text-align: center; padding: 0 0 0 12px; }
 .fnd-card .filter-bar { padding: 12px 16px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
 /* ═══ Workload health strips (pulse check) ═══ */
-.idd-hrow { display: grid; grid-template-columns: 240px minmax(0, 1fr) 300px; gap: 16px; align-items: center; min-height: 56px; padding: 8px 12px; }
+.idd-hrow[data-wlrow] { display: grid; grid-template-columns: 240px minmax(0, 1fr) 300px; gap: 16px; align-items: center; min-height: 56px; padding: 8px 12px; }   /* scoped: the finding History table reuses the .idd-hrow name */
 .idd-hrow[data-wlrow]:hover { background: var(--em-green-tint); cursor: pointer; }
 .idd-hstrip { display: flex; gap: 2px; height: 24px; }
 .idd-hcell { flex: 1 1 0; min-width: 2px; border-radius: 2px; background: var(--black-10); }
@@ -1034,7 +1045,7 @@ td.idd-chk, th.idd-chk { text-align: center; padding: 0 0 0 12px; }
 .idd-haxis > div { display: flex; justify-content: space-between; font-size: 14px; line-height: 20px; color: var(--black-70); }
 .idd-hlegend { display: flex; gap: 16px; padding: 4px 12px 12px; font-size: 14px; line-height: 20px; color: var(--black-70); flex-wrap: wrap; }
 .idd-hlegend i { display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 8px; vertical-align: -1px; }
-@media (max-width: 1100px) { .idd-hrow, .idd-haxis { grid-template-columns: 1fr; gap: 8px; } .idd-haxis > div:first-child, .idd-haxis > div:last-child { display: none; } }
+@media (max-width: 1100px) { .idd-hrow[data-wlrow], .idd-haxis { grid-template-columns: 1fr; gap: 8px; } .idd-haxis > div:first-child, .idd-haxis > div:last-child { display: none; } }
 </style>
 </head>
 <body>
@@ -1697,7 +1708,7 @@ var WIDGETS = {
   'kpi-succ':   { title: 'Backup success',             go: ACT },
   'kpi-rpo':    { title: 'Policies within RPO',        go: POL },
   'kpi-issues': { title: 'Open findings',               go: TC },
-  'top':        { title: 'Top findings',                go: TC },
+  'top':        { title: 'Top findings',                go: TC, pick: true },
   'sessions':   { title: 'Recent sessions',            go: ACT },
   'attn':       { title: 'Protection issues',            titleId: 'iddAttTitle', multi: true },
   'threats':    { title: 'Recent threats',             threat: true },
@@ -1713,7 +1724,7 @@ var AGE = { conn: '1m ago' };   // compact so KPI-card titles never truncate
 function ageOf(k) { return AGE[k] || '2m ago'; }
 function wh(k) {
   var w = WIDGETS[k];
-  return '<div class="idd-wh"><div class="idd-wt"' + (w.titleId ? ' id="' + w.titleId + '"' : '') + '>' + w.title + '</div>'
+  return '<div class="idd-wh"><div class="idd-wt"' + (w.titleId ? ' id="' + w.titleId + '"' : '') + '>' + (w.pick ? '<button type="button" class="idd-wt-pick" data-toppick="1" aria-haspopup="menu" aria-label="Change view: ' + w.title + '"><span id="iddTopTitle">' + w.title + '</span>' + ico('keyboard-arrow-down-outlined', 24) + '</button>' : w.title) + '</div>'
     + '<span class="idd-wage" data-age="' + k + '">' + ageOf(k) + '</span>'
     + '<button type="button" class="idd-ibtn" data-refresh="' + k + '" aria-label="Refresh ' + w.title + '">' + ICON_REFRESH + '</button>'
     + '<button type="button" class="idd-ibtn" data-kebab="' + k + '" aria-label="' + w.title + ' options" aria-haspopup="menu">' + ICON_KEBAB + '</button></div>';
@@ -2167,7 +2178,7 @@ function renderThreats_parked() {   // PARKED 2026-10-05: threats are findings �
 }
 
 /* Detail overlay */
-var NODE_ICON = { Actor: 'user-outlined', Technique: 'risk-outlined', Subject: 'objects-outlined', Impact: 'alert-warning-outlined', Workload: 'workload-outlined', Connection: 'integration-widget-outlined', Policy: 'policy-outlined', Sessions: 'history-outlined', Backups: 'backup-outlined', Objects: 'objects-outlined', Finding: 'issues-outlined', 'Restore point': 'restore-point-outlined' };
+var NODE_ICON = { Actor: 'user-outlined', Technique: 'risk-outlined', Subject: 'objects-outlined', Impact: 'alert-warning-outlined', Workload: 'workload-outlined', Connection: 'integration-widget-outlined', Policy: 'policy-outlined', Sessions: 'history-outlined', Backups: 'backup-outlined', Objects: 'objects-outlined', Finding: 'issues-outlined', Incident: 'sd-folder', 'Restore point': 'restore-point-outlined' };
 function nodeGlyph(k, cx, cy, color) { var n = NODE_ICON[k] || 'objects-outlined', g = (typeof ico === 'function' ? ico(n, 24) : '') || _dsStoreIconSvg(n, 24) || ''; return g.replace('<svg ', '<svg x="' + (cx - 12) + '" y="' + (cy - 12) + '" style="color:' + (color || '#fff') + '" '); }
 function graphSvg(t) {
   var W = 900, nodes = [ { k: 'Actor', v: t.actor, c: 'var(--plum)' }, { k: 'Technique', v: t.tech.split(' · ')[0], c: 'var(--orange)' }, { k: 'Subject', v: t.subject, c: 'var(--dk-blue)' }, { k: 'Impact', v: t.blast, c: 'var(--red)' } ];
@@ -2426,7 +2437,44 @@ function uRow(x) {
   return '<tr tabindex="0" ' + attr + '="' + x.id + '" data-hint="Open finding details" data-dest="Finding details"><td>' + x.id + '</td><td>' + tDots(x.lvl) + '</td><td>' + fTitleCell(x) + '</td><td>' + chip('neutral', x.type) + '</td><td>' + chip(STATUS_CHIP[x.status], x.status) + '</td><td>' + fWl(x).name + '</td>'
     + '<td>' + fDate(x.c, true) + '</td><td>' + fDate(x.u, true) + '</td><td>' + assigneeCell(x.assignee) + '</td><td class="idd-act"><button type="button" class="idd-ibtn rowdetail" ' + attr + '="' + x.id + '" data-tooltip="View finding details" aria-label="View finding details: ' + esc(x.name) + '">' + opn + '</button></td></tr>';
 }
+/* ── Incidents: a collection of findings (Threat Center: an incident groups related findings, security and resilience alike). Every figure is derived from its member findings. ── */
+var INCIDENTS = [
+  { id: 'INC-1043', name: 'Suspected Active Directory compromise', assignee: 'Unassigned',
+    desc: 'A DCSync replication request from a non-DC host, a service account added to Domain Admins and an out-of-hours change to the Default Domain Policy landed within about an hour. The forest recovery finding carries the last clean restore point.',
+    members: [['threat', '10486'], ['threat', '10483'], ['threat', '10487'], ['finding', '24550']] },
+  { id: 'INC-1042', name: 'Privilege escalation in Entra ID', assignee: 'Darren Lasso',
+    desc: 'A new app was granted Directory.ReadWrite.All and the conditional access policy that requires MFA for admins was disabled within half an hour of each other.',
+    members: [['threat', '10485'], ['threat', '10484']] },
+  { id: 'INC-1041', name: 'Bulk identity changes in Okta', assignee: 'Unassigned',
+    desc: 'User accounts and groups were deleted, a group was emptied and the global MFA enforcement policy was weakened within the same morning. Each finding has a restore point from before the change.',
+    members: [['finding', '24548'], ['finding', '24547'], ['finding', '24546'], ['finding', '24549']] }
+];
+function tKey(t) { return -t.off * 1440 + t.h * 60 + t.m; }
+function incView(inc) {
+  if (!inc || !inc.members) return null;
+  var all = unifiedFindings(), mem = inc.members.map(function(m){ return all.filter(function(x){ return x.kind === m[0] && x.id === m[1]; })[0]; }).filter(Boolean);
+  if (!mem.length) return null;
+  var openAny = mem.some(function(x){ return x.status === 'Open'; }), invAny = mem.some(function(x){ return x.status === 'Under Investigation'; }), srcs = [];
+  mem.forEach(function(x){ var n = fWl(x).name; if (srcs.indexOf(n) < 0) srcs.push(n); });
+  var c = mem.reduce(function(a, x){ return tKey(x.c) < tKey(a) ? x.c : a; }, mem[0].c), u = mem.reduce(function(a, x){ return tKey(x.u) > tKey(a) ? x.u : a; }, mem[0].u);
+  return { id: inc.id, name: inc.name, desc: inc.desc, assignee: inc.assignee, mem: mem.sort(fSort), lvl: Math.max.apply(null, mem.map(function(x){ return x.lvl; })), status: openAny ? 'Open' : invAny ? 'Under Investigation' : 'Resolved - Remediated', srcs: srcs, c: c, u: u };
+}
+function incidentsOpen() { return INCIDENTS.map(incView).filter(function(v){ return v && (v.status === 'Open' || v.status === 'Under Investigation'); }).sort(function(a, b){ return (b.lvl - a.lvl) || (tKey(b.u) - tKey(a.u)); }); }
+function iRow(v) {
+  var opn = _dsStoreIconSvg('metadata-explorer-outlined', 16) || '';
+  return '<tr tabindex="0" data-incident="' + v.id + '" data-hint="Open incident details" data-dest="Incident details"><td>' + v.id + '</td><td>' + tDots(v.lvl) + '</td><td><span class="idd-ell" style="display:block">' + esc(v.name) + '</span></td><td>' + chip(STATUS_CHIP[v.status], v.status) + '</td><td><span class="idd-ell" style="display:block">' + esc(v.srcs.join(', ')) + '</span></td><td>' + v.mem.length + '</td>'
+    + '<td>' + fDate(v.c, true) + '</td><td>' + fDate(v.u, true) + '</td><td>' + assigneeCell(v.assignee) + '</td><td class="idd-act"><button type="button" class="idd-ibtn rowdetail" data-incident="' + v.id + '" data-tooltip="View incident details" aria-label="View incident details: ' + esc(v.name) + '">' + opn + '</button></td></tr>';
+}
+var TOPMODE = 'findings', TOP_MODES = [['findings', 'Top findings', 'Findings', 'Open findings, most severe first'], ['incidents', 'Top incidents', 'Incidents', 'Groups of related findings, most severe first']];
 function renderTop() {
+  var tt = document.getElementById('iddTopTitle'); if (tt) tt.textContent = TOP_MODES[TOPMODE === 'incidents' ? 1 : 0][1];
+  if (TOPMODE === 'incidents') {
+    var inc = incidentsOpen(), shown = inc.slice(0, 10);
+    document.getElementById('iddTop').innerHTML = shown.length ? '<table class="idd-tbl dense"><colgroup><col style="width:9%"><col style="width:7%"><col style="width:24%"><col style="width:13%"><col style="width:13%"><col style="width:8%"><col style="width:10%"><col style="width:10%"><col style="width:9%"><col style="width:3%"></colgroup>'
+      + '<thead><tr><th>ID</th><th>Severity</th><th>Name</th><th>Status</th><th>Source</th><th>Findings</th><th>Created At</th><th>Last Updated</th><th>Assignee</th><th></th></tr></thead><tbody>' + shown.map(iRow).join('') + '</tbody></table>' : '<div class="idd-empty">No open incidents.</div>';
+    document.getElementById('iddTopFoot').innerHTML = '<span class="idd-sp"></span><span class="link is-disabled" aria-disabled="true" data-tooltip="Threat Center › Incidents, filtered to identity workloads (not part of this prototype yet)">View all in Threat Center</span><span class="cnt">' + (shown.length ? '1 - ' + shown.length + ' of ' + inc.length : '0 of 0') + '</span>';
+    return;
+  }
   var all = openUnified(), top = all.slice(0, 10);
   document.getElementById('iddTop').innerHTML = top.length ? '<table class="idd-tbl dense"><colgroup><col style="width:6%"><col style="width:7%"><col style="width:21%"><col style="width:11%"><col style="width:14%"><col style="width:11%"><col style="width:10%"><col style="width:10%"><col style="width:7%"><col style="width:3%"></colgroup><thead><tr><th>ID</th><th>Severity</th><th>Name</th><th>Type</th><th>Status</th><th>Source</th><th>Created At</th><th>Last Updated</th><th>Assignee</th><th></th></tr></thead><tbody>' + top.map(uRow).join('') + '</tbody></table>' : '<div class="idd-empty">No open findings.</div>';
   document.getElementById('iddTopFoot').innerHTML = '<span class="idd-sp"></span><span class="link is-disabled" aria-disabled="true" data-tooltip="' + esc(TC_HINT) + '">View all in Threat Center</span><span class="cnt">' + (top.length ? '1 - ' + top.length + ' of ' + all.length : '0 of 0') + '</span>';
@@ -2494,6 +2542,52 @@ function renderSession() {
   document.getElementById('iddSMain').innerHTML = '<div class="idd-cols"><div class="idd-col-l"><div class="idd-sec-h"><h3>Session Details</h3></div><div class="idd-slog"><div class="idd-slog-bar"><div class="idd-slog-search">' + ico('search-outlined', 16) + '<input id="iddSLogQ" placeholder="Search by message" value="' + esc(SS.q) + '" aria-label="Search the session log"></div>'
     + '<button type="button" class="idd-slog-sel" data-ssf="1" aria-haspopup="menu"><span>Status: ' + fl[SS.f] + '</span>' + ico('keyboard-arrow-down-outlined', 20) + '</button></div><div class="idd-slog-rows">' + rows + '</div></div></div>'
     + '<div class="idd-col-r"><div class="idd-sec-h"><h3>Properties</h3></div>' + props + '</div></div>';
+}
+/* Incident = a tab in the same work-tab overlay as findings (Threat Center): ONE view model (like findings) so the graph, left-panel sections, entity tables and History all work. Every entity, event and count is aggregated from the member findings. */
+function incEnt(mem) {
+  var out = {}, order = ['Workloads', 'Connections', 'Policies', 'Objects', 'Restore points', 'Identities'], o2 = {};
+  mem.forEach(function(x){ var m = modelOf({ kind: x.kind, id: x.id }); Object.keys(m.ent || {}).forEach(function(k){ out[k] = out[k] || []; m.ent[k].forEach(function(e){ if (!out[k].some(function(o){ return o[0] === e[0]; })) out[k].push(e); }); }); });
+  order.forEach(function(k){ if (out[k] && out[k].length) o2[k] = out[k]; }); return o2;
+}
+function histMs(stamp) { return Date.parse(String(stamp).replace(/(\d+:\d+ [AP]M)$/, ' $1')); }
+function incHist(v) {
+  var ev = [[fDate(v.c), 'Incident created from ' + v.mem.length + ' correlated findings', v.id]];
+  v.mem.forEach(function(x){ var m = modelOf({ kind: x.kind, id: x.id }); (m.hist || []).forEach(function(h){ ev.push([h[0], h[1], 'FND-' + x.id + (h[2] ? ' · ' + h[2] : '')]); }); });
+  return ev.sort(function(a, b){ return histMs(a[0]) - histMs(b[0]); });
+}
+function graphIncident(v, ent) {
+  var W = 900, H = 340, cx = 650, cy = H / 2, FX = 830;
+  /* three columns of at most two entity types, staggered so no edge runs through another node's label */
+  var cols = [[90, [.3, .7], [['Workload', 'Workloads'], ['Connection', 'Connections']], 'var(--plum)'], [270, [.14, .84], [['Policy', 'Policies'], ['Actor', 'Identities']], 'var(--dk-blue)'], [450, [.22, .78], [['Objects', 'Objects'], ['Restore point', 'Restore points']], 'var(--orange)']];
+  var L = []; cols.forEach(function(c){ var k = 0; c[2].forEach(function(d){ var e = ent[d[1]]; if (!e) return; L.push({ k: d[0], x: c[0], y: H * c[1][k++], c: e.length, v: e[0][0] + (e.length > 1 ? ' +' + (e.length - 1) : ''), col: c[3] }); }); });
+  var edges = '';
+  var curve = function(ax, ay, bx, by){ var xm = (ax + bx) / 2; return '<path class="edge" d="M' + ax + ' ' + ay + ' C' + xm + ' ' + ay + ',' + xm + ' ' + by + ',' + bx + ' ' + by + '"/>'; };
+  L.forEach(function(n){ edges += curve(n.x + 22, n.y, cx - 34, cy); });
+  var fcol = function(l){ return l === 5 ? 'var(--red)' : l === 4 ? 'var(--orange)' : 'var(--gold-20)'; }, fnodes;
+  if (v.mem.length > 1) {   // several findings collapse into ONE node with a count badge; it opens the Findings section
+    edges += curve(cx + 34, cy, FX - 22, cy);
+    fnodes = '<g class="gn" data-gnode="Findings" role="link" tabindex="0" aria-label="Open Findings"><circle cx="' + FX + '" cy="' + cy + '" r="22" fill="' + fcol(v.lvl) + '"/>' + nodeGlyph('Finding', FX, cy) + '<circle cx="' + (FX + 18) + '" cy="' + (cy - 19) + '" r="12" fill="var(--white)" stroke="var(--black-10)"/><text class="b" x="' + (FX + 18) + '" y="' + (cy - 15) + '" text-anchor="middle">' + v.mem.length + '</text><text class="k" x="' + FX + '" y="' + (cy + 40) + '" text-anchor="middle">Findings</text></g>';
+  } else {
+    var x1 = v.mem[0]; edges += curve(cx + 34, cy, FX - 22, cy);
+    fnodes = '<g class="gn" data-open="' + x1.kind + ':' + x1.id + '" role="link" tabindex="0" aria-label="Open finding ' + x1.id + '"><circle cx="' + FX + '" cy="' + cy + '" r="22" fill="' + fcol(x1.lvl) + '"/>' + nodeGlyph('Finding', FX, cy) + '<text class="k" x="' + FX + '" y="' + (cy + 40) + '" text-anchor="middle">FND-' + x1.id + '</text></g>';
+  }
+  var circle = function(n){ var vv = n.v.length > 22 ? n.v.slice(0, 21) + '…' : n.v;
+    return '<g class="gn" data-gnode="' + n.k + '" role="link" tabindex="0" aria-label="Open ' + n.k + '"><circle cx="' + n.x + '" cy="' + n.y + '" r="22" fill="' + n.col + '"/>' + nodeGlyph(n.k, n.x, n.y) + '<circle cx="' + (n.x + 18) + '" cy="' + (n.y - 19) + '" r="12" fill="var(--white)" stroke="var(--black-10)"/><text class="b" x="' + (n.x + 18) + '" y="' + (n.y - 15) + '" text-anchor="middle">' + n.c + '</text><text class="k" x="' + n.x + '" y="' + (n.y + 40) + '" text-anchor="middle">' + n.k + '</text><text x="' + n.x + '" y="' + (n.y + 58) + '" text-anchor="middle">' + esc(vv) + '</text></g>'; };
+  var hub = '<g class="gn" data-gnode="Finding" role="link" tabindex="0" aria-label="Open Overview"><circle cx="' + cx + '" cy="' + cy + '" r="34" fill="var(--status-blue-5)" stroke="#9dd3ee" stroke-width="2"/>' + nodeGlyph('Incident', cx, cy, 'var(--status-blue)') + '<text class="k" x="' + cx + '" y="' + (cy + 54) + '" text-anchor="middle" style="font-weight:500">' + v.id + '</text></g>';
+  return '<svg viewBox="0 0 ' + W + ' ' + (H + 40) + '" role="img" aria-label="Relationship graph for incident ' + v.id + '">' + edges + L.map(circle).join('') + fnodes + hub + '</svg>';
+}
+function incModel(id) {
+  var iv = incView(INCIDENTS.filter(function(i){ return i.id === id; })[0]); if (!iv) return null;
+  var ent = incEnt(iv.mem), types = []; iv.mem.forEach(function(x){ if (types.indexOf(x.type) < 0) types.push(x.type); });
+  return { kind: 'incident', id: iv.id, lvl: iv.lvl, name: iv.name, status: iv.status, assignee: iv.assignee, kicker: 'Incident', icon: '', upd: fDate(iv.u), iv: iv,
+    summary: '', desc: iv.desc, steps: [], hist: incHist(iv), ent: ent, graph: graphIncident(iv, ent), related: iv.mem.map(function(x){ return { kind: x.kind, id: x.id, lvl: x.lvl }; }),
+    props: [['Status', chip(STATUS_CHIP[iv.status], iv.status)], ['Severity', '<span class="idd-conf ' + (iv.lvl === 3 ? '' : 'High') + '">' + LVL_NAME[iv.lvl] + '</span>'], ['Assignee', assigneeCell(iv.assignee)], ['Findings', null], ['Finding Types', types.map(function(t){ return chip('neutral', t); }).join(' ')],
+      ['Incident ID', iv.id], ['Source', esc(iv.srcs.join(', '))], ['Created At', fDate(iv.c)], ['Last Updated', fDate(iv.u)], ['Created By', 'Veeam Resilience Posture Engine'], ['Environment', 'Production']] };
+}
+function renderIncFindings(M) {
+  return '<div class="idd-ehead"><span class="idd-ntile">' + ico('issues-outlined') + '</span><span class="ttl">Findings</span><span class="ct">' + M.iv.mem.length + '</span></div>'
+    + '<div class="idd-tbl-wrap"><table class="idd-tbl dense"><colgroup><col style="width:7%"><col style="width:7%"><col style="width:21%"><col style="width:11%"><col style="width:14%"><col style="width:11%"><col style="width:10%"><col style="width:10%"><col style="width:9%"><col style="width:3%"></colgroup>'
+    + '<thead><tr><th>ID</th><th>Severity</th><th>Name</th><th>Type</th><th>Status</th><th>Source</th><th>Created At</th><th>Last Updated</th><th>Assignee</th><th></th></tr></thead><tbody>' + M.iv.mem.map(uRow).join('') + '</tbody></table></div>';
 }
 function openSession(id) { SS.id = id; SS.q = ''; SS.f = 'all'; renderSession(); var o = document.getElementById('iddSess'); o.classList.add('open'); o.setAttribute('aria-hidden', 'false'); }
 function closeSession() { var o = document.getElementById('iddSess'); o.classList.remove('open'); o.setAttribute('aria-hidden', 'true'); SS.id = null; if (typeof closeMenu === 'function') closeMenu(); }
@@ -2653,7 +2747,7 @@ function graphFinding(f) {
   var cc = { x: C.x, y: C.y }; var from = M.length ? M : L;
   if (M.length) L.forEach(function(a){ edges += curve(a, M[0]); });
   from.forEach(function(a){ edges += curve(a, { x: C.x - 12, y: C.y }); }); O.forEach(function(b){ edges += curve({ x: C.x + 12, y: C.y }, b); });
-  var circle = function(n){ var v = String(n.v).length > 22 ? String(n.v).slice(0, 21) + '…' : String(n.v), badge = n.c > 1 ? '<circle cx="' + (n.x + 16) + '" cy="' + (n.y - 16) + '" r="10" fill="var(--white)" stroke="var(--black-20)"/><text class="b" x="' + (n.x + 16) + '" y="' + (n.y - 12) + '" text-anchor="middle">' + (n.c >= 1000 ? Math.round(n.c / 100) / 10 + 'k' : n.c) + '</text>' : '';
+  var circle = function(n){ var v = String(n.v).length > 22 ? String(n.v).slice(0, 21) + '…' : String(n.v), badge = '<circle cx="' + (n.x + 18) + '" cy="' + (n.y - 19) + '" r="12" fill="var(--white)" stroke="var(--black-10)"/><text class="b" x="' + (n.x + 18) + '" y="' + (n.y - 15) + '" text-anchor="middle">' + (n.c >= 1000 ? Math.round(n.c / 100) / 10 + 'k' : n.c) + '</text>';
     return '<g class="gn" data-gnode="' + n.k + '" role="link" tabindex="0" aria-label="Open ' + n.k + '"><circle cx="' + n.x + '" cy="' + n.y + '" r="22" fill="' + n.col + '"/>' + nodeGlyph(n.k, n.x, n.y) + badge + '<text class="k" x="' + n.x + '" y="' + (n.y + 40) + '" text-anchor="middle">' + n.k + '</text><text x="' + n.x + '" y="' + (n.y + 58) + '" text-anchor="middle">' + esc(v) + '</text></g>'; };
   var sevCol = f.lvl === 5 ? 'var(--red)' : f.lvl === 4 ? 'var(--orange)' : 'var(--gold-20)';
   var center = '<g class="gn" data-gnode="Finding" role="link" tabindex="0" aria-label="Open Overview"><circle cx="' + C.x + '" cy="' + C.y + '" r="34" fill="var(--white)" stroke="' + sevCol + '" stroke-width="3"/>' + nodeGlyph('Finding', C.x, C.y, sevCol) + '<text class="k" x="' + C.x + '" y="' + (C.y + 54) + '" text-anchor="middle">Finding</text><text x="' + C.x + '" y="' + (C.y + 72) + '" text-anchor="middle">' + f.rule + '</text></g>';
@@ -2678,12 +2772,13 @@ function ico(n, s) { s = s || 20; var e = window.__SECURITI_ICONS && window.__SE
 function sevClass(l) { return 'sev' + l; }
 function sevChip(l) { return chip(l === 5 ? 'err' : l === 4 ? 'warn' : 'neutral', LVL_NAME[l]); }
 function relItem(kind, id) { return (kind === 'finding' ? FINDINGS : THREATS).filter(function(x){ return x.id === id; })[0]; }
-function fid(kind, id, lvl) { return '<span class="idd-fid sev' + lvl + '">FND-' + id + '</span>'; }
+function fid(kind, id, lvl) { return kind === 'incident' ? '<span class="idd-fid inc">' + ico('sd-folder', 14) + id + '</span>' : '<span class="idd-fid sev' + lvl + '">FND-' + id + '</span>'; }
 function pr(k, v) { return '<div class="idd-pr"><span class="k">' + k + '</span><span class="v">' + v + '</span></div>'; }
 /* Properties: the core rows first (Phase 2 order: Status, Severity, Assignee, Related…, Source, dates), everything else after "Expand" */
 var PROPS_CORE = 12;
 function orderProps(props, first) { var head = [], rest = props.slice(); first.forEach(function(k){ var i = rest.findIndex(function(p){ return p[0] === k; }); if (i >= 0) head.push(rest.splice(i, 1)[0]); }); return head.concat(rest); }
 function modelOf(tab) {
+  if (tab.kind === 'incident') return incModel(tab.id);
   var x = relItem(tab.kind, tab.id); if (!x) return null;
   if (tab.kind === 'finding') {
     var f = x, r = RULES[f.rule], w = fWl(f), std = r.std, sev = FSEV[f.lvl];
@@ -2730,6 +2825,7 @@ function renderHistory(M) {
   var list = all.filter(function(e){ return TS.hf === 'all' || e.kind === TS.hf; }).reverse();
   var rows = list.map(function(e){
     var plain = e.kind === 'status' ? e.from + ' → ' + e.to + (e.note ? ' · ' + e.note : '') : e.kind === 'assign' ? e.to : e.kind === 'note' ? e.note : e.msg;
+    if (M.kind === 'incident' && e.note && (e.kind === 'system' || e.kind === 'assign')) plain += ' · ' + e.note;   // which member finding the event belongs to
     var title = e.kind === 'system' && list.indexOf(e) !== list.length - 1 ? 'System Event' : HIST_TITLE[e.kind];
     return '<div class="idd-hrow"><div class="t">' + esc(e.day + ' ' + e.time) + '</div><div class="e">' + title + '</div><div class="d">' + esc(plain) + '</div><div class="u">' + (e.by === 'you' ? 'You' : esc(e.by)) + '</div></div>'; }).join('');
   return '<div class="idd-hwrap">'
@@ -2774,7 +2870,7 @@ function renderEntity(M, ek) {
 }
 function graphPane(M) {
   return TS.graph ? '<div class="idd-gpane' + (TS.gfull ? ' full' : '') + '" id="iddGraph"><button type="button" class="plv-btn plv-btn-secondary idd-gbtn" data-tgraph="1">Hide Graph</button><div class="idd-gcanvas" id="iddGCanvas">' + M.graph + '</div>'
-      + '<div class="idd-gzoom"><button type="button" data-gz="1" aria-label="Zoom in">' + ico('add-outlined') + '</button><button type="button" data-gz="-1" aria-label="Zoom out">' + ico('diff-minus-outlined') + '</button><button type="button" data-gfull="1" aria-label="' + (TS.gfull ? 'Exit full screen' : 'Full screen') + '">' + ico('zoom-out-map-outlined') + '</button></div></div>'
+      + '<div class="idd-gctl"><button type="button" data-gfull="1" aria-label="' + (TS.gfull ? 'Exit full screen' : 'Full screen') + '">' + ico('zoom-out-map-outlined') + '</button><div class="idd-gstack"><button type="button" data-gz="1" aria-label="Zoom in">' + ico('add-outlined') + '</button><button type="button" data-gz="-1" aria-label="Zoom out">' + ico('diff-minus-outlined') + '</button></div></div></div>'
     : '<div class="idd-gbar"><button type="button" class="plv-btn plv-btn-secondary" data-tgraph="1">Show Graph</button></div>';
 }
 /* Phase 2's truncation: cut at a word boundary near n characters, add an ellipsis, and put "Read more" INLINE at the end of the text (not in the section header) */
@@ -2787,7 +2883,7 @@ function renderOverview(M) {
   var graph = graphPane(M);
   if (TS.gfull && TS.graph) return graph;
   return graph + '<div class="idd-cols"><div class="idd-col-l">'
-    + '<div class="idd-sec"><div class="idd-sec-h"><h3>Summary</h3></div><p>' + inlineText(M.summary, 170, TS.sumMore, 'sum') + '</p></div>'
+    + (M.summary ? '<div class="idd-sec"><div class="idd-sec-h"><h3>Summary</h3></div><p>' + inlineText(M.summary, 170, TS.sumMore, 'sum') + '</p></div>' : '')
     + '<div class="idd-sec"><div class="idd-sec-h"><h3>Description</h3></div><p>' + inlineText(M.desc, 320, TS.descMore, 'desc') + '</p></div>'
     + (steps.length ? '<div class="idd-sec"><div class="idd-sec-h"><h3>Recommended Next Steps</h3></div><ol class="idd-nsteps">'
       + shownSteps.map(function(s, i){ return '<li><span class="n">' + (i + 1) + '</span><div class="b"><span>' + esc(s.t) + '</span>' + s.btn + '</div></li>'; }).join('') + '</ol></div>' : '')
@@ -2796,10 +2892,10 @@ function renderOverview(M) {
 }
 function renderNav(M) {
   var q = (TS.sideQ || '').toLowerCase(), keys = Object.keys(M.ent || {}), rows = [];
-  var base = [['overview', 'Overview', 'dashboard-outlined', 0, ''], ['history', 'History', 'history-outlined', histEvents(M.hist).length, '']].filter(function(r){ return !q || r[1].toLowerCase().indexOf(q) >= 0; });
+  var base = [['overview', 'Overview', 'dashboard-outlined', 0, ''], M.kind === 'incident' ? ['findings', 'Findings', 'issues-outlined', M.iv.mem.length, ''] : null, ['history', 'History', 'history-outlined', histEvents(M.hist).length, '']].filter(Boolean).filter(function(r){ return !q || r[1].toLowerCase().indexOf(q) >= 0; });
   var ents = keys.filter(function(k){ return !q || k.toLowerCase().indexOf(q) >= 0; });
-  var h = base.map(function(r){ return '<button type="button" class="idd-tn' + (TS.tab === r[0] ? ' on' : '') + '" data-ttab="' + r[0] + '"><span class="idd-ntile">' + ico(r[2]) + '</span><span class="lbl">' + r[1] + '</span>' + (r[3] ? '<span class="ct">' + r[3] + '</span>' : '') + '</button>'; }).join('');
-  if (ents.length) h += '<div class="idd-tnav-h">Related entities</div>' + ents.map(function(k){ return '<button type="button" class="idd-tn ent' + (TS.tab === 'ent:' + k ? ' on' : '') + '" data-ttab="ent:' + k + '"><span class="idd-ntile">' + ico(ENT_ICON[k] || 'objects-outlined') + '</span><span class="lbl">' + k + '</span><span class="ct">' + entCount(M, k) + '</span></button>'; }).join('');
+  var h = base.map(function(r){ return '<button type="button" class="idd-tn' + (TS.tab === r[0] ? ' on' : '') + '" data-ttab="' + r[0] + '"><span class="idd-ntile' + (r[4] ? ' ' + r[4] : '') + '">' + ico(r[2]) + '</span><span class="lbl">' + r[1] + '</span>' + (r[3] ? '<span class="ct">' + r[3] + '</span>' : '') + '</button>'; }).join('');
+  if (ents.length) h += ents.map(function(k){ return '<button type="button" class="idd-tn ent' + (TS.tab === 'ent:' + k ? ' on' : '') + '" data-ttab="ent:' + k + '"><span class="idd-ntile">' + ico(ENT_ICON[k] || 'objects-outlined') + '</span><span class="lbl">' + k + '</span><span class="ct">' + entCount(M, k) + '</span></button>'; }).join('');
   if (!base.length && !ents.length) h = '<div class="idd-tnav-none">No sections match “' + esc(TS.sideQ) + '”. <button type="button" class="idd-more" data-sideclear="1">Clear search</button></div>';
   document.getElementById('iddTNav').innerHTML = h; document.getElementById('iddTSearchX').hidden = !TS.sideQ;
 }
@@ -2815,16 +2911,17 @@ function renderOverlay() {
     + '<span class="idd-tupd">Last updated ' + M.upd + '</span>'
     + '<button type="button" class="idd-tstatus" id="iddTStatus" aria-haspopup="menu">' + ico(STATUS_ICON[M.status] || 'issues-outlined') + '<span>' + M.status + '</span>' + ico('keyboard-arrow-down-outlined', 20) + '</button>'
     + '<button type="button" class="idd-tactions" id="iddTMore" aria-haspopup="menu">Actions' + ico('keyboard-arrow-down-outlined', 20) + '</button>';
+  if (M.kind === 'incident') document.getElementById('iddTHead').innerHTML = '<span class="idd-ttile inc">' + ico('sd-folder', 28) + '</span><div class="idd-thead-main"><div class="idd-tkicker">Incident' + sevChip(M.lvl) + '</div><div class="idd-ttitle" id="iddTTitle">' + esc(M.name) + '</div></div><span class="idd-tupd">Last updated ' + M.upd + '</span>' + chip(STATUS_CHIP[M.status], M.status);
   var full = TS.gfull && TS.graph && TS.tab !== 'history'; document.getElementById('iddTNavWrap').style.display = full ? 'none' : '';
   renderNav(M);
   var main = document.getElementById('iddTMain'); main.style.overflowY = full ? 'hidden' : '';
-  main.innerHTML = TS.tab === 'history' ? renderHistory(M) : TS.tab.indexOf('ent:') === 0 ? (TS.gfull && TS.graph ? graphPane(M) : graphPane(M) + renderEntity(M, TS.tab.slice(4))) : renderOverview(M);
+  main.innerHTML = TS.tab === 'history' ? renderHistory(M) : (TS.tab === 'findings' && M.kind === 'incident') ? (TS.gfull && TS.graph ? graphPane(M) : graphPane(M) + renderIncFindings(M)) : TS.tab.indexOf('ent:') === 0 ? (TS.gfull && TS.graph ? graphPane(M) : graphPane(M) + renderEntity(M, TS.tab.slice(4))) : renderOverview(M);
   applyGraphTransform();
 }
 /* Clicking a node in the graph opens the matching section in the left panel (same view as clicking it there) */
 var NODE_TAB = { 'Workload': 'Workloads', 'Connection': 'Connections', 'Policy': 'Policies', 'Objects': 'Objects', 'Sessions': 'Sessions', 'Restore point': 'Restore points', 'Actor': 'Identities', 'Subject': 'Objects' };
 function goNode(kind) {
-  var M = modelOf(TS.tabs[TS.active]); if (!M) return; var tab = kind === 'Finding' ? 'overview' : (M.ent && NODE_TAB[kind] && M.ent[NODE_TAB[kind]] ? 'ent:' + NODE_TAB[kind] : null);
+  var M = modelOf(TS.tabs[TS.active]); if (!M) return; var tab = kind === 'Finding' ? 'overview' : kind === 'Findings' ? 'findings' : (M.ent && NODE_TAB[kind] && M.ent[NODE_TAB[kind]] ? 'ent:' + NODE_TAB[kind] : null);
   if (!tab) return; TS.tab = tab; TS.gfull = false; TS.sideQ = ''; var si = document.getElementById('iddTSearch'); if (si) si.value = ''; renderOverlay();
 }
 function applyGraphTransform() { var c = document.getElementById('iddGCanvas'); if (c) c.style.transform = 'translate(' + TS.px + 'px,' + TS.py + 'px) scale(' + TS.z + ')'; }
@@ -3065,6 +3162,7 @@ function openCustomMenu(btn, items, heading, cls) {
   menuEl.innerHTML = (heading ? '<div class="idd-menu-head">' + heading + '</div>' : '') + items.map(function(it){
     var ic = it.icon ? '<span class="ic">' + (_dsStoreIconSvg(it.icon, 20) || '') + '</span>' : '';
     if (it.sep) return '<div class="idd-menu-sep"></div>';
+    if (it.topmode) return '<button type="button" class="idd-menu-item two' + (it.current ? ' is-current' : '') + '" role="menuitem" data-settopmode="' + it.topmode + '"><span>' + it.label + '</span><small>' + it.desc + '</small></button>';
     if (it.status) return '<button type="button" class="idd-menu-item' + (it.current ? ' is-current' : '') + '" role="menuitem" data-setstatus="' + it.status + '">' + ic + it.label + (it.current ? '<span class="cur">Current</span>' : '') + '</button>';
     if (it.ssf) return '<button type="button" class="idd-menu-item' + (it.current ? ' is-current' : '') + '" role="menuitem" data-setssf="' + it.ssf + '">' + it.label + '</button>';
     if (it.rp != null) return '<button type="button" class="idd-menu-item' + (it.current ? ' is-current' : '') + '" role="menuitem" data-setrp="' + it.rp + '">' + it.label + (it.current ? '<span class="cur">Current</span>' : '') + '</button>';
@@ -3083,6 +3181,9 @@ function stampAge(k) { AGE[k] = 'just now'; Array.prototype.forEach.call(documen
 document.addEventListener('click', function(e){
   var t = e.target;
   var sso = t.closest('[data-session]'); if (sso) { closeMenu(); openSession(sso.getAttribute('data-session')); return; }
+  var tpk = t.closest('[data-toppick]'); if (tpk) { e.stopPropagation(); closeMenu(); openCustomMenu(tpk, TOP_MODES.map(function(m, i){ return [{ topmode: m[0], label: m[2], desc: m[3], current: TOPMODE === m[0] }, i === 0 ? { sep: true } : null]; }).reduce(function(a, b){ return a.concat(b.filter(Boolean)); }, []), null, 'wide'); var rr = tpk.getBoundingClientRect(); menuEl.style.left = Math.max(8, rr.left) + 'px'; return; }
+  var stm = t.closest('[data-settopmode]'); if (stm) { closeMenu(); TOPMODE = stm.getAttribute('data-settopmode'); renderTop(); return; }
+  var inr = t.closest('[data-incident]'); if (inr) { closeMenu(); openItem('incident', inr.getAttribute('data-incident')); document.getElementById('iddTClose').focus(); return; }
   if (t.closest('[data-sclose]') || t === document.getElementById('iddSess')) { closeSession(); return; }
   var ssf = t.closest('[data-ssf]'); if (ssf) { e.stopPropagation(); closeMenu(); openCustomMenu(ssf, [['all', 'All'], ['success', 'Success'], ['warning', 'Warning'], ['error', 'Error']].map(function(f){ return { label: f[1], ssf: f[0], current: SS.f === f[0] }; }), 'Status', 'wide'); return; }
   var sset = t.closest('[data-setssf]'); if (sset) { closeMenu(); SS.f = sset.getAttribute('data-setssf'); renderSession(); return; }
