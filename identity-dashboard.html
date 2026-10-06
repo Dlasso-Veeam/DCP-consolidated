@@ -1202,7 +1202,7 @@ td.idd-chk, th.idd-chk { text-align: center; padding: 0 0 0 12px; }
         <div class="idd-grid">
           <div class="idd-widget idd-span-6">
             <div data-wh="t1"></div>
-            <div class="idd-wb"><div class="idd-cov-ctl" id="iddT1Ctl" style="padding:0 0 4px"></div><div class="idd-chart-big" id="iddT1Big"></div><div class="idd-chart" id="iddT1" data-go="activity.html" data-dest="Activity"></div>
+            <div class="idd-wb"><div class="idd-chart-big" id="iddT1Big"></div><div class="idd-chart" id="iddT1" data-go="activity.html" data-dest="Activity"></div>
               <div class="idd-legend"><span><i style="background:var(--em-green)"></i>Successful</span><span><i style="background:var(--orange)"></i>With warnings</span><span><i style="background:var(--red)"></i>Failed</span></div></div>
           </div>
           <div class="idd-widget idd-span-6">
@@ -1713,7 +1713,7 @@ var WIDGETS = {
   'attn':       { title: 'Protection issues',            titleId: 'iddAttTitle', multi: true },
   'threats':    { title: 'Recent threats',             threat: true },
   'wl':         { title: 'Connection health',            go: TC },
-  't1':         { title: 'Sessions by outcome',        go: ACT },
+  't1':         { title: 'Backup sessions',            go: ACT, pick: true },
   't2':         { title: 'Protection coverage trend',  go: INV },
   't3':         { title: 'Identity changes captured',  go: PD },
   'cov':        { title: 'Protection by object type',  go: INV },
@@ -1724,7 +1724,7 @@ var AGE = { conn: '1m ago' };   // compact so KPI-card titles never truncate
 function ageOf(k) { return AGE[k] || '2m ago'; }
 function wh(k) {
   var w = WIDGETS[k];
-  return '<div class="idd-wh"><div class="idd-wt"' + (w.titleId ? ' id="' + w.titleId + '"' : '') + '>' + (w.pick ? '<button type="button" class="idd-wt-pick" data-toppick="1" aria-haspopup="menu" aria-label="Change view: ' + w.title + '"><span id="iddTopTitle">' + w.title + '</span>' + ico('keyboard-arrow-down-outlined', 24) + '</button>' : w.title) + '</div>'
+  return '<div class="idd-wh"><div class="idd-wt"' + (w.titleId ? ' id="' + w.titleId + '"' : '') + '>' + (w.pick ? '<button type="button" class="idd-wt-pick" data-wpick="' + k + '" aria-haspopup="menu" aria-label="Change view: ' + w.title + '"><span id="iddPick-' + k + '">' + w.title + '</span>' + ico('keyboard-arrow-down-outlined', 24) + '</button>' : w.title) + '</div>'
     + '<span class="idd-wage" data-age="' + k + '">' + ageOf(k) + '</span>'
     + '<button type="button" class="idd-ibtn" data-refresh="' + k + '" aria-label="Refresh ' + w.title + '">' + ICON_REFRESH + '</button>'
     + '<button type="button" class="idd-ibtn" data-kebab="' + k + '" aria-label="' + w.title + ' options" aria-haspopup="menu">' + ICON_KEBAB + '</button></div>';
@@ -1983,7 +1983,7 @@ function renderTrends() {
   // T1 — SESSIONS by outcome per day; a segmented control switches Backup / Restore sessions (volume AND verdict; the KPI above carries the backup rate)
   var tot = {}, outs = { backup: s.outcomes, restore: s.routcomes };
   ['backup', 'restore'].forEach(function(m){ tot[m] = outs[m].reduce(function(a, o){ return a + o.ok + o.warn + o.err; }, 0); });
-  document.getElementById('iddT1Ctl').innerHTML = '<div class="idd-tabs" role="tablist" aria-label="Session type">' + [['backup', 'Backup'], ['restore', 'Restore']].map(function(m){ return '<button type="button" role="tab" class="idd-tab' + (SESSMODE === m[0] ? ' is-active' : '') + '" aria-selected="' + (SESSMODE === m[0]) + '" data-sessmode="' + m[0] + '">' + m[1] + ' (' + tot[m[0]] + ')</button>'; }).join('') + '</div>';
+  pickTitle('t1');
   var o1 = outs[SESSMODE], t1 = tot[SESSMODE], w1 = o1.reduce(function(a, o){ return a + o.warn; }, 0), e1 = o1.reduce(function(a, o){ return a + o.err; }, 0), noun = SESSMODE === 'backup' ? 'backup' : 'restore';
   document.getElementById('iddT1Big').innerHTML = t1 ? fmt(t1) + ' sessions <span class="idd-chart-cap">' + w1 + ' with warnings · ' + e1 + ' failed</span>' : '0 sessions <span class="idd-chart-cap">No ' + noun + ' sessions in this period</span>';
   var elT = document.getElementById('iddT1'); elT.innerHTML = ''; var hT = Math.max(150, elT.clientHeight);
@@ -2465,9 +2465,15 @@ function iRow(v) {
   return '<tr tabindex="0" data-incident="' + v.id + '" data-hint="Open incident details" data-dest="Incident details"><td>' + v.id + '</td><td>' + tDots(v.lvl) + '</td><td><span class="idd-ell" style="display:block">' + esc(v.name) + '</span></td><td>' + chip(STATUS_CHIP[v.status], v.status) + '</td><td><span class="idd-ell" style="display:block">' + esc(v.srcs.join(', ')) + '</span></td><td>' + v.mem.length + '</td>'
     + '<td>' + fDate(v.c, true) + '</td><td>' + fDate(v.u, true) + '</td><td>' + assigneeCell(v.assignee) + '</td><td class="idd-act"><button type="button" class="idd-ibtn rowdetail" data-incident="' + v.id + '" data-tooltip="View incident details" aria-label="View incident details: ' + esc(v.name) + '">' + opn + '</button></td></tr>';
 }
-var TOPMODE = 'findings', TOP_MODES = [['findings', 'Top findings', 'Findings', 'Open findings, most severe first'], ['incidents', 'Top incidents', 'Incidents', 'Groups of related findings, most severe first']];
+var TOPMODE = 'findings';
+/* card-title view pickers (Threat Center pattern): [value, card title, menu label, one-line description] */
+var PICKS = {
+  top: { opts: [['findings', 'Top findings', 'Findings', 'Open findings, most severe first'], ['incidents', 'Top incidents', 'Incidents', 'Groups of related findings, most severe first']], get: function(){ return TOPMODE; }, set: function(v){ TOPMODE = v; renderTop(); } },
+  t1:  { opts: [['backup', 'Backup sessions', 'Backup sessions', 'Successful, warning and failed backups per day'], ['restore', 'Restore sessions', 'Restore sessions', 'Successful, warning and failed restores per day']], get: function(){ return SESSMODE; }, set: function(v){ SESSMODE = v; renderTrends(); } }
+};
+function pickTitle(k) { var P = PICKS[k], cur = P.get(), el = document.getElementById('iddPick-' + k); if (el) el.textContent = P.opts.filter(function(o){ return o[0] === cur; })[0][1]; }
 function renderTop() {
-  var tt = document.getElementById('iddTopTitle'); if (tt) tt.textContent = TOP_MODES[TOPMODE === 'incidents' ? 1 : 0][1];
+  pickTitle('top');
   if (TOPMODE === 'incidents') {
     var inc = incidentsOpen(), shown = inc.slice(0, 10);
     document.getElementById('iddTop').innerHTML = shown.length ? '<table class="idd-tbl dense"><colgroup><col style="width:9%"><col style="width:7%"><col style="width:24%"><col style="width:13%"><col style="width:13%"><col style="width:8%"><col style="width:10%"><col style="width:10%"><col style="width:9%"><col style="width:3%"></colgroup>'
@@ -3162,7 +3168,7 @@ function openCustomMenu(btn, items, heading, cls) {
   menuEl.innerHTML = (heading ? '<div class="idd-menu-head">' + heading + '</div>' : '') + items.map(function(it){
     var ic = it.icon ? '<span class="ic">' + (_dsStoreIconSvg(it.icon, 20) || '') + '</span>' : '';
     if (it.sep) return '<div class="idd-menu-sep"></div>';
-    if (it.topmode) return '<button type="button" class="idd-menu-item two' + (it.current ? ' is-current' : '') + '" role="menuitem" data-settopmode="' + it.topmode + '"><span>' + it.label + '</span><small>' + it.desc + '</small></button>';
+    if (it.topmode) return '<button type="button" class="idd-menu-item two' + (it.current ? ' is-current' : '') + '" role="menuitem" data-wsetpick="' + it.topmode + '"><span>' + it.label + '</span><small>' + it.desc + '</small></button>';
     if (it.status) return '<button type="button" class="idd-menu-item' + (it.current ? ' is-current' : '') + '" role="menuitem" data-setstatus="' + it.status + '">' + ic + it.label + (it.current ? '<span class="cur">Current</span>' : '') + '</button>';
     if (it.ssf) return '<button type="button" class="idd-menu-item' + (it.current ? ' is-current' : '') + '" role="menuitem" data-setssf="' + it.ssf + '">' + it.label + '</button>';
     if (it.rp != null) return '<button type="button" class="idd-menu-item' + (it.current ? ' is-current' : '') + '" role="menuitem" data-setrp="' + it.rp + '">' + it.label + (it.current ? '<span class="cur">Current</span>' : '') + '</button>';
@@ -3181,13 +3187,12 @@ function stampAge(k) { AGE[k] = 'just now'; Array.prototype.forEach.call(documen
 document.addEventListener('click', function(e){
   var t = e.target;
   var sso = t.closest('[data-session]'); if (sso) { closeMenu(); openSession(sso.getAttribute('data-session')); return; }
-  var tpk = t.closest('[data-toppick]'); if (tpk) { e.stopPropagation(); closeMenu(); openCustomMenu(tpk, TOP_MODES.map(function(m, i){ return [{ topmode: m[0], label: m[2], desc: m[3], current: TOPMODE === m[0] }, i === 0 ? { sep: true } : null]; }).reduce(function(a, b){ return a.concat(b.filter(Boolean)); }, []), null, 'wide'); var rr = tpk.getBoundingClientRect(); menuEl.style.left = Math.max(8, rr.left) + 'px'; return; }
-  var stm = t.closest('[data-settopmode]'); if (stm) { closeMenu(); TOPMODE = stm.getAttribute('data-settopmode'); renderTop(); return; }
+  var tpk = t.closest('[data-wpick]'); if (tpk) { e.stopPropagation(); closeMenu(); var pk = tpk.getAttribute('data-wpick'), P = PICKS[pk]; openCustomMenu(tpk, P.opts.reduce(function(a, m, i){ if (i) a.push({ sep: true }); a.push({ topmode: pk + '|' + m[0], label: m[2], desc: m[3], current: P.get() === m[0] }); return a; }, []), null, 'wide'); var rr = tpk.getBoundingClientRect(); menuEl.style.left = Math.max(8, rr.left) + 'px'; return; }
+  var stm = t.closest('[data-wsetpick]'); if (stm) { closeMenu(); var sv = stm.getAttribute('data-wsetpick').split('|'); PICKS[sv[0]].set(sv[1]); return; }
   var inr = t.closest('[data-incident]'); if (inr) { closeMenu(); openItem('incident', inr.getAttribute('data-incident')); document.getElementById('iddTClose').focus(); return; }
   if (t.closest('[data-sclose]') || t === document.getElementById('iddSess')) { closeSession(); return; }
   var ssf = t.closest('[data-ssf]'); if (ssf) { e.stopPropagation(); closeMenu(); openCustomMenu(ssf, [['all', 'All'], ['success', 'Success'], ['warning', 'Warning'], ['error', 'Error']].map(function(f){ return { label: f[1], ssf: f[0], current: SS.f === f[0] }; }), 'Status', 'wide'); return; }
   var sset = t.closest('[data-setssf]'); if (sset) { closeMenu(); SS.f = sset.getAttribute('data-setssf'); renderSession(); return; }
-  var smd = t.closest('[data-sessmode]'); if (smd) { SESSMODE = smd.getAttribute('data-sessmode'); renderTrends(); return; }
   var cmd = t.closest('[data-covmode]'); if (cmd) { COVMODE = cmd.getAttribute('data-covmode'); renderCoverage(); return; }
   var hr = t.closest('[data-wlrow]'); if (hr) { var w0 = WL.filter(function(x){ return x.id === hr.getAttribute('data-wlrow'); })[0], tg = healthTarget(w0, dayHealth(w0, 0)); if (tg) { if (tg.kind === 'findings') openFindingsFor(w0.name); else window.location.href = tg.href; } return; }
   var dv = t.closest('[data-view]'); if (dv) { closeMenu(); setView(dv.getAttribute('data-view')); return; }
