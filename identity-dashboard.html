@@ -631,6 +631,13 @@ table.idd-tbl td.idd-act { text-align: right; padding-right: 8px; }
 .idd-sev.l5 i { background: var(--red); } .idd-sev.l4 i { background: var(--orange); } .idd-sev.l3 i { background: var(--gold-20); }
 table.idd-tbl.dense td { height: 40px; padding-top: 0; padding-bottom: 0; }
 table.idd-tbl.dense { min-width: 1240px; }   /* below this the table scrolls horizontally instead of clipping cells */
+/* Actions column pinned right — same recipe as #actTable in activity.html: sticky last column, 8px depth shadow that only paints while content is hidden behind it (.has-h-scroll-right on the wrap), hover colour synced. Fixed 56px on every dense table so the column is identical across them. */
+table.idd-tbl.dense col:last-child { width: 56px !important; }
+table.idd-tbl.dense thead th:last-child, table.idd-tbl.dense tbody td:last-child { position: sticky; right: 0; z-index: 4; overflow: visible; background: var(--white); padding-left: 8px; padding-right: 8px; }
+table.idd-tbl.dense thead th:last-child { z-index: 5; }
+table.idd-tbl.dense thead th:last-child::before, table.idd-tbl.dense tbody td:last-child::before { content: ''; position: absolute; top: 0; left: -8px; bottom: 0; width: 8px; background: linear-gradient(to left, rgba(0,0,0,0.10), rgba(0,0,0,0)); pointer-events: none; opacity: 0; transition: opacity 0.18s ease; }
+.idd-tbl-wrap.has-h-scroll-right table.idd-tbl.dense thead th:last-child::before, .idd-tbl-wrap.has-h-scroll-right table.idd-tbl.dense tbody td:last-child::before { opacity: 1; }
+table.idd-tbl.dense tbody tr:hover td:last-child { background: var(--em-green-tint); }
 table.idd-tbl tr[tabindex]:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); }
 .idd-conf { display: inline-flex; align-items: center; gap: 8px; }
 .idd-conf::before { content: ""; width: 2px; height: 16px; background: var(--gold-20); }
@@ -2053,14 +2060,14 @@ var THREATS = [
     summary: 'App registration "DataSync Helper" was created and immediately granted tenant-wide directory write through admin consent. The name mimics a legitimate integration and the publisher is unverified.',
     actor: 'd.kovac (admin consent flow)', subject: 'DataSync Helper (appId 4c1f…9e02)', blast: 'Tenant-wide write to all directory objects', evidence: 'Object created between snapshots, consent grant in the backed-up audit log, consent granted 16 minutes after creation at 02:47 local', det: 'backup-delta + eid-audit-log',
     hist: [['Oct 5, 2026 02:47 AM', 'Detected from snapshot delta 02:00 to 04:00']] },
-  { id: '10484', lvl: 5, conf: 'High', name: 'CA policy "Require MFA for admins" disabled', status: 'Under Investigation', wl: 'entra', day: 0, c: [2, 31], u: [2, 58], assignee: 'Karsten Rowe', tech: 'T1556.009 · Conditional Access Modification',
+  { id: '10484', lvl: 5, conf: 'High', name: 'CA policy "Require MFA for admins" disabled', status: 'Under Investigation', wl: 'entra', day: 0, c: [2, 31], u: [2, 58], assignee: 'Darren Lasso', tech: 'T1556.009 · Conditional Access Modification',
     summary: 'A conditional access policy protecting 14 admin roles was set to disabled. Combined with the Domain Admins grant 17 minutes earlier, this matches a privilege-escalation-then-persistence pattern.',
     actor: 'd.kovac (backed-up Entra audit log)', subject: 'CA policy 7f3a…c218', blast: '1,240 admin-role sessions no longer challenged for MFA', evidence: 'Snapshot diff (state: enabled to disabled; grantControls: [mfa] to []) correlated with the Domain Admins grant by actor and time', det: 'backup-delta + eid-audit-log (merged)',
-    hist: [['Oct 5, 2026 02:31 AM', 'Detected from snapshot delta'], ['Oct 5, 2026 02:58 AM', 'Assigned to Karsten Rowe'], ['Oct 5, 2026 02:58 AM', 'Status changed to Under Investigation by Karsten Rowe']] },
-  { id: '10483', lvl: 5, conf: 'High', name: 'svc-syncgw added to Domain Admins', status: 'Open', wl: 'ad', day: 0, c: [2, 14], u: [2, 14], assignee: 'Karsten Rowe', tech: 'T1098 · Account Manipulation',
+    hist: [['Oct 5, 2026 02:31 AM', 'Detected from snapshot delta'], ['Oct 5, 2026 02:58 AM', 'Assigned to Darren Lasso'], ['Oct 5, 2026 02:58 AM', 'Status changed to Under Investigation by Darren Lasso']] },
+  { id: '10483', lvl: 5, conf: 'High', name: 'svc-syncgw added to Domain Admins', status: 'Open', wl: 'ad', day: 0, c: [2, 14], u: [2, 14], assignee: 'Darren Lasso', tech: 'T1098 · Account Manipulation',
     summary: 'Service account svc-syncgw was added to Domain Admins outside change windows. The account has no PIM assignment and had never held privileged membership in 3 years of snapshot history.',
     actor: 'd.kovac (AD change feed)', subject: 'svc-syncgw (service account)', blast: 'Full domain: 22,304 objects administrable', evidence: 'Snapshot delta 02:00 to 04:00, change feed event, first privileged grant for this account in a 36-month baseline', det: 'backup-delta + change feed (tamper-resistant)',
-    hist: [['Oct 5, 2026 02:14 AM', 'Detected from the AD change feed'], ['Oct 5, 2026 02:20 AM', 'Assigned to Karsten Rowe']] },
+    hist: [['Oct 5, 2026 02:14 AM', 'Detected from the AD change feed'], ['Oct 5, 2026 02:20 AM', 'Assigned to Darren Lasso']] },
   { id: '10487', lvl: 4, conf: 'Medium', name: 'GPO "Default Domain Policy" modified out-of-hours', status: 'Open', wl: 'ad', day: 0, c: [3, 2], u: [3, 2], assignee: 'Unassigned', tech: 'T1484.001 · Group Policy Modification',
     summary: 'Two settings changed in Default Domain Policy: a startup script was added and audit policy verbosity reduced. Both are common persistence and anti-forensics moves.',
     actor: 'd.kovac', subject: 'GPO {31B2F340…}', blast: 'All domain-joined machines (4,120)', evidence: 'GPO version diff between snapshots plus a SYSVOL file hash change', det: 'backup-delta (event logs on DCs showed gaps; snapshots did not)',
@@ -2069,11 +2076,11 @@ var THREATS = [
     summary: '14 users were added to okta-grp-payments in one batch. The AI baseline flagged the volume; correlation with the HR provisioning window resolved it as routine. Kept for audit.',
     actor: 'HR provisioning integration (SCIM)', subject: 'okta-grp-payments', blast: 'None', evidence: 'System Log correlation matches the monthly onboarding cohort pattern', det: 'okta-system-log + baseline model',
     hist: [['Oct 5, 2026 08:15 AM', 'Detected by the AI baseline'], ['Oct 5, 2026 08:31 AM', 'Auto-resolved: matches the HR provisioning window']] },
-  { id: '10412', lvl: 4, conf: 'Medium', name: 'Legacy authentication used from a new country', status: 'Suppressed', wl: 'entra', day: 12, c: [14, 20], u: [14, 45], assignee: 'Karsten Rowe', tech: 'T1078 · Valid Accounts',
+  { id: '10412', lvl: 4, conf: 'Medium', name: 'Legacy authentication used from a new country', status: 'Suppressed', wl: 'entra', day: 12, c: [14, 20], u: [14, 45], assignee: 'Darren Lasso', tech: 'T1078 · Valid Accounts',
     summary: 'Basic authentication sign-ins succeeded from a country not seen for this service account in 12 months. Suppressed after the owner confirmed a vendor migration.',
     actor: 'smtp-relay-01', subject: 'Exchange Online SMTP AUTH', blast: 'Mailbox send rights for one relay account', evidence: 'Backed-up sign-in log shows 3 successful basic-auth logons from a new ASN', det: 'eid-audit-log',
-    hist: [['Sep 23, 2026 02:20 PM', 'Detected from the backed-up sign-in log'], ['Sep 23, 2026 02:45 PM', 'Suppressed by Karsten Rowe: vendor migration confirmed']] },
-  { id: '10377', lvl: 3, conf: 'Low', name: 'Service principal secret added outside change window', status: 'Resolved - Remediated', wl: 'entra', day: 27, c: [22, 5], u: [23, 10], assignee: 'Karsten Rowe', tech: 'T1098.001 · Additional Cloud Credentials',
+    hist: [['Sep 23, 2026 02:20 PM', 'Detected from the backed-up sign-in log'], ['Sep 23, 2026 02:45 PM', 'Suppressed by Darren Lasso: vendor migration confirmed']] },
+  { id: '10377', lvl: 3, conf: 'Low', name: 'Service principal secret added outside change window', status: 'Resolved - Remediated', wl: 'entra', day: 27, c: [22, 5], u: [23, 10], assignee: 'Darren Lasso', tech: 'T1098.001 · Additional Cloud Credentials',
     summary: 'A new client secret was added to a production service principal at night. The secret was removed and the owner rotated credentials.',
     actor: 'Pipeline automation account', subject: 'sp-billing-sync', blast: 'App-level access to the billing API', evidence: 'Snapshot diff shows an extra credential entry on the service principal', det: 'backup-delta',
     hist: [['Sep 8, 2026 10:05 PM', 'Detected from snapshot delta'], ['Sep 9, 2026 11:10 AM', 'Remediated: secret removed and credentials rotated']] },
@@ -2091,10 +2098,10 @@ function threatsInRange() { var b = bounds(); return THREATS.filter(function(t){
   .sort(function(a, z){ return (z.lvl - a.lvl) || ((a.day - z.day) || ((z.c[0] * 60 + z.c[1]) - (a.c[0] * 60 + a.c[1]))); }); }
 function tDots(lvl) { return '<span class="idd-sev l' + lvl + '" role="img" aria-label="' + LVL_NAME[lvl] + '">' + new Array(lvl + 1).join('<i></i>') + '</span>'; }
 /* People = the Threat Center Phase 2 list (name · initials · avatar colour). An assignee is a person or Unassigned: no "System" assignee. */
-var PEOPLE = { 'Karsten Rowe': ['KR', '#0779A5', 'k.rowe'], 'Sarah Rivera': ['SR', '#A745A9', 's.rivera'], 'Mira Khan': ['MK', '#38BEBE', 'm.khan'] };
+var PEOPLE = { 'Darren Lasso': ['DL', '#0779A5', 'd.lasso'], 'Sarah Rivera': ['SR', '#A745A9', 's.rivera'], 'Mira Khan': ['MK', '#38BEBE', 'm.khan'] };
 function initialsOf(n) { return (PEOPLE[n] && PEOPLE[n][0]) || String(n).split(/[ .]+/).filter(Boolean).map(function(w){ return w[0]; }).join('').slice(0, 2).toUpperCase(); }
-function personEmail(n) { var who = n === 'you' ? 'Karsten Rowe' : n; return ((PEOPLE[who] && PEOPLE[who][2]) || String(who).toLowerCase().replace(/\s+/g, '.')) + '@meridianfg.com'; }
-function avatar(n, size) { var un = n === 'Unassigned' || !n, bg = un ? 'var(--black-30)' : ((PEOPLE[n === 'you' ? 'Karsten Rowe' : n] || [0, '#62646A'])[1]); return '<span class="idd-av2" style="width:' + (size || 24) + 'px;height:' + (size || 24) + 'px;background:' + bg + '" aria-hidden="true">' + (un ? '\u2014' : initialsOf(n === 'you' ? 'Karsten Rowe' : n)) + '</span>'; }
+function personEmail(n) { var who = n === 'you' ? 'Darren Lasso' : n; return ((PEOPLE[who] && PEOPLE[who][2]) || String(who).toLowerCase().replace(/\s+/g, '.')) + '@meridianfg.com'; }
+function avatar(n, size) { var un = n === 'Unassigned' || !n, bg = un ? 'var(--black-30)' : ((PEOPLE[n === 'you' ? 'Darren Lasso' : n] || [0, '#62646A'])[1]); return '<span class="idd-av2" style="width:' + (size || 24) + 'px;height:' + (size || 24) + 'px;background:' + bg + '" aria-hidden="true">' + (un ? '\u2014' : initialsOf(n === 'you' ? 'Darren Lasso' : n)) + '</span>'; }
 function assigneeCell(a) { var n = (a === 'System' || !a) ? 'Unassigned' : a; return '<span class="idd-wl-cell">' + avatar(n, 24) + '<span class="idd-ell">' + esc(n) + '</span></span>'; }
 function renderThreats_parked() {   // PARKED 2026-10-05: threats are findings — merged into the Top findings table
   var all = threatsInRange(), pages = Math.max(1, Math.ceil(all.length / THREAT_PAGE));
@@ -2226,7 +2233,7 @@ var RULES = {
   'RES-104': { name: 'Backup SLA missed',                                     cat: 'Protection',    std: ['ISO 27001', 'DORA', 'NIS2'],  desc: 'Raises a finding when no successful backup has completed within the SLA defined by the policy schedule.' }
 };
 var FSEV = { 5: 'Critical', 4: 'High', 3: 'Medium', 2: 'Low' };
-var USERS = ['Karsten Rowe', 'Sarah Rivera', 'Mira Khan', 'Unassigned'];
+var USERS = ['Darren Lasso', 'Sarah Rivera', 'Mira Khan', 'Unassigned'];
 function T(off, h, m) { return { off: off, h: h, m: m }; }
 function pdCompare(wl, items, point) { return { dest: 'Protected Data', href: 'inventory-V1.html#compare=' + wl + '&items=' + items.join(',') + '&point=' + point }; }
 function pdRestore(wl, items, point) { return { dest: 'Protected Data', href: 'inventory-V1.html#restore=' + wl + '&items=' + items.join(',') + '&point=' + point }; }
@@ -2256,14 +2263,14 @@ var FINDINGS = [
     graph: { src: [['Workload', 'Okta', 1], ['Connection', 'meridian.okta.com', 1]], mid: [['Policy', 'Org backup', 1]], out: [['Objects', 'Deleted', 4], ['Restore point', 'Oct 5, 3:15 AM', 1]] },
     ent: { Workloads: [['Okta', '12 connections']], Connections: [['meridian.okta.com', 'Healthy']], Policies: [['Org backup', '2 runs per day, SLA 12h']], Objects: [['alice@example.com', 'User · deleted'], ['bob.chen@acme.com', 'User · deleted'], ['dave.kim@acme.com', 'User · deleted'], ['walter.reyes@acme.com', 'User · deleted']], 'Restore points': [['Oct 5, 2026 9:00 AM', 'Latest · captured after the change'], ['Oct 5, 2026 3:15 AM', 'Before the first deletion · all 4 users intact · recommended']] },
     hist: [['Oct 5, 2026 8:10 AM', 'Finding opened by rule RES-106 (Unexpected change detected, restore point available)']] },
-  { id: '24547', rule: 'RES-106', lvl: 5, status: 'Open', wl: 'okta', name: 'Finance-Admins and AppSec-Reviewers groups were deleted', c: T(0, 8, 40), u: T(0, 8, 40), rOff: null, assignee: 'Karsten Rowe',
+  { id: '24547', rule: 'RES-106', lvl: 5, status: 'Open', wl: 'okta', name: 'Finance-Admins and AppSec-Reviewers groups were deleted', c: T(0, 8, 40), u: T(0, 8, 40), rOff: null, assignee: 'Darren Lasso',
     evidence: 'The Finance-Admins group (8 privileged members) and the AppSec-Reviewers group (14 members) were deleted at 8:38 AM using an API token. The 3:15 AM snapshot contains both groups with full membership and their app assignments.', policy: 'Org backup', conn: 'meridian.okta.com', asset: 'Groups',
     cmp: [{ name: 'Finance-Admins', rows: [['Status', 'Active', 'Deleted'], ['Members', '8', '—'], ['App assignments', '3 apps', '—']] }, { name: 'AppSec-Reviewers', rows: [['Status', 'Active', 'Deleted'], ['Members', '14', '—'], ['App assignments', '2 apps', '—']] }],
     restore: { nowDeleted: true, point: 'Oct 5, 2026 3:15 AM', short: '3:15 AM', objects: '2 groups, 22 memberships', change: 'Oct 5, 2026 8:38 AM', actor: 'API token ending 7c1d' },
     steps: [['Review what changed since the 3:15 AM restore point', 'Compare to 3:15 AM', { tab: 'ent:Restore points' }], ['Restore Finance-Admins and AppSec-Reviewers to the 3:15 AM restore point', 'Restore to 3:15 AM', pdRestore('okta-wic', ['okta-grp-finance', 'okta-grp-appsec'], '2026-10-05T03:15')], ['Rotate the API token that ran the deletion', 'Review connection', INT], ['Check access to the apps assigned through these groups', 'Review objects', PD]],
     graph: { src: [['Workload', 'Okta', 1], ['Connection', 'meridian.okta.com', 1]], mid: [['Policy', 'Org backup', 1]], out: [['Objects', 'Deleted', 2], ['Restore point', 'Oct 5, 3:15 AM', 1]] },
     ent: { Workloads: [['Okta', '12 connections']], Connections: [['meridian.okta.com', 'Healthy']], Policies: [['Org backup', '2 runs per day, SLA 12h']], Objects: [['Finance-Admins', 'Group · deleted · 8 members'], ['AppSec-Reviewers', 'Group · deleted · 14 members']], 'Restore points': [['Oct 5, 2026 9:00 AM', 'Latest · captured after the change'], ['Oct 5, 2026 3:15 AM', 'Before the deletion · both groups intact · recommended']] },
-    hist: [['Oct 5, 2026 8:40 AM', 'Finding opened by rule RES-106 (Unexpected change detected, restore point available)'], ['Oct 5, 2026 8:52 AM', 'Assigned to Karsten Rowe']] },
+    hist: [['Oct 5, 2026 8:40 AM', 'Finding opened by rule RES-106 (Unexpected change detected, restore point available)'], ['Oct 5, 2026 8:52 AM', 'Assigned to Darren Lasso']] },
   { id: '24546', rule: 'RES-106', lvl: 4, status: 'Open', wl: 'okta', name: 'okta-grp-payments membership was emptied', c: T(0, 7, 52), u: T(0, 7, 52), rOff: null, assignee: 'Unassigned',
     evidence: 'All 214 members were removed from okta-grp-payments at 7:52 AM by a script using an API token. The 3:15 AM snapshot shows the full membership list, and no other changes were made to the group since.', policy: 'Org backup', conn: 'meridian.okta.com', asset: 'Groups',
     cmp: [{ name: 'okta-grp-payments', rows: [['Status', 'Active', 'Active'], ['Members', '214', '0'], ['App assignments', '4 apps', '4 apps'], ['Last modified', 'Oct 4, 2026 4:40 PM', 'Oct 5, 2026 7:52 AM']] }],
@@ -2314,28 +2321,28 @@ var FINDINGS = [
     graph: { src: [['Workload', 'Okta', 1], ['Connection', 'meridian.okta.com', 1]], mid: [['Policy', 'Org backup', 1]], out: [['Groups', 'Uncovered', 60], ['Apps', 'Uncovered', 85]] },
     ent: { Workloads: [['Okta', '12 connections']], Connections: [['meridian.okta.com', 'Healthy']], Policies: [['Org backup', '2 runs per day']], Objects: [['Groups', '60 uncovered'], ['Applications', '85 uncovered']] },
     hist: [['Oct 4, 2026 8:00 AM', 'Finding opened by rule RES-102 (Objects are not covered by any backup policy)']] },
-  { id: '24497', rule: 'RES-103', lvl: 3, status: 'Under Investigation', wl: 'okta', name: 'System Log capture policy has been paused for 4 days', c: T(4, 14, 20), u: T(1, 11, 5), rOff: null, assignee: 'Karsten Rowe',
-    evidence: 'Paused by Karsten Rowe on Oct 1 at 2:20 PM. Okta change history has a gap from that point.', policy: 'System Log capture', conn: 'meridian.okta.com', asset: 'Backup policy',
+  { id: '24497', rule: 'RES-103', lvl: 3, status: 'Under Investigation', wl: 'okta', name: 'System Log capture policy has been paused for 4 days', c: T(4, 14, 20), u: T(1, 11, 5), rOff: null, assignee: 'Darren Lasso',
+    evidence: 'Paused by Darren Lasso on Oct 1 at 2:20 PM. Okta change history has a gap from that point.', policy: 'System Log capture', conn: 'meridian.okta.com', asset: 'Backup policy',
     steps: [['Resume the paused policy', 'Resume policy', POL]],
     graph: { src: [['Workload', 'Okta', 1], ['Connection', 'meridian.okta.com', 1]], mid: [['Policy', 'System Log capture', 1]], out: [] },
     ent: { Workloads: [['Okta', '12 connections']], Connections: [['meridian.okta.com', 'Healthy']], Policies: [['System Log capture', 'Paused · every 5 minutes']] },
-    hist: [['Oct 1, 2026 2:20 PM', 'Policy paused by Karsten Rowe'], ['Oct 4, 2026 2:21 PM', 'Finding opened by rule RES-103 (Backup policy paused for more than 72 hours)'], ['Oct 4, 2026 11:05 AM', 'Status changed to Under Investigation by Karsten Rowe']] },
-  { id: '24390', rule: 'RES-104', lvl: 4, status: 'Resolved - Remediated', wl: 'entra', name: 'Entra ID Directory objects backup missed its 6h SLA', c: T(17, 3, 15), u: T(16, 9, 30), rOff: 16, assignee: 'Karsten Rowe', evidence: 'No successful backup between 2:00 AM and 9:00 AM.', policy: 'Directory objects', conn: 'meridianfg.com', asset: 'Backup policy',
+    hist: [['Oct 1, 2026 2:20 PM', 'Policy paused by Darren Lasso'], ['Oct 4, 2026 2:21 PM', 'Finding opened by rule RES-103 (Backup policy paused for more than 72 hours)'], ['Oct 4, 2026 11:05 AM', 'Status changed to Under Investigation by Darren Lasso']] },
+  { id: '24390', rule: 'RES-104', lvl: 4, status: 'Resolved - Remediated', wl: 'entra', name: 'Entra ID Directory objects backup missed its 6h SLA', c: T(17, 3, 15), u: T(16, 9, 30), rOff: 16, assignee: 'Darren Lasso', evidence: 'No successful backup between 2:00 AM and 9:00 AM.', policy: 'Directory objects', conn: 'meridianfg.com', asset: 'Backup policy',
     steps: [], graph: { src: [['Workload', 'Entra ID', 1]], mid: [['Policy', 'Directory objects', 1]], out: [['Sessions', 'Failed', 2]] }, ent: { Policies: [['Directory objects', '4 runs per day']] },
     hist: [['Sep 18, 2026 3:15 AM', 'Finding opened by rule RES-104'], ['Sep 19, 2026 9:30 AM', 'Resolved: next backup succeeded and the rule passed']] },
   { id: '24366', rule: 'RES-102', lvl: 3, status: 'Resolved - Remediated', wl: 'ad', name: '38 Active Directory GPOs were not covered by a backup policy', c: T(6, 7, 45), u: T(4, 10, 0), rOff: 4, assignee: 'Sarah Rivera', evidence: '38 new GPOs were outside the Forest protection scope.', policy: 'Forest protection', conn: 'corp.meridian.local', asset: 'Backup policy',
     steps: [], graph: { src: [['Workload', 'Active Directory', 1]], mid: [['Policy', 'Forest protection', 1]], out: [['GPOs', 'Uncovered', 38]] }, ent: { Policies: [['Forest protection', 'Daily']] },
     hist: [['Sep 29, 2026 7:45 AM', 'Finding opened by rule RES-102'], ['Oct 1, 2026 10:00 AM', 'Resolved: scope widened and the rule passed']] },
-  { id: '24310', rule: 'RES-103', lvl: 3, status: 'Suppressed', wl: 'okta', name: 'Org backup policy has been paused for 4 days', c: T(23, 9, 0), u: T(20, 15, 0), rOff: 20, assignee: 'Karsten Rowe', evidence: 'Planned pause during an Okta migration window.', policy: 'Org backup', conn: 'meridian.okta.com', asset: 'Backup policy',
+  { id: '24310', rule: 'RES-103', lvl: 3, status: 'Suppressed', wl: 'okta', name: 'Org backup policy has been paused for 4 days', c: T(23, 9, 0), u: T(20, 15, 0), rOff: 20, assignee: 'Darren Lasso', evidence: 'Planned pause during an Okta migration window.', policy: 'Org backup', conn: 'meridian.okta.com', asset: 'Backup policy',
     steps: [], graph: { src: [['Workload', 'Okta', 1]], mid: [['Policy', 'Org backup', 1]], out: [] }, ent: { Policies: [['Org backup', 'Paused']] },
-    hist: [['Sep 12, 2026 9:00 AM', 'Finding opened by rule RES-103'], ['Sep 15, 2026 3:00 PM', 'Suppressed by Karsten Rowe: planned migration window']] },
+    hist: [['Sep 12, 2026 9:00 AM', 'Finding opened by rule RES-103'], ['Sep 15, 2026 3:00 PM', 'Suppressed by Darren Lasso: planned migration window']] },
   { id: '24251', rule: 'RES-101', lvl: 5, status: 'Resolved - Closed', wl: 'entra', name: 'Entra ID dev tenant has no backup policy', c: T(30, 11, 0), u: T(28, 13, 20), rOff: 28, assignee: 'Sarah Rivera', evidence: 'Tenant meridian-dev.onmicrosoft.com was connected without a policy.', policy: '—', conn: 'meridian-dev.onmicrosoft.com', asset: 'Workload',
     steps: [], graph: { src: [['Workload', 'Entra ID', 1], ['Connection', 'meridian-dev.onmicrosoft.com', 1]], mid: [], out: [['Objects', 'Unprotected', 2300]] }, ent: { Connections: [['meridian-dev.onmicrosoft.com', 'Healthy']] },
     hist: [['Sep 5, 2026 11:00 AM', 'Finding opened by rule RES-101'], ['Sep 7, 2026 1:20 PM', 'Closed: policy created']] },
   { id: '24102', rule: 'RES-104', lvl: 4, status: 'Resolved - Remediated', wl: 'ad', name: 'Active Directory Forest protection missed its 24h SLA', c: T(46, 2, 30), u: T(45, 8, 10), rOff: 45, assignee: 'Unassigned', evidence: 'The 2:00 AM run did not complete.', policy: 'Forest protection', conn: 'corp.meridian.local', asset: 'Backup policy',
     steps: [], graph: { src: [['Workload', 'Active Directory', 1]], mid: [['Policy', 'Forest protection', 1]], out: [['Sessions', 'Failed', 1]] }, ent: { Policies: [['Forest protection', 'Daily']] },
     hist: [['Aug 20, 2026 2:30 AM', 'Finding opened by rule RES-104'], ['Aug 21, 2026 8:10 AM', 'Resolved: next backup succeeded']] },
-  { id: '24055', rule: 'RES-102', lvl: 3, status: 'Resolved - Remediated', wl: 'okta', name: '31 Okta applications were not covered by a backup policy', c: T(38, 10, 0), u: T(35, 16, 40), rOff: 35, assignee: 'Karsten Rowe', evidence: '31 apps were added after the scope was set.', policy: 'Org backup', conn: 'meridian.okta.com', asset: 'Backup policy',
+  { id: '24055', rule: 'RES-102', lvl: 3, status: 'Resolved - Remediated', wl: 'okta', name: '31 Okta applications were not covered by a backup policy', c: T(38, 10, 0), u: T(35, 16, 40), rOff: 35, assignee: 'Darren Lasso', evidence: '31 apps were added after the scope was set.', policy: 'Org backup', conn: 'meridian.okta.com', asset: 'Backup policy',
     steps: [], graph: { src: [['Workload', 'Okta', 1]], mid: [['Policy', 'Org backup', 1]], out: [['Apps', 'Uncovered', 31]] }, ent: { Policies: [['Org backup', '2 runs per day']] },
     hist: [['Aug 28, 2026 10:00 AM', 'Finding opened by rule RES-102'], ['Aug 31, 2026 4:40 PM', 'Resolved: scope widened']] }
 ];
@@ -2398,7 +2405,7 @@ function sessionsRecent() {
     var total = r.st === 'err' ? 1 : rs ? 2 + Math.floor(rnd() * 38) : prot, warns = r.st === 'warn' ? 3 + Math.floor(rnd() * 20) : 0, errs = r.st === 'err' ? 1 : 0;
     var fd = function(day, h, m){ var d = new Date(BASE.getTime() - day * 86400000); return MON[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear() + ' ' + t12(h, m); };
     return { id: 'SES-' + (10000 + hash(key) % 90000), w: w, st: r.st, type: x.type, name: rs ? w.name + ' restore' : w.name + (r.manual ? ' on-demand backup' : ' scheduled backup'), policy: rs ? '—' : w.policy, started: dayLabel(r.day) + ', ' + t12(r.hour, 0), completed: dayLabel(endDay) + ', ' + t12(Math.floor(em / 60), em % 60), size: size,
-      startFull: fd(r.day, r.hour, 0), endFull: fd(endDay, Math.floor(em / 60), em % 60), mins: mins, total: total, ok: Math.max(0, total - warns - errs), warns: warns, errs: errs, conn: w.scope, initiator: (rs || r.manual) ? (['Karsten Rowe', 'Sarah Rivera', 'Mira Khan'][hash(key) % 3]) : 'System', rnd: hash(key) };
+      startFull: fd(r.day, r.hour, 0), endFull: fd(endDay, Math.floor(em / 60), em % 60), mins: mins, total: total, ok: Math.max(0, total - warns - errs), warns: warns, errs: errs, conn: w.scope, initiator: (rs || r.manual) ? (['Darren Lasso', 'Sarah Rivera', 'Mira Khan'][hash(key) % 3]) : 'System', rnd: hash(key) };
   });
 }
 /* Session log (mock, derived from the session): the steps a backup or restore goes through; a warning or failure appears at the step where it happened. */
@@ -3102,6 +3109,17 @@ window.iddRefresh = function() {   // page-level: refreshes every widget's age +
 };
 var rz; window.addEventListener('resize', function(){ clearTimeout(rz); rz = setTimeout(function(){ renderCoverage(); renderTrends(); }, 120); });
 
+/* Pinned-column scroll shadow (ported from activity.html updateTableScrollShadows): toggles .has-h-scroll-right while content is hidden behind the pinned actions column */
+(function(){
+  function norm(w){ w.querySelectorAll('table.idd-tbl.dense').forEach(function(t){ var c = [].slice.call(t.querySelectorAll('col')), b = c.slice(0, -1), sum = 0; b.forEach(function(x){ sum += parseFloat(x.style.width) || 0; }); if (sum > 0 && Math.abs(sum - 100) > 0.01) b.forEach(function(x){ x.style.width = ((parseFloat(x.style.width) || 0) * 100 / sum).toFixed(2) + '%'; }); }); }   /* the pinned actions col is a fixed 56px, so the other columns share 100% and the actions col is the same width on every table */
+  function upd(w){ norm(w); w.classList.toggle('has-h-scroll-right', w.scrollWidth - w.clientWidth - w.scrollLeft > 1); }
+  function wire(){ document.querySelectorAll('.idd-tbl-wrap').forEach(function(w){ if (w.dataset.shadowWired) return; w.dataset.shadowWired = '1';
+    w.addEventListener('scroll', function(){ upd(w); }, { passive: true });
+    new MutationObserver(function(){ upd(w); }).observe(w, { childList: true });
+    if (window.ResizeObserver) new ResizeObserver(function(){ upd(w); }).observe(w);
+    upd(w); }); }
+  wire(); window.addEventListener('resize', function(){ document.querySelectorAll('.idd-tbl-wrap').forEach(upd); });
+})();
 window.iddHooks = { S: S, presets: RANGE_PRESETS, renderAll: renderAll, bounds: bounds, label: rangeChipLabel };
 iddWlChip();
 renderAll();
