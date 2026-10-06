@@ -142,13 +142,14 @@
 
     var searchSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
     var html = '<div class="wlp-search">' + searchSvg + '<input type="text" placeholder="Search" autocomplete="off"></div>';
-    html += '<div class="wlp-cats">' + CATS.map(function (c) {
+    // cfg.noCats (2026-10-06, Identity dashboard): a picker scoped to ONE group of workloads has no All/SaaS/Datacenter chips to switch between
+    if (!cfg.noCats) html += '<div class="wlp-cats">' + CATS.map(function (c) {
       return '<button type="button" class="wlp-cat' + (st.cat === c ? ' is-on' : '') + '" data-cat="' + c + '">' + c + '</button>';
     }).join('') + '</div>';
 
     var visible = entries.filter(function (en) {
       if (st.q && en.name.toLowerCase().indexOf(st.q) < 0) return false;
-      if (st.cat !== 'All' && en.cat !== _catOfChip[st.cat]) return false;
+      if (!cfg.noCats && st.cat !== 'All' && en.cat !== _catOfChip[st.cat]) return false;
       return true;
     });
     var catRank = { 'SaaS platforms': 0, 'Datacenter': 1 };

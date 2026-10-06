@@ -12253,6 +12253,8 @@ var RESOURCES = (function(){
   list.push(R('okta-grp-appsec',  'AppSec-Reviewers',  'Group', 'Okta WIC', 'acme-corp', 'okta-org', {parentId:'okta-wd-groups', existence:'drift', oktaMembers:14, oktaSource:'OKTA_GROUP', oktaGroupType:'manual', oktaDesc:'Security review rotation — manually curated', meta:'ACTIVE · OKTA_GROUP · 14 members · manual · differs from latest backup'}));
   list.push(R('okta-grp-contractors','Contractors-2026', 'Group', 'Okta WIC', 'acme-corp', 'okta-org', {parentId:'okta-wd-groups', existence:'unknown', oktaSource:'OKTA_GROUP', oktaGroupType:'manual', oktaDesc:'2026 contractor cohort', meta:'OKTA_GROUP · live status unavailable (read-only scope)'}));
 
+  list.push(R('okta-grp-payments', 'okta-grp-payments', 'Group', 'Okta WIC', 'acme-corp', 'okta-org', {parentId:'okta-wd-groups', policy:'Production — Compliance', oktaMembers:0, oktaSource:'OKTA_GROUP', oktaGroupType:'manual', oktaDesc:'Payments team access — membership emptied Oct 5, 7:52 AM', meta:'ACTIVE · OKTA_GROUP · 0 members · 214 at the last restore point'}));
+
   // R0 seed-enrichment: APP_GROUP rows with provenance + the BUILT_IN
   // Everyone group, so the doc 9 Type facet (OKTA_GROUP / APP_GROUP /
   // BUILT_IN) and Source column carry real values.
@@ -62831,6 +62833,51 @@ function refreshAllTableScrollShadows() {
     })();
     if (defaultTableId && typeof openRecordsDrill === 'function') openRecordsDrill(defaultTableId);
   }
+})();
+
+// Deep link from the Identity Resilience dashboard (finding → "Restore to <point>"):
+//   inventory-V1.html#compare=<workload-id>&items=…&point=…  opens the record drawer on the first item: LEFT = its latest restore point, RIGHT = the point given (backup vs backup, never production)
+//   inventory-V1.html#restore=<workload-id>&items=<resourceId,...>&point=<YYYY-MM-DD[THH:MM]>   (hash, not query: static servers drop the query on the .html redirect)
+// Opens that workload, pins each item to its latest restore point at or before `point`, and opens the restore wizard (express: the cart is untouched)
+// on its first step with the item(s) already staged. Workloads / items this prototype doesn't have get a toast instead.
+(function(){
+  var q = new URLSearchParams((window.location.hash || '').replace(/^#/, '')), wlId = q.get('restore') || q.get('compare'), compareOnly = !q.get('restore');
+  if (!wlId) return;
+  function go(){
+    var ids = (q.get('items') || '').split(',').filter(Boolean), point = q.get('point');
+    var label = (typeof WL_MAP !== 'undefined') ? WL_MAP[wlId] : null;
+    var res = ids.map(function(id){ return RESOURCES.find(function(r){ return r.id === id; }); }).filter(Boolean);
+    try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch (e) {}
+    if (!label || !res.length) { if (typeof showToast === 'function') showToast('This workload is not in Protected Data in the prototype yet'); return; }
+    enterWorkloadCatalog(wlId, label);
+    // #compare=…: open the existing record drawer (restore point vs production) on the FIRST item, pinned to the shared restore point. #restore=…: the wizard below.
+    // point = YYYY-MM-DD or YYYY-MM-DDTHH:MM (local). Each item pins to ITS latest restore point at or before that moment.
+    var pt = point ? new Date(point.length > 10 ? point : point + 'T23:59').getTime() : null;
+    // The restore wizard works on ONE shared point per cart, and each item only has the restore points its own schedule produced.
+    // So pin every item to the latest point at or before `point` that ALL of them have (falls back to each item's own latest).
+    var lists = res.map(function(r){ return (typeof generateRps === 'function') ? generateRps(r.id) : []; }), shared = null;
+    if (pt != null && lists.length) {
+      lists[0].filter(function(rp){ return rp.ts <= pt; }).sort(function(a, b){ return b.ts - a.ts; }).some(function(rp){
+        if (lists.every(function(l){ return l.some(function(x){ return x.id === rp.id; }); })) { shared = rp.id; return true; } return false; });
+    }
+    if (compareOnly) {   // drawer = backup-to-backup only: LEFT = the item's latest restore point (current), RIGHT = the restore point in the link
+      var pinned = shared || (function(){ var pk = null; lists[0].forEach(function(rp){ if (pt != null && rp.ts <= pt && (!pk || rp.ts > pk.ts)) pk = rp; }); return pk && pk.id; })();
+      var _lat = lists[0][0];
+      openRecordDrawer(res[0].id, null, null, null, _lat ? { rpId: _lat.id } : null);
+      rdState.singleSnap = false; rdState.rightSel = (pinned && _lat && pinned !== _lat.id) ? pinned : 'none';
+      if (typeof renderRdBody === 'function') renderRdBody();
+      return;
+    }
+    _v1ExpressRestore(function(){
+      res.forEach(function(r, i){
+        var pick = null;
+        if (!shared && pt != null) lists[i].forEach(function(rp){ if (rp.ts <= pt && (!pick || rp.ts > pick.ts)) pick = rp; });
+        var rpId = shared || (pick && pick.id);
+        addToPlan(r.id, rpId ? { isPinned: true, manualRpId: rpId, source: 'express' } : { source: 'express' });
+      });
+    });
+  }
+  window.addEventListener('load', function(){ setTimeout(go, 500); });
 })();
 
 // ═══════════════════════════════════════════════════════════════════
