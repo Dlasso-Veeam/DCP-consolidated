@@ -611,6 +611,7 @@ a.plv-btn { text-decoration: none; }
 .idd-chart .bar-ok { fill: var(--em-green); }
 .idd-chart .bar-warn { fill: var(--orange); }
 .idd-chart .bar-err { fill: var(--red); }
+.idd-chart .bar-run { fill: var(--status-blue); }
 .idd-chart .pt { fill: var(--em-green); stroke: var(--white); stroke-width: 2; opacity: 0; pointer-events: none; }
 .idd-chart .col:hover .pt { opacity: 1; }
 .idd-chart .col:hover .hov { opacity: 0.04; }
@@ -791,6 +792,25 @@ table.idd-tbl tr[data-incident] { cursor: pointer; }
 .idd-mscrim { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1500; display: none; align-items: center; justify-content: center; }
 .idd-mscrim.open { display: flex; }
 .idd-modal { width: 680px; max-width: calc(100vw - 48px); background: var(--white); border-radius: 8px; box-shadow: 0 8px 24px rgba(31,34,41,0.25); display: flex; flex-direction: column; }
+.idd-modal.wide { width: 840px; }
+.idd-modal-b.plan { max-height: calc(100vh - 220px); overflow-y: auto; gap: 16px; }
+.idd-plan-lead { margin: 0; font-size: 16px; line-height: 22px; color: var(--black-70); }
+.idd-plan-ord { display: flex; align-items: center; gap: 12px; font-size: 16px; color: var(--black-70); }
+.idd-plan-note { border: 1px solid color-mix(in srgb, var(--status-blue) 35%, white); background: var(--status-blue-5); border-radius: 8px; padding: 12px; color: var(--black-100); }
+.idd-plan-note.warn { border-color: color-mix(in srgb, var(--orange) 40%, white); background: var(--orange-10); }
+.idd-plan-note .h { display: flex; align-items: center; gap: 8px; font-size: 16px; line-height: 22px; } .idd-plan-note p { margin: 0; padding-left: 24px; font-size: 16px; line-height: 22px; }
+.idd-plan-row { border: 1px solid var(--border-light); border-radius: 8px; padding: 0 16px 8px; }
+.idd-plan-h, .idd-plan-run { display: flex; align-items: center; gap: 12px; min-height: 56px; }
+.idd-plan-run { border: 1px solid var(--border-light); border-radius: 8px; padding: 0 16px; margin-bottom: 8px; }
+.idd-plan-h .t, .idd-plan-run .t { display: flex; flex-direction: column; min-width: 0; font-size: 16px; line-height: 22px; } .idd-plan-h .t span, .idd-plan-run .t span { font-size: 14px; line-height: 18px; color: var(--black-70); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.idd-plan-n { width: 24px; height: 24px; border-radius: 50%; background: var(--black-5); color: var(--black-70); font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.idd-plan-row .idd-pr { align-items: flex-start; padding: 9px 0; min-height: 0; } .idd-plan-row .idd-pr .k { padding-top: 0; }
+.idd-plan-start { font-size: 14px; color: var(--black-70); white-space: nowrap; }
+.idd-plan-opts { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; font-size: 16px; line-height: 22px; color: var(--black-70); } .idd-plan-opts b { font-weight: 500; color: var(--black-100); }
+.idd-elink { color: var(--em-green); font-weight: 500; text-decoration: none; cursor: pointer; } .idd-elink:hover { text-decoration: underline; color: var(--em-green-accent); }
+.idd-entw table.dense th:last-child, .idd-entw table.dense td:last-child { position: static; }
+.idd-rp-bar.blk { position: static; } .idd-rp-wl { padding: 10px 14px; display: flex; align-items: center; min-width: 0; font-weight: 500; }
+.idd-rp-acct { display: flex; align-items: baseline; gap: 8px; padding: 8px 14px; font-size: 16px; font-weight: 500; line-height: 22px; } .idd-rp-acct span { font-size: 14px; font-weight: 450; color: var(--black-70); }
 .idd-modal-h { display: flex; align-items: center; gap: 12px; padding: 16px 16px 8px 24px; }
 .idd-modal-h h2 { margin: 0; flex: 1; font-size: 24px; font-weight: 500; line-height: 32px; color: var(--black-100); }
 .idd-modal-b { padding: 8px 24px 16px; display: flex; flex-direction: column; gap: 12px; }
@@ -857,7 +877,7 @@ table.idd-tbl tr[data-incident] { cursor: pointer; }
 .idd-slog-rows { padding: 8px 12px 12px; display: flex; flex-direction: column; }
 .idd-lrow { display: flex; align-items: center; gap: 12px; min-height: 40px; }
 .idd-ltile { width: 28px; height: 28px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--green-s10); color: var(--em-green); } .idd-ltile svg { width: 20px; height: 20px; }
-.idd-lrow.warning .idd-ltile { background: var(--orange-10); color: var(--orange); } .idd-lrow.error .idd-ltile { background: var(--red-10); color: var(--red); }
+.idd-lrow.running .idd-ltile { background: var(--status-blue-5); color: var(--status-blue); } .idd-lrow.warning .idd-ltile { background: var(--orange-10); color: var(--orange); } .idd-lrow.error .idd-ltile { background: var(--red-10); color: var(--red); }
 .idd-lmsg { flex: 1; min-width: 0; font-size: 16px; line-height: 22px; color: var(--black-100); overflow-wrap: anywhere; } .idd-ldur { font-size: 14px; color: var(--black-70); font-variant-numeric: tabular-nums; flex-shrink: 0; }
 .idd-lconn { width: 2px; height: 10px; background: var(--black-10); margin: 0 0 0 13px; }
 .idd-tn.static { cursor: default; } .idd-tn.static:hover { background: var(--white); } .idd-tn.static .ct { background: var(--black-5); color: var(--grey-100); border-radius: 2px; font-weight: 500; }
@@ -1203,7 +1223,7 @@ td.idd-chk, th.idd-chk { text-align: center; padding: 0 0 0 12px; }
           <div class="idd-widget idd-span-6">
             <div data-wh="t1"></div>
             <div class="idd-wb"><div class="idd-chart-big" id="iddT1Big"></div><div class="idd-chart" id="iddT1" data-go="activity.html" data-dest="Activity"></div>
-              <div class="idd-legend"><span><i style="background:var(--em-green)"></i>Successful</span><span><i style="background:var(--orange)"></i>With warnings</span><span><i style="background:var(--red)"></i>Failed</span></div></div>
+              <div class="idd-legend"><span><i style="background:var(--em-green)"></i>Success</span><span><i style="background:var(--orange)"></i>Warning</span><span><i style="background:var(--red)"></i>Failed</span><span><i style="background:var(--status-blue)"></i>Running</span></div></div>
           </div>
           <div class="idd-widget idd-span-6">
             <div data-wh="t2"></div>
@@ -1294,6 +1314,11 @@ td.idd-chk, th.idd-chk { text-align: center; padding: 0 0 0 12px; }
   <div class="idd-modal-b"><div class="row" id="iddStRow"></div>
     <label for="iddStNote">Note <b>*</b></label><textarea id="iddStNote" placeholder="Explain why the status is changing"></textarea><div class="errt">A note is required to change the status.</div></div>
   <div class="idd-modal-f"><button type="button" class="plv-btn plv-btn-secondary" id="iddStCancel">Cancel</button><button type="button" class="plv-btn plv-btn-primary" id="iddStOk">Change Status</button></div>
+</div></div>
+<div class="idd-mscrim" id="iddPlan"><div class="idd-modal wide" role="dialog" aria-modal="true" aria-labelledby="iddPlanTitle">
+  <div class="idd-modal-h"><h2 id="iddPlanTitle">Restore</h2><button type="button" class="idd-ibtn" data-planclose="1" aria-label="Close"></button></div>
+  <div class="idd-modal-b plan" id="iddPlanBody"></div>
+  <div class="idd-modal-f" id="iddPlanFoot"></div>
 </div></div>
 <div class="idd-toast" id="iddToast" role="status"></div>
 <div class="filter-picker" id="filterPicker">
@@ -1785,6 +1810,17 @@ WL.forEach(function(w){
   w.restores = list.sort(function(a, b){ return a.day - b.day || b.hour - a.hour; });
 });
 
+/* Exports (a third session type, as in Activity) and sessions running right now (started 10:00, 14 minutes before "now"). Running sessions are kept apart from the run history so rates and RPO only count finished sessions. */
+var EXPORT_MOCK = { okta: [[2, 11, 'ok'], [9, 14, 'ok'], [24, 10, 'warn'], [47, 15, 'ok']], entra: [[4, 13, 'ok'], [15, 9, 'err'], [38, 11, 'ok']], ad: [[7, 10, 'ok'], [29, 14, 'ok']], google: [] };
+var LIVE_MOCK = { entra: [['Backup', true]], ad: [['Restore', false]], okta: [['Export', false]] };
+WL.forEach(function(w){
+  var list = (EXPORT_MOCK[w.id] || []).map(function(x){ return { day: x[0], hour: x[1], st: x[2] }; });
+  var er = rng(hash(w.id + 'exports')), pe = { okta: 0.22, entra: 0.16, ad: 0.1 }[w.id] || 0;
+  for (var d = 0; d < 90; d++) { if (er() > pe) continue; var hr = 8 + Math.floor(er() * 10); if (d === 0 && hr * 60 > NOW_MIN - 30) hr = 8; if (list.some(function(z){ return z.day === d && z.hour === hr; })) continue; var u = er(); list.push({ day: d, hour: hr, st: u < 0.88 ? 'ok' : u < 0.95 ? 'warn' : 'err' }); }
+  w.exports = list.sort(function(a, b){ return a.day - b.day || b.hour - a.hour; });
+  w.live = (LIVE_MOCK[w.id] || []).map(function(x){ return { day: 0, hour: 10, type: x[0], manual: x[1], st: 'run' }; });
+});
+
 /* ── State + range ── */
 var S = { range: { k: '7d' } };
 var WSCOPE = null;   // null = All identity workloads; else one workload id (the shared picker, scoped to the identity workloads)
@@ -1829,14 +1865,14 @@ function renderFilters() { var l = rangeChipLabel(); document.getElementById('id
 function series() {
   var list = sel(), b = bounds(), N = b.hi - b.lo + 1, i;
   var days = []; for (i = b.hi; i >= b.lo; i--) days.push(i);        // oldest → newest (day offsets)
-  var outcomes = days.map(function(d){ var o = { ok: 0, warn: 0, err: 0 }; list.forEach(function(w){ w.runs.forEach(function(r){ if (r.day === d) o[r.st]++; }); }); return o; });
-  var routcomes = days.map(function(d){ var o = { ok: 0, warn: 0, err: 0 }; list.forEach(function(w){ w.restores.forEach(function(r){ if (r.day === d) o[r.st]++; }); }); return o; });
+  var outc = function(prop, type){ return days.map(function(d){ var o = { ok: 0, warn: 0, err: 0, run: 0 }; list.forEach(function(w){ w[prop].forEach(function(r){ if (r.day === d) o[r.st]++; }); (w.live || []).forEach(function(r){ if (r.type === type && r.day === d) o.run++; }); }); return o; }); };
+  var outcomes = outc('runs', 'Backup'), routcomes = outc('restores', 'Restore'), eoutcomes = outc('exports', 'Export');
   var pt = protTotals(list), covToday = pt.t ? pt.p / pt.t * 100 : null, r1 = rng(hash('cov' + N + ':' + b.lo)), drift = 0.9 * Math.sqrt(N / 7);
   var cov = covToday === null ? null : days.map(function(d, k){ if (k === N - 1) return covToday; var f = (N - 1 - k) / Math.max(1, N - 1); return Math.min(100, covToday + drift * f + (r1() - 0.5) * 0.12); });
   var r2 = rng(hash('chg' + N + ':' + b.lo));
   var chg = days.map(function(d){ var c = 0, f = 0; list.forEach(function(w){ var base = w.perDayChanges * (d === 0 ? 0.43 : 1) * (0.78 + r2() * 0.44); c += Math.round(base);
     f += d === 0 ? w.flagToday : (w.perDayChanges ? Math.floor(r2() * (w.perDayChanges > 50 ? 3.2 : 1.6)) : 0); }); return { c: c, f: f }; });
-  return { days: days, outcomes: outcomes, routcomes: routcomes, cov: cov, chg: chg };
+  return { days: days, outcomes: outcomes, routcomes: routcomes, eoutcomes: eoutcomes, cov: cov, chg: chg };
 }
 
 /* ── 1 · KPIs (whole card is the click target) ── */
@@ -1981,14 +2017,14 @@ function renderTrends() {
   renderHealth();
   var s = series(), N = spanN(), days = s.days, g = '';
   // T1 — SESSIONS by outcome per day; a segmented control switches Backup / Restore sessions (volume AND verdict; the KPI above carries the backup rate)
-  var tot = {}, outs = { backup: s.outcomes, restore: s.routcomes };
-  ['backup', 'restore'].forEach(function(m){ tot[m] = outs[m].reduce(function(a, o){ return a + o.ok + o.warn + o.err; }, 0); });
+  var tot = {}, outs = { backup: s.outcomes, restore: s.routcomes, export: s.eoutcomes };
+  ['backup', 'restore', 'export'].forEach(function(m){ tot[m] = outs[m].reduce(function(a, o){ return a + o.ok + o.warn + o.err + o.run; }, 0); });
   pickTitle('t1');
-  var o1 = outs[SESSMODE], t1 = tot[SESSMODE], w1 = o1.reduce(function(a, o){ return a + o.warn; }, 0), e1 = o1.reduce(function(a, o){ return a + o.err; }, 0), noun = SESSMODE === 'backup' ? 'backup' : 'restore';
-  document.getElementById('iddT1Big').innerHTML = t1 ? fmt(t1) + ' sessions <span class="idd-chart-cap">' + w1 + ' with warnings · ' + e1 + ' failed</span>' : '0 sessions <span class="idd-chart-cap">No ' + noun + ' sessions in this period</span>';
+  var o1 = outs[SESSMODE], t1 = tot[SESSMODE], w1 = o1.reduce(function(a, o){ return a + o.warn; }, 0), e1 = o1.reduce(function(a, o){ return a + o.err; }, 0), r1 = o1.reduce(function(a, o){ return a + o.run; }, 0), noun = SESSMODE;
+  document.getElementById('iddT1Big').innerHTML = t1 ? fmt(t1) + ' sessions <span class="idd-chart-cap">' + w1 + ' warning · ' + e1 + ' failed' + (r1 ? ' · ' + r1 + ' running' : '') + '</span>' : '0 sessions <span class="idd-chart-cap">No ' + noun + ' sessions in this period</span>';
   var elT = document.getElementById('iddT1'); elT.innerHTML = ''; var hT = Math.max(150, elT.clientHeight);
-  if (t1) barsChart(elT, days, o1.map(function(o){ return [{ v: o.ok, cls: 'bar-ok' }, { v: o.warn, cls: 'bar-warn' }, { v: o.err, cls: 'bar-err' }]; }),
-    { h: hT, step: SESSMODE === 'backup' ? 4 : 1, label: (noun === 'backup' ? 'Backup' : 'Restore') + ' sessions by outcome per day', tip: function(k){ var o = o1[k]; return o.ok + ' successful · ' + o.warn + ' with warnings · ' + o.err + ' failed'; } });
+  if (t1) barsChart(elT, days, o1.map(function(o){ return [{ v: o.ok, cls: 'bar-ok' }, { v: o.warn, cls: 'bar-warn' }, { v: o.err, cls: 'bar-err' }, { v: o.run, cls: 'bar-run' }]; }),
+    { h: hT, step: SESSMODE === 'backup' ? 4 : 1, label: noun.charAt(0).toUpperCase() + noun.slice(1) + ' sessions by outcome per day', tip: function(k){ var o = o1[k]; return o.ok + ' success · ' + o.warn + ' warning · ' + o.err + ' failed' + (o.run ? ' · ' + o.run + ' running' : ''); } });
   else document.getElementById('iddT1').innerHTML = '<div class="idd-empty">No ' + noun + ' sessions in this period.</div>';
   // T2 — coverage % over time (is the gap closing or growing?)
   if (s.cov) {
@@ -2178,7 +2214,7 @@ function renderThreats_parked() {   // PARKED 2026-10-05: threats are findings �
 }
 
 /* Detail overlay */
-var NODE_ICON = { Actor: 'user-outlined', Technique: 'risk-outlined', Subject: 'objects-outlined', Impact: 'alert-warning-outlined', Workload: 'workload-outlined', Connection: 'integration-widget-outlined', Policy: 'policy-outlined', Sessions: 'history-outlined', Backups: 'backup-outlined', Objects: 'objects-outlined', Finding: 'issues-outlined', Incident: 'sd-folder', 'Restore point': 'restore-point-outlined' };
+var NODE_ICON = { Actor: 'user-outlined', Technique: 'risk-outlined', Subject: 'objects-outlined', Impact: 'alert-warning-outlined', Workload: 'workload-outlined', Connection: 'integration-widget-outlined', Policy: 'policy-outlined', Sessions: 'history-outlined', Backups: 'backup-outlined', Objects: 'objects-outlined', Finding: 'issues-outlined', Incident: 'sd-folder', Person: 'user-outlined', 'Restore point': 'restore-point-outlined' };
 function nodeGlyph(k, cx, cy, color) { var n = NODE_ICON[k] || 'objects-outlined', g = (typeof ico === 'function' ? ico(n, 24) : '') || _dsStoreIconSvg(n, 24) || ''; return g.replace('<svg ', '<svg x="' + (cx - 12) + '" y="' + (cy - 12) + '" style="color:' + (color || '#fff') + '" '); }
 function graphSvg(t) {
   var W = 900, nodes = [ { k: 'Actor', v: t.actor, c: 'var(--plum)' }, { k: 'Technique', v: t.tech.split(' · ')[0], c: 'var(--orange)' }, { k: 'Subject', v: t.subject, c: 'var(--dk-blue)' }, { k: 'Impact', v: t.blast, c: 'var(--red)' } ];
@@ -2306,6 +2342,31 @@ var FINDINGS = [
     graph: { src: [['Workload', 'Okta', 1], ['Connection', 'meridian.okta.com', 1]], mid: [['Policy', 'Org backup', 1]], out: [['Objects', 'Changed', 1], ['Restore point', 'Oct 5, 3:15 AM', 1]] },
     ent: { Workloads: [['Okta', '12 connections']], Connections: [['meridian.okta.com', 'Healthy']], Policies: [['Org backup', '2 runs per day, SLA 12h']], Objects: [['Global MFA Enforcement', 'Sign-on policy · rule disabled']], 'Restore points': [['Oct 5, 2026 9:00 AM', 'Latest · captured after the change'], ['Oct 5, 2026 3:15 AM', 'Last backup before the change · policy intact · recommended']] },
     hist: [['Oct 5, 2026 8:20 AM', 'Finding opened by rule RES-106 (Unexpected change detected, restore point available)']] },
+  { id: '24551', rule: 'RES-106', lvl: 5, status: 'Open', wl: 'ad', wls: ['ad', 'entra', 'okta'], name: 'Jordan Alvarez was deleted in Active Directory, Entra ID and Okta', c: T(0, 7, 45), u: T(0, 7, 45), rOff: null, assignee: 'Unassigned',
+    evidence: 'The HR sync service svc-hr-sync deleted the accounts for Jordan Alvarez (employee ID 40817) in Active Directory, Entra ID and Okta between 7:31 AM and 7:37 AM, after a contractor-to-employee conversion created a duplicate record. Each workload has a restore point from before its deletion.', policy: 'Forest protection, Directory objects, Org backup', conn: 'corp.meridian.local, meridianfg.com, meridian.okta.com', asset: 'Users',
+    restore: { nowDeleted: true, point: 'One per workload', short: '', objects: '1 person, 3 accounts', change: 'Oct 5, 2026 7:31 AM to 7:37 AM', actor: 'svc-hr-sync' },
+    multi: { person: 'Jordan Alvarez', key: 'employee ID 40817',
+      orderNote: 'Active Directory restores first. Entra ID and Okta sync users from it, so each later session starts when the previous one succeeds.',
+      orderWarn: 'Entra ID and Okta sync users from Active Directory. Restoring them before Active Directory is back can let the sync delete the restored account again.',
+      items: [
+        { wl: 'ad', conn: 'corp.meridian.local', account: 'MERIDIAN\\j.alvarez', kind: 'User account', deleted: 'Oct 5, 7:31 AM', pdWl: 'active-directory', pdItem: 'ad-user-j-alvarez', rec: 1, sel: null,
+          points: [['Oct 5, 2026 8:00 AM', 'Latest · captured after the deletion'], ['Oct 5, 2026 2:00 AM', 'Before the deletion · recommended'], ['Oct 4, 2026 2:00 AM', 'Earlier']],
+          config: [['Conflict handling', 'Skip'], ['Group memberships', 'Merge'], ['Account state', 'Enabled']],
+          cmp: [['Account status', 'Enabled', 'Deleted'], ['Group memberships', 'Domain Users, Finance-Staff, VPN-Users', '—'], ['Organizational unit', 'OU=Finance,DC=corp,DC=meridian,DC=local', '—'], ['Manager', 'm.okafor', '—']] },
+        { wl: 'entra', conn: 'meridianfg.com', account: 'j.alvarez@meridianfg.com', kind: 'User', deleted: 'Oct 5, 7:34 AM', pdWl: 'entra-id', pdItem: 'entra-user-j-alvarez', rec: 1, sel: null,
+          points: [['Oct 5, 2026 8:00 AM', 'Latest · captured after the deletion'], ['Oct 5, 2026 2:00 AM', 'Before the deletion · recommended'], ['Oct 4, 2026 8:00 PM', 'Earlier']],
+          config: [['Conflict handling', 'Skip'], ['Object relationships', 'Merge'], ['Require sign-in method reset', 'On']],
+          cmp: [['Account status', 'Active', 'Deleted'], ['Group memberships', '4 groups', '—'], ['Assigned licenses', 'Microsoft 365 E5', '—'], ['Directory roles', 'None', '—']] },
+        { wl: 'okta', conn: 'meridian.okta.com', account: 'j.alvarez@meridianfg.com', kind: 'User', deleted: 'Oct 5, 7:37 AM', pdWl: 'okta-wic', pdItem: 'okta-user-jalvarez', rec: 1, sel: null,
+          points: [['Oct 5, 2026 9:00 AM', 'Latest · captured after the deletion'], ['Oct 5, 2026 3:15 AM', 'Before the deletion · recommended'], ['Oct 4, 2026 3:15 PM', 'Earlier']],
+          config: [['Conflict handling', 'Skip'], ['Object relationships', 'Merge'], ['Activation invitation email', 'Off']],
+          cmp: [['Status', 'Active', 'Deprovisioned'], ['Group memberships', '3 groups', '—'], ['App assignments', '6 apps', '—'], ['Factors enrolled', 'Okta Verify, WebAuthn', '—']] }] },
+    steps: [['Review what changed in each workload since its restore point', 'Compare restore points', { tab: 'ent:Restore points' }], ['Disable the HR sync rule that matched the duplicate record before restoring, or the next sync can delete the accounts again', null, null], ['Restore Jordan Alvarez in all 3 workloads, one session each, in the order shown', 'Restore all (3)', { plan: true }], ['After the sessions finish, confirm sign-in and group memberships in each workload', null, null]],
+    graph: { src: [['Workload', 'Active Directory +2', 3], ['Connection', 'corp.meridian.local +2', 3]], mid: [['Policy', 'Forest protection +2', 3]], out: [['Person', 'Jordan Alvarez', 3], ['Restore point', 'Oct 5, 2:00 AM +2', 3]] },
+    ent: { Workloads: [['Active Directory', '2 connections'], ['Entra ID', '3 connections'], ['Okta', '12 connections']], Connections: [['corp.meridian.local', 'Healthy', 'ad'], ['meridianfg.com', 'Healthy', 'entra'], ['meridian.okta.com', 'Healthy', 'okta']], Policies: [['Forest protection', '1 run per day, SLA 24h', 'ad'], ['Directory objects', '4 runs per day, SLA 6h', 'entra'], ['Org backup', '2 runs per day, SLA 12h', 'okta']],
+      Identities: [['MERIDIAN\\j.alvarez', 'Deleted · matched on employee ID', 'ad'], ['j.alvarez@meridianfg.com', 'Deleted · matched on employee ID', 'entra'], ['j.alvarez@meridianfg.com', 'Deprovisioned · matched on employee ID', 'okta']],
+      'Restore points': [['Oct 5, 2026 2:00 AM', 'Active Directory · before the deletion · recommended'], ['Oct 5, 2026 2:00 AM', 'Entra ID · before the deletion · recommended'], ['Oct 5, 2026 3:15 AM', 'Okta · before the deletion · recommended']] },
+    hist: [['Oct 5, 2026 7:45 AM', 'Finding opened by rule RES-106 (Unexpected change detected, restore point available)']] },
   { id: '24548', rule: 'RES-106', lvl: 5, status: 'Open', wl: 'okta', name: '4 Okta user accounts were deleted within 17 minutes', c: T(0, 8, 5), u: T(0, 8, 5), rOff: null, assignee: 'Unassigned',
     evidence: '4 user accounts (alice, bob.chen, dave.kim and walter.reyes) were deleted between 7:48 AM and 8:05 AM by d.kovac, outside any change window. The 3:15 AM snapshot, taken before the first deletion, holds all 4 accounts with profiles, group memberships and app assignments intact.', policy: 'Org backup', conn: 'meridian.okta.com', asset: 'Users',
     cmp: [{ name: 'alice@example.com', rows: [['Status', 'Active', 'Deleted'], ['Group memberships', '3 groups', '—'], ['App assignments', '5 apps', '—']] }, { name: 'bob.chen@acme.com', rows: [['Status', 'Active', 'Deleted'], ['Group memberships', '2 groups', '—'], ['App assignments', '4 apps', '—']] },
@@ -2403,6 +2464,8 @@ var FINDINGS = [
 var FINDINGS_ALL = FINDINGS, PARKED_RULES = ['RES-101', 'RES-102', 'RES-104'];
 FINDINGS = FINDINGS_ALL.filter(function(f){ return PARKED_RULES.indexOf(f.rule) < 0; });
 function fWl(f) { return WL.filter(function(w){ return w.id === f.wl; })[0]; }
+function fScope(f) { return (f.wls || [f.wl]).some(inScope); }
+function srcName(f) { var n = fWl(f).name, k = (f.wls || []).length; return k > 1 ? n + ' +' + (k - 1) : n; }
 function isOpen(f) { return f.status === 'Open' || f.status === 'Under Investigation'; }
 function fDate(t, short) { var d = new Date(BASE.getTime() - t.off * 86400000); return MON[d.getMonth()] + ' ' + d.getDate() + ', ' + (short ? '' : d.getFullYear() + ' ') + ((t.h % 12) || 12) + ':' + (t.m < 10 ? '0' : '') + t.m + ' ' + (t.h < 12 ? 'AM' : 'PM'); }
 function fSort(a, b) { return (b.lvl - a.lvl) || ((a.c.off - b.c.off) || ((b.c.h * 60 + b.c.m) - (a.c.h * 60 + a.c.m))); }
@@ -2413,7 +2476,7 @@ function fRow(f, opts) {
   var opn = _dsStoreIconSvg('metadata-explorer-outlined', 16) || '';
   return '<tr tabindex="0" data-finding="' + f.id + '" data-hint="Open finding details" data-dest="Finding details">'
     + (opts.check ? '<td class="idd-chk"><input type="checkbox" data-fsel="' + f.id + '" aria-label="Select finding ' + f.id + '"' + (FV.sel[f.id] ? ' checked' : '') + '></td>' : '')
-    + '<td>' + f.id + '</td><td>' + tDots(f.lvl) + '</td><td>' + fTitleCell(f) + '</td><td>' + chip(STATUS_CHIP[f.status], f.status) + '</td><td>' + fWl(f).name + '</td>'
+    + '<td>' + f.id + '</td><td>' + tDots(f.lvl) + '</td><td>' + fTitleCell(f) + '</td><td>' + chip(STATUS_CHIP[f.status], f.status) + '</td><td>' + srcName(f) + '</td>'
     + '<td>' + fDate(f.c, true) + '</td><td>' + fDate(f.u, true) + '</td><td>' + assigneeCell(f.assignee) + '</td>'
     + '<td class="idd-act"><button type="button" class="idd-ibtn corner" data-finding="' + f.id + '" aria-label="Open finding details: ' + esc(f.name) + '">' + opn + '</button></td></tr>';
 }
@@ -2427,14 +2490,14 @@ var TC_HINT = 'Threat Center › Findings, filtered to identity workloads (not p
 function threatOpen(t) { return t.status === 'Open' || t.status === 'Under Investigation'; }
 function unifiedFindings() {
   var out = [];
-  FINDINGS.filter(function(f){ return inScope(f.wl); }).forEach(function(f){ out.push({ type: 'Resilience', kind: 'finding', id: f.id, lvl: f.lvl, name: f.name, status: f.status, wl: f.wl, c: f.c, u: f.u, assignee: f.assignee }); });
+  FINDINGS.filter(fScope).forEach(function(f){ out.push({ type: 'Resilience', kind: 'finding', id: f.id, lvl: f.lvl, name: f.name, status: f.status, wl: f.wl, wls: f.wls, c: f.c, u: f.u, assignee: f.assignee }); });
   THREATS.filter(function(t){ return inScope(t.wl); }).forEach(function(t){ out.push({ type: 'Security threat', kind: 'threat', id: t.id, lvl: t.lvl, name: t.name, status: t.status, wl: t.wl, c: { off: t.day, h: t.c[0], m: t.c[1] }, u: { off: t.day, h: t.u[0], m: t.u[1] }, assignee: t.assignee }); });
   return out;
 }
 function openUnified() { return unifiedFindings().filter(function(x){ return x.status === 'Open' || x.status === 'Under Investigation'; }).sort(fSort); }
 function uRow(x) {
   var opn = _dsStoreIconSvg('metadata-explorer-outlined', 16) || '', attr = x.kind === 'threat' ? 'data-threat' : 'data-finding';
-  return '<tr tabindex="0" ' + attr + '="' + x.id + '" data-hint="Open finding details" data-dest="Finding details"><td>' + x.id + '</td><td>' + tDots(x.lvl) + '</td><td>' + fTitleCell(x) + '</td><td>' + chip('neutral', x.type) + '</td><td>' + chip(STATUS_CHIP[x.status], x.status) + '</td><td>' + fWl(x).name + '</td>'
+  return '<tr tabindex="0" ' + attr + '="' + x.id + '" data-hint="Open finding details" data-dest="Finding details"><td>' + x.id + '</td><td>' + tDots(x.lvl) + '</td><td>' + fTitleCell(x) + '</td><td>' + chip('neutral', x.type) + '</td><td>' + chip(STATUS_CHIP[x.status], x.status) + '</td><td>' + srcName(x) + '</td>'
     + '<td>' + fDate(x.c, true) + '</td><td>' + fDate(x.u, true) + '</td><td>' + assigneeCell(x.assignee) + '</td><td class="idd-act"><button type="button" class="idd-ibtn rowdetail" ' + attr + '="' + x.id + '" data-tooltip="View finding details" aria-label="View finding details: ' + esc(x.name) + '">' + opn + '</button></td></tr>';
 }
 /* ── Incidents: a collection of findings (Threat Center: an incident groups related findings, security and resilience alike). Every figure is derived from its member findings. ── */
@@ -2455,7 +2518,7 @@ function incView(inc) {
   var all = unifiedFindings(), mem = inc.members.map(function(m){ return all.filter(function(x){ return x.kind === m[0] && x.id === m[1]; })[0]; }).filter(Boolean);
   if (!mem.length) return null;
   var openAny = mem.some(function(x){ return x.status === 'Open'; }), invAny = mem.some(function(x){ return x.status === 'Under Investigation'; }), srcs = [];
-  mem.forEach(function(x){ var n = fWl(x).name; if (srcs.indexOf(n) < 0) srcs.push(n); });
+  mem.forEach(function(x){ (x.wls || [x.wl]).forEach(function(id){ var n = WL.filter(function(w){ return w.id === id; })[0].name; if (srcs.indexOf(n) < 0) srcs.push(n); }); });
   var c = mem.reduce(function(a, x){ return tKey(x.c) < tKey(a) ? x.c : a; }, mem[0].c), u = mem.reduce(function(a, x){ return tKey(x.u) > tKey(a) ? x.u : a; }, mem[0].u);
   return { id: inc.id, name: inc.name, desc: inc.desc, assignee: inc.assignee, mem: mem.sort(fSort), lvl: Math.max.apply(null, mem.map(function(x){ return x.lvl; })), status: openAny ? 'Open' : invAny ? 'Under Investigation' : 'Resolved - Remediated', srcs: srcs, c: c, u: u };
 }
@@ -2469,7 +2532,7 @@ var TOPMODE = 'findings';
 /* card-title view pickers (Threat Center pattern): [value, card title, menu label, one-line description] */
 var PICKS = {
   top: { opts: [['findings', 'Top findings', 'Findings', 'Open findings, most severe first'], ['incidents', 'Top incidents', 'Incidents', 'Groups of related findings, most severe first']], get: function(){ return TOPMODE; }, set: function(v){ TOPMODE = v; renderTop(); } },
-  t1:  { opts: [['backup', 'Backup sessions', 'Backup sessions', 'Successful, warning and failed backups per day'], ['restore', 'Restore sessions', 'Restore sessions', 'Successful, warning and failed restores per day']], get: function(){ return SESSMODE; }, set: function(v){ SESSMODE = v; renderTrends(); } }
+  t1:  { opts: [['backup', 'Backup sessions', 'Backup sessions', 'Success, warning, failed and running backups per day'], ['restore', 'Restore sessions', 'Restore sessions', 'Success, warning, failed and running restores per day'], ['export', 'Export sessions', 'Export sessions', 'Success, warning, failed and running exports per day']], get: function(){ return SESSMODE; }, set: function(v){ SESSMODE = v; renderTrends(); } }
 };
 function pickTitle(k) { var P = PICKS[k], cur = P.get(), el = document.getElementById('iddPick-' + k); if (el) el.textContent = P.opts.filter(function(o){ return o[0] === cur; })[0][1]; }
 function renderTop() {
@@ -2486,33 +2549,43 @@ function renderTop() {
   document.getElementById('iddTopFoot').innerHTML = '<span class="idd-sp"></span><span class="link is-disabled" aria-disabled="true" data-tooltip="' + esc(TC_HINT) + '">View all in Threat Center</span><span class="cnt">' + (top.length ? '1 - ' + top.length + ' of ' + all.length : '0 of 0') + '</span>';
 }
 /* ── Recent sessions: every backup run in range (any outcome), newest first; Activity columns: Process Name, Type, Status, Workload, Policy, Started, Completed, Size ── */
-var SESS_SHOWN = 10, SESS_STATUS = { ok: ['ok', 'Successful'], warn: ['warn', 'Warning'], err: ['err', 'Failed'] };
+var SESS_SHOWN = 10, SESS_STATUS = { run: ['info', 'Running'], ok: ['ok', 'Success'], warn: ['warn', 'Warning'], err: ['err', 'Failed'] };   // Activity vocabulary
 function t12(h, m) { return ((h % 12) || 12) + ':' + (m < 10 ? '0' : '') + m + ' ' + (h < 12 ? 'AM' : 'PM'); }
 function sessionsRecent() {
-  var all = [];
-  sel().forEach(function(w){ runsIn(w).forEach(function(r){ all.push({ w: w, r: r, type: 'Backup', age: r.day * 1440 + (NOW_MIN - r.hour * 60) }); });
-    (w.restores || []).filter(function(r){ var b = bounds(); return r.day >= b.lo && r.day <= b.hi; }).forEach(function(r){ all.push({ w: w, r: r, type: 'Restore', age: r.day * 1440 + (NOW_MIN - r.hour * 60) }); }); });
+  var all = [], b = bounds(), inR = function(r){ return r.day >= b.lo && r.day <= b.hi; }, age = function(r){ return r.day * 1440 + (NOW_MIN - r.hour * 60); };
+  sel().forEach(function(w){ runsIn(w).forEach(function(r){ all.push({ w: w, r: r, type: 'Backup', age: age(r) }); });
+    (w.restores || []).filter(inR).forEach(function(r){ all.push({ w: w, r: r, type: 'Restore', age: age(r) }); });
+    (w.exports || []).filter(inR).forEach(function(r){ all.push({ w: w, r: r, type: 'Export', age: age(r) }); });
+    (w.live || []).filter(inR).forEach(function(r){ all.push({ w: w, r: r, type: r.type, age: age(r) }); }); });
   all.sort(function(a, b){ return a.age - b.age; });
   return all.map(function(x){
-    var w = x.w, r = x.r, rs = x.type === 'Restore', key = w.id + x.type + r.day + ':' + r.hour, rnd = rng(hash(key)), mins = rs ? (r.st === 'err' ? 6 : 4 + Math.floor(rnd() * 14)) : r.st === 'err' ? 14 : (w.id === 'ad' ? 55 + Math.floor(rnd() * 15) : w.id === 'entra' ? 24 + Math.floor(rnd() * 14) : 12 + Math.floor(rnd() * 12)), end = r.hour * 60 + mins, endDay = r.day - Math.floor(end / 1440), em = end % 1440;
-    var size = r.st === 'err' ? '—' : rs ? (1 + Math.floor(rnd() * 40)) + ' MB' : w.id === 'okta' ? (40 + Math.floor(rnd() * 50)) + ' MB' : w.id === 'entra' ? (1.2 + rnd() * 0.9).toFixed(1) + ' GB' : (3 + rnd() * 1.2).toFixed(1) + ' GB';
+    var w = x.w, r = x.r, t = x.type, rs = t === 'Restore', ex = t === 'Export', run = r.st === 'run', err = r.st === 'err', key = w.id + t + r.day + ':' + r.hour, rnd = rng(hash(key));
+    var mins = run ? NOW_MIN - r.hour * 60 : rs ? (err ? 6 : 4 + Math.floor(rnd() * 14)) : ex ? (err ? 2 : 2 + Math.floor(rnd() * 7)) : err ? 14 : (w.id === 'ad' ? 55 + Math.floor(rnd() * 15) : w.id === 'entra' ? 24 + Math.floor(rnd() * 14) : 12 + Math.floor(rnd() * 12)), end = r.hour * 60 + mins, endDay = r.day - Math.floor(end / 1440), em = end % 1440;
+    var size = run || err ? '—' : rs ? (1 + Math.floor(rnd() * 40)) + ' MB' : ex ? (2 + Math.floor(rnd() * 60)) + ' MB' : w.id === 'okta' ? (40 + Math.floor(rnd() * 50)) + ' MB' : w.id === 'entra' ? (1.2 + rnd() * 0.9).toFixed(1) + ' GB' : (3 + rnd() * 1.2).toFixed(1) + ' GB';
     var prot = 0; Object.keys(OBJ[w.id]).forEach(function(k){ prot += OBJ[w.id][k][1]; });
-    var total = r.st === 'err' ? 1 : rs ? 2 + Math.floor(rnd() * 38) : prot, warns = r.st === 'warn' ? 3 + Math.floor(rnd() * 20) : 0, errs = r.st === 'err' ? 1 : 0;
+    var total = err ? 1 : rs ? 2 + Math.floor(rnd() * 38) : ex ? 20 + Math.floor(rnd() * 380) : prot, warns = r.st === 'warn' ? 3 + Math.floor(rnd() * 20) : 0, errs = err ? 1 : 0;
     var fd = function(day, h, m){ var d = new Date(BASE.getTime() - day * 86400000); return MON[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear() + ' ' + t12(h, m); };
-    return { id: 'SES-' + (10000 + hash(key) % 90000), w: w, st: r.st, type: x.type, name: rs ? w.name + ' restore' : w.name + (r.manual ? ' on-demand backup' : ' scheduled backup'), policy: rs ? '—' : w.policy, started: dayLabel(r.day) + ', ' + t12(r.hour, 0), completed: dayLabel(endDay) + ', ' + t12(Math.floor(em / 60), em % 60), size: size,
-      startFull: fd(r.day, r.hour, 0), endFull: fd(endDay, Math.floor(em / 60), em % 60), mins: mins, total: total, ok: Math.max(0, total - warns - errs), warns: warns, errs: errs, conn: w.scope, initiator: (rs || r.manual) ? (['Darren Lasso', 'Sarah Rivera', 'Mira Khan'][hash(key) % 3]) : 'System', rnd: hash(key) };
+    return { id: 'SES-' + (10000 + hash(key) % 90000), w: w, st: r.st, type: t, name: rs ? w.name + ' restore' : ex ? w.name + ' export' : w.name + (r.manual ? ' on-demand backup' : ' scheduled backup'), policy: t === 'Backup' ? w.policy : '—', started: dayLabel(r.day) + ', ' + t12(r.hour, 0), completed: run ? '—' : dayLabel(endDay) + ', ' + t12(Math.floor(em / 60), em % 60), size: size,
+      startFull: fd(r.day, r.hour, 0), endFull: run ? '—' : fd(endDay, Math.floor(em / 60), em % 60), mins: mins, total: total, ok: run ? Math.floor(total * 0.4) : Math.max(0, total - warns - errs), warns: warns, errs: errs, conn: w.scope, initiator: (rs || ex || r.manual) ? (['Darren Lasso', 'Sarah Rivera', 'Mira Khan'][hash(key) % 3]) : 'System', rnd: hash(key) };
   });
 }
 /* Session log (mock, derived from the session): the steps a backup or restore goes through; a warning or failure appears at the step where it happened. */
 function sessionLog(x) {
   var w = x.w, rs = x.type === 'Restore', rnd = rng(x.rnd), L = [], push = function(st, msg, secs){ L.push({ st: st, msg: msg, secs: secs }); };
-  if (!rs) {
+  if (x.type === 'Backup') {
     push('success', x.initiator === 'System' ? 'Session started · policy ' + x.policy : 'Session started by ' + x.initiator + ' · policy ' + x.policy, 1); push('success', 'Connected to ' + x.conn, 2);
     if (x.st === 'err') { push('error', REASON[w.id].err, 11); push('error', 'Session failed: no objects were processed', 0); return L; }
     push('success', 'Discovered ' + fmt(x.total) + ' objects in scope', 5 + Math.floor(rnd() * 10));
     var types = Object.keys(OBJ[w.id]).filter(function(k){ return OBJ[w.id][k][1] > 0; });
     types.forEach(function(k, i){ if (x.st === 'warn' && i === 1) push('warning', REASON[w.id].warn, 20 + Math.floor(rnd() * 40)); push('success', 'Backed up ' + k + ' (' + fmt(OBJ[w.id][k][1]) + ')', 20 + Math.floor(rnd() * 120)); });
     push('success', 'Stored restore point', 4);
+    push(x.st === 'warn' ? 'warning' : 'success', x.st === 'warn' ? 'Session completed with warnings' : 'Session completed', 0);
+  } else if (x.type === 'Export') {
+    push('success', 'Session started by ' + x.initiator, 1); push('success', 'Validated the export scope', 3);
+    push('success', 'Collected ' + fmt(x.total) + ' object' + (x.total > 1 ? 's' : '') + ' from the latest restore point', 6 + Math.floor(rnd() * 8));
+    if (x.st === 'err') { push('error', 'Package assembly failed: the export could not be completed', 14); push('error', 'Session failed: no export package was created', 0); return L; }
+    if (x.st === 'warn') push('warning', x.warns + ' write-only attributes were left out of the package', 8);
+    push('success', 'Assembled the export package (ZIP)', 12 + Math.floor(rnd() * 30)); push('success', 'Package is ready to download', 2);
     push(x.st === 'warn' ? 'warning' : 'success', x.st === 'warn' ? 'Session completed with warnings' : 'Session completed', 0);
   } else {
     push('success', 'Session started by ' + x.initiator, 1); push('success', 'Validated the restore point', 3);
@@ -2523,27 +2596,28 @@ function sessionLog(x) {
     push('success', 'Verified restored objects', 12);
     push(x.st === 'warn' ? 'warning' : 'success', x.st === 'warn' ? 'Session completed with warnings' : 'Session completed', 0);
   }
+  if (x.st === 'run') { L = L.slice(0, Math.max(3, Math.ceil(L.length / 2))); push('running', 'In progress', 0); }   // a running session has only reached its first steps
   return L;
 }
 var SS = { id: null, q: '', f: 'all' }, SESS_ALL = [];
-var LOG_ICON = { success: 'sd-log-check', warning: 'alert-warning-outlined', error: 'status-error-outlined' };
+var LOG_ICON = { running: 'history-outlined', success: 'sd-log-check', warning: 'alert-warning-outlined', error: 'status-error-outlined' };
 function fmtSecs(n) { return n >= 60 ? Math.floor(n / 60) + 'm ' + (n % 60 < 10 ? '0' : '') + (n % 60) + 's' : n ? n + 's' : '–'; }
 function renderSession() {
   var x = SESS_ALL.filter(function(y){ return y.id === SS.id; })[0]; if (!x) return;
-  var rs = x.type === 'Restore';
+  var bk = x.type === 'Backup';
   document.getElementById('iddSTabs').innerHTML = '<div class="idd-wtabs-l"><div class="idd-wtab on" role="tab" aria-selected="true"><span class="idd-ntile">' + ico('sd-tab-store', 16) + '</span><span class="idd-wtab-n">' + esc(x.name) + '</span><span class="idd-wtab-x" data-sclose="1" role="button" aria-label="Close session">' + ico('close-outlined', 16) + '</span></div></div>'
     + '<div class="idd-wtabs-r"><button type="button" class="idd-ibtn" data-sclose="1" aria-label="Close">' + ico('close-outlined') + '</button></div>';
   document.getElementById('iddSHead').innerHTML = '<span class="idd-ttile ses">' + ico('sd-session-log', 28) + '</span><div class="idd-thead-main"><div class="idd-tkicker">Session Log</div><div class="idd-ttitle">' + esc(x.name) + '</div></div>' + chip(SESS_STATUS[x.st][0], SESS_STATUS[x.st][1]);
-  var rel = [['workload-outlined', 'Workload', 1], ['integration-widget-outlined', 'Connection', 1], [rs ? 'restore-point-outlined' : 'policy-outlined', rs ? 'Restore Point' : 'Policy', 1]];
+  var rel = [['workload-outlined', 'Workload', 1], ['integration-widget-outlined', 'Connection', 1], [bk ? 'policy-outlined' : 'restore-point-outlined', bk ? 'Policy' : 'Restore Point', 1]];
   document.getElementById('iddSNav').innerHTML = '<button type="button" class="idd-tn on" aria-current="page"><span class="idd-ntile">' + ico('sd-session-log') + '</span><span class="lbl">Session Details</span></button>'
     + '<div class="idd-tn static" aria-disabled="true"><span class="idd-ntile">' + ico('objects-outlined') + '</span><span class="lbl">Objects</span><span class="ct">' + fmt(x.total) + '</span></div><div class="idd-tnav-div"></div>'
     + rel.map(function(r){ return '<div class="idd-tn static" aria-disabled="true"><span class="idd-ntile">' + ico(r[0]) + '</span><span class="lbl">' + r[1] + '</span><span class="ct">' + r[2] + '</span></div>'; }).join('');
   var all = sessionLog(x), q = SS.q.trim().toLowerCase(), shown = all.filter(function(e){ return (SS.f === 'all' || e.st === SS.f) && (!q || e.msg.toLowerCase().indexOf(q) >= 0); });
   var rows = shown.map(function(e, i){ return (i ? '<div class="idd-lconn"></div>' : '') + '<div class="idd-lrow ' + e.st + '"><span class="idd-ltile">' + ico(LOG_ICON[e.st]) + '</span><span class="idd-lmsg">' + esc(e.msg) + '</span><span class="idd-ldur">' + fmtSecs(e.secs) + '</span></div>'; }).join('') || '<div style="padding:12px 0;color:var(--black-70)">No log entries match.</div>';
-  var objTypes = rs ? 'Selected objects' : Object.keys(OBJ[x.w.id]).filter(function(k){ return OBJ[x.w.id][k][1] > 0; }).join(', ');
+  var objTypes = !bk ? 'Selected objects' : Object.keys(OBJ[x.w.id]).filter(function(k){ return OBJ[x.w.id][k][1] > 0; }).join(', ');
   var fl = { all: 'All', success: 'Success', warning: 'Warning', error: 'Error' };
   var props = pr('Session ID', x.id) + pr('Type', x.type) + pr('Object Types', '<span class="idd-greychip ses">' + esc(objTypes) + '</span>') + pr('Initiator', x.initiator === 'System' ? 'System' : avatar(x.initiator, 24) + esc(x.initiator))
-    + pr('Status', chip(SESS_STATUS[x.st][0], SESS_STATUS[x.st][1])) + pr('Start Time', x.startFull) + pr('End Time', x.endFull) + pr('Duration', x.mins + 'm') + pr('Organization', esc(x.conn)) + pr(rs ? 'Restore Point' : 'Policy', esc(rs ? 'Selected restore point' : x.policy))
+    + pr('Status', chip(SESS_STATUS[x.st][0], SESS_STATUS[x.st][1])) + pr('Start Time', x.startFull) + pr('End Time', x.endFull) + pr('Duration', x.mins + 'm' + (x.st === 'run' ? ' so far' : '')) + pr('Organization', esc(x.conn)) + pr(bk ? 'Policy' : 'Restore Point', esc(bk ? x.policy : 'Selected restore point'))
     + pr('Total', fmt(x.total)) + pr('Success', '<span class="ws-status-chip ok">' + fmt(x.ok) + '</span>') + pr('Skipped', '0') + pr('Warning', x.warns ? '<span class="ws-status-chip warn">' + x.warns + '</span>' : '0') + pr('Error', x.errs ? '<span class="ws-status-chip err">' + x.errs + '</span>' : '0');
   document.getElementById('iddSMain').innerHTML = '<div class="idd-cols"><div class="idd-col-l"><div class="idd-sec-h"><h3>Session Details</h3></div><div class="idd-slog"><div class="idd-slog-bar"><div class="idd-slog-search">' + ico('search-outlined', 16) + '<input id="iddSLogQ" placeholder="Search by message" value="' + esc(SS.q) + '" aria-label="Search the session log"></div>'
     + '<button type="button" class="idd-slog-sel" data-ssf="1" aria-haspopup="menu"><span>Status: ' + fl[SS.f] + '</span>' + ico('keyboard-arrow-down-outlined', 20) + '</button></div><div class="idd-slog-rows">' + rows + '</div></div></div>'
@@ -2552,7 +2626,7 @@ function renderSession() {
 /* Incident = a tab in the same work-tab overlay as findings (Threat Center): ONE view model (like findings) so the graph, left-panel sections, entity tables and History all work. Every entity, event and count is aggregated from the member findings. */
 function incEnt(mem) {
   var out = {}, order = ['Workloads', 'Connections', 'Policies', 'Objects', 'Restore points', 'Identities'], o2 = {};
-  mem.forEach(function(x){ var m = modelOf({ kind: x.kind, id: x.id }); Object.keys(m.ent || {}).forEach(function(k){ out[k] = out[k] || []; m.ent[k].forEach(function(e){ if (!out[k].some(function(o){ return o[0] === e[0]; })) out[k].push(e); }); }); });
+  mem.forEach(function(x){ var m = modelOf({ kind: x.kind, id: x.id }); Object.keys(m.ent || {}).forEach(function(k){ out[k] = out[k] || []; m.ent[k].forEach(function(e){ var row = e.length > 2 ? e : [e[0], e[1], x.wl]; if (!out[k].some(function(o){ return o[0] === row[0] && o[2] === row[2]; })) out[k].push(row); }); }); });
   order.forEach(function(k){ if (out[k] && out[k].length) o2[k] = out[k]; }); return o2;
 }
 function histMs(stamp) { return Date.parse(String(stamp).replace(/(\d+:\d+ [AP]M)$/, ' $1')); }
@@ -2594,6 +2668,67 @@ function renderIncFindings(M) {
   return '<div class="idd-ehead"><span class="idd-ntile">' + ico('issues-outlined') + '</span><span class="ttl">Findings</span><span class="ct">' + M.iv.mem.length + '</span></div>'
     + '<div class="idd-tbl-wrap"><table class="idd-tbl dense"><colgroup><col style="width:7%"><col style="width:7%"><col style="width:21%"><col style="width:11%"><col style="width:14%"><col style="width:11%"><col style="width:10%"><col style="width:10%"><col style="width:9%"><col style="width:3%"></colgroup>'
     + '<thead><tr><th>ID</th><th>Severity</th><th>Name</th><th>Type</th><th>Status</th><th>Source</th><th>Created At</th><th>Last Updated</th><th>Assignee</th><th></th></tr></thead><tbody>' + M.iv.mem.map(uRow).join('') + '</tbody></table></div>';
+}
+/* ═══ Multi-workload restore: one person, one session per workload ═══
+   The Protected Data cart holds ONE workload, so a person who exists in several workloads is restored through a plan: one ordinary restore session per workload
+   (each with its own restore point and restore options), created together and monitored in Activity. */
+var PL = { fid: null, order: 'seq', launched: false, rows: [] };
+function multiOf(fid) { var f = FINDINGS.filter(function(x){ return x.id === fid; })[0]; return f && f.multi ? f : null; }
+function mpoint(it) { return it.points[it.sel == null ? it.rec : it.sel]; }
+function mpIso(label) { return rpIso(label); }
+function mItemHref(it) { return pdRestore(it.pdWl, [it.pdItem], mpIso(mpoint(it)[0])).href; }
+function renderMultiRestore(M) {
+  var X = M.multi, changed = 0, n = X.items.length;
+  var wlN = function(it){ return WL.filter(function(w){ return w.id === it.wl; })[0]; };
+  var blocks = X.items.map(function(it){
+    var pt = mpoint(it), w = wlN(it), rows = it.cmp.filter(function(r){ return !TS.rpOnly || r[2] !== r[1]; }); it.cmp.forEach(function(r){ if (r[2] !== r[1]) changed++; });
+    var bar = '<div class="idd-rp-bar blk"><div class="idd-rp-wl"><span class="idd-wl-cell">' + logoTile(w) + '<span class="idd-ell">' + esc(w.name) + '</span></span></div>'
+      + '<div class="idd-hd now"><div class="idd-hd-t">Now</div><div class="idd-hd-s">Deleted ' + esc(it.deleted) + '</div><div class="idd-hd-s">Not in any later backup</div></div>'
+      + '<div class="idd-hd aft"><div class="idd-rp-row"><div class="idd-rp-stack"><div class="idd-hd-t">After restore</div><div class="idd-hd-s">Restore point · ' + esc(pt[0]) + '</div><div class="idd-hd-s">' + (it.sel == null || it.sel === it.rec ? 'Before the deletion' : 'Chosen in the restore plan') + '</div></div>'
+      + '<a class="plv-btn plv-btn-tertiary idd-rp-restore" href="' + mItemHref(it) + '" target="_blank" rel="noopener" aria-label="Restore ' + esc(it.account) + ' in ' + esc(w.name) + ' in Protected Data (opens in a new tab)">Restore' + ico('open-in-new-outlined', 20) + '</a></div></div></div>';
+    return '<div class="idd-rp-sec">' + bar + '<div class="idd-rp-card"><div class="idd-rp-acct">' + esc(it.account) + '<span>' + esc(it.kind) + '</span></div><table>' + rows.map(function(r){ var ch = r[2] !== r[1];
+      return '<tr' + (ch ? ' class="diff"' : '') + '><td class="a">' + esc(r[0]) + '</td><td>' + esc(r[2]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</table></div></div>'; }).join('');
+  var sum = '<div class="idd-rp-sum"><span class="idd-rp-badge">' + changed + ' difference' + (changed > 1 ? 's' : '') + '</span><span><b>' + esc(X.person) + '</b> in ' + n + ' workloads, each compared with its own restore point</span><span class="idd-sp"></span><button type="button" class="idd-more" data-rponly="1">' + (TS.rpOnly ? 'Show all' : 'Show changes only') + '</button></div>';
+  return '<div class="idd-ehead"><span class="idd-ntile">' + ico('restore-point-outlined') + '</span><span class="ttl">Restore points</span><span class="ct">' + n + '</span><span class="idd-sp"></span><button type="button" class="plv-btn plv-btn-tertiary" data-plan="' + M.id + '">Restore all (' + n + ')</button></div><div class="idd-rp">' + sum + blocks + '</div>';
+}
+function planStart(i) { return PL.order === 'seq' && i > 0 ? 'After session ' + i + ' succeeds' : 'Starts immediately'; }
+function planActivityHref() { var f = multiOf(PL.fid), X = f.multi; return 'activity.html#jobs?workload=' + encodeURIComponent(PL.rows.map(function(r){ return r.wlLabel; }).join(',')) + '&q=' + encodeURIComponent(X.person.toLowerCase().replace(/[^a-z0-9]+/g, '-')); }
+function renderPlan() {
+  var f = multiOf(PL.fid); if (!f) return; var X = f.multi, n = X.items.length, el = document.getElementById('iddPlanBody'), foot = document.getElementById('iddPlanFoot');
+  document.getElementById('iddPlanTitle').textContent = PL.launched ? n + ' restore sessions created' : 'Restore ' + X.person;
+  var wlN = function(it){ return WL.filter(function(w){ return w.id === it.wl; })[0]; };
+  if (PL.launched) {
+    el.innerHTML = '<p class="idd-plan-lead">' + (PL.order === 'seq' ? 'The sessions run in the order below. Each one starts when the previous session succeeds.' : 'All sessions started together.') + ' Follow their progress in Activity.</p>'
+      + PL.rows.map(function(r, i){ return '<div class="idd-plan-run"><span class="idd-plan-n">' + (i + 1) + '</span>' + logoTile(r.w) + '<div class="t"><b>' + esc(r.w.name) + ' restore</b><span>' + esc(r.account) + ' · ' + esc(r.point) + (PL.order === 'seq' && i > 0 ? ' · starts after session ' + i + ' succeeds' : '') + '</span></div><span class="idd-sp"></span>' + chip('info', 'Running') + '</div>'; }).join('');
+    foot.innerHTML = '<button type="button" class="plv-btn plv-btn-secondary" data-planclose="1">Close</button><a class="plv-btn plv-btn-primary" href="' + planActivityHref() + '" target="_blank" rel="noopener">View in Activity' + ico('open-in-new-outlined', 20) + '</a>'; return;
+  }
+  var seg = '<div class="idd-tabs" role="tablist" aria-label="Run order">' + [['seq', 'In order'], ['all', 'All at once']].map(function(m){ return '<button type="button" role="tab" class="idd-tab' + (PL.order === m[0] ? ' is-active' : '') + '" aria-selected="' + (PL.order === m[0]) + '" data-planorder="' + m[0] + '">' + m[1] + '</button>'; }).join('') + '</div>';
+  var note = PL.order === 'seq'
+    ? '<div class="idd-plan-note"><div class="h">' + ico('workflow-outlined', 16) + '<b>Restore in this order</b></div><p>' + esc(X.orderNote) + '</p></div>'
+    : '<div class="idd-plan-note warn"><div class="h">' + ico('alert-warning-outlined', 16) + '<b>Order is not enforced</b></div><p>' + esc(X.orderWarn) + '</p></div>';
+  var rows = X.items.map(function(it, i){
+    var w = wlN(it), pt = mpoint(it);
+    return '<div class="idd-plan-row"><div class="idd-plan-h"><span class="idd-plan-n">' + (i + 1) + '</span>' + logoTile(w) + '<div class="t"><b>' + esc(w.name) + '</b><span>' + esc(it.account) + ' · ' + esc(it.kind) + '</span></div><span class="idd-sp"></span><span class="idd-plan-start">' + planStart(i) + '</span></div>'
+      + pr('Restore point', '<button type="button" class="idd-rp-pick" data-planrp="' + i + '" aria-haspopup="menu"><span class="lbl">' + esc(pt[0]) + '</span>' + (it.sel == null || it.sel === it.rec ? chip('ok', 'Recommended') : '') + ico('keyboard-arrow-down-outlined', 20) + '</button>')
+      + pr('Restore options', '<div class="idd-plan-opts">' + it.config.map(function(c){ return '<span>' + esc(c[0]) + ': <b>' + esc(c[1]) + '</b></span>'; }).join('') + '</div><a class="idd-rm" href="' + mItemHref(it) + '" target="_blank" rel="noopener" data-tooltip="Opens this workload\'s restore wizard. Step 2 holds these options.">Edit options</a>')
+      + '</div>'; }).join('');
+  el.innerHTML = '<p class="idd-plan-lead">' + n + ' restore sessions will be created, one per workload. Each has its own restore point and restore options.</p>'
+    + '<div class="idd-plan-ord"><span>Run sessions</span>' + seg + '</div>' + note + rows;
+  foot.innerHTML = '<button type="button" class="plv-btn plv-btn-secondary" data-planclose="1">Cancel</button><button type="button" class="plv-btn plv-btn-primary" data-planrun="1">Restore all (' + n + ')</button>';
+}
+function openPlan(fid) { document.querySelector('#iddPlan .idd-modal-h .idd-ibtn').innerHTML = ico('close-outlined'); PL.fid = fid; PL.order = 'seq'; PL.launched = false; PL.rows = []; renderPlan(); document.getElementById('iddPlan').classList.add('open'); }
+function closePlan() { document.getElementById('iddPlan').classList.remove('open'); }
+function runPlan() {
+  var f = multiOf(PL.fid); if (!f) return; var X = f.multi, KEY = 'dcc-jobs-bridge', list = [], now = Date.now();
+  try { list = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) {}
+  PL.rows = X.items.map(function(it, i){ var w = WL.filter(function(x){ return x.id === it.wl; })[0], pt = mpoint(it);
+    list.unshift({ id: 'br-' + now.toString(36) + '-' + i, type: 'Restore', job: 'restore-' + X.person.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + it.wl, resource: it.account, wl: it.wl === 'okta' ? 'Okta WIC' : w.name, tenant: it.conn, status: (PL.order === 'seq' && i > 0) ? 'queued' : 'running',
+      startedTs: now, queueForMs: (PL.order === 'seq' && i > 0) ? i * 15 * 60000 : 0, runForMs: 6 * 3600 * 1000, dest: 'Original location', owner: 'Darren Lasso', itemCount: 1 });
+    w.live = w.live || []; w.live.push({ day: 0, hour: 10, type: 'Restore', manual: true, st: 'run' });
+    return { w: w, account: it.account, point: pt[0], wlLabel: it.wl === 'okta' ? 'Okta WIC' : w.name }; });
+  try { localStorage.setItem(KEY, JSON.stringify(list.slice(0, 40))); } catch (e) {}
+  touch(f, 'Restore started for ' + X.person + ': ' + PL.rows.length + ' sessions (' + PL.rows.map(function(r){ return r.w.name; }).join(', ') + ')' + (PL.order === 'seq' ? ', run in order' : ', run at once'), 'Started by Darren Lasso');
+  PL.launched = true; renderPlan(); renderAll(); if (TS.openId) renderOverlay();
 }
 function openSession(id) { SS.id = id; SS.q = ''; SS.f = 'all'; renderSession(); var o = document.getElementById('iddSess'); o.classList.add('open'); o.setAttribute('aria-hidden', 'false'); }
 function closeSession() { var o = document.getElementById('iddSess'); o.classList.remove('open'); o.setAttribute('aria-hidden', 'true'); SS.id = null; if (typeof closeMenu === 'function') closeMenu(); }
@@ -2792,9 +2927,9 @@ function modelOf(tab) {
     var rel = FINDINGS.filter(function(o){ return o.wl === f.wl && o.id !== f.id; }).slice(0, 3).map(function(o){ return { kind: 'finding', id: o.id, lvl: o.lvl }; })
       .concat(THREATS.filter(function(o){ return o.wl === f.wl && threatOpen(o); }).slice(0, 2).map(function(o){ return { kind: 'threat', id: o.id, lvl: o.lvl }; }));
     var Mf = { kind: 'finding', item: f, id: f.id, lvl: f.lvl, name: f.name, status: f.status, assignee: f.assignee, kicker: 'Resilience Finding', icon: VN_ICONS['findings'] || '', upd: fDate(f.u),
-      summary: f.evidence, desc: r.desc, steps: f.steps.map(function(s){ var d = s[2]; return { t: s[0], btn: isOpen(f) && d ? (d.tab ? '<button type="button" class="plv-btn plv-btn-secondary" data-ttab="' + d.tab + '">' + s[1] + '</button>' : d.href ? '<a class="plv-btn ' + (/^Restore/.test(s[1]) ? 'plv-btn-tertiary' : 'plv-btn-secondary') + '" href="' + d.href + '" target="_blank" rel="noopener" aria-label="' + s[1] + ' in ' + d.dest + ' (opens in a new tab)">' + s[1] + ' in ' + d.dest + ico('open-in-new-outlined', 20) + '</a>' : '<span class="plv-btn plv-btn-secondary is-disabled" aria-disabled="true" data-tooltip="' + notBuilt(d.dest) + '">' + s[1] + ' in ' + d.dest + '</span>') : '' }; }),
-      hist: f.hist, ent: f.ent, cmp: f.cmp || null, restoreHref: (function(){ var st = f.steps.filter(function(x){ return x[2] && x[2].href && x[2].href.indexOf('#restore=') >= 0; })[0]; return st ? st[2].href : ''; })(), graph: graphFinding(f), related: rel,
-      props: [['Status', chip(STATUS_CHIP[f.status], f.status)], ['Severity', '<span class="idd-conf ' + (f.lvl === 3 ? '' : 'High') + '">' + sev + '</span>'], ['Finding ID', uuidOf(f)], ['Rule ID', f.rule], ['Policy', esc(f.policy)], ['Data Source', esc(f.conn)], ['Hosting', w.name], ['Assignee', assigneeCell(f.assignee)],
+      summary: f.evidence, desc: r.desc, steps: f.steps.map(function(s){ var d = s[2]; return { t: s[0], btn: isOpen(f) && d ? (d.plan ? '<button type="button" class="plv-btn plv-btn-tertiary" data-plan="' + f.id + '">' + s[1] + '</button>' : d.tab ? '<button type="button" class="plv-btn plv-btn-secondary" data-ttab="' + d.tab + '">' + s[1] + '</button>' : d.href ? '<a class="plv-btn ' + (/^Restore/.test(s[1]) ? 'plv-btn-tertiary' : 'plv-btn-secondary') + '" href="' + d.href + '" target="_blank" rel="noopener" aria-label="' + s[1] + ' in ' + d.dest + ' (opens in a new tab)">' + s[1] + ' in ' + d.dest + ico('open-in-new-outlined', 20) + '</a>' : '<span class="plv-btn plv-btn-secondary is-disabled" aria-disabled="true" data-tooltip="' + notBuilt(d.dest) + '">' + s[1] + ' in ' + d.dest + '</span>') : '' }; }),
+      hist: f.hist, ent: f.ent, cmp: f.cmp || null, multi: f.multi ? { person: f.multi.person, items: f.multi.items } : null, restoreHref: (function(){ var st = f.steps.filter(function(x){ return x[2] && x[2].href && x[2].href.indexOf('#restore=') >= 0; })[0]; return st ? st[2].href : ''; })(), graph: graphFinding(f), related: rel,
+      props: [['Status', chip(STATUS_CHIP[f.status], f.status)], ['Severity', '<span class="idd-conf ' + (f.lvl === 3 ? '' : 'High') + '">' + sev + '</span>'], ['Finding ID', uuidOf(f)], ['Rule ID', f.rule], ['Policy', esc(f.policy)], ['Data Source', esc(f.conn)], ['Hosting', f.wls ? f.wls.map(function(id){ return WL.filter(function(x){ return x.id === id; })[0].name; }).join(', ') : w.name], ['Assignee', assigneeCell(f.assignee)],
         ['Related Findings', null], ['Asset Type', f.asset], ['Rule Category', r.cat], ['Standards', ch(std[0], std.length > 1 ? '+' + (std.length - 1) : '')], ['Regulations', ch(std[std.length - 1], std.length > 2 ? '+' + (std.length - 2) : '')], ['Owner', '<span class="idd-greychip">System</span>'],
         ['Created At', fDate(f.c)], ['Last Updated', fDate(f.u)], ['Last Updated By', f.assignee === 'Unassigned' ? 'System' : personEmail(f.assignee)], ['Created By', 'Veeam Resilience Posture Engine'],
         ['Source ID', 'conn-' + f.wl + '-' + hash(f.conn).toString(16).slice(0, 6)], ['Environment', 'Production'], ['Engine', 'Veeam Resilience Posture Engine'], ['Version', '1.0'], ['Tenant', 'org-001'], ['Is Auto Remediated', '<span class="idd-xbox" aria-label="No">×</span>']] };
@@ -2868,11 +3003,16 @@ function renderRestorePoints(M) {
       return '<tr' + (ch ? ' class="diff"' : '') + '><td class="a">' + esc(r[0]) + '</td><td>' + esc(r[2]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</table></div></div>'; }).join('');
   return '<div class="idd-ehead"><span class="idd-ntile">' + ico('restore-point-outlined') + '</span><span class="ttl">Restore points</span><span class="ct">' + entCount(M, 'Restore points') + '</span><span class="idd-sp"></span>' + (compareHref ? '<a class="plv-btn plv-btn-secondary" href="' + compareHref + '" target="_blank" rel="noopener" aria-label="View in Protected Data (opens in a new tab)">View in Protected Data' + ico('open-in-new-outlined', 20) + '</a>' : '') + '</div><div class="idd-rp">' + bar + sum + cards + '</div>';
 }
+var ENT_LINK_TIP = { Workloads: 'Opens the workload in Protected Data (not part of this prototype yet)', Connections: 'Opens the connection details in Integrations (not part of this prototype yet)', Policies: 'Opens the policy in Backup Policies (not part of this prototype yet)', Identities: 'Opens the identity in Protected Data (not part of this prototype yet)', Objects: 'Opens the object in Protected Data (not part of this prototype yet)' };
+function entLink(ek, txt) { var tip = ENT_LINK_TIP[ek]; return tip ? '<a href="#" class="idd-elink idd-cell-1" data-elink="1" data-tooltip="' + esc(tip) + '">' + esc(txt) + '</a>' : '<span class="idd-cell-1">' + esc(txt) + '</span>'; }
 function renderEntity(M, ek) {
+  if (ek === 'Restore points' && M.multi) return renderMultiRestore(M);
   if (ek === 'Restore points' && M.cmp) return renderRestorePoints(M);
-  var n = (M.ent[ek] || []).length;
+  var list = M.ent[ek] || [], n = list.length, ids = []; list.forEach(function(e){ if (e[2] && ids.indexOf(e[2]) < 0) ids.push(e[2]); });
+  var wlCol = ek !== 'Workloads' && ids.length > 1, wlOf = function(id){ return WL.filter(function(w){ return w.id === id; })[0]; };   // when the rows span several workloads, name the workload in its own column
   return '<div class="idd-ehead"><span class="idd-ntile">' + ico(ENT_ICON[ek] || 'objects-outlined') + '</span><span class="ttl">' + esc(ek) + '</span><span class="ct">' + n + '</span></div>'
-    + '<div class="idd-entw"><table class="idd-tbl dense" style="min-width:0"><thead><tr><th>Name</th><th>Detail</th></tr></thead><tbody>' + (M.ent[ek] || []).map(function(e){ return '<tr><td><span class="idd-cell-1">' + esc(e[0]) + '</span></td><td>' + esc(e[1]) + '</td></tr>'; }).join('') + '</tbody></table></div>';
+    + '<div class="idd-entw"><table class="idd-tbl dense" style="min-width:0"><thead><tr><th>Name</th>' + (wlCol ? '<th>Workload</th>' : '') + '<th>Detail</th></tr></thead><tbody>' + list.map(function(e){ var w = wlCol && wlOf(e[2]);
+      return '<tr><td>' + entLink(ek, e[0]) + '</td>' + (wlCol ? '<td>' + (w ? '<span class="idd-wl-cell">' + logoTile(w) + entLink('Workloads', w.name) + '</span>' : '') + '</td>' : '') + '<td>' + esc(e[1]) + '</td></tr>'; }).join('') + '</tbody></table></div>';
 }
 function graphPane(M) {
   return TS.graph ? '<div class="idd-gpane' + (TS.gfull ? ' full' : '') + '" id="iddGraph"><button type="button" class="plv-btn plv-btn-secondary idd-gbtn" data-tgraph="1">Hide Graph</button><div class="idd-gcanvas" id="iddGCanvas">' + M.graph + '</div>'
@@ -2925,7 +3065,7 @@ function renderOverlay() {
   applyGraphTransform();
 }
 /* Clicking a node in the graph opens the matching section in the left panel (same view as clicking it there) */
-var NODE_TAB = { 'Workload': 'Workloads', 'Connection': 'Connections', 'Policy': 'Policies', 'Objects': 'Objects', 'Sessions': 'Sessions', 'Restore point': 'Restore points', 'Actor': 'Identities', 'Subject': 'Objects' };
+var NODE_TAB = { 'Workload': 'Workloads', 'Connection': 'Connections', 'Policy': 'Policies', 'Objects': 'Objects', 'Sessions': 'Sessions', 'Restore point': 'Restore points', 'Person': 'Identities', 'Actor': 'Identities', 'Subject': 'Objects' };
 function goNode(kind) {
   var M = modelOf(TS.tabs[TS.active]); if (!M) return; var tab = kind === 'Finding' ? 'overview' : kind === 'Findings' ? 'findings' : (M.ent && NODE_TAB[kind] && M.ent[NODE_TAB[kind]] ? 'ent:' + NODE_TAB[kind] : null);
   if (!tab) return; TS.tab = tab; TS.gfull = false; TS.sideQ = ''; var si = document.getElementById('iddTSearch'); if (si) si.value = ''; renderOverlay();
@@ -3186,6 +3326,13 @@ function openCustomMenu(btn, items, heading, cls) {
 function stampAge(k) { AGE[k] = 'just now'; Array.prototype.forEach.call(document.querySelectorAll('[data-age="' + k + '"]'), function(el){ el.textContent = 'just now'; }); }
 document.addEventListener('click', function(e){
   var t = e.target;
+  var elk = t.closest('[data-elink]'); if (elk) { e.preventDefault(); return; }   // entity links are styled only; the destinations are not built yet
+  var pln = t.closest('[data-plan]'); if (pln) { e.preventDefault(); openPlan(pln.getAttribute('data-plan')); return; }
+  if (t.closest('[data-planclose]')) { closePlan(); return; }
+  var pord = t.closest('[data-planorder]'); if (pord) { PL.order = pord.getAttribute('data-planorder'); renderPlan(); return; }
+  if (t.closest('[data-planrun]')) { runPlan(); return; }
+  var prp = t.closest('[data-planrp]'); if (prp) { e.stopPropagation(); closeMenu(); var pf = multiOf(PL.fid), pit = pf.multi.items[+prp.getAttribute('data-planrp')]; openCustomMenu(prp, pit.points.map(function(pt, j){ return { rp: j, label: pt[0] + ' · ' + pt[1].replace(/^Latest · /, 'Latest, '), current: (pit.sel == null ? pit.rec : pit.sel) === j }; }), null, 'wide'); menuEl.setAttribute('data-planfor', prp.getAttribute('data-planrp')); return; }
+  var srp = t.closest('[data-setrp]'); if (srp && menuEl && menuEl.getAttribute('data-planfor') != null) { multiOf(PL.fid).multi.items[+menuEl.getAttribute('data-planfor')].sel = +srp.getAttribute('data-setrp'); closeMenu(); renderPlan(); return; }
   var sso = t.closest('[data-session]'); if (sso) { closeMenu(); openSession(sso.getAttribute('data-session')); return; }
   var tpk = t.closest('[data-wpick]'); if (tpk) { e.stopPropagation(); closeMenu(); var pk = tpk.getAttribute('data-wpick'), P = PICKS[pk]; openCustomMenu(tpk, P.opts.reduce(function(a, m, i){ if (i) a.push({ sep: true }); a.push({ topmode: pk + '|' + m[0], label: m[2], desc: m[3], current: P.get() === m[0] }); return a; }, []), null, 'wide'); var rr = tpk.getBoundingClientRect(); menuEl.style.left = Math.max(8, rr.left) + 'px'; return; }
   var stm = t.closest('[data-wsetpick]'); if (stm) { closeMenu(); var sv = stm.getAttribute('data-wsetpick').split('|'); PICKS[sv[0]].set(sv[1]); return; }
@@ -3245,7 +3392,7 @@ document.addEventListener('click', function(e){
   var g = t.closest('[data-go]');
   if (g) { var u = g.getAttribute('data-go'); if (u === '#findings') setView('findings'); else if (u) window.location.href = u; }
 });
-document.addEventListener('keydown', function(e){ if (e.key === 'Escape') { if (menuEl) closeMenu(); else if (NT.open) cancelNotes(); else if (document.getElementById('iddSess').classList.contains('open')) closeSession(); else if (document.getElementById('iddStModal').classList.contains('open')) closeStModal(); else if (TS.openId) closeThreat(); }
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') { if (menuEl) closeMenu(); else if (document.getElementById('iddPlan').classList.contains('open')) closePlan(); else if (NT.open) cancelNotes(); else if (document.getElementById('iddSess').classList.contains('open')) closeSession(); else if (document.getElementById('iddStModal').classList.contains('open')) closeStModal(); else if (TS.openId) closeThreat(); }
   if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('.gn')) { e.preventDefault(); goNode(e.target.getAttribute('data-gnode')); }
   if (e.key === 'Enter' && e.target.matches && e.target.matches('tr[data-session]')) openSession(e.target.getAttribute('data-session'));
   if (e.target.id === 'iddNtText' && e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); postNote(); }

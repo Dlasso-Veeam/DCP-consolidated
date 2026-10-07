@@ -11305,6 +11305,12 @@ function _actApplyJobsDeepLink(hash) {
   var wl = params.get('workload');   if (wl)     filters.push({ attr: 'workload', values: wl.split(',') });
   state.actFilters = filters;
   state.actPage = 1;
+  // Several workloads in the link (a multi-workload restore plan, user 2026-10-07): scope the picker to exactly that set, the way a category scope does, so the default-workload fallback doesn't replace it.
+  if (wl && wl.split(',').length > 1) {
+    state._actWlCat = 'Selected workloads';
+    var _wc = document.getElementById('actWlCur'); if (_wc) _wc.textContent = wl.split(',').length + ' workloads';
+    var _wi = document.getElementById('actWlCurIcon'); if (_wi) { _wi.innerHTML = ''; _wi.style.display = 'none'; }
+  }
   setActView('jobs');
   // Session state is a SEPARATE scope-rank pivot from the status filter
   // (Active = started/queued only, Completed = every terminal status) — a
