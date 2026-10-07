@@ -7324,6 +7324,19 @@ body.ai-open.ai-full #toast { right: 24px; }   /* full screen: nothing beside it
 
 /* View graph retired across prototypes (user 2026-07-31) — markup kept, hidden. */
 .view-graph-btn { display: none !important; }
+.mc-cartbtn { position: relative; width: 36px; height: 36px; margin: 0 4px 0 8px; border: 1px solid var(--black-20); border-radius: 4px; background: var(--white); color: var(--black-100); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+.mc-cartbtn:hover { background: var(--black-5); } .mc-cartbtn svg { width: 24px; height: 24px; }
+.mc-bdg { position: absolute; top: -8px; right: -8px; min-width: 20px; height: 20px; padding: 0 4px; box-sizing: border-box; border-radius: 4px; background: var(--white); border: 1px solid var(--black-10); box-shadow: 0 1px 3px rgba(31,34,41,0.18); font-style: normal; font-size: 12px; font-weight: 500; line-height: 18px; color: var(--black-70); display: inline-flex; align-items: center; justify-content: center; }
+.mc-tray { position: fixed; z-index: 1200; width: 520px; max-width: calc(100vw - 16px); background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; box-shadow: 0 8px 24px rgba(31,34,41,0.2); font-size: 16px; }
+.mc-h { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--black-10); } .mc-h b { font-weight: 500; }
+.mc-from { margin-left: 8px; font-size: 12px; font-weight: 500; line-height: 20px; background: var(--status-blue-5, #eaf6fc); color: var(--status-blue, #0779a5); border-radius: 2px; padding: 0 6px; text-decoration: none; vertical-align: 1px; } .mc-from:hover { text-decoration: underline; } .mc-sp { flex: 1; }
+.mc-row { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--black-5); cursor: pointer; } .mc-row:hover:not(.cur):not(.run):not(.dis) { background: var(--em-green-tint); } .mc-row.cur { background: var(--em-green-tint); box-shadow: inset 2px 0 0 var(--em-green); cursor: default; } .mc-row.cur .mc-t b { color: var(--em-green); } .mc-row.run { cursor: default; } .mc-row.dis { opacity: 0.5; cursor: default; }
+.mc-t { display: flex; flex-direction: column; min-width: 0; line-height: 22px; } .mc-t b { font-weight: 500; } .mc-t span { font-size: 14px; line-height: 18px; color: var(--black-70); }
+.mc-sel { height: 28px; padding: 0 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); color: var(--black-100); font: inherit; font-size: 14px; cursor: pointer; } .mc-sel:hover:not(:disabled) { background: var(--black-5); } .mc-sel:disabled { color: var(--black-30); border-color: var(--black-10); cursor: default; }
+.mc-chip { display: inline-block; padding: 2px 8px; border-radius: 2px; font-size: 14px; font-weight: 500; background: var(--black-5); color: var(--black-100); } .mc-chip.ok { background: var(--green-10, #f6fbf9); color: var(--em-green); } .mc-chip.info { background: #e8f6fc; color: #0779a5; } .mc-chip.err { background: var(--red-10); color: var(--red); }
+.mc-link { font-size: 14px; font-weight: 500; color: var(--em-green); text-decoration: none; white-space: nowrap; } .mc-link:hover { text-decoration: underline; }
+.mc-x { width: 24px; height: 24px; border: none; background: none; color: var(--black-60); font-size: 18px; line-height: 1; cursor: pointer; border-radius: 4px; } .mc-x:hover { background: var(--black-5); color: var(--black-100); }
+.mc-f { padding: 10px 16px; font-size: 14px; color: var(--black-70); }
 </style>
 
 <!-- ============================================================== -->
@@ -7643,7 +7656,7 @@ input[type="checkbox"] { accent-color: var(--em-green); }
 <script>
 (function(){
   try {
-    var raw = sessionStorage.getItem('_sw_s');
+    var raw = (localStorage.getItem('_sw_s') || sessionStorage.getItem('_sw_s'));
     if (!raw) return;
     var parsed = JSON.parse(raw);
     if (parsed && parsed.expires && Date.now() < parsed.expires) {
@@ -12256,6 +12269,78 @@ var RESOURCES = (function(){
 
   list.push(R('okta-grp-payments', 'okta-grp-payments', 'Group', 'Okta WIC', 'acme-corp', 'okta-org', {parentId:'okta-wd-groups', policy:'Production — Compliance', oktaMembers:0, oktaSource:'OKTA_GROUP', oktaGroupType:'manual', oktaDesc:'Payments team access — membership emptied Oct 5, 7:52 AM', meta:'ACTIVE · OKTA_GROUP · 0 members · 214 at the last restore point'}));
 
+  // ─── Entra ID (Identity, SaaS) and Active Directory (Directory, Datacenter) ───────────────────────────────────
+  // Same tenant/forest-rooted model as Microsoft 365 and Okta: ONE root row per workload, then explicit Folder rows (sections → object types) and the objects themselves.
+  //   Entra ID          → Tenant meridianfg.com → Directory (Users · Groups · Devices) · Applications (App registrations) · Security (Conditional Access policies · Named locations · Directory roles)
+  //   Active Directory  → Forest corp.meridian.local → Organizational Units (Finance · Engineering · IT · Service Accounts) · Group Policy Objects · Domain Controllers
+  // j.alvarez is the person the Identity Resilience finding FND-24551 restores: deleted in live in both, with restore points from before the deletion.
+  (function(){
+    var EW = 'Entra ID', ET = 'meridianfg', EC = 'entra-tenant', ER = 'entra-tenant-meridianfg';
+    function EF(id, name, parent, meta){ list.push(R(id, name, 'Folder', EW, ET, EC, {parentId:parent, drillable:true, drillTarget:'children', meta:meta})); }
+    function EI(id, name, type, parent, meta, opts){ opts = opts || {}; opts.parentId = parent; opts.meta = meta; list.push(R(id, name, type, EW, ET, EC, opts)); }
+    list.push(R(ER, 'meridianfg.com', 'Tenant', EW, ET, EC, {drillable:true, drillTarget:'children', meta:'3 sections · 7 object types · 18,420 users'}));
+    EF('entra-sec-dir',  'Directory',    ER, '3 types');
+    EF('entra-sec-apps', 'Applications', ER, '1 type');
+    EF('entra-sec-sec',  'Security',     ER, '3 types');
+    EF('entra-t-users',  'Users',   'entra-sec-dir', '18,420 items');
+    EF('entra-t-groups', 'Groups',  'entra-sec-dir', '1,364 items');
+    EF('entra-t-devices','Devices', 'entra-sec-dir', '9,876 items');
+    EF('entra-t-apps',   'App registrations', 'entra-sec-apps', '412 items');
+    EF('entra-t-ca',     'Conditional Access policies', 'entra-sec-sec', '14 items');
+    EF('entra-t-locs',   'Named locations', 'entra-sec-sec', '6 items');
+    EF('entra-t-roles',  'Directory roles', 'entra-sec-sec', '58 items');
+    EI('entra-user-j-alvarez', 'j.alvarez@meridianfg.com', 'User', 'entra-t-users', 'DELETED · Finance · Jordan Alvarez', {existence:'deleted-in-live', rpGapDays:[0]});
+    EI('entra-user-m-okafor',  'm.okafor@meridianfg.com',  'User', 'entra-t-users', 'ACTIVE · Finance · Mira Okafor');
+    EI('entra-user-t-nguyen',  't.nguyen@meridianfg.com',  'User', 'entra-t-users', 'ACTIVE · Engineering · Tran Nguyen');
+    EI('entra-user-d-kovac',   'd.kovac@meridianfg.com',   'User', 'entra-t-users', 'ACTIVE · IT · Dana Kovac');
+    EI('entra-user-s-rivera',  's.rivera@meridianfg.com',  'User', 'entra-t-users', 'ACTIVE · Security · Sarah Rivera');
+    EI('entra-user-d-lasso',   'd.lasso@meridianfg.com',   'User', 'entra-t-users', 'ACTIVE · Product · Darren Lasso');
+    EI('entra-user-svc-syncgw','svc-syncgw@meridianfg.com','User', 'entra-t-users', 'ACTIVE · Service account');
+    EI('entra-grp-finance',    'Finance-Staff',  'Group', 'entra-t-groups', 'Security group · 48 members');
+    EI('entra-grp-vpn',        'VPN-Users',      'Group', 'entra-t-groups', 'Security group · 1,204 members');
+    EI('entra-grp-eng',        'Engineering',    'Group', 'entra-t-groups', 'Microsoft 365 group · 312 members');
+    EI('entra-grp-secadmins',  'Security-Admins','Group', 'entra-t-groups', 'Security group · 9 members');
+    EI('entra-dev-1', 'MERIDIAN-LT-0142', 'Device', 'entra-t-devices', 'Windows 11 · Compliant');
+    EI('entra-dev-2', 'MERIDIAN-LT-0377', 'Device', 'entra-t-devices', 'Windows 11 · Compliant');
+    EI('entra-app-datasync', 'DataSync Helper', 'App registration', 'entra-t-apps', 'Directory.ReadWrite.All · created Oct 5');
+    EI('entra-app-payroll',  'Payroll Connector','App registration', 'entra-t-apps', 'User.Read.All');
+    EI('entra-app-hrsync',   'HR Sync Service',  'App registration', 'entra-t-apps', 'User.ReadWrite.All');
+    EI('entra-ca-mfa-admins','Require MFA for admins', 'Conditional Access policy', 'entra-t-ca', 'Enabled');
+    EI('entra-ca-legacy',    'Block legacy authentication', 'Conditional Access policy', 'entra-t-ca', 'Enabled');
+    EI('entra-ca-device',    'Require compliant device', 'Conditional Access policy', 'entra-t-ca', 'Report-only');
+    EI('entra-loc-corp',     'Corporate network', 'Named location', 'entra-t-locs', 'IP ranges · trusted');
+    EI('entra-loc-block',    'Blocked countries', 'Named location', 'entra-t-locs', 'Countries');
+    EI('entra-role-ga',      'Global Administrator',   'Directory role', 'entra-t-roles', '4 assignments');
+    EI('entra-role-sec',     'Security Administrator', 'Directory role', 'entra-t-roles', '9 assignments');
+
+    var AW = 'Active Directory', AT = 'meridian', AC = 'ad-forest', AR = 'ad-forest-corp-meridian-local';
+    function AF(id, name, parent, meta){ list.push(R(id, name, 'Folder', AW, AT, AC, {parentId:parent, drillable:true, drillTarget:'children', meta:meta})); }
+    function AI(id, name, type, parent, meta, opts){ opts = opts || {}; opts.parentId = parent; opts.meta = meta; list.push(R(id, name, type, AW, AT, AC, opts)); }
+    list.push(R(AR, 'corp.meridian.local', 'Forest', AW, AT, AC, {drillable:true, drillTarget:'children', meta:'1 domain · 4 domain controllers · 24,908 objects'}));
+    AF('ad-sec-ou',  'Organizational Units', AR, '4 OUs');
+    AF('ad-sec-gpo', 'Group Policy Objects', AR, '38 GPOs');
+    AF('ad-sec-dc',  'Domain Controllers',   AR, '4 domain controllers');
+    AF('ad-ou-finance', 'Finance',          'ad-sec-ou', '48 users · 6 groups');
+    AF('ad-ou-eng',     'Engineering',      'ad-sec-ou', '312 users · 18 groups');
+    AF('ad-ou-it',      'IT',               'ad-sec-ou', '27 users · 9 groups');
+    AF('ad-ou-svc',     'Service Accounts', 'ad-sec-ou', '41 accounts');
+    AI('ad-user-j-alvarez', 'MERIDIAN\\j.alvarez', 'User', 'ad-ou-finance', 'DELETED · Jordan Alvarez · OU=Finance', {existence:'deleted-in-live', rpGapDays:[0]});
+    AI('ad-user-m-okafor',  'MERIDIAN\\m.okafor',  'User', 'ad-ou-finance', 'ENABLED · Mira Okafor · manager of j.alvarez');
+    AI('ad-grp-finance',    'Finance-Staff',  'Group', 'ad-ou-finance', 'Global security group · 48 members');
+    AI('ad-grp-vpn',        'VPN-Users',      'Group', 'ad-ou-finance', 'Global security group · 1,204 members');
+    AI('ad-user-t-nguyen',  'MERIDIAN\\t.nguyen',  'User', 'ad-ou-eng', 'ENABLED · Tran Nguyen · OU=Engineering');
+    AI('ad-user-d-kovac',   'MERIDIAN\\d.kovac',   'User', 'ad-ou-it',  'ENABLED · Dana Kovac · OU=IT');
+    AI('ad-grp-domadmins',  'Domain Admins',  'Group', 'ad-ou-it', 'Global security group · 7 members');
+    AI('ad-user-svc-syncgw','MERIDIAN\\svc-syncgw','User', 'ad-ou-svc', 'ENABLED · Service account');
+    AI('ad-gpo-default',    'Default Domain Policy',            'Group Policy Object', 'ad-sec-gpo', 'Linked to the domain root');
+    AI('ad-gpo-dc',         'Default Domain Controllers Policy','Group Policy Object', 'ad-sec-gpo', 'Linked to Domain Controllers');
+    AI('ad-gpo-baseline',   'Workstation Security Baseline',    'Group Policy Object', 'ad-sec-gpo', 'Linked to Engineering, Finance');
+    AI('ad-dc-01', 'DC-01', 'Domain Controller', 'ad-sec-dc', 'PDC emulator · Windows Server 2022');
+    AI('ad-dc-02', 'DC-02', 'Domain Controller', 'ad-sec-dc', 'Windows Server 2022');
+    AI('ad-dc-03', 'DC-03', 'Domain Controller', 'ad-sec-dc', 'Windows Server 2019');
+    AI('ad-dc-04', 'DC-04', 'Domain Controller', 'ad-sec-dc', 'Windows Server 2019');
+  })();
+
   // R0 seed-enrichment: APP_GROUP rows with provenance + the BUILT_IN
   // Everyone group, so the doc 9 Type facet (OKTA_GROUP / APP_GROUP /
   // BUILT_IN) and Source column carry real values.
@@ -16683,6 +16768,8 @@ function childFoldersFor(parent) {
   // content folders, all real RESOURCES rows. Early return blocks the
   // CHILDREN_FOLDERS['Tenant'] (Power Platform) type-key bleed.
   if (parent.wl === 'Microsoft 365') return [];
+  // Entra ID and Active Directory: explicit Folder rows too (tenant/forest → sections → object types → objects).
+  if (parent.wl === 'Entra ID' || parent.wl === 'Active Directory') return [];
   // GitHub repositories use a workload-specific schema that splits the
   // shared 'Repo' Config bundle into the PRD's category folders (+ the
   // collapsed-by-default sections).
@@ -25913,6 +26000,7 @@ function enterWorkloadCatalog(id, label) {
   if (typeof planActiveWorkload === 'function' && typeof clearPlan === 'function') {
     var newWlLabel = (typeof WL_MAP !== 'undefined' && WL_MAP[id]) ? WL_MAP[id] : label;
     var activeWl = planActiveWorkload();
+    if (activeWl && activeWl !== newWlLabel && window.__MC && window.__MC.active && typeof mcSnapshot === 'function') mcSnapshot();   // multi-cart: keep the cart we are leaving
     if (activeWl && activeWl !== newWlLabel) clearPlan();
   }
   if (typeof selectWl === 'function') selectWl(label, id);
@@ -26203,6 +26291,8 @@ var WL_MAP = {
   'okta-wic':       'Okta WIC',
   'ping':           'Ping',
   'powerplatform':  'Power Platform',
+  'entra-id':       'Entra ID',
+  'active-directory': 'Active Directory',
   'hybrid-vms':     'Virtual Machines'
 };
 
@@ -26235,6 +26325,8 @@ var CAT_ICONS = {
   // MS365 tenant root — clone of the gws-tenant building glyph (same
   // org-container concept; tile is forced green by _catTileStyle anyway).
   'ms365-tenant':       { tint:'#e8f6fc', color:'#1ca8dd', svg:'<path d="M4 21V7l8-4 8 4v14"/><path d="M9 21v-6h6v6"/><path d="M8 10h2M14 10h2M8 14h2M14 14h2"/>' },
+  'entra-tenant':       { tint:'#e8f6fc', color:'#1ca8dd', svg:'<path d="M4 21V7l8-4 8 4v14"/><path d="M9 21v-6h6v6"/><path d="M8 10h2M14 10h2M8 14h2M14 14h2"/>' },
+  'ad-forest':          { tint:'#f3ecfa', color:'#8a5bd4', svg:'<path d="M4 21V7l8-4 8 4v14"/><path d="M9 21v-6h6v6"/><path d="M8 10h2M14 10h2M8 14h2M14 14h2"/>' },
   'repositories':       { tint:'#e9f4dc', color:'#86b62c', svg:'<path d="M8 4l-5 8 5 8"/><path d="M16 4l5 8-5 8"/><path d="M14 4l-4 16"/>' },
   'projects':           { tint:'#e8f6fc', color:'#1ca8dd', svg:'<rect x="3" y="5" width="18" height="16" rx="1"/><path d="M3 9h18"/><path d="M7 5V3M17 5V3"/>' },
   'pipelines':          { tint:'#fef1ea', color:'#e8823e', svg:'<rect x="3" y="6" width="6" height="5" rx="1"/><rect x="15" y="13" width="6" height="5" rx="1"/><path d="M9 8.5h3a3 3 0 013 3v2"/><path d="M12 12l3 3.5"/>' },
@@ -26333,6 +26425,8 @@ var CAT_PRIMARY_TYPES = {
   // Microsoft 365 (Figma 13027-98203): single tenant root, same org-rooted
   // model as GWS — All Mailboxes / OneDrive / SharePoint / Teams drill under it.
   'ms365-tenant':    ['Tenant'],
+  'entra-tenant':    ['Tenant'],
+  'ad-forest':       ['Forest'],
   'mailboxes':      ['Mailbox'],
   'records':        ['Table'],
   // Confluence — Spaces is the primary scope unit per the PRD. Pages
@@ -26381,7 +26475,10 @@ var CATEGORIES = [
     // Microsoft 365: same tenant-rooted model (Figma 13027-98203 — tree root
     // is "All Tenants" → contoso.onmicrosoft.com; Mailboxes / OneDrive /
     // SharePoint / Teams are sections beneath it).
-    { id: 'ms365-tenant',      label: 'Tenants',              wls: ['ms365'] }
+    { id: 'ms365-tenant',      label: 'Tenants',              wls: ['ms365'] },
+    // Entra ID (tenant-rooted, like Microsoft 365) and Active Directory (forest-rooted): Directory / Applications / Security and Organizational Units / GPOs / Domain Controllers drill beneath them.
+    { id: 'entra-tenant',      label: 'Tenants',              wls: ['entra-id'] },
+    { id: 'ad-forest',         label: 'Forests',              wls: ['active-directory'] }
   ]},
   // (Collaboration section retired with GWS's flat 'mailboxes' cat — Gmail
   //  now lives under each user inside the tenant drill.)
@@ -31023,7 +31120,7 @@ function getInvColumns() {
 // user), so it isn't meaningful on the container row — drop the Policy column
 // in these views. Keyed on cat name (not primary type) because 'Group' is
 // shared between 'organizations' (a container) and 'identities' (not a root).
-var ROOT_CONTAINER_CATS = { 'organizations': 1, 'okta-org': 1, 'gws-tenant': 1, 'ms365-tenant': 1, 'jira-site': 1, 'conf-site': 1, 'environments': 1, 'tenant': 1 };
+var ROOT_CONTAINER_CATS = { 'organizations': 1, 'okta-org': 1, 'gws-tenant': 1, 'ms365-tenant': 1, 'entra-tenant': 1, 'ad-forest': 1, 'jira-site': 1, 'conf-site': 1, 'environments': 1, 'tenant': 1 };
 function _isRootContainerCat() {
   return !!(state && state.cat && ROOT_CONTAINER_CATS[state.cat]);
 }
@@ -38743,6 +38840,8 @@ function _restoreAvailability(r) {
   // Power Platform tenants slipped this gate until 2026-09-11 (user caught an
   // enabled express Restore on contoso.onmicrosoft.com in search results).
   if (r.type === 'Tenant') return 'context';
+  // Entra ID / Active Directory: the forest root and the folder rows are navigation; every object restores as a unit.
+  if (r.wl === 'Entra ID' || r.wl === 'Active Directory') return (r.type === 'Forest' || r.type === 'Folder') ? 'context' : 'add';
   // ── Google Workspace (workload-scoped) ─────────────────────────────────
   // User WAS context-only ("identity boundary, not restored — DCC never
   // recreates identities", PRD §3.1/§3.2, user ruling 2026-08-17) — REVERSED
@@ -40256,8 +40355,10 @@ function renderTopActionBar() {
     // Guarded — _dsStoreIconSvg returns null before the store loads, and a
     // bare concat would paint the literal "null" (burned once already).
     var _ctaIcon = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('settings-backup-restore-outlined', 20)) || '';
-    rightHtml = _selChipHtml + '<button class="tab-right-primary" onclick="openWorkspace()">' + _ctaIcon + _ctaVerb + '</button>';
+    rightHtml = _selChipHtml + ((window.__MC && window.__MC.active && typeof mcCartBtnHtml === 'function') ? mcCartBtnHtml() : '') + '<button class="tab-right-primary" onclick="openWorkspace()">' + _ctaIcon + _ctaVerb + '</button>';
   }
+  // Multi-cart (only after arriving from a multi-item finding): with an empty current cart the other carts stay reachable.
+  if (!rightHtml && window.__MC && window.__MC.active && typeof mcCartBtnHtml === 'function') rightHtml = mcCartBtnHtml();
   // ── Paint every .top-action-bar instance on the page ────────────
   // The mockup has one in the inventory layout and one in the
   // children-drill layout; the active screen's instance is the only
@@ -46504,6 +46605,7 @@ function wsBeginRestoreAnimation() {
     });
     if (typeof aiAgent !== 'undefined') aiAgent._pendingAgentJob = null;   // consumed
   })();
+  if (window.__MC && window.__MC.active && typeof mcOnRestoreStarted === 'function') { try { mcOnRestoreStarted(); } catch (e) {} }   // multi-cart: mark this workload's cart as started
   state.restorePlan.forEach(function(_, key){ ws.progress[key] = { state: 'pending' }; });
   wsRenderAll();
   // [moved 2026-07-15] The confirmation toast now fires in wsShowLaunchPopup
@@ -47429,6 +47531,7 @@ function wsFinishAndClose() {
   if (typeof updateBulkBar === 'function') updateBulkBar();
   if (typeof updateChildBulkBar === 'function') updateChildBulkBar();
   if (typeof updatePlanDock === 'function') updatePlanDock();
+  if (window.__MC && window.__MC.active && typeof mcAfterFinish === 'function') { try { mcAfterFinish(); } catch (e) {} }   // multi-cart: move on to the next pending cart
 }
 // V1 INVARIANT: assert the wizard's global "Restoring as of" picker
 // agrees with every basket item's resolved target ts. Both surfaces
@@ -50236,7 +50339,9 @@ var WORKLOAD_PINNED_FILTERS = {
   'jira':           [],
   'okta-wic':       [],   // Type pin removed — Okta root is orgs-only, so a Type filter is noise
   'ping':           ['status'],
-  'ms365':          []
+  'ms365':          [],
+  'entra-id':       [],
+  'active-directory': []
 };
 var FILTER_CONFIG = {
   inv: {
@@ -62881,6 +62986,119 @@ function refreshAllTableScrollShadows() {
   window.addEventListener('load', function(){ setTimeout(go, 500); });
 })();
 
+
+// ═══════════════════════════════════════════════════════════════════
+// MULTI-CART (restore carts across workloads) — HIDDEN unless the page is opened from a multi-item finding:
+//   inventory-V1.html#carts=<finding id>     e.g. #carts=FND-24551
+// The Identity Resilience dashboard writes the carts for that finding to localStorage ('dcc-restore-carts'). This layer only adds a cart button
+// (+ tray) beside the existing selection chip and Restore button. Each cart is exactly today's single-workload cart and restores through today's
+// wizard, one at a time; Select in the tray switches the workload and loads that cart, Restore starts its wizard, submitting returns to the next
+// pending cart. Without the hash nothing below runs: window.__MC stays undefined and every hook in the file short-circuits.
+// ═══════════════════════════════════════════════════════════════════
+(function(){
+  var _q = new URLSearchParams((window.location.hash || '').replace(/^#/, '')), fid = _q.get('carts'), wantWl = _q.get('cart');   // wantWl: open this workload's cart first
+  if (!fid) return;
+  var KEY = 'dcc-restore-carts', MC = { active: false, fid: fid, cur: null, open: false }, rec = null;
+  function readAll() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
+  function load() { rec = readAll()[fid] || null; return rec; }
+  function save() { if (!rec) return; try { var all = readAll(); all[fid] = rec; localStorage.setItem(KEY, JSON.stringify(all)); } catch (e) {} }
+  if (!load() || !rec.carts || !rec.carts.length) return;
+  MC.active = true; window.__MC = MC;
+  try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch (e) {}
+  function labelOf(c) { return (typeof WL_MAP !== 'undefined' && WL_MAP[c.wlId]) || null; }
+  function supported(c) { return !!labelOf(c) && (c.items || []).every(function(id){ return typeof RESOURCES !== 'undefined' && RESOURCES.some(function(r){ return r.id === id; }); }); }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+  function ptLabel(p) { if (!p) return 'Latest backup'; var d = new Date(p.length > 10 ? p : p + 'T23:59'), M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return M[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear() + ' · ' + ((d.getHours() % 12) || 12) + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes() + ' ' + (d.getHours() < 12 ? 'AM' : 'PM'); }
+  function pending() { return rec.carts.filter(function(c){ return c.status === 'pending'; }); }
+  function ico(n, s) { return (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg(n, s)) || ''; }
+
+  /* the cart currently in the page's plan → keep it in the list (so switching workload or cart never loses it) */
+  window.mcSnapshot = function(){
+    if (!MC.active || typeof state === 'undefined' || !state.restorePlan) return;
+    var wl = (typeof planActiveWorkload === 'function') ? planActiveWorkload() : null; if (!wl) return;
+    var wlId = null; Object.keys(WL_MAP).forEach(function(k){ if (WL_MAP[k] === wl) wlId = k; }); if (!wlId) return;
+    var items = []; state.restorePlan.forEach(function(_, k){ items.push(k); });
+    var c = rec.carts.filter(function(x){ return x.wlId === wlId && x.status === 'pending'; })[0];
+    var lbl = (typeof _planSelectionLabel === 'function') ? _planSelectionLabel() : (items.length + ' items');
+    if (c) { c.items = items; c.what = lbl; }
+    else { rec.carts.push({ wlId: wlId, wlName: wl, items: items, what: lbl, point: null, status: 'pending', account: '', user: true }); }
+    save();
+  };
+  function rpFor(c) {
+    var pt = c.point ? new Date(c.point.length > 10 ? c.point : c.point + 'T23:59').getTime() : null; if (pt == null) return null;
+    var lists = c.items.map(function(id){ return (typeof generateRps === 'function') ? generateRps(id) : []; }), shared = null;
+    if (lists.length) lists[0].filter(function(rp){ return rp.ts <= pt; }).sort(function(a, b){ return b.ts - a.ts; }).some(function(rp){ if (lists.every(function(l){ return l.some(function(x){ return x.id === rp.id; }); })) { shared = rp.id; return true; } return false; });
+    return shared;
+  }
+  function repaint() {
+    if (typeof renderTopActionBar === 'function') renderTopActionBar();
+    if (typeof renderTable === 'function') renderTable();
+    if (typeof childState !== 'undefined' && childState && childState.parentId && typeof childRender === 'function') childRender();
+    if (MC.open) renderTray();
+  }
+  function select(i) {
+    var c = rec.carts[i]; if (!c || c.status !== 'pending') return false;
+    if (!supported(c)) { if (typeof showToast === 'function') showToast((c.wlLabel || c.wlName || 'This workload') + ' is not in Protected Data in the prototype yet', { type: 'warning' }); return false; }
+    mcSnapshot();
+    enterWorkloadCatalog(c.wlId, labelOf(c));
+    clearPlan();
+    var rpId = rpFor(c);
+    c.items.forEach(function(id){ addToPlan(id, rpId ? { isPinned: true, manualRpId: rpId } : {}); });
+    MC.cur = i; save(); repaint();
+    return true;
+  }
+  window.mcSelect = function(i){ if (select(i)) closeTray(); };
+
+  /* the cart button + tray */
+  window.mcCartBtnHtml = function(){
+    if (!MC.active || !rec) return '';
+    return '<button type="button" class="mc-cartbtn" onclick="mcToggleTray(event)" aria-haspopup="menu" aria-label="Restore carts, ' + rec.carts.length + '" data-tooltip="Restore carts">' + ico('shopping-cart-outlined', 24) + '<i class="mc-bdg">' + rec.carts.length + '</i></button>';
+  };
+  function closeTray() { MC.open = false; var t = document.getElementById('mcTray'); if (t) t.remove(); }
+  function renderTray() {
+    var btn = document.querySelector('.top-action-bar .mc-cartbtn'); if (!btn || !btn.offsetParent) { closeTray(); return; }
+    var t = document.getElementById('mcTray'); if (!t) { t = document.createElement('div'); t.id = 'mcTray'; t.className = 'mc-tray'; document.body.appendChild(t); }
+    var TRASH = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+    var rows = rec.carts.map(function(c, i){
+      var cur = MC.cur === i && c.status === 'pending', run = c.status !== 'pending', ok = supported(c);
+      var from = c.from || (c.user ? null : fid), badge = from ? '<a class="mc-from" href="identity-dashboard.html" target="_blank" rel="noopener" data-tooltip="Added from this finding. Opens the finding" onclick="event.stopPropagation()">' + esc(from) + '</a>' : '';
+      var act = run ? '<span class="mc-chip ' + (c.status === 'success' ? 'ok' : c.status === 'failed' ? 'err' : 'info') + '">' + (c.status === 'running' ? 'Running' : c.status === 'success' ? 'Success' : 'Failed') + '</span><a class="mc-link" href="activity.html" target="_blank" rel="noopener" onclick="event.stopPropagation()">View session</a>' : '';
+      var rm = run ? '' : '<button class="btn-icon btn-icon-sm ws-basket-row-remove" type="button" data-tooltip="Remove this cart" aria-label="Remove the ' + esc(c.wlLabel || c.wlName) + ' cart" onclick="event.stopPropagation(); mcRemove(' + i + ')">' + TRASH + '</button>';
+      var tip = (!run && !ok) ? ' data-tooltip="' + esc((c.wlLabel || c.wlName) + ' is not in Protected Data in the prototype yet') + '"' : '';
+      return '<div class="mc-row' + (cur ? ' cur' : '') + (run ? ' run' : '') + (!run && !ok ? ' dis' : '') + '" role="option" aria-selected="' + cur + '"' + (!run && !cur ? ' onclick="mcSelect(' + i + ')"' : '') + tip + '><div class="mc-t"><b>' + esc(c.wlLabel || c.wlName) + badge + '</b><span>' + esc(c.what || '') + ' \u00b7 restoring as of ' + esc(ptLabel(c.point)) + '</span></div><span class="mc-sp"></span>' + act + rm + '</div>';
+    }).join('');
+    t.innerHTML = '<div class="mc-h"><b>Restore carts</b></div>' + rows + '<div class="mc-f">Pick a cart to switch to its workload, then use Restore.</div>';
+    var r = btn.getBoundingClientRect(); t.style.top = (r.bottom + 8) + 'px'; t.style.right = Math.max(8, window.innerWidth - r.right - 4) + 'px';
+  }
+  window.mcToggleTray = function(e){ if (e) e.stopPropagation(); if (MC.open) { closeTray(); return; } load(); MC.open = true; renderTray(); };
+  window.mcRemove = function(i){ var c = rec.carts[i]; if (!c) return; var wasCur = MC.cur === i; rec.carts.splice(i, 1); if (MC.cur != null) { if (wasCur) { MC.cur = null; clearPlan(); } else if (MC.cur > i) MC.cur--; } save(); repaint(); };
+  document.addEventListener('click', function(e){ if (MC.open && !e.target.closest('#mcTray') && !e.target.closest('.mc-cartbtn')) closeTray(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && MC.open) closeTray(); });
+
+  /* a restore for one of the carts was submitted in the wizard: record it, then (on return) move to the next pending cart */
+  window.mcOnRestoreStarted = function(){
+    var wl = (typeof planActiveWorkload === 'function') ? planActiveWorkload() : null; if (!wl) return;
+    var c = rec.carts.filter(function(x){ return x.status === 'pending' && (x.wlName === wl || labelOf(x) === wl); })[0]; if (!c) return;
+    var job = null; try { job = (JSON.parse(localStorage.getItem('dcc-jobs-bridge')) || [])[0]; } catch (e) {}
+    c.status = 'running'; c.jobId = job && job.id; c.startedTs = Date.now(); c.sessionName = job && job.job; save(); MC.justStarted = c;
+  };
+  window.mcAfterFinish = function(){
+    var c = MC.justStarted; MC.justStarted = null; if (!c) return;
+    var next = null; rec.carts.forEach(function(x, i){ if (!next && x.status === 'pending' && supported(x)) next = i; });
+    var left = pending().length;
+    if (next != null) { select(next); if (typeof showToast === 'function') showToast((c.wlLabel || c.wlName) + ' restore started — Next: ' + (rec.carts[next].wlLabel || rec.carts[next].wlName)); }
+    else { MC.cur = null; repaint(); if (typeof showToast === 'function') showToast((c.wlLabel || c.wlName) + ' restore started' + (left ? ' — ' + left + ' cart' + (left > 1 ? 's' : '') + ' still waiting' : '')); }
+  };
+
+  /* arrival: land on the first cart that can be opened, tray open */
+  window.addEventListener('load', function(){ setTimeout(function(){
+    var first = null; rec.carts.forEach(function(c, i){ if (first == null && c.status === 'pending' && supported(c) && (!wantWl || c.wlId === wantWl)) first = i; });
+    if (first == null && wantWl) rec.carts.forEach(function(c, i){ if (first == null && c.status === 'pending' && supported(c)) first = i; });
+    if (first != null) select(first); else repaint();
+    MC.open = true; renderTray();
+  }, 700); });
+})();
+
 // ═══════════════════════════════════════════════════════════════════
 // PASSWORD GATE
 // ═══════════════════════════════════════════════════════════════════
@@ -62899,16 +63117,16 @@ function refreshAllTableScrollShadows() {
   const LOCKOUT_TIERS = [30000,120000,600000,3600000,86400000];
   function isAuthenticated() {
     try {
-      const raw = sessionStorage.getItem(SESSION_KEY);
+      const raw = (localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY));
       if (!raw) return false;
       const {token,expires} = JSON.parse(raw);
-      if (Date.now() > expires) { sessionStorage.removeItem(SESSION_KEY); return false; }
+      if (Date.now() > expires) { localStorage.removeItem(SESSION_KEY); sessionStorage.removeItem(SESSION_KEY); return false; }
       return token === _H.slice(0,16) + String(expires);
     } catch(e) { return false; }
   }
   function grantSession() {
     const expires = Date.now() + SESSION_TTL;
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify({token:_H.slice(0,16)+String(expires),expires}));
+    localStorage.setItem(SESSION_KEY, JSON.stringify({token:_H.slice(0,16)+String(expires),expires}));
   }
   function getLockout() { try { return JSON.parse(localStorage.getItem(LOCKOUT_KEY)) || {attempts:0,until:0}; } catch(e) { return {attempts:0,until:0}; } }
   function saveLockout(s) { localStorage.setItem(LOCKOUT_KEY, JSON.stringify(s)); }
@@ -63320,8 +63538,8 @@ window.__devJumpResolve = function(h) {
 <!-- Securiti DS icon runtime — swaps inline SVGs into the Securiti
      glyph set at load time. Data file MUST load first so the runtime
      finds window.__SECURITI_ICONS already populated. -->
-<script src="securiti-icons-data.js?v=20260924d"></script>
-<script src="workload-picker.js?v=20260918a"></script>
+<script src="securiti-icons-data.js?v=20261007"></script>
+<script src="workload-picker.js?v=20261007"></script>
 <script src="securiti-icons.js"></script>
 
 <!-- Re-render the tree-nav when crossing the compact (≤1024px) breakpoint, so

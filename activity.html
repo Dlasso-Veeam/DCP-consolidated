@@ -2002,7 +2002,7 @@ body.ai-full #aiWorkingGlow { display: none; }
 <script>
 (function(){
   try {
-    var raw = sessionStorage.getItem('_sw_s');
+    var raw = (localStorage.getItem('_sw_s') || sessionStorage.getItem('_sw_s'));
     if (!raw) return;
     var parsed = JSON.parse(raw);
     if (parsed && parsed.expires && Date.now() < parsed.expires) {
@@ -13155,16 +13155,16 @@ go('activity');
   const LOCKOUT_TIERS = [30000,120000,600000,3600000,86400000];
   function isAuthenticated() {
     try {
-      const raw = sessionStorage.getItem(SESSION_KEY);
+      const raw = (localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY));
       if (!raw) return false;
       const {token,expires} = JSON.parse(raw);
-      if (Date.now() > expires) { sessionStorage.removeItem(SESSION_KEY); return false; }
+      if (Date.now() > expires) { localStorage.removeItem(SESSION_KEY); sessionStorage.removeItem(SESSION_KEY); return false; }
       return token === _H.slice(0,16) + String(expires);
     } catch(e) { return false; }
   }
   function grantSession() {
     const expires = Date.now() + SESSION_TTL;
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify({token:_H.slice(0,16)+String(expires),expires}));
+    localStorage.setItem(SESSION_KEY, JSON.stringify({token:_H.slice(0,16)+String(expires),expires}));
   }
   function getLockout() { try { return JSON.parse(localStorage.getItem(LOCKOUT_KEY)) || {attempts:0,until:0}; } catch(e) { return {attempts:0,until:0}; } }
   function saveLockout(s) { localStorage.setItem(LOCKOUT_KEY, JSON.stringify(s)); }

@@ -317,10 +317,14 @@
     // (Figma 13027-98203). Other consumer pages have no ms365 seeds yet and
     // will show empty states when it is picked there.
     { id: 'ms365',              name: 'Microsoft 365',     cat: 'SaaS platforms', colorKey: 'wl-logo-ms365' },
+    // Entra ID: a cloud identity service, so it sits with the SaaS platforms next to Okta and Google Identity (mono mark until a brand logo is added to the store).
+    { id: 'entra-id',           name: 'Entra ID',          cat: 'SaaS platforms', colorKey: null, monoKey: 'iam-identity-provider-outlined' },
     // ENABLED 2026-09-18 (was: disabled 'Not connected' placeholder, same
     // pattern as ms365 above) — seeds a flat VM list (no hierarchy; the tree
     // explorer collapses for this workload, see selectWl in inventory-V1.html).
     { id: 'hybrid-vms',         name: 'Virtual Machines',  cat: 'Datacenter',     colorKey: null, monoKey: 'dc-vms' },
+    // Active Directory: an on-premises directory service, so it is a Datacenter workload of its own (the computers and users are objects INSIDE the forest, not a sub-type of Computers).
+    { id: 'active-directory',   name: 'Active Directory',  cat: 'Datacenter',     colorKey: null, monoKey: 'dc-computers' },
     { id: 'hybrid-computers',   name: 'Computers',         cat: 'Datacenter',     colorKey: null /* was 'logo-computers' — the picker mock 9286-65208 shows the MONO dns entity glyph */, monoKey: 'dc-computers', disabled: true, tip: 'Not connected in this prototype' },
     { id: 'hybrid-unstructured',name: 'Unstructured Data', cat: 'Datacenter',     colorKey: null, monoKey: 'dc-files',     disabled: true, tip: 'Not connected in this prototype' },
     { id: 'hybrid-files',       name: 'Files',             cat: 'Datacenter',     colorKey: null, monoKey: 'dc-files',     disabled: true, tip: 'Not connected in this prototype' }

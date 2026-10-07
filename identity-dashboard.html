@@ -703,7 +703,7 @@ table.idd-tbl tr[tabindex]:focus-visible { outline: none; box-shadow: var(--vv-f
 .idd-tn .idd-ntile { border-radius: 6px; }
 .idd-tn.on .idd-ntile { background: var(--em-green); color: var(--white); }
 .idd-tn .lbl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.idd-tn .ct { min-width: 28px; height: 28px; padding: 0 8px; box-sizing: border-box; border-radius: 14px; background: var(--em-green-tint); color: var(--em-green); font-size: 16px; font-weight: 500; line-height: 20px; display: inline-flex; align-items: center; justify-content: center; }   /* Figma entity list count: tint pill, 16/500 brand text */
+.idd-tn .ct { min-width: 28px; height: 28px; padding: 0 8px; box-sizing: border-box; border-radius: 4px; background: var(--em-green-tint); color: var(--em-green); font-size: 16px; font-weight: 500; line-height: 20px; display: inline-flex; align-items: center; justify-content: center; }   /* Figma entity list count: tint pill, 16/500 brand text */
 .idd-tn.on .ct { background: var(--white); }
 .idd-tn.static .ct { min-width: 24px; height: 20px; padding: 0 6px; font-size: 12px; line-height: normal; border-radius: 2px; }
 /* card title with a view picker (Threat Center pattern: title + chevron → menu of views with a one-line description each) */
@@ -792,24 +792,11 @@ table.idd-tbl tr[data-incident] { cursor: pointer; }
 .idd-mscrim { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1500; display: none; align-items: center; justify-content: center; }
 .idd-mscrim.open { display: flex; }
 .idd-modal { width: 680px; max-width: calc(100vw - 48px); background: var(--white); border-radius: 8px; box-shadow: 0 8px 24px rgba(31,34,41,0.25); display: flex; flex-direction: column; }
-.idd-modal.wide { width: 840px; }
-.idd-modal-b.plan { max-height: calc(100vh - 220px); overflow-y: auto; gap: 16px; }
-.idd-plan-lead { margin: 0; font-size: 16px; line-height: 22px; color: var(--black-70); }
-.idd-plan-ord { display: flex; align-items: center; gap: 12px; font-size: 16px; color: var(--black-70); }
-.idd-plan-note { border: 1px solid color-mix(in srgb, var(--status-blue) 35%, white); background: var(--status-blue-5); border-radius: 8px; padding: 12px; color: var(--black-100); }
-.idd-plan-note.warn { border-color: color-mix(in srgb, var(--orange) 40%, white); background: var(--orange-10); }
-.idd-plan-note .h { display: flex; align-items: center; gap: 8px; font-size: 16px; line-height: 22px; } .idd-plan-note p { margin: 0; padding-left: 24px; font-size: 16px; line-height: 22px; }
-.idd-plan-row { border: 1px solid var(--border-light); border-radius: 8px; padding: 0 16px 8px; }
-.idd-plan-h, .idd-plan-run { display: flex; align-items: center; gap: 12px; min-height: 56px; }
-.idd-plan-run { border: 1px solid var(--border-light); border-radius: 8px; padding: 0 16px; margin-bottom: 8px; }
-.idd-plan-h .t, .idd-plan-run .t { display: flex; flex-direction: column; min-width: 0; font-size: 16px; line-height: 22px; } .idd-plan-h .t span, .idd-plan-run .t span { font-size: 14px; line-height: 18px; color: var(--black-70); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.idd-plan-n { width: 24px; height: 24px; border-radius: 50%; background: var(--black-5); color: var(--black-70); font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.idd-plan-row .idd-pr { align-items: flex-start; padding: 9px 0; min-height: 0; } .idd-plan-row .idd-pr .k { padding-top: 0; }
-.idd-plan-start { font-size: 14px; color: var(--black-70); white-space: nowrap; }
-.idd-plan-opts { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; font-size: 16px; line-height: 22px; color: var(--black-70); } .idd-plan-opts b { font-weight: 500; color: var(--black-100); }
 .idd-elink { color: var(--em-green); font-weight: 500; text-decoration: none; cursor: pointer; } .idd-elink:hover { text-decoration: underline; color: var(--em-green-accent); }
 .idd-entw table.dense th:last-child, .idd-entw table.dense td:last-child { position: static; }
-.idd-rp-bar.blk { position: static; } .idd-rp-wl { padding: 10px 14px; display: flex; align-items: center; min-width: 0; font-weight: 500; }
+.idd-rp-bar.blk { position: static; } .idd-rp-wl { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; font-weight: 500; } .idd-rp-wl .items { font-size: 14px; line-height: 18px; font-weight: 450; color: var(--black-70); overflow-wrap: anywhere; } .idd-rp-wl .idd-rp-link { font-size: 14px; }
+.idd-nb { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 4px; background: var(--em-green); color: var(--white); font-size: 12px; font-weight: 500; line-height: 1; margin-left: 4px; }
+.plv-btn.is-on { background: var(--green-s10); } .plv-btn.is-on svg { width: 18px; height: 18px; }
 .idd-rp-acct { display: flex; align-items: baseline; gap: 8px; padding: 8px 14px; font-size: 16px; font-weight: 500; line-height: 22px; } .idd-rp-acct span { font-size: 14px; font-weight: 450; color: var(--black-70); }
 .idd-modal-h { display: flex; align-items: center; gap: 12px; padding: 16px 16px 8px 24px; }
 .idd-modal-h h2 { margin: 0; flex: 1; font-size: 24px; font-weight: 500; line-height: 32px; color: var(--black-100); }
@@ -848,7 +835,7 @@ table.idd-tbl tr[data-incident] { cursor: pointer; }
 .idd-ehead .ttl { font-size: 18px; font-weight: 500; color: var(--black-100); } .idd-ehead .ct { font-size: 14px; color: var(--black-70); }
 .idd-ehead .idd-ntile { border-radius: 6px; }
 .idd-rp { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-.idd-rp-bar { display: grid; grid-template-columns: 180px minmax(0, 1fr) minmax(0, 1fr); align-items: start; background: var(--black-5); border: 1px solid transparent; border-radius: 8px; }   /* (transparent border keeps the geometry identical to the cards below) SAME columns + cell padding as .idd-rp-card, so each date sits over its column of values */
+.idd-rp-bar { display: grid; grid-template-columns: 220px minmax(0, 1fr) minmax(0, 1fr); align-items: stretch; background: var(--black-5); border: 1px solid transparent; border-radius: 8px; }   /* (transparent border keeps the geometry identical to the cards below) SAME columns + cell padding as .idd-rp-card, so each date sits over its column of values */
 .idd-rp-bar > div { padding: 10px 14px; min-width: 0; }
 .idd-rp-bar { background: var(--white); overflow: hidden; border-radius: 8px; }
 .idd-hd.now { background: var(--black-5); } .idd-hd.aft { background: var(--em-green-tint); box-shadow: inset 0 3px 0 var(--em-green); }
@@ -868,7 +855,7 @@ table.idd-tbl tr[data-incident] { cursor: pointer; }
 .idd-rp-sec { margin: 4px 0 0; } .idd-rp-sech { font-size: 16px; font-weight: 500; line-height: 22px; padding: 4px 0; }
 .idd-rp-card { background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; overflow: hidden; margin-top: 6px; } .idd-rp-card table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .idd-rp-card td { padding: 8px 14px; font-size: 16px; line-height: 22px; vertical-align: middle; border-top: 1px solid var(--border-light); } .idd-rp-card tr:first-child td { border-top: none; }
-.idd-rp-card td.a { width: 180px; font-weight: 500; color: var(--black-60); white-space: normal; overflow-wrap: anywhere; }   /* long attribute names wrap inside the fixed label column instead of running into the values */ .idd-rp-card tr.diff td { background: var(--orange-10); } .idd-rp-card td.snap { color: var(--orange); font-weight: 500; } .idd-rp-card td.prod { color: var(--black-60); }
+.idd-rp-card td.a { width: 220px; font-weight: 500; color: var(--black-60); white-space: normal; overflow-wrap: anywhere; }   /* long attribute names wrap inside the fixed label column instead of running into the values */ .idd-rp-card tr.diff td { background: var(--orange-10); } .idd-rp-card td.snap { color: var(--orange); font-weight: 500; } .idd-rp-card td.prod { color: var(--black-60); }
 .idd-ttile.ses { background: var(--em-green-tint); color: var(--em-green); }
 .idd-slog { border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); }
 .idd-slog-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--border-light); }
@@ -908,8 +895,6 @@ table.idd-tbl tr[data-incident] { cursor: pointer; }
 .idd-nt-add textarea { height: 112px; border-radius: 4px; border: 1px solid var(--black-20); padding: 10px 12px; font-family: inherit; font-size: 16px; color: var(--black-100); resize: none; outline: none; box-sizing: border-box; background: var(--form-bg); } .idd-nt-add textarea:focus { background: var(--em-green-tint); border-color: var(--em-green); }
 .idd-nt-f { display: flex; justify-content: flex-end; gap: 8px; }
 .idd-btn-del { background: var(--red); color: var(--white); border: none; height: 32px; padding: 0 12px; border-radius: 4px; font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer; } .idd-btn-del:hover { background: var(--red-40); }
-.idd-toast { position: fixed; left: 50%; bottom: 48px; transform: translateX(-50%); z-index: 1600; background: var(--black-100); color: var(--white); font-size: 16px; padding: 12px 16px; border-radius: 4px; box-shadow: 0 8px 24px rgba(31,34,41,0.25); display: none; }
-.idd-toast.show { display: block; }
 @media (max-width: 1100px) { .idd-cols { flex-direction: column; } .idd-col-r { width: auto; border-left: none; border-top: 1px solid var(--black-10); } }
 @media (max-width: 960px) { .idd-tnav { display: none; } }
 .idd-menu-item .ic { display: inline-flex; margin-right: 8px; } .idd-menu-item .ic svg { width: 20px; height: 20px; }
@@ -1066,6 +1051,23 @@ td.idd-chk, th.idd-chk { text-align: center; padding: 0 0 0 12px; }
 .idd-hlegend { display: flex; gap: 16px; padding: 4px 12px 12px; font-size: 14px; line-height: 20px; color: var(--black-70); flex-wrap: wrap; }
 .idd-hlegend i { display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 8px; vertical-align: -1px; }
 @media (max-width: 1100px) { .idd-hrow[data-wlrow], .idd-haxis { grid-template-columns: 1fr; gap: 8px; } .idd-haxis > div:first-child, .idd-haxis > div:last-child { display: none; } }
+.cart-st { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; } .cart-st .idd-ibtn { flex-shrink: 0; }
+.idd-rp-link { display: inline-flex; align-items: center; gap: 4px; font-size: 16px; font-weight: 500; color: var(--em-green); text-decoration: none; white-space: nowrap; } .idd-rp-link:hover { text-decoration: underline; } .idd-rp-link svg { width: 16px; height: 16px; }
+.idd-nsteps li > .b { flex: 1; } .idd-nsteps .b > .pg { width: 100%; }
+table.idd-tbl.pgt { table-layout: auto; min-width: 0; width: 100%; border-top: 1px solid var(--black-10); } table.idd-tbl.pgt td { height: auto; padding: 10px 8px; white-space: normal; overflow: visible; vertical-align: top; } table.idd-tbl.pgt td .mut { color: var(--black-70); font-size: 14px; line-height: 18px; } table.idd-tbl.pgt .idd-wl-cell { align-items: center; } table.idd-tbl.pgt td.nw { white-space: nowrap; }
+.pg { border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); width: 100%; }
+.pg-h { display: flex; align-items: center; gap: 12px; padding: 12px 16px; font-size: 16px; } .cf { display: flex; flex-direction: column; font-size: 16px; line-height: 22px; } .cf b { font-weight: 500; } .cf span { font-size: 14px; line-height: 18px; color: var(--black-70); }
+.cx-row { border-top: 1px solid var(--black-10); padding: 10px 16px; } .cx-main { display: flex; align-items: center; gap: 12px; }
+.cx-main .t { display: flex; flex-direction: column; min-width: 0; font-size: 16px; line-height: 22px; flex: 1; } .cx-main .t b { font-weight: 500; } .cx-main .t span { font-size: 14px; line-height: 18px; color: var(--black-70); } .cx-main .t .cx-back { color: var(--black-100); margin-top: 2px; }
+.cx-pt { display: flex; flex-direction: column; text-align: right; font-size: 14px; line-height: 18px; color: var(--black-70); } .cx-pt b { font-size: 16px; line-height: 22px; font-weight: 500; color: var(--black-100); } .cx-pt i { font-style: normal; }
+.al { margin: 0 16px 12px; border: 1px solid color-mix(in srgb, var(--orange) 40%, white); background: var(--orange-10); border-radius: 8px; padding: 12px; } .al.info { border-color: color-mix(in srgb, var(--status-blue) 35%, white); background: var(--status-blue-5); }
+.al-h { display: flex; align-items: center; gap: 8px; font-size: 16px; line-height: 22px; } .al p { margin: 0; padding-left: 24px; font-size: 16px; line-height: 22px; } .al-f { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.toast { position: fixed; top: calc(16px + var(--devjump-h, 0px)); right: 24px; max-width: 420px; min-width: 320px; border: 1px solid; border-radius: 8px; padding: 16px 18px; display: flex; gap: 16px; align-items: flex-start; z-index: 10000; box-shadow: 0 4px 16px rgba(0,0,0,0.08); transform: translateY(-12px); opacity: 0; transition: opacity 0.2s, transform 0.2s; pointer-events: none; }
+.toast.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
+.toast.toast-success { background: var(--green-bg); border-color: var(--green-30); } .toast.toast-error { background: var(--red-10); border-color: var(--red); } .toast.toast-warning { background: var(--orange-10); border-color: var(--orange-30); }
+.toast-content { flex: 1; min-width: 0; } .toast-title { font-size: 16px; font-weight: 500; color: var(--black-100); line-height: 1.4; } .toast-body { font-size: 14px; font-weight: 450; color: var(--black-100); line-height: 1.5; margin-top: 4px; }
+.toast-close { background: none; border: none; padding: 0; cursor: pointer; flex-shrink: 0; align-self: flex-start; margin-top: 2px; } .toast-close svg { width: 16px; height: 16px; display: block; stroke-width: 2.5; }
+.toast.toast-success .toast-close { color: var(--green); } .toast.toast-error .toast-close { color: var(--red); } .toast.toast-warning .toast-close { color: var(--orange); }
 </style>
 </head>
 <body>
@@ -1100,7 +1102,7 @@ td.idd-chk, th.idd-chk { text-align: center; padding: 0 0 0 12px; }
 <script>
 (function(){
   try {
-    var raw = sessionStorage.getItem('_sw_s');
+    var raw = (localStorage.getItem('_sw_s') || sessionStorage.getItem('_sw_s'));
     if (!raw) return;
     var parsed = JSON.parse(raw);
     if (parsed && parsed.expires && Date.now() < parsed.expires) {
@@ -1315,12 +1317,10 @@ td.idd-chk, th.idd-chk { text-align: center; padding: 0 0 0 12px; }
     <label for="iddStNote">Note <b>*</b></label><textarea id="iddStNote" placeholder="Explain why the status is changing"></textarea><div class="errt">A note is required to change the status.</div></div>
   <div class="idd-modal-f"><button type="button" class="plv-btn plv-btn-secondary" id="iddStCancel">Cancel</button><button type="button" class="plv-btn plv-btn-primary" id="iddStOk">Change Status</button></div>
 </div></div>
-<div class="idd-mscrim" id="iddPlan"><div class="idd-modal wide" role="dialog" aria-modal="true" aria-labelledby="iddPlanTitle">
-  <div class="idd-modal-h"><h2 id="iddPlanTitle">Restore</h2><button type="button" class="idd-ibtn" data-planclose="1" aria-label="Close"></button></div>
-  <div class="idd-modal-b plan" id="iddPlanBody"></div>
-  <div class="idd-modal-f" id="iddPlanFoot"></div>
-</div></div>
-<div class="idd-toast" id="iddToast" role="status"></div>
+<div class="toast toast-success" id="toast" role="status" aria-live="polite">
+  <div class="toast-content"><div class="toast-title" id="toastTitle"></div><div class="toast-body" id="toastBody" style="display:none"></div></div>
+  <button class="toast-close" type="button" aria-label="Dismiss" onclick="hideToast()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+</div>
 <div class="filter-picker" id="filterPicker">
   <div class="fp-search"><input id="fpSearch" placeholder="Search filter properties…"></div>
   <div class="fp-body">
@@ -1374,7 +1374,7 @@ td.idd-chk, th.idd-chk { text-align: center; padding: 0 0 0 12px; }
 
 
 <script src="securiti-icons-data.js?v=20261001a"></script>
-<script src="workload-picker.js?v=20261006"></script>
+<script src="workload-picker.js?v=20261007"></script>
 <script>
 function _dsStoreIconSvg(name, size) {
   var e = (typeof window !== 'undefined' && window.__SECURITI_ICONS) ? window.__SECURITI_ICONS[name] : null;
@@ -2214,7 +2214,7 @@ function renderThreats_parked() {   // PARKED 2026-10-05: threats are findings �
 }
 
 /* Detail overlay */
-var NODE_ICON = { Actor: 'user-outlined', Technique: 'risk-outlined', Subject: 'objects-outlined', Impact: 'alert-warning-outlined', Workload: 'workload-outlined', Connection: 'integration-widget-outlined', Policy: 'policy-outlined', Sessions: 'history-outlined', Backups: 'backup-outlined', Objects: 'objects-outlined', Finding: 'issues-outlined', Incident: 'sd-folder', Person: 'user-outlined', 'Restore point': 'restore-point-outlined' };
+var NODE_ICON = { Actor: 'user-outlined', Technique: 'risk-outlined', Subject: 'objects-outlined', Impact: 'alert-warning-outlined', Workload: 'workload-outlined', Connection: 'integration-widget-outlined', Policy: 'policy-outlined', Sessions: 'history-outlined', Backups: 'backup-outlined', Objects: 'objects-outlined', Finding: 'issues-outlined', Incident: 'sd-folder', Identity: 'user-outlined', 'Restore point': 'restore-point-outlined' };
 function nodeGlyph(k, cx, cy, color) { var n = NODE_ICON[k] || 'objects-outlined', g = (typeof ico === 'function' ? ico(n, 24) : '') || _dsStoreIconSvg(n, 24) || ''; return g.replace('<svg ', '<svg x="' + (cx - 12) + '" y="' + (cy - 12) + '" style="color:' + (color || '#fff') + '" '); }
 function graphSvg(t) {
   var W = 900, nodes = [ { k: 'Actor', v: t.actor, c: 'var(--plum)' }, { k: 'Technique', v: t.tech.split(' · ')[0], c: 'var(--orange)' }, { k: 'Subject', v: t.subject, c: 'var(--dk-blue)' }, { k: 'Impact', v: t.blast, c: 'var(--red)' } ];
@@ -2349,20 +2349,20 @@ var FINDINGS = [
       orderNote: 'Active Directory restores first. Entra ID and Okta sync users from it, so each later session starts when the previous one succeeds.',
       orderWarn: 'Entra ID and Okta sync users from Active Directory. Restoring them before Active Directory is back can let the sync delete the restored account again.',
       items: [
-        { wl: 'ad', conn: 'corp.meridian.local', account: 'MERIDIAN\\j.alvarez', kind: 'User account', deleted: 'Oct 5, 7:31 AM', pdWl: 'active-directory', pdItem: 'ad-user-j-alvarez', rec: 1, sel: null,
+        { wl: 'ad', conn: 'corp.meridian.local', account: 'MERIDIAN\\j.alvarez', kind: 'User account', deleted: 'Oct 5, 7:31 AM', back: 'The account, 3 group memberships, its OU and manager', pdWl: 'active-directory', pdItem: 'ad-user-j-alvarez', rec: 1, sel: null,
           points: [['Oct 5, 2026 8:00 AM', 'Latest · captured after the deletion'], ['Oct 5, 2026 2:00 AM', 'Before the deletion · recommended'], ['Oct 4, 2026 2:00 AM', 'Earlier']],
           config: [['Conflict handling', 'Skip'], ['Group memberships', 'Merge'], ['Account state', 'Enabled']],
           cmp: [['Account status', 'Enabled', 'Deleted'], ['Group memberships', 'Domain Users, Finance-Staff, VPN-Users', '—'], ['Organizational unit', 'OU=Finance,DC=corp,DC=meridian,DC=local', '—'], ['Manager', 'm.okafor', '—']] },
-        { wl: 'entra', conn: 'meridianfg.com', account: 'j.alvarez@meridianfg.com', kind: 'User', deleted: 'Oct 5, 7:34 AM', pdWl: 'entra-id', pdItem: 'entra-user-j-alvarez', rec: 1, sel: null,
+        { wl: 'entra', conn: 'meridianfg.com', account: 'j.alvarez@meridianfg.com', kind: 'User', deleted: 'Oct 5, 7:34 AM', back: 'The account, 4 groups and the Microsoft 365 E5 license', pdWl: 'entra-id', pdItem: 'entra-user-j-alvarez', rec: 1, sel: null,
           points: [['Oct 5, 2026 8:00 AM', 'Latest · captured after the deletion'], ['Oct 5, 2026 2:00 AM', 'Before the deletion · recommended'], ['Oct 4, 2026 8:00 PM', 'Earlier']],
           config: [['Conflict handling', 'Skip'], ['Object relationships', 'Merge'], ['Require sign-in method reset', 'On']],
           cmp: [['Account status', 'Active', 'Deleted'], ['Group memberships', '4 groups', '—'], ['Assigned licenses', 'Microsoft 365 E5', '—'], ['Directory roles', 'None', '—']] },
-        { wl: 'okta', conn: 'meridian.okta.com', account: 'j.alvarez@meridianfg.com', kind: 'User', deleted: 'Oct 5, 7:37 AM', pdWl: 'okta-wic', pdItem: 'okta-user-jalvarez', rec: 1, sel: null,
+        { wl: 'okta', conn: 'meridian.okta.com', account: 'j.alvarez@meridianfg.com', kind: 'User', deleted: 'Oct 5, 7:37 AM', back: 'The account, 3 groups, 6 app assignments and 2 factors', pdWl: 'okta-wic', pdItem: 'okta-user-jalvarez', rec: 1, sel: null,
           points: [['Oct 5, 2026 9:00 AM', 'Latest · captured after the deletion'], ['Oct 5, 2026 3:15 AM', 'Before the deletion · recommended'], ['Oct 4, 2026 3:15 PM', 'Earlier']],
           config: [['Conflict handling', 'Skip'], ['Object relationships', 'Merge'], ['Activation invitation email', 'Off']],
           cmp: [['Status', 'Active', 'Deprovisioned'], ['Group memberships', '3 groups', '—'], ['App assignments', '6 apps', '—'], ['Factors enrolled', 'Okta Verify, WebAuthn', '—']] }] },
-    steps: [['Review what changed in each workload since its restore point', 'Compare restore points', { tab: 'ent:Restore points' }], ['Disable the HR sync rule that matched the duplicate record before restoring, or the next sync can delete the accounts again', null, null], ['Restore Jordan Alvarez in all 3 workloads, one session each, in the order shown', 'Restore all (3)', { plan: true }], ['After the sessions finish, confirm sign-in and group memberships in each workload', null, null]],
-    graph: { src: [['Workload', 'Active Directory +2', 3], ['Connection', 'corp.meridian.local +2', 3]], mid: [['Policy', 'Forest protection +2', 3]], out: [['Person', 'Jordan Alvarez', 3], ['Restore point', 'Oct 5, 2:00 AM +2', 3]] },
+    steps: [['Review what changed in each workload since its restore point', 'Compare restore points', { tab: 'ent:Restore points' }], ['Disable the HR sync rule that matched the duplicate record before restoring, or the next sync can delete the accounts again', null, null], ['Restore Jordan Alvarez in all 3 workloads, one session each, in the order shown', 'Restore all (3)', { cart: true }], ['After the sessions finish, confirm sign-in and group memberships in each workload', null, null]],
+    graph: { src: [['Workload', 'Active Directory +2', 3], ['Connection', 'corp.meridian.local +2', 3]], mid: [['Policy', 'Forest protection +2', 3]], out: [['Identity', 'Jordan Alvarez', 3], ['Restore point', 'Oct 5, 2:00 AM +2', 3]] },
     ent: { Workloads: [['Active Directory', '2 connections'], ['Entra ID', '3 connections'], ['Okta', '12 connections']], Connections: [['corp.meridian.local', 'Healthy', 'ad'], ['meridianfg.com', 'Healthy', 'entra'], ['meridian.okta.com', 'Healthy', 'okta']], Policies: [['Forest protection', '1 run per day, SLA 24h', 'ad'], ['Directory objects', '4 runs per day, SLA 6h', 'entra'], ['Org backup', '2 runs per day, SLA 12h', 'okta']],
       Identities: [['MERIDIAN\\j.alvarez', 'Deleted · matched on employee ID', 'ad'], ['j.alvarez@meridianfg.com', 'Deleted · matched on employee ID', 'entra'], ['j.alvarez@meridianfg.com', 'Deprovisioned · matched on employee ID', 'okta']],
       'Restore points': [['Oct 5, 2026 2:00 AM', 'Active Directory · before the deletion · recommended'], ['Oct 5, 2026 2:00 AM', 'Entra ID · before the deletion · recommended'], ['Oct 5, 2026 3:15 AM', 'Okta · before the deletion · recommended']] },
@@ -2646,13 +2646,13 @@ function graphIncident(v, ent) {
   var fcol = function(l){ return l === 5 ? 'var(--red)' : l === 4 ? 'var(--orange)' : 'var(--gold-20)'; }, fnodes;
   if (v.mem.length > 1) {   // several findings collapse into ONE node with a count badge; it opens the Findings section
     edges += curve(cx + 34, cy, FX - 22, cy);
-    fnodes = '<g class="gn" data-gnode="Findings" role="link" tabindex="0" aria-label="Open Findings"><circle cx="' + FX + '" cy="' + cy + '" r="22" fill="' + fcol(v.lvl) + '"/>' + nodeGlyph('Finding', FX, cy) + '<circle cx="' + (FX + 18) + '" cy="' + (cy - 19) + '" r="12" fill="var(--white)" stroke="var(--black-10)"/><text class="b" x="' + (FX + 18) + '" y="' + (cy - 15) + '" text-anchor="middle">' + v.mem.length + '</text><text class="k" x="' + FX + '" y="' + (cy + 40) + '" text-anchor="middle">Findings</text></g>';
+    fnodes = '<g class="gn" data-gnode="Findings" role="link" tabindex="0" aria-label="Open Findings"><circle cx="' + FX + '" cy="' + cy + '" r="22" fill="' + fcol(v.lvl) + '"/>' + nodeGlyph('Finding', FX, cy) + '' + nbadge(FX + 18, cy - 19, v.mem.length) + '<text class="k" x="' + FX + '" y="' + (cy + 40) + '" text-anchor="middle">Findings</text></g>';
   } else {
     var x1 = v.mem[0]; edges += curve(cx + 34, cy, FX - 22, cy);
     fnodes = '<g class="gn" data-open="' + x1.kind + ':' + x1.id + '" role="link" tabindex="0" aria-label="Open finding ' + x1.id + '"><circle cx="' + FX + '" cy="' + cy + '" r="22" fill="' + fcol(x1.lvl) + '"/>' + nodeGlyph('Finding', FX, cy) + '<text class="k" x="' + FX + '" y="' + (cy + 40) + '" text-anchor="middle">FND-' + x1.id + '</text></g>';
   }
   var circle = function(n){ var vv = n.v.length > 22 ? n.v.slice(0, 21) + '…' : n.v;
-    return '<g class="gn" data-gnode="' + n.k + '" role="link" tabindex="0" aria-label="Open ' + n.k + '"><circle cx="' + n.x + '" cy="' + n.y + '" r="22" fill="' + n.col + '"/>' + nodeGlyph(n.k, n.x, n.y) + '<circle cx="' + (n.x + 18) + '" cy="' + (n.y - 19) + '" r="12" fill="var(--white)" stroke="var(--black-10)"/><text class="b" x="' + (n.x + 18) + '" y="' + (n.y - 15) + '" text-anchor="middle">' + n.c + '</text><text class="k" x="' + n.x + '" y="' + (n.y + 40) + '" text-anchor="middle">' + n.k + '</text><text x="' + n.x + '" y="' + (n.y + 58) + '" text-anchor="middle">' + esc(vv) + '</text></g>'; };
+    return '<g class="gn" data-gnode="' + n.k + '" role="link" tabindex="0" aria-label="Open ' + n.k + '"><circle cx="' + n.x + '" cy="' + n.y + '" r="22" fill="' + n.col + '"/>' + nodeGlyph(n.k, n.x, n.y) + '' + nbadge(n.x + 18, n.y - 19, n.c) + '<text class="k" x="' + n.x + '" y="' + (n.y + 40) + '" text-anchor="middle">' + n.k + '</text><text x="' + n.x + '" y="' + (n.y + 58) + '" text-anchor="middle">' + esc(vv) + '</text></g>'; };
   var hub = '<g class="gn" data-gnode="Finding" role="link" tabindex="0" aria-label="Open Overview"><circle cx="' + cx + '" cy="' + cy + '" r="34" fill="var(--status-blue-5)" stroke="#9dd3ee" stroke-width="2"/>' + nodeGlyph('Incident', cx, cy, 'var(--status-blue)') + '<text class="k" x="' + cx + '" y="' + (cy + 54) + '" text-anchor="middle" style="font-weight:500">' + v.id + '</text></g>';
   return '<svg viewBox="0 0 ' + W + ' ' + (H + 40) + '" role="img" aria-label="Relationship graph for incident ' + v.id + '">' + edges + L.map(circle).join('') + fnodes + hub + '</svg>';
 }
@@ -2669,66 +2669,96 @@ function renderIncFindings(M) {
     + '<div class="idd-tbl-wrap"><table class="idd-tbl dense"><colgroup><col style="width:7%"><col style="width:7%"><col style="width:21%"><col style="width:11%"><col style="width:14%"><col style="width:11%"><col style="width:10%"><col style="width:10%"><col style="width:9%"><col style="width:3%"></colgroup>'
     + '<thead><tr><th>ID</th><th>Severity</th><th>Name</th><th>Type</th><th>Status</th><th>Source</th><th>Created At</th><th>Last Updated</th><th>Assignee</th><th></th></tr></thead><tbody>' + M.iv.mem.map(uRow).join('') + '</tbody></table></div>';
 }
-/* ═══ Multi-workload restore: one person, one session per workload ═══
-   The Protected Data cart holds ONE workload, so a person who exists in several workloads is restored through a plan: one ordinary restore session per workload
-   (each with its own restore point and restore options), created together and monitored in Activity. */
-var PL = { fid: null, order: 'seq', launched: false, rows: [] };
-function multiOf(fid) { var f = FINDINGS.filter(function(x){ return x.id === fid; })[0]; return f && f.multi ? f : null; }
+/* ═══ Multi-workload restore: one cart per workload ═══
+   A person who exists in several workloads is restored through several Protected Data carts, one per workload. The finding does not restore anything itself: it compares,
+   puts a cart in the list for each workload (Restore / Restore all), and mirrors what the carts and sessions say. The carts live in localStorage ('dcc-restore-carts'), shared with
+   Protected Data, which updates them as restores start. Every state shown here is read from that record, so adding, removing or submitting in Protected Data updates both views. */
+var CART_KEY = 'dcc-restore-carts', PD_WL = { ad: ['active-directory', 'Active Directory'], entra: ['entra-id', 'Entra ID'], okta: ['okta-wic', 'Okta WIC'] };
+function multiOf(id) { var f = FINDINGS.filter(function(x){ return x.id === id; })[0]; return f && f.multi ? f : null; }
 function mpoint(it) { return it.points[it.sel == null ? it.rec : it.sel]; }
 function mpIso(label) { return rpIso(label); }
-function mItemHref(it) { return pdRestore(it.pdWl, [it.pdItem], mpIso(mpoint(it)[0])).href; }
+function fndKey(f) { return 'FND-' + f.id; }
+try { localStorage.removeItem(CART_KEY); } catch (e) {}   // the dashboard starts with an empty cart on every load
+function cartAll() { try { return JSON.parse(localStorage.getItem(CART_KEY)) || {}; } catch (e) { return {}; } }
+function cartRec(f) { return cartAll()[fndKey(f)] || null; }
+function cartSave(f, rec) { try { var all = cartAll(); all[fndKey(f)] = rec; localStorage.setItem(CART_KEY, JSON.stringify(all)); } catch (e) {} }
+function cartOf(f, it) { var rec = cartRec(f); return rec ? (rec.carts.filter(function(c){ return c.wlId === PD_WL[it.wl][0]; })[0] || null) : null; }
+function cstate(f, it) { var c = cartOf(f, it); return !c ? 'out' : c.status === 'pending' ? 'cart' : c.status === 'running' ? 'run' : c.status === 'success' ? 'ok' : 'bad'; }
+function cartWlName(it) { return WL.filter(function(w){ return w.id === it.wl; })[0].name; }
+function addToCart(f, idxs) {
+  var rec = cartRec(f) || { fid: fndKey(f), person: f.multi.person, carts: [] }, added = [];
+  idxs.forEach(function(i){ var it = f.multi.items[i]; if (cartOf(f, it)) return;
+    rec.carts.push({ wlId: PD_WL[it.wl][0], wlName: PD_WL[it.wl][1], wlLabel: cartWlName(it), what: it.kind === 'User account' ? '1 user account' : '1 user', account: it.account, items: [it.pdItem], point: mpIso(mpoint(it)[0]), status: 'pending', from: fndKey(f) }); added.push(cartWlName(it)); });
+  if (!added.length) return;
+  var order = f.multi.items.map(function(it){ return PD_WL[it.wl][0]; }); rec.carts.sort(function(a, b){ return order.indexOf(a.wlId) - order.indexOf(b.wlId); });
+  cartSave(f, rec); touch(f, 'Added to cart: ' + added.join(', ') + ' (' + added.length + ' pending restore' + (added.length > 1 ? 's' : '') + ')', 'Added by Darren Lasso');
+}
+function removeFromCart(f, i) {
+  var rec = cartRec(f), it = f.multi.items[i], c = cartOf(f, it); if (!rec || !c || c.status !== 'pending') return;
+  rec.carts = rec.carts.filter(function(x){ return x !== c && x.wlId !== c.wlId; }); cartSave(f, rec); touch(f, 'Removed from cart: ' + cartWlName(it), 'Removed by Darren Lasso');
+}
+/* restores that Protected Data started since the last look → one History event each, once */
+function syncCartHistory(f) {
+  var rec = cartRec(f); if (!rec) return; var fresh = rec.carts.filter(function(c){ return c.status !== 'pending' && !c.logged; });
+  if (!fresh.length) return; fresh.forEach(function(c){ c.logged = true; touch(f, 'Restore started: ' + (c.wlLabel || c.wlName), c.sessionName ? 'Session ' + c.sessionName : ''); }); cartSave(f, rec);
+}
+function pdHref(f, i) { return 'inventory-V1.html#carts=' + fndKey(f) + (i == null ? '' : '&cart=' + PD_WL[f.multi.items[i].wl][0]); }
+function pdCompareHref(f, i) { var it = f.multi.items[i]; return 'inventory-V1.html#compare=' + PD_WL[it.wl][0] + '&items=' + it.pdItem + '&point=' + mpIso(mpoint(it)[0]); }
+function activityHref(f) { var rec = cartRec(f); var names = rec ? rec.carts.filter(function(c){ return c.status !== 'pending'; }).map(function(c){ return c.wlName; }) : []; return 'activity.html#jobs?workload=' + encodeURIComponent(names.join(',')) + '&q=' + encodeURIComponent(f.multi.person.toLowerCase().replace(/[^a-z0-9]+/g, '-')); }
+function cchip(s) { return s === 'cart' ? chip('neutral', 'In your cart') : s === 'run' ? chip('info', 'Running') : s === 'ok' ? chip('ok', 'Success') : s === 'bad' ? chip('err', 'Failed') : ''; }
+/* One logic for every restore finding. The unit of restore is a GROUP: the items in one workload, restored together by one session.
+   • Finding level (the tab header and step 3): Restore (one group) / Restore all (several groups) / Restore remaining / Open cart / View in Activity.
+   • Group level (a workload's block): only when there are several groups, and only Restore (then "In cart").
+   • Never per item. Choosing individual items is done in Protected Data, through the View in Protected Data link. */
+function nb(n) { return '<span class="idd-nb">' + n + '</span>'; }
+var CART_TIP = 'Different workloads restore separately. Adding puts one cart per workload in your cart, and you restore each cart from Protected Data.';
+function cartHead(f) {
+  var st = f.multi.items.map(function(it){ return cstate(f, it); }), out = st.filter(function(x){ return x === 'out'; }).length, cart = st.filter(function(x){ return x === 'cart'; }).length, n = st.length;
+  if (out === n) return '<button type="button" class="plv-btn plv-btn-tertiary" data-cartadd="all" data-tooltip="' + esc(CART_TIP) + '">Add all to cart' + nb(n) + '</button>';
+  if (out > 0) return '<button type="button" class="plv-btn plv-btn-tertiary" data-cartadd="all" data-tooltip="' + esc(CART_TIP) + '">Add remaining to cart' + nb(out) + '</button>';
+  if (cart > 0) return '<a class="plv-btn plv-btn-tertiary" href="' + pdHref(f) + '" target="_blank" rel="noopener" aria-label="Open cart, ' + cart + ' pending" data-tooltip="Restore each cart from Protected Data, one workload at a time">Open cart' + nb(cart) + ico('open-in-new-outlined', 20) + '</a>';
+  return '<a class="idd-rp-link" href="' + activityHref(f) + '" target="_blank" rel="noopener">View in Activity ' + ico('open-in-new-outlined', 16) + '</a>';
+}
+function blockAction(f, i) {
+  var it = f.multi.items[i], s = cstate(f, it), w = cartWlName(it);
+  if (s === 'out') return '<button type="button" class="plv-btn plv-btn-tertiary" data-cartadd="' + i + '" data-tooltip="' + esc(CART_TIP) + '">Add to cart</button>';
+  if (s === 'cart') return '<button type="button" class="plv-btn plv-btn-tertiary is-on" data-cartrm="' + i + '" aria-label="In your cart. Remove ' + esc(w) + ' from the cart" data-tooltip="In your cart. Click to remove">' + ico('sd-log-check', 18) + 'In cart</button>';
+  return '<span class="cart-st">' + cchip(s) + '<a class="idd-rp-link" href="' + activityHref(f) + '" target="_blank" rel="noopener">View session</a></span>';
+}
+function blockLink(f, i) { var s = cstate(f, f.multi.items[i]); return s === 'cart' ? pdHref(f, i) : pdCompareHref(f, i); }   // in the cart → that cart, selected; otherwise the item in context
+/* The Overview's restore table (one row per group): Workload | Item (a link to it in Protected Data) | Restores | Options | Restore point | Status */
+function restoreTable(rows, withState) {
+  return '<div class="idd-tbl-wrap"><table class="idd-tbl pgt"><thead><tr><th>Item</th><th>Workload</th><th>Restore point</th>' + (withState ? '<th>Status</th>' : '') + '</tr></thead><tbody>'
+    + rows.map(function(r){ return '<tr><td><a class="idd-elink" href="' + r.href + '" target="_blank" rel="noopener" aria-label="View ' + esc(r.item) + ' in Protected Data (opens in a new tab)">' + esc(r.item) + '</a>' + (r.kind ? '<div class="mut">' + esc(r.kind) + '</div>' : '') + '</td><td><span class="idd-wl-cell">' + logoTile(r.w) + '<span>' + esc(r.w.name) + '</span></span></td><td class="nw">' + esc(r.point) + '</td>' + (withState ? '<td>' + (r.state || '') + '</td>' : '') + '</tr>'; }).join('') + '</tbody></table></div>';
+}
+/* Overview step for a finding with ONE group (any number of items in one workload): the same panel as the several-group case, with one row. */
+var WL_OPTS = { okta: 'Skip conflicts · merge relationships', entra: 'Skip conflicts · merge relationships', ad: 'Skip conflicts · merge group memberships' };
+function singlePanel(f, d) {
+  var w = fWl(f), r = f.restore, names = (f.cmp || []).map(function(o){ return o.name; }), what = names.length ? names.slice(0, 3).join(', ') + (names.length > 3 ? ' and ' + (names.length - 3) + ' more' : '') : r.objects;
+  var tbl = restoreTable([{ w: w, item: what, kind: r.objects, href: d.href.replace('#restore=', '#compare='), back: r.forest ? 'The whole forest, intact, with its domain controllers' : (f.cmp && f.cmp[0] && f.cmp[0].rows.length > 1) ? 'The ' + (names.length > 1 ? 'accounts' : 'account') + ' with ' + f.cmp[0].rows.filter(function(x){ return !/^status$/i.test(x[0]); }).map(function(x){ return x[0].toLowerCase(); }).join(' and ') : r.objects, opts: WL_OPTS[f.wl] || '—', point: r.point, pointNote: 'Before the change' }], false);
+  return '<div class="pg"><div class="pg-h"><div class="cf"><b>Restore ' + esc(r.objects) + '</b><span>One restore session in ' + esc(w.name) + '</span></div><span class="idd-sp"></span><a class="plv-btn plv-btn-tertiary" href="' + d.href + '" target="_blank" rel="noopener" aria-label="Restore ' + esc(r.objects) + ' in Protected Data (opens in a new tab)">Restore' + ico('open-in-new-outlined', 20) + '</a></div>' + tbl + '</div>';
+}
 function renderMultiRestore(M) {
-  var X = M.multi, changed = 0, n = X.items.length;
-  var wlN = function(it){ return WL.filter(function(w){ return w.id === it.wl; })[0]; };
-  var blocks = X.items.map(function(it){
-    var pt = mpoint(it), w = wlN(it), rows = it.cmp.filter(function(r){ return !TS.rpOnly || r[2] !== r[1]; }); it.cmp.forEach(function(r){ if (r[2] !== r[1]) changed++; });
-    var bar = '<div class="idd-rp-bar blk"><div class="idd-rp-wl"><span class="idd-wl-cell">' + logoTile(w) + '<span class="idd-ell">' + esc(w.name) + '</span></span></div>'
+  var f = multiOf(M.id), X = M.multi, changed = 0, n = X.items.length;
+  var blocks = X.items.map(function(it, i){
+    var pt = mpoint(it), w = WL.filter(function(x){ return x.id === it.wl; })[0], rows = it.cmp.filter(function(r){ return !TS.rpOnly || r[2] !== r[1]; }); it.cmp.forEach(function(r){ if (r[2] !== r[1]) changed++; });
+    var bar = '<div class="idd-rp-bar blk">' + rpLeft(w, it.account + ' · ' + it.kind, blockLink(f, i))
       + '<div class="idd-hd now"><div class="idd-hd-t">Now</div><div class="idd-hd-s">Deleted ' + esc(it.deleted) + '</div><div class="idd-hd-s">Not in any later backup</div></div>'
-      + '<div class="idd-hd aft"><div class="idd-rp-row"><div class="idd-rp-stack"><div class="idd-hd-t">After restore</div><div class="idd-hd-s">Restore point · ' + esc(pt[0]) + '</div><div class="idd-hd-s">' + (it.sel == null || it.sel === it.rec ? 'Before the deletion' : 'Chosen in the restore plan') + '</div></div>'
-      + '<a class="plv-btn plv-btn-tertiary idd-rp-restore" href="' + mItemHref(it) + '" target="_blank" rel="noopener" aria-label="Restore ' + esc(it.account) + ' in ' + esc(w.name) + ' in Protected Data (opens in a new tab)">Restore' + ico('open-in-new-outlined', 20) + '</a></div></div></div>';
+      + '<div class="idd-hd aft"><div class="idd-rp-row"><div class="idd-rp-stack"><div class="idd-hd-t">After restore</div><div class="idd-hd-s">Restore point · ' + esc(pt[0]) + '</div></div>' + blockAction(f, i) + '</div></div></div>';
     return '<div class="idd-rp-sec">' + bar + '<div class="idd-rp-card"><div class="idd-rp-acct">' + esc(it.account) + '<span>' + esc(it.kind) + '</span></div><table>' + rows.map(function(r){ var ch = r[2] !== r[1];
       return '<tr' + (ch ? ' class="diff"' : '') + '><td class="a">' + esc(r[0]) + '</td><td>' + esc(r[2]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</table></div></div>'; }).join('');
   var sum = '<div class="idd-rp-sum"><span class="idd-rp-badge">' + changed + ' difference' + (changed > 1 ? 's' : '') + '</span><span><b>' + esc(X.person) + '</b> in ' + n + ' workloads, each compared with its own restore point</span><span class="idd-sp"></span><button type="button" class="idd-more" data-rponly="1">' + (TS.rpOnly ? 'Show all' : 'Show changes only') + '</button></div>';
-  return '<div class="idd-ehead"><span class="idd-ntile">' + ico('restore-point-outlined') + '</span><span class="ttl">Restore points</span><span class="ct">' + n + '</span><span class="idd-sp"></span><button type="button" class="plv-btn plv-btn-tertiary" data-plan="' + M.id + '">Restore all (' + n + ')</button></div><div class="idd-rp">' + sum + blocks + '</div>';
+  return '<div class="idd-ehead"><span class="idd-ntile">' + ico('restore-point-outlined') + '</span><span class="ttl">Restore points</span><span class="ct">' + n + '</span><span class="idd-sp"></span>' + cartHead(f) + '</div><div class="idd-rp">' + sum + blocks + '</div>';
 }
-function planStart(i) { return PL.order === 'seq' && i > 0 ? 'After session ' + i + ' succeeds' : 'Starts immediately'; }
-function planActivityHref() { var f = multiOf(PL.fid), X = f.multi; return 'activity.html#jobs?workload=' + encodeURIComponent(PL.rows.map(function(r){ return r.wlLabel; }).join(',')) + '&q=' + encodeURIComponent(X.person.toLowerCase().replace(/[^a-z0-9]+/g, '-')); }
-function renderPlan() {
-  var f = multiOf(PL.fid); if (!f) return; var X = f.multi, n = X.items.length, el = document.getElementById('iddPlanBody'), foot = document.getElementById('iddPlanFoot');
-  document.getElementById('iddPlanTitle').textContent = PL.launched ? n + ' restore sessions created' : 'Restore ' + X.person;
-  var wlN = function(it){ return WL.filter(function(w){ return w.id === it.wl; })[0]; };
-  if (PL.launched) {
-    el.innerHTML = '<p class="idd-plan-lead">' + (PL.order === 'seq' ? 'The sessions run in the order below. Each one starts when the previous session succeeds.' : 'All sessions started together.') + ' Follow their progress in Activity.</p>'
-      + PL.rows.map(function(r, i){ return '<div class="idd-plan-run"><span class="idd-plan-n">' + (i + 1) + '</span>' + logoTile(r.w) + '<div class="t"><b>' + esc(r.w.name) + ' restore</b><span>' + esc(r.account) + ' · ' + esc(r.point) + (PL.order === 'seq' && i > 0 ? ' · starts after session ' + i + ' succeeds' : '') + '</span></div><span class="idd-sp"></span>' + chip('info', 'Running') + '</div>'; }).join('');
-    foot.innerHTML = '<button type="button" class="plv-btn plv-btn-secondary" data-planclose="1">Close</button><a class="plv-btn plv-btn-primary" href="' + planActivityHref() + '" target="_blank" rel="noopener">View in Activity' + ico('open-in-new-outlined', 20) + '</a>'; return;
-  }
-  var seg = '<div class="idd-tabs" role="tablist" aria-label="Run order">' + [['seq', 'In order'], ['all', 'All at once']].map(function(m){ return '<button type="button" role="tab" class="idd-tab' + (PL.order === m[0] ? ' is-active' : '') + '" aria-selected="' + (PL.order === m[0]) + '" data-planorder="' + m[0] + '">' + m[1] + '</button>'; }).join('') + '</div>';
-  var note = PL.order === 'seq'
-    ? '<div class="idd-plan-note"><div class="h">' + ico('workflow-outlined', 16) + '<b>Restore in this order</b></div><p>' + esc(X.orderNote) + '</p></div>'
-    : '<div class="idd-plan-note warn"><div class="h">' + ico('alert-warning-outlined', 16) + '<b>Order is not enforced</b></div><p>' + esc(X.orderWarn) + '</p></div>';
-  var rows = X.items.map(function(it, i){
-    var w = wlN(it), pt = mpoint(it);
-    return '<div class="idd-plan-row"><div class="idd-plan-h"><span class="idd-plan-n">' + (i + 1) + '</span>' + logoTile(w) + '<div class="t"><b>' + esc(w.name) + '</b><span>' + esc(it.account) + ' · ' + esc(it.kind) + '</span></div><span class="idd-sp"></span><span class="idd-plan-start">' + planStart(i) + '</span></div>'
-      + pr('Restore point', '<button type="button" class="idd-rp-pick" data-planrp="' + i + '" aria-haspopup="menu"><span class="lbl">' + esc(pt[0]) + '</span>' + (it.sel == null || it.sel === it.rec ? chip('ok', 'Recommended') : '') + ico('keyboard-arrow-down-outlined', 20) + '</button>')
-      + pr('Restore options', '<div class="idd-plan-opts">' + it.config.map(function(c){ return '<span>' + esc(c[0]) + ': <b>' + esc(c[1]) + '</b></span>'; }).join('') + '</div><a class="idd-rm" href="' + mItemHref(it) + '" target="_blank" rel="noopener" data-tooltip="Opens this workload\'s restore wizard. Step 2 holds these options.">Edit options</a>')
-      + '</div>'; }).join('');
-  el.innerHTML = '<p class="idd-plan-lead">' + n + ' restore sessions will be created, one per workload. Each has its own restore point and restore options.</p>'
-    + '<div class="idd-plan-ord"><span>Run sessions</span>' + seg + '</div>' + note + rows;
-  foot.innerHTML = '<button type="button" class="plv-btn plv-btn-secondary" data-planclose="1">Cancel</button><button type="button" class="plv-btn plv-btn-primary" data-planrun="1">Restore all (' + n + ')</button>';
-}
-function openPlan(fid) { document.querySelector('#iddPlan .idd-modal-h .idd-ibtn').innerHTML = ico('close-outlined'); PL.fid = fid; PL.order = 'seq'; PL.launched = false; PL.rows = []; renderPlan(); document.getElementById('iddPlan').classList.add('open'); }
-function closePlan() { document.getElementById('iddPlan').classList.remove('open'); }
-function runPlan() {
-  var f = multiOf(PL.fid); if (!f) return; var X = f.multi, KEY = 'dcc-jobs-bridge', list = [], now = Date.now();
-  try { list = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) {}
-  PL.rows = X.items.map(function(it, i){ var w = WL.filter(function(x){ return x.id === it.wl; })[0], pt = mpoint(it);
-    list.unshift({ id: 'br-' + now.toString(36) + '-' + i, type: 'Restore', job: 'restore-' + X.person.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + it.wl, resource: it.account, wl: it.wl === 'okta' ? 'Okta WIC' : w.name, tenant: it.conn, status: (PL.order === 'seq' && i > 0) ? 'queued' : 'running',
-      startedTs: now, queueForMs: (PL.order === 'seq' && i > 0) ? i * 15 * 60000 : 0, runForMs: 6 * 3600 * 1000, dest: 'Original location', owner: 'Darren Lasso', itemCount: 1 });
-    w.live = w.live || []; w.live.push({ day: 0, hour: 10, type: 'Restore', manual: true, st: 'run' });
-    return { w: w, account: it.account, point: pt[0], wlLabel: it.wl === 'okta' ? 'Okta WIC' : w.name }; });
-  try { localStorage.setItem(KEY, JSON.stringify(list.slice(0, 40))); } catch (e) {}
-  touch(f, 'Restore started for ' + X.person + ': ' + PL.rows.length + ' sessions (' + PL.rows.map(function(r){ return r.w.name; }).join(', ') + ')' + (PL.order === 'seq' ? ', run in order' : ', run at once'), 'Started by Darren Lasso');
-  PL.launched = true; renderPlan(); renderAll(); if (TS.openId) renderOverlay();
+/* Overview step 3: a read-only mirror of the same state */
+function cartPanel(f) {
+  var X = f.multi, st = X.items.map(function(it){ return cstate(f, it); }), n = X.items.length, cnt = function(k){ return st.filter(function(x){ return x === k; }).length; };
+  var parts = []; if (cnt('cart')) parts.push(cnt('cart') + ' in your cart'); if (cnt('run')) parts.push(cnt('run') + ' running'); if (cnt('ok') || cnt('bad')) parts.push(cnt('ok') + ' of ' + n + ' restored' + (cnt('bad') ? ', ' + cnt('bad') + ' failed' : ''));
+  var status = parts.length ? parts.join(' · ') : 'Different workloads restore separately, one cart each';
+  var rows = X.items.map(function(it, i){ return { w: WL.filter(function(x){ return x.id === it.wl; })[0], item: it.account, kind: it.kind, href: blockLink(f, i), back: it.back, opts: it.config.map(function(c){ return c[1]; }).join(' · '), point: mpoint(it)[0], pointNote: 'Before the deletion', state: st[i] === 'out' ? '' : cchip(st[i]) }; });
+  var note = cnt('cart') > 0 ? '<div class="al info"><div class="al-h">' + ico('workflow-outlined', 16) + '<b>Restore each cart separately</b></div><p>' + st.length + ' workloads means ' + st.length + ' carts. Open the cart in Protected Data and restore them one at a time. Nothing restores until you do.</p></div>' : '';
+  var done = cnt('ok') === n, prompt = done && f.status !== 'Resolved - Remediated' ? '<div class="al info"><div class="al-h">' + ico('sd-log-check', 16) + '<b>All ' + n + ' restores succeeded</b></div><p>Move this finding to Resolved - Remediated?</p><div class="al-f"><button type="button" class="plv-btn plv-btn-primary sm" data-resolvefix="' + f.id + '">Resolve finding</button></div></div>' : '';
+  return '<div class="pg"><div class="pg-h"><div class="cf"><b>Restore ' + esc(X.person) + '</b><span>' + status + '</span></div><span class="idd-sp"></span>' + cartHead(f) + '</div>' + note + prompt + restoreTable(rows, true) + '</div>';
 }
 function openSession(id) { SS.id = id; SS.q = ''; SS.f = 'all'; renderSession(); var o = document.getElementById('iddSess'); o.classList.add('open'); o.setAttribute('aria-hidden', 'false'); }
 function closeSession() { var o = document.getElementById('iddSess'); o.classList.remove('open'); o.setAttribute('aria-hidden', 'true'); SS.id = null; if (typeof closeMenu === 'function') closeMenu(); }
@@ -2880,6 +2910,8 @@ function removeFilter(kind, idx) { var cfg = FILTER_CONFIG[kind]; state[cfg.stat
 /* ── Finding detail overlay (same shell as the threat overlay; Threat Center finding view) ── */
 var ENT_ICON = { Workloads: 'workload-outlined', Connections: 'integration-widget-outlined', Policies: 'policy-outlined', Objects: 'objects-outlined', Sessions: 'history-outlined' };
 function uuidOf(f) { var h = hash(f.id + f.rule), s = ''; for (var i = 0; i < 4; i++) { h = (h * 1103515245 + 12345) >>> 0; s += ('00000000' + h.toString(16)).slice(-8); } return s.slice(0, 8) + '-' + s.slice(8, 12) + '-4' + s.slice(13, 16) + '-b' + s.slice(17, 20) + '-' + s.slice(20, 32); }
+/* Count badge on a graph node: a white square with a 4px radius (never a circle). */
+function nbadge(cx, cy, label) { var t = String(label), w = Math.max(24, t.length * 8 + 12); return '<rect x="' + (cx - w / 2) + '" y="' + (cy - 12) + '" width="' + w + '" height="24" rx="4" fill="var(--white)" stroke="var(--black-10)"/><text class="b" x="' + cx + '" y="' + (cy + 4) + '" text-anchor="middle">' + t + '</text>'; }
 function graphFinding(f) {
   var W = 900, H = 310, g = f.graph, cols = [[g.src, 110, 'var(--plum)'], [g.mid, 340, 'var(--dk-blue)'], [g.out, 790, 'var(--orange)']], nodes = [], edges = '';
   var place = function(list, x, col){ var n = list.length; return list.map(function(nd, i){ return { x: x, y: H / (n + 1) * (i + 1), k: nd[0], v: nd[1], c: nd[2], col: col }; }); };
@@ -2888,7 +2920,7 @@ function graphFinding(f) {
   var cc = { x: C.x, y: C.y }; var from = M.length ? M : L;
   if (M.length) L.forEach(function(a){ edges += curve(a, M[0]); });
   from.forEach(function(a){ edges += curve(a, { x: C.x - 12, y: C.y }); }); O.forEach(function(b){ edges += curve({ x: C.x + 12, y: C.y }, b); });
-  var circle = function(n){ var v = String(n.v).length > 22 ? String(n.v).slice(0, 21) + '…' : String(n.v), badge = '<circle cx="' + (n.x + 18) + '" cy="' + (n.y - 19) + '" r="12" fill="var(--white)" stroke="var(--black-10)"/><text class="b" x="' + (n.x + 18) + '" y="' + (n.y - 15) + '" text-anchor="middle">' + (n.c >= 1000 ? Math.round(n.c / 100) / 10 + 'k' : n.c) + '</text>';
+  var circle = function(n){ var v = String(n.v).length > 22 ? String(n.v).slice(0, 21) + '…' : String(n.v), badge = nbadge(n.x + 18, n.y - 19, n.c >= 1000 ? Math.round(n.c / 100) / 10 + 'k' : n.c);
     return '<g class="gn" data-gnode="' + n.k + '" role="link" tabindex="0" aria-label="Open ' + n.k + '"><circle cx="' + n.x + '" cy="' + n.y + '" r="22" fill="' + n.col + '"/>' + nodeGlyph(n.k, n.x, n.y) + badge + '<text class="k" x="' + n.x + '" y="' + (n.y + 40) + '" text-anchor="middle">' + n.k + '</text><text x="' + n.x + '" y="' + (n.y + 58) + '" text-anchor="middle">' + esc(v) + '</text></g>'; };
   var sevCol = f.lvl === 5 ? 'var(--red)' : f.lvl === 4 ? 'var(--orange)' : 'var(--gold-20)';
   var center = '<g class="gn" data-gnode="Finding" role="link" tabindex="0" aria-label="Open Overview"><circle cx="' + C.x + '" cy="' + C.y + '" r="34" fill="var(--white)" stroke="' + sevCol + '" stroke-width="3"/>' + nodeGlyph('Finding', C.x, C.y, sevCol) + '<text class="k" x="' + C.x + '" y="' + (C.y + 54) + '" text-anchor="middle">Finding</text><text x="' + C.x + '" y="' + (C.y + 72) + '" text-anchor="middle">' + f.rule + '</text></g>';
@@ -2927,7 +2959,7 @@ function modelOf(tab) {
     var rel = FINDINGS.filter(function(o){ return o.wl === f.wl && o.id !== f.id; }).slice(0, 3).map(function(o){ return { kind: 'finding', id: o.id, lvl: o.lvl }; })
       .concat(THREATS.filter(function(o){ return o.wl === f.wl && threatOpen(o); }).slice(0, 2).map(function(o){ return { kind: 'threat', id: o.id, lvl: o.lvl }; }));
     var Mf = { kind: 'finding', item: f, id: f.id, lvl: f.lvl, name: f.name, status: f.status, assignee: f.assignee, kicker: 'Resilience Finding', icon: VN_ICONS['findings'] || '', upd: fDate(f.u),
-      summary: f.evidence, desc: r.desc, steps: f.steps.map(function(s){ var d = s[2]; return { t: s[0], btn: isOpen(f) && d ? (d.plan ? '<button type="button" class="plv-btn plv-btn-tertiary" data-plan="' + f.id + '">' + s[1] + '</button>' : d.tab ? '<button type="button" class="plv-btn plv-btn-secondary" data-ttab="' + d.tab + '">' + s[1] + '</button>' : d.href ? '<a class="plv-btn ' + (/^Restore/.test(s[1]) ? 'plv-btn-tertiary' : 'plv-btn-secondary') + '" href="' + d.href + '" target="_blank" rel="noopener" aria-label="' + s[1] + ' in ' + d.dest + ' (opens in a new tab)">' + s[1] + ' in ' + d.dest + ico('open-in-new-outlined', 20) + '</a>' : '<span class="plv-btn plv-btn-secondary is-disabled" aria-disabled="true" data-tooltip="' + notBuilt(d.dest) + '">' + s[1] + ' in ' + d.dest + '</span>') : '' }; }),
+      summary: f.evidence, desc: r.desc, steps: f.steps.map(function(s){ var d = s[2]; return { t: s[0], btn: isOpen(f) && d ? (d.cart ? cartPanel(f) : (d.href && f.restore && /^Restore/.test(s[1])) ? singlePanel(f, d) : d.tab ? '<button type="button" class="plv-btn plv-btn-secondary" data-ttab="' + d.tab + '">' + s[1] + '</button>' : d.href ? '<a class="plv-btn ' + (/^Restore/.test(s[1]) ? 'plv-btn-tertiary' : 'plv-btn-secondary') + '" href="' + d.href + '" target="_blank" rel="noopener" aria-label="' + s[1] + ' in ' + d.dest + ' (opens in a new tab)">' + s[1] + ' in ' + d.dest + ico('open-in-new-outlined', 20) + '</a>' : '<span class="plv-btn plv-btn-secondary is-disabled" aria-disabled="true" data-tooltip="' + notBuilt(d.dest) + '">' + s[1] + ' in ' + d.dest + '</span>') : '' }; }),
       hist: f.hist, ent: f.ent, cmp: f.cmp || null, multi: f.multi ? { person: f.multi.person, items: f.multi.items } : null, restoreHref: (function(){ var st = f.steps.filter(function(x){ return x[2] && x[2].href && x[2].href.indexOf('#restore=') >= 0; })[0]; return st ? st[2].href : ''; })(), graph: graphFinding(f), related: rel,
       props: [['Status', chip(STATUS_CHIP[f.status], f.status)], ['Severity', '<span class="idd-conf ' + (f.lvl === 3 ? '' : 'High') + '">' + sev + '</span>'], ['Finding ID', uuidOf(f)], ['Rule ID', f.rule], ['Policy', esc(f.policy)], ['Data Source', esc(f.conn)], ['Hosting', f.wls ? f.wls.map(function(id){ return WL.filter(function(x){ return x.id === id; })[0].name; }).join(', ') : w.name], ['Assignee', assigneeCell(f.assignee)],
         ['Related Findings', null], ['Asset Type', f.asset], ['Rule Category', r.cat], ['Standards', ch(std[0], std.length > 1 ? '+' + (std.length - 1) : '')], ['Regulations', ch(std[std.length - 1], std.length > 2 ? '+' + (std.length - 2) : '')], ['Owner', '<span class="idd-greychip">System</span>'],
@@ -2985,6 +3017,8 @@ var RP_VS = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
 function entCount(M, k) { return (k === 'Restore points' && M.cmp) ? M.ent[k].filter(function(r){ return /recommended$/.test(r[1]); }).length : M.ent[k].length; }
 function rpList(M) { return M.ent['Restore points'].map(function(r, i){ return { i: i, label: r[0], detail: r[1], after: /^Latest ·/.test(r[1]), rec: /recommended$/.test(r[1]) }; }); }
 function rpPicker(rp) { return '<div class="idd-rp-picker"><span class="idd-rp-pick is-locked" aria-disabled="true"><span class="lbl">' + esc(rp.label) + '</span></span></div>'; }
+/* The left cell of every comparison header, single or multi: the workload, the items being restored, and the way into Protected Data to see them in context. */
+function rpLeft(w, items, href) { return '<div class="idd-rp-wl"><span class="idd-wl-cell">' + logoTile(w) + '<span class="idd-ell">' + esc(w.name) + '</span></span><span class="items">' + esc(items) + '</span>' + (href ? '<a class="idd-rp-link" href="' + href + '" target="_blank" rel="noopener" aria-label="View ' + esc(items) + ' in ' + esc(w.name) + ' in Protected Data (opens in a new tab)">View in Protected Data' + ico('open-in-new-outlined', 16) + '</a>' : '') + '</div>'; }
 function renderRestorePoints(M) {
   /* LOCKED comparison: column 1 = the current point (the latest restore point, which contains the change), column 2 = the point the finding recommends restoring.
      Two CTAs: Restore (wizard, step 1, this item + point) · Compare more (Protected Data, this item, diff panel open). */
@@ -2995,13 +3029,13 @@ function renderRestorePoints(M) {
   /* Headers name the ROLE of each column (Variant 1 of the compare-panel options): Now = the latest backup (includes the change); After restore = the recommended restore point, with the Restore button */
   var gone = !!M.item.restore.nowDeleted;   // deleted objects are in NO backup after the restore point, so "Now" describes the objects, not a backup
   var nowS = gone ? ['Deleted ' + esc(M.item.restore.change.replace(/^Oct 5, 2026 /, 'Oct 5, ')), 'Not in any later backup'] : ['Latest backup · ' + esc(cur.label), 'Includes the change'];
-  var bar = '<div class="idd-rp-bar"><div></div><div class="idd-hd now"><div class="idd-hd-t">Now</div><div class="idd-hd-s">' + nowS[0] + '</div><div class="idd-hd-s">' + nowS[1] + '</div></div>'
-    + '<div class="idd-hd aft"><div class="idd-rp-row"><div class="idd-rp-stack"><div class="idd-hd-t">After restore</div><div class="idd-hd-s">Restore point · ' + esc(rec.label) + '</div><div class="idd-hd-s">Before the change</div></div>' + rbtn + '</div></div></div>';
+  var bar = '<div class="idd-rp-bar">' + rpLeft(fWl(M.item), M.item.restore.objects, compareHref) + '<div class="idd-hd now"><div class="idd-hd-t">Now</div><div class="idd-hd-s">' + nowS[0] + '</div><div class="idd-hd-s">' + nowS[1] + '</div></div>'
+    + '<div class="idd-hd aft"><div class="idd-rp-row"><div class="idd-rp-stack"><div class="idd-hd-t">After restore</div><div class="idd-hd-s">Restore point · ' + esc(rec.label) + '</div></div></div></div></div>';
   var sum = '<div class="idd-rp-sum">' + (changed ? '<span class="idd-rp-badge">' + changed + ' difference' + (changed > 1 ? 's' : '') + '</span>' : '<span class="idd-rp-badge ok">No differences</span>') + '<span>between <b>' + (gone ? 'the current state' : esc(cur.label)) + '</b> and <b>' + esc(rec.label) + '</b></span><span class="idd-sp"></span><button type="button" class="idd-more" data-rponly="1">' + (TS.rpOnly ? 'Show all' : 'Show changes only') + '</button></div>';
   var cards = M.cmp.map(function(o){ var rows = o.rows.filter(function(r){ return !TS.rpOnly || r[2] !== r[1]; }); if (!rows.length) return '';
     return '<div class="idd-rp-sec"><div class="idd-rp-sech">' + esc(o.name) + '</div><div class="idd-rp-card"><table>' + rows.map(function(r){ var ch = r[2] !== r[1];
       return '<tr' + (ch ? ' class="diff"' : '') + '><td class="a">' + esc(r[0]) + '</td><td>' + esc(r[2]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</table></div></div>'; }).join('');
-  return '<div class="idd-ehead"><span class="idd-ntile">' + ico('restore-point-outlined') + '</span><span class="ttl">Restore points</span><span class="ct">' + entCount(M, 'Restore points') + '</span><span class="idd-sp"></span>' + (compareHref ? '<a class="plv-btn plv-btn-secondary" href="' + compareHref + '" target="_blank" rel="noopener" aria-label="View in Protected Data (opens in a new tab)">View in Protected Data' + ico('open-in-new-outlined', 20) + '</a>' : '') + '</div><div class="idd-rp">' + bar + sum + cards + '</div>';
+  return '<div class="idd-ehead"><span class="idd-ntile">' + ico('restore-point-outlined') + '</span><span class="ttl">Restore points</span><span class="ct">' + entCount(M, 'Restore points') + '</span><span class="idd-sp"></span>' + rbtn + '</div><div class="idd-rp">' + bar + sum + cards + '</div>';
 }
 var ENT_LINK_TIP = { Workloads: 'Opens the workload in Protected Data (not part of this prototype yet)', Connections: 'Opens the connection details in Integrations (not part of this prototype yet)', Policies: 'Opens the policy in Backup Policies (not part of this prototype yet)', Identities: 'Opens the identity in Protected Data (not part of this prototype yet)', Objects: 'Opens the object in Protected Data (not part of this prototype yet)' };
 function entLink(ek, txt) { var tip = ENT_LINK_TIP[ek]; return tip ? '<a href="#" class="idd-elink idd-cell-1" data-elink="1" data-tooltip="' + esc(tip) + '">' + esc(txt) + '</a>' : '<span class="idd-cell-1">' + esc(txt) + '</span>'; }
@@ -3046,7 +3080,8 @@ function renderNav(M) {
   document.getElementById('iddTNav').innerHTML = h; document.getElementById('iddTSearchX').hidden = !TS.sideQ;
 }
 function renderOverlay() {
-  var tab = TS.tabs[TS.active], M = tab && modelOf(tab); if (!M) return;
+  var tab = TS.tabs[TS.active]; if (tab && tab.kind === 'finding' && multiOf(tab.id)) syncCartHistory(multiOf(tab.id));
+  var M = tab && modelOf(tab); if (!M) return;
   if (NT.open && NT.ctx !== tab.kind + ':' + tab.id) closeNotes();
   TS.kind = tab.kind; TS.openId = tab.id;
   document.getElementById('iddWTabs').innerHTML = '<div class="idd-wtabs-l">' + TS.tabs.map(function(t, i){ var m = modelOf(t); if (!m) return '';
@@ -3065,7 +3100,7 @@ function renderOverlay() {
   applyGraphTransform();
 }
 /* Clicking a node in the graph opens the matching section in the left panel (same view as clicking it there) */
-var NODE_TAB = { 'Workload': 'Workloads', 'Connection': 'Connections', 'Policy': 'Policies', 'Objects': 'Objects', 'Sessions': 'Sessions', 'Restore point': 'Restore points', 'Person': 'Identities', 'Actor': 'Identities', 'Subject': 'Objects' };
+var NODE_TAB = { 'Workload': 'Workloads', 'Connection': 'Connections', 'Policy': 'Policies', 'Objects': 'Objects', 'Sessions': 'Sessions', 'Restore point': 'Restore points', 'Identity': 'Identities', 'Actor': 'Identities', 'Subject': 'Objects' };
 function goNode(kind) {
   var M = modelOf(TS.tabs[TS.active]); if (!M) return; var tab = kind === 'Finding' ? 'overview' : kind === 'Findings' ? 'findings' : (M.ent && NODE_TAB[kind] && M.ent[NODE_TAB[kind]] ? 'ent:' + NODE_TAB[kind] : null);
   if (!tab) return; TS.tab = tab; TS.gfull = false; TS.sideQ = ''; var si = document.getElementById('iddTSearch'); if (si) si.value = ''; renderOverlay();
@@ -3084,7 +3119,14 @@ function openFinding(id) { openItem('finding', id); document.getElementById('idd
 function closeTab(i) { TS.tabs.splice(i, 1); if (!TS.tabs.length) { closeThreat(); return; } TS.active = Math.min(i <= TS.active && TS.active > 0 ? TS.active - 1 : TS.active, TS.tabs.length - 1); TS.tab = 'overview'; renderOverlay(); }
 function closeThreat() { closeNotes(); closeNote(); closeStModal(); var o = document.getElementById('iddThreat'); o.classList.remove('open'); o.setAttribute('aria-hidden', 'true'); TS.openId = null; TS.tabs = []; TS.active = 0; if (typeof closeMenu === 'function') closeMenu(); }
 var toastT = null;
-function toast(msg) { var t = document.getElementById('iddToast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(function(){ t.classList.remove('show'); }, 2400); }
+function toast(msg, opts) {   // the design-system toast (same markup, styles and timing as Protected Data's showToast)
+  var t = document.getElementById('toast'); if (!t) return; opts = opts || {};
+  t.classList.remove('toast-success', 'toast-error', 'toast-warning'); t.classList.add('toast-' + (opts.type || 'success'));
+  document.getElementById('toastTitle').textContent = msg || '';
+  var b = document.getElementById('toastBody'); if (opts.body) { b.textContent = opts.body; b.style.display = ''; } else { b.textContent = ''; b.style.display = 'none'; }
+  t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(function(){ t.classList.remove('show'); }, opts.body ? 6000 : 3000);
+}
+function hideToast() { var t = document.getElementById('toast'); if (t) t.classList.remove('show'); clearTimeout(toastT); }
 /* status change = menu → confirmation modal with a REQUIRED note (Phase 2) */
 var STM = { to: null };
 function askStatus(st) {
@@ -3327,12 +3369,9 @@ function stampAge(k) { AGE[k] = 'just now'; Array.prototype.forEach.call(documen
 document.addEventListener('click', function(e){
   var t = e.target;
   var elk = t.closest('[data-elink]'); if (elk) { e.preventDefault(); return; }   // entity links are styled only; the destinations are not built yet
-  var pln = t.closest('[data-plan]'); if (pln) { e.preventDefault(); openPlan(pln.getAttribute('data-plan')); return; }
-  if (t.closest('[data-planclose]')) { closePlan(); return; }
-  var pord = t.closest('[data-planorder]'); if (pord) { PL.order = pord.getAttribute('data-planorder'); renderPlan(); return; }
-  if (t.closest('[data-planrun]')) { runPlan(); return; }
-  var prp = t.closest('[data-planrp]'); if (prp) { e.stopPropagation(); closeMenu(); var pf = multiOf(PL.fid), pit = pf.multi.items[+prp.getAttribute('data-planrp')]; openCustomMenu(prp, pit.points.map(function(pt, j){ return { rp: j, label: pt[0] + ' · ' + pt[1].replace(/^Latest · /, 'Latest, '), current: (pit.sel == null ? pit.rec : pit.sel) === j }; }), null, 'wide'); menuEl.setAttribute('data-planfor', prp.getAttribute('data-planrp')); return; }
-  var srp = t.closest('[data-setrp]'); if (srp && menuEl && menuEl.getAttribute('data-planfor') != null) { multiOf(PL.fid).multi.items[+menuEl.getAttribute('data-planfor')].sel = +srp.getAttribute('data-setrp'); closeMenu(); renderPlan(); return; }
+  var cad = t.closest('[data-cartadd]'); if (cad) { var gf = multiOf(TS.openId), gk = cad.getAttribute('data-cartadd'); if (gf) { var gidx = gk === 'all' ? gf.multi.items.map(function(x, k){ return k; }) : [+gk]; addToCart(gf, gidx); toast(gidx.length > 1 ? 'Added ' + gidx.length + ' carts' : 'Added to cart', { body: 'Each workload restores from its own cart. Open the cart and restore them one at a time.' }); renderOverlay(); } return; }
+  var crm = t.closest('[data-cartrm]'); if (crm) { var rf = multiOf(crm.getAttribute('data-f') || TS.openId); if (rf) { removeFromCart(rf, +crm.getAttribute('data-cartrm')); renderOverlay(); } return; }
+  var rsv = t.closest('[data-resolvefix]'); if (rsv) { applyStatus([rsv.getAttribute('data-resolvefix')], 'Resolved - Remediated', 'All restores succeeded'); toast('Finding resolved'); renderOverlay(); renderAll(); return; }
   var sso = t.closest('[data-session]'); if (sso) { closeMenu(); openSession(sso.getAttribute('data-session')); return; }
   var tpk = t.closest('[data-wpick]'); if (tpk) { e.stopPropagation(); closeMenu(); var pk = tpk.getAttribute('data-wpick'), P = PICKS[pk]; openCustomMenu(tpk, P.opts.reduce(function(a, m, i){ if (i) a.push({ sep: true }); a.push({ topmode: pk + '|' + m[0], label: m[2], desc: m[3], current: P.get() === m[0] }); return a; }, []), null, 'wide'); var rr = tpk.getBoundingClientRect(); menuEl.style.left = Math.max(8, rr.left) + 'px'; return; }
   var stm = t.closest('[data-wsetpick]'); if (stm) { closeMenu(); var sv = stm.getAttribute('data-wsetpick').split('|'); PICKS[sv[0]].set(sv[1]); return; }
@@ -3392,7 +3431,9 @@ document.addEventListener('click', function(e){
   var g = t.closest('[data-go]');
   if (g) { var u = g.getAttribute('data-go'); if (u === '#findings') setView('findings'); else if (u) window.location.href = u; }
 });
-document.addEventListener('keydown', function(e){ if (e.key === 'Escape') { if (menuEl) closeMenu(); else if (document.getElementById('iddPlan').classList.contains('open')) closePlan(); else if (NT.open) cancelNotes(); else if (document.getElementById('iddSess').classList.contains('open')) closeSession(); else if (document.getElementById('iddStModal').classList.contains('open')) closeStModal(); else if (TS.openId) closeThreat(); }
+window.addEventListener('storage', function(e){ if (e.key === CART_KEY && TS.openId && document.getElementById('iddThreat').classList.contains('open')) renderOverlay(); });
+window.addEventListener('focus', function(){ if (TS.openId && document.getElementById('iddThreat').classList.contains('open')) renderOverlay(); });
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') { if (menuEl) closeMenu(); else if (NT.open) cancelNotes(); else if (document.getElementById('iddSess').classList.contains('open')) closeSession(); else if (document.getElementById('iddStModal').classList.contains('open')) closeStModal(); else if (TS.openId) closeThreat(); }
   if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('.gn')) { e.preventDefault(); goNode(e.target.getAttribute('data-gnode')); }
   if (e.key === 'Enter' && e.target.matches && e.target.matches('tr[data-session]')) openSession(e.target.getAttribute('data-session'));
   if (e.target.id === 'iddNtText' && e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); postNote(); }
@@ -3596,16 +3637,16 @@ function setIddRange(k) { iddHooks.S.range = { k: k }; document.getElementById('
   const LOCKOUT_TIERS = [30000,120000,600000,3600000,86400000];
   function isAuthenticated() {
     try {
-      const raw = sessionStorage.getItem(SESSION_KEY);
+      const raw = (localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY));
       if (!raw) return false;
       const {token,expires} = JSON.parse(raw);
-      if (Date.now() > expires) { sessionStorage.removeItem(SESSION_KEY); return false; }
+      if (Date.now() > expires) { localStorage.removeItem(SESSION_KEY); sessionStorage.removeItem(SESSION_KEY); return false; }
       return token === _H.slice(0,16) + String(expires);
     } catch(e) { return false; }
   }
   function grantSession() {
     const expires = Date.now() + SESSION_TTL;
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify({token:_H.slice(0,16)+String(expires),expires}));
+    localStorage.setItem(SESSION_KEY, JSON.stringify({token:_H.slice(0,16)+String(expires),expires}));
   }
   function getLockout() { try { return JSON.parse(localStorage.getItem(LOCKOUT_KEY)) || {attempts:0,until:0}; } catch(e) { return {attempts:0,until:0}; } }
   function saveLockout(s) { localStorage.setItem(LOCKOUT_KEY, JSON.stringify(s)); }
