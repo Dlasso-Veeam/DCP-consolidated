@@ -62987,6 +62987,18 @@ function refreshAllTableScrollShadows() {
 })();
 
 
+// Deep link from the Identity Resilience dashboard to the list a group of items lives in:  inventory-V1.html#view=<workload-id>&parent=<folder id>
+(function(){
+  var q = new URLSearchParams((window.location.hash || '').replace(/^#/, '')), wlId = q.get('view'), parent = q.get('parent');
+  if (!wlId || !parent) return;
+  window.addEventListener('load', function(){ setTimeout(function(){
+    try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch (e) {}
+    var label = (typeof WL_MAP !== 'undefined') ? WL_MAP[wlId] : null;
+    if (!label || !RESOURCES.some(function(r){ return r.id === parent; })) { if (typeof showToast === 'function') showToast('This view is not in Protected Data in the prototype yet'); return; }
+    enterWorkloadCatalog(wlId, label); openChildrenDrill(parent);
+  }, 500); });
+})();
+
 // ═══════════════════════════════════════════════════════════════════
 // MULTI-CART (restore carts across workloads) — HIDDEN unless the page is opened from a multi-item finding:
 //   inventory-V1.html#carts=<finding id>     e.g. #carts=FND-24551

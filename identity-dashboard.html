@@ -657,7 +657,7 @@ table.idd-tbl tr[tabindex]:focus-visible { outline: none; box-shadow: var(--vv-f
 .idd-ibtn.bordered svg { width: 20px; height: 20px; }
 /* Overlay: scrim covers the CONTENT area only (rail stays visible), card inset 24px, radius 12 + 1px outline (restore-wizard recipe) */
 .idd-tscrim { position: fixed; top: 0; right: 0; bottom: 0; left: 72px; background: rgba(31,34,41,0.4); z-index: 1200; display: none; }
-.idd-tscrim.open { display: block; }
+.idd-tscrim.open { display: block; } .idd-tscrim, .idd-tnav, .idd-tmain { overscroll-behavior: contain; } html.idd-lock { overflow: hidden; }   /* an open overlay owns the scroll: the page behind it stays put */
 .idd-tcard { position: absolute; inset: 24px; background: var(--white); box-shadow: inset 0 0 0 1px var(--black-30), 0 8px 24px rgba(31,34,41,0.25); border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
 /* work-tab strip (Phase 2: 48px, Black/S5) */
 .idd-wtabs { height: 48px; flex-shrink: 0; background: var(--black-5); border-bottom: 1px solid var(--black-10); display: flex; align-items: stretch; }
@@ -838,6 +838,8 @@ table.idd-tbl tr[data-incident] { cursor: pointer; }
 .idd-rp-bar { display: grid; grid-template-columns: 220px minmax(0, 1fr) minmax(0, 1fr); align-items: stretch; background: var(--black-5); border: 1px solid transparent; border-radius: 8px; }   /* (transparent border keeps the geometry identical to the cards below) SAME columns + cell padding as .idd-rp-card, so each date sits over its column of values */
 .idd-rp-bar > div { padding: 10px 14px; min-width: 0; }
 .idd-rp-bar { background: var(--white); overflow: hidden; border-radius: 8px; }
+.idd-rp-bar:not(.blk) { border-radius: 8px 8px 0 0; }   /* square bottom edge: when the header is pinned over scrolling rows it sits flush on them */
+.idd-rp-bar { border-color: var(--border-light); } .idd-rp-bar > .idd-rp-wl { border-right: 1px solid var(--border-light); justify-content: center; }   /* the workload cell reads as the first cell of the same header: shared outline + a divider before Now, content centred on the header height */
 .idd-hd.now { background: var(--black-5); } .idd-hd.aft { background: var(--em-green-tint); box-shadow: inset 0 3px 0 var(--em-green); }
 .idd-hd-t { font-size: 16px; font-weight: 500; line-height: 22px; color: var(--black-100); } .idd-hd-s { font-size: 14px; line-height: 20px; color: var(--black-70); }
 .idd-rp-cap { font-size: 14px; line-height: 18px; color: var(--black-70); margin: 0; } .idd-rp-stack .idd-rp-pick { line-height: 22px; }
@@ -853,6 +855,8 @@ table.idd-tbl tr[data-incident] { cursor: pointer; }
 .idd-rp-sum { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 16px; line-height: 22px; padding: 4px 0; }
 .idd-rp-badge { display: inline-flex; align-items: center; height: 28px; padding: 3px 8px; background: var(--orange-10); color: var(--orange); border-radius: 2px; font-weight: 500; } .idd-rp-badge.ok { background: var(--green-s10); color: var(--em-green); }
 .idd-rp-sec { margin: 4px 0 0; } .idd-rp-sech { font-size: 16px; font-weight: 500; line-height: 22px; padding: 4px 0; }
+.idd-rp-card table tr td:nth-child(2) { background-image: linear-gradient(rgba(31,34,41,0.05), rgba(31,34,41,0.05)); } .idd-rp-card table tr td:nth-child(3) { background-image: linear-gradient(rgba(1,128,74,0.07), rgba(1,128,74,0.07)); }   /* the Now / After restore tints of the header carry down their columns, so the header reads as the column headings of the rows below */
+.idd-rp-bar + .idd-rp-sec .idd-rp-sech { padding-top: 0; }
 .idd-rp-card { background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; overflow: hidden; margin-top: 6px; } .idd-rp-card table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .idd-rp-card td { padding: 8px 14px; font-size: 16px; line-height: 22px; vertical-align: middle; border-top: 1px solid var(--border-light); } .idd-rp-card tr:first-child td { border-top: none; }
 .idd-rp-card td.a { width: 220px; font-weight: 500; color: var(--black-60); white-space: normal; overflow-wrap: anywhere; }   /* long attribute names wrap inside the fixed label column instead of running into the values */ .idd-rp-card tr.diff td { background: var(--orange-10); } .idd-rp-card td.snap { color: var(--orange); font-weight: 500; } .idd-rp-card td.prod { color: var(--black-60); }
@@ -1056,6 +1060,7 @@ td.idd-chk, th.idd-chk { text-align: center; padding: 0 0 0 12px; }
 .idd-nsteps li > .b { flex: 1; } .idd-nsteps .b > .pg { width: 100%; }
 table.idd-tbl.pgt { table-layout: auto; min-width: 0; width: 100%; border-top: 1px solid var(--black-10); } table.idd-tbl.pgt td { height: auto; padding: 10px 8px; white-space: normal; overflow: visible; vertical-align: top; } table.idd-tbl.pgt td .mut { color: var(--black-70); font-size: 14px; line-height: 18px; } table.idd-tbl.pgt .idd-wl-cell { align-items: center; } table.idd-tbl.pgt td.nw { white-space: nowrap; }
 .pg { border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); width: 100%; }
+.pg > .idd-tbl-wrap, .pg > .idd-tbl-wrap table.idd-tbl:last-child { border-radius: 0 0 7px 7px; } .pg > .idd-tbl-wrap tbody tr:last-child td:first-child { border-bottom-left-radius: 7px; } .pg > .idd-tbl-wrap tbody tr:last-child td:last-child { border-bottom-right-radius: 7px; }   /* the white cells would otherwise square off the card's rounded bottom corners and hide part of its border */
 .pg-h { display: flex; align-items: center; gap: 12px; padding: 12px 16px; font-size: 16px; } .cf { display: flex; flex-direction: column; font-size: 16px; line-height: 22px; } .cf b { font-weight: 500; } .cf span { font-size: 14px; line-height: 18px; color: var(--black-70); }
 .cx-row { border-top: 1px solid var(--black-10); padding: 10px 16px; } .cx-main { display: flex; align-items: center; gap: 12px; }
 .cx-main .t { display: flex; flex-direction: column; min-width: 0; font-size: 16px; line-height: 22px; flex: 1; } .cx-main .t b { font-weight: 500; } .cx-main .t span { font-size: 14px; line-height: 18px; color: var(--black-70); } .cx-main .t .cx-back { color: var(--black-100); margin-top: 2px; }
@@ -2329,7 +2334,7 @@ var FINDINGS = [
   { id: '24550', rule: 'RES-107', lvl: 5, status: 'Open', wl: 'ad', name: 'Forest corp.meridian.local shows signs of compromise: forest recovery recommended', c: T(0, 3, 5), u: T(0, 3, 5), rOff: null, assignee: 'Unassigned',
     evidence: 'Within 48 minutes of each other: svc-syncgw was added to Domain Admins (2:14 AM), a DCSync replication request came from a non-DC host (2:52 AM) and Default Domain Policy gained a startup script (3:02 AM). The krbtgt account may be exposed. The 2:00 AM scheduled backup is the last point before any of these changes; the 2:52 AM immutable snapshot, taken by the automated response, already contains them.', policy: 'Forest protection', conn: 'corp.meridian.local', asset: 'Forest',
     cmp: [{ name: 'krbtgt', rows: [['Password last set', 'Sep 12, 2026', 'Sep 12, 2026'], ['Replication requests from non-DC hosts', '0', '1']] }, { name: 'Domain Admins', rows: [['Members', '8', '9'], ['Last member added', 'Mar 3, 2026', 'Oct 5, 2026 2:14 AM']] }, { name: 'Default Domain Policy', rows: [['Version', '14', '15'], ['Startup scripts', '0', '1'], ['Audit policy verbosity', 'Detailed', 'Reduced']] }],
-    restore: { point: 'Oct 5, 2026 2:00 AM', short: '2:00 AM', objects: 'Forest corp.meridian.local, 4 domain controllers', change: 'Oct 5, 2026 2:14 AM to 3:02 AM', actor: 'd.kovac', forest: true },
+    restore: { point: 'Oct 5, 2026 2:00 AM', short: '2:00 AM', objects: 'Forest corp.meridian.local, 4 domain controllers', item: 'corp.meridian.local', incl: 'Includes its 4 domain controllers', change: 'Oct 5, 2026 2:14 AM to 3:02 AM', actor: 'd.kovac', forest: true },
     steps: [['Review what changed since the 2:00 AM restore point', 'Compare to 2:00 AM', { tab: 'ent:Restore points' }], ['Isolate the domain controllers from the network before recovering', null, null], ['Initiate forest recovery to the 2:00 AM restore point', 'Restore to 2:00 AM', pdRestore('active-directory', ['ad-forest-corp-meridian-local'], '2026-10-05T02:00')], ['After recovery, reset the krbtgt password twice and review privileged accounts', null, null]],
     graph: { src: [['Workload', 'Active Directory', 1], ['Connection', 'corp.meridian.local', 1]], mid: [['Policy', 'Forest protection', 1]], out: [['Objects', 'Changed', 3], ['Restore point', 'Oct 5, 2:00 AM', 1]] },
     ent: { Workloads: [['Active Directory', '2 connections']], Connections: [['corp.meridian.local', 'Healthy']], Policies: [['Forest protection', '1 run per day, SLA 24h']], Objects: [['krbtgt', 'Account · exposure suspected'], ['Domain Admins', 'Group · 1 member added'], ['Default Domain Policy', 'GPO · startup script added']], 'Restore points': [['Oct 5, 2026 2:52 AM', 'Latest · captured after the change'], ['Oct 5, 2026 2:00 AM', 'Last scheduled backup before the changes · whole forest intact · recommended']] },
@@ -2735,8 +2740,10 @@ function restoreTable(rows, withState) {
 var WL_OPTS = { okta: 'Skip conflicts · merge relationships', entra: 'Skip conflicts · merge relationships', ad: 'Skip conflicts · merge group memberships' };
 function singlePanel(f, d) {
   var w = fWl(f), r = f.restore, names = (f.cmp || []).map(function(o){ return o.name; }), what = names.length ? names.slice(0, 3).join(', ') + (names.length > 3 ? ' and ' + (names.length - 3) + ' more' : '') : r.objects;
-  var tbl = restoreTable([{ w: w, item: what, kind: r.objects, href: d.href.replace('#restore=', '#compare='), back: r.forest ? 'The whole forest, intact, with its domain controllers' : (f.cmp && f.cmp[0] && f.cmp[0].rows.length > 1) ? 'The ' + (names.length > 1 ? 'accounts' : 'account') + ' with ' + f.cmp[0].rows.filter(function(x){ return !/^status$/i.test(x[0]); }).map(function(x){ return x[0].toLowerCase(); }).join(' and ') : r.objects, opts: WL_OPTS[f.wl] || '—', point: r.point, pointNote: 'Before the change' }], false);
-  return '<div class="pg"><div class="pg-h"><div class="cf"><b>Restore ' + esc(r.objects) + '</b><span>One restore session in ' + esc(w.name) + '</span></div><span class="idd-sp"></span><a class="plv-btn plv-btn-tertiary" href="' + d.href + '" target="_blank" rel="noopener" aria-label="Restore ' + esc(r.objects) + ' in Protected Data (opens in a new tab)">Restore' + ico('open-in-new-outlined', 20) + '</a></div>' + tbl + '</div>';
+  var ids = (/[#&]items=([^&]+)/.exec(d.href) || [0, ''])[1].split(',').filter(Boolean), wlId = (/#restore=([^&]+)/.exec(d.href) || [0, ''])[1], iso = (/point=([^&]+)/.exec(d.href) || [0, ''])[1];
+  var kindOf = function(id){ return /-user-/.test(id) ? 'User' : /-grp-/.test(id) ? 'Group' : /-pol-/.test(id) ? 'Policy' : /-forest-/.test(id) ? 'Forest' : ''; };
+  var tbl = restoreTable(ids.map(function(id, k){ return { w: w, item: (names.length === ids.length ? names[k] : (r.item || r.objects)), kind: kindOf(id), href: 'inventory-V1.html#compare=' + wlId + '&items=' + id + '&point=' + iso, point: r.point }; }), false);
+  return '<div class="pg"><div class="pg-h"><div class="cf"><b>Restore ' + esc(r.item ? (kindOf(ids[0]) || 'item').toLowerCase() + ' ' + r.item : r.objects) + '</b><span>One restore session in ' + esc(w.name) + (r.incl ? ' · ' + esc(r.incl.charAt(0).toLowerCase() + r.incl.slice(1)) : '') + '</span></div><span class="idd-sp"></span><a class="plv-btn plv-btn-tertiary" href="' + d.href + '" target="_blank" rel="noopener" aria-label="Restore ' + esc(r.objects) + ' in Protected Data (opens in a new tab)">Restore' + ico('open-in-new-outlined', 20) + '</a></div>' + tbl + '</div>';
 }
 function renderMultiRestore(M) {
   var f = multiOf(M.id), X = M.multi, changed = 0, n = X.items.length;
@@ -3018,6 +3025,7 @@ function entCount(M, k) { return (k === 'Restore points' && M.cmp) ? M.ent[k].fi
 function rpList(M) { return M.ent['Restore points'].map(function(r, i){ return { i: i, label: r[0], detail: r[1], after: /^Latest ·/.test(r[1]), rec: /recommended$/.test(r[1]) }; }); }
 function rpPicker(rp) { return '<div class="idd-rp-picker"><span class="idd-rp-pick is-locked" aria-disabled="true"><span class="lbl">' + esc(rp.label) + '</span></span></div>'; }
 /* The left cell of every comparison header, single or multi: the workload, the items being restored, and the way into Protected Data to see them in context. */
+function pdParentOf(id) { return /-user-/.test(id) ? 'okta-wd-users' : /-grp-/.test(id) ? 'okta-wd-groups' : ''; }
 function rpLeft(w, items, href) { return '<div class="idd-rp-wl"><span class="idd-wl-cell">' + logoTile(w) + '<span class="idd-ell">' + esc(w.name) + '</span></span><span class="items">' + esc(items) + '</span>' + (href ? '<a class="idd-rp-link" href="' + href + '" target="_blank" rel="noopener" aria-label="View ' + esc(items) + ' in ' + esc(w.name) + ' in Protected Data (opens in a new tab)">View in Protected Data' + ico('open-in-new-outlined', 16) + '</a>' : '') + '</div>'; }
 function renderRestorePoints(M) {
   /* LOCKED comparison: column 1 = the current point (the latest restore point, which contains the change), column 2 = the point the finding recommends restoring.
@@ -3025,17 +3033,19 @@ function renderRestorePoints(M) {
   var L = rpList(M), cur = L.filter(function(x){ return x.after; })[0], rec = L.filter(function(x){ return x.rec; })[0];
   var changed = 0; M.cmp.forEach(function(o){ o.rows.forEach(function(r){ if (r[2] !== r[1]) changed++; }); });
   var iso = rpIso(rec.label), restoreHref = M.restoreHref ? M.restoreHref.replace(/point=[^&]+/, 'point=' + iso) : '', compareHref = M.restoreHref ? M.restoreHref.replace('#restore=', '#compare=').replace(/point=[^&]+/, 'point=' + iso) : '';
+  var _ids = M.restoreHref ? (/[#&]items=([^&]+)/.exec(M.restoreHref) || [0, ''])[1].split(',').filter(Boolean) : [], _wl = M.restoreHref ? (/#restore=([^&]+)/.exec(M.restoreHref) || [0, ''])[1] : '';
+  if (_ids.length > 1 && pdParentOf(_ids[0])) compareHref = 'inventory-V1.html#view=' + _wl + '&parent=' + pdParentOf(_ids[0]);   // several items: the list they live in, not just the first one
   var rbtn = restoreHref ? '<a class="plv-btn plv-btn-tertiary idd-rp-restore" href="' + restoreHref + '" target="_blank" rel="noopener" aria-label="Restore ' + esc(M.item.restore.objects) + ' from ' + esc(rec.label) + ' in Protected Data (opens in a new tab)">Restore' + ico('open-in-new-outlined', 20) + '</a>' : '';
   /* Headers name the ROLE of each column (Variant 1 of the compare-panel options): Now = the latest backup (includes the change); After restore = the recommended restore point, with the Restore button */
   var gone = !!M.item.restore.nowDeleted;   // deleted objects are in NO backup after the restore point, so "Now" describes the objects, not a backup
   var nowS = gone ? ['Deleted ' + esc(M.item.restore.change.replace(/^Oct 5, 2026 /, 'Oct 5, ')), 'Not in any later backup'] : ['Latest backup · ' + esc(cur.label), 'Includes the change'];
-  var bar = '<div class="idd-rp-bar">' + rpLeft(fWl(M.item), M.item.restore.objects, compareHref) + '<div class="idd-hd now"><div class="idd-hd-t">Now</div><div class="idd-hd-s">' + nowS[0] + '</div><div class="idd-hd-s">' + nowS[1] + '</div></div>'
+  var bar = '<div class="idd-rp-bar">' + rpLeft(fWl(M.item), M.item.restore.item || M.item.restore.objects, compareHref) + '<div class="idd-hd now"><div class="idd-hd-t">Now</div><div class="idd-hd-s">' + nowS[0] + '</div><div class="idd-hd-s">' + nowS[1] + '</div></div>'
     + '<div class="idd-hd aft"><div class="idd-rp-row"><div class="idd-rp-stack"><div class="idd-hd-t">After restore</div><div class="idd-hd-s">Restore point · ' + esc(rec.label) + '</div></div></div></div></div>';
   var sum = '<div class="idd-rp-sum">' + (changed ? '<span class="idd-rp-badge">' + changed + ' difference' + (changed > 1 ? 's' : '') + '</span>' : '<span class="idd-rp-badge ok">No differences</span>') + '<span>between <b>' + (gone ? 'the current state' : esc(cur.label)) + '</b> and <b>' + esc(rec.label) + '</b></span><span class="idd-sp"></span><button type="button" class="idd-more" data-rponly="1">' + (TS.rpOnly ? 'Show all' : 'Show changes only') + '</button></div>';
   var cards = M.cmp.map(function(o){ var rows = o.rows.filter(function(r){ return !TS.rpOnly || r[2] !== r[1]; }); if (!rows.length) return '';
     return '<div class="idd-rp-sec"><div class="idd-rp-sech">' + esc(o.name) + '</div><div class="idd-rp-card"><table>' + rows.map(function(r){ var ch = r[2] !== r[1];
       return '<tr' + (ch ? ' class="diff"' : '') + '><td class="a">' + esc(r[0]) + '</td><td>' + esc(r[2]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</table></div></div>'; }).join('');
-  return '<div class="idd-ehead"><span class="idd-ntile">' + ico('restore-point-outlined') + '</span><span class="ttl">Restore points</span><span class="ct">' + entCount(M, 'Restore points') + '</span><span class="idd-sp"></span>' + rbtn + '</div><div class="idd-rp">' + bar + sum + cards + '</div>';
+  return '<div class="idd-ehead"><span class="idd-ntile">' + ico('restore-point-outlined') + '</span><span class="ttl">Restore points</span><span class="ct">' + entCount(M, 'Restore points') + '</span><span class="idd-sp"></span>' + rbtn + '</div><div class="idd-rp">' + sum + bar + cards + '</div>';
 }
 var ENT_LINK_TIP = { Workloads: 'Opens the workload in Protected Data (not part of this prototype yet)', Connections: 'Opens the connection details in Integrations (not part of this prototype yet)', Policies: 'Opens the policy in Backup Policies (not part of this prototype yet)', Identities: 'Opens the identity in Protected Data (not part of this prototype yet)', Objects: 'Opens the object in Protected Data (not part of this prototype yet)' };
 function entLink(ek, txt) { var tip = ENT_LINK_TIP[ek]; return tip ? '<a href="#" class="idd-elink idd-cell-1" data-elink="1" data-tooltip="' + esc(tip) + '">' + esc(txt) + '</a>' : '<span class="idd-cell-1">' + esc(txt) + '</span>'; }
@@ -3680,6 +3690,10 @@ function setIddRange(k) { iddHooks.S.range = { k: k }; document.getElementById('
   else{const lo=getLockout();if(lo.until>Date.now())showLockout(lo.until);else document.getElementById('pwInput').focus();}
   window._bde_auth = {check};
 })();
+</script>
+<script>
+(function(){ var scr = document.querySelectorAll('.idd-tscrim'); function sync(){ var open = !!document.querySelector('.idd-tscrim.open'); document.documentElement.classList.toggle('idd-lock', open); }
+  var mo = new MutationObserver(sync); scr.forEach(function(el){ mo.observe(el, { attributes: true, attributeFilter: ['class'] }); }); sync(); })();
 </script>
 </body>
 </html>
