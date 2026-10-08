@@ -71220,15 +71220,24 @@ window.D365X.recChip = function (key, item) {
   'use strict';
   var X = window.D365X;
   X.chip = function () { return ''; };
-  var row = document.getElementById('wlChromeRow');
-  if (row && !document.getElementById('dxLegend')) {
-    var lg = document.createElement('span'); lg.id = 'dxLegend'; lg.className = 'dx-lg'; lg.style.display = 'none';
+  /* the key sits in the table's own header (list and drill), after the title, where it wraps under it when space runs out */
+  [].slice.call(document.querySelectorAll('.inv-header')).forEach(function (hd) {
+    if (hd.querySelector('.dx-lg') || !hd.firstElementChild) return;
+    var lg = document.createElement('span'); lg.className = 'dx-lg'; lg.style.display = 'none';
     lg.setAttribute('aria-label', 'Row marker key');
     lg.innerHTML = '<span><i class="dx-ld m"></i>Modified</span><span><i class="dx-ld d"></i>Deleted since</span><span><i class="dx-ld a"></i>Created since</span><span><i class="dx-ld u"></i>Unchanged</span>';
-    var wrap = document.getElementById('d365CmpWrap'); (wrap && wrap.nextSibling) ? row.insertBefore(lg, wrap.nextSibling) : row.appendChild(lg);
-  }
+    hd.insertBefore(lg, hd.firstElementChild.nextSibling);
+  });
+  /* the key sits at the right while the title leaves room for it; once it wraps beneath, it lines up left */
+  X.fitLegend = function () {
+    [].slice.call(document.querySelectorAll('.inv-header > .dx-lg')).forEach(function (lg) {
+      if (!lg.offsetParent) return; var t = lg.parentElement.firstElementChild;
+      lg.classList.remove('is-wrapped'); if (lg.getBoundingClientRect().top >= t.getBoundingClientRect().bottom - 1) lg.classList.add('is-wrapped');
+    });
+  };
+  if (typeof ResizeObserver !== 'undefined') { var fitRo = new ResizeObserver(function () { X.fitLegend(); }); [].slice.call(document.querySelectorAll('.inv-header')).forEach(function (h) { fitRo.observe(h); if (h.firstElementChild) fitRo.observe(h.firstElementChild); }); }
   var sync = X.syncChrome;
-  X.syncChrome = function () { sync.apply(this, arguments); var lg = document.getElementById('dxLegend'); if (lg) lg.style.display = X.on() ? '' : 'none'; };
+  X.syncChrome = function () { sync.apply(this, arguments); [].slice.call(document.querySelectorAll('.dx-lg')).forEach(function (lg) { lg.style.display = X.on() ? '' : 'none'; }); X.fitLegend(); };
   /* changed first, then by name, until the user sorts a column themselves */
   var origSort = window.getChildSortValue;
   window.getChildSortValue = function (r, key) {
@@ -71242,7 +71251,8 @@ window.D365X.recChip = function (key, item) {
     return origSort.apply(this, arguments);
   };
   var css = document.createElement('style'); css.textContent = [
-    '.dx-lg { display: inline-flex; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 14px; line-height: 20px; color: var(--black-70); margin-left: 4px; }',
+    '.dx-lg { display: inline-flex; align-items: center; gap: 4px 16px; flex-wrap: wrap; justify-content: flex-end; flex: 0 1 auto; font-size: 14px; line-height: 20px; color: var(--black-70); }',
+    '.inv-header { flex-wrap: wrap; } .inv-header > div:first-child { flex: 1 1 max-content !important; } .inv-header > .dx-lg { flex: 0 1 auto; margin-left: auto; } .inv-header > .dx-lg.is-wrapped { margin-left: 0; justify-content: flex-start; flex-basis: 100%; }',
     '.dx-lg span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }',
     '.dx-ld { display: inline-block; width: 8px; height: 8px; border-radius: 50%; } .dx-ld.m { background: var(--yellow); } .dx-ld.d { background: var(--red); } .dx-ld.a { background: var(--green); } .dx-ld.u { background: var(--black-30); }'
   ].join('\n'); document.head.appendChild(css);
@@ -71302,13 +71312,13 @@ window.D365X.recChip = function (key, item) {
       var keyOf = function (n) { return 'field-' + _fieldRowId(c.k, c.idx, n); };
       if (what === 'all') names.forEach(function (n) { if (!isInPlan(keyOf(n))) addToPlan(keyOf(n), { isPinned: false, source: 'bulk' }); });
       else if (what === 'changed') { if (!state.fieldsDiffActive) toggleSelectChangedFields(); }
-      else if (what === 'none') { names.forEach(function (n) { if (isInPlan(keyOf(n))) removeFromPlan(keyOf(n)); }); state.fieldsDiffActive = false; }
+      else if (what === 'none') { names.forEach(function (n) { if (isInPlan(keyOf(n))) drill.setRow('field', _fieldRowId(c.k, c.idx, n), false); }); state.fieldsDiffActive = false; }
       childRender(); if (typeof updatePlanDock === 'function') updatePlanDock(); if (typeof renderTopActionBar === 'function') renderTopActionBar();
       return;
     }
     if (what === 'none') {
       var keys = []; state.restorePlan.forEach(function (_, key) { if (c.lv === 'records' ? key.indexOf('rec-' + c.k + '-') === 0 : c.tables.some(function (r) { return r.id === key; })) keys.push(key); });
-      keys.forEach(function (key) { removeFromPlan(key); }); childRender(); if (typeof updatePlanDock === 'function') updatePlanDock(); return;
+      keys.forEach(function (key) { if (c.lv === 'records') drill.setRow('rec', key.slice(4), false); else drill.setRow('child', key, false); }); childRender(); if (typeof updatePlanDock === 'function') updatePlanDock(); return;
     }
     if (c.lv === 'records') {
       var ids = what === 'all' ? c.allIds : what === 'changed' ? c.chIds : what === 'mod' ? (c.d ? c.d.ids.modified : []) : what === 'del' ? (c.d ? c.d.ids.removed : []) : [];
@@ -71374,8 +71384,17 @@ window.D365X.recChip = function (key, item) {
       b.onclick = function (e) { e.stopPropagation(); openMenu(b); }; th.appendChild(b);
     });
   };
-  if (typeof MutationObserver !== 'undefined') ['invTable', 'childTable'].forEach(function (id) { var t = $(id); if (!t) return; var busy = false, ob = new MutationObserver(function () { if (busy) return; busy = true; try { X.injectBulk(); } catch (e) {} ob.takeRecords(); busy = false; }); ob.observe(t, { childList: true, subtree: true, attributes: true, attributeFilter: ['disabled'] }); });
+  if (typeof MutationObserver !== 'undefined') ['invTable', 'childTable'].forEach(function (id) { var t = $(id); if (!t) return; var busy = false, ob = new MutationObserver(function () { if (busy) return; busy = true; try { X.injectBulk(); X.syncMaster(); } catch (e) {} ob.takeRecords(); busy = false; }); ob.observe(t, { childList: true, subtree: true, attributes: true, attributeFilter: ['disabled'] }); });
   setTimeout(function () { try { X.injectBulk(); } catch (e) {} }, 0);
+  /* the header checkbox mirrors the rows: empty, partly selected (a dash) or all selected. Record and field rows don't update it themselves. */
+  X.syncMaster = function () {
+    var t = (typeof _drillType === 'function') ? _drillType() : null; if (t !== 'records' && t !== 'fields') return;
+    var all = $('childSelectAll'); if (!all || all.disabled) return;
+    var boxes = [].slice.call(document.querySelectorAll('#childTbody .row-cb:not(:disabled)')); if (!boxes.length) return;
+    var n = boxes.filter(function (b) { return b.checked; }).length;
+    all.checked = n === boxes.length; all.indeterminate = n > 0 && n < boxes.length;
+  };
+  document.addEventListener('change', function (e) { var b = e.target; if (b && b.classList && b.classList.contains('row-cb') && b.closest('#childTbody')) setTimeout(X.syncMaster, 0); });
   var origThead = window.renderChildThead;
   window.renderChildThead = function () { var r = origThead.apply(this, arguments); try { X.injectBulk(); } catch (e) {} return r; };
   document.addEventListener('click', function (e) {   // the pinned header is a markup copy with no handlers, so clicks are handled here
