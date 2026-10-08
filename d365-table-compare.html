@@ -6850,7 +6850,12 @@ body.pol-drawer-open { overflow: hidden; }
 .rw-preview-tbl-hdr-cell { display: table-cell; }
 .rw-preview-tbl-hdr thead th.rw-preview-tbl-hdr-cell { text-transform: none; letter-spacing: 0; font-size: 14px; font-weight: 500; color: var(--black-100); }
 /* was: .rw-preview-tbl-hdr … .d365-compare-hdr-dot { display: inline-block; … } — dot retired 2026-08-19 */
-.rw-preview-tbl-hdr thead th.rw-preview-tbl-hdr-cell .rw-rp-picker-hdr { display: inline-block; vertical-align: middle; width: calc(100% - 18px); }
+.rw-preview-tbl-hdr thead th.rw-preview-tbl-hdr-cell .rw-rp-picker-hdr { display: inline-block; vertical-align: middle; width: 100%; }   /* was calc(100% - 18px), the room the retired marker dot used to take */
+/* The retired marker dot no longer takes a gap ahead of the picker, and the compare header gives its width to the date pickers. */
+.rw-preview-tbl-hdr thead th.rw-preview-tbl-hdr-cell .d365-compare-hdr-dot { display: none; }
+.rd-compare-tbl thead th.rw-preview-tbl-hdr-cell { padding-left: 4px; padding-right: 4px; }
+.rd-compare-tbl thead th.rw-preview-tbl-hdr-cell > div:first-child { gap: 6px !important; }
+.rd-compare-tbl thead th.rw-preview-tbl-hdr-cell .rw-rp-picker-btn-hdr { padding-left: 6px; padding-right: 6px; }
 /* No strikethrough on prior values — modification ≠ deletion. */
 .rw-preview-tbl-hdr td.cell-diff-prod { color: var(--black-60); }
 .rw-preview-tbl-hdr td.cell-diff-snap { color: var(--orange); font-weight: 500; }
@@ -53001,7 +53006,7 @@ function rdResolveSel(resource, sel) {
     var _rpD = new Date(rp.ts);
     var _dLbl = (typeof fmtLabel === 'function') ? fmtLabel(_rpD) : _rpD.toLocaleDateString('en-US');
     var _tLbl = _rpD.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    label = 'As of ' + _dLbl + ' · ' + _tLbl;
+    label = _dLbl + ' · ' + _tLbl;
   }
   return { isProd: false, isSnap: false, rp: rp, label: label };
 }
@@ -58301,8 +58306,8 @@ function renderRdBody() {
     var colGroupRec = rdState.singleSnap
       ? '<colgroup><col style="width:180px"><col></colgroup>'
       : (_hasMask
-        ? '<colgroup><col style="width:36px"><col style="width:180px"><col><col></colgroup>'
-        : '<colgroup><col style="width:180px"><col><col></colgroup>');
+        ? '<colgroup><col style="width:36px"><col style="width:120px"><col><col></colgroup>'
+        : '<colgroup><col style="width:120px"><col><col></colgroup>');
     var theadRec = '<thead><tr>'
       + (_hasMask ? '<th></th>' : '')
       + '<th>Attribute</th>'
