@@ -24111,7 +24111,7 @@ function _childRenderRecords() {
     if (r._diffStatus === 'removed') rowTitle = ' title="Record removed since ' + fmtCompareDate(state.recCompareDate) + '"';
     var cb = r._phantom
       ? '<td class="cb-col"><span style="display:inline-block;width:14px"></span></td>'
-      : '<td class="cb-col"><input type="checkbox" class="row-cb" data-id="' + r._id + '"' + (rowSelected ? ' checked' : '') + ((isCovered || _dxAdded) ? ' disabled' : '') + ' onchange="toggleRecRow(\'' + r._id + '\',this)"></td>';
+      : '<td class="cb-col"><input type="checkbox" class="row-cb" data-id="' + r._id + '"' + (rowSelected ? ' checked' : '') + ((isCovered || _dxAdded || (!rowSelected && (typeof _d365Locked === 'function' && _d365Locked('rec-' + r._id)))) ? ' disabled' : '') + ' onchange="toggleRecRow(\'' + r._id + '\',this)"></td>';
     var actions;
     // V1: phantom (deleted) rows are informational only — they exist
     // at the compare date but not the global as-of, so restoring them
@@ -24403,7 +24403,7 @@ function _childRenderFields() {
     var _valueChangedCls = _isChanged ? ' rec-diff-cell-changed' : '';
     var _fieldDiffBadge = _isChanged ? _diffBadgeHtml('modified', _fieldsCmpLbl) : '';
     // Cells, in thead order — cb / Field / Type / Value / Modified / actions.
-    var cb = '<td class="cb-col"><input type="checkbox" class="row-cb" data-id="' + fid + '"' + cbChecked + cbDisabled + ' onchange="toggleFieldRow(\'' + safeForJs + '\',this)"></td>';
+    var cb = '<td class="cb-col"><input type="checkbox" class="row-cb" data-id="' + fid + '"' + cbChecked + (cbDisabled || (!_rowSelectedFinal && (typeof _d365Locked === 'function' && _d365Locked('field-' + fid))) ? ' disabled' : '') + ' onchange="toggleFieldRow(\'' + safeForJs + '\',this)"></td>';
     // Name = leaf: clicking opens the preview drawer (same pattern as
     // any leaf elsewhere in the platform). Wraps cell-name + diff badge
     // in a flex container so the badge wraps onto its own line on narrow
@@ -71469,6 +71469,12 @@ window.D365X.recChip = function (key, item) {
   var X = window.D365X, origAdd = window.addToPlan;
   window.addToPlan = function (key, opts) {
     opts = opts || {};
+    /* record and field keys have no resource row, so the funnel's own lock check never sees them: apply the same lock here */
+    if (typeof key === 'string' && /^(rec|field)-/.test(key) && state.restorePlan.size && !state.restorePlan.has(key) && typeof _categoryLockBlocks === 'function' && _categoryLockBlocks(key)) {
+      if (typeof showToast === 'function') showToast(_categoryLockMsg());
+      if (typeof refreshSegBtnForResource === 'function') refreshSegBtnForResource(key);
+      return;
+    }
     try {
       if (X.on() && !opts.manualRpId && !opts.asOfDate && typeof key === 'string') {
         var res = RESOURCES.find(function (r) { return r.id === key; });
@@ -71494,6 +71500,55 @@ window.D365X.recChip = function (key, item) {
     if (state.invCmpRange && !(typeof _d365SupersetOn === 'function' && _d365SupersetOn())) { try { _clearInvCompareDateImpl(); } catch (e) {} }
     return r;
   };
+})();
+
+/* ═══ Dynamics 365 cart gate: a job holds tables, OR records from one table, OR fields from one record ═══ */
+(function () {
+  'use strict';
+  var X = window.D365X;
+  /* what an item is, as a category: 'Tables' | 'Records from <table>' | 'Fields from <record>' | the type of any other item (a journey, a segment) */
+  function d365Category(key) {
+    if (typeof key !== 'string') key = key && key.id; if (!key) return null;
+    if (/^field-/.test(key)) {
+      var f = /^field-([^~]+)~(\d+)~/.exec(key), rec = f && _resolveD365Record('rec-' + f[1] + '-' + f[2]);
+      return { id: 'fields:' + (f ? f[1] + '~' + f[2] : key), name: 'Fields from ' + (rec ? rec.name : 'one record'), type: 'Category' };
+    }
+    if (/^rec-/.test(key)) {
+      var rr = _resolveD365Record(key);
+      return { id: 'records:' + (rr ? rr.schemaKey : key), name: 'Records from ' + (rr && rr.tableResource ? rr.tableResource.name : 'one table'), type: 'Category' };
+    }
+    var r = _resById(key.indexOf(':') > 0 ? key.split(':')[0] : key);
+    if (!r || r.wl !== 'Dynamics 365') return null;
+    if (r.drillTarget === 'records') return { id: 'tables', name: 'Tables', type: 'Category' };
+    if (r.type === 'Environment') return null;
+    return { id: 'other:' + r.type, name: String(r.type || 'Items') + ' items', type: 'Category' };
+  }
+  var origCat = window._restoreCategoryNodeOf;
+  window._restoreCategoryNodeOf = function (k) {
+    var kk = typeof k === 'string' ? k : (k && k.id), isD = typeof kk === 'string' && (/^(rec|field)-/.test(kk) || (_resById(kk.indexOf(':') > 0 ? kk.split(':')[0] : kk) || {}).wl === 'Dynamics 365');
+    return isD ? d365Category(kk) : origCat.apply(this, arguments);
+  };
+  var origWl = window.planActiveWorkload;
+  window.planActiveWorkload = function () {
+    var wl = origWl.apply(this, arguments); if (wl) return wl;
+    var hit = false; state.restorePlan.forEach(function (_, key) { if (typeof key === 'string' && /^field-/.test(key)) hit = true; });
+    return hit ? 'Dynamics 365' : null;
+  };
+  var origActive = window.planActiveCategoryNode;
+  window.planActiveCategoryNode = function () {
+    if (window.planActiveWorkload() !== 'Dynamics 365') return origActive.apply(this, arguments);
+    var node = null; state.restorePlan.forEach(function (_, key) { if (!node) node = d365Category(key); }); return node;
+  };
+  var origMsg = window._categoryLockMsg;
+  window._categoryLockMsg = function () {
+    if (window.planActiveWorkload() === 'Dynamics 365' && !(typeof planIsExportOnly === 'function' && planIsExportOnly())) {
+      var n = window.planActiveCategoryNode(); if (n) return 'This job holds ' + n.name.replace(/^(\w)/, function (m) { return m.toLowerCase(); }) + '. Clear the job to select anything else.';
+    }
+    return origMsg.apply(this, arguments);
+  };
+  X.d365Category = d365Category;
+  /* a row that would cross the job's lock renders disabled, the way locked rows do in the other workloads */
+  window._d365Locked = function (key) { try { return state.restorePlan.size > 0 && !state.restorePlan.has(key) && typeof _categoryLockBlocks === 'function' && _categoryLockBlocks(key); } catch (e) { return false; } };
 })();
 </script>
 </body>
