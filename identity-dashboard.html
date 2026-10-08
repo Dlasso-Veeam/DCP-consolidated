@@ -2367,7 +2367,7 @@ var FINDINGS = [
           config: [['Conflict handling', 'Skip'], ['Object relationships', 'Merge'], ['Activation invitation email', 'Off']],
           cmp: [['Status', 'Active', 'Deprovisioned'], ['Group memberships', '3 groups', '—'], ['App assignments', '6 apps', '—'], ['Factors enrolled', 'Okta Verify, WebAuthn', '—']] }] },
     steps: [['Review what changed in each workload since its restore point', 'Compare restore points', { tab: 'ent:Restore points' }], ['Disable the HR sync rule that matched the duplicate record before restoring, or the next sync can delete the accounts again', null, null], ['Restore Jordan Alvarez in all 3 workloads, one session each, in the order shown', 'Restore all (3)', { cart: true }], ['After the sessions finish, confirm sign-in and group memberships in each workload', null, null]],
-    graph: { src: [['Workload', 'Active Directory +2', 3], ['Connection', 'corp.meridian.local +2', 3]], mid: [['Policy', 'Forest protection +2', 3]], out: [['Identity', 'Jordan Alvarez', 3], ['Restore point', 'Oct 5, 2:00 AM +2', 3]] },
+    graph: { src: [['Workload', 'Active Directory', 3], ['Connection', 'corp.meridian.local', 3]], mid: [['Policy', 'Forest protection', 3]], out: [['Identity', 'Jordan Alvarez', 3], ['Restore point', 'Oct 5, 2:00 AM', 3]] },
     ent: { Workloads: [['Active Directory', '2 connections'], ['Entra ID', '3 connections'], ['Okta', '12 connections']], Connections: [['corp.meridian.local', 'Healthy', 'ad'], ['meridianfg.com', 'Healthy', 'entra'], ['meridian.okta.com', 'Healthy', 'okta']], Policies: [['Forest protection', '1 run per day, SLA 24h', 'ad'], ['Directory objects', '4 runs per day, SLA 6h', 'entra'], ['Org backup', '2 runs per day, SLA 12h', 'okta']],
       Identities: [['MERIDIAN\\j.alvarez', 'Deleted · matched on employee ID', 'ad'], ['j.alvarez@meridianfg.com', 'Deleted · matched on employee ID', 'entra'], ['j.alvarez@meridianfg.com', 'Deprovisioned · matched on employee ID', 'okta']],
       'Restore points': [['Oct 5, 2026 2:00 AM', 'Active Directory · before the deletion · recommended'], ['Oct 5, 2026 2:00 AM', 'Entra ID · before the deletion · recommended'], ['Oct 5, 2026 3:15 AM', 'Okta · before the deletion · recommended']] },
@@ -2919,19 +2919,59 @@ var ENT_ICON = { Workloads: 'workload-outlined', Connections: 'integration-widge
 function uuidOf(f) { var h = hash(f.id + f.rule), s = ''; for (var i = 0; i < 4; i++) { h = (h * 1103515245 + 12345) >>> 0; s += ('00000000' + h.toString(16)).slice(-8); } return s.slice(0, 8) + '-' + s.slice(8, 12) + '-4' + s.slice(13, 16) + '-b' + s.slice(17, 20) + '-' + s.slice(20, 32); }
 /* Count badge on a graph node: a white square with a 4px radius (never a circle). */
 function nbadge(cx, cy, label) { var t = String(label), w = Math.max(24, t.length * 8 + 12); return '<rect x="' + (cx - w / 2) + '" y="' + (cy - 12) + '" width="' + w + '" height="24" rx="4" fill="var(--white)" stroke="var(--black-10)"/><text class="b" x="' + cx + '" y="' + (cy + 4) + '" text-anchor="middle">' + t + '</text>'; }
+/* Finding graph, laid out like the live product's findings: layered left to right, the finding is the right-most node and nothing follows it.
+   The links follow how the entities depend on one another: a Workload has Connections (an org / tenant); the Connection is what the inventory is cataloged from; a Policy is bound to
+   that inventory; a Restore point exists because a policy backed the object up. Which of those links a finding draws depends on what the rule is about:
+   106/107 (objects deleted or changed)  Workload > Connection > Objects, Policy > Objects, Objects > Restore point > Finding
+   105 (connection health), 103 (policy paused)  Workload > Connection > Policy > Finding
+   104 (backup SLA missed)  Connection > Objects, Policy > Objects, Policy > Sessions, Objects + Sessions > Finding
+   101 (no policy)  Workload > Connection > Objects > Finding      102 (coverage gap)  Workload > Connection > Objects > Finding, Policy > Finding
+   Every node carries a count badge; the value under a node shows only when it stands for ONE entity. */
+var GRAPH_ASSET = { Objects: 1, Identity: 1, Groups: 1, Apps: 1, GPOs: 1 };
+function graphEdges(f, N) {
+  var has = function(k){ return !!N[k]; }, asset = Object.keys(N).filter(function(k){ return GRAPH_ASSET[k]; }), E = [], e = function(a, b){ if (N[a] && (b === 'Finding' || N[b])) E.push([a, b]); };
+  var ctx = has('Connection') ? 'Connection' : 'Workload';
+  if (has('Workload') && has('Connection')) e('Workload', 'Connection');
+  var rule = f.rule;
+  if (rule === 'RES-106' || rule === 'RES-107') {
+    asset.forEach(function(a){ e(ctx, a); e('Policy', a); }); if (has('Restore point')) { asset.forEach(function(a){ e(a, 'Restore point'); }); e('Restore point', 'Finding'); } else asset.forEach(function(a){ e(a, 'Finding'); });
+  } else if (rule === 'RES-104') {
+    asset.forEach(function(a){ e(ctx, a); e('Policy', a); e(a, 'Finding'); }); if (!asset.length) e(ctx, 'Policy'); e('Policy', 'Sessions'); e('Sessions', 'Finding');
+  } else if (rule === 'RES-102') {
+    asset.forEach(function(a){ e(ctx, a); e(a, 'Finding'); }); e('Policy', 'Finding');
+  } else if (rule === 'RES-101') {
+    asset.forEach(function(a){ e(ctx, a); e(a, 'Finding'); });
+  } else {   // 105 / 103: the connection or policy the finding is about
+    e(ctx, 'Policy'); e('Policy', 'Finding'); if (!has('Policy')) e(ctx, 'Finding');
+  }
+  if (!E.some(function(x){ return x[1] === 'Finding'; })) Object.keys(N).forEach(function(k){ if (k !== 'Finding' && !E.some(function(x){ return x[0] === k; })) E.push([k, 'Finding']); });
+  return E;
+}
 function graphFinding(f) {
-  var W = 900, H = 310, g = f.graph, cols = [[g.src, 110, 'var(--plum)'], [g.mid, 340, 'var(--dk-blue)'], [g.out, 790, 'var(--orange)']], nodes = [], edges = '';
-  var place = function(list, x, col){ var n = list.length; return list.map(function(nd, i){ return { x: x, y: H / (n + 1) * (i + 1), k: nd[0], v: nd[1], c: nd[2], col: col }; }); };
-  var L = place(g.src, 110, 'var(--plum)'), M = place(g.mid, 340, 'var(--dk-blue)'), O = place(g.out, 790, 'var(--orange)'), C = { x: 570, y: H / 2 };
-  var curve = function(a, b){ var xm = (a.x + b.x) / 2; return '<path class="edge" d="M' + (a.x + 22) + ' ' + a.y + ' C' + xm + ' ' + a.y + ',' + xm + ' ' + b.y + ',' + (b.x - 22) + ' ' + b.y + '"/>'; };
-  var cc = { x: C.x, y: C.y }; var from = M.length ? M : L;
-  if (M.length) L.forEach(function(a){ edges += curve(a, M[0]); });
-  from.forEach(function(a){ edges += curve(a, { x: C.x - 12, y: C.y }); }); O.forEach(function(b){ edges += curve({ x: C.x + 12, y: C.y }, b); });
-  var circle = function(n){ var v = String(n.v).length > 22 ? String(n.v).slice(0, 21) + '…' : String(n.v), badge = nbadge(n.x + 18, n.y - 19, n.c >= 1000 ? Math.round(n.c / 100) / 10 + 'k' : n.c);
-    return '<g class="gn" data-gnode="' + n.k + '" role="link" tabindex="0" aria-label="Open ' + n.k + '"><circle cx="' + n.x + '" cy="' + n.y + '" r="22" fill="' + n.col + '"/>' + nodeGlyph(n.k, n.x, n.y) + badge + '<text class="k" x="' + n.x + '" y="' + (n.y + 40) + '" text-anchor="middle">' + n.k + '</text><text x="' + n.x + '" y="' + (n.y + 58) + '" text-anchor="middle">' + esc(v) + '</text></g>'; };
-  var sevCol = f.lvl === 5 ? 'var(--red)' : f.lvl === 4 ? 'var(--orange)' : 'var(--gold-20)';
-  var center = '<g class="gn" data-gnode="Finding" role="link" tabindex="0" aria-label="Open Overview"><circle cx="' + C.x + '" cy="' + C.y + '" r="34" fill="var(--white)" stroke="' + sevCol + '" stroke-width="3"/>' + nodeGlyph('Finding', C.x, C.y, sevCol) + '<text class="k" x="' + C.x + '" y="' + (C.y + 54) + '" text-anchor="middle">Finding</text><text x="' + C.x + '" y="' + (C.y + 72) + '" text-anchor="middle">' + f.rule + '</text></g>';
-  return '<svg viewBox="0 0 ' + W + ' ' + (H + 40) + '" role="img" aria-label="Relationship graph for finding ' + f.id + '">' + edges + L.concat(M, O).map(circle).join('') + center + '</svg>';
+  var g = f.graph, N = {}, W = 900;
+  g.src.concat(g.mid, g.out).forEach(function(nd){ N[nd[0]] = { k: nd[0], v: nd[1], c: nd[2] }; });
+  N.Finding = { k: 'Finding' };
+  var E = graphEdges(f, N), keys = Object.keys(N);
+  /* layer = longest path from a source; a node with no inputs sits one column before the first node it feeds */
+  var layer = {}; keys.forEach(function(k){ layer[k] = 0; });
+  for (var i = 0; i < keys.length; i++) E.forEach(function(x){ if (layer[x[1]] < layer[x[0]] + 1) layer[x[1]] = layer[x[0]] + 1; });
+  keys.forEach(function(k){ if (k !== 'Finding' && !E.some(function(x){ return x[1] === k; })) { var out = E.filter(function(x){ return x[0] === k; }).map(function(x){ return layer[x[1]]; }); if (out.length) layer[k] = Math.min.apply(null, out) - 1; } });
+  var top = layer.Finding = Math.max.apply(null, keys.map(function(k){ return layer[k]; }).concat([1]));
+  var cols = []; for (var c = 0; c <= top; c++) cols.push(keys.filter(function(k){ return layer[k] === c; }));
+  var H = Math.max(290, 100 * (Math.max.apply(null, cols.map(function(x){ return x.length; })) + 0.5)), pos = {};
+  var xAt = function(c){ return top ? 110 + (W - 220) / top * c : W / 2; };
+  cols.forEach(function(list, c){
+    var bar = function(k){ var ps = E.filter(function(x){ return x[1] === k && pos[x[0]]; }).map(function(x){ return pos[x[0]].y; }); return ps.length ? ps.reduce(function(a, b){ return a + b; }, 0) / ps.length : H / 2; };
+    list.sort(function(a, b){ return bar(a) - bar(b); }).forEach(function(k, i){ pos[k] = { x: xAt(c), y: k === 'Finding' ? H / 2 : H / (list.length + 1) * (i + 1) }; });
+  });
+  var curve = function(a, b, toF){ var xm = (a.x + b.x) / 2; return '<path class="edge" d="M' + (a.x + 22) + ' ' + a.y + ' C' + xm + ' ' + a.y + ',' + xm + ' ' + b.y + ',' + (b.x - (toF ? 34 : 22)) + ' ' + b.y + '"/>'; };
+  var edges = E.map(function(x){ return curve(pos[x[0]], pos[x[1]], x[1] === 'Finding'); }).join('');
+  var colr = function(k){ return k === 'Workload' || k === 'Connection' ? 'var(--plum)' : GRAPH_ASSET[k] ? 'var(--orange)' : 'var(--dk-blue)'; };
+  var circle = function(k){ var n = N[k], p = pos[k], v = n.c > 1 ? '' : String(n.v).length > 22 ? String(n.v).slice(0, 21) + '…' : String(n.v), badge = nbadge(p.x + 18, p.y - 19, n.c >= 1000 ? Math.round(n.c / 100) / 10 + 'k' : n.c);
+    return '<g class="gn" data-gnode="' + k + '" role="link" tabindex="0" aria-label="Open ' + k + '"><circle cx="' + p.x + '" cy="' + p.y + '" r="22" fill="' + colr(k) + '"/>' + nodeGlyph(k, p.x, p.y) + badge + '<text class="k" x="' + p.x + '" y="' + (p.y + 40) + '" text-anchor="middle">' + k + '</text>' + (v ? '<text x="' + p.x + '" y="' + (p.y + 58) + '" text-anchor="middle">' + esc(v) + '</text>' : '') + '</g>'; };
+  var rn = (RULES[f.rule] || { name: f.rule }).name, C = pos.Finding, sevCol = f.lvl === 5 ? 'var(--red)' : f.lvl === 4 ? 'var(--orange)' : 'var(--gold-20)';
+  var center = '<g class="gn" data-gnode="Finding" role="link" tabindex="0" aria-label="Open Overview"><circle cx="' + C.x + '" cy="' + C.y + '" r="34" fill="var(--white)" stroke="' + sevCol + '" stroke-width="3"/>' + nodeGlyph('Finding', C.x, C.y, sevCol) + '<text class="k" x="' + C.x + '" y="' + (C.y + 54) + '" text-anchor="middle">Finding</text><text x="' + C.x + '" y="' + (C.y + 72) + '" text-anchor="middle">' + esc(rn.length > 22 ? rn.slice(0, 21) + '…' : rn) + '</text></g>';
+  return '<svg viewBox="0 0 ' + W + ' ' + (H + 40) + '" role="img" aria-label="Relationship graph for finding ' + f.id + '">' + edges + keys.filter(function(k){ return k !== 'Finding'; }).map(circle).join('') + center + '</svg>';
 }
 /* ═══ Finding detail (Threat Center "Phase 2" prototype presentation) — ONE view model for both finding types ═══ */
 var STATUS_ICON = { 'Open': 'issues-outlined', 'Under Investigation': 'search-outlined', 'Suppressed': 'status-paused-outlined', 'Resolved - Closed': 'status-complete-outlined', 'Resolved - Remediated': 'recommend-outlined' };
@@ -3485,6 +3525,8 @@ var iddPick = { start: null, clicks: 0 };
 function outsideClickCal(e) {
   if (e.target && !document.contains(e.target)) return;   // detached-target guard (re-render before this handler runs)
   if (!document.getElementById('calPicker').contains(e.target)) {
+    // Dismissing after one click keeps that day, the same as clicking it twice.
+    if (calState.mode === 'iddRange' && iddPick.clicks === 1 && iddPick.start) { iddRangePickClick(null, iddPick.start); return; }
     document.getElementById('calPicker').classList.remove('open');
     document.removeEventListener('click', outsideClickCal);
   }

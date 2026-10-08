@@ -9167,6 +9167,8 @@ function outsideClickCal(e) {
   // two-click range). If the target left the document, it was inside.
   if (e.target && !document.contains(e.target)) return;
   if (!document.getElementById('calPicker').contains(e.target)) {
+    // Dismissing after one click keeps that day, the same as clicking it twice.
+    if (calState.mode === 'actRange' && state.actRangePickClicks === 1 && state.actRangePickStart) { actRangePickClick(null, state.actRangePickStart); return; }
     document.getElementById('calPicker').classList.remove('open');
     document.removeEventListener('click', outsideClickCal);
   }
@@ -11338,6 +11340,9 @@ function _actApplyJobsDeepLink(hash) {
   else if (typeof renderActTable === 'function') renderActTable();
   if (typeof renderFilterBar === 'function') renderFilterBar('act');
   _actShowStatusChip();
+  // open=<jobId>: land with that session's detail view open (the restore-started toast in Protected Data links here)
+  var openId = params.get('open');
+  if (openId && typeof openJobDrawer === 'function') setTimeout(function(){ try { openJobDrawer(openId); } catch (e) {} }, 0);
   return true;
 }
 // STATUS FILTER CHIP (2026-09-21, corrected from an earlier over-built
