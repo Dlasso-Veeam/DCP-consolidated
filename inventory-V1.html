@@ -71358,14 +71358,16 @@ window.D365X.recChip = function (key, item) {
   function esc2(e) { if (e.key === 'Escape') closeMenu(); }
   function openMenu(btn) {
     closeMenu(); var T = target(); if (!T) return; var c = ctx(), cmp = !!c && X.on();
-    var item = function (w, label, arg, dis) { return '<button type="button" class="dx-mi"' + (dis ? ' disabled' : '') + ' onclick="D365X.bulk(\'' + w + '\'' + (arg != null ? ',\'' + String(arg).replace(/\'/g, "\\'") + '\'' : '') + ')">' + esc(label) + '</button>'; };
+    var jobLocked = !!(T.cb && T.cb.dataset && T.cb.dataset.dxLocked);   // every row is outside the job's category, so only clearing makes sense
+    /* a count rides as a number badge at the right: grey for all changes, then the legend's own colours for modified, deleted and created */
+    var item = function (w, label, arg, dis, count, tone) { if (jobLocked && w !== 'none') dis = true; return '<button type="button" class="dx-mi"' + (dis ? ' disabled' : '') + ' onclick="D365X.bulk(\'' + w + '\'' + (arg != null ? ',\'' + String(arg).replace(/\'/g, "\\'") + '\'' : '') + ')"><span>' + esc(label) + '</span>' + (count != null ? '<span class="dx-nb ' + (tone || '') + '">' + count + '</span>' : '') + '</button>'; };
     var h = item('all', 'Select all across all pages') + item('page', 'Select all on this page');
     if (cmp) {
-      h += '<div class="dx-md"></div>' + item('changed', 'Select all with changes (' + c.changed + ')', null, !c.changed);
+      h += '<div class="dx-md"></div>' + item('changed', 'Select all with changes', null, !c.changed, c.changed);
       if (c.lv === 'records') {
         var k = c.d ? c.d.counts : { modified: 0, removed: 0, added: 0 };
-        h += item('mod', 'Select all modified (' + k.modified + ')', null, !k.modified) + item('del', 'Select all deleted since (' + k.removed + ')', null, !k.removed)
-          + '<button type="button" class="dx-mi" disabled data-tooltip="Created after the Compare to point, so there is nothing to restore it to">Select all created since (' + k.added + ')</button>';
+        h += item('mod', 'Select all modified', null, !k.modified, k.modified, 'm') + item('del', 'Select all deleted since', null, !k.removed, k.removed, 'd')
+          + '<button type="button" class="dx-mi" disabled data-tooltip="Created after the Compare to point, so there is nothing to restore it to"><span>Select all created since</span><span class="dx-nb a">' + k.added + '</span></button>';
       }
       h += '<div class="dx-md"></div>';
     }
@@ -71389,11 +71391,21 @@ window.D365X.recChip = function (key, item) {
       b.onclick = function (e) { e.stopPropagation(); openMenu(b); }; th.appendChild(b);
     });
   };
-  if (typeof MutationObserver !== 'undefined') ['invTable', 'childTable'].forEach(function (id) { var t = $(id); if (!t) return; var busy = false, ob = new MutationObserver(function () { if (busy) return; busy = true; try { X.injectBulk(); X.syncMaster(); } catch (e) {} ob.takeRecords(); busy = false; }); ob.observe(t, { childList: true, subtree: true, attributes: true, attributeFilter: ['disabled'] }); });
+  if (typeof MutationObserver !== 'undefined') ['invTable', 'childTable'].forEach(function (id) { var t = $(id); if (!t) return; var busy = false, ob = new MutationObserver(function () { if (busy) return; busy = true; try { X.syncMaster(); X.injectBulk(); } catch (e) {} ob.takeRecords(); busy = false; }); ob.observe(t, { childList: true, subtree: true, attributes: true, attributeFilter: ['disabled'] }); });
   setTimeout(function () { try { X.injectBulk(); } catch (e) {} }, 0);
   /* the header checkbox mirrors the rows: empty, partly selected (a dash) or all selected. Record and field rows don't update it themselves. */
   X.syncMaster = function () {
-    var t = (typeof _drillType === 'function') ? _drillType() : null; if (t !== 'records' && t !== 'fields') return;
+    var t = (typeof _drillType === 'function') ? _drillType() : null;
+    var all0 = $('childSelectAll');
+    /* every row locked by the job's category: the header has nothing it may select either */
+    var lp = (typeof childState !== 'undefined' && childState.parentId) ? RESOURCES.find(function (r) { return r.id === childState.parentId; }) : null;
+    if (all0 && (t === 'records' || t === 'fields' || (t === 'standard' && lp && lp.wl === 'Dynamics 365')) && typeof state !== 'undefined' && state.invMode === 'drill') {
+      var rb = [].slice.call(document.querySelectorAll('#childTbody .row-cb')), covered = typeof childCoveredByAncestor === 'function' && childCoveredByAncestor();
+      var locked = rb.length > 0 && !covered && rb.every(function (b) { return b.disabled && !b.checked; });
+      if (locked) { all0.disabled = true; all0.dataset.dxLocked = '1'; }
+      else if (all0.dataset.dxLocked) { all0.disabled = false; delete all0.dataset.dxLocked; }
+    }
+    if (t !== 'records' && t !== 'fields') return;
     var all = $('childSelectAll'); if (!all || all.disabled) return;
     var boxes = [].slice.call(document.querySelectorAll('#childTbody .row-cb:not(:disabled)')); if (!boxes.length) return;
     var n = boxes.filter(function (b) { return b.checked; }).length;
@@ -71411,7 +71423,9 @@ window.D365X.recChip = function (key, item) {
     '.dx-bulk-caret { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; margin-left: 4px; padding: 0; border: 0; border-radius: 4px; background: var(--black-5); color: var(--black-100); cursor: pointer; }',
     '.dx-bulk-caret:hover { background: var(--black-8); } .dx-bulk-caret svg { width: 20px; height: 20px; }',
     '.dx-bm { position: fixed; z-index: 3200; min-width: 260px; max-width: 360px; padding: 4px 0; background: var(--white); border: 1px solid var(--border); border-radius: 4px; box-shadow: 0 8px 24px rgba(31,34,41,.16); }',
-    '.dx-mi { display: block; width: 100%; padding: 10px 16px; border: 0; background: transparent; text-align: left; font-family: inherit; font-size: 16px; line-height: 22px; color: var(--black-100); cursor: pointer; }',
+    '.dx-mi { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; padding: 10px 16px; border: 0; background: transparent; text-align: left; font-family: inherit; font-size: 16px; line-height: 22px; color: var(--black-100); cursor: pointer; }',
+    '.dx-nb { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 22px; padding: 0 8px; box-sizing: border-box; border-radius: 2px; background: var(--black-5); color: var(--black-70); font-size: 14px; font-weight: 500; line-height: 20px; flex: none; }',
+    '.dx-nb.m { background: var(--gold-chip-bg); color: var(--gold-chip-fg); } .dx-nb.d { background: var(--soft-red-bg); color: var(--red); } .dx-nb.a { background: var(--em-green-tint); color: var(--em-green); } .dx-mi:disabled .dx-nb { opacity: .5; }',
     '.dx-mi:hover:not(:disabled) { background: var(--black-5); } .dx-mi:disabled { color: var(--black-30); cursor: default; }',
     '.dx-md { height: 1px; margin: 4px 0; background: var(--border-light); } .dx-mh { padding: 8px 16px 4px; font-size: 14px; line-height: 20px; color: var(--black-60); }',
     '/* column-header "Select N changed" links retired: selection by field is in the header menu */',
@@ -71447,6 +71461,7 @@ window.D365X.recChip = function (key, item) {
       var b = document.createElement('button'); b.type = 'button'; b.className = 'dx-col-sel' + (on ? ' on' : ''); b.setAttribute('aria-pressed', on ? 'true' : 'false');
       b.setAttribute('aria-label', tip); b.setAttribute('data-tooltip', tip); b.innerHTML = CHECKLIST;
       b.setAttribute('data-col', col); b.onclick = function (e) { e.stopPropagation(); toggleSelectByDiffCol(col); };
+      if (tbl.querySelector('#childSelectAll[data-dx-locked]')) { b.disabled = true; b.style.opacity = '.4'; b.style.cursor = 'default'; }
       th.classList.add('dx-has-sel'); th.appendChild(b);
     });
   };
@@ -71479,7 +71494,7 @@ window.D365X.recChip = function (key, item) {
       if (X.on() && !opts.manualRpId && !opts.asOfDate && typeof key === 'string') {
         var res = RESOURCES.find(function (r) { return r.id === key; });
         var target = res || ((key.indexOf('rec-') === 0 || key.indexOf('field-') === 0) ? X.table : null);
-        if (target && target.wl === 'Dynamics 365') { var rp = X.compareRp(target); if (rp) opts = Object.assign({}, opts, { manualRpId: rp.id, isPinned: true }); }
+        if (target && target.wl === 'Dynamics 365') { var rp = (X.targetRp || X.compareRp)(target); if (rp) opts = Object.assign({}, opts, { manualRpId: rp.id, isPinned: true }); }
       }
     } catch (e) {}
     return origAdd.call(this, key, opts);
@@ -71549,6 +71564,84 @@ window.D365X.recChip = function (key, item) {
   X.d365Category = d365Category;
   /* a row that would cross the job's lock renders disabled, the way locked rows do in the other workloads */
   window._d365Locked = function (key) { try { return state.restorePlan.size > 0 && !state.restorePlan.has(key) && typeof _categoryLockBlocks === 'function' && _categoryLockBlocks(key); } catch (e) { return false; } };
+})();
+
+/* ═══ Restore target while comparing: the Restore button names the point it restores from, and a chevron switches between the two compared points ═══ */
+(function () {
+  'use strict';
+  var X = window.D365X, stored = 'anchor';
+  X.target = 'compare';   // 'compare' = the Compare to point (default: go back to how it was) | 'anchor' = the Restore Point
+  try { Object.defineProperty(state, 'invRestoreTarget', { configurable: true, get: function () { return X.on() ? X.target : stored; }, set: function (v) { stored = v; } }); } catch (e) {}
+  X.targetRp = function (res) { var r = X.target === 'anchor' ? X.anchorRp(res) : X.compareRp(res); return r || X.compareRp(res); };
+  function jobRes() {
+    var res = null;
+    state.restorePlan.forEach(function (_, key) { if (res) return; var r = RESOURCES.find(function (x) { return x.id === key; }) || (/^(rec|field)-/.test(key) ? X.table : null); if (r && r.wl === 'Dynamics 365') res = r; });
+    return res || X.table;
+  }
+  function esc(v) { return String(v).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function day(ts) { return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+  function chipText(sel) { var e = document.querySelector(sel); return e ? e.textContent.trim() : ''; }
+  var NAME = { compare: 'Compare to', anchor: 'Restore Point' };
+  X.setTarget = function (t) {
+    if (t === X.target) return; X.target = t;
+    state.restorePlan.forEach(function (item, key) {
+      var r = RESOURCES.find(function (x) { return x.id === key; }) || (/^(rec|field)-/.test(key) ? X.table : null);
+      if (!item || !r || r.wl !== 'Dynamics 365') return;
+      var rp = X.targetRp(r); if (rp) { item.isPinned = true; item.manualRpId = rp.id; state.selectedRpOverrides[key] = rp.id; }
+    });
+    closeRs(); if (typeof renderTopActionBar === 'function') renderTopActionBar();
+    if (typeof rdRefreshActiveTable === 'function') rdRefreshActiveTable();
+  };
+  X.decorateRestore = function () {
+    [].slice.call(document.querySelectorAll('.top-action-bar')).forEach(function (bar) {
+      var old = bar.querySelector('.dx-rs'); if (old) old.remove();
+      if (!X.on() || !state.restorePlan.size) return;
+      var btn = bar.querySelector('.tab-right-primary'); if (!btn || btn.closest('.dx-rs') || btn.disabled || !/^\s*Restore\s*$/.test(btn.textContent)) return;
+      var res = jobRes(), rp = res && X.targetRp(res), when = rp ? day(rp.ts) : '', full = rp ? X.short(rp.ts) : '';
+      var icon = (btn.querySelector('svg') || {}).outerHTML || '';
+      var chev = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('keyboard-arrow-down-outlined', 20)) || '▾';
+      var grp = document.createElement('span'); grp.className = 'dx-rs';
+      var main = document.createElement('button'); main.type = 'button'; main.className = 'tab-right-primary dx-rs-main'; main.setAttribute('onclick', btn.getAttribute('onclick') || 'openWorkspace()');
+      main.innerHTML = icon + 'Restore' + (when ? ' to ' + when : '');
+      main.setAttribute('data-tooltip', 'Restores from the ' + (X.target === 'anchor' ? 'Restore Point' : 'Compare to point') + (full ? ': ' + full : ''));
+      var ch = document.createElement('button'); ch.type = 'button'; ch.className = 'tab-right-primary dx-rs-chev'; ch.setAttribute('aria-haspopup', 'menu'); ch.setAttribute('aria-label', 'Choose the restore point to restore from'); ch.innerHTML = chev;
+      ch.onclick = function (e) { e.stopPropagation(); openRs(ch); };
+      grp.appendChild(main); grp.appendChild(ch); btn.replaceWith(grp);
+    });
+  };
+  var rsMenu = null, rsAnchor = null;
+  function closeRs() { if (rsMenu) { rsMenu.remove(); rsMenu = null; } rsAnchor = null; document.removeEventListener('click', rsOut, true); document.removeEventListener('keydown', rsEsc, true); window.removeEventListener('scroll', rsPlace, true); window.removeEventListener('resize', rsPlace); }
+  function rsOut(e) { if (rsMenu && !rsMenu.contains(e.target)) closeRs(); }
+  function rsEsc(e) { if (e.key === 'Escape') closeRs(); }
+  function rsPlace() { if (!rsMenu || !rsAnchor || !document.contains(rsAnchor)) return closeRs(); var r = rsAnchor.getBoundingClientRect(); rsMenu.style.top = (r.bottom + 4) + 'px'; rsMenu.style.left = Math.max(8, r.right - rsMenu.offsetWidth) + 'px'; }
+  function openRs(btn) {
+    if (rsMenu) { closeRs(); return; }
+    var check = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
+    var row = function (t, label) {
+      return '<button type="button" class="dx-mi dx-rs-opt" role="menuitemradio" aria-checked="' + (X.target === t) + '" onclick="D365X.setTarget(\'' + t + '\')"><span class="dx-rs-ck">' + (X.target === t ? check : '') + '</span><span class="dx-rs-tx"><span class="dx-rs-cap">' + NAME[t] + '</span><span>' + esc(label) + '</span></span></button>';
+    };
+    var m = document.createElement('div'); m.className = 'dx-bm'; m.setAttribute('role', 'menu');
+    m.innerHTML = row('compare', chipText('#d365CmpVal') || X.cmpLabel()) + row('anchor', chipText('#rpChip .rp-chip-val'));
+    document.body.appendChild(m); rsMenu = m; rsAnchor = btn; rsPlace();
+    window.addEventListener('scroll', rsPlace, true); window.addEventListener('resize', rsPlace);
+    setTimeout(function () { document.addEventListener('click', rsOut, true); document.addEventListener('keydown', rsEsc, true); }, 0);
+  }
+  var origBar2 = window.renderTopActionBar;
+  window.renderTopActionBar = function () { var r = origBar2.apply(this, arguments); try { X.decorateRestore(); } catch (e) {} return r; };
+  var origSync = X.syncChrome;
+  X.syncChrome = function () { origSync.apply(this, arguments); if (!X.on()) X.target = 'compare'; };
+  var st = document.createElement('style');
+  st.textContent = [
+    /* Veeam Vision Combo Button (node 291:21331): two 36px buttons, a 1px Green S30 divider between them, 4px outer radius */
+    '.dx-rs { display: inline-flex; align-items: stretch; gap: 1px; background: var(--green-s30); border-radius: 4px; overflow: hidden; }',
+    '.top-action-bar .dx-rs .tab-right-primary:not(:disabled) { height: 36px; border: 0; border-radius: 0; padding: 0 16px; line-height: 22px; }',
+    '.top-action-bar .dx-rs .dx-rs-chev:not(:disabled) { width: 36px; padding: 0; justify-content: center; }',
+    '.dx-rs .dx-rs-chev svg { width: 20px; height: 20px; }',
+    '.dx-rs-opt { justify-content: flex-start !important; gap: 8px !important; min-width: 220px; }',
+    '.dx-rs-ck { width: 16px; height: 16px; flex: none; color: var(--em-green); display: inline-flex; } .dx-rs-ck svg { width: 16px; height: 16px; }',
+    '.dx-rs-tx { display: flex; flex-direction: column; text-align: left; line-height: 20px; } .dx-rs-cap { font-size: 14px; color: var(--black-60); }'
+  ].join('\n');
+  document.head.appendChild(st);
 })();
 </script>
 </body>
