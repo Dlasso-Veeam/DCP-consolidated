@@ -97,7 +97,7 @@
   --black-100: #1f2229;
   --black-80: #4c4e54;    /* DS Dark Black S80 — wizard summary value text (designer mock 2026-07-09) */
   --black-60: #626469;
-  --status-blue: #1ca8dd;      /* REAL Securiti Blue S100, pinned for per-VALUE chips (total-count chip, Figma 10746:122220) — must not follow the theme's blue→green remap (activity.html convention) */
+  --status-blue: #1ca8dd;      /* REAL Securiti Blue S100, pinned for per-VALUE chips (total-count chip, Figma 10746:122220) — must not follow the theme's blue→green remap (activity-agent-overlay.html convention) */
   --status-blue-5: #f3fafd;    /* REAL Securiti Blue S5, pinned (same rule) */
   --status-blue-40: #a4dcf1;   /* REAL Securiti Blue S40, pinned — info-alert border (Figma 7220:22946); --blue-40 is Vision-remapped to green below */
   --black-50: #797a7f;    /* DS Dark Black S60 (this file's --black-60 holds the S70 value) — summary micro-labels */
@@ -7948,7 +7948,7 @@ input[type="checkbox"] { accent-color: var(--em-green); }
           <!-- View Activity RETIRED from this topbar (user 2026-07-15) — the
                Activity log is a first-class core-nav destination now. Parked,
                not deleted; the screen-toggle in go() is also parked. -->
-          <button class="btn btn-outline btn-sm" onclick="window.location.href='activity.html'" id="btnActivity" style="display:none" aria-hidden="true">
+          <button class="btn btn-outline btn-sm" onclick="window.location.href='activity-agent-overlay.html'" id="btnActivity" style="display:none" aria-hidden="true">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             View Activity
           </button>
@@ -8689,7 +8689,7 @@ input[type="checkbox"] { accent-color: var(--em-green); }
                       <span class="pm-sub">Force-include the selection in a policy&rsquo;s scope. Conditions unchanged.</span>
                     </div>
                     <div class="protect-menu-divider"></div>
-                    <div class="protect-menu-item" role="menuitem" onclick="closeProtectMenus();window.location.href='legacy%20designs/backup-policies.html#new'">
+                    <div class="protect-menu-item" role="menuitem" onclick="closeProtectMenus();window.location.href='legacy%20designs/backup-policies-agent-overlay.html#new'">
                       <span class="pm-title">Create a new policy from selection</span>
                       <span class="pm-sub">Opens policy authoring pre-seeded with the selected resources.</span>
                     </div>
@@ -8907,7 +8907,7 @@ input[type="checkbox"] { accent-color: var(--em-green); }
                       <span class="pm-sub">Force-include the selection in a policy&rsquo;s scope. Conditions unchanged.</span>
                     </div>
                     <div class="protect-menu-divider"></div>
-                    <div class="protect-menu-item" role="menuitem" onclick="closeProtectMenus();window.location.href='legacy%20designs/backup-policies.html#new'">
+                    <div class="protect-menu-item" role="menuitem" onclick="closeProtectMenus();window.location.href='legacy%20designs/backup-policies-agent-overlay.html#new'">
                       <span class="pm-title">Create a new policy from selection</span>
                       <span class="pm-sub">Opens policy authoring pre-seeded with the selected resources.</span>
                     </div>
@@ -9056,7 +9056,7 @@ input[type="checkbox"] { accent-color: var(--em-green); }
     <!-- Primary = Return to Protected Data w/ the onboarding arrow glyph;
          View activity demoted to the iconless text action (user 2026-07-15). -->
     <div style="display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-top:16px">
-      <button class="btn btn-text" onclick="window.location.href='activity.html'" style="display:inline-flex;align-items:center;height:36px;padding:0 4px;font-size:14px;font-weight:500;color:var(--blue);background:transparent;border:none;cursor:pointer">View activity</button>
+      <button class="btn btn-text" onclick="window.location.href='activity-agent-overlay.html'" style="display:inline-flex;align-items:center;height:36px;padding:0 4px;font-size:14px;font-weight:500;color:var(--blue);background:transparent;border:none;cursor:pointer">View activity</button>
       <button class="btn btn-blue" onclick="wsLaunchReturn()" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;padding:0 14px;font-size:14px;font-weight:500;min-width:200px">
         Return to Protected Data
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
@@ -13950,7 +13950,7 @@ var RESOURCES = (function(){
   });
 
   // ── POLICY BINDINGS ────────────────────────────────────────────────────
-  // The policies page (backup-policies.html) carries an authoritative list
+  // The policies page (backup-policies-agent-overlay.html) carries an authoritative list
   // of policies with `resourceCount` per policy. To keep inventory and
   // policies in sync — i.e. so clicking "View resources" from a policy
   // actually lands on a populated table — we mirror that authoritative
@@ -13960,10 +13960,10 @@ var RESOURCES = (function(){
   // budgeted count fall through as Unprotected ("—").
   //
   // Order within each workload mirrors the policy ladder rank order from
-  // backup-policies.html POLICIES seed. Default-policy entries sit at the
+  // backup-policies-agent-overlay.html POLICIES seed. Default-policy entries sit at the
   // end of each list to model "catch-all only after no custom matches."
   // Sum per workload must be ≤ resource count for that workload.
-  // Keep this in lockstep with backup-policies.html POLICIES seed —
+  // Keep this in lockstep with backup-policies-agent-overlay.html POLICIES seed —
   // changes in either place need to land in both.
   // ── Status ↔ Policy invariant normalization ─────────────────────
   // The status and policy fields are coupled by the rules of this
@@ -14081,7 +14081,7 @@ var RESOURCES = (function(){
   });
 
   // Hydrate custom-binding hints from localStorage so newly-created
-  // policies in backup-policies.html show up here as a populated set.
+  // policies in backup-policies-agent-overlay.html show up here as a populated set.
   // Each hint says "tag N resources of workload W with name P" — we
   // pick from the unprotected pool ('—') so we don't steal resources
   // from existing seeded bindings. The pool excludes Excluded items
@@ -15916,16 +15916,16 @@ function _v1FormatDateAsRp(dateStr) {
 })();
 
 // ═══════════════════════════════════════════════════════════════════
-// BACKUP POLICIES — workload-aware, mirrors backup-policies.html
+// BACKUP POLICIES — workload-aware, mirrors backup-policies-agent-overlay.html
 // ═══════════════════════════════════════════════════════════════════
 // Policies are scoped per-workload. Every workload ships with 3 system
 // default policies (Bronze / Silver / Gold) that act as catch-alls;
 // admins can add any number of higher-ranked custom policies in
-// backup-policies.html. This drawer shows the policies available to
+// backup-policies-agent-overlay.html. This drawer shows the policies available to
 // the currently selected resource(s), grouped by workload.
 //
 // Resources on this page store `wl` as a display label (e.g. 'GitHub',
-// 'Dynamics 365'); backup-policies.html keys workloads by slug
+// 'Dynamics 365'); backup-policies-agent-overlay.html keys workloads by slug
 // (e.g. 'github', 'd365'). WL_DISPLAY_TO_KEY bridges the two.
 var WL_DISPLAY_TO_KEY = {
   'Okta WIC': 'okta-wic',
@@ -15943,7 +15943,7 @@ var WL_DISPLAY_TO_KEY = {
 var WL_KEY_TO_DISPLAY = Object.keys(WL_DISPLAY_TO_KEY).reduce(function(acc, k){ acc[WL_DISPLAY_TO_KEY[k]] = k; return acc; }, {});
 
 // Per-tier retention meta (for the card sub-line). Matches PRESETS in
-// backup-policies.html — kept in sync manually; duplicate source of truth
+// backup-policies-agent-overlay.html — kept in sync manually; duplicate source of truth
 // for this standalone prototype file.
 var POLICY_TIER_META = {
   gold:   'Every 8h · 365d / 52w / 84m · RPO 8h',
@@ -15953,7 +15953,7 @@ var POLICY_TIER_META = {
 
 // Policy catalog — custom policies per workload, plus 3 default tiers
 // (Bronze / Silver / Gold) seeded for every workload. Mirrors the seed
-// in backup-policies.html line 2146.
+// in backup-policies-agent-overlay.html line 2146.
 var POLICIES = [
   // Okta WIC
   {id:'pol_oktawic_tenantcfg',      name:'Tenant Configuration', workload:'okta-wic',     rank:1, isDefault:false, tier:'gold',   scopeDesc:'All configuration objects (49 types) · 12h RPO', retention:'365d / 52w / 84m'},
@@ -30086,11 +30086,11 @@ function resourceDiscoveredDaysAgo(r) {
 // fly. For the prototype we deterministically derive applicable
 // policies from a workload-keyed candidate pool, seeded by resource
 // id so the same row always shows the same ladder across renders.
-// Mirror of WL_LABELS in backup-policies.html, inverted. Used by the
+// Mirror of WL_LABELS in backup-policies-agent-overlay.html, inverted. Used by the
 // policy ladder drawer's primary CTA to land the user on the policies
 // page with the right workload pre-selected (so they can see the full
 // priority order and reorder it if they have permissions). Keep this in
-// lockstep with backup-policies.html WL_LABELS — both are sources of
+// lockstep with backup-policies-agent-overlay.html WL_LABELS — both are sources of
 // truth for cross-page navigation by workload.
 var WL_LABEL_TO_ID = {
   'Okta WIC':         'okta-wic',
@@ -30127,7 +30127,7 @@ function _invSimpleHash(s) {
 }
 
 // Terminology used here matches the policy-stack lock — see the block
-// at the top of backup-policies.html (search "TERMINOLOGY LOCK"). Quick
+// at the top of backup-policies-agent-overlay.html (search "TERMINOLOGY LOCK"). Quick
 // reference: in scope = matches scope; effective = the one policy that
 // actually protects it; shadowed = matches but a higher-ranked policy
 // claimed it first; unprotected = no active policy matches.
@@ -30222,11 +30222,11 @@ function closePolicyLadderDrawer() {
   _policyLadderWl = null;
 }
 
-// Footer CTA handler — navigates to backup-policies.html with the
+// Footer CTA handler — navigates to backup-policies-agent-overlay.html with the
 // resource's workload pre-selected via the wl/<id> hash branch.
 function goToPolicyLadder() {
   if (!_policyLadderWl) return;
-  window.location.href = 'legacy%20designs/backup-policies.html#wl/' + encodeURIComponent(_policyLadderWl);
+  window.location.href = 'legacy%20designs/backup-policies-agent-overlay.html#wl/' + encodeURIComponent(_policyLadderWl);
 }
 
 function ladderRowHTML(name, rank, isEffective, isOnly) {
@@ -45329,7 +45329,7 @@ function wsExportD365Records() {
   var n = state.restorePlan ? state.restorePlan.size : 0;
   if (!n) return;
   var noun = n + ' record' + (n === 1 ? '' : 's');
-  if (typeof showToast === 'function') showToast('Export job started \u2014 ' + noun, { type: 'loading', body: 'You\u2019ll receive an email when it\u2019s ready. Track it in the <a href="activity.html">Activity</a>.' });
+  if (typeof showToast === 'function') showToast('Export job started \u2014 ' + noun, { type: 'loading', body: 'You\u2019ll receive an email when it\u2019s ready. Track it in the <a href="activity-agent-overlay.html">Activity</a>.' });
 }
 // "Export" / "Export all" — the cart-level export ACTION (cart action bar +
 // wizard Select-step footer). Opens the shared Export dialog (format, scope,
@@ -45341,7 +45341,7 @@ function wsDownloadAllBasket() {
   var n = state.restorePlan ? state.restorePlan.size : 0;
   if (n === 0) return;
   var noun = n + ' item' + (n === 1 ? '' : 's');
-  if (typeof showToast === 'function') showToast('Export job started \u2014 ' + noun, { type: 'loading', body: 'You\u2019ll receive an email when it\u2019s ready. Track it in the <a href="activity.html">Activity</a>.' });
+  if (typeof showToast === 'function') showToast('Export job started \u2014 ' + noun, { type: 'loading', body: 'You\u2019ll receive an email when it\u2019s ready. Track it in the <a href="activity-agent-overlay.html">Activity</a>.' });
 }
 // Per-row Download — wired to the kebab menu's Download item on each
 // basket row. Resolves the cart key back to its display name (best
@@ -45353,7 +45353,7 @@ function wsDownloadBasketItem(key) {
   // Modal retired (pass 2): single-item export dispatches directly.
   var r = RESOURCES.find(function(x){ return x.id === (typeof key === 'string' && key.indexOf(':') > 0 ? key.split(':')[0] : key); });
   var noun = r ? r.name : '1 item';
-  if (typeof showToast === 'function') showToast('Export job started \u2014 ' + noun, { type: 'loading', body: 'You\u2019ll receive an email when it\u2019s ready. Track it in the <a href="activity.html">Activity</a>.' });
+  if (typeof showToast === 'function') showToast('Export job started \u2014 ' + noun, { type: 'loading', body: 'You\u2019ll receive an email when it\u2019s ready. Track it in the <a href="activity-agent-overlay.html">Activity</a>.' });
 }
 // Toggle the Configure step's behavior-notes (warn/info) card.
 // (Legacy — the inline behavior-notes card was replaced by the
@@ -46531,13 +46531,13 @@ function wsLaunchToast() {
     if (isExp) {
       showToast('Export job started for ' + noun, {
         type:   'loading',
-        body:   'You\'ll receive an email when it\'s ready. Track it in the <a href="activity.html">Activity</a>.',
+        body:   'You\'ll receive an email when it\'s ready. Track it in the <a href="activity-agent-overlay.html">Activity</a>.',
         action: null
       });
     } else {
       showToast('Restore job started for ' + noun, {
         type:   'loading',
-        body:   'Track progress in the <a href="activity.html">Activity</a>.',
+        body:   'Track progress in the <a href="activity-agent-overlay.html">Activity</a>.',
         action: null
       });
     }
@@ -46570,13 +46570,13 @@ function wsShowLaunchPopup() {
     if (isExp) {
       showToast('Export job started for ' + noun, {
         type:   'loading',
-        body:   'You\'ll receive an email when it\'s ready. Track it in the <a href="activity.html">Activity</a>.',
+        body:   'You\'ll receive an email when it\'s ready. Track it in the <a href="activity-agent-overlay.html">Activity</a>.',
         action: null
       });
     } else {
       showToast('Restore job started for ' + noun, {
         type:   'loading',
-        body:   'Track progress in the <a href="activity.html">Activity</a>.',
+        body:   'Track progress in the <a href="activity-agent-overlay.html">Activity</a>.',
         action: null
       });
     }
@@ -46615,9 +46615,9 @@ function wsBeginExecute() {
 // Restore-animation kick-off — split out from wsBeginExecute so the
 // pre-execution ticker can call it once every check has cleared.
 // ── Cross-page job bridge (designer 2026-07-10): dispatched jobs publish
-// to localStorage so the Activity page (activity.html) lists them for real —
+// to localStorage so the Activity page (activity-agent-overlay.html) lists them for real —
 // the "Track it in the Activity log" links stop pointing at a page that
-// doesn't know the job exists. Reader: activity.html's _actBridgeJobs().
+// doesn't know the job exists. Reader: activity-agent-overlay.html's _actBridgeJobs().
 function _bridgePublishJob(job) {
   try {
     var KEY = 'dcc-jobs-bridge';
@@ -46665,7 +46665,7 @@ function wsBeginRestoreAnimation() {
       // the Jobs record stays ONE table, initiator is a fact on the row
       // (realignment 2026-09-10). Fictional operator otherwise (2026-07-13
       // — no real coworkers in demo data).
-      owner: ((typeof aiAgent !== 'undefined' && aiAgent._pendingAgentJob && (Date.now() - aiAgent._pendingAgentJob) < 30000) ? 'Backup Admin Agent \u2014 approved by you' : 'j.rivera@acme.com'),
+      owner: ((typeof aiAgent !== 'undefined' && aiAgent._pendingAgentJob && (Date.now() - aiAgent._pendingAgentJob) < 30000) ? 'Veeam Intelligence \u2014 approved by you' : 'j.rivera@acme.com'),
       itemCount: keys.length,
       artifact: isExp ? { file: slug + '-' + new Date().toISOString().slice(0, 10) + '.zip', format: 'ZIP of JSON', size: (keys.length * 6) + ' MB' } : null,
       origin: 'inventory'
@@ -47002,7 +47002,7 @@ function wsRenderProgress() {
     if ((!_jaDone && jobState !== 'ready') || (_jaDone && _isExpJob)) {
       // Export-completed keeps View activity too — the persistent success
       // alert stays actionable, not just decorative.
-      _jaRight = _jaSteps + '<button type="button" class="btn btn-outline ws-job-alert-btn" onclick="window.location.href=\'activity.html\'">View activity</button>';
+      _jaRight = _jaSteps + '<button type="button" class="btn btn-outline ws-job-alert-btn" onclick="window.location.href=\'activity-agent-overlay.html\'">View activity</button>';
     } else {
       _jaRight = _jaSteps;
     }
@@ -49236,7 +49236,7 @@ function wsExecute() {
   closeWorkspace();
   clearPlan();
   if (typeof go === 'function') go('activity');
-  else window.location.href = 'activity.html';
+  else window.location.href = 'activity-agent-overlay.html';
 }
 
 // ─── Heatmap helpers ─────────────────────────────────────────
@@ -58979,7 +58979,7 @@ function openExportDialog(arg) {
   var n = arg.count != null ? arg.count : (state.restorePlan ? state.restorePlan.size : 0) || 1;
   var noun = arg.target || (n + ' item' + (n === 1 ? '' : 's'));
   if (typeof showToast === 'function') {
-    showToast('Export job started \u2014 ' + noun, { type: 'loading', body: 'You\u2019ll receive an email when it\u2019s ready. Track it in the <a href="activity.html">Activity</a>.' });
+    showToast('Export job started \u2014 ' + noun, { type: 'loading', body: 'You\u2019ll receive an email when it\u2019s ready. Track it in the <a href="activity-agent-overlay.html">Activity</a>.' });
   }
   // var cfg, title, subtitle = '', target;
   // if (typeof arg === 'string') {
@@ -59103,10 +59103,10 @@ function confirmExport() {
   if (s.cfg && s.cfg.packages) {
     var hrs = _exportPackageHours();
     var msg = 'Export job started — ' + hrs.toLocaleString('en-US') + ' one-hour package' + (hrs === 1 ? '' : 's') + ' → ZIP of JSON';
-    if (typeof showToast === 'function') showToast(msg, { type: 'loading', body: 'You’ll receive an email when it’s ready. Track it in the <a href="activity.html">Activity</a>.' });
+    if (typeof showToast === 'function') showToast(msg, { type: 'loading', body: 'You’ll receive an email when it’s ready. Track it in the <a href="activity-agent-overlay.html">Activity</a>.' });
     return;
   }
-  if (typeof showToast === 'function') showToast('Export job started — ' + (s.target || 'selection') + rangeLabel + ' → ' + s.format, { type: 'loading', body: 'You’ll receive an email when it’s ready. Track it in the <a href="activity.html">Activity</a>.' });
+  if (typeof showToast === 'function') showToast('Export job started — ' + (s.target || 'selection') + rangeLabel + ' → ' + s.format, { type: 'loading', body: 'You’ll receive an email when it’s ready. Track it in the <a href="activity-agent-overlay.html">Activity</a>.' });
 }
 // Row export icon (all workloads) — was a toast stub; now opens the dialog.
 // Express export (pass 2, 2026-07-07): the standalone modal is retired —
@@ -60566,7 +60566,7 @@ function rwConfirm() {
     '<div class="rw-success-sub">' + jobs + ' restore job' + (jobs === 1 ? '' : 's') + ' queued. You\'ll be notified when ' + (jobs === 1 ? 'it completes' : 'they complete') + '. Track progress from the Activity view.</div>' +
     '<div style="display:flex;gap:10px">' +
     '<button class="btn btn-outline" onclick="closeRestore()">Return to Restore</button>' +
-    '<button class="btn btn-blue" onclick="closeRestore();window.location.href=\'activity.html\'">View in Activity →</button>' +
+    '<button class="btn btn-blue" onclick="closeRestore();window.location.href=\'activity-agent-overlay.html\'">View in Activity →</button>' +
     '</div></div>';
 }
 
@@ -63156,7 +63156,7 @@ function refreshAllTableScrollShadows() {
       if (c.status !== 'pending') return '';
       var cur = MC.cur === i && c.status === 'pending', run = false, ok = supported(c);
       var from = c.from || (c.user ? null : fid), badge = from ? '<a class="mc-from" href="identity-dashboard.html" target="_blank" rel="noopener" data-tooltip="Added from this finding. Opens the finding" onclick="event.stopPropagation()">' + esc(from) + '</a>' : '';
-      var act = run ? '<span class="mc-chip ' + (c.status === 'success' ? 'ok' : c.status === 'failed' ? 'err' : 'info') + '">' + (c.status === 'running' ? 'Running' : c.status === 'success' ? 'Success' : 'Failed') + '</span><a class="mc-link" href="activity.html" target="_blank" rel="noopener" onclick="event.stopPropagation()">View session</a>' : '';
+      var act = run ? '<span class="mc-chip ' + (c.status === 'success' ? 'ok' : c.status === 'failed' ? 'err' : 'info') + '">' + (c.status === 'running' ? 'Running' : c.status === 'success' ? 'Success' : 'Failed') + '</span><a class="mc-link" href="activity-agent-overlay.html" target="_blank" rel="noopener" onclick="event.stopPropagation()">View session</a>' : '';
       var rm = run ? '' : '<button class="btn-icon btn-icon-sm ws-basket-row-remove" type="button" data-tooltip="Remove this cart" aria-label="Remove the ' + esc(c.wlLabel || c.wlName) + ' cart" onclick="event.stopPropagation(); mcRemove(' + i + ')">' + TRASH + '</button>';
       var tip = (!run && !ok) ? ' data-tooltip="' + esc((c.wlLabel || c.wlName) + ' is not in Protected Data in the prototype yet') + '"' : '';
       return '<div class="mc-row' + (cur ? ' cur' : '') + (run ? ' run' : '') + (!run && !ok ? ' dis' : '') + '" role="option" aria-selected="' + cur + '"' + (!run && !cur ? ' onclick="mcSelect(' + i + ')"' : '') + tip + '><div class="mc-t"><b>' + esc(c.wlLabel || c.wlName) + badge + '</b><span>' + esc(c.what || '') + ' \u00b7 restoring as of ' + esc(ptLabel(c.point)) + '</span></div><span class="mc-sp"></span>' + act + rm + '</div>';
@@ -63181,7 +63181,7 @@ function refreshAllTableScrollShadows() {
     var c = MC.justStarted; MC.justStarted = null; if (!c) return;
     var next = null; rec.carts.forEach(function(x, i){ if (!next && x.status === 'pending' && supported(x)) next = i; });
     var left = pending().length;
-    var actHref = 'activity.html#jobs?workload=' + encodeURIComponent(c.wlName) + (c.jobId ? '&open=' + encodeURIComponent(c.jobId) : '&q=' + encodeURIComponent(String(rec.person || '').toLowerCase().replace(/[^a-z0-9]+/g, '-')));   // with a session id the link lands on that session's detail
+    var actHref = 'activity-agent-overlay.html#jobs?workload=' + encodeURIComponent(c.wlName) + (c.jobId ? '&open=' + encodeURIComponent(c.jobId) : '&q=' + encodeURIComponent(String(rec.person || '').toLowerCase().replace(/[^a-z0-9]+/g, '-')));   // with a session id the link lands on that session's detail
     var track = 'Track progress in the <a href="' + actHref + '" target="_blank" rel="noopener">Activity</a>.';
     if (next != null) { select(next); if (typeof showToast === 'function') showToast((c.wlLabel || c.wlName) + ' restore job started', { type: 'loading', body: track + ' Next in your cart: ' + esc(rec.carts[next].wlLabel || rec.carts[next].wlName) + '.' }); }
     else { MC.cur = null; repaint(); if (typeof showToast === 'function') showToast((c.wlLabel || c.wlName) + ' restore job started', { type: 'loading', body: track }); }
@@ -63300,7 +63300,7 @@ function refreshAllTableScrollShadows() {
   <div class="policy-ladder-body" id="policyLadderBody">
     <!-- populated by openPolicyLadderDrawer -->
   </div>
-  <!-- Footer CTA: lands the admin on backup-policies.html with the
+  <!-- Footer CTA: lands the admin on backup-policies-agent-overlay.html with the
        resource's workload pre-selected, so they can see the full
        priority ladder (this drawer shows only the policies that
        actually match this resource) and reorder it if permitted.
@@ -64834,7 +64834,7 @@ function aiHxRenderOverlay(){
     // The agent-activity door, rehomed from the retired dock footer (user
     // 2026-09-17). History is where you go to look back at agent work, so the
     // audit trail belongs beside it rather than pinned above the composer.
-    + '<div class="ai-hx-foot"><a href="activity.html#agent">View agent activity</a></div>'
+    + '<div class="ai-hx-foot"><a href="activity-agent-overlay.html#agent">View agent activity</a></div>'
     + '</div></div>');
   var b = document.getElementById('aiHxBtn'); if (b) b.classList.add('is-on');
   aiHxKbPaint();
@@ -65266,7 +65266,7 @@ function _aiPersistTranscript(){
   try {
     var _mk = sessionStorage.getItem('vdc-ai-handoff');
     if (_mk) sessionStorage.removeItem('vdc-ai-handoff');   // one-shot
-    if (_mk !== 'inventory-V1.html') return;
+    if (_mk !== 'inventory-V1-agent-overlay.html') return;
   } catch(e){ return; }
   try {
     var raw = JSON.parse(localStorage.getItem('vdc-ai-transcript'));
@@ -65430,7 +65430,7 @@ function _aiBoardDockRenderParked(){
   var b = aiAgent._board;
   // MIRROR to Activity (realignment 2026-09-10): the dock is a session
   // window; the record lives on Activity's Agent view. Every board change
-  // publishes to localStorage — reader: activity.html _agentTasksLive().
+  // publishes to localStorage — reader: activity-agent-overlay.html _agentTasksLive().
   try {
     localStorage.setItem('vdc-agent-tasks', JSON.stringify({
       ts: Date.now(),
@@ -65580,7 +65580,7 @@ function _aiBoardDockRenderParked(){
     + '</button>'
     + '<div class="ai-dock-body">' + rows
     // the dock is a mirror — the record's home is one click away
-    + '<div class="ai-dock-foot"><a href="activity.html#agent">View in Activity</a></div>'
+    + '<div class="ai-dock-foot"><a href="activity-agent-overlay.html#agent">View in Activity</a></div>'
     + '</div>';
 }
 // TASK MANIFEST (user 2026-09-16): the staged launch task arrives once the
@@ -65776,7 +65776,7 @@ var AI_HELD_GATES = {
         type: 'Backup', job: 'backup-sharepoint-sites-rerun',
         resource: 'SharePoint Sites — Retail Division', wl: 'Microsoft 365', tenant: 'contoso-corp',
         status: 'running', startedTs: Date.now(), runForMs: 45 * 60 * 1000,
-        dest: 'Veeam Data Cloud repository', owner: 'Backup Admin Agent — approved by you', origin: 'inventory'
+        dest: 'Veeam Data Cloud repository', owner: 'Veeam Intelligence — approved by you', origin: 'inventory'
       });
       _aiTaskOverride('at3', 'done');
       aiPushAgent('Backup session started — <strong>SharePoint Sites · Retail Division</strong> is re-running now. The session is live in <strong>Activity</strong>; I’ll flag it if the permission-drift signature comes back.' + aiAction('Re-run approved · session dispatched'));
@@ -65969,7 +65969,7 @@ function aiBoardReview(ti){
     headsub: 'Executed under your approval \u00b7 the record lives in Activity',
     actions: [
       { tone:'ok', chip:'Result', txt: t.info && t.info.result ? t.info.result : 'The change is in place.', sub: t.info && t.info.sub ? t.info.sub : '', btn:'Show me the result', toast:'__showresult__' },
-      { tone:'n', chip:'Job', txt:'Full session detail, timings and the audit trail', btn:'Open in Activity', nav:'activity.html#agent', look:true }
+      { tone:'n', chip:'Job', txt:'Full session detail, timings and the audit trail', btn:'Open in Activity', nav:'activity-agent-overlay.html#agent', look:true }
     ]
   });
   aiRender();
@@ -66235,7 +66235,7 @@ function aiacCardHtml(m, i){
     // lie about what happened (a past turn silently changed meaning once you
     // acted on it). The card keeps saying what it always said; the arrival on
     // Activity gets its OWN new turn instead (see _aiHandoffHydrate in
-    // activity.html, which appends a fresh "Back to Protected Data" message
+    // activity-agent-overlay.html, which appends a fresh "Back to Protected Data" message
     // rather than mutating this one) — user: "that button is instead added
     // as a new addition to the bottom of the conversation... the context and
     // conversation have now progressed."
@@ -66270,8 +66270,8 @@ function aiacCardHtml(m, i){
           // names it). Both open the agent's grants in Agentic Studio.
           var _exec = '';
           var _sparkle = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('ai-sparkle', 16)) || '';
-          if (a.flow) _exec = '<button type="button" class="aiac-exec" data-tooltip="The agent can run this — review its grants in Agentic Studio" onclick="window.location.href=\'agent-studio.html#cfg\'">' + _sparkle + '</button>';
-          else if (a.grant) _exec = '<button type="button" class="aiac-exec off" data-tooltip="Yours to do — ' + _aiEsc(a.grant) + ' is off in Agentic Studio; click to review the grant" onclick="window.location.href=\'agent-studio.html#cfg\'">' + _sparkle
+          if (a.flow) _exec = '<button type="button" class="aiac-exec" data-tooltip="The agent can run this — review its grants in Agentic Studio" onclick="window.location.href=\'agent-studio-agent-overlay.html#cfg\'">' + _sparkle + '</button>';
+          else if (a.grant) _exec = '<button type="button" class="aiac-exec off" data-tooltip="Yours to do — ' + _aiEsc(a.grant) + ' is off in Agentic Studio; click to review the grant" onclick="window.location.href=\'agent-studio-agent-overlay.html#cfg\'">' + _sparkle
             + '<span class="aiac-exec-lock">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('lock-filled', 11)) || '') + '</span></button>';
           // ACCEPTED-ACTION LIFECYCLE (user 2026-09-17: "once i click to accept a
           // recommended action, shouldnt the card change in some way to show
@@ -66900,7 +66900,7 @@ function aiDashFlow(){
   var tr = [
     { kind:'route', label:'Interpreting request — estate-wide volume summary', ms:400, chip:'estate-wide',
       detail:[['scope','all repositories · every workload']], result:'A tenant-level aggregate is the right scope here' },
-    { kind:'agent', label:'Delegating to Dashboard Agent', ms:300 },
+    { kind:'agent', label:'Spawning a volume-analysis agent', ms:300, spawn:{ task:'Total and per-repository consumption, trailing 30 days', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
     { kind:'tool',  label:'repos.query — capacity and used space', ms:800, chip:'6 repositories',
       detail:[['metric','used vs provisioned per repository']], result:'427 TB used of 760 TB provisioned (56%)' },
     { kind:'tool',  label:'growth.aggregate — trailing 30 days', ms:700, chip:'+9.0%',
@@ -68401,14 +68401,13 @@ function aiStepsManufacturing(){
     { trace: [
         { kind:'route', label:'Interpreting request — spans backup inventory and record contents', ms:400, chip:'2 clues',
           detail:[['topic','“Manufacturing”'],['tier','records + field values']], result:'Query reaches into record contents — a field-value search, not a name search' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Dynamics 365)', ms:300,
-          detail:[['workload','Dynamics 365'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns Dataverse recovery' },
+        { kind:'agent', label:'Spawning a Dynamics 365 recovery agent', ms:300, spawn:{ task:'Restore the manufacturing records you select', granted:'Restore data · asks first', denied:'Export · Configure policies' } },
         { kind:'tool',  label:'catalog.lookup — field-value index for “Manufacturing”', ms:700, chip:'index hit',
           detail:[['index','backed-up field values'],['term','“Manufacturing”']], result:'Term present in the index — a scoped search will land' }
       ],
       say: function(){ return "<p>Got it — find the Dynamics 365 <strong>records that mention “Manufacturing”</strong> and set them up to restore. I'll search the backed-up field values, see where the term actually lands, and walk you through it.</p><p>Here's how I'll work, right here in your console:</p><p>1 · search &amp; filter → 2 · select the matches → 3 · review &amp; lock the restore point → 4 · configure → 5 · you review the summary and approve.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Graph Agent — searching the backed-up estate', ms:300 },
+        { kind:'agent', label:'Spawning a record-search agent', ms:300, spawn:{ task:'Find matching records in the backed-up estate', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
         { kind:'tool',  label:'inventory.search — “Manufacturing” · in: Field values · all contents', ms:900, chip: m.n + ' records',
           detail:[['query','“Manufacturing”'],['token','in: Field values'],['scope','all contents']], result: m.n + ' records carry matching field values — every match lands on the Industry field' },
         { kind:'tool',  label:'filters.apply — Type: Records', ms:300, chip:'Type: Records',
@@ -68508,12 +68507,11 @@ function aiStepsOwnerFields(){
     { trace: [
         { kind:'route', label:'Interpreting request — field-level rollback to a fixed date', ms:400, chip:'2 clues',
           detail:[['field','Owner'],['target date', DATE_LBL]], result:'Only the Owner value reverts — every other field stays as it is today' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Dynamics 365)', ms:300,
-          detail:[['workload','Dynamics 365'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns Dataverse recovery' }
+        { kind:'agent', label:'Spawning a field-rollback agent', ms:300, spawn:{ task:'Roll the Owner fields back to the fixed date', granted:'Restore data · asks first', denied:'Export · Configure policies' } }
       ],
       say: function(){ return "<p>Got it — roll the <strong>Owner</strong> field on <strong>every record</strong> back to its <strong>"+DATE_LBL+"</strong> value, leaving every other field exactly as it is today. The usual fix after a bad bulk reassignment.</p><p>Here's how I'll work, right here in your console:</p><p>1 · search the backup for the <strong>Owner field</strong> → 2 · narrow the table to just those fields → 3 · select them → 4 · set the restore point to "+DATE_LBL+" and configure → 5 · you review the summary and approve.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Graph Agent — searching the backed-up estate', ms:300 },
+        { kind:'agent', label:'Spawning a field-comparison agent', ms:300, spawn:{ task:'Compare Owner fields at the fixed date', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
         { kind:'tool',  label:'inventory.search — “Owner” · in: Field names · all contents', ms:900, chip: m.n + ' fields',
           detail:[['query','“Owner”'],['token','in: Field names — matches the COLUMN, not values'],['scope','all contents']], result: m.n + ' Owner fields across Accounts, Cases and Opportunities' },
         { kind:'tool',  label:'filters.apply — Type: Field', ms:300, chip:'Type: Field',
@@ -68635,12 +68633,11 @@ function aiStepsDeletedRecovery(){
     { trace: [
         { kind:'route', label:'Interpreting request — recover recently deleted objects', ms:400, chip:'1 lens',
           detail:[['state','deleted in live · intact in backup'],['scope','all of Dynamics 365']], result:'An existence-filter job — the inventory has a lens for exactly this' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Dynamics 365)', ms:300,
-          detail:[['workload','Dynamics 365'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns Dataverse recovery' }
+        { kind:'agent', label:'Spawning a Dynamics 365 recovery agent', ms:300, spawn:{ task:'Recover the recently deleted objects', granted:'Restore data · asks first', denied:'Export · Configure policies' } }
       ],
       say: function(){ return "<p>Got it — find everything <strong>recently deleted</strong> from Dynamics 365 and bring it back. Deleted objects are gone from your live org but still intact in backup.</p><p>Here's how I'll work: 1 · filter the inventory to deleted objects → 2 · select them → 3 · review the restore point → 4 · configure → 5 · you review the summary and approve.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Graph Agent — filtering the inventory', ms:300 },
+        { kind:'agent', label:'Spawning a deletion-lookup agent', ms:300, spawn:{ task:'Filter the inventory to recent deletions', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
         { kind:'tool',  label:'filters.apply — Existence: Deleted', ms:600, chip: m.n + ' objects',
           detail:[['filter','Existence = Deleted in live'],['meaning','in backup · gone from production']], result: m.n + ' recoverable objects — each row carries its dated Deleted badge' }
       ],
@@ -68736,14 +68733,13 @@ function aiStepsMs365DeletedMail(){
     { trace: [
         { kind:'route', label:'Interpreting request — owner: John Voight · topic: “contract renewal” · state: deleted', ms:400, chip:'3 clues',
           detail:[['owner','John Voight'],['topic','“contract renewal”'],['state','deleted']], result:'Scope derivable from the request — no tenant-wide sweep needed' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Microsoft 365)', ms:300,
-          detail:[['workload','Microsoft 365'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns mailbox recovery' },
+        { kind:'agent', label:'Spawning a mailbox recovery agent', ms:300, spawn:{ task:'Recover the deleted email you select', granted:'Restore data · asks first', denied:'Export · Configure policies' } },
         { kind:'tool',  label:'scope.set — John Voight’s mailbox (named in the request)', ms:200, chip:'scoped',
           detail:[['container','All Mailboxes › John Voight'],['reason','owner named in the request']], result:'Search will sweep 1 mailbox instead of 12' }
       ],
       say: function(){ return "<p>Got it — find the <strong>contract renewal</strong> email <strong>John Voight</strong> deleted and set it up to restore. The request names the owner, so I'll scope to <strong>his mailbox</strong> rather than searching the whole tenant.</p><p>1 · open his mailbox → 2 · search it → 3 · lock the restore point → 4 · configure → 5 · you review the summary and approve.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Graph Agent — searching inside the scoped mailbox', ms:300 },
+        { kind:'agent', label:'Spawning a mailbox-search agent', ms:300, spawn:{ task:'Search inside the scoped mailbox', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
         { kind:'tool',  label:'inventory.open — All Mailboxes · John Voight', ms:600, chip:'5 folders',
           detail:[['path','contoso.onmicrosoft.com › All Mailboxes › John Voight']], result:'5 mail folders listed · the breadcrumb confirms the scope' },
         { kind:'tool',  label:'drill.search — “contract renewal” · all contents of this mailbox', ms:900, chip:'1 match',
@@ -68805,8 +68801,7 @@ function aiStepsMs365Offboard(){
     { trace: [
         { kind:'route', label:'Interpreting request — departed user, cross-service recovery', ms:400, chip:'2 services',
           detail:[['user','Mark Aldridge'],['goal','handoff to his manager'],['services','Mailbox · OneDrive']], result:'Departed-user recovery — check what backup still holds' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Microsoft 365)', ms:300,
-          detail:[['workload','Microsoft 365'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns mailbox recovery' },
+        { kind:'agent', label:'Spawning a departed-user recovery agent', ms:300, spawn:{ task:'Recover the departed user across services', granted:'Restore data · asks first', denied:'Export · Configure policies' } },
         { kind:'tool',  label:'directory.lookup — Mark Aldridge · account state', ms:600, chip:'deprovisioned',
           detail:[['account','mark.aldridge@contoso.onmicrosoft.com'],['state','deprovisioned Apr 17']], result:'Account gone from the live tenant' },
         { kind:'tool',  label:'backup.coverage — Mailbox · OneDrive', ms:500, chip:'mailbox only',
@@ -68814,7 +68809,7 @@ function aiStepsMs365Offboard(){
       ],
       say: function(){ return "<p>Got it — recover <strong>Mark Aldridge's</strong> data so his manager can take it over. Checking what the backup still holds for him:</p><p>His <strong>mailbox</strong> was deprovisioned with his account on <strong>Apr 17</strong> — it's gone from the live tenant but <strong>fully restorable from backup</strong>.</p><p>His <strong>OneDrive</strong> isn't in the protected estate — it was never enrolled in backup — so there's nothing to recover there.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Graph Agent — searching the backed-up estate', ms:300 },
+        { kind:'agent', label:'Spawning a cross-service search agent', ms:300, spawn:{ task:'Find the departed user’s data across the backed-up estate', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
         { kind:'tool',  label:'inventory.search — “Mark Aldridge” · all contents', ms:800, chip:'0 hits',
           detail:[['query','“Mark Aldridge”'],['scope','all contents'],['range','Last 30 days']], result:'No mailbox surfaced inside the current window' },
         { kind:'tool',  label:'range.check — no hits inside Last 30 days', ms:300, chip:'out of window',
@@ -68960,14 +68955,13 @@ function aiStepsMs365SiteRollback(){
     { trace: [
         { kind:'route', label:'Interpreting request — point-in-time rollback of one SharePoint folder', ms:400, chip:'3 clues',
           detail:[['site','Retail Division'],['folder','Taxes'],['point','before yesterday’s bulk edit']], result:'Whole-folder rollback to the last clean point' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Microsoft 365)', ms:300,
-          detail:[['workload','Microsoft 365'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns SharePoint recovery' },
+        { kind:'agent', label:'Spawning a SharePoint rollback agent', ms:300, spawn:{ task:'Roll the folder back to the chosen point in time', granted:'Restore data · asks first', denied:'Export · Configure policies' } },
         { kind:'tool',  label:'sharepoint.locate — Retail Division · Taxes', ms:500, chip:'located',
           detail:[['path','All SharePoint › Retail Division › Taxes']], result:'Folder present in backup at the pre-edit point' }
       ],
       say: function(){ return "<p>Got it — the <strong>Taxes</strong> folder on the <strong>Retail Division</strong> site was damaged by yesterday's bulk edit. I'll roll the whole folder back to the last clean point <strong>before</strong> the edit (" + DATE_LBL + "), replacing today's contents.</p><p>1 · open the folder → 2 · confirm the scope → 3 · lock the pre-edit restore point → 4 · configure → 5 · you review the summary and approve.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Graph Agent — searching the backed-up estate', ms:300 },
+        { kind:'agent', label:'Spawning a folder-history agent', ms:300, spawn:{ task:'Search folder history in the backed-up estate', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
         { kind:'tool',  label:'inventory.search — “Taxes” · all contents · Type: Folder', ms:800, chip:'3 folders',
           detail:[['query','“Taxes”'],['filter','Type: Folder'],['scope','all contents']], result:'3 folders share the name — the path under each row tells them apart' }
       ],
@@ -69051,8 +69045,7 @@ function aiStepsMs365MassDelete(){
     { trace: [
         { kind:'route', label:'Interpreting request — anomaly investigation across OneDrive accounts', ms:400, chip:'estate-wide',
           detail:[['signal','unusual deletion activity'],['service','OneDrive'],['window','this morning']], result:'Genuinely estate-wide — a tenant-level scan is the right scope here' },
-        { kind:'agent', label:'Delegating to Graph Agent (Microsoft 365)', ms:300,
-          detail:[['workload','Microsoft 365'],['autonomy','Always ask — approval gates stay with you']], result:'Graph Agent owns OneDrive recovery' },
+        { kind:'agent', label:'Spawning a deletion-pattern agent', ms:300, spawn:{ task:'Rank OneDrive accounts by unusual deletion activity', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
         { kind:'tool',  label:'activity.scan — deletion events · OneDrive · last 12h', ms:900, chip:'412 events',
           detail:[['window','last 12 hours'],['service','OneDrive · 12 accounts']], result:'Deletion volume concentrated in a 20-minute window' },
         { kind:'tool',  label:'anomaly.rank — per-account deletion volume vs 30-day baseline', ms:700, chip:'3 accounts',
@@ -69060,7 +69053,7 @@ function aiStepsMs365MassDelete(){
       ],
       say: function(){ return "<p>On it — scanning this morning's <strong>deletion events across every OneDrive account</strong> and ranking them against each account's 30-day baseline.</p><p>Three accounts stand well outside their baseline: <strong>" + names.map(_aiEsc).join('</strong>, <strong>') + "</strong> — together they account for the bulk of this morning's deletions, concentrated in a 20-minute window. That pattern is consistent with a scripted or bulk action, not everyday cleanup.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Backup Admin Agent — opening the affected accounts', ms:300 },
+        { kind:'agent', label:'Spawning an account-recovery agent', ms:300, spawn:{ task:'Open and restore the affected accounts', granted:'Restore data · asks first', denied:'Export · Configure policies' } },
         { kind:'tool',  label:'tree.open — All OneDrive', ms:400, chip:'13 drives',
           detail:[['path','contoso.onmicrosoft.com › All OneDrive']], result:'Every account in one table — the three affected are selectable here' }
       ],
@@ -69120,8 +69113,7 @@ function aiStepsMs365Overnight(){
     { trace: [
         { kind:'route', label:'Interpreting request — daily composite, exception-first', ms:400, chip:'composite',
           detail:[['scope','whole tenant · trailing 24h'],['mode','exception-first']], result:'Composite of coverage, sessions, threat, license and lifecycle signals' },
-        { kind:'agent', label:'Delegating to Dashboard Agent (Microsoft 365)', ms:300,
-          detail:[['workload','Microsoft 365'],['autonomy','Always ask — approval gates stay with you']], result:'Dashboard Agent owns estate reporting' },
+        { kind:'agent', label:'Spawning a nightly-health agent', ms:300, spawn:{ task:'Compose the overnight picture, exceptions first', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
         { kind:'tool',  label:'sessions.scan — trailing 24h · all policies', ms:900, chip:'42 sessions',
           detail:[['window','trailing 24h'],['policies','4 active']], result:'40 succeeded · 1 failed · 1 warning' },
         { kind:'tool',  label:'graph.query — policy staleness vs RPO', ms:600, chip:'1 stale',
@@ -69135,8 +69127,8 @@ function aiStepsMs365Overnight(){
         stripTitle: 'Overnight sessions by result', unit: 'sessions',
         strip: [ ['Succeeded', 40, 'var(--chart-soft-green)'], ['Failed', 1, 'var(--chart-soft-red)'], ['Stale', 1, 'var(--chart-soft-gold)'] ],
         actions: [
-          { tone:'bad', chip:'Critical', txt:'SharePoint Sites — Retail Division failed', sub:'Permission-drift signature · 3 same-named folders — SharePoint one selected', btn:'Recover the site', flow:'ms365SiteRollback', ack:'On it \u2014 recovering the Retail Division site. Nothing gets written until you approve the plan.' },   // was: btn 'Review session — Activity', nav activity.html (insight→action bridge 2026-09-02); tightened 2026-09-21
-          { tone:'warn', chip:'Warning', txt:'Executive Mailboxes — 11h behind RPO', sub:'Schedule throttled — restore the 10-minute cadence', btn:'Fix the schedule', factId:'exec-mail-rpo', nav:'backup-policies.html#edit/pol_gws_exec_mail', look:true, grant:'Configure policies' }
+          { tone:'bad', chip:'Critical', txt:'SharePoint Sites — Retail Division failed', sub:'Permission-drift signature · 3 same-named folders — SharePoint one selected', btn:'Recover the site', flow:'ms365SiteRollback', ack:'On it \u2014 recovering the Retail Division site. Nothing gets written until you approve the plan.' },   // was: btn 'Review session — Activity', nav activity-agent-overlay.html (insight→action bridge 2026-09-02); tightened 2026-09-21
+          { tone:'warn', chip:'Warning', txt:'Executive Mailboxes — 11h behind RPO', sub:'Schedule throttled — restore the 10-minute cadence', btn:'Fix the schedule', factId:'exec-mail-rpo', nav:'backup-policies-agent-overlay.html#edit/pol_gws_exec_mail', look:true, grant:'Configure policies' }
         ],
         table: { label: 'Exceptions', cols: ['Exception', 'Detail', 'Status'], rows: [
           ['SharePoint Sites — Retail Division', 'Failed 3:12 AM · role/permission error — a known, documented signature', ['bad', 'Failed']],
@@ -69150,8 +69142,7 @@ function aiStepsMs365Coverage(){
     { trace: [
         { kind:'route', label:'Interpreting request — coverage, policy mapping, staleness vs RPO', ms:400, chip:'3 questions',
           detail:[['clauses','backed up? · which policies cover what? · behind schedule?']], result:'All three clauses answered in the headline' },
-        { kind:'agent', label:'Delegating to Q&A Agent (Microsoft 365)', ms:300,
-          detail:[['workload','Microsoft 365'],['autonomy','Always ask — approval gates stay with you']], result:'Q&A Agent owns estate reporting' },
+        { kind:'agent', label:'Spawning a coverage-audit agent', ms:300, spawn:{ task:'Check coverage, policy mapping and staleness against RPO', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
         { kind:'tool',  label:'graph.query — VDC_BACKUP policies · scope by object type', ms:800, chip:'4 policies',
           detail:[['policies','Default · Executive Mailboxes · SharePoint Sites · Teams Files']], result:'Every service has a covering policy (Default is the catch-all)' },
         { kind:'tool',  label:'sessions.scan — last session age per policy', ms:700, chip:'1 stale',
@@ -69172,12 +69163,12 @@ function aiStepsMs365Coverage(){
             { label: 'SharePoint Sites', frac: 3/24, color: 'var(--chart-soft-green)', val: '3h / 24h' },
             { label: 'Teams Files', frac: 6/24, color: 'var(--chart-soft-green)', val: '6h / 24h' } ] },
         actions: [
-          { tone:'warn', chip:'Warning', txt:'Executive Mailboxes — 11h behind RPO', sub:'Schedule throttled — restore the 10-minute cadence', btn:'Fix the schedule', factId:'exec-mail-rpo', nav:'backup-policies.html#edit/pol_gws_exec_mail', look:true, grant:'Configure policies' },
-          { tone:'bad', chip:'Critical', txt:'SharePoint Sites — Retail Division failed', sub:'Permission-drift signature · 3 same-named folders — SharePoint one selected', btn:'Recover the site', flow:'ms365SiteRollback', ack:'On it \u2014 recovering the Retail Division site. Nothing gets written until you approve the plan.' },   // was: btn 'Review session — Activity', nav activity.html (insight→action bridge 2026-09-02)
+          { tone:'warn', chip:'Warning', txt:'Executive Mailboxes — 11h behind RPO', sub:'Schedule throttled — restore the 10-minute cadence', btn:'Fix the schedule', factId:'exec-mail-rpo', nav:'backup-policies-agent-overlay.html#edit/pol_gws_exec_mail', look:true, grant:'Configure policies' },
+          { tone:'bad', chip:'Critical', txt:'SharePoint Sites — Retail Division failed', sub:'Permission-drift signature · 3 same-named folders — SharePoint one selected', btn:'Recover the site', flow:'ms365SiteRollback', ack:'On it \u2014 recovering the Retail Division site. Nothing gets written until you approve the plan.' },   // was: btn 'Review session — Activity', nav activity-agent-overlay.html (insight→action bridge 2026-09-02)
           // the "any gaps?" clause — seeded gap facts, same tiles as the
           // estate health check's roll-up (2026-09-02 overflow staging)
-          { tone:'warn', chip:'Warning', txt:'2 mailbox types unsupported on Express', sub:'Draft a Flex policy — eDiscovery + Boardroom A/V', btn:'Draft the Flex policy', nav:'backup-policies.html#new', look:true, grant:'Configure policies' },
-          { tone:'warn', chip:'Warning', txt:'Team Posts backup — off by default', sub:'One policy toggle closes the only coverage gap', btn:'Enable Team Posts backup', nav:'backup-policies.html', look:true, grant:'Configure policies' }
+          { tone:'warn', chip:'Warning', txt:'2 mailbox types unsupported on Express', sub:'Draft a Flex policy — eDiscovery + Boardroom A/V', btn:'Draft the Flex policy', nav:'backup-policies-agent-overlay.html#new', look:true, grant:'Configure policies' },
+          { tone:'warn', chip:'Warning', txt:'Team Posts backup — off by default', sub:'One policy toggle closes the only coverage gap', btn:'Enable Team Posts backup', nav:'backup-policies-agent-overlay.html', look:true, grant:'Configure policies' }
         ],
         table: { label: 'Per-policy health', cols: ['Policy', 'Type · RPO', 'Last session', 'Result'], rows: [
           ['Default Policy — Bronze', 'Flex · 24h', '5h ago', ['ok', 'Success']],
@@ -69193,8 +69184,7 @@ function aiStepsMs365MailboxCov(){
     { trace: [
         { kind:'route', label:'Interpreting request — protected %, exclusions, license flags', ms:400, chip:'3 questions',
           detail:[['clauses','how many protected? · types excluded? · near a license limit?']], result:'All three clauses answered in the headline' },
-        { kind:'agent', label:'Delegating to Q&A Agent (Microsoft 365)', ms:300,
-          detail:[['workload','Microsoft 365'],['autonomy','Always ask — approval gates stay with you']], result:'Q&A Agent owns estate reporting' },
+        { kind:'agent', label:'Spawning a mailbox-coverage agent', ms:300, spawn:{ task:'Count protected mailboxes, exclusions and license flags', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
         { kind:'tool',  label:'graph.query — BACKUPED_MAILBOX · restore point in trailing 30d', ms:800, chip:'23 / 25',
           detail:[['rule','protected = restore point inside the trailing 30 days']], result:'23 of 25 mailboxes protected (92%)' },
         { kind:'tool',  label:'mailboxes.classify — type support on Express-Outlook', ms:600, chip:'2 excluded',
@@ -69214,13 +69204,13 @@ function aiStepsMs365MailboxCov(){
         // its limit-proximity bar lives with its finding below.
         // was: cap: { label: 'finance-shared', val: 47.2, max: 50, unit: 'GB', color: 'var(--chart-soft-gold)' },
         actions: [
-          { tone:'warn', chip:'Warning', txt:'2 mailbox types unsupported on Express', sub:'Draft a Flex policy — eDiscovery + Boardroom A/V', btn:'Draft the Flex policy', nav:'backup-policies.html#new', look:true, grant:'Configure policies' },
+          { tone:'warn', chip:'Warning', txt:'2 mailbox types unsupported on Express', sub:'Draft a Flex policy — eDiscovery + Boardroom A/V', btn:'Draft the Flex policy', nav:'backup-policies-agent-overlay.html#new', look:true, grant:'Configure policies' },
           // 2026-09-02 FINAL: secondary claims get DESCRIPTIVE COPY, not a
           // second chart — the number folds into the finding text.
           // was: txt:'finance-shared is 2.8GB from consuming a license seat', sub:'Shared mailboxes consume a seat past 50GB', cap: { val: 47.2, max: 50, unit: 'GB', color: 'var(--chart-soft-gold)' },
           // flagged alongside the coverage answer — the seeded stale Express
           // policy is mailbox protection health (2026-09-02 overflow staging)
-          { tone:'bad', chip:'Critical', txt:'Executive Mailboxes — 11h behind RPO', sub:'Schedule throttled — restore the 10-minute cadence', btn:'Fix the schedule', factId:'exec-mail-rpo', nav:'backup-policies.html#edit/pol_gws_exec_mail', look:true, grant:'Configure policies' }
+          { tone:'bad', chip:'Critical', txt:'Executive Mailboxes — 11h behind RPO', sub:'Schedule throttled — restore the 10-minute cadence', btn:'Fix the schedule', factId:'exec-mail-rpo', nav:'backup-policies-agent-overlay.html#edit/pol_gws_exec_mail', look:true, grant:'Configure policies' }
         ],
         table: { label: 'Exclusions & flags', cols: ['Mailbox', 'Type', 'Flag'], rows: [
           ['eDiscovery Search', 'Discovery-search', ['warn', 'Unsupported on Express']],
@@ -69238,8 +69228,7 @@ function aiStepsMs365Health(){
     { trace: [
         { kind:'route', label:'Interpreting request — full estate sweep, ranked by severity', ms:400, chip:'open-ended',
           detail:[['scope','sessions · policies · coverage · licenses · platform gaps']], result:'Broad prompt → aggregate every open issue, ranked by impact' },
-        { kind:'agent', label:'Delegating to Q&A Agent (Microsoft 365)', ms:300,
-          detail:[['workload','Microsoft 365'],['autonomy','Always ask — approval gates stay with you']], result:'Q&A Agent owns estate reporting' },
+        { kind:'agent', label:'Spawning an estate-health agent', ms:300, spawn:{ task:'Sweep the estate and rank findings by severity', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
         { kind:'tool',  label:'sessions.review — trailing 24h across all policies', ms:700, chip:'1 failed · 1 stale',
           detail:[['failed','SharePoint Sites — Retail Division site'],['stale','Executive Mailboxes — 11h vs a 10-minute RPO']], result:'Two session-level issues need action now' },
         { kind:'tool',  label:'mailboxes.classify — type support on Express-Outlook', ms:500, chip:'2 excluded',
@@ -69258,10 +69247,10 @@ function aiStepsMs365Health(){
         strip: [ ['Critical', 2, 'var(--chart-soft-red)'], ['Warning', 3, 'var(--chart-soft-gold)'], ['Info', 1, 'var(--chart-soft-blue)'] ],
         insight: 'Ranked by blast radius: the <strong>failed SharePoint session</strong> and the <strong>stale Express policy</strong> are live data-loss exposure; everything below them costs money or coverage, not data. Each of these also appears in its focused report — this view is the roll-up. <strong>Also worth noting:</strong> finance-shared is at 94% of the 50GB seat threshold — 2.8GB of headroom before it consumes a license seat. Multi-geo teams may need a region review — Known 502 signature on multi-geo backups.',
         actions: [
-          { tone:'bad',  chip:'Critical', txt:'SharePoint Sites — Retail Division failed', sub:'Permission-drift signature · 3 same-named folders — SharePoint one selected', btn:'Recover the site', flow:'ms365SiteRollback', ack:'On it \u2014 recovering the Retail Division site. Nothing gets written until you approve the plan.' },   // was: btn 'Review session — Activity', nav activity.html (insight→action bridge 2026-09-02); tightened 2026-09-21
-          { tone:'bad',  chip:'Critical', txt:'Executive Mailboxes — 11h behind RPO', sub:'Schedule throttled — restore the 10-minute cadence', btn:'Fix the schedule', factId:'exec-mail-rpo', nav:'backup-policies.html#edit/pol_gws_exec_mail', look:true, grant:'Configure policies' },
-          { tone:'warn', chip:'Warning', txt:'2 mailbox types unsupported on Express', sub:'Draft a Flex policy — eDiscovery + Boardroom A/V', btn:'Draft the Flex policy', nav:'backup-policies.html#new', look:true, grant:'Configure policies' },
-          { tone:'warn', chip:'Warning', txt:'Team Posts backup — off by default', sub:'One policy toggle closes the only coverage gap', btn:'Enable Team Posts backup', nav:'backup-policies.html', look:true, grant:'Configure policies' }
+          { tone:'bad',  chip:'Critical', txt:'SharePoint Sites — Retail Division failed', sub:'Permission-drift signature · 3 same-named folders — SharePoint one selected', btn:'Recover the site', flow:'ms365SiteRollback', ack:'On it \u2014 recovering the Retail Division site. Nothing gets written until you approve the plan.' },   // was: btn 'Review session — Activity', nav activity-agent-overlay.html (insight→action bridge 2026-09-02); tightened 2026-09-21
+          { tone:'bad',  chip:'Critical', txt:'Executive Mailboxes — 11h behind RPO', sub:'Schedule throttled — restore the 10-minute cadence', btn:'Fix the schedule', factId:'exec-mail-rpo', nav:'backup-policies-agent-overlay.html#edit/pol_gws_exec_mail', look:true, grant:'Configure policies' },
+          { tone:'warn', chip:'Warning', txt:'2 mailbox types unsupported on Express', sub:'Draft a Flex policy — eDiscovery + Boardroom A/V', btn:'Draft the Flex policy', nav:'backup-policies-agent-overlay.html#new', look:true, grant:'Configure policies' },
+          { tone:'warn', chip:'Warning', txt:'Team Posts backup — off by default', sub:'One policy toggle closes the only coverage gap', btn:'Enable Team Posts backup', nav:'backup-policies-agent-overlay.html', look:true, grant:'Configure policies' }
         ]
       }; } }
   ];
@@ -69271,8 +69260,7 @@ function aiStepsMs365TeamsGaps(){
     { trace: [
         { kind:'route', label:'Interpreting request — scope check + inherent platform gaps', ms:400, chip:'2 questions',
           detail:[['clauses','protected end-to-end? · what’s never backed up?']], result:'Both clauses answered in the headline' },
-        { kind:'agent', label:'Delegating to Q&A Agent (Microsoft 365)', ms:300,
-          detail:[['workload','Microsoft 365'],['autonomy','Always ask — approval gates stay with you']], result:'Q&A Agent owns estate reporting' },
+        { kind:'agent', label:'Spawning a Teams-gap agent', ms:300, spawn:{ task:'Check Teams scope and inherent platform gaps', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
         { kind:'tool',  label:'graph.query — BACKUPED_TEAM · policy scope', ms:700, chip:'6 teams',
           detail:[['policy','Teams Files (Flex) — Teams is Flex-only']], result:'All 6 teams covered' },
         { kind:'tool',  label:'docs.match — considerations & limitations (Teams)', ms:500, chip:'4 gaps',
@@ -69285,7 +69273,7 @@ function aiStepsMs365TeamsGaps(){
         // chart per the claim-shape rule; the 6/6 lives in the headline
         actionsLabel: 'Recommended actions',
         actions: [
-          { tone:'warn', chip:'Warning', txt:'Team Posts backup — off by default', sub:'One policy toggle closes the only coverage gap', btn:'Enable Team Posts backup', nav:'backup-policies.html', look:true, grant:'Configure policies' }
+          { tone:'warn', chip:'Warning', txt:'Team Posts backup — off by default', sub:'One policy toggle closes the only coverage gap', btn:'Enable Team Posts backup', nav:'backup-policies-agent-overlay.html', look:true, grant:'Configure policies' }
         ],
         table: { label: 'Never backed up — regardless of configuration', cols: ['Content', 'Why'], rows: [
           ['1:1 and group chats', 'Outside team channels — never captured'],
@@ -69309,8 +69297,7 @@ function aiStepsGhGrowth(){
     { trace: [
         { kind:'route', label:'Interpreting request — growth rate + what’s driving it', ms:400, chip:'2 questions',
           detail:[['clauses','how fast is it growing? · what’s driving it?']], result:'Both clauses answered in the headline' },
-        { kind:'agent', label:'Delegating to Dashboard Agent (GitHub)', ms:300,
-          detail:[['workload','GitHub'],['autonomy','Always ask — approval gates stay with you']], result:'Dashboard Agent owns estate reporting' },
+        { kind:'agent', label:'Spawning a growth-analysis agent', ms:300, spawn:{ task:'Measure growth and attribute it to its drivers', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
         { kind:'tool',  label:'footprint.series — protected data size, trailing 30 days', ms:800, chip:'+12%',
           detail:[['scope','acme-corp · 16 repositories']], result:'75 → 84 GB over the trailing 30 days' },
         { kind:'tool',  label:'repos.classify — growth attribution by repository', ms:600, chip:'top: data-pipeline',
@@ -69336,7 +69323,7 @@ function aiStepsGhGrowth(){
         // test-infra gap keeps its own action since "Review policies" is
         // real.
         actions: [
-          { tone:'warn', chip:'Warning', txt:'This trend is missing test-infra — newly discovered, matching no policy', sub:'Today’s number reads low — covering it adds a one-time jump to the curve', btn:'Review policies', nav:'backup-policies.html' }
+          { tone:'warn', chip:'Warning', txt:'This trend is missing test-infra — newly discovered, matching no policy', sub:'Today’s number reads low — covering it adds a one-time jump to the curve', btn:'Review policies', nav:'backup-policies-agent-overlay.html' }
         ],
         table: { label: 'Growth by repository (trailing 30 days)', cols: ['Repository', 'Growth', 'Driver'], rows: [
           ['data-pipeline', '+4.1 GB', 'LFS artifacts (Airflow job outputs)'],
@@ -69355,8 +69342,7 @@ function aiStepsAdoRpo(){
     { trace: [
         { kind:'route', label:'Interpreting request — every project vs its own backup window', ms:400, chip:'6 projects',
           detail:[['clauses','are all six inside their policy windows?']], result:'Answered per project in the headline + rows' },
-        { kind:'agent', label:'Delegating to Q&A Agent (Azure DevOps)', ms:300,
-          detail:[['workload','Azure DevOps'],['autonomy','Always ask — approval gates stay with you']], result:'Q&A Agent owns estate reporting' },
+        { kind:'agent', label:'Spawning a policy-window agent', ms:300, spawn:{ task:'Compare each project with its own backup window', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
         { kind:'tool',  label:'graph.query — latest restore point per project', ms:800, chip:'6 checked',
           detail:[['scope','contoso-org · 6 projects']], result:'Ages range 3h to 13h' },
         { kind:'tool',  label:'policies.match — window per project', ms:500, chip:'1 behind',
@@ -69376,7 +69362,7 @@ function aiStepsAdoRpo(){
             { label: 'docs',         frac: 0.5,  color: 'var(--chart-soft-green)', val: '12h / 24h' }
           ] },
         actions: [
-          { tone:'bad', chip:'Critical', txt:'payments — 13h since last restore point', sub:'Queued behind nightly-legacy-build for 3 runs', btn:'Open Activity', nav:'activity.html' }
+          { tone:'bad', chip:'Critical', txt:'payments — 13h since last restore point', sub:'Queued behind nightly-legacy-build for 3 runs', btn:'Open Activity', nav:'activity-agent-overlay.html' }
         ],
         table: { label: 'Backup age vs policy window', cols: ['Project', 'Policy', 'Last restore point', 'Age'], rows: [
           ['payments', 'Production — Compliance (4h)', 'Yesterday 11:40 PM', ['bad', '13h — behind']],
@@ -69396,8 +69382,7 @@ function aiStepsPpCapacity(){
     { trace: [
         { kind:'route', label:'Interpreting request — capacity headroom per environment', ms:400, chip:'3 environments',
           detail:[['clauses','is any environment close to its Dataverse limit?']], result:'Answered with the nearest limit up front' },
-        { kind:'agent', label:'Delegating to Dashboard Agent (Power Platform)', ms:300,
-          detail:[['workload','Power Platform'],['autonomy','Always ask — approval gates stay with you']], result:'Dashboard Agent owns estate reporting' },
+        { kind:'agent', label:'Spawning a capacity-headroom agent', ms:300, spawn:{ task:'Check Dataverse capacity per environment', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
         { kind:'tool',  label:'capacity.check — Dataverse usage vs entitlement', ms:800, chip:'1 near limit',
           detail:[['rule','flag environments past 85% of entitled capacity']], result:'Contoso Production at 91% · EU Production 38% · Sandbox 22%' },
         { kind:'tool',  label:'growth.attribute — what’s consuming Production', ms:600, chip:'top: attachments',
@@ -69432,14 +69417,12 @@ function aiStepsInfraFailedJobs(){
     { trace: [
         { kind:'route', label:'Interpreting request — failures + affected VMs, trailing 24h', ms:400, chip:'62 sessions',
           detail:[['window','trailing 24h'],['mode','failure + retry clustering, resolved to protected VMs']], result:'7 failed of 62 sessions across 5 jobs' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Backup Infrastructure)', ms:300,
-          detail:[['scope','all jobs · all repositories'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns job & session reporting' },
+        { kind:'agent', label:'Spawning a failure-analysis agent', ms:300, spawn:{ task:'Cluster the last 24 hours of failures', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
         { kind:'tool',  label:'sessions.scan — trailing 24h · every job', ms:900, chip:'7 failed',
           detail:[['window','trailing 24h'],['jobs','7 total']], result:'49 succeeded · 5 warning · 7 failed · 1 running' },
         { kind:'tool',  label:'failures.cluster — group by failure message per job', ms:600, chip:'2 repeats',
           detail:[['rule','same job + same failure text across a scheduled retry']], result:'Production Sites and Finance VMs each failed twice on the same cause' },
-        { kind:'agent', label:'Delegating to Graph Agent \u2014 job membership across the inventory', ms:300,
-          detail:[['scope','failed job \u2192 protected VMs'],['autonomy','Read-only']], result:'Graph Agent walks each failed job to the VMs behind it' },
+        { kind:'agent', label:'Spawning a job-membership agent', ms:300, spawn:{ task:'Resolve each failed job to the VMs behind it', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
         { kind:'tool',  label:'job.members — resolve each failed job to its protected VMs', ms:500, chip:'8 VMs',
           detail:[['source','Virtual Machines inventory']], result:'All 8 protected VMs sit behind one of the 5 failing jobs' },
         { kind:'tool',  label:'repository.check — free space on the affected repository', ms:400, chip:'87% used',
@@ -69452,13 +69435,13 @@ function aiStepsInfraFailedJobs(){
         strip: [ ['Succeeded', 49, 'var(--chart-soft-green)'], ['Warning', 5, 'var(--chart-soft-gold)'], ['Failed', 7, 'var(--chart-soft-red)'] ],
         // Deep link (2026-09-18): the "look-here" secondary button (same
         // .aiac-btn the manual nav actions below use), pointed at
-        // activity.html's new filtered-jobs hash (see _actApplyJobsDeepLink)
+        // activity-agent-overlay.html's new filtered-jobs hash (see _actApplyJobsDeepLink)
         // — lands on exactly these 7 sessions (seeded verbatim in
-        // activity.html's ACT_JOBS), not a generic Activity landing. was: an
+        // activity-agent-overlay.html's ACT_JOBS), not a generic Activity landing. was: an
         // inline .aiac-more text link in the headsub — user 2026-09-18 catch:
         // it visually blended into the unrelated Show-more/less toggle,
         // which owns that style.
-        lookLink: { label: 'View the 7 failed sessions in Activity', nav: 'activity.html#jobs?status=Failed&workload=Virtual+Machines&range=24h' },
+        lookLink: { label: 'View the 7 failed sessions in Activity', nav: 'activity-agent-overlay.html#jobs?status=Failed&workload=Virtual+Machines&range=24h' },
         // 2026-09-23 (user: no action cards whose only affordance is
         // "Acknowledge"): HR-File-Server + Config DB Resync's failures were
         // one-off (VSS error, agent drop — neither repeated), so there's no
@@ -69466,7 +69449,7 @@ function aiStepsInfraFailedJobs(){
         // 4th card (merged, not duplicated — this card already had one
         // after the table).
         actions: [
-          { tone:'bad', chip:'Critical', txt:'Production Sites — repository full', sub:'3 VMs affected · veeam-repo-01: 312 GB free, needs 1.4 TB', btn:'Review repository capacity', nav:'backup-policies.html', look:true, grant:'Configure repositories' },
+          { tone:'bad', chip:'Critical', txt:'Production Sites — repository full', sub:'3 VMs affected · veeam-repo-01: 312 GB free, needs 1.4 TB', btn:'Review repository capacity', nav:'backup-policies-agent-overlay.html', look:true, grant:'Configure repositories' },
           { tone:'bad', chip:'Critical', txt:'Finance VMs — network timeout to dr-esx-01', sub:'2 VMs affected · dr-esx-01 reachable again — safe to retry', btn:'Retry the session', flow:'infraRetryFinanceVms', ack:'On it — retrying Weekly Replication for Finance VMs now that dr-esx-01 is reachable again.', watchJob:'Weekly Replication — Finance VMs' },
           { tone:'warn', chip:'Warning', txt:'Edge Sites — agent unreachable', sub:'2 VMs affected · edge-proxy-01 back online — safe to retry', btn:'Retry the session', flow:'infraRetryEdgeSites', ack:'On it — retrying Daily Backup for Edge Sites now that edge-proxy-01 is back online.', watchJob:'Daily Backup — Edge Sites' }
         ],
@@ -69495,7 +69478,7 @@ function aiStepsInfraFailedJobs(){
 // stuck reading "Working…" forever.
 // _aiWatchOnActivity is called DIRECTLY from the tile's "Show me" link
 // (bypassing aiacGo('flow', ...) and this whole step engine entirely) — the
-// visible payoff lives on activity.html, so there is nothing for THIS page's
+// visible payoff lives on activity-agent-overlay.html, so there is nothing for THIS page's
 // step engine to narrate; see _aiRestartOnActivity there for the linear,
 // timed, loading-bar walkthrough (the SAME .ai-rsteps component the ms365
 // scenarios use, ported — not a bespoke one-off).
@@ -69505,17 +69488,17 @@ function _aiWatchOnActivity(flowId, jobName){
   aiRender();
   try {
     sessionStorage.setItem('vdc-ai-restart-job', jobName);
-    sessionStorage.setItem('vdc-ai-handoff', 'activity.html');
+    sessionStorage.setItem('vdc-ai-handoff', 'activity-agent-overlay.html');
     if (typeof _aiPersistTranscript === 'function') _aiPersistTranscript();
   } catch(e){}
-  window.location.href = 'activity.html';
+  window.location.href = 'activity-agent-overlay.html';
 }
 // AGENT ACTIONS THAT ALREADY HAPPENED, ELSEWHERE (2026-09-21, user: "if i
 // retry the session, shouldn't there be an affordance here as well to view
 // activity? then i could see that i have a few sessions that are attempting
-// to retry?"). The backgrounded retry never navigates to activity.html, so
+// to retry?"). The backgrounded retry never navigates to activity-agent-overlay.html, so
 // it can't mutate that page's ACTIVITY array directly — this leaves a
-// ONE-SHOT marker (see _actApplyRetriedMarkers in activity.html, which
+// ONE-SHOT marker (see _actApplyRetriedMarkers in activity-agent-overlay.html, which
 // consumes and clears it immediately) so the real row flips out of 'failed'
 // the moment that page next loads, whether via this card's own lookLink or
 // any other path. sessionStorage, not localStorage — was: localStorage,
@@ -69536,8 +69519,7 @@ function aiStepsInfraRetryFinanceVms(){
     { trace: [
         { kind:'route', label:'Retrying Weekly Replication — Finance VMs', ms:300, chip:'2 VMs',
           detail:[['cause','network timeout to dr-esx-01, both prior attempts']], result:'Safe to automate — a transient network fault, not a config error' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Backup Infrastructure)', ms:250,
-          detail:[['autonomy','Automated retries on transient network faults — pre-approved']], result:'Backup Admin Agent runs this class of retry without a gate' },
+        { kind:'agent', label:'Spawning a retry agent', ms:250, spawn:{ task:'Restart the failed session after a transient network fault', granted:'Retry sessions · pre-approved for transient faults', denied:'Restore · Export · Configure policies' } },
         { kind:'tool',  label:'network.check — dr-esx-01 reachability', ms:500, chip:'reachable',
           detail:[['target','dr-esx-01']], result:'Target responds now — the timeout has cleared' },
         { kind:'tool',  label:'sessions.retry — Weekly Replication, Finance VMs', ms:600, chip:'queued',
@@ -69549,7 +69531,7 @@ function aiStepsInfraRetryFinanceVms(){
         // Toast confirmation (2026-09-21, user: "once the sessions are
         // restarted, it should result in a toast message confirming that n
         // sessions have restarted") — same wording actBulkRestart() itself
-        // uses on activity.html's "Show me" path, so the background retry
+        // uses on activity-agent-overlay.html's "Show me" path, so the background retry
         // confirms exactly the same way regardless of which path ran it.
         if (typeof showToast === 'function') showToast('Restarted 2 sessions');
         _aiMarkRetried('Weekly Replication — Finance VMs');
@@ -69564,7 +69546,7 @@ function aiStepsInfraRetryFinanceVms(){
         // the original failed-jobs card, scoped to just this one job's now-
         // active session via the search box (q=), not the whole workload —
         // Activity's default Active lens already shows a 'started' session.
-        lookLink: { label: 'View the retry in Activity', nav: 'activity.html#jobs?workload=Virtual+Machines&q=' + encodeURIComponent('Weekly Replication — Finance VMs') }
+        lookLink: { label: 'View the retry in Activity', nav: 'activity-agent-overlay.html#jobs?workload=Virtual+Machines&q=' + encodeURIComponent('Weekly Replication — Finance VMs') }
       }; } }
   ];
 }
@@ -69573,8 +69555,7 @@ function aiStepsInfraRetryEdgeSites(){
     { trace: [
         { kind:'route', label:'Retrying Daily Backup — Edge Sites', ms:300, chip:'2 VMs',
           detail:[['cause','edge proxy agent unreachable']], result:'Safe to automate — a one-off agent drop, not a config error' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Backup Infrastructure)', ms:250,
-          detail:[['autonomy','Automated retries on an unreachable-agent fault — pre-approved']], result:'Backup Admin Agent runs this class of retry without a gate' },
+        { kind:'agent', label:'Spawning a retry agent', ms:250, spawn:{ task:'Restart the failed session after an unreachable-agent fault', granted:'Retry sessions · pre-approved for transient faults', denied:'Restore · Export · Configure policies' } },
         { kind:'tool',  label:'agent.ping — edge proxy', ms:500, chip:'online',
           detail:[['proxy','edge-proxy-01']], result:'Agent responds now — it was offline only during the last run' },
         { kind:'tool',  label:'sessions.retry — Daily Backup, Edge Sites', ms:600, chip:'queued',
@@ -69594,7 +69575,7 @@ function aiStepsInfraRetryEdgeSites(){
         insight: 'Worth watching if it recurs — a repeat drop on the same proxy would point at the proxy itself, not a one-off blip, and that case would need your review instead of an automatic retry.',
         // Deep link (2026-09-21) — see the Finance VMs card for the full
         // rationale.
-        lookLink: { label: 'View the retry in Activity', nav: 'activity.html#jobs?workload=Virtual+Machines&q=' + encodeURIComponent('Daily Backup — Edge Sites') }
+        lookLink: { label: 'View the retry in Activity', nav: 'activity-agent-overlay.html#jobs?workload=Virtual+Machines&q=' + encodeURIComponent('Daily Backup — Edge Sites') }
       }; } }
   ];
 }
@@ -69605,8 +69586,7 @@ function aiStepsInfraLiveSessions(){
     { trace: [
         { kind:'route', label:'Interpreting request — live job states + why anything is queued', ms:400, chip:'7 jobs',
           detail:[['clauses','what’s running? · what’s queued? · what already finished?']], result:'All three answered from a live poll' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Backup Infrastructure)', ms:300,
-          detail:[['scope','all jobs · live poll'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns job & session reporting' },
+        { kind:'agent', label:'Spawning a live-session agent', ms:300, spawn:{ task:'Poll live job states and where sessions are waiting', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
         { kind:'tool',  label:'jobs.poll — live status across all jobs', ms:700, chip:'3 running',
           detail:[['states','running · queued · finished · disabled']], result:'3 running · 2 queued · 1 finished with a warning · 1 disabled' },
         { kind:'tool',  label:'proxy.assignment — task slots per live session', ms:600, chip:'5 of 8 slots',
@@ -69631,11 +69611,11 @@ function aiStepsInfraLiveSessions(){
         // in this prototype (no proxy-management surface exists) — folded
         // into the insight below instead (merged, not duplicated — this
         // card already had one after the table). "Review repository
-        // capacity" DOES have a real destination (backup-policies.html,
+        // capacity" DOES have a real destination (backup-policies-agent-overlay.html,
         // same as the identical concept elsewhere in this file) — wired to
         // nav instead of a bare toast.
         actions: [
-          { tone:'warn', chip:'Warning', txt:'SQL Cluster 01 — queued behind repo failure', sub:'Blocked until veeam-repo-01 has free space', btn:'Review repository capacity', nav:'backup-policies.html', look:true, grant:'Configure repositories' }
+          { tone:'warn', chip:'Warning', txt:'SQL Cluster 01 — queued behind repo failure', sub:'Blocked until veeam-repo-01 has free space', btn:'Review repository capacity', nav:'backup-policies-agent-overlay.html', look:true, grant:'Configure repositories' }
         ],
         table: { label: 'Jobs by current state', cols: ['Job', 'State', 'Progress', 'Next run'], rows: [
           ['Daily Backup — Production Sites', ['ok','Running · 74%'], '412 MB/s', 'Tomorrow 1:00 AM'],
@@ -69655,8 +69635,7 @@ function aiStepsInfraRepoCapacity(){
     { trace: [
         { kind:'route', label:'Interpreting request — capacity headroom + an actionable plan', ms:400, chip:'3 repositories',
           detail:[['clauses','which repository is at risk? · what closes the gap?']], result:'One repository at risk, one clear move to fix it' },
-        { kind:'agent', label:'Delegating to Dashboard Agent (Backup Infrastructure)', ms:300,
-          detail:[['scope','all repositories'],['autonomy','Always ask — approval gates stay with you']], result:'Dashboard Agent owns repository reporting' },
+        { kind:'agent', label:'Spawning a capacity-planning agent', ms:300, spawn:{ task:'Project repository headroom and draft a plan', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
         { kind:'tool',  label:'repository.capacity — free space & growth per repository', ms:800, chip:'1 at risk',
           detail:[['repositories','veeam-repo-01 · nas-archive-01 · object-s3-vault']], result:'veeam-repo-01 is 87% full and growing 176 GB/day — full in about 18 days' },
         { kind:'tool',  label:'immutability.check — lock status per repository', ms:500, chip:'2 disabled',
@@ -69682,7 +69661,7 @@ function aiStepsInfraRepoCapacity(){
         // the identical repository-capacity concept in infraLiveSessions and
         // ppCapacity — not a new pattern.
         actions: [
-          { tone:'bad', chip:'Critical', txt:'veeam-repo-01 — full in ~18 days', sub:'Moving SQL Cluster 01 + HR-File-Server chains to object-s3-vault buys ~4 months', btn:'Review repository capacity', nav:'backup-policies.html', look:true, grant:'Configure repositories' }
+          { tone:'bad', chip:'Critical', txt:'veeam-repo-01 — full in ~18 days', sub:'Moving SQL Cluster 01 + HR-File-Server chains to object-s3-vault buys ~4 months', btn:'Review repository capacity', nav:'backup-policies-agent-overlay.html', look:true, grant:'Configure repositories' }
         ],
         table: { label: 'Repositories — capacity and protection', cols: ['Repository', 'Capacity', 'Free', 'Growth / day', 'Immutability', 'Risk'], rows: [
           ['veeam-repo-01', '24 TB', '3.1 TB', '176 GB', ['bad','Disabled'], ['bad','Full in 18 d']],
@@ -69725,8 +69704,7 @@ function aiStepsInfraCapacityCharts(){
       say: function(){ return 'You asked for this in charts — here are three: veeam-repo-01’s growth trend, a capacity comparison across all three repositories, and their immutability posture.'; },
       noFb: true },
     { trace: [
-        { kind:'agent', label:'Delegating to Dashboard Agent (Backup Infrastructure)', ms:300,
-          detail:[['scope','all repositories'],['autonomy','Always ask — approval gates stay with you']], result:'Dashboard Agent owns repository reporting' },
+        { kind:'agent', label:'Spawning a capacity-charts agent', ms:300, spawn:{ task:'Chart repository capacity, growth and immutability', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
         { kind:'tool',  label:'repository.history — trailing 14-day usage, veeam-repo-01', ms:600, chip:'+2.3 TB',
           detail:[['window','trailing 14 days']], result:'18.6 TB → 20.9 TB over the window' }
       ],
@@ -69774,7 +69752,7 @@ function aiStepsInfraCapacityCharts(){
   ];
 }
 // ═══ AGENT GOVERNANCE WIRE (Phase 3, 2026-09-09) — the Agentic Studio
-// admin page (agent-studio.html) writes standing autonomy grants to
+// admin page (agent-studio-agent-overlay.html) writes standing autonomy grants to
 // localStorage. The wizard tail reads the flow's process tier at BUILD time
 // (scenario pick): 'ask' keeps today's approval gate; 'auto' executes under
 // the standing grant and the receipt cites it; 'off' stages everything but
@@ -69864,7 +69842,7 @@ function aiWizardTailSteps(noun, opts){
       ];
       return {
         trace: [
-          { kind:'agent', label:'Backup Admin Agent — resolving restore points for the selection', ms:300 },
+          { kind:'agent', label:'Spawning a restore-point agent', ms:300, spawn:{ task:'Resolve restore points for the selection', granted:'Restore data · asks first', denied:'Export · Configure policies' } },
           { kind:'tool',  label:'wizard.open — Select step', ms:500,
             detail:[['step','Select — review restore items']], result:'Cart items staged in the wizard' },
           { kind:'tool',  label:'restorepoint.set — ' + rpLabel, ms:400, chip:'locked',
@@ -70008,12 +69986,12 @@ function aiOnRestoreStarted(n, rcOpts){
   // START with an acknowledge-only button. Activity is now an inline link
   // in the sub-line; the spot-check belongs at completion, not here.
   // was: actions: [
-  //   { tone:'n', chip:'Job running', txt:'Track the job and per-item results in Activity', sub:'Session detail, timings and the audit trail', btn:'Open Activity', nav:'activity.html#agent' },
+  //   { tone:'n', chip:'Job running', txt:'Track the job and per-item results in Activity', sub:'Session detail, timings and the audit trail', btn:'Open Activity', nav:'activity-agent-overlay.html#agent' },
   //   { tone:'n', chip:'Follow-up', txt:'Spot-check the restored data once the job finishes', sub:'Preview any restored item to confirm its values came back as expected', btn:'Got it', toast:'Spot-check noted' }
   // ]
   aiPushCard({
     headline: 'Restore job started — ' + n + ' ' + itemsWord + ' queued.',
-    headsub: 'Writing in place to the source ' + wlLbl + ' environment · ' + approvedBy + ' · progress is live on the Summary and in <a href="activity.html#agent" class="aiac-more">Activity</a>'
+    headsub: 'Writing in place to the source ' + wlLbl + ' environment · ' + approvedBy + ' · progress is live on the Summary and in <a href="activity-agent-overlay.html#agent" class="aiac-more">Activity</a>'
   });
   var _bt = (typeof _aiBoardActive === 'function') ? _aiBoardActive() : null;
   if (_bt){
@@ -70103,7 +70081,7 @@ VN_ICONS['app-gencore'] = '<svg viewBox="0 0 48 48" fill="none" aria-hidden="tru
 VN_ICONS['activitylog'] = VN_ICONS['activity'];   // Activity Log keeps the VIRO activity glyph
 // CORE-NAV IA (designer 2026-07-14): Data Resilience is no longer an APP —
 // these eight sections ARE the product's main navigation. Wired pages:
-// Protected Data = inventory-V1.html, Activity Log = activity.html, and
+// Protected Data = inventory-V1.html, Activity Log = activity-agent-overlay.html, and
 // Settings carries the Integrations/Connections link (index.html onboarding).
 // hrefs stay RELATIVE .html paths (file:// safe). Unbuilt sections disabled.
 var VN_ITEMS = [
@@ -70115,19 +70093,19 @@ var VN_ITEMS = [
   // 2026-07-14 leadership IA are parked below, not deleted.
   { id: 'dashboards',   label: 'Dashboard', disabled: true },
   { id: 'findings',     label: 'Findings', disabled: true },
-  { id: 'policies',     label: 'Policies', href: 'backup-policies.html', rail: true },   // re-wired 2026-09-28 (user: "turn on the link to backup policies on all files again")
-  { id: 'protected',    label: 'Protected Data', href: 'inventory-V1.html', rail: true },
+  { id: 'policies',     label: 'Policies', href: 'backup-policies-agent-overlay.html', rail: true },   // re-wired 2026-09-28 (user: "turn on the link to backup policies on all files again")
+  { id: 'protected',    label: 'Protected Data', href: 'inventory-V1-agent-overlay.html', rail: true },
   // Activity UNLINKED everywhere in this nav (user 2026-08-11, second pass —
   // rail:false only hid the rail icon; the expanded panel still linked it).
   // disabled:true = the greyed placeholder treatment the other non-wired
   // entries use. Activity is reachable only from the Agent hub now.
-  // was: href: 'activity.html', rail: true, subs: [{ label: 'Audit log', href: 'activity.html#audit' }]
+  // was: href: 'activity-agent-overlay.html', rail: true, subs: [{ label: 'Audit log', href: 'activity-agent-overlay.html#audit' }]
   // Activity RE-LINKED in the expanded panel (user 2026-09-04; reverses the
   // 2026-08-11 unlink now that the page is a first-class demo surface).
   // Panel link only — no rail icon.
   // [parked 2026-09-09, user: no nav link until broader agreement on the approach]
-  // was: { id: 'agentstudio',  label: 'Agentic Studio', href: 'agent-studio.html' },
-  { id: 'activitylog',  label: 'Activity', href: 'activity.html', subs: [{ label: 'Audit log', href: 'activity.html#audit' }] },
+  // was: { id: 'agentstudio',  label: 'Agentic Studio', href: 'agent-studio-agent-overlay.html' },
+  { id: 'activitylog',  label: 'Activity', href: 'activity-agent-overlay.html', subs: [{ label: 'Audit log', href: 'activity-agent-overlay.html#audit' }] },
   { id: 'graphexplorer',label: 'Graph Explorer', disabled: true },
   { id: 'inventory',    label: 'Inventory', disabled: true },
   { id: 'helpcenter',   label: 'Help Center', disabled: true },
@@ -70353,7 +70331,7 @@ var VN_ITEMS = [
 // cut off, a slim fixed scrollbar at the viewport bottom mirrors and drives
 // its scrollLeft. Page-level tables only — wizard overlay, record drawer,
 // and modal tables keep their own contained scrolling. IDENTICAL block in
-// activity.html + inventory-V1.html (shared-helper rule).
+// activity-agent-overlay.html + inventory-V1.html (shared-helper rule).
 (function(){
   var proxy = null, inner = null, activeWrap = null, syncing = false;
   function ensure() {
@@ -71822,6 +71800,21 @@ button.ov-rs-row:hover .ov-rs-lbl { text-decoration: underline; text-decoration-
 .ov-pill svg { width: 16px; height: 16px; flex-shrink: 0; }
 .ov-pill { text-align: left; }
 .ov-pill > svg, .ov-pill > .disc-spinner { align-self: flex-start; margin-top: 3px; }
+.ov-consent { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.ov-consent-lead { font-size: 16px; line-height: 24px; font-weight: 500; }
+.ov-consent-sub { font-size: 16px; line-height: 24px; }
+.ov-consent-card { border: 1px solid var(--em-green); border-radius: 4px; padding: 12px; background: var(--white); display: flex; flex-direction: column; gap: 4px; }
+.ov-consent-card.is-resolved { border-color: var(--border-light); }
+.ov-consent-tool { display: flex; align-items: center; gap: 8px; font-size: 16px; line-height: 24px; font-weight: 500; margin-bottom: 4px; }
+.ov-consent-tool svg { width: 16px; height: 16px; flex-shrink: 0; }
+.ov-consent-card .ai-approval-row { font-size: 14px; }
+.ov-consent-btns { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.ov-consent-note { width: 100%; min-height: 72px; margin-top: 8px; padding: 8px 12px; border: 1px solid var(--em-green); border-radius: 4px; background: var(--em-green-tint); font: inherit; font-size: 14px; resize: vertical; }
+.ov-danger { background: var(--red); border-color: var(--red); color: var(--white); }
+.ov-consent-done { margin-top: 8px; font-size: 14px; color: var(--em-green); font-weight: 500; }
+.ov-consent-done.is-denied { color: var(--red); }
+.ai-approval .ov-consent-sub { margin: -2px 0 4px; }
+.ai-approval .ai-gate-btns { justify-content: flex-end; }
 </style>
 <script id="ov-script">
 /* ══ AGENT OVERLAY — answer renderer + panel behavior ═══════════════════════
@@ -71943,6 +71936,24 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
   var _busy = aiSetBusy;
   aiSetBusy = function(b){ _busy.apply(this, arguments); paintDock();
     if (!b && (aiAgent.msgs || []).length && typeof aiRender === 'function'){ aiAgent._scrollAnchor = 'keep'; aiRender(); } };   // next steps land the moment the turn settles   // pills appear the moment the run settles
+  // Every spawned agent leaves a run in Activity > Agent activity (read there from localStorage).
+  var WL_NAME = { ms365:'Microsoft 365', d365:'Dynamics 365', github:'GitHub', 'azure-devops':'Azure DevOps', powerplatform:'Power Platform', 'hybrid-vms':'Virtual Machines' };
+  function logSpawns(){
+    var fresh = [];
+    (aiAgent.msgs || []).forEach(function(m){
+      if (m.role !== 'reasoning' || !m.done || m._spawnLogged) return;
+      m._spawnLogged = true;
+      (m.steps || []).forEach(function(st){
+        if (!st || !st.spawn) return;
+        var nm = String(st.label).replace(/^Spawning an? /, '');
+        fresh.push({ agent: nm.charAt(0).toUpperCase() + nm.slice(1), task: st.spawn.task, granted: st.spawn.granted,
+          kind: /^Restore data/.test(st.spawn.granted) ? 'Restore' : (/^Configure policies/.test(st.spawn.granted) ? 'Review' : 'Question'),
+          wl: WL_NAME[(typeof state !== 'undefined' && state.wl) || ''] || 'All workloads', ts: Date.now(), dur: Math.max(1, Math.round((st.ms || 300) / 100) / 10) + 's' });
+      });
+    });
+    if (!fresh.length) return;
+    try { var all = JSON.parse(localStorage.getItem('vdc-agent-spawns')) || []; localStorage.setItem('vdc-agent-spawns', JSON.stringify(all.concat(fresh).slice(-60))); } catch (e) {}
+  }
   var _home = aiRenderHome;
   aiRenderHome = function(){
     _home.apply(this, arguments);
@@ -72027,6 +72038,12 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
     var pairs = [];
     if (st.kind === 'tool'){
       pairs.push([titleCase(sig), 'Using ' + sig + (kv ? ' with ' + kv : (rest ? ' \u2014 ' + rest : ''))]);
+    } else if (st.kind === 'agent' && st.spawn){
+      var sn = String(st.label).replace(/^Spawning an? /, '');
+      pairs.push([sn.charAt(0).toUpperCase() + sn.slice(1), st.spawn.task]);
+      pairs.push(['Granted', st.spawn.granted + ' \u2014 not granted: ' + st.spawn.denied]);
+      pairs.push(['Lifetime', 'Retired when the task completes']);
+      pairs.push(['Activity', 'Logged as a run of this agent in Agent activity']);
     } else if (st.kind === 'agent'){
       var nm = /(?:Delegating to )?([A-Za-z&][A-Za-z& ]*? Agent)/.exec(sig);
       pairs.push([nm ? nm[1] : 'Delegation', kv ? 'Handing off with ' + kv : (rest || sig)]);
@@ -72036,7 +72053,7 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
     if (st.result) pairs.push(['Result', st.result]);
     return pairs.map(function(r){
       return '<div><div class="ov-rs-t"><i>\u00b7\u00b7\u00b7</i>' + esc(r[0]) + '</div><div class="ov-rs-d">' + rsIcon(st.kind) + '<span>' + esc(r[1]) + '</span></div></div>';
-    }).join('');
+    }).join('') + ((st.kind === 'agent' && st.spawn) ? '<button type="button" class="ov-look" onclick="aiacGo(\'nav\', \'activity-agent-overlay.html#agents\')">View in Agent activity' + ic('open-in-new-outlined', 16) + '</button>' : '');
   }
   // Row = a one-line SUMMARY of the step in plain language (Figma: "Collecting node
   // details"); the tool name and execution live inside the expanded pair.
@@ -72066,7 +72083,7 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
       var running = live && si === steps.length - 1;
       var expanded = running || !!(m.stepOpen && m.stepOpen[si]);
       var lbl = esc(rsLabel(o));
-      var hasSub = !!(o.detail || o.result);
+      var hasSub = !!(o.detail || o.result || o.spawn);
       var tag = hasSub ? 'button type="button" onclick="aiToggleReasonStep(' + i + ',' + si + ')" aria-expanded="' + expanded + '"' : 'div';
       var close = hasSub ? 'button' : 'div';
       return '<' + tag + ' class="ov-rs-row">'
@@ -72094,11 +72111,48 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
     }
     if (pinned) body.scrollTop = body.scrollHeight;
   }
+  // '#assistant' (Agent Studio's "Start new conversation") opens the panel on arrival.
+  if (location.hash === '#assistant') document.addEventListener('DOMContentLoaded', function(){ setTimeout(function(){ if (typeof aiOpen === 'function') aiOpen(); }, 400); });
+
+  // ── Tool-consent pattern on the existing approval gates (Gencore Figma 4597:219009) ──
+  // "User consent required" + a one-line ask; non-primary actions read "Deny" and open an
+  // optional note ("tell the agent what to do differently"); the primary keeps its own
+  // label. "Allow for this session" is deliberately NOT offered here: these gates guard
+  // restores and in-place changes, which always ask.
+  function ovDeny(note){
+    var m = aiAgent.activeGate; if (!m || !m.gate || m.gate.resolved) return;
+    m.gate.resolved = true; m.gate.superseded = true; m.gate.choice = 'Denied' + (note ? ' \u2014 \u201c' + note + '\u201d' : '');
+    aiAgent.activeGate = null; aiAgent.steps = []; aiAgent.idx = 0; aiAgent.started = false;   // the run stops; the next prompt starts fresh
+    if (typeof aiSetBusy === 'function') aiSetBusy(false);
+    aiRender();
+    aiPushAgent('<p>Understood \u2014 nothing was changed.' + (note ? ' I\u2019ve noted \u201c' + _aiEsc(note) + '\u201d and will factor that in.' : '') + '</p>', null, true);
+  }
+  function consentize(){
+    var body = document.getElementById('aiBody'); if (!body) return;
+    [].forEach.call(body.querySelectorAll('.ai-approval:not(.resolved)'), function(card){
+      var t = card.querySelector('.ai-approval-title'), bar = card.querySelector('.ai-gate-btns'); if (!t || !bar || !bar.querySelector('.ai-gate-btn.primary')) return;
+      t.textContent = 'User consent required';
+      var sub = document.createElement('div'); sub.className = 'ov-consent-sub'; sub.textContent = 'Veeam Intelligence needs your approval before it can continue:';
+      var hd = t.closest('.ai-approval-hd') || t; hd.parentNode.insertBefore(sub, hd.nextSibling);
+      var deny = document.createElement('button'); deny.type = 'button'; deny.className = 'ai-gate-btn'; deny.textContent = 'Deny';
+      bar.insertBefore(deny, bar.firstChild);
+      deny.addEventListener('click', function(){
+        var box = document.createElement('div');
+        box.innerHTML = '<textarea class="ov-consent-note" rows="3" placeholder="Optional \u2013 Tell the agent what to do differently"></textarea><div class="ov-consent-btns"><button type="button" class="ai-gate-btn ov-danger">Deny</button><button type="button" class="ai-gate-btn">Cancel</button></div>';
+        bar.style.display = 'none'; bar.parentNode.insertBefore(box, bar.nextSibling);
+        var ta = box.querySelector('textarea'); ta.focus();
+        box.querySelector('.ov-danger').addEventListener('click', function(){ ovDeny(ta.value.trim()); });
+        box.querySelectorAll('.ai-gate-btn')[1].addEventListener('click', function(){ box.remove(); bar.style.display = ''; });
+      });
+    });
+  }
   // Header title = the conversation's topic (Figma: "Backup Job Analysis").
   var _render = aiRender;
   aiRender = function(){
     _render.apply(this, arguments);
     swapReasoning();
+    consentize();
+    logSpawns();
     var t = document.querySelector('.ai-head-title'); if (!t) return;
     // Title = how the agent read the request: the first delegation-trace
     // 'Interpreting request — <topic>' step. Until that step lands, the user's
