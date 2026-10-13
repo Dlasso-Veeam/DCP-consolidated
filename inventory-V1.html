@@ -3893,6 +3893,10 @@ body.ai-hx-transcript .ai-foot { display: none; }
 .ws-body-split .sb-badge.prog { background: var(--blue-light); color: var(--blue); }
 .ws-body-split .sb-badge svg { width: 14px; height: 14px; }
 .ws-step-pad { max-width: 780px; margin: 0 auto; padding: 32px 24px 48px; }
+/* Placeholder notice strip — aligned to the step content column (780 - 2x24 padding). DS Alert / Warning via .ws-alert-warn. */
+.ws-placeholder-banner { flex: 0 0 auto; padding: 16px 24px 0; }
+.ws-placeholder-banner .ws-alert { max-width: 732px; margin: 0 auto; }
+.ws-placeholder-banner .ws-alert > svg { width: 16px; height: 16px; margin-top: 2px; }
 /* Step header — title + description at the top of each step body,
    mirroring the connector wizard's per-step .form-title /
    .form-subtitle pattern. Keeps the step's purpose oriented above
@@ -41292,6 +41296,17 @@ function wsGetSteps() {
   return steps;
 }
 var WS_STEPS = wsGetSteps();
+// Active Directory restore is not designed yet: it renders the shared wizard, so say so on every step.
+function wsRenderPlaceholderBanner() {
+  var el = document.getElementById('wsPlaceholderBanner'); if (!el) return;
+  var wl = (typeof planActiveWorkload === 'function') ? planActiveWorkload() : null;
+  if (wl !== 'Active Directory') { el.style.display = 'none'; el.innerHTML = ''; return; }
+  var icon = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('alert-warning-outlined', 16)) || '<span></span>';
+  el.innerHTML = '<div class="ws-alert ws-alert-warn" role="note">' + icon
+    + '<div class="ws-alert-body"><div class="ws-alert-title">Placeholder content</div>'
+    + 'This wizard reuses restore flows from other workloads. It is not the final design for Active Directory restore.</div></div>';
+  el.style.display = '';
+}
 function wsRenderAll() {
   if (!ws.isOpen) return;
   var body = document.getElementById('wsBody');
@@ -41300,6 +41315,7 @@ function wsRenderAll() {
   WS_STEPS = wsGetSteps();
   wsRenderTopbar();
   wsRenderSidebar();
+  wsRenderPlaceholderBanner();
   if (ws.step === 1) body.innerHTML = wsRenderConfigure();
   else if (ws.step === 2) body.innerHTML = wsRenderReview('dest');     // Destination
   else if (ws.step === 3) body.innerHTML = wsRenderReview('config');   // Configure
@@ -63560,6 +63576,8 @@ window.__devJumpResolve = function(h) {
     <div class="ws-body-split">
       <aside class="left-sidebar" id="wsSidebar"></aside>
       <main class="ws-main">
+        <!-- Placeholder notice (AD restore only, user 2026-10-13): shown on every step while the cart is Active Directory. -->
+        <div class="ws-placeholder-banner" id="wsPlaceholderBanner" style="display:none"></div>
         <div class="ws-body" id="wsBody"></div>
         <div class="ws-footer" id="wsFooter">
           <div class="ws-footer-inner" id="wsFooterInner"></div>
@@ -71470,8 +71488,11 @@ window.D365X.recChip = function (key, item) {
     }
     if (!X.on() || X.bulkLevel() !== 'records') return;
     var p = RESOURCES.find(function (r) { return r.id === childState.parentId; }), d = p && X.diffNow(d365SchemaFor(p)); if (!d) return;
+    /* data-col-key is the CSS-safe key (_colResizeCssKey: "Contract value" -> "Contract-value"), but the diff counts are keyed by the REAL column
+       name. Map back through the changed columns, or every multi-word column (Contract value, Payment terms) never got its button. */
+    var rawByKey = {}; Object.keys(d.fieldCounts).forEach(function (c) { rawByKey[_colResizeCssKey(c)] = c; });
     [].slice.call(tbl.querySelectorAll('thead th[data-col-key]')).forEach(function (th) {
-      var col = th.getAttribute('data-col-key'), n = d.fieldCounts[col] || 0; if (!n) return;
+      var col = rawByKey[th.getAttribute('data-col-key')] || th.getAttribute('data-col-key'), n = d.fieldCounts[col] || 0; if (!n) return;
       var on = (state.recDiffActiveCols || []).indexOf(col) >= 0, noun = n + ' record' + (n === 1 ? '' : 's');
       var tip = on ? noun + ' where ' + col + ' changed are selected. Click to deselect them.' : 'Select the ' + noun + ' where ' + col + ' changed between the two ranges';
       var b = document.createElement('button'); b.type = 'button'; b.className = 'dx-col-sel' + (on ? ' on' : ''); b.setAttribute('aria-pressed', on ? 'true' : 'false');
