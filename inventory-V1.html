@@ -7356,6 +7356,7 @@ body.ai-open.ai-full #toast { right: 24px; }   /* full screen: nothing beside it
 .dx-select-changed:disabled { border-color: var(--border); color: var(--black-40); cursor: default; }
 .dx-wiz-note { margin-top: 12px; padding: 12px 16px; border: 1px solid var(--green-30); background: var(--green-10); border-radius: 8px; font-size: 14px; line-height: 20px; color: var(--black-100); }
 .dx-wiz-note b { font-weight: 500; }
+#d365CmpBtn { gap: 4px; padding-left: 8px; } #d365CmpBtn svg { width: 20px; height: 20px; flex-shrink: 0; }   /* DS Button with a Pre Icon: 20px glyph, 4px gap */
 .dx-cmp { display: inline-flex; align-items: center; height: 36px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); }
 .dx-cmp:hover { border-color: var(--black-40); } .dx-cmp .rp-chip { border: 0; height: 34px; background: transparent; }
 .dx-cmp-x { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; margin-left: -12px; margin-right: 3px; border: 0; border-radius: 2px; background: transparent; color: var(--black-60); cursor: pointer; padding: 0; }
@@ -57925,8 +57926,9 @@ function renderRdBody() {
     // in the column header; compare mode carries a remove ✕ on the
     // comparison column so the mode can be exited.
     var _addCmpBtn = rdState.singleSnap
-      ? '<button type="button" class="btn btn-outline btn-sm" style="flex-shrink:0;white-space:nowrap" onclick="rdAddComparison()">'
-        + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
+      ? '<button type="button" class="btn btn-outline btn-sm" style="flex-shrink:0;white-space:nowrap;gap:4px;padding-left:8px" onclick="rdAddComparison()">'
+        // Pre Icon = DS compare_arrows (user 2026-10-11) — was a hand-drawn 14px "+", which read as "add"
+        + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('compare-arrows-outlined', 20)) || '')
         + 'Compare</button>'
       : '';
     var _rmCmpBtn = rdState.singleSnap ? '' :
@@ -63633,7 +63635,7 @@ window.__devJumpResolve = function(h) {
 <!-- Securiti DS icon runtime — swaps inline SVGs into the Securiti
      glyph set at load time. Data file MUST load first so the runtime
      finds window.__SECURITI_ICONS already populated. -->
-<script src="securiti-icons-data.js?v=20261007"></script>
+<script src="securiti-icons-data.js?v=20261011"></script>
 <script src="workload-picker.js?v=20261007"></script>
 <script src="securiti-icons.js"></script>
 
@@ -70942,17 +70944,31 @@ window.D365X.recChip = function (key, item) {
     var x = document.createElement('button'); x.type = 'button'; x.id = 'd365CmpX'; x.className = 'dx-cmp-x'; x.style.display = 'none';
     x.setAttribute('aria-label', 'Stop comparing'); x.setAttribute('data-tooltip', 'Stop comparing');
     x.innerHTML = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('close-outlined', 16)) || '×';
-    x.onclick = function (e) { e.stopPropagation(); clearInvCompareDate(); };
+    x.onclick = function (e) { e.stopPropagation(); if (state.invCmpRange) clearInvCompareDate(); else { X._cmpOpen = false; if (typeof _closeCalPicker === 'function') _closeCalPicker(); X.syncChrome(); } };
     wrap.appendChild(x);
+    /* Resting state (user 2026-10-11): a concise "Compare" button. Clicking it swaps in the chip below and opens the picker in the same click. */
+    var cb = document.createElement('button'); cb.type = 'button'; cb.id = 'd365CmpBtn'; cb.className = 'btn btn-outline'; cb.innerHTML = ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('compare-arrows-outlined', 20)) || '') + '<span>Compare</span>';   /* Pre Icon: DS compare_arrows, 20px slot, 4px gap */
+    cb.setAttribute('aria-label', 'Compare with an earlier restore point'); cb.style.display = 'none';
+    cb.onclick = function (e) { X.beginCompare(e); };
+    wrap.parentNode.insertBefore(cb, wrap);
   }
+  X._cmpOpen = false;   // chip shown before any date is chosen (reached from the Compare button)
+  X.beginCompare = function (e) {
+    if (e && e.stopPropagation) e.stopPropagation();
+    X._cmpOpen = true; X.syncChrome();
+    var c = $('d365CmpChip');   // anchor the picker under the chip that just replaced the button
+    openCalPicker({ stopPropagation: function () {}, currentTarget: c }, 'invCmp');
+  };
   X.cmpLabel = function () { return state.invCmpRange ? withRange(state.invCmpRange, _v1RangeLabel) : ''; };
   X.syncChrome = function () {
     var d365 = isD365(), wrap = $('d365CmpWrap'), val = $('d365CmpVal'), x = $('d365CmpX'); if (!wrap) return;
-    wrap.style.display = d365 ? '' : 'none';
+    if (!d365) X._cmpOpen = false;
+    var on = d365 && !!state.invCmpRange, engaged = on || (d365 && X._cmpOpen), cbtn = $('d365CmpBtn');
+    wrap.style.display = engaged ? '' : 'none';
+    if (cbtn) cbtn.style.display = (d365 && !engaged) ? '' : 'none';
     var rowEl = $('wlChromeRow'); if (rowEl) rowEl.classList.toggle('dx-on', d365);
-    var on = d365 && !!state.invCmpRange;
     if (val) { val.textContent = on ? X.cmpLabel() : 'Choose date'; val.style.background = on ? '' : 'var(--black-5)'; val.style.color = on ? '' : 'var(--black-70)'; }
-    if (x) x.style.display = on ? '' : 'none';
+    if (x) x.style.display = engaged ? '' : 'none';
     wrap.classList.toggle('is-on', on);
     var c = $('d365CmpChip'); if (c) c.style.display = '';
     if (c) c.setAttribute('data-tooltip', on ? 'Each table is compared with its latest restore point in this range' : '');
@@ -70986,7 +71002,7 @@ window.D365X.recChip = function (key, item) {
     X.syncChrome();
   };
   var origClear = window._clearInvCompareDateImpl;
-  window._clearInvCompareDateImpl = function () { state.invCmpRange = null; return origClear.apply(this, arguments); };
+  window._clearInvCompareDateImpl = function () { state.invCmpRange = null; X._cmpOpen = false; return origClear.apply(this, arguments); };
 
   /* ── 3. the change summary: state chips with counts, in the action bar above the table ── */
   X.stateCounts = function () {
