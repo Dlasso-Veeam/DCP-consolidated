@@ -3352,8 +3352,10 @@ body.ai-full #aiWorkingGlow { display: none; }
    kb-active row = DS selected-list recipe (Figma 9286-65490). Overlay
    chrome: no DS modal component exists (searched live 2026-09-01) —
    flagged for a DS-team request. */
-.ai-hx-scrim { position: absolute; inset: 0; background: rgba(31,34,41,0.32); display: flex; align-items: flex-start; justify-content: center; padding-top: 56px; z-index: 30; }
-.ai-hx-card { width: calc(100% - 48px); max-width: 560px; max-height: calc(100% - 112px); background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; box-shadow: 0 12px 32px rgba(31,34,41,0.18); display: flex; flex-direction: column; overflow: hidden; }
+.ai-hx-side { position: fixed; top: var(--devjump-h, 0px); bottom: 0; right: var(--ai-w); width: 300px; z-index: 9600; background: var(--white); border-left: 1px solid var(--border-light); display: flex; flex-direction: column; }
+.ai-hx-side-hd { padding: 16px 16px 8px; font-size: 16px; line-height: 22px; font-weight: 500; flex-shrink: 0; }
+body.ai-full .ai-hx-side { right: auto; left: 0; }
+.ai-hx-row.is-active { background: var(--em-green-tint); box-shadow: inset 2px 0 0 var(--em-green); }
 .ai-hx-search-band { padding: 8px; background: var(--white); }
 /* Same row the dock footer used (13px, S80 green link, hairline above) — the
    grammar moved with the affordance rather than being redrawn. */
@@ -3363,7 +3365,7 @@ body.ai-full #aiWorkingGlow { display: none; }
 .ai-hx-search { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--form-bg, var(--black-3)); padding: 0 10px; height: 36px; }
 .ai-hx-search:focus-within { border-color: var(--em-green); background: var(--em-green-tint); }
 .ai-hx-search input { flex: 1; min-width: 0; border: none; background: none; font-family: inherit; font-size: 14px; color: var(--black-100); outline: none; }
-.ai-hx-body { overflow-y: auto; padding: 4px 8px 8px; }
+.ai-hx-body { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 8px 8px; }
 .ai-hx-group { font-size: 13px; font-weight: 450; color: var(--black-50); padding: 12px 4px 4px; }
 .ai-hx-row { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: none; background: var(--white); border-radius: 4px; cursor: pointer; text-align: left; font-family: inherit; width: 100%; }
 .ai-hx-row:hover { background: var(--em-green-tint); }
@@ -63935,6 +63937,7 @@ function aiToggleFull(){
   }
 }
 function aiClose(){
+  if (typeof aiHxClose === 'function' && aiHx.open) aiHxClose();
   if (aiAgent.activeGate && aiAgent.activeGate.gate && !aiAgent.activeGate.gate.resolved){
     var _vb2 = document.querySelector('.btn-veeam-ai'); if (_vb2) _vb2.classList.add('has-pending');
   }
@@ -64770,7 +64773,7 @@ function aiHxToggle(){
 }
 function aiHxClose(){
   aiHx.open = false;
-  var s = document.getElementById('aiHxScrim'); if (s) s.remove();
+  var s = document.getElementById('aiHxSide'); if (s) s.remove();
   var b = document.getElementById('aiHxBtn'); if (b) b.classList.remove('is-on');
 }
 function _aiHxFinderBody(q){
@@ -64783,7 +64786,7 @@ function _aiHxFinderBody(q){
       });
       if (!inG.length) return '';
       return '<div class="ai-hx-group">' + g[0] + '</div>' + inG.map(function(c){
-        return '<button type="button" class="ai-hx-row" onclick="aiHxOpenTranscript(\'' + c.id + '\', \'\')">'
+        return '<button type="button" class="ai-hx-row' + (aiHx.view === 'transcript' && aiHx.openId === c.id ? ' is-active' : '') + '" onclick="aiHxOpenTranscript(\'' + c.id + '\', \'\')">'
           + _aiHxTile()
           + '<span class="ai-hx-main">'
           + '<span class="ai-hx-title">' + _aiEsc(c.title) + '</span>'
@@ -64816,26 +64819,20 @@ function _aiHxFinderBody(q){
     : '<div class="ai-hx-empty">No matches for “' + _aiEsc(q) + '”</div>';
 }
 function aiHxRenderOverlay(){
+  // History is a SIDE PANEL docked to the left edge of the assistant (not an overlay on the chat): it stays open while
+  // a conversation is read, and closes with the history button, Esc, or when the assistant closes.
   var panel = document.getElementById('aiPanel'); if (!panel) return;
-  var old = document.getElementById('aiHxScrim'); if (old) old.remove();
+  var old = document.getElementById('aiHxSide'); if (old) old.remove();
   var q = aiHx.q.trim();
-  // was: a teach-once dismissible info-alert note ("Your full history,
-  // newest first… ↑↓ move · Enter opens · Esc closes") — REMOVED entirely
-  // (user 2026-09-01: "let people intuit that on their own"; it had already
-  // been demoted from a persistent footer to a dismissible alert the same
-  // day). aiHxDismissHint + .ai-hx-note CSS parked below for the record.
-  panel.insertAdjacentHTML('beforeend',
-    '<div class="ai-hx-scrim" id="aiHxScrim" onclick="if(event.target===this){aiHxClose()}">'
-    + '<div class="ai-hx-card">'
+  document.body.insertAdjacentHTML('beforeend',
+    '<aside class="ai-hx-side" id="aiHxSide" aria-label="Chat history">'
+    + '<div class="ai-hx-side-hd">Chat history</div>'
     + '<div class="ai-hx-search-band"><div class="ai-hx-search">' + (_dsStoreIconSvg('search-outlined', 15) || '')
     + '<input id="aiHxQ" placeholder="Search chat history" value="' + _aiEsc(aiHx.q) + '" oninput="aiHx.q=this.value; aiHx.kb=-1; aiHxKeepFocus()">'
     + '</div></div>'
     + '<div class="ai-hx-body" id="aiHxBody">' + _aiHxFinderBody(q) + '</div>'
-    // The agent-activity door, rehomed from the retired dock footer (user
-    // 2026-09-17). History is where you go to look back at agent work, so the
-    // audit trail belongs beside it rather than pinned above the composer.
     + '<div class="ai-hx-foot"><a href="activity-agent-overlay.html#agent">View agent activity</a></div>'
-    + '</div></div>');
+    + '</aside>');
   var b = document.getElementById('aiHxBtn'); if (b) b.classList.add('is-on');
   aiHxKbPaint();
   var i = document.getElementById('aiHxQ'); if (i) i.focus();
@@ -64861,10 +64858,14 @@ function aiHxKbPaint(){
 // way back (no back chevron, user ruling); Continue returns to the live chat.
 function aiHxOpenTranscript(id, q){
   var c = AI_HISTORY.filter(function(x){ return x.id === id; })[0]; if (!c) return;
-  aiHxClose();
   aiHx.view = 'transcript'; aiHx.openId = id; aiHx.trQ = q || ''; aiHx.cur = 0;
   document.body.classList.add('ai-hx-transcript');
   aiHxRenderTranscript();
+  aiHxMarkActive();
+}
+function aiHxMarkActive(){
+  var rows = document.querySelectorAll('#aiHxBody .ai-hx-row'); var tr = aiHx.view === 'transcript' ? aiHx.openId : null;
+  [].forEach.call(rows, function(r){ var m = /aiHxOpenTranscript\('([^']+)'/.exec(r.getAttribute('onclick') || ''); r.classList.toggle('is-active', !!tr && !!m && m[1] === tr); });
 }
 function aiHxRenderTranscript(){
   var body = document.getElementById('aiBody');
@@ -64896,7 +64897,7 @@ function aiHxTrKeepFocus(){
 }
 function aiHxBackToChat(){
   aiHx.view = 'chat'; aiHx.openId = null;
-  document.body.classList.remove('ai-hx-transcript');
+  document.body.classList.remove('ai-hx-transcript'); aiHxMarkActive();
   if (aiAgent.msgs.length) aiRender(); else aiRenderHome();
 }
 // returning the pointer to the open panel after acting in the console =

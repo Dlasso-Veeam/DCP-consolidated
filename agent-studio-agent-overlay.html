@@ -1853,13 +1853,14 @@ body.ai-full #aiWorkingGlow { display: none; }
 /* Figma 9286-65490 (selected-row recipe) — recent-conversations overlay,
    ported from inventory-V1 .ai-hx-* (the picked history pattern 2026-09-01):
    scrim over the studio shell, card, search band, grouped rows. */
-.as-hx-scrim { position: absolute; inset: 0; background: rgba(31,34,41,0.32); display: flex; align-items: flex-start; justify-content: center; padding-top: 56px; z-index: 60; }
-.as-hx-card { width: calc(100% - 96px); max-width: 560px; max-height: calc(100% - 112px); background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; box-shadow: 0 12px 32px rgba(31,34,41,0.18); display: flex; flex-direction: column; overflow: hidden; }
+.as-hx-side { display: none; order: 3; width: 320px; flex-shrink: 0; flex-direction: column; background: var(--white); border-left: 1px solid var(--border-light); min-height: 0; }
+.as-hx-side.open { display: flex; }
+.as-hx-side-hd { padding: 16px 16px 8px; font-size: 16px; line-height: 22px; font-weight: 500; flex-shrink: 0; }
 .as-hx-search-band { padding: 8px; }
 .as-hx-search { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--black-3); padding: 0 10px; height: 36px; color: var(--black-40); }
 .as-hx-search:focus-within { border-color: var(--em-green); background: var(--green-s5); }
 .as-hx-search input { flex: 1; min-width: 0; border: none; background: none; font-family: inherit; font-size: 14px; color: var(--black-100); outline: none; }
-.as-hx-body { overflow-y: auto; padding: 4px 8px 8px; }
+.as-hx-body { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 8px 8px; }
 .as-hx-group { font-size: 13px; font-weight: 450; color: var(--black-50); padding: 12px 4px 4px; }
 .as-hx-row { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: none; background: var(--white); border-radius: 4px; cursor: default; text-align: left; font-family: inherit; width: 100%; font-size: 14px; color: var(--black-100); }
 .as-hx-row:hover { background: var(--green-s5); }
@@ -2126,17 +2127,16 @@ td.as-td-actions { position: relative; }
       <!-- Recent-conversations overlay — ported from inventory-V1's chat-history
            overlay (.ai-hx-*, the picked pattern 2026-09-01): scrim card, search
            band, grouped rows. Transcript-open is out of scope here. -->
-      <div class="as-hx-scrim" id="asHxScrim" style="display:none" onclick="asHxToggle()">
-        <div class="as-hx-card" onclick="event.stopPropagation()">
-          <div class="as-hx-search-band">
-            <div class="as-hx-search">
-              <span class="as-glyph-search" style="display:inline-flex;width:16px;height:16px" aria-hidden="true"></span>
-              <input type="text" id="asHxInput" placeholder="Search conversations" oninput="asHxRender()" />
-            </div>
+      <aside class="as-hx-side" id="asHxSide" aria-label="Chat history">
+        <div class="as-hx-side-hd">Chat history</div>
+        <div class="as-hx-search-band">
+          <div class="as-hx-search">
+            <span class="as-glyph-search" style="display:inline-flex;width:16px;height:16px" aria-hidden="true"></span>
+            <input type="text" id="asHxInput" placeholder="Search conversations" oninput="asHxRender()" />
           </div>
-          <div class="as-hx-body" id="asHxBody"></div>
         </div>
-      </div>
+        <div class="as-hx-body" id="asHxBody"></div>
+      </aside>
       <section class="as-body" id="as-admin">
         <!-- was: "All agents" back link — no catalog to go back to now -->
         <!-- Entity header — the Protected Data / Policies recipe (.plv-entity,
@@ -3421,12 +3421,11 @@ function asSelect(id) {
   if (a) asShowAdmin(a);
   asRenderSidebar();
 }
-// Recent-conversations overlay (ported grammar; transcripts out of scope).
+// Chat history side panel (ported grammar; transcripts out of scope).
 function asHxToggle() {
-  var sc = document.getElementById('asHxScrim');
-  var open = sc.style.display !== 'none';
-  sc.style.display = open ? 'none' : 'flex';
-  if (!open) { document.getElementById('asHxInput').value = ''; asHxRender(); document.getElementById('asHxInput').focus(); }
+  var sc = document.getElementById('asHxSide');
+  var open = sc.classList.toggle('open');
+  if (open) { document.getElementById('asHxInput').value = ''; asHxRender(); document.getElementById('asHxInput').focus(); }
 }
 function asHxRender() {
   var q = (document.getElementById('asHxInput').value || '').toLowerCase().trim();
@@ -3434,8 +3433,8 @@ function asHxRender() {
     var rows = grp.rows.filter(function(r){ return !q || r.t.toLowerCase().indexOf(q) >= 0; });
     if (!rows.length) return '';
     return '<div class="as-hx-group">' + grp.g + '</div>' + rows.map(function(r){
-      var a = AS_AGENTS.filter(function(x){ return x.id === r.agent; })[0];
-      var t = AS_TINTS[a.tint];
+      var a = AS_AGENTS.filter(function(x){ return x.id === r.agent; })[0] || AS_AGENTS[0];   // single-agent model: every conversation belongs to Veeam Intelligence
+      var t = AS_TINTS[a.tint] || AS_TINTS[Object.keys(AS_TINTS)[0]];
       return '<div class="as-hx-row" data-plv-tip="Conversations are out of scope for this exploration.">'
         + '<span style="width:28px;height:28px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;background:' + t.bg + ';color:' + t.fg + '">' + _asIcon(a.icon) + '</span>'
         + '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + r.t + '</span>'
