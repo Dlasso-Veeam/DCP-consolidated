@@ -2922,8 +2922,8 @@ function hydrateDefaultPolicyForm(wl) {
   // confirm:true makes raising to it a confirmed change). chip = the short label shown in the table.
   var CAPS = [
     { id:'data', name:'Access & visualize data', sub:'Read estate data, answer questions, render charts and custom views.', access:'Read', scope:'All connected workloads', runs:214 , levels:[
-      { id:'ask',   chip:'Answer', kind:'read', label:'Answer when asked', sub:'Answers questions and draws charts from backed-up data when you ask.', does:['Answer questions about protection coverage, health, growth and RPO','Render charts and custom views from backed-up metadata'] },
-      { id:'sweep', chip:'Report', kind:'read', label:'Also report overnight', sub:'Also runs a nightly health sweep and reports only what needs attention.', does:['Everything in Answer when asked','Run the nightly sweep across workloads and report exceptions'] } ], def:'sweep' },
+      { id:'ask',   chip:'Answer', kind:'read', label:'When asked', sub:'Answers questions and draws charts from backed-up data when you ask.', does:['Answer questions about protection coverage, health, growth and RPO','Render charts and custom views from backed-up metadata'] },
+      { id:'sweep', chip:'Report', kind:'read', label:'Also while you\u2019re away', sub:'Also monitors protection in the background and reports what needs attention.', does:['Everything in When asked','Monitor health across workloads in the background and report exceptions'] } ], def:'sweep' },
     { id:'restore', name:'Restore data', sub:'Prepare or run restore jobs from backup. In-place rollbacks always ask.', access:'Write · restores data', scope:'Any restorable item or container', runs:15, def:'ask', levels:[
       { id:'prepare', chip:'Prepare',   kind:'prepare', label:'Prepare the restore', sub:'Builds the plan and the cart. You start the job.', does:['Select items, resolve restore points and destination','Assemble the restore plan for you to run'] },
       { id:'ask',     chip:'Ask first', kind:'ask',     label:'Ask before running', sub:'Runs the restore after you approve it.', does:['Everything in Prepare','Run restores that create new copies (production untouched) after your approval','Run in-place rollbacks — always gated','Post job receipts and hand tracking to Activity'] },
@@ -3129,7 +3129,7 @@ function hydrateDefaultPolicyForm(wl) {
   var WHO = {
     restore:{ prepare:'Agent plans · you start the job', ask:'Agent runs · you approve each one', auto:'Agent runs new-copy restores · no approval' },
     exportd:{ prepare:'Agent packages · you run it', ask:'Agent runs · you approve each one' },
-    data:{ ask:'Agent answers \u00b7 you act', sweep:'Agent reports overnight \u00b7 you act' },
+    data:{ ask:'Agent answers when you ask', sweep:'Agent also reports on its own' },
     jobs:{ prepare:'Agent suggests \u00b7 you run it', ask:'Agent runs \u00b7 you approve each one', auto:'Agent retries transient faults \u00b7 you review Activity' },
     findings:{ read:'Agent explains \u00b7 you act', ask:'Agent triages \u00b7 you approve each one', auto:'Agent triages low severity \u00b7 you review the history' },
     policies:{ recommend:'Agent drafts · you create it', create:'Agent creates it inactive · you activate', activate:'Agent creates and activates · you review the audit trail' },
