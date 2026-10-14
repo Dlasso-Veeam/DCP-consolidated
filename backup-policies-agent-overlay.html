@@ -629,6 +629,65 @@ body.actions-parked .action-row-edit, body.actions-parked .action-row-delete, bo
 .gxs-rule-acts { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
 .gxs-iconbtn { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font-family: inherit; font-size: 14px; color: var(--black-100); cursor: pointer; }
 .gxs-iconbtn:hover { background: var(--black-3); }
+
+/* ── COMPLEX QUERY TREE (2026-10-14) — how Data Scope scales past a one-line rule.
+   A rule with grouped (AND / OR) conditions or nested traversals renders as a
+   tree: entity head card, a trunk with AND badges between siblings, grey OR
+   panels, condition cards (bold property · grey operator · blue value + "+N"),
+   and ↳ relation cards whose conditions nest beneath them. Simple rules keep
+   the one-line .gxs-line form. Reference: DCC Data System query builder. ── */
+.tq { --tq-line: var(--black-30); font-size: 16px; line-height: 24px; color: var(--black-100); }
+.tq-card { display: block; background: var(--white); border: 1px solid var(--border-light); border-radius: 4px; padding: 8px 12px; box-sizing: border-box; width: fit-content; max-width: 100%; }
+.tq-row { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; min-width: 0; }
+.tq-row b { font-weight: 500; color: var(--black-100); }
+.tq-op { color: var(--black-60); }
+.tq-v { color: var(--val-blue); }
+.tq-more { display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: 2px; background: var(--val-blue-bg); color: var(--val-blue); font-size: 14px; font-weight: 500; }
+.tq-head { display: flex; align-items: center; gap: 8px; }
+.tq-head .gxs-strip-ic { margin-right: 0; }
+.tq-join { position: relative; padding-left: 40px; margin-left: 12px; }
+.tq-badge { position: absolute; left: 0; top: 50%; transform: translateY(-50%); z-index: 1; width: 36px; height: 24px; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; background: var(--white); border: 1px solid color-mix(in srgb, var(--val-blue) 35%, white); border-radius: 2px; color: var(--val-blue); font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: 0.02em; }
+.tq-join:not(.tq-multi) { padding-left: 22px; }
+.tq-item { --sy: 24px; position: relative; padding: 4px 0; }
+.tq-item::before { content: ''; position: absolute; left: -22px; top: var(--sy); width: 22px; border-top: 1px solid var(--tq-line); }
+.tq-item::after { content: ''; position: absolute; left: -22px; top: 0; height: 100%; border-left: 1px solid var(--tq-line); }
+.tq-item:last-child::after { height: var(--sy); }
+.tq-or > .tq-item:first-child::after { top: var(--sy); height: calc(100% - var(--sy)); }
+.tq-or > .tq-item:first-child:last-child::after { display: none; }
+.tq-item.is-join { --sy: 50%; }
+.tq-or { background: var(--black-5); border-radius: 4px; margin-left: 0; padding: 8px 8px 8px 40px; }
+.tq-or > .tq-item { padding: 4px 0; }
+.tq-plain .tq-item { --sy: 16px; padding: 4px 0; }
+.tq-plain.tq-multi { padding-left: 52px; }
+.tq-plain.tq-multi .tq-badge { left: 8px; }
+.tq-plain.tq-multi > .tq-item::before { left: -26px; width: 26px; }
+.tq-plain.tq-multi > .tq-item::after { left: -26px; }
+.tq-plain .tq-row { padding: 0; }
+.tq-comp-body { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-light); }
+.tq-comp-body .tq-join { margin-left: 0; }
+.tq-rel { display: inline-flex; align-items: center; gap: 8px; }
+.tq-rel .tq-elbow { color: var(--black-30); display: inline-flex; }
+.tq-verb { color: var(--val-blue); }
+.tq-ent { display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 8px; border: 1px solid color-mix(in srgb, var(--val-blue) 35%, white); border-radius: 4px; color: var(--val-blue); background: var(--white); }
+.tq-ent svg { width: 16px; height: 16px; display: block; color: var(--plum); }
+.tq-trav > .tq-join { margin-top: 0; }
+.tq-compact { font-size: 14px; line-height: 20px; }
+.tq-compact .tq-card { padding: 8px; }
+.tq-compact .tq-join { padding-left: 32px; margin-left: 8px; }
+.tq-compact .tq-join:not(.tq-multi) { padding-left: 16px; }
+.tq-compact .tq-badge { width: 30px; height: 20px; font-size: 11px; line-height: 14px; }
+.tq-compact .tq-item { --sy: 20px; }
+.tq-compact .tq-item.is-join { --sy: 50%; }
+.tq-compact .tq-item::before { left: -16px; width: 16px; }
+.tq-compact .tq-item::after { left: -16px; }
+.tq-compact .tq-multi > .tq-item::before { left: -17px; width: 17px; }
+.tq-compact .tq-multi > .tq-item::after { left: -17px; }
+.tq-compact .tq-or { padding: 8px 8px 8px 32px; }
+.tq-compact .tq-more { height: 20px; padding: 0 6px; font-size: 12px; }
+.tq-compact .tq-ent { height: 24px; padding: 0 6px; gap: 6px; }
+.tq-compact .tq-plain .tq-item { --sy: 14px; }
+.tq-wrap { padding: 8px; }
+.tq-wrap + .tq-wrap { border-top: 1px solid var(--border-light); }
 #screen-1.policy-readonly .gxs-adds, #screen-1.policy-readonly .gxs-rule-acts { display: none; }
 /* Workload FORM control = the shared picker (user 2026-09-08). Panel =
    WorkloadPickerDS (Figma DCP fcV4iUjRZz7k… node 9286-65490, the picker
@@ -2022,7 +2081,7 @@ body.ai-full #aiWorkingGlow { display: none; }
         <div class="rot-alert" id="rotRecBanner" role="status" hidden>
           <span class="rot-alert-ic" id="rotAiTile" aria-hidden="true"></span>
           <div class="rot-alert-txt"><strong>Recommended ROT policy — Retail Division</strong><span>4.2 TB of untouched content across three Retail SharePoint sites isn’t covered by any ROT policy. I’ve configured one for you to review.</span></div>
-          <div class="rot-ai-act"><button type="button" class="plv-btn plv-btn-tertiary" onclick="rotOpenDetail()">Review policy</button><button type="button" class="plv-btn plv-btn-flat rot-ai-x" id="rotAiX" onclick="rotDismiss()" data-plv-tip="Dismiss" aria-label="Dismiss recommendation"></button></div>
+          <div class="rot-ai-act"><button type="button" class="plv-btn plv-btn-tertiary" onclick="rotOpenDetail()">Review policy</button><button type="button" class="plv-btn plv-btn-flat rot-ai-x" id="rotAiX" onclick="rotDismissAsk()" data-plv-tip="Dismiss" aria-label="Dismiss recommendation"></button></div>
         </div>
         <div class="pol-card">
           <!-- was: 4-cell KPI strip with sparkline charts (Total / Protected /
@@ -3489,11 +3548,12 @@ var WL_GRAPH_VOCAB = {
     roots: ['Repositories', 'Branches'],
     strip: [['Repositories', 84, 'graph-entity-site', 'plum'], ['Branches', 412, 'graph-entity-file', 'plum']],
     props: {
-      Repositories: [['Visibility', ['is one of']], ['Topic', ['is one of']], ['Language', ['is one of']], ['Last Push', ['before', 'after']]],
+      Repositories: [['Visibility', ['is one of']], ['Topic', ['is one of']], ['Language', ['is one of']], ['Last Push', ['before', 'after']], ['Archived', ['equals']], ['Name', ['contains', 'is one of']]],
       Branches:     [['Branch Name', ['is one of', 'begins with']], ['Protected', ['equals']]],
-      Organization: [['Name', ['is one of']]]
+      Organization: [['Name', ['is one of']], ['Plan', ['equals']]],
+      Team:         [['Name', ['is one of']], ['Permission', ['equals']]]
     },
-    rels: { Repositories: [['Belongs to', 'Organization'], ['Has', 'Branches']], Branches: [['Belongs to', 'Repositories']] }
+    rels: { Repositories: [['Belongs to', 'Organization'], ['Has', 'Branches']], Branches: [['Belongs to', 'Repositories']], Organization: [['Has', 'Team']] }
   },
   'hybrid-vms': {
     roots: ['Virtual Machines'],
@@ -3540,12 +3600,12 @@ var currentGraphScope = [];
 function _gxHash(str) { var h = 0; for (var i = 0; i < str.length; i++) { h = ((h << 5) - h + str.charCodeAt(i)) | 0; } return Math.abs(h); }
 function _gxRuleCount(rule) {
   var base = 20 + _gxHash(rule.root) % 80;
-  var narrow = (rule.predicates || []).length + _gxTravCount(rule);
+  var narrow = (rule.predicates || []).length + _tqLeaves(rule.expr) + _gxTravCount(rule);
   return Math.max(1, Math.round(base / (1 + narrow * 0.6)));
 }
 function _gxTravCount(node) {
   var n = 0;
-  (node.traversals || []).forEach(function(t){ n += 1 + (t.predicates || []).length + _gxTravCount(t); });
+  (node.traversals || []).forEach(function(t){ n += 1 + (t.predicates || []).length + _tqLeaves(t.expr) + _gxTravCount(t); });
   return n;
 }
 function _gxPill(cls, txt) { return '<span class="' + cls + '">' + escapeHtmlBP(txt) + '</span>'; }
@@ -3562,6 +3622,76 @@ function _gxLineHtml(node, depth) {
   var html = '<div class="gxs-line">' + bits.join('') + '</div>';
   (node.traversals || []).forEach(function(t){ html += _gxLineHtml(t, depth + 1); });
   return html;
+}
+// ═══ COMPLEX QUERY TREE (2026-10-14) ═══
+// Extends the rule grammar: a node may carry `expr` — { op:'and'|'or', items:[leaf|expr] } — in place of the
+// flat AND-only `predicates`. leaf = { prop, op, values:[..] } or a composite { prop, op:'matches', group:expr }.
+// Traversals ({ verb, entity, expr, traversals }) nest to any depth. Nodes without `expr` keep the one-line form.
+function _tqExprOf(node) {
+  if (node.expr) return node.expr;
+  var pr = node.predicates || [];
+  return pr.length ? { op: 'and', items: pr.map(function(x){ return { prop: x.prop, op: x.op, values: [x.value] }; }) } : null;
+}
+function _tqHasExpr(rule) {
+  return !!(rule && (rule.expr || (rule.traversals || []).some(_tqHasExpr)));
+}
+function _tqLeaves(e) {
+  if (!e) return 0;
+  if (e.items) return e.items.reduce(function(n, i){ return n + _tqLeaves(i); }, 0);
+  return 1 + (e.group ? _tqLeaves(e.group) : 0);
+}
+function _tqStats(rule) {
+  var cond = _tqLeaves(_tqExprOf(rule)), rel = 0;
+  (function walk(n){ (n.traversals || []).forEach(function(t){ rel++; cond += _tqLeaves(_tqExprOf(t)); walk(t); }); })(rule);
+  return { cond: cond, rel: rel };
+}
+function _tqVals(vals) {
+  var v = vals || [];
+  if (!v.length) return '';
+  return '<span class="tq-v">' + escapeHtmlBP(String(v[0])) + '</span>'
+    + (v.length > 1 ? '<span class="tq-more" data-plv-tip="' + escapeHtmlBP(v.slice(1).join(', ')) + '">+' + (v.length - 1) + '</span>' : '');
+}
+function _tqLeafHtml(l, plain) {
+  var row = '<div class="tq-row"><b>' + escapeHtmlBP(l.prop) + '</b><span class="tq-op">' + escapeHtmlBP(l.op) + '</span>';
+  if (l.group) {
+    var n = _tqLeaves(l.group);
+    row += '<span class="tq-more">' + (l.group.op === 'or' ? 'any' : 'all') + ' of ' + n + '</span></div>';
+    return '<div class="tq-card tq-comp">' + row + '<div class="tq-comp-body">' + _tqJoinHtml(l.group.op, l.group.items.map(function(i){ return { x: i }; }), true) + '</div></div>';
+  }
+  row += _tqVals(l.values) + '</div>';
+  return plain ? row : '<div class="tq-card">' + row + '</div>';
+}
+function _tqTravHtml(t, compact) {
+  var ent = _dsStoreIconSvg('graph-entity-site', 16) || '';
+  var head = '<div class="tq-card"><span class="tq-rel"><span class="tq-elbow">' + (_PRIO_SUBDIR_SVG || '↳') + '</span><span class="tq-verb">' + escapeHtmlBP(String(t.verb || 'Which has').toLowerCase()) + '</span><span class="tq-ent">' + ent + escapeHtmlBP(t.entity) + '</span></span></div>';
+  var body = _tqBodyHtml(t);
+  return '<div class="tq-trav">' + head + body + '</div>';
+}
+function _tqItemHtml(it, plain) {
+  if (it.t) return '<div class="tq-item">' + _tqTravHtml(it.t) + '</div>';
+  var x = it.x;
+  if (x.items) {
+    if (x.items.length === 1) return _tqItemHtml({ x: x.items[0] }, plain);
+    return '<div class="tq-item is-join">' + _tqJoinHtml(x.op, x.items.map(function(i){ return { x: i }; }), plain) + '</div>';
+  }
+  return '<div class="tq-item">' + _tqLeafHtml(x, plain) + '</div>';
+}
+function _tqJoinHtml(op, items, plain) {
+  var multi = items.length > 1;
+  return '<div class="tq-join tq-' + op + (multi ? ' tq-multi' : '') + (plain ? ' tq-plain' : '') + '">'
+    + (multi ? '<span class="tq-badge">' + op.toUpperCase() + '</span>' : '')
+    + items.map(function(i){ return _tqItemHtml(i, plain); }).join('') + '</div>';
+}
+function _tqBodyHtml(node) {
+  var items = [], e = _tqExprOf(node);
+  if (e) { if (e.items && e.op === 'and') e.items.forEach(function(i){ items.push({ x: i }); }); else items.push({ x: e }); }
+  (node.traversals || []).forEach(function(t){ items.push({ t: t }); });
+  return items.length ? _tqJoinHtml('and', items, false) : '';
+}
+function tqRuleHtml(rule, compact) {
+  var tile = '<span class="gxs-strip-ic t-plum">' + (_dsStoreIconSvg('graph-entity-site', 16) || '') + '</span>';
+  var head = '<div class="tq-card tq-head">' + tile + '<b>' + escapeHtmlBP(rule.root) + '</b><span class="tq-op">' + (_tqExprOf(rule) ? 'with properties' : '') + '</span></div>';
+  return '<div class="tq' + (compact ? ' tq-compact' : '') + '">' + head + _tqBodyHtml(rule) + '</div>';
 }
 function renderGraphScope() {
   var host = document.getElementById('gxs-scope');
@@ -3586,8 +3716,8 @@ function renderGraphScope() {
     html += '<div style="font-size:14px;color:var(--black-60);padding:8px 4px">No scope rules yet \u2014 add an entity above. An entity with no conditions protects everything of that type.</div>';
   }
   currentGraphScope.forEach(function(rule, i){
-    html += '<div class="gxs-rule"><div class="gxs-q">' + _gxLineHtml(rule, 0)
-      + '<div style="font-size:13px;color:var(--black-50)">' + _gxRuleCount(rule) + ' matching \u00b7 evaluated at policy run</div>'
+    html += '<div class="gxs-rule"><div class="gxs-q">' + (_tqHasExpr(rule) ? tqRuleHtml(rule, false) : _gxLineHtml(rule, 0))
+      + '<div style="font-size:13px;color:var(--black-50)">' + (_tqHasExpr(rule) ? (_tqStats(rule).cond + ' conditions \u00b7 ' + _tqStats(rule).rel + ' related \u00b7 ') : '') + _gxRuleCount(rule) + ' matching \u00b7 evaluated at policy run</div>'
       + '</div><div class="gxs-rule-acts">'
       + (typeof GX_ENABLED !== 'undefined' && !GX_ENABLED
           ? '<span data-plv-tip="Graph Explorer design is under review"><button type="button" class="gxs-iconbtn" disabled style="color:var(--black-30);border-color:var(--border-light);cursor:default">Edit Query</button></span>'
@@ -5820,9 +5950,27 @@ let POLICIES = [
 
   // === GitHub — 10 custom (heavy) + 1 default ===
   { id: 'pol_prod_compliance',   name: 'Production — Compliance',        workload: 'github', rank: 1,  isDefault: false, tier: 'gold',   tenantSummary: ['acme-corp', 'contoso-corp'],    scopeDesc: 'topic = production',               retention: '365d / 52w / 84m', resourceCount: 12, shadowedCount: 0, status: 'active',   origin: 'custom', createdAt: 'Mar 24, 2026' },
-  { id: 'pol_security_critical', name: 'Security-Critical Services',     workload: 'github', rank: 2,  isDefault: false, tier: 'gold',   tenantSummary: ['acme-corp', 'contoso-corp'],    scopeDesc: 'topic = security',                 retention: '365d / 52w / 84m', resourceCount: 7, shadowedCount: 1, status: 'active',   origin: 'custom', createdAt: 'Feb 11, 2026' },
-  { id: 'pol_billing_finance',   name: 'Billing & Finance Repos',        workload: 'github', rank: 3,  isDefault: false, tier: 'gold',   tenantSummary: ['acme-corp'],                    scopeDesc: 'name contains billing | finance',  retention: '365d / 52w / 84m', resourceCount: 4,  shadowedCount: 1, status: 'active',   origin: 'custom', createdAt: 'Jan 22, 2026' },
-  { id: 'pol_data_pipelines',    name: 'Data Pipelines',                 workload: 'github', rank: 4,  isDefault: false, tier: 'gold',   tenantSummary: ['contoso-corp'],                 scopeDesc: 'topic = data-pipeline',            retention: '365d / 52w / 84m', resourceCount: 3,  shadowedCount: 1, status: 'active',   origin: 'custom', createdAt: 'Mar 02, 2026' },
+  { id: 'pol_security_critical', name: 'Security-Critical Services',     workload: 'github', rank: 2,  isDefault: false, tier: 'gold',   tenantSummary: ['acme-corp', 'contoso-corp'],    scopeDesc: 'topic = security',                 retention: '365d / 52w / 84m', resourceCount: 7, shadowedCount: 1, status: 'active',   origin: 'custom', createdAt: 'Feb 11, 2026',
+    graphScope: [{ root: 'Repositories', expr: { op: 'and', items: [
+      { op: 'or', items: [ { prop: 'Visibility', op: 'is one of', values: ['Private','Internal'] }, { prop: 'Topic', op: 'is one of', values: ['security','compliance','pci-dss'] } ] },
+      { prop: 'Archived', op: 'equals', values: ['False'] },
+      { op: 'or', items: [ { prop: 'Language', op: 'is one of', values: ['Go','Rust','Java'] }, { prop: 'Last Push', op: 'after', values: ['90 days ago'] } ] } ] },
+    traversals: [
+      { verb: 'Belongs to', entity: 'Organization', expr: { op: 'and', items: [ { prop: 'Name', op: 'is one of', values: ['acme-corp','contoso-corp'] }, { prop: 'Plan', op: 'equals', values: ['Enterprise'] } ] }, traversals: [
+        { verb: 'Has', entity: 'Team', expr: { op: 'or', items: [ { prop: 'Name', op: 'is one of', values: ['platform-security','sre'] }, { prop: 'Permission', op: 'equals', values: ['Admin'] } ] }, traversals: [] } ] },
+      { verb: 'Has', entity: 'Branches', expr: { op: 'or', items: [
+        { prop: 'Branch Name', op: 'matches', group: { op: 'and', items: [ { prop: 'Branch Name', op: 'begins with', values: ['release/'] }, { prop: 'Protected', op: 'equals', values: ['True'] } ] } },
+        { prop: 'Branch Name', op: 'is one of', values: ['main','master'] } ] }, traversals: [] } ] }] },
+  { id: 'pol_billing_finance',   name: 'Billing & Finance Repos',        workload: 'github', rank: 3,  isDefault: false, tier: 'gold',   tenantSummary: ['acme-corp'],                    scopeDesc: 'name contains billing | finance',  retention: '365d / 52w / 84m', resourceCount: 4,  shadowedCount: 1, status: 'active',   origin: 'custom', createdAt: 'Jan 22, 2026',
+    graphScope: [{ root: 'Repositories', expr: { op: 'and', items: [
+      { op: 'or', items: [ { prop: 'Name', op: 'contains', values: ['billing','finance','invoice'] }, { prop: 'Topic', op: 'is one of', values: ['payments','billing'] } ] },
+      { prop: 'Visibility', op: 'is one of', values: ['Private'] } ] },
+    traversals: [ { verb: 'Belongs to', entity: 'Organization', expr: { prop: 'Name', op: 'is one of', values: ['acme-corp'] }, traversals: [] } ] }] },
+  { id: 'pol_data_pipelines',    name: 'Data Pipelines',                 workload: 'github', rank: 4,  isDefault: false, tier: 'gold',   tenantSummary: ['contoso-corp'],                 scopeDesc: 'topic = data-pipeline',            retention: '365d / 52w / 84m', resourceCount: 3,  shadowedCount: 1, status: 'active',   origin: 'custom', createdAt: 'Mar 02, 2026',
+    graphScope: [{ root: 'Repositories', expr: { op: 'and', items: [
+      { op: 'or', items: [ { prop: 'Topic', op: 'is one of', values: ['data-pipeline','etl','airflow'] }, { prop: 'Language', op: 'is one of', values: ['Python','Scala'] } ] },
+      { prop: 'Last Push', op: 'after', values: ['30 days ago'] } ] },
+    traversals: [ { verb: 'Has', entity: 'Branches', expr: { op: 'and', items: [ { prop: 'Protected', op: 'equals', values: ['True'] }, { prop: 'Branch Name', op: 'begins with', values: ['main'] } ] }, traversals: [] } ] }] },
   { id: 'pol_mobile_apps',       name: 'Mobile Apps',                    workload: 'github', rank: 5,  isDefault: false, tier: 'silver', tenantSummary: ['acme-corp', 'fabrikam-dev'],    scopeDesc: 'language = Swift | Kotlin',        retention: '365d / 52w / 36m', resourceCount: 4,  shadowedCount: 1, status: 'active',   origin: 'custom', createdAt: 'Mar 15, 2026' },
   { id: 'pol_engineering_exp',   name: 'Engineering — Experiments',      workload: 'github', rank: 6,  isDefault: false, tier: 'silver', tenantSummary: ['contoso-corp', 'fabrikam-dev'], scopeDesc: 'topic = experiment',               retention: '365d / 52w / 36m', resourceCount: 5, shadowedCount: 1, status: 'active',   origin: 'custom', createdAt: 'Feb 28, 2026' },
   { id: 'pol_open_source',       name: 'Open Source — Public Repos',     workload: 'github', rank: 7,  isDefault: false, tier: 'bronze', tenantSummary: ['acme-corp', 'contoso-corp', 'fabrikam-dev', 'kontoso-org', 'litware-labs', 'wingtip-toys'],    scopeDesc: 'visibility = public',              retention: '365d / 52w / 12m', resourceCount: 6, shadowedCount: 2, status: 'active',   origin: 'custom', createdAt: 'Dec 08, 2025' },
@@ -5922,6 +6070,12 @@ let POLICIES = [
   if (def) def.rank = rank + 1;
 })();
 
+// Policies carrying a grouped / nested graph query get a summary label for the list tooltip.
+POLICIES.forEach(function(p){
+  if (!(p.graphScope || []).some(_tqHasExpr)) return;
+  var st = _tqStats(p.graphScope[0]);
+  p.scopeDesc = p.graphScope[0].root + ' \u00b7 ' + st.cond + ' conditions \u00b7 ' + st.rel + ' related ' + (st.rel === 1 ? 'entity' : 'entities');
+});
 let POLICIES_SNAPSHOT = null;
 let reorderDirty = false;
 
@@ -8147,6 +8301,8 @@ function _prioScopeQuery(p) {
       lines.push(_prioQRow(0,
         '<span class="prio-q-unit is-first is-last">' + _prioToken('All ' + ent, 'entity') + '</span>'));
     });
+  } else if ((p.graphScope || []).some(_tqHasExpr)) {
+    p.graphScope.forEach(function(r){ lines.push('<div class="tq-wrap">' + tqRuleHtml(r, true) + '</div>'); });
   } else {
     var rules = p.scopeRules || [];
     if (!rules.length) {
@@ -11351,6 +11507,12 @@ body.rot-on .rot-hdr { display: inline-flex; }
 .rot-ibtn { display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; }
 .rot-editor { display: none; position: fixed; left: 72px; right: 0; top: var(--devjump-h, 0px); bottom: 0; z-index: 900; background: var(--white); overflow: auto; padding: 0 24px 24px; }
 .rot-editor.open { display: block; }
+.rot-prop { margin: 0 0 24px; }
+.rot-dlg-scrim { position: fixed; inset: 0; z-index: 9700; background: rgba(31,34,41,0.4); display: flex; align-items: center; justify-content: center; }
+.rot-dlg { width: 480px; max-width: calc(100vw - 32px); background: var(--white); border-radius: 8px; box-shadow: 0 8px 32px rgba(31,34,41,0.24); }
+.rot-dlg-t { padding: 16px 24px 0; font-size: 20px; line-height: 28px; font-weight: 500; }
+.rot-dlg-b { padding: 8px 24px 16px; font-size: 16px; line-height: 22px; }
+.rot-dlg-f { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 24px; border-top: 1px solid var(--border-light); }
 .rot-ed-hd { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 16px 0 16px; }
 .rot-ed-bc { font-size: 14px; color: var(--black-60); }
 .rot-ed-title { font-size: 24px; line-height: 32px; font-weight: 500; letter-spacing: -0.01em; }
@@ -11558,7 +11720,7 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
         if (!st || !st.spawn) return;
         var nm = String(st.label).replace(/^Spawning an? /, '');
         fresh.push({ agent: nm.charAt(0).toUpperCase() + nm.slice(1), task: st.spawn.task, granted: st.spawn.granted,
-          kind: /^Restore data/.test(st.spawn.granted) ? 'Restore' : (/^Configure policies/.test(st.spawn.granted) ? 'Review' : 'Question'),
+          kind: /^Restore data/.test(st.spawn.granted) ? 'Restore' : (/^Manage policies/.test(st.spawn.granted) ? 'Review' : 'Question'),
           wl: WL_NAME[(typeof state !== 'undefined' && state.wl) || ''] || 'All workloads', ts: Date.now(), dur: Math.max(1, Math.round((st.ms || 300) / 100) / 10) + 's' });
       });
     });
@@ -11859,7 +12021,8 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
     var p = draft;
     var actions = p.actions.map(function(a, i){ return '<span class="rot-act">' + mark() + esc(a) + '<button type="button" class="rot-x" aria-label="Remove action" onclick="rotRemoveAction(' + i + ')">' + ic('close-outlined', 14) + '</button></span>'; }).join('');
     var lib = ACTION_LIB.filter(function(a){ return p.actions.indexOf(a) < 0; }).map(function(a){ return '<button type="button" onclick="rotAddAction(this.textContent)">' + esc(a) + '</button>'; }).join('') || '<span class="rot-menu-empty">All actions added</span>';
-    return '<div class="rot-ed-col">'
+    var strip = p._proposal ? '<div class="rot-alert rot-prop"><span class="rot-alert-ic">' + ic('ai-sparkle', 18) + '</span><div class="rot-alert-txt"><strong>Proposed by Veeam Intelligence \u2014 not created yet</strong><span>4.2 TB (63%) of backed-up content in Retail Taxes, Retail Archive and Retail Ops has not been modified in 36 months, and no ROT policy covers it. Review the configuration below. Nothing exists until you create it; cancelling leaves the recommendation on the Policies page.</span></div></div>' : '';
+    return '<div class="rot-ed-col">' + strip
       + '<div class="rot-ed-tile">' + ic('policy-outlined', 28) + '</div>'
       + '<div class="rot-ed-h">File ROT</div><div class="rot-ed-sub">Detect unstructured data/files related to certain types of Sensitive Data Elements</div>'
       + '<div class="form-group"><label class="form-label">Name<span class="req">*</span>' + (blank ? '' : mark()) + '</label><input class="form-input" id="rotfName" value="' + esc(p.name) + '" oninput="rotValidate()"></div>'
@@ -11879,18 +12042,18 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
       + '<div class="rot-sec" style="margin-top:32px">Actions</div>'
       + '<div class="rot-scope-box rot-actbox"><div class="rot-act-l">Actions<span class="req">*</span></div><div class="rot-acts" id="rotActs">' + actions + '</div>'
       +   '<div class="rot-addwrap"><button type="button" class="rot-add" onclick="rotToggleMenu()"><span class="rot-add-ic">' + ic('add-outlined', 20) + '</span>Add Actions</button><div class="rot-menu" id="rotMenu" hidden>' + lib + '</div></div></div>'
-      + '<div class="rot-ed-foot"><button type="button" class="plv-btn plv-btn-primary rot-create" id="rotCreate2" onclick="rotSave()">Create Policy</button><button type="button" class="plv-btn plv-btn-secondary" onclick="rotCloseEditor()">Cancel</button></div>'
+      + '<div class="rot-ed-foot"><button type="button" class="plv-btn plv-btn-primary rot-create" id="rotCreate2" onclick="rotSave()">Create Policy</button><button type="button" class="plv-btn plv-btn-secondary" onclick="rotCloseEditor()">' + 'Cancel</button></div>'
       + '</div>';
   }
   function editorShell(){
-    return '<div class="rot-ed-hd"><div><div class="rot-ed-bc">' + '<span class="bc-home">\u2302</span> \u203a Policies \u203a</div><div class="rot-ed-title">File ROT Policy Editor</div></div>'
+    return '<div class="rot-ed-hd"><div><div class="rot-ed-bc">' + '<span class="bc-home">\u2302</span> \u203a Policies \u203a</div><div class="rot-ed-title">' + (draft && draft._proposal ? 'Review proposed policy' : 'File ROT Policy Editor') + '</div></div>'
       + '<div class="rot-ed-act"><button type="button" class="plv-btn plv-btn-primary" id="rotCreate1" onclick="rotSave()">' + ic('save-outlined', 20) + 'Create Policy</button><button type="button" class="plv-btn plv-btn-secondary" onclick="rotCloseEditor()">' + ic('close-outlined', 20) + 'Cancel</button><button type="button" class="plv-btn plv-btn-secondary rot-help" aria-label="Help">' + ic('help-circle-outlined', 20) + '</button></div></div>'
       + '<div class="rot-ed-card" id="rotEdBody"></div>';
   }
   function openEditor(blank){
     draft = blank ? { name:'', desc:'', severity:'Medium', sites:PROPOSED.sites, months:'36', size:'1 MB', actions:[], active:false }
                   : JSON.parse(JSON.stringify(PROPOSED));
-    draft._blank = !!blank; draft.active = false;
+    draft._blank = !!blank; draft._proposal = !blank; draft.active = false;
     var ed = document.getElementById('rotEditor'); ed.innerHTML = editorShell(); ed.classList.add('open');
     document.getElementById('rotEdBody').innerHTML = editorBody(!!blank);
     rotValidate(); ed.scrollTop = 0; rotRender();
@@ -11942,7 +12105,23 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
   window.rotOpenDetail = function(){ rotShowView(false, true); };
   window.rotCreateBlank = function(){ openEditor(true); };
   window.rotAsk = function(){ if (typeof aiOpen === 'function') aiOpen(); setTimeout(function(){ rotGapFlow(); }, 320); };
-  window.rotDismiss = function(){ var s = st(); if (s.rec) return; s.rec = 'dismissed'; s.ts = Date.now(); save(s); rotRender(); };
+  window.rotDismiss = function(note){ var s = st(); if (s.rec) return; s.rec = 'dismissed'; s.by = 'Darren Lasso'; s.note = note || ''; s.ts = Date.now(); save(s); rotRender(); };
+  // Declining is a decision, so it asks for an optional note and is recorded (audit trail + the Activity task).
+  window.rotDismissAsk = function(){
+    var d = document.getElementById('rotDlg'); if (d) d.remove();
+    d = document.createElement('div'); d.id = 'rotDlg'; d.className = 'rot-dlg-scrim';
+    d.innerHTML = '<div class="rot-dlg" role="dialog" aria-modal="true" aria-label="Dismiss recommendation"><div class="rot-dlg-t">Dismiss this recommendation?</div>'
+      + '<div class="rot-dlg-b">No policy will be created. Veeam Intelligence will not raise this one again unless the situation changes.<label class="form-label" for="rotDlgNote" style="margin-top:16px">Note (optional)</label><textarea class="form-input rot-ta" id="rotDlgNote" placeholder="Why are you dismissing it?"></textarea></div>'
+      + '<div class="rot-dlg-f"><button type="button" class="plv-btn plv-btn-secondary" onclick="rotDlgClose()">Cancel</button><button type="button" class="plv-btn plv-btn-primary" onclick="rotDlgOk()">Dismiss</button></div></div>';
+    document.body.appendChild(d); document.getElementById('rotDlgNote').focus();
+  };
+  window.rotDlgClose = function(){ var d = document.getElementById('rotDlg'); if (d) d.remove(); };
+  window.rotDlgOk = function(){
+    var n = (document.getElementById('rotDlgNote') || {}).value || ''; rotDlgClose();
+    var ed = document.getElementById('rotEditor'); if (ed) ed.classList.remove('open'); draft = null;
+    rotDismiss(n.trim());
+    if (typeof showToast === 'function') showToast({ tone:'info', title:'Recommendation dismissed', body:'No policy was created. The decision is in the audit trail.' });
+  };
   window.rotUndoDismiss = function(){ var s = st(); delete s.rec; save(s); rotRender(); };
 
   // ── assistant: the same recommendation, as a conversation that ends at the policy form ──
@@ -11959,10 +12138,10 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
     var rs = aiPushReasoning(); rs.named = true; rs.open = false;
     var steps = [
       { kind:'route', label:'Interpreting request — retention gap on Retail Division SharePoint', ms:400, detail:[['scope','Retail Division sites · ROT policies'],['mode','read-only analysis']], result:'A coverage gap against the four active ROT policies' },
-      { kind:'agent', label:'Spawning a retention-gap analysis agent', ms:300, spawn:{ task:'Measure untouched and duplicate content per Retail site against the active ROT policies', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
+      { kind:'agent', label:'Spawning a retention-gap analysis agent', ms:300, spawn:{ task:'Measure untouched and duplicate content per Retail site against the active ROT policies', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
       { kind:'tool', label:'content.age — last-modified distribution per site', ms:800, detail:[['sites','5 in Retail Division'],['threshold','36 months']], result:'4.2 TB untouched across 3 sites' },
       { kind:'tool', label:'policies.match — which ROT policies cover which sites', ms:600, detail:[['policies','4 active']], result:'None cover Retail Taxes, Retail Archive or Retail Ops' },
-      { kind:'agent', label:'Spawning a policy-proposal agent', ms:300, spawn:{ task:'Configure a ROT policy for the three uncovered sites', granted:'Configure policies · asks first', denied:'Restore · Export' } }
+      { kind:'agent', label:'Spawning a policy-proposal agent', ms:300, spawn:{ task:'Configure a ROT policy for the three uncovered sites', granted:'Manage policies · asks first', denied:'Restore · Export' } }
     ];
     steps.forEach(function(en, i){ setTimeout(function(){ rs.steps.push(en); aiRender(); }, 350 + i * 700); });
     setTimeout(function(){

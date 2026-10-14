@@ -1599,9 +1599,9 @@ body.ai-open.ai-full #toast { right: 24px; }
 .sd-graph-btn span { padding: 0 8px; }
 .sd-graph-btn:hover { background: var(--black-5); }
 .sd-sec-hd { padding: 12px; font-size: 18px; line-height: 24px; font-weight: 500; color: var(--black-100); }
-.sd-cols { display: flex; margin: 0 12px 12px; border: 1px solid var(--border-light); border-radius: 8px; overflow: hidden; flex: 1 0 auto; }
+.sd-cols { display: flex; flex: 1 0 auto; } /* canonical: Identity Dashboard finding overview (.idd-cols) — two columns, no outer box */
 /* activity log panel — Figma 10845:113161 (40px rows + 12px connectors) */
-.sd-log { flex: 1.17; min-width: 0; padding: 16px; }
+.sd-log { flex: 1; min-width: 0; padding: 16px 24px 24px 16px; }
 .sd-log-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
 .sd-log-rows { }
 .sd-log-row { display: flex; align-items: center; gap: 8px; height: 40px; padding: 8px 8px 8px 0; box-sizing: border-box; }
@@ -1613,12 +1613,13 @@ body.ai-open.ai-full #toast { right: 24px; }
 .sd-log-dur { width: 112px; flex-shrink: 0; font-size: 16px; line-height: 22px; color: var(--black-100); }
 .sd-log-conn { height: 12px; margin-left: 13.5px; border-left: 1px solid var(--border-light); }
 /* properties panel — Figma 10845:113250 (258/258 label-value rows) */
-.sd-props { width: 45%; min-width: 320px; flex-shrink: 0; border-left: 1px solid var(--border-light); }
-.sd-props-hd { padding: 13px 12px; font-size: 16px; font-weight: 500; line-height: 22px; color: var(--black-100); }
+.sd-props { width: 440px; flex-shrink: 0; padding: 16px 16px 24px 24px; border-left: 1px solid var(--black-10); }
+@media (max-width: 1100px) { .sd-cols { flex-direction: column; } .sd-props { width: auto; border-left: none; border-top: 1px solid var(--black-10); } }
+.sd-props-hd { display: flex; align-items: center; min-height: 28px; margin-bottom: 4px; padding: 0; font-size: 18px; font-weight: 500; line-height: 22px; color: var(--black-100); }
 /* property row — Figma 10845:113255 (_Columns Data Grid) */
-.sd-prop-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0; align-items: center; min-height: 32px; margin: 0 12px 8px; }
-.sd-prop-row .k { font-size: 16px; line-height: 22px; color: var(--black-60); }
-.sd-prop-row .v { font-size: 16px; line-height: 22px; color: var(--black-100); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sd-prop-row { display: flex; align-items: center; gap: 12px; min-height: 40px; margin: 0; font-size: 16px; line-height: 22px; }
+.sd-prop-row .k { width: 150px; flex-shrink: 0; font-size: 16px; line-height: 22px; color: var(--black-60); }
+.sd-prop-row .v { flex: 1; min-width: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 16px; line-height: 22px; color: var(--black-100); overflow-wrap: anywhere; }
 /* value chips — Figma 10845:113261 (Chip, 28px r2 tinted) */
 .sd-chip { display: inline-flex; align-items: center; height: 28px; padding: 3px 8px; border-radius: 2px; background: var(--black-5); color: var(--black-100); font-size: 16px; font-weight: 500; line-height: 22px; box-sizing: border-box; }
 .sd-chip.ok { background: var(--em-green-tint); color: var(--em-green); }
@@ -1970,14 +1971,6 @@ body.ai-full #aiWorkingGlow { display: none; }
 <style id="ag-style">
 :root { --ag-plum: #98269b; }   /* Base/Plum (Vision chip Purple) — the spawned-agent node */
 /* Agent sessions view: left navigator + entity header + KPI strip (borrowed from the Data System catalog) */
-.ag-nav { width: 280px; flex-shrink: 0; border-right: 1px solid var(--border-light); background: var(--white); padding: 12px 0 12px 12px; overflow-y: auto; }
-.ag-nav-sec { display: flex; align-items: center; gap: 8px; padding: 12px 12px 4px 4px; font-size: 16px; font-weight: 500; color: var(--black-100); }
-.ag-nav-sec svg { width: 16px; height: 16px; color: var(--black-60); }
-.ag-nav .sd-side-item { height: 44px; margin-right: 12px; cursor: pointer; border: 0; background: none; width: calc(100% - 12px); text-align: left; font-family: inherit; }
-.ag-nav .sd-side-item:hover { background: var(--em-green-tint); }
-.ag-nav .sd-side-item.active:hover { background: var(--em-green-tint); }
-.ag-nav .sd-side-count { background: var(--em-green-tint); color: var(--em-green); font-weight: 500; }
-.ag-nav .sd-side-item.active .sd-side-count { background: var(--em-green); color: var(--white); }
 .ag-entity { flex-shrink: 0; display: flex; align-items: flex-start; gap: 16px; padding: 16px 20px 8px; background: var(--white); }
 .ag-entity-tile { width: 48px; height: 48px; border-radius: 8px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; background: var(--em-green-tint); color: var(--em-green); }
 .ag-entity-tile svg { width: 28px; height: 28px; }
@@ -1992,25 +1985,43 @@ body.ai-full #aiWorkingGlow { display: none; }
 #sdSide button.sd-side-item { border: 0; background: none; width: 100%; text-align: left; font-family: inherit; cursor: pointer; }
 #sdSide button.sd-side-item:hover { background: var(--em-green-tint); }
 #sdSide button.sd-side-item.active { background: var(--em-green-tint); }
+.sd-hd-main { min-width: 0; }
+.sd-hd-meta { display: flex; align-items: center; gap: 8px; }
+.sd-hd-acts { margin-left: auto; display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+.sd-hd-upd { font-size: 16px; color: var(--black-60); white-space: nowrap; }
+.ag-pbtn { display: inline-flex; align-items: center; height: 36px; padding: 0 16px; border: 1px solid var(--em-green); border-radius: 4px; background: var(--em-green); color: var(--white); font: inherit; font-size: 16px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+.ag-pbtn:hover { filter: brightness(0.94); }
+.ag-menu-wrap { position: relative; }
+.ag-abtn { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font: inherit; font-size: 16px; font-weight: 500; color: var(--black-100); cursor: pointer; }
+.ag-abtn:hover { background: var(--black-5); }
+.ag-menu { display: none; position: absolute; right: 0; top: 40px; z-index: 30; min-width: 220px; padding: 4px 0; background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; box-shadow: 0 4px 16px rgba(31,34,41,0.16); }
+.ag-menu.open { display: block; }
+.ag-menu button { display: block; width: 100%; height: 36px; padding: 0 16px; border: 0; background: none; text-align: left; font: inherit; font-size: 16px; color: var(--black-100); cursor: pointer; }
+.ag-menu button:hover { background: var(--black-5); }
+.sd-blk { margin-bottom: 24px; }
+.ag-sum { margin: 0; font-size: 16px; line-height: 22px; color: var(--black-100); }
+.ag-hist { }
+.ag-hist-row { display: flex; gap: 16px; padding: 8px 0; border-top: 1px solid var(--border-light); font-size: 16px; line-height: 22px; }
+.ag-hist-row .w { width: 168px; flex-shrink: 0; color: var(--black-60); }
 .ag-tools { display: flex; align-items: center; gap: 8px; padding: 12px 12px 0; }
 .ag-btn { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font: inherit; font-size: 16px; cursor: pointer; }
 .ag-btn:hover { background: var(--black-5); }
-.ag-graph { position: relative; margin: 8px 12px 0; min-height: 300px; border-bottom: 1px solid var(--border-light); overflow: hidden; }
+.ag-graph { position: relative; margin: 8px 12px 0; border-bottom: 1px solid var(--border-light); overflow: hidden; }
 .ag-graph.is-hidden { display: none; }
 .ag-zoom { position: absolute; left: 0; bottom: 12px; display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 4px; background: var(--white); z-index: 2; }
 .ag-zoom button { width: 44px; height: 44px; border: 0; border-bottom: 1px solid var(--border-light); background: none; font-size: 20px; cursor: pointer; }
 .ag-zoom button:last-child { border-bottom: 0; }
-.ag-svg { width: 100%; height: 300px; display: block; }
+.ag-svg { width: 100%; max-width: 1000px; height: auto; display: block; margin: 0 auto; } /* was height:300px — fixed height made `meet` scale the diagram up on wide screens; now it renders at 1:1 and never grows past its viewBox */
 .ag-svg .ag-edge { fill: none; stroke: var(--border); stroke-width: 1; }
 .ag-svg .ag-node-lbl { font-size: 14px; fill: var(--black-100); text-anchor: middle; }
 .ag-svg .ag-node-name { font-size: 14px; fill: var(--status-blue); text-anchor: middle; }
 .ag-svg g.ag-node { cursor: pointer; transition: opacity 0.15s ease; }
 .ag-svg.has-hl g.ag-node:not(.hl), .ag-svg.has-hl path.ag-edge { opacity: 0.25; }
 .ag-svg .ag-node.hl circle { stroke: var(--em-green); stroke-width: 3; }
-.ag-sec { padding: 16px 12px 8px; font-size: 20px; line-height: 28px; font-weight: 500; }
-.ag-props { display: grid; grid-template-columns: 1fr 1fr; column-gap: 48px; padding: 0 12px 12px; }
-.ag-props .sd-prop-row { margin: 0 0 8px; grid-template-columns: 180px 1fr; }
-.ag-props .sd-prop-row .v { white-space: normal; }
+
+
+
+
 </style>
 </head>
 <body>
@@ -2946,7 +2957,6 @@ body.ai-full #aiWorkingGlow { display: none; }
           </div>
         </div>
         <div class="body-row" id="actAgentsBody" style="display:none">
-          <aside class="ag-nav" id="agNav" aria-label="Agent session categories"></aside>
           <div style="display:flex;flex-direction:column;flex:1;min-width:0">
           <!-- ══ TASK QUEUE (user 2026-09-10, realignment): the agent view is a
                dedicated Activity lens like the Audit log, and the QUEUE is its
@@ -10486,12 +10496,12 @@ function _auditFromRot() {
   var INTEG = 'Microsoft 365 \u2013 contoso';
   var out = [ AE('ag-rot1', 0, 8, 41, 'Veeam Intelligence', 'agent_recommendation_raised', 'backup_policy', 'Backup',
     'Recommendation raised: create ROT policy \u201c' + NAME + '\u201d (nothing created)', INTEG, 'Microsoft 365',
-    { source: 'agent', details: { agent: 'Veeam Intelligence', capability: 'Recommend policies', evidence: '4.2 TB (63%) untouched 36+ months across 3 Retail sites; no active ROT policy covers them', policy_created: false } }) ];
+    { source: 'agent', details: { agent: 'Veeam Intelligence', capability: 'Manage policies \u00b7 Recommend', evidence: '4.2 TB (63%) untouched 36+ months across 3 Retail sites; no active ROT policy covers them', policy_created: false } }) ];
   if (s.rec === 'approved') {
     var e = AE('ag-rot2', 0, 0, 0, 'd.lasso@veeam.com', 'backup_policy_created', 'backup_policy', 'Backup',
       'ROT policy \u201c' + NAME + '\u201d ' + (pol.active === false ? 'saved (inactive)' : 'created and activated') + ' by d.lasso@veeam.com from a Veeam Intelligence recommendation', INTEG, 'Microsoft 365',
       { source: 'agent', imp: true,
-        details: { agent: 'Veeam Intelligence', authorization: 'Reviewed and saved by the user', approver: 'd.lasso@veeam.com', capability: 'Configure policies \u00b7 Ask first' },
+        details: { agent: 'Veeam Intelligence', authorization: 'Reviewed and saved by the user', approver: 'd.lasso@veeam.com', capability: 'Manage policies \u00b7 Recommend' },
         changed: [['status', '\u2014', 'Active'], ['data_scope', '\u2014', 'SharePoint \u00b7 Retail Taxes, Retail Archive, Retail Ops'], ['scope_query', '\u2014', pol.crit || 'SharePoint files in Retail Taxes, Retail Archive, Retail Ops \u00b7 not modified in 36 months'], ['actions', '\u2014', pol.actionText || 'Flag for review; Exclude from backup after a 30-day review window'], ['severity', '\u2014', pol.severity || 'Low']] });
     e.ts = new Date(s.ts || Date.now()); out.push(e);
   } else if (s.rec === 'dismissed') {
@@ -10704,8 +10714,9 @@ var AGENT_TASK_PILL = {
   done:      ['success', 'Done'],
   cancelled: ['aborted', 'Cancelled']
 };
-function _agentTaskPill(st){
+function _agentTaskPill(st, id){
   var c = AGENT_TASK_PILL[st] || AGENT_TASK_PILL.queued;
+  if (id === 'rot1') c = { done:['success','Created'], cancelled:['aborted','Dismissed'] }[st] || c;   // a recommendation is created or dismissed, not done / cancelled
   return '<span class="act-status-pill ' + c[0] + '">' + (_JOB_STATUS_ICON[c[0]] || '') + c[1] + '</span>';
 }
 // run outcomes on the same component (was: _agentOutcomePill's raw-hex pill)
@@ -10743,7 +10754,7 @@ function _rotTask(){
     trigger:'Proactive \u00b7 Veeam Intelligence', source:'Recommendation \u2014 Policies \u203a File ROT',
     when: status === 'awaiting' ? 'Waiting on you since this morning' : (status === 'done' ? 'Approved by Darren Lasso' : 'Dismissed'),
     started: s.ts ? new Date(s.ts) : new Date(Date.now() - 2 * 36e5),
-    href:'backup-policies-agent-overlay.html#rot-review', cta:'Review the recommendation' };
+    href:'backup-policies-agent-overlay.html#rot-review', cta:'Review and create', rs:s };
 }
 function _agentTaskRows(){
   // Cross-page resolution (gate handoff): approving a held task in the
@@ -10760,7 +10771,7 @@ function _agentTaskRows(){
   return _agentTasksLive().map(function(t, i){ t.id = 'lv' + i; return t; }).concat([_rotTask()]).concat(AGENT_TASKS_SEED).map(function(t){
     return { _task: true, id: t.id, capability: t.title, agent: t.agent,
       kind: t.kind || '—', wl: t.wl || '—', trigger: t.trigger || t.source,
-      started: t.started || new Date(), whenLbl: t.when, dur: '—', outcome: t.status, href: t.href, cta: t.cta };
+      started: t.started || new Date(), whenLbl: t.when, dur: '—', outcome: t.status, href: t.href, cta: t.cta, rs: t.rs };
   });
 }
 // ── selection + bulk actions (user 2026-09-10: Sessions is the reference
@@ -10901,7 +10912,7 @@ function renderAgentTasks(){
     return '<tr>'
       + '<td><div class="cell-name">' + esc(t.title) + '</div><div style="font-size:12px;color:var(--black-60);margin-top:2px">' + esc(t.source) + '</div></td>'
       + '<td>' + esc(t.agent) + '</td>'
-      + '<td>' + _agentTaskPill(t.status) + '</td>'
+      + '<td>' + _agentTaskPill(t.status, t.id) + '</td>'
       + '<td style="white-space:nowrap">' + esc(t.when) + '</td>'
     + '</tr>';
   }).join('') || '<tr><td colspan="4"><div style="padding:32px;text-align:center;color:var(--black-60)">No tasks in the queue.</div></td></tr>';
@@ -10968,42 +10979,6 @@ function _agStatus(r){
 var AG_STATUS_LBL = { pending:'Pending approval', running:'In progress', scheduled:'Scheduled', success:'Succeeded', warning:'Warning', failed:'Failed', cancelled:'Cancelled' };
 var AG_STATUS_ICON = { pending:'lock-outlined', running:'play-circle-outlined', scheduled:'history-outlined', success:'sd-log-check', warning:'status-warning-outlined', failed:'status-error-outlined', cancelled:'close-outlined' };
 function _agCap(r){ return r._task ? null : String(r.granted || '').split(' · ')[0] || null; }
-function _agNavMatch(r, nav){
-  if (!nav) return true;
-  if (nav.g === 'status') return _agStatus(r) === nav.v;
-  if (nav.g === 'type') return r.kind === nav.v;
-  if (nav.g === 'cap') return _agCap(r) === nav.v;
-  return true;
-}
-function agNavPick(g, v){
-  state.agentsNav = (g === 'all') ? null : { g: g, v: v };
-  state.agentsPage = 1;
-  renderAgentsTable();
-}
-function renderAgentNav(){
-  var host = document.getElementById('agNav'); if (!host) return;
-  var all = _agAll(), nav = state.agentsNav;
-  var esc = function(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
-  var ico = function(n){ return _sdIc(n, 20) || _sdIc('my-ai-agents-outlined', 20); };
-  var item = function(g, v, label, count, icon){
-    var on = (g === 'all') ? !nav : (nav && nav.g === g && nav.v === v);
-    return '<button type="button" class="sd-side-item' + (on ? ' active' : '') + '" onclick="agNavPick(\'' + g + '\',\'' + esc(v).replace(/'/g, "\\'") + '\')"><span class="sd-side-tile">' + ico(icon) + '</span><span class="lbl">' + esc(label) + '</span><span class="sd-side-count">' + count + '</span></button>';
-  };
-  var chev = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>';
-  var html = item('all', '', 'All sessions', all.length, 'my-ai-agents-outlined');
-  html += '<div class="ag-nav-sec">' + chev + 'Status</div>';
-  ['pending','running','scheduled','success','warning','failed','cancelled'].forEach(function(s){
-    var n = all.filter(function(r){ return _agStatus(r) === s; }).length;
-    if (n) html += item('status', s, AG_STATUS_LBL[s], n, AG_STATUS_ICON[s]);
-  });
-  var kinds = {}; all.forEach(function(r){ if (r.kind && r.kind !== '—') kinds[r.kind] = (kinds[r.kind] || 0) + 1; });
-  html += '<div class="ag-nav-sec">' + chev + 'Type</div>';
-  Object.keys(kinds).sort().forEach(function(k){ html += item('type', k, k, kinds[k], k === 'Restore' ? 'restore-point' : (k === 'Review' ? 'policy-outlined' : 'securiti-graph')); });
-  var caps = {}; all.forEach(function(r){ var c = _agCap(r); if (c) caps[c] = (caps[c] || 0) + 1; });
-  html += '<div class="ag-nav-sec">' + chev + 'Capability granted</div>';
-  Object.keys(caps).sort().forEach(function(c){ html += item('cap', c, c, caps[c], 'integration-widget-outlined'); });
-  host.innerHTML = html;
-}
 function renderAgentKpis(){
   var host = document.getElementById('agKpis'); if (!host) return;
   var all = _agAll(), runs = AGENT_RUNS;
@@ -11043,13 +11018,11 @@ function renderAgentsTable(){
   var _rc = document.getElementById('actRangeChip');
   if (_rc && state.actView === 'agents') _rc.style.display = _activeLens ? 'none' : '';
   var _TASK_ACTIVE = { scheduled:1, queued:1, running:1, awaiting:1, waiting:1 };
-  var _nav = state.agentsNav;
-  var pool = _nav ? _agAll() : _agentTaskRows().filter(function(t){ return !!_TASK_ACTIVE[t.outcome] === _activeLens; })
+  var pool = _agentTaskRows().filter(function(t){ return !!_TASK_ACTIVE[t.outcome] === _activeLens; })
     .concat(AGENT_RUNS.filter(function(r){ return (r.outcome === 'Running') === _activeLens; }));
   var rows = pool.filter(function(r){
     var t = r.started.getTime();
-    if (!_activeLens && !_nav && (t < b.startTs || t > b.endTs)) return false;
-    if (_nav && !_agNavMatch(r, _nav)) return false;
+    if (!_activeLens && (t < b.startTs || t > b.endTs)) return false;
     for (var i = 0; i < (state.agentsFilters || []).length; i++) {
       var f = state.agentsFilters[i];
       if (f.attr === 'agent'   && f.values.indexOf(r.agent)   < 0) return false;
@@ -11092,7 +11065,7 @@ function renderAgentsTable(){
         + '<td>' + esc(r.trigger) + '</td>'
         + '<td style="white-space:nowrap">' + esc(r.whenLbl) + '</td>'
         + '<td style="white-space:nowrap">' + esc(r.dur) + '</td>'
-        + '<td>' + _agentTaskPill(r.outcome) + '</td>'
+        + '<td>' + _agentTaskPill(r.outcome, r.id) + '</td>'
         + acts
       + '</tr>';
     }
@@ -11113,7 +11086,7 @@ function renderAgentsTable(){
   // selection bookkeeping (Sessions convention): prune to the scoped set,
   // sync the header checkbox, render the bulk bar
   _agentsLastPageIds = pageRows.map(function(r){ return r.id; });
-  renderAgentNav(); renderAgentKpis();
+  renderAgentKpis();
   if (!state.agentsSel) state.agentsSel = new Set();
   var _poolIds = {}; pool.forEach(function(r){ _poolIds[r.id] = 1; });
   Array.from(state.agentsSel).forEach(function(id){ if (!_poolIds[id]) state.agentsSel.delete(id); });
@@ -11214,7 +11187,7 @@ function _agentGraphModel(r){
     var col = nodes.filter(function(n){ return n.col === c; });
     col.forEach(function(n, i){ n.x = colX[c]; n.y = H / 2 - 20 + (i - (col.length - 1) / 2) * 110; });
   });
-  return { nodes: nodes, edges: edges, W: W, H: H, denied: r.kind === 'Review' ? 'Restore · Export' : (r.kind === 'Restore' ? 'Export · Configure policies' : '') };
+  return { nodes: nodes, edges: edges, W: W, H: H, denied: r.kind === 'Review' ? 'Restore · Export' : (r.kind === 'Restore' ? 'Export · Manage policies' : '') };
 }
 function _agentGraphSvg(m){
   var by = {}; m.nodes.forEach(function(n){ by[n.id] = n; });
@@ -11234,12 +11207,12 @@ function _agentGraphSvg(m){
       + '<text class="ag-node-lbl" x="' + n.x + '" y="' + (n.y + 50) + '">' + esc(t.lbl) + '</text>'
       + '<text class="ag-node-name" x="' + n.x + '" y="' + (n.y + 68) + '">' + esc(n.name.length > 22 ? n.name.slice(0, 21) + '…' : n.name) + '</text></g>';
   }).join('');
-  return '<svg class="ag-svg" id="agSvg" viewBox="0 0 ' + m.W + ' ' + m.H + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Spawn graph"><g id="agSvgG">' + path + nodes + '</g></svg>';
+  return '<svg class="ag-svg" id="agSvg" viewBox="0 0 ' + m.W + ' ' + m.H + '" style="aspect-ratio:' + m.W + '/' + m.H + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Spawn graph"><g id="agSvgG">' + path + nodes + '</g></svg>';
 }
 var _agZoom = 1;
 function agGraphZoom(f){
   _agZoom = f === 0 ? 1 : Math.max(0.6, Math.min(2, _agZoom * f));
-  var g = document.getElementById('agSvgG'); if (g) g.setAttribute('transform', 'translate(' + (500 * (1 - _agZoom)) + ',' + (150 * (1 - _agZoom)) + ') scale(' + _agZoom + ')');
+  var g = document.getElementById('agSvgG'); if (g) var vb = document.getElementById('agSvg').viewBox.baseVal; g.setAttribute('transform', 'translate(' + (vb.width / 2 * (1 - _agZoom)) + ',' + (vb.height / 2 * (1 - _agZoom)) + ') scale(' + _agZoom + ')');
 }
 function agGraphToggle(){
   var w = document.getElementById('agGraphWrap'), b = document.getElementById('agHideBtn'); if (!w) return;
@@ -11301,15 +11274,15 @@ function openAgentRunModal(runId){
     + prow('Duration', running ? 'In progress' : esc(r.dur))
     + prow('Granted', esc(r.granted || 'Access & visualize data'))
     + prow('Lifetime', 'Retired when the task completed')
-    + (denied ? prow('Not granted', esc(denied)) : prow('Not granted', 'Restore · Export · Configure policies'))
+    + (denied ? prow('Not granted', esc(denied)) : prow('Not granted', 'Restore · Export · Manage policies'))
     + prow('Human-in-the-loop', (r.kind === 'Restore' || r.kind === 'Review') ? 'Required before anything is written' : 'Not required — read-only')
     + prow('Guardrails', 'LLM Firewall · logged to the audit trail');
   document.getElementById('sdMain').innerHTML =
       '<div class="ag-tools"><button type="button" class="ag-btn" id="agHideBtn" onclick="agGraphToggle()">' + (_sdIc('sd-visibility', 20) || '') + '<span>Hide Graph</span></button></div>'
     + '<div class="ag-graph" id="agGraphWrap">' + _agentGraphSvg(model)
     +   '<div class="ag-zoom"><button type="button" aria-label="Zoom in" onclick="agGraphZoom(1.2)">+</button><button type="button" aria-label="Zoom out" onclick="agGraphZoom(1/1.2)">−</button><button type="button" aria-label="Fit" onclick="agGraphZoom(0)">⤢</button></div></div>'
-    + '<div class="ag-sec">Properties</div><div class="ag-props">' + props + '</div>'
-    + '<div class="ag-sec">Run log</div><div class="sd-cols" style="margin-top:0"><div class="sd-log" style="width:100%"><div class="sd-log-rows">' + logRows + '</div></div></div>';
+    + '<div class="sd-cols"><div class="sd-log"><div class="sd-props-hd">Run log</div><div class="sd-log-rows">' + logRows + '</div></div>'
+    +   '<div class="sd-props"><div class="sd-props-hd">Properties</div>' + props + '</div></div>';
   document.getElementById('sdOverlay').classList.add('open');
   document.getElementById('sdModal').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -11317,6 +11290,17 @@ function openAgentRunModal(runId){
 // TASK detail — same full-page shell, summarizing a queued/scheduled/gated
 // task (it has no run log yet; the summary is what WILL happen and what the
 // task is waiting on).
+function agTaskMenu(ev){
+  ev.stopPropagation();
+  var m = document.getElementById('agTaskMenu'); if (!m) return;
+  var open = m.classList.toggle('open');
+  if (open) setTimeout(function(){ document.addEventListener('click', function f(){ m.classList.remove('open'); document.removeEventListener('click', f); }); }, 0);
+}
+function agCopyTaskLink(id){
+  var u = location.href.split('#')[0] + '#agents';
+  try { navigator.clipboard.writeText(u); } catch (e) {}
+  var m = document.getElementById('agTaskMenu'); if (m) m.classList.remove('open');
+}
 function openAgentTaskModal(taskId){
   var t = _agentTaskRows().filter(function(x){ return x.id === taskId; })[0];
   if (!t) return;
@@ -11328,36 +11312,79 @@ function openAgentTaskModal(taskId){
       + '<button class="sd-tab-close" type="button" aria-label="Close task" onclick="closeSessionModal()">' + _sdIc('sd-close', 20) + '</button>'
     + '</div>'
     + '<div class="sd-tabs-actions"><button class="sd-act-btn" type="button" data-tooltip="Close" aria-label="Close" onclick="closeSessionModal()">' + _sdIc('sd-close', 20) + '</button></div>';
-  document.getElementById('sdHeader').innerHTML =
-    '<span class="sd-hd-tile">' + _sdIc('sd-session-log', 28) + '</span>'
-    + '<div><div class="sd-hd-eyebrow">Agent Task</div><div class="sd-hd-title">' + esc(t.capability) + '</div></div>';
+  var pending = (t.outcome === 'awaiting' || t.outcome === 'waiting');
   var note = t.outcome === 'awaiting' || t.outcome === 'waiting'
-    ? (t.id === 'rot1' ? 'Veeam Intelligence proposed this. Nothing is created until you approve it \u2014 on the Policies page or in the assistant.' : 'The agent is holding for you — nothing runs until the approval is answered.')
+    ? (t.id === 'rot1' ? 'Veeam Intelligence found 4.2 TB (63%) of backed-up content in Retail Taxes, Retail Archive and Retail Ops that has not been modified in 36 months and is not covered by any ROT policy. It drafted a policy to flag that content and, after a 30-day review window, exclude it from backup. Nothing exists until you review the draft and create it.' : 'The agent is holding for you — nothing runs until the approval is answered.')
     : (t.outcome === 'scheduled' ? 'Runs on its standing schedule; the run log lands here once it starts.'
     : (t.outcome === 'cancelled' ? 'Cancelled before it ran — nothing was changed.' : 'Waiting its turn in the queue — tasks run one at a time.'));
-  document.getElementById('sdSide').innerHTML =
-    '<div class="sd-side-item active" aria-current="page"><span class="sd-side-tile">' + _sdIc('sd-session-log', 20) + '</span><span class="lbl">Task Details</span></div>'
-    + '<div class="sd-side-div"></div>'
-    + '<div class="sd-side-note"><span class="ic">' + _sdIc('securiti-graph', 32) + '</span><div>' + note + '</div></div>';
-  function prow(k, v){ return '<div class="sd-prop-row"><span class="k">' + k + '</span><span class="v">' + v + '</span></div>'; }
+  var rot = (t.id === 'rot1'), rs = t.rs || {};
+  if (rot && t.outcome === 'done') note = 'Created by ' + (rs.by || 'Darren Lasso') + ' from this recommendation' + (rs.policy ? ' \u2014 \u201c' + rs.policy.name + '\u201d' + (rs.policy.active ? ', active.' : ', saved inactive.') : '.');
+  if (rot && t.outcome === 'cancelled') note = 'Dismissed by ' + (rs.by || 'Darren Lasso') + '. No policy was created.' + (rs.note ? ' Note: \u201c' + rs.note + '\u201d' : '');
   var initials = t.agent.split(/\s+/).map(function(w){ return w[0]; }).join('').slice(0, 2).toUpperCase();
-  var props = prow('Agent', '<span class="sd-init"><span class="sd-init-av">' + esc(initials) + '</span>' + esc(t.agent) + '</span>')
+  var capName = t.kind === 'Review' ? 'Manage policies' : (t.kind === 'Backup' ? 'Restore data' : 'Access & visualize data');
+  var goHref = t.href || ('inventory-V1-agent-overlay.html#agentgate/' + t.id);
+  // ── header: type + status chip, title, then the actions (the Finding page's grammar: primary decision button
+  // + an Actions menu at the top right; a pending approval leads with the decision) ──
+  var acts = [];
+  if (rot && pending) acts.push(['Open the draft in Policies', "window.location.href='backup-policies-agent-overlay.html#rot-review'"]);
+  if (rot && t.outcome === 'done') acts.push(['Open File ROT policies', "window.location.href='backup-policies-agent-overlay.html#rot'"]);
+  if (pending && !rot) acts.push(['Open in the assistant', "window.location.href='inventory-V1-agent-overlay.html#agentgate/" + t.id + "'"]);
+  acts.push(['View in the audit trail', "window.location.href='activity-agent-overlay.html#audit'"]);
+  acts.push(['Copy link', "agCopyTaskLink('" + t.id + "')"]);
+  var chev = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>';
+  document.getElementById('sdHeader').innerHTML =
+    '<span class="sd-hd-tile">' + _sdIc('sd-session-log', 28) + '</span>'
+    + '<div class="sd-hd-main"><div class="sd-hd-meta"><span class="sd-hd-eyebrow">' + (rot ? 'Agent Recommendation' : 'Agent Task') + '</span>' + _agentTaskPill(t.outcome, t.id) + '</div><div class="sd-hd-title">' + esc(t.capability) + '</div></div>'
+    + '<div class="sd-hd-acts"><span class="sd-hd-upd">Last updated ' + esc(_actFmtFull(t.started)) + '</span>'
+    + (pending ? '<button type="button" class="ag-pbtn" onclick="window.location.href=\'' + esc(goHref) + '\'">' + esc(t.cta || 'Review in the conversation') + '</button>' : (rot && t.outcome === 'done' ? '<button type="button" class="ag-pbtn" onclick="window.location.href=\'backup-policies-agent-overlay.html#rot\'">Open policy</button>' : ''))
+    + '<span class="ag-menu-wrap"><button type="button" class="ag-abtn" aria-haspopup="true" onclick="agTaskMenu(event)"><span>Actions</span>' + chev + '</button>'
+    + '<div class="ag-menu" id="agTaskMenu" role="menu">' + acts.map(function(x){ return '<button type="button" role="menuitem" onclick="' + esc(x[1]) + '">' + esc(x[0]) + '</button>'; }).join('') + '</div></span></div>';
+  // ── related-object list (left) + graph (what is held, and by whom), like the run page ──
+  var model = (function(){
+    var nodes = [], edges = [], id = 0;
+    var add = function(type, name, col){ var n = { id:'n' + (++id), type:type, name:name, col:col }; nodes.push(n); return n; };
+    var o = add('orchestrator', 'Veeam Intelligence', 0), c = add('capability', capName, 1);
+    var ap = pending ? add('approval', 'd.lasso@veeam.com', 2) : null;
+    var tl = add('tool', t.kind === 'Review' ? 'Policy Server' : 'Protected Data Server', 3);
+    var ou = add('output', t.id === 'rot1' ? 'ROT policy (not created)' : 'Task result', 4);
+    edges.push([o.id, c.id]);
+    if (ap){ edges.push([c.id, ap.id], [ap.id, tl.id]); } else edges.push([c.id, tl.id]);
+    edges.push([tl.id, ou.id]);
+    var W = 1000, H = 220, colX = [130, 320, 515, 710, 880];
+    nodes.forEach(function(n){ n.x = colX[n.col]; n.y = H / 2 - 20; });
+    return { nodes:nodes, edges:edges, W:W, H:H, denied:'' };
+  })();
+  window._agGraph = model;
+  var typeRows = [['orchestrator','Orchestrator','my-ai-agents-outlined'],['capability','Capability','integration-widget-outlined'],['approval','Approval','lock-outlined'],['tool','Tool','securiti-graph'],['output','Output','policy-outlined']];
+  var side = '<button type="button" class="sd-side-item active" id="agSideAll" onclick="agGraphHL(null)"><span class="sd-side-tile">' + _sdIc('sd-session-log', 20) + '</span><span class="lbl">Overview</span></button>';
+  typeRows.forEach(function(r){
+    var n = model.nodes.filter(function(x){ return x.type === r[0]; }).length;
+    if (n) side += '<button type="button" class="sd-side-item" data-agt="' + r[0] + '" onclick="agGraphHL(\'' + r[0] + '\')"><span class="sd-side-tile">' + (_sdIc(r[2], 20) || '') + '</span><span class="lbl">' + r[1] + '</span><span class="sd-side-count">' + n + '</span></button>';
+  });
+  document.getElementById('sdSide').innerHTML = side;
+  function prow(k, v){ return '<div class="sd-prop-row"><span class="k">' + k + '</span><span class="v">' + v + '</span></div>'; }
+  var props = prow('Status', _agentTaskPill(t.outcome, t.id))
+    + prow('Agent', '<span class="sd-init"><span class="sd-init-av">' + esc(initials) + '</span>' + esc(t.agent) + '</span>')
     + prow('Source', esc(t.trigger))
-    + prow('Status', _agentTaskPill(t.outcome))
+    + prow('Capability', esc(capName))
+    + (rot ? prow('Decision', t.outcome === 'done' ? 'Created by ' + esc(rs.by || 'Darren Lasso') : (t.outcome === 'cancelled' ? 'Dismissed by ' + esc(rs.by || 'Darren Lasso') : 'Awaiting your review')) : '')
     + prow('Scheduled / started', esc(t.whenLbl))
     + prow('Data touched', 'Per the capability’s grant — nothing writes without an approval')
     + prow('Guardrails', 'LLM Firewall · logged to the audit trail');
-  // GATE HANDOFF (user 2026-09-10): a pending approval is resolved in the
-  // CONVERSATION — one gate, one owner. This modal's job is the bridge:
-  // open the dialog with the held task's context and the approval card
-  // rendered there (inventory-V1 #agentgate/<id> handler).
-  var toolbar = (t.outcome === 'awaiting' || t.outcome === 'waiting')
-    ? '<div class="sd-toolbar"><button class="sd-graph-btn" type="button" onclick="window.location.href=\'' + esc(t.href || ('inventory-V1-agent-overlay.html#agentgate/' + t.id)) + '\'"><span>' + esc(t.cta || 'Review in the conversation') + '</span></button></div>'
-    : '';
-  document.getElementById('sdMain').innerHTML = toolbar
-    + '<div class="sd-sec-hd">Task Details</div>'
+  var hist = [];
+  hist.push([esc(_actFmtFull(t.started)), (t.id === 'rot1' ? 'Veeam Intelligence proposed the policy' : 'Task created for Veeam Intelligence')]);
+  if (rot && t.outcome === 'done') hist.push([esc(_actFmtFull(new Date(rs.ts || Date.now()))), 'Created by ' + esc(rs.by || 'Darren Lasso') + ' after review']);
+  else if (rot && t.outcome === 'cancelled') hist.push([esc(_actFmtFull(new Date(rs.ts || Date.now()))), 'Dismissed by ' + esc(rs.by || 'Darren Lasso') + (rs.note ? ' \u2014 \u201c' + esc(rs.note) + '\u201d' : '')]);
+  else if (pending) hist.push([esc(t.whenLbl), rot ? 'Waiting for your review \u2014 nothing is created until you create the policy' : 'Waiting for an approval — nothing runs until it is answered']);
+  else hist.push([esc(t.whenLbl), esc(t.outcome === 'scheduled' ? 'Scheduled' : (t.outcome === 'cancelled' ? 'Cancelled' : 'Updated'))]);
+  document.getElementById('sdMain').innerHTML =
+      '<div class="ag-tools"><button type="button" class="ag-btn" id="agHideBtn" onclick="agGraphToggle()">' + (_sdIc('sd-visibility', 20) || '') + '<span>Hide Graph</span></button></div>'
+    + '<div class="ag-graph" id="agGraphWrap">' + _agentGraphSvg(model)
+    +   '<div class="ag-zoom"><button type="button" aria-label="Zoom in" onclick="agGraphZoom(1.2)">+</button><button type="button" aria-label="Zoom out" onclick="agGraphZoom(1/1.2)">−</button></div></div>'
     + '<div class="sd-cols">'
-      + '<div class="sd-log"><div class="sd-log-rows"><div style="padding:12px 0;color:var(--black-60);font-size:14px">' + esc(note) + '</div></div></div>'
+      + '<div class="sd-log"><div class="sd-blk"><div class="sd-props-hd">Summary</div><p class="ag-sum">' + esc(note) + '</p></div>'
+      + (rot ? '<div class="sd-blk"><div class="sd-props-hd">' + (t.outcome === 'done' ? 'Policy created' : 'Proposed policy') + '</div>' + (function(){ var pp = (t.outcome === 'done' && rs.policy) ? rs.policy : null; var nm = pp ? pp.name : 'Stale SharePoint content \u2014 Retail Division'; return prow('Name', esc(nm)) + prow('Scope', esc(pp && pp.crit ? pp.crit : 'SharePoint files in Retail Taxes, Retail Archive, Retail Ops \u00b7 not modified in 36 months \u00b7 larger than 1 MB')) + prow('Matches', '31,480 files (4.2 TB)') + prow('Actions', esc(pp && pp.actionText ? pp.actionText : 'Flag for review; Exclude from backup after a 30-day review window')) + prow('Severity', esc(pp ? pp.severity : 'Low')) + prow('Activation', pp ? (pp.active ? 'Active' : 'Inactive') : 'Inactive until you activate it'); })() + '</div>' : '')
+      +   '<div class="sd-blk"><div class="sd-props-hd">History</div><div class="ag-hist">' + hist.map(function(h){ return '<div class="ag-hist-row"><span class="w">' + h[0] + '</span><span>' + h[1] + '</span></div>'; }).join('') + '</div></div></div>'
       + '<div class="sd-props"><div class="sd-props-hd">Properties</div>' + props + '</div>'
     + '</div>';
   document.getElementById('sdOverlay').classList.add('open');
@@ -15006,7 +15033,7 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
         if (!st || !st.spawn) return;
         var nm = String(st.label).replace(/^Spawning an? /, '');
         fresh.push({ agent: nm.charAt(0).toUpperCase() + nm.slice(1), task: st.spawn.task, granted: st.spawn.granted,
-          kind: /^Restore data/.test(st.spawn.granted) ? 'Restore' : (/^Configure policies/.test(st.spawn.granted) ? 'Review' : 'Question'),
+          kind: /^Restore data/.test(st.spawn.granted) ? 'Restore' : (/^Manage policies/.test(st.spawn.granted) ? 'Review' : 'Question'),
           wl: WL_NAME[(typeof state !== 'undefined' && state.wl) || ''] || 'All workloads', ts: Date.now(), dur: Math.max(1, Math.round((st.ms || 300) / 100) / 10) + 's' });
       });
     });

@@ -1776,29 +1776,78 @@ body.ai-full #aiWorkingGlow { display: none; }
 .ss-menu button { display: block; width: 100%; text-align: left; padding: 8px 12px; border: 0; background: none; font: inherit; font-size: 16px; border-radius: 4px; cursor: pointer; }
 .ss-menu button:hover { background: var(--em-green-tint); }
 /* capability drawer */
-.ss-dr-scrim { display: none; position: fixed; inset: 0; z-index: 9600; background: rgba(31,34,41,0.4); }
-.ss-dr-scrim.open { display: block; }
-.ss-dr { position: fixed; top: var(--devjump-h, 0px); right: 0; bottom: 0; width: 520px; max-width: 100vw; z-index: 9610; background: var(--white); border-left: 1px solid var(--border-light); transform: translateX(100%); transition: transform 0.22s ease; display: flex; flex-direction: column; }
-.ss-dr.open { transform: none; }
-.ss-dr-hd { display: flex; align-items: flex-start; gap: 12px; padding: 16px 24px; border-bottom: 1px solid var(--border-light); }
-.ss-dr-t { flex: 1; font-size: 20px; line-height: 28px; font-weight: 500; }
-.ss-dr-t small { display: block; font-size: 14px; line-height: 20px; font-weight: 450; color: var(--black-60); }
-.ss-dr-body { flex: 1; overflow-y: auto; padding: 16px 24px; }
-.ss-dr-ft { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 24px; border-top: 1px solid var(--border-light); }
-.ss-dr-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--border-light); }
-.ss-dr-k { font-size: 16px; font-weight: 500; }
-.ss-dr-d { font-size: 14px; line-height: 20px; color: var(--black-60); }
-.ss-dr-sec { font-size: 16px; font-weight: 500; margin: 20px 0 8px; }
-.ss-wl-list { display: flex; flex-direction: column; gap: 8px; margin: 12px 0 0 24px; }
-.ss-wl-list .ss-warn { font-size: 14px; line-height: 20px; color: var(--orange); }
+/* ── capability page: full-page view (same shell as the Finding / Agent Task pages) ── */
+/* ── capability config: full-page modal (same shell as the Activity session / task pages: tab strip, header band, content) ── */
+.ss-md-scrim { display: none; position: fixed; top: var(--devjump-h, 0px); left: 72px; right: 0; bottom: 0; z-index: 9605; background: rgba(31,34,41,0.4); }
+.ss-md-scrim.open { display: block; }
+.ss-md { display: none; position: fixed; top: calc(var(--devjump-h, 0px) + 24px); left: calc(72px + 24px); right: 24px; bottom: 24px; z-index: 9610; background: var(--white); border-radius: 12px; border: 1px solid var(--border-light); box-shadow: 0 16px 48px rgba(0,0,0,0.18); flex-direction: column; overflow: hidden; }
+.ss-md.open { display: flex; }
+.ss-md-hd { display: flex; align-items: center; gap: 12px; padding: 16px 24px; border-bottom: 1px solid var(--border-light); flex-shrink: 0; }
+.ss-md-hd .tile { width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); color: var(--black-100); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ss-md-hd .tile svg { width: 20px; height: 20px; }
+.ss-md-hd .ti { font-size: 24px; line-height: 32px; font-weight: 500; letter-spacing: -0.01em; }
+.ss-md-hd .x { margin-left: auto; width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); display: inline-flex; align-items: center; justify-content: center; color: var(--black-100); cursor: pointer; }
+.ss-md-hd .x:hover { background: var(--black-5); }
+.ss-md-ft { flex-shrink: 0; border-top: 1px solid var(--border-light); padding: 16px 24px; }
+.ss-md-ft .ss-md-col { display: flex; justify-content: flex-end; align-items: center; gap: 8px; }
+.ss-md-hint { margin-right: auto; font-size: 14px; line-height: 20px; color: var(--orange); }
+.ss-st { display: inline-flex; align-items: center; gap: 12px; font-size: 16px; line-height: 22px; cursor: pointer; }
+.ss-md-h1 { margin: 0 0 8px; font-size: 24px; line-height: 32px; font-weight: 500; letter-spacing: -0.01em; }
+.ss-md-lead { margin: 0 0 32px; font-size: 18px; line-height: 26px; color: var(--black-60); }
+.ss-md-body { flex: 1; min-height: 0; overflow-y: auto; padding: 24px; }
+.ss-md-col { max-width: 1040px; margin: 0 auto; }
+.ss-pg-sec { margin-bottom: 40px; scroll-margin-top: 16px; }
+.ss-pg-h { display: flex; align-items: center; min-height: 28px; margin: 0 0 4px; font-size: 18px; font-weight: 500; line-height: 22px; }
+.ss-pg-d { margin: 0 0 16px; font-size: 16px; line-height: 22px; color: var(--black-60); }
+.ss-pg-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid var(--border-light); }
+.ss-pg-row b { display: block; font-weight: 500; }
+.ss-pg-row small { display: block; font-size: 14px; line-height: 20px; color: var(--black-60); }
+/* Selection card — verbatim from the restore wizard (Figma DCP Consolidated 9590:66530 "_selectionCard"): grey Header band + 24px radio, white Description; selected = Veeam Green border + Green/S5 header + bold green title. */
+.ss-sc { position: relative; display: flex; flex-direction: column; align-items: stretch; gap: 0; padding: 0; background: var(--white); border: 1px solid var(--black-10); border-radius: 4px; cursor: pointer; text-align: left; font-family: inherit; min-width: 0; }
+.ss-sc:hover:not(.is-disabled):not(.is-selected) { border-color: var(--black-30); }
+.ss-sc.is-selected { border-color: var(--em-green); }
+.ss-sc.is-disabled { opacity: 0.5; cursor: not-allowed; }
+.sc-header { position: relative; display: flex; align-items: center; gap: 8px; min-height: 38px; padding: 8px 36px 8px 12px; background: var(--black-3); border-radius: 3px 3px 0 0; font-size: 16px; font-weight: 450; line-height: 22px; color: var(--black-100); }
+.is-selected > .sc-header { background: var(--em-green-tint); color: var(--em-green); font-weight: 700; line-height: 20px; }
+.sc-header .sc-t { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 0; font: inherit; color: inherit; }
+.sc-radio { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; color: var(--em-green); }
+.sc-radio svg { display: block; width: 24px; height: 24px; }
+.sc-radio .sc-on { display: none; }
+.is-selected > .sc-header .sc-radio .sc-on { display: block; }
+.is-selected > .sc-header .sc-radio .sc-off { display: none; }
+.sc-desc { flex: 1 1 auto; display: flex; flex-direction: column; gap: 4px; padding: 8px 12px; background: var(--white); border-radius: 0 0 3px 3px; font-size: 14px; font-weight: 450; line-height: 20px; color: var(--black-60); }
+.ss-scs { display: grid; gap: 12px; }
+.sc-meta { font-weight: 500; color: var(--black-100); }
+.ss-mx { width: 100%; margin-top: 24px; border: 1px solid var(--border-light); border-radius: 8px; border-collapse: separate; border-spacing: 0; overflow: hidden; font-size: 16px; }
+.ss-mx th { padding: 10px 12px; font-size: 14px; font-weight: 500; text-align: center; color: var(--black-60); background: var(--white); border-bottom: 1px solid var(--border-light); }
+.ss-mx th:first-child { text-align: left; }
+.ss-mx td { padding: 10px 12px; text-align: center; border-bottom: 1px solid var(--border-light); color: var(--em-green); }
+.ss-mx td:first-child { text-align: left; color: var(--black-100); line-height: 22px; }
+.ss-mx tr:last-child td { border-bottom: 0; }
+.ss-mx .is-sel { background: var(--em-green-tint); }
+.ss-mx .no { color: var(--black-30); }
+.ss-note { margin-top: 12px; font-size: 14px; line-height: 20px; color: var(--black-60); }
+.ss-wp { display: flex; margin-top: 16px; border: 1px solid var(--border-light); border-radius: 8px; overflow: hidden; height: 400px; }
+.ss-wp-cats { width: 240px; flex-shrink: 0; border-right: 1px solid var(--border-light); overflow-y: auto; }
+.ss-wp-cats button { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; height: 44px; padding: 0 12px; border: 0; background: none; font: inherit; font-size: 16px; text-align: left; cursor: pointer; color: var(--black-100); }
+.ss-wp-cats button:hover { background: var(--em-green-tint); }
+.ss-wp-cats button.is-active { background: var(--em-green-tint); color: var(--em-green); font-weight: 500; box-shadow: inset 2px 0 0 var(--em-green); }
+.ss-wp-cats .n { font-size: 14px; color: var(--black-60); }
+.ss-wp-r { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.ss-wp-s { position: relative; padding: 8px; border-bottom: 1px solid var(--border-light); }
+.ss-wp-s input { width: 100%; height: 36px; padding: 0 40px 0 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--form-bg, var(--black-5)); font: inherit; font-size: 16px; box-sizing: border-box; }
+.ss-wp-s input:focus { outline: none; background: var(--em-green-tint); border-color: var(--em-green); }
+.ss-wp-ic { position: absolute; right: 20px; top: 18px; width: 20px; height: 20px; display: inline-flex; pointer-events: none; }
+.ss-wp-list { flex: 1; overflow-y: auto; padding: 4px 12px; }
+.ss-wp-list .ss-ck { height: 36px; }
+.ss-wp-ghd { padding: 8px 0 0; font-size: 14px; color: var(--black-60); }
+.ss-wp-ft { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; border-top: 1px solid var(--border-light); background: var(--black-5); font-size: 14px; color: var(--black-60); }
+.ss-wp-ft .is-warn { color: var(--orange); }
+.ss-wp-ft button { height: 28px; padding: 0 8px; border: 0; border-radius: 2px; background: none; font: inherit; font-size: 14px; color: var(--em-green); cursor: pointer; }
+.ss-wp-ft button:hover { background: var(--em-green-tint); }
+.ss-rl-s { color: var(--black-60); font-size: 14px; margin-left: 4px; }
 .ss-ck { display: flex; align-items: center; gap: 8px; font-size: 16px; cursor: pointer; }
 .ss-ck input { width: 16px; height: 16px; margin: 0; accent-color: var(--em-green); }
-.ss-dr-list { margin: 0; padding-left: 20px; font-size: 16px; line-height: 24px; }
-.ss-dr-tbl { width: 100%; border: 1px solid var(--border-light); border-radius: 4px; border-collapse: collapse; font-size: 14px; }
-.ss-dr-tbl td { padding: 8px 12px; border-bottom: 1px solid var(--border-light); vertical-align: top; }
-.ss-dr-tbl td:first-child { width: 96px; background: var(--black-5); color: var(--black-60); }
-.ss-dr-tbl tr:last-child td { border-bottom: 0; }
-.ss-dr-row:has(.ss-seg) { flex-direction: column; align-items: flex-start; gap: 12px; }
 .ss-seg { flex-shrink: 0; display: inline-flex; gap: 2px; padding: 2px; border-radius: 4px; background: var(--black-5); }
 .ss-seg button { white-space: nowrap; height: 32px; padding: 0 12px; border: 1px solid transparent; border-radius: 4px; background: none; font: inherit; font-size: 16px; cursor: pointer; color: var(--black-60); }
 .ss-seg button.on { background: var(--white); border-color: var(--border); color: var(--black-100); font-weight: 500; }
@@ -2251,8 +2300,12 @@ td.as-td-actions { position: relative; }
 
 <div class="ss-dlg-scrim" id="ssDlg" role="dialog" aria-modal="true" aria-label="Confirm higher autonomy"><div class="ss-dlg"><div class="ss-dlg-t" id="ssDlgT">Raise autonomy?</div><div class="ss-dlg-b"><span id="ssDlgIntro">These capabilities will act without asking you first:</span><ul id="ssDlgList"></ul></div><div class="ss-dlg-f"><button type="button" class="plv-btn plv-btn-secondary" onclick="ssDlgClose(false)">Cancel</button><button type="button" class="plv-btn plv-btn-primary" onclick="ssDlgClose(true)">Confirm and save</button></div></div></div>
 <div class="ss-menu" id="ssMenu" role="menu"></div>
-<div class="ss-dr-scrim" id="ssDrScrim" onclick="ssDrClose()"></div>
-<aside class="ss-dr" id="ssDr" aria-label="Capability"><div class="ss-dr-hd"><div class="ss-dr-t" id="ssDrT"></div><button type="button" class="ss-ib" aria-label="Close" onclick="ssDrClose()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><div class="ss-dr-body" id="ssDrBody"></div><div class="ss-dr-ft"><button type="button" class="plv-btn plv-btn-secondary" onclick="ssDrClose()">Cancel</button><button type="button" class="plv-btn plv-btn-primary" id="ssDrSave" onclick="ssDrSave()" disabled>Save</button></div></aside>
+<div class="ss-md-scrim" id="ssPgScrim" onclick="ssDrClose()"></div>
+<div class="ss-md" id="ssPg" role="dialog" aria-modal="true" aria-label="Configure capability">
+  <div class="ss-md-hd" id="ssPgHd"></div>
+  <div class="ss-md-body" id="ssPgMain"></div>
+  <div class="ss-md-ft"><div class="ss-md-col"><span class="ss-md-hint" id="ssPgHint"></span><button type="button" class="plv-btn plv-btn-secondary" onclick="ssDrClose()">Cancel</button><button type="button" class="plv-btn plv-btn-primary" id="ssDrSave" onclick="ssDrSave()">Save</button></div></div>
+</div>
 <div id="ssToast" class="ss-toast" aria-live="polite"></div>
 
 <div id="passwordGate" style="
@@ -2847,64 +2900,131 @@ function hydrateDefaultPolicyForm(wl) {
 <script id="ss-script">
 /* Agent Settings controller. Three pages under System Settings > AI Agents:
    Agent Settings (form + Save) · Capabilities (list + drawer) · System Access (list).
-   State keys shared with the rest of the prototype: vdcAgentAutonomy {id:{on,tier}} and vdcAgentAvailability. */
+   State keys shared with the rest of the prototype: vdcAgentAutonomy {id:{on,level,tier,wl}} and vdcAgentAvailability. */
 (function(){
   function ic(n, z){ var e = (window.__SECURITI_ICONS || {})[n]; if (!e || !e.paths) return ''; return '<svg width="' + z + '" height="' + z + '" viewBox="' + e.viewBox + '" fill="currentColor" aria-hidden="true">' + e.paths.map(function(p){ return '<path d="' + p + '"/>'; }).join('') + '</svg>'; }
   function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   var KEBAB = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>';
   var AS_GRANTS = {
     data: { does: ['Query protection coverage, health, growth and RPO across workloads','Compose answer cards: stats, trends, finding tiles, recommendations','Render custom visualizations from backed-up metadata'], tools: ['Protected Data Server'], reversal: 'Read-only \u2014 nothing to reverse.', receipt: 'Answer cards carry their query trace; no job receipt.' },
-    ui: { does: ['Navigate the inventory; switch workloads; set the browse range','Search, filter, select items and build the job cart','Open the wizard and prefill destination and options; stand down when scope collapses'], tools: ['Protected Data Server'], reversal: 'Fully reversible in place \u2014 nothing executes; the workspace-sync contract governs user overrides.', receipt: 'Every action posts a trace line in the conversation.' },
     restore: { does: ['Execute restores that create new copies (production untouched)','Execute in-place rollbacks \u2014 always gated, regardless of autonomy','Post job receipts and hand tracking to Activity'],
       limits: 'Automatic never applies to in-place rollback \u2014 restores that replace current contents always ask.',
       tools: ['Restore Job Server','Activity & Audit Server'], reversal: 'New-copy restores: remove the copies to undo. In-place: prior contents remain in backup.', receipt: '\u201cRestore job started \u2014 N queued\u201d, citing the gate approval or this standing grant.' },
     exportd: { does: ['Build and execute export jobs \u2014 files leave the platform'], tools: ['Export Server','Activity & Audit Server'], reversal: 'Not reversible \u2014 a produced file cannot be un-produced.', receipt: 'Export receipt with package contents and requester.' },
-    policies: { does: ['Draft backup-policy changes for review','Edit policy scope rules (graph queries)'], tools: ['Policy Server'], reversal: 'Policy edits are versioned \u2014 the prior configuration is restorable.', receipt: 'Policy-change record naming the approver.' },
-    recommend: { does: ['Compare content age, duplication and policy coverage across sites','Propose a policy with its scope, criteria, effect, evidence and reversal','Raise it on the Policies page and in the conversation as a gated approval'], tools: ['Protected Data Server','Policy Server'], limits: 'Proposing creates nothing. Creating the policy needs the Configure policies capability and your approval.', reversal: 'Nothing exists until approved \u2014 dismiss it and nothing changes.', receipt: 'Recommendation record in Activity, then the policy-change record naming the approver.' },
-    watch: { does: ['Run the nightly composite across workloads','Report exceptions first; stay quiet when nothing needs attention'], tools: ['Protected Data Server','Activity & Audit Server'], reversal: 'Read-only \u2014 nothing to reverse.', receipt: 'Nightly summary in Activity.' },
+    policies: { limits: 'Policies that exclude or delete data always ask, at every level.', tools: ['Protected Data Server','Policy Server'], reversal: 'Nothing exists until it is created. Created policies are versioned \u2014 the prior configuration is restorable.', receipt: 'Recommendation record in Activity, then the policy-change record naming the approver or the standing grant.' },
+    jobs: { tools: ['Backup Job Server','Activity & Audit Server'], reversal: 'A retried session can be stopped; the failed run stays in history.', receipt: 'Job receipt in Activity naming the approver or this standing grant.' },
+    findings: { tools: ['Findings Server'], reversal: 'Status and assignment changes are versioned in the finding history and can be reverted.', receipt: 'History entry on the finding naming the approver or this standing grant.' },
     integrations: { does: ['Guide workload connection setup step by step','Prefill connection details for review \u2014 never submits credentials'], tools: ['Integrations Server'], reversal: 'Assistive only \u2014 connections commit through the wizard\u2019s own controls.', receipt: 'Setup-assist trace in the conversation.' }
   };
   
+  // Each capability is either on/off, or has a LADDER of levels: how far the agent goes with it, from preparing for you
+  // to acting on its own. level.kind: read | prepare (nothing executes) | ask (needs your approval) | auto (acts without asking;
+  // confirm:true makes raising to it a confirmed change). chip = the short label shown in the table.
   var CAPS = [
-    { id:'data',         name:'Access & visualize data',  sub:'Read estate data, answer questions, render charts and custom views.', access:'Read',                        scope:'All connected workloads', def:'auto', runs:214 },
-    { id:'ui',           name:'Act on the UI',            sub:'Navigate, search, build selections and carts, prefill wizards. Nothing executes.', access:'Navigate',             scope:'All connected workloads', def:'auto', runs:57 },
-    { id:'restore',      name:'Restore data',             sub:'Execute restore jobs from backup. In-place rollbacks always ask.',    access:'Write \u00b7 restores data',  scope:'Any restorable item or container', def:'ask', runs:15 },
-    { id:'exportd',      name:'Export data',              sub:'Produce files that leave the platform.',                              access:'Write \u00b7 produces files', scope:'Export-eligible items', def:'ask', runs:6 },
-    { id:'policies',     name:'Configure policies',       sub:'Create and edit backup and ROT policies, and their scopes.',          access:'Write \u00b7 policy settings', scope:'Policies', def:'ask', runs:0 },
-    { id:'recommend',    name:'Recommend policies',       sub:'Spot a retention or coverage gap and propose a policy. Proposing creates nothing.', access:'Propose only', scope:'Policies \u203a File ROT, Resilience', def:'auto', runs:3, needs:['data','policies'] },
-    { id:'watch',        name:'Overnight health watch',   sub:'Run the nightly sweep and report only what needs attention.',        access:'Read',                        scope:'Microsoft 365', def:'auto', runs:30, needs:['data'] },
-    { id:'integrations', name:'Assist with integrations', sub:'Guide and prefill workload connections and setup. Never submits credentials.', access:'Assist only', scope:'Onboarding & connections', def:'ask', runs:0 }
+    { id:'data', name:'Access & visualize data', sub:'Read estate data, answer questions, render charts and custom views.', access:'Read', scope:'All connected workloads', runs:214 , levels:[
+      { id:'ask',   chip:'Answer', kind:'read', label:'Answer when asked', sub:'Answers questions and draws charts from backed-up data when you ask.', does:['Answer questions about protection coverage, health, growth and RPO','Render charts and custom views from backed-up metadata'] },
+      { id:'sweep', chip:'Report', kind:'read', label:'Also report overnight', sub:'Also runs a nightly health sweep and reports only what needs attention.', does:['Everything in Answer when asked','Run the nightly sweep across workloads and report exceptions'] } ], def:'sweep' },
+    { id:'restore', name:'Restore data', sub:'Prepare or run restore jobs from backup. In-place rollbacks always ask.', access:'Write · restores data', scope:'Any restorable item or container', runs:15, def:'ask', levels:[
+      { id:'prepare', chip:'Prepare',   kind:'prepare', label:'Prepare the restore', sub:'Builds the plan and the cart. You start the job.', does:['Select items, resolve restore points and destination','Assemble the restore plan for you to run'] },
+      { id:'ask',     chip:'Ask first', kind:'ask',     label:'Ask before running', sub:'Runs the restore after you approve it.', does:['Everything in Prepare','Run restores that create new copies (production untouched) after your approval','Run in-place rollbacks — always gated','Post job receipts and hand tracking to Activity'] },
+      { id:'auto',    chip:'Automatic', kind:'auto', confirm:true, label:'Run new-copy restores automatically', sub:'Starts restores that create new copies without asking. In-place rollbacks still ask.', does:['Everything in Ask before running','Start new-copy restores without asking, citing this standing grant in the receipt'] } ] },
+    { id:'exportd', name:'Export data', sub:'Prepare or run exports. Files leave the platform.', access:'Write · produces files', scope:'Export-eligible items', runs:6, def:'ask', note:'There is no automatic level: an exported file cannot be recalled.', levels:[
+      { id:'prepare', chip:'Prepare',   kind:'prepare', label:'Prepare the export', sub:'Builds the package. You run it.', does:['Select items and assemble the export package'] },
+      { id:'ask',     chip:'Ask first', kind:'ask',     label:'Ask before exporting', sub:'Runs the export after you approve it.', does:['Everything in Prepare','Build and run export jobs after your approval'] } ] },
+    { id:'policies', name:'Manage policies', sub:'Spot gaps and recommend, create or edit backup and ROT policies and their scopes.', access:'Write · policy settings', scope:'Policies', runs:3, def:'recommend', needs:['data'], levels:[
+      { id:'recommend', chip:'Recommend',       kind:'prepare', label:'Recommend', sub:'Spots a gap and drafts a policy for you to review. You create it.', does:['Compare content age, duplication and policy coverage across sites','Draft a policy with its scope, criteria, effect, evidence and reversal','Raise it on the Policies page and in the conversation — creates nothing'] },
+      { id:'create',    chip:'Ask to activate', kind:'ask',     label:'Create, ask before activating', sub:'Creates the policy as an inactive draft, then asks before it turns on.', does:['Everything in Recommend','Create the policy inactive and edit scope rules as new versions','Ask before activating it'] },
+      { id:'activate',  chip:'Automatic',       kind:'auto', confirm:true, label:'Create and activate', sub:'Builds and turns on policies itself. Policies that exclude or delete data still ask.', does:['Everything in Create','Activate policies without asking, citing this standing grant in the audit trail'] } ] },
+    { id:'jobs', name:'Backup jobs', sub:'Recommend, retry or re-run failed backup sessions.', access:'Write \u00b7 runs jobs', scope:'Backup jobs and sessions', runs:0, def:'ask', needs:['data'], levels:[
+      { id:'prepare', chip:'Recommend',   kind:'prepare', label:'Recommend', sub:'Spots failed sessions and suggests which to retry. You run them.', does:['Group failed sessions by cause and workload','Suggest which sessions to retry or re-run'] },
+      { id:'ask',     chip:'Ask first',   kind:'ask',     label:'Ask before running', sub:'Retries or re-runs a session after you approve it.', does:['Everything in Recommend','Retry or re-run failed sessions after your approval'] },
+      { id:'auto',    chip:'Automatic',   kind:'auto', confirm:true, label:'Retry transient faults automatically', sub:'Retries sessions that failed for transient reasons without asking. Everything else asks.', does:['Everything in Ask before running','Retry transient failures without asking, citing this standing grant in the receipt'] } ] },
+    { id:'findings', name:'Findings and alerts', sub:'Summarize findings and triage them: set status and assign owners.', access:'Write \u00b7 finding status', scope:'Findings and incidents', runs:0, def:'read', needs:['data'], levels:[
+      { id:'read',  chip:'Summarize',     kind:'read', label:'Summarize', sub:'Explains findings, groups related ones and suggests next steps. Changes nothing.', does:['Explain a finding and group related findings','Suggest next steps'] },
+      { id:'ask',   chip:'Ask first',     kind:'ask',  label:'Triage after approval', sub:'Sets status or assigns an owner after you approve it.', does:['Everything in Summarize','Set finding status and assign owners after your approval'] },
+      { id:'auto',  chip:'Automatic',     kind:'auto', confirm:true, label:'Triage low-severity findings automatically', sub:'Acts on Low and Informational findings without asking. Medium and above still ask.', does:['Everything in Triage after approval','Triage Low and Informational findings without asking, citing this standing grant in the history'] } ] },
+    { id:'integrations', name:'Assist with integrations', sub:'Guide and prefill workload connections and setup. Never submits credentials.', access:'Assist only', scope:'Onboarding & connections', runs:0, def:'prefill', levels:[
+      { id:'guide',   chip:'Guide',   kind:'read',    label:'Guide', sub:'Walks you through connection setup step by step.', does:['Guide workload connection setup step by step'] },
+      { id:'prefill', chip:'Prefill', kind:'prepare', label:'Prefill for review', sub:'Also prefills connection details. You review and submit.', does:['Guide workload connection setup step by step','Prefill connection details for review — never submits credentials'] } ] }
   ];
   // Product AREAS, read-only labels: which part of the product a capability touches (shown in its drawer).
   var AREAS = [
-    { id:'protected',    name:'Protected Data',   perm:'Read',               used:['data','ui','recommend','watch'] },
+    { id:'protected',    name:'Protected Data',   perm:'Read',               used:['data','policies'] },
     { id:'restore',      name:'Restore jobs',     perm:'Read & write',       used:['restore'] },
     { id:'exports',      name:'Exports',          perm:'Read & write',       used:['exportd'] },
-    { id:'policies',     name:'Policies',         perm:'Read & write',       used:['policies','recommend'] },
+    { id:'policies',     name:'Policies',         perm:'Read & write',       used:['policies'] },
     { id:'integrations', name:'Integrations',     perm:'Read',               used:['integrations'] },
     { id:'audit',        name:'Activity & Audit', perm:'Read & append only', used:['every capability'], locked:true }
   ];
   // Which areas each capability touches.
-  var CAP_AREAS = { data:['protected'], ui:['protected'], restore:['restore','protected'], exportd:['exports'], policies:['policies'], recommend:['protected','policies'], watch:['protected'], integrations:['integrations'] };
-  // WORKLOADS a capability can be limited to. A capability is either available on all of them or on a chosen few;
+  var CAP_AREAS = { data:['protected'], restore:['restore','protected'], exportd:['exports'], policies:['policies','protected'], integrations:['integrations'] };
+  // WORKLOADS a capability can be limited to (a sample of the catalog, which grows toward ~100). Grouped by category. A capability is either available on all of them or on a chosen few;
   // CAP_WL lists the workloads each capability can apply to at all.
+  var WL_CATS = ['SaaS applications', 'Identity', 'Developer tools', 'Cloud infrastructure', 'Datacenter'];
   var WLS = [
-    { id:'ms365',  name:'Microsoft 365' },
-    { id:'d365',   name:'Dynamics 365' },
-    { id:'github', name:'GitHub' },
-    { id:'ado',    name:'Azure DevOps' },
-    { id:'pp',     name:'Power Platform' },
-    { id:'vms',    name:'Virtual Machines' }
+    { id:'ms365', name:'Microsoft 365', cat:'SaaS applications' },
+    { id:'d365', name:'Dynamics 365', cat:'SaaS applications' },
+    { id:'google-workspace', name:'Google Workspace', cat:'SaaS applications' },
+    { id:'salesforce', name:'Salesforce', cat:'SaaS applications' },
+    { id:'box', name:'Box', cat:'SaaS applications' },
+    { id:'slack', name:'Slack', cat:'SaaS applications' },
+    { id:'zoom', name:'Zoom', cat:'SaaS applications' },
+    { id:'servicenow', name:'ServiceNow', cat:'SaaS applications' },
+    { id:'workday', name:'Workday', cat:'SaaS applications' },
+    { id:'pp', name:'Power Platform', cat:'SaaS applications' },
+    { id:'power-bi', name:'Power BI', cat:'SaaS applications' },
+    { id:'jira', name:'Jira', cat:'SaaS applications' },
+    { id:'confluence', name:'Confluence', cat:'SaaS applications' },
+    { id:'okta', name:'Okta', cat:'Identity' },
+    { id:'ping-identity', name:'Ping Identity', cat:'Identity' },
+    { id:'microsoft-entra-id', name:'Microsoft Entra ID', cat:'Identity' },
+    { id:'github', name:'GitHub', cat:'Developer tools' },
+    { id:'ado', name:'Azure DevOps', cat:'Developer tools' },
+    { id:'gitlab', name:'GitLab', cat:'Developer tools' },
+    { id:'bitbucket', name:'Bitbucket', cat:'Developer tools' },
+    { id:'aws-ec2', name:'AWS EC2', cat:'Cloud infrastructure' },
+    { id:'aws-s3', name:'AWS S3', cat:'Cloud infrastructure' },
+    { id:'aws-rds', name:'AWS RDS', cat:'Cloud infrastructure' },
+    { id:'azure-virtual-machines', name:'Azure Virtual Machines', cat:'Cloud infrastructure' },
+    { id:'azure-sql', name:'Azure SQL', cat:'Cloud infrastructure' },
+    { id:'google-compute-engine', name:'Google Compute Engine', cat:'Cloud infrastructure' },
+    { id:'kubernetes', name:'Kubernetes', cat:'Cloud infrastructure' },
+    { id:'vms', name:'Virtual Machines', cat:'Datacenter' },
+    { id:'vmware-vsphere', name:'VMware vSphere', cat:'Datacenter' },
+    { id:'microsoft-hyper-v', name:'Microsoft Hyper-V', cat:'Datacenter' },
+    { id:'nutanix-ahv', name:'Nutanix AHV', cat:'Datacenter' },
+    { id:'computers', name:'Computers', cat:'Datacenter' },
+    { id:'files', name:'Files', cat:'Datacenter' },
+    { id:'unstructured-data', name:'Unstructured Data', cat:'Datacenter' },
+    { id:'nas', name:'NAS', cat:'Datacenter' },
+    { id:'sql-server', name:'SQL Server', cat:'Datacenter' },
+    { id:'oracle-database', name:'Oracle Database', cat:'Datacenter' }
   ];
-  var CAP_WL = { recommend:['ms365'], watch:['ms365'] };
+  var CAP_WL = {};
   function wlApplies(id){ return CAP_WL[id] || WLS.map(function(w){ return w.id; }); }
   function wlName(id){ return WLS.filter(function(w){ return w.id === id; })[0].name; }
   var NAV = ['Organizational','Deployment','Integrations','Data Access Governance','Security','Support','Data Classification','Tag Management','Policy Center','Privacy Notice Management','AI Agents'];
   var KEYC = 'vdcAgentAutonomy', KEYA = 'vdcAgentAvailability';
   function capById(id){ return CAPS.filter(function(c){ return c.id === id; })[0]; }
   function normWl(w, id){ var ok = wlApplies(id); if (!Array.isArray(w)) return ok.length === WLS.length ? 'all' : ok.slice(); var f = w.filter(function(x){ return ok.indexOf(x) >= 0; }); return f.length ? f : ok.slice(); }
-  function norm(v, def, id){ if (v && typeof v === 'object' && 'on' in v) return { on: !!v.on, tier: v.tier === 'auto' ? 'auto' : 'ask', wl: normWl(v.wl, id) }; var t = (typeof v === 'string') ? v : def; if (t === 'off') return { on:false, tier: def === 'auto' ? 'auto' : 'ask', wl: normWl(null, id) }; return { on:true, tier: t === 'auto' ? 'auto' : 'ask', wl: normWl(null, id) }; }
-  function load(){ var st = {}; try { st = JSON.parse(localStorage.getItem(KEYC)) || {}; } catch(e){} var o = {}; CAPS.forEach(function(c){ o[c.id] = norm(st[c.id], c.def, c.id); }); return o; }
+  function lvlOf(c, id){ return c.levels ? (c.levels.filter(function(l){ return l.id === id; })[0] || null) : null; }
+  function curLvl(c, st){ return lvlOf(c, (st || state[c.id]).level); }
+  function tierOf(c, level){ var l = lvlOf(c, level); return l && l.kind === 'auto' ? 'auto' : 'ask'; }
+  // Saved shape {on, level, tier, wl}; tier (ask|auto) is derived so older readers keep working. Older saves have only a tier.
+  function norm(v, c){
+    var o = { on:true, level:c.def || null, wl:normWl(v && v.wl, c.id) };
+    if (v && typeof v === 'object'){
+      if ('on' in v) o.on = !!v.on;
+      if (c.levels){
+        var lv = lvlOf(c, v.level);
+        if (!lv && v.tier) lv = c.levels.filter(function(l){ return l.kind === (v.tier === 'auto' ? 'auto' : 'ask'); })[0] || null;
+        if (lv) o.level = lv.id;
+      }
+    }
+    o.tier = tierOf(c, o.level);
+    return o;
+  }
+  function load(){ var st = {}; try { st = JSON.parse(localStorage.getItem(KEYC)) || {}; } catch(e){} var o = {}; CAPS.forEach(function(c){ o[c.id] = norm(st[c.id], c); }); return o; }
   function loadAvail(){ try { return localStorage.getItem(KEYA) === 'inactive' ? 'inactive' : 'active'; } catch(e){ return 'active'; } }
   function persist(){ try { localStorage.setItem(KEYC, JSON.stringify(state)); } catch(e){} }
   var state = load(), savedAvail = loadAvail(), draftAvail = savedAvail, view = 'settings';
@@ -2977,17 +3097,19 @@ function hydrateDefaultPolicyForm(wl) {
   window.ssDlgClose = function(ok){ document.getElementById('ssDlg').classList.remove('open'); var f = _pending; _pending = null; if (ok && f) f(); };
 
   // ── 2. Capabilities (list) ──
+  // One shared vocabulary for how far the agent goes, so rows compare at a glance; each capability's page keeps its own wording.
+  var RANK = { read:'Observe', prepare:'Recommend', ask:'Ask first', auto:'Automatic' };
   window.ssRenderCaps = function(){
     var q = (document.getElementById('ssCapSearch').value || '').trim().toLowerCase();
-    var on = CAPS.filter(function(c){ return state[c.id].on; }).length, auto = CAPS.filter(function(c){ return state[c.id].on && state[c.id].tier === 'auto'; }).length;
-    document.getElementById('ssCapStats').innerHTML = statCell('Total Capabilities', CAPS.length) + statCell('Enabled', on) + statCell('Act automatically', auto) + statCell('Ask first', on - auto);
+    var on = CAPS.filter(function(c){ return state[c.id].on; }).length, kindN = function(k){ return CAPS.filter(function(c){ var l = curLvl(c); return state[c.id].on && l && l.kind === k; }).length; };
+    document.getElementById('ssCapStats').innerHTML = statCell('Total Capabilities', CAPS.length) + statCell('Enabled', on) + statCell('Acts without asking', kindN('auto')) + statCell('Needs your approval', kindN('ask'));
     document.getElementById('ssCapSrchIc').innerHTML = ic('search-outlined', 20);
     document.getElementById('ssCapBody').innerHTML = CAPS.filter(function(c){ return !q || c.name.toLowerCase().indexOf(q) >= 0; }).map(function(c){
       var s = state[c.id], why = unavailable(c);
       return '<tr><td class="ss-sw">' + sw(s.on, c.name + ' enabled', "ssCapToggle('" + c.id + "')") + '</td>'
         + '<td><span class="ss-nmc">' + esc(c.name) + '<small>' + esc(c.sub) + '</small>' + (s.on && why.length ? '<span class="ss-warn">Unavailable — ' + esc(why.join(', ')) + ' is off</span>' : '') + '</span></td>'
         + '<td><span class="ss-chip">' + esc(c.access) + '</span></td><td>' + esc(wlSummary(s.wl, c.id)) + '</td>'
-        + '<td>' + (s.on ? '<span class="ss-chip">' + (s.tier === 'auto' ? 'Automatic' : 'Ask first') + '</span>' : '<span style="color:var(--black-40, var(--black-60))">—</span>') + '</td><td>' + (c.runs > 0 ? c.runs : '—') + '</td>'
+        + '<td>' + (s.on ? '<span class="ss-chip">' + RANK[curLvl(c) ? curLvl(c).kind : 'read'] + '</span>' : '<span style="color:var(--black-40, var(--black-60))">—</span>') + '</td><td>' + (c.runs > 0 ? c.runs : '—') + '</td>'
         + '<td class="ss-pin"><button type="button" class="ss-ib" aria-label="Configure ' + esc(c.name) + '" data-plv-tip="Configure" onclick="ssOpen(\'' + c.id + '\')">' + ic('edit-outlined', 18) + '</button>'
         + '<button type="button" class="ss-ib" aria-label="More actions" onclick="ssMenu(event, [[\'Configure\', function(){ ssOpen(\'' + c.id + '\'); }], [\'View in Agent activity\', function(){ location.href = \'activity-agent-overlay.html#agents\'; }]])">' + KEBAB + '</button></td></tr>';
     }).join('') || '<tr><td colspan="7" style="padding:32px;color:var(--black-60)">No capabilities match your search.</td></tr>';
@@ -2997,56 +3119,116 @@ function hydrateDefaultPolicyForm(wl) {
   window.ssCapToggle = function(id){
     var s = state[id], c = capById(id);
     if (s.on){ s.on = false; persist(); ssRenderCaps(); return; }
-    if (s.tier === 'auto'){ confirmAuto('Turn on an automatic capability?', 'This capability acts without asking you first:', [c.name], function(){ s.on = true; persist(); ssRenderCaps(); }); return; }
+    var cl = curLvl(c); if (cl && cl.confirm){ confirmAuto('Turn on an automatic capability?', 'This capability acts without asking you first:', [c.name + ' \u2014 ' + cl.label], function(){ s.on = true; persist(); ssRenderCaps(); }); return; }
     s.on = true; persist(); ssRenderCaps();
   };
-  window.ssResetAll = function(){ CAPS.forEach(function(c){ state[c.id] = { on:true, tier:c.def, wl:normWl(null, c.id) }; }); persist(); ssRenderCaps(); toast('Capabilities reset to defaults'); };
+  window.ssResetAll = function(){ CAPS.forEach(function(c){ state[c.id] = norm(null, c); }); persist(); ssRenderCaps(); toast('Capabilities reset to defaults'); };
 
-  // ── drawer (a capability) ──
+  // ── capability page (full-page view) ──
   var dr = null;
-  window.ssOpen = function(id){
-    var c = capById(id); dr = { kind:'cap', id:id, on:state[id].on, tier:state[id].tier, wl:(state[id].wl === 'all' ? 'all' : state[id].wl.slice()) };
-    document.getElementById('ssDrT').innerHTML = esc(c.name) + '<small>' + esc(c.scope) + '</small>';
-    drawBody(); document.getElementById('ssDrScrim').classList.add('open'); document.getElementById('ssDr').classList.add('open');
+  var WHO = {
+    restore:{ prepare:'Agent plans · you start the job', ask:'Agent runs · you approve each one', auto:'Agent runs new-copy restores · no approval' },
+    exportd:{ prepare:'Agent packages · you run it', ask:'Agent runs · you approve each one' },
+    data:{ ask:'Agent answers \u00b7 you act', sweep:'Agent reports overnight \u00b7 you act' },
+    jobs:{ prepare:'Agent suggests \u00b7 you run it', ask:'Agent runs \u00b7 you approve each one', auto:'Agent retries transient faults \u00b7 you review Activity' },
+    findings:{ read:'Agent explains \u00b7 you act', ask:'Agent triages \u00b7 you approve each one', auto:'Agent triages low severity \u00b7 you review the history' },
+    policies:{ recommend:'Agent drafts · you create it', create:'Agent creates it inactive · you activate', activate:'Agent creates and activates · you review the audit trail' },
+    integrations:{ guide:'Agent guides · you set up', prefill:'Agent prefills · you submit' }
   };
-  function drawBody(){
-    var sv = document.getElementById('ssDrSave');
-    var c = capById(dr.id), g = AS_GRANTS[dr.id] || { does:[c.sub], tools:[], reversal:'—', receipt:'—' };
-    document.getElementById('ssDrBody').innerHTML =
-        '<div class="ss-dr-row"><div><div class="ss-dr-k">Status</div><div class="ss-dr-d">Switch off to stop the agent using this capability.</div></div>' + sw(dr.on, 'Enabled', 'ssDrOn()') + '</div>'
-      + '<div class="ss-dr-row"><div><div class="ss-dr-k">Autonomy</div><div class="ss-dr-d">' + (g.limits ? esc(g.limits) : 'Whether the agent asks before using it.') + '</div></div><span class="ss-seg"><button type="button" class="' + (dr.tier === 'ask' ? 'on' : '') + '"' + (dr.on ? '' : ' disabled') + ' onclick="ssDrTier(\'ask\')">Ask first</button><button type="button" class="' + (dr.tier === 'auto' ? 'on' : '') + '"' + (dr.on ? '' : ' disabled') + ' onclick="ssDrTier(\'auto\')">Automatic</button></span></div>'
-      + wlSection(dr)
-      + '<div class="ss-dr-sec">What this allows</div><ul class="ss-dr-list">' + g.does.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'
-      + '<div class="ss-dr-sec">This grant</div><table class="ss-dr-tbl"><tr><td>Areas</td><td>' + esc((CAP_AREAS[dr.id] || []).map(function(a){ return AREAS.filter(function(x){ return x.id === a; })[0].name; }).join(', ') || '—') + '</td></tr><tr><td>Reversal</td><td>' + esc(g.reversal || '—') + '</td></tr><tr><td>Receipt</td><td>' + esc(g.receipt || '—') + '</td></tr></table>';
-    var raise = dr.on && dr.tier === 'auto' && !(state[dr.id].on && state[dr.id].tier === 'auto');
-    var cw = state[dr.id].wl, same = JSON.stringify(dr.wl) === JSON.stringify(cw), noneChosen = dr.wl !== 'all' && !dr.wl.length;
-    var changed = (dr.on !== state[dr.id].on || dr.tier !== state[dr.id].tier || !same) && !noneChosen;
+  var SC_ON = '<svg class="sc-on" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 16C13.1067 16 14.05 15.61 14.83 14.83C15.61 14.05 16 13.1067 16 12C16 10.8933 15.61 9.95 14.83 9.17C14.05 8.39 13.1067 8 12 8C10.8933 8 9.95 8.39 9.17 9.17C8.39 9.95 8 10.8933 8 12C8 13.1067 8.39 14.05 9.17 14.83C9.95 15.61 10.8933 16 12 16ZM12 20C10.8933 20 9.85333 19.79 8.88 19.37C7.90667 18.95 7.06 18.38 6.34 17.66C5.62 16.94 5.05 16.0933 4.63 15.12C4.21 14.1467 4 13.1067 4 12C4 10.8933 4.21 9.85333 4.63 8.88C5.05 7.90667 5.62 7.06 6.34 6.34C7.06 5.62 7.90667 5.05 8.88 4.63C9.85333 4.21 10.8933 4 12 4C13.1067 4 14.1467 4.21 15.12 4.63C16.0933 5.05 16.94 5.62 17.66 6.34C18.38 7.06 18.95 7.90667 19.37 8.88C19.79 9.85333 20 10.8933 20 12C20 13.1067 19.79 14.1467 19.37 15.12C18.95 16.0933 18.38 16.94 17.66 17.66C16.94 18.38 16.0933 18.95 15.12 19.37C14.1467 19.79 13.1067 20 12 20ZM12 18.4C13.7867 18.4 15.3 17.78 16.54 16.54C17.78 15.3 18.4 13.7867 18.4 12C18.4 10.2133 17.78 8.7 16.54 7.46C15.3 6.22 13.7867 5.6 12 5.6C10.2133 5.6 8.7 6.22 7.46 7.46C6.22 8.7 5.6 10.2133 5.6 12C5.6 13.7867 6.22 15.3 7.46 16.54C8.7 17.78 10.2133 18.4 12 18.4Z" fill="currentColor"/></svg>';
+  var SC_OFF = '<svg class="sc-off" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 20C10.8933 20 9.85333 19.79 8.88 19.37C7.90667 18.95 7.06 18.38 6.34 17.66C5.62 16.94 5.05 16.0933 4.63 15.12C4.21 14.1467 4 13.1067 4 12C4 10.8933 4.21 9.85333 4.63 8.88C5.05 7.90667 5.62 7.06 6.34 6.34C7.06 5.62 7.90667 5.05 8.88 4.63C9.85333 4.21 10.8933 4 12 4C13.1067 4 14.1467 4.21 15.12 4.63C16.0933 5.05 16.94 5.62 17.66 6.34C18.38 7.06 18.95 7.90667 19.37 8.88C19.79 9.85333 20 10.8933 20 12C20 13.1067 19.79 14.1467 19.37 15.12C18.95 16.0933 18.38 16.94 17.66 17.66C16.94 18.38 16.0933 18.95 15.12 19.37C14.1467 19.79 13.1067 20 12 20ZM12 18.4C13.7867 18.4 15.3 17.78 16.54 16.54C17.78 15.3 18.4 13.7867 18.4 12C18.4 10.2133 17.78 8.7 16.54 7.46C15.3 6.22 13.7867 5.6 12 5.6C10.2133 5.6 8.7 6.22 7.46 7.46C6.22 8.7 5.6 10.2133 5.6 12C5.6 13.7867 6.22 15.3 7.46 16.54C8.7 17.78 10.2133 18.4 12 18.4Z" fill="currentColor"/></svg>';
+  var CHK = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="5 12 10 17 19 7"/></svg>';
+  function pgC(){ return capById(dr.id); }
+  window.ssOpen = function(id){
+    dr = { kind:'cap', id:id, on:state[id].on, level:state[id].level, wl:(state[id].wl === 'all' ? 'all' : state[id].wl.slice()), wlq:'', wlCat:0, sec:'overview' };
+    document.getElementById('ssPg').classList.add('open'); document.getElementById('ssPgScrim').classList.add('open');
+    pgHead(); pgMain(); pgSync();
+    document.getElementById('ssPgMain').scrollTop = 0;
+  };
+  function pgHead(){
+    var c = pgC();
+    document.getElementById('ssPgHd').innerHTML = '<span class="tile">' + ic('ai-sparkle', 20) + '</span><span class="ti">' + esc(c.name) + '</span>'
+      + '<button type="button" class="x" aria-label="Close" onclick="ssDrClose()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
+  }
+  function secOverview(c){
+    return '<h2 class="ss-md-h1">Configure ' + esc(c.name) + ' capability</h2><p class="ss-md-lead">' + esc(c.sub) + '</p>'
+      + '<section class="ss-pg-sec" id="ssSec_overview"><h3 class="ss-pg-h">Status</h3>'
+      + '<label class="ss-st">' + sw(dr.on, 'Enabled', 'ssDrOn()') + '<span>' + (dr.on ? 'Enabled' : 'Off') + '</span></label></section>';
+  }
+  function secLevel(c){
+    if (!c.levels) return '';
+    var g = AS_GRANTS[c.id] || {}, lim = g.limits || c.note, n = c.levels.length;
+    var cards = c.levels.map(function(l){
+      var sel = dr.level === l.id;
+      return '<button type="button" role="radio" aria-checked="' + sel + '" class="ss-sc sc' + (sel ? ' is-selected' : '') + (dr.on ? '' : ' is-disabled') + '"' + (dr.on ? '' : ' disabled') + ' onclick="ssDrLevel(\'' + l.id + '\')">'
+        + '<div class="sc-header"><span class="sc-t">' + esc(l.label) + '</span><span class="sc-radio">' + SC_ON + SC_OFF + '</span></div>'
+        + '<div class="sc-desc"><span>' + esc(l.sub) + '</span><span class="sc-meta">' + esc((WHO[c.id] || {})[l.id] || '') + '</span></div></button>';
+    }).join('');
+    // what each level can do: items introduced at the first level that lists them, carried by every higher level
+    var rows = [], seen = {};
+    c.levels.forEach(function(l, i){ l.does.forEach(function(t){ if (/^Everything in/.test(t) || seen[t]) return; seen[t] = 1; rows.push({ t:t, from:i }); }); });
+    var mx = '<table class="ss-mx"><thead><tr><th>What the agent can do</th>' + c.levels.map(function(l){ return '<th class="' + (dr.level === l.id ? 'is-sel' : '') + '">' + esc(l.chip) + '</th>'; }).join('') + '</tr></thead><tbody>'
+      + rows.map(function(r){ return '<tr><td>' + esc(r.t) + '</td>' + c.levels.map(function(l, i){ return '<td class="' + (dr.level === l.id ? 'is-sel ' : '') + (i >= r.from ? '' : 'no') + '">' + (i >= r.from ? CHK : '—') + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table>';
+    return '<section class="ss-pg-sec" id="ssSec_level"><h3 class="ss-pg-h">Autonomy</h3><p class="ss-pg-d">Choose how much the agent can do on its own.</p>'
+      + '<div class="ss-scs" role="radiogroup" aria-label="Level" style="grid-template-columns:repeat(' + n + ', minmax(0, 1fr))">' + cards + '</div>' + mx
+      + (lim ? '<div class="ss-note">' + esc(lim) + '</div>' : '') + (c.note && lim !== c.note ? '<div class="ss-note">' + esc(c.note) + '</div>' : '') + '</section>';
+  }
+  function secWl(c){
+    var ok = wlApplies(c.id), fixed = ok.length < WLS.length, all = dr.wl === 'all';
+    var head = '<section class="ss-pg-sec" id="ssSec_wl"><h3 class="ss-pg-h">Workloads</h3>';
+    if (fixed) return head + '<p class="ss-pg-d">Only available on ' + esc(ok.map(wlName).join(', ')) + '.</p></section>';
+    return head + '<p class="ss-pg-d">Where the agent may use this capability.</p>'
+      + '<span class="ss-seg" role="group" aria-label="Workload scope"><button type="button" class="' + (all ? 'on' : '') + '" onclick="ssDrWlMode(true)">All workloads</button><button type="button" class="' + (all ? '' : 'on') + '" onclick="ssDrWlMode(false)">Specific workloads</button></span>'
+      + (all ? '<div class="ss-note">Includes workloads added later.</div>' : '<div id="ssWp"></div>') + '</section>';
+  }
+  function pgMain(){
+    var m = document.getElementById('ssPgMain'), top = m.scrollTop, c = pgC();
+    m.style.scrollBehavior = 'auto'; m.innerHTML = '<div class="ss-md-col">' + secOverview(c) + secLevel(c) + secWl(c) + '</div>'; m.scrollTop = top; m.style.scrollBehavior = '';
+    pgWp();
+  }
+  function wlMatches(w){ var q = (dr.wlq || '').trim().toLowerCase(); return !q || w.name.toLowerCase().indexOf(q) >= 0; }
+  function pgWp(){
+    var host = document.getElementById('ssWp'); if (!host || dr.wl === 'all') return;
+    var sel = dr.wl, q = (dr.wlq || '').trim();
+    var cats = WL_CATS.map(function(cat, i){ var all = WLS.filter(function(w){ return w.cat === cat; }), n = all.filter(function(w){ return sel.indexOf(w.id) >= 0; }).length; return '<button type="button" class="' + (!q && dr.wlCat === i ? 'is-active' : '') + '" onclick="ssWlCat(' + i + ')"><span>' + esc(cat) + '</span><span class="n">' + n + ' of ' + all.length + '</span></button>'; }).join('');
+    var shown = q ? WLS.filter(wlMatches) : WLS.filter(function(w){ return w.cat === WL_CATS[dr.wlCat]; });
+    var list = shown.map(function(w){ return '<label class="ss-ck"><input type="checkbox"' + (sel.indexOf(w.id) >= 0 ? ' checked' : '') + ' onchange="ssDrWl(\'' + w.id + '\')"><span>' + esc(w.name) + '</span></label>'; }).join('') || '<div class="ss-note" style="text-align:center;padding:24px 0">No workloads match.</div>';
+    var sf = document.getElementById('ssWlQ'), had = sf && document.activeElement === sf;
+    host.innerHTML = '<div class="ss-wp"><div class="ss-wp-cats">' + cats + '</div><div class="ss-wp-r"><div class="ss-wp-s"><input type="text" id="ssWlQ" placeholder="Search all workloads" value="' + esc(dr.wlq) + '" oninput="ssWlSearch(this.value)" aria-label="Search workloads"><span class="ss-wp-ic">' + ic('search-outlined', 20) + '</span></div>'
+      + '<div class="ss-wp-list">' + (q ? '<div class="ss-wp-ghd">Results across all categories</div>' : '') + list + '</div>'
+      + '<div class="ss-wp-ft"><span class="' + (sel.length ? '' : 'is-warn') + '">' + (sel.length ? sel.length + ' of ' + WLS.length + ' selected' : 'Choose at least one workload') + '</span><span><button type="button" onclick="ssWlAll()">Select all' + (q ? ' results' : ' in category') + '</button><button type="button" onclick="ssWlNone()">Clear all</button></span></div></div></div>';
+    if (had){ var nf = document.getElementById('ssWlQ'); nf.focus(); nf.setSelectionRange(nf.value.length, nf.value.length); }
+  }
+  function pgSync(){
+    var sv = document.getElementById('ssDrSave'); if (!sv) return;
+    var cc = pgC(), dlv = lvlOf(cc, dr.level), raise = dr.on && dlv && dlv.confirm && !(state[dr.id].on && state[dr.id].level === dr.level);
+    var cw = state[dr.id].wl, same = JSON.stringify(wlKey(dr.wl)) === JSON.stringify(wlKey(cw)), noneChosen = dr.wl !== 'all' && !dr.wl.length;
+    var changed = (dr.on !== state[dr.id].on || dr.level !== state[dr.id].level || !same) && !noneChosen;
     sv.disabled = !changed; sv.textContent = raise ? 'Review and save' : 'Save';
+    var hint = document.getElementById('ssPgHint'); if (hint) hint.textContent = noneChosen ? 'Choose at least one workload to save.' : '';
   }
-  window.ssDrOn = function(){ dr.on = !dr.on; drawBody(); };
-  window.ssDrTier = function(t){ dr.tier = t; drawBody(); };
-  function wlSection(d){
-    var ok = wlApplies(d.id), fixed = ok.length < WLS.length, all = d.wl === 'all';
-    var head = '<div class="ss-dr-sec">Workloads</div>';
-    if (fixed) return head + '<div class="ss-dr-d" style="margin-bottom:8px">Only available on ' + esc(ok.map(wlName).join(', ')) + '.</div>';
-    var chosen = all ? [] : d.wl;
-    return head + '<div class="ss-dr-d">Where the agent may use this capability.</div>'
-      + '<label class="ss-radio"><input type="radio" name="ssWlMode"' + (all ? ' checked' : '') + ' onchange="ssDrWlMode(true)"><span class="ss-rd"></span><span class="ss-rl">All workloads</span></label>'
-      + '<label class="ss-radio"><input type="radio" name="ssWlMode"' + (all ? '' : ' checked') + ' onchange="ssDrWlMode(false)"><span class="ss-rd"></span><span class="ss-rl">Specific workloads</span></label>'
-      + (all ? '' : '<div class="ss-wl-list">' + WLS.map(function(w){ return '<label class="ss-ck"><input type="checkbox"' + (chosen.indexOf(w.id) >= 0 ? ' checked' : '') + ' onchange="ssDrWl(\'' + w.id + '\')"><span>' + esc(w.name) + '</span></label>'; }).join('') + (chosen.length ? '' : '<div class="ss-warn">Choose at least one workload.</div>') + '</div>');
-  }
-  window.ssDrWlMode = function(all){ dr.wl = all ? 'all' : WLS.map(function(w){ return w.id; }); drawBody(); };
-  window.ssDrWl = function(id){ var i = dr.wl.indexOf(id); if (i >= 0) dr.wl.splice(i, 1); else dr.wl.push(id); drawBody(); };
-  window.ssDrClose = function(){ dr = null; document.getElementById('ssDrScrim').classList.remove('open'); document.getElementById('ssDr').classList.remove('open'); };
+  function wlKey(w){ return w === 'all' ? w : w.slice().sort(); }
+  function pgAll(){ pgHead(); pgMain(); pgSync(); }
+  window.ssDrOn = function(){ dr.on = !dr.on; pgAll(); };
+  window.ssDrLevel = function(id){ dr.level = id; pgMain(); pgSync(); };
+  window.ssDrWlMode = function(all){ dr.wl = all ? 'all' : []; dr.wlq = ''; dr.wlCat = 0; pgMain(); pgSync(); };
+  window.ssDrWl = function(id){ var i = dr.wl.indexOf(id); if (i >= 0) dr.wl.splice(i, 1); else dr.wl.push(id); pgWp(); pgSync(); };
+  window.ssWlSearch = function(v){ dr.wlq = v; pgWp(); };
+  window.ssWlCat = function(i){ dr.wlCat = i; dr.wlq = ''; pgWp(); };
+  window.ssWlAll = function(){ var q = (dr.wlq || '').trim(); (q ? WLS.filter(wlMatches) : WLS.filter(function(w){ return w.cat === WL_CATS[dr.wlCat]; })).forEach(function(w){ if (dr.wl.indexOf(w.id) < 0) dr.wl.push(w.id); }); pgWp(); pgSync(); };
+  window.ssWlNone = function(){ dr.wl = []; pgWp(); pgSync(); };
+  window.ssDrClose = function(){ dr = null; document.getElementById('ssPg').classList.remove('open'); document.getElementById('ssPgScrim').classList.remove('open'); };
   function commitDr(){
-    state[dr.id] = { on:dr.on, tier:dr.tier, wl:(dr.wl === 'all' || dr.wl.length === WLS.length) && wlApplies(dr.id).length === WLS.length ? 'all' : dr.wl }; persist(); var n = capById(dr.id).name; ssDrClose(); ssRenderCaps(); toast(n + ' updated');
+    state[dr.id] = { on:dr.on, level:dr.level, tier:tierOf(capById(dr.id), dr.level), wl:(dr.wl === 'all' || dr.wl.length === WLS.length) && wlApplies(dr.id).length === WLS.length ? 'all' : dr.wl }; persist(); var n = capById(dr.id).name; ssDrClose(); ssRenderCaps(); toast(n + ' updated');
   }
   window.ssDrSave = function(){
-    if (dr.on && dr.tier === 'auto' && !(state[dr.id].on && state[dr.id].tier === 'auto')){
-      confirmAuto('Raise autonomy?', 'These capabilities will act without asking you first:', [capById(dr.id).name], commitDr); return;
+    var _c = capById(dr.id), _l = lvlOf(_c, dr.level);
+    if (dr.on && _l && _l.confirm && !(state[dr.id].on && state[dr.id].level === dr.level)){
+      confirmAuto('Raise autonomy?', 'This capability will act without asking you first:', [_c.name + ' — ' + _l.label], commitDr); return;
     }
     commitDr();
   };
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && dr && !document.getElementById('ssDlg').classList.contains('open')) ssDrClose(); });
 
   function boot(){
     var h = (location.hash || '').replace('#', ''); view = (h === 'capabilities' || h === 'access') ? 'caps' : 'settings';

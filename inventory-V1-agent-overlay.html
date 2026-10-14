@@ -66900,7 +66900,7 @@ function aiDashFlow(){
   var tr = [
     { kind:'route', label:'Interpreting request — estate-wide volume summary', ms:400, chip:'estate-wide',
       detail:[['scope','all repositories · every workload']], result:'A tenant-level aggregate is the right scope here' },
-    { kind:'agent', label:'Spawning a volume-analysis agent', ms:300, spawn:{ task:'Total and per-repository consumption, trailing 30 days', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
+    { kind:'agent', label:'Spawning a volume-analysis agent', ms:300, spawn:{ task:'Total and per-repository consumption, trailing 30 days', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
     { kind:'tool',  label:'repos.query — capacity and used space', ms:800, chip:'6 repositories',
       detail:[['metric','used vs provisioned per repository']], result:'427 TB used of 760 TB provisioned (56%)' },
     { kind:'tool',  label:'growth.aggregate — trailing 30 days', ms:700, chip:'+9.0%',
@@ -68401,13 +68401,13 @@ function aiStepsManufacturing(){
     { trace: [
         { kind:'route', label:'Interpreting request — spans backup inventory and record contents', ms:400, chip:'2 clues',
           detail:[['topic','“Manufacturing”'],['tier','records + field values']], result:'Query reaches into record contents — a field-value search, not a name search' },
-        { kind:'agent', label:'Spawning a Dynamics 365 recovery agent', ms:300, spawn:{ task:'Restore the manufacturing records you select', granted:'Restore data · asks first', denied:'Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a Dynamics 365 recovery agent', ms:300, spawn:{ task:'Restore the manufacturing records you select', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
         { kind:'tool',  label:'catalog.lookup — field-value index for “Manufacturing”', ms:700, chip:'index hit',
           detail:[['index','backed-up field values'],['term','“Manufacturing”']], result:'Term present in the index — a scoped search will land' }
       ],
       say: function(){ return "<p>Got it — find the Dynamics 365 <strong>records that mention “Manufacturing”</strong> and set them up to restore. I'll search the backed-up field values, see where the term actually lands, and walk you through it.</p><p>Here's how I'll work, right here in your console:</p><p>1 · search &amp; filter → 2 · select the matches → 3 · review &amp; lock the restore point → 4 · configure → 5 · you review the summary and approve.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Spawning a record-search agent', ms:300, spawn:{ task:'Find matching records in the backed-up estate', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a record-search agent', ms:300, spawn:{ task:'Find matching records in the backed-up estate', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'inventory.search — “Manufacturing” · in: Field values · all contents', ms:900, chip: m.n + ' records',
           detail:[['query','“Manufacturing”'],['token','in: Field values'],['scope','all contents']], result: m.n + ' records carry matching field values — every match lands on the Industry field' },
         { kind:'tool',  label:'filters.apply — Type: Records', ms:300, chip:'Type: Records',
@@ -68507,11 +68507,11 @@ function aiStepsOwnerFields(){
     { trace: [
         { kind:'route', label:'Interpreting request — field-level rollback to a fixed date', ms:400, chip:'2 clues',
           detail:[['field','Owner'],['target date', DATE_LBL]], result:'Only the Owner value reverts — every other field stays as it is today' },
-        { kind:'agent', label:'Spawning a field-rollback agent', ms:300, spawn:{ task:'Roll the Owner fields back to the fixed date', granted:'Restore data · asks first', denied:'Export · Configure policies' } }
+        { kind:'agent', label:'Spawning a field-rollback agent', ms:300, spawn:{ task:'Roll the Owner fields back to the fixed date', granted:'Restore data · asks first', denied:'Export · Manage policies' } }
       ],
       say: function(){ return "<p>Got it — roll the <strong>Owner</strong> field on <strong>every record</strong> back to its <strong>"+DATE_LBL+"</strong> value, leaving every other field exactly as it is today. The usual fix after a bad bulk reassignment.</p><p>Here's how I'll work, right here in your console:</p><p>1 · search the backup for the <strong>Owner field</strong> → 2 · narrow the table to just those fields → 3 · select them → 4 · set the restore point to "+DATE_LBL+" and configure → 5 · you review the summary and approve.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Spawning a field-comparison agent', ms:300, spawn:{ task:'Compare Owner fields at the fixed date', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a field-comparison agent', ms:300, spawn:{ task:'Compare Owner fields at the fixed date', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'inventory.search — “Owner” · in: Field names · all contents', ms:900, chip: m.n + ' fields',
           detail:[['query','“Owner”'],['token','in: Field names — matches the COLUMN, not values'],['scope','all contents']], result: m.n + ' Owner fields across Accounts, Cases and Opportunities' },
         { kind:'tool',  label:'filters.apply — Type: Field', ms:300, chip:'Type: Field',
@@ -68633,11 +68633,11 @@ function aiStepsDeletedRecovery(){
     { trace: [
         { kind:'route', label:'Interpreting request — recover recently deleted objects', ms:400, chip:'1 lens',
           detail:[['state','deleted in live · intact in backup'],['scope','all of Dynamics 365']], result:'An existence-filter job — the inventory has a lens for exactly this' },
-        { kind:'agent', label:'Spawning a Dynamics 365 recovery agent', ms:300, spawn:{ task:'Recover the recently deleted objects', granted:'Restore data · asks first', denied:'Export · Configure policies' } }
+        { kind:'agent', label:'Spawning a Dynamics 365 recovery agent', ms:300, spawn:{ task:'Recover the recently deleted objects', granted:'Restore data · asks first', denied:'Export · Manage policies' } }
       ],
       say: function(){ return "<p>Got it — find everything <strong>recently deleted</strong> from Dynamics 365 and bring it back. Deleted objects are gone from your live org but still intact in backup.</p><p>Here's how I'll work: 1 · filter the inventory to deleted objects → 2 · select them → 3 · review the restore point → 4 · configure → 5 · you review the summary and approve.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Spawning a deletion-lookup agent', ms:300, spawn:{ task:'Filter the inventory to recent deletions', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a deletion-lookup agent', ms:300, spawn:{ task:'Filter the inventory to recent deletions', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'filters.apply — Existence: Deleted', ms:600, chip: m.n + ' objects',
           detail:[['filter','Existence = Deleted in live'],['meaning','in backup · gone from production']], result: m.n + ' recoverable objects — each row carries its dated Deleted badge' }
       ],
@@ -68733,13 +68733,13 @@ function aiStepsMs365DeletedMail(){
     { trace: [
         { kind:'route', label:'Interpreting request — owner: John Voight · topic: “contract renewal” · state: deleted', ms:400, chip:'3 clues',
           detail:[['owner','John Voight'],['topic','“contract renewal”'],['state','deleted']], result:'Scope derivable from the request — no tenant-wide sweep needed' },
-        { kind:'agent', label:'Spawning a mailbox recovery agent', ms:300, spawn:{ task:'Recover the deleted email you select', granted:'Restore data · asks first', denied:'Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a mailbox recovery agent', ms:300, spawn:{ task:'Recover the deleted email you select', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
         { kind:'tool',  label:'scope.set — John Voight’s mailbox (named in the request)', ms:200, chip:'scoped',
           detail:[['container','All Mailboxes › John Voight'],['reason','owner named in the request']], result:'Search will sweep 1 mailbox instead of 12' }
       ],
       say: function(){ return "<p>Got it — find the <strong>contract renewal</strong> email <strong>John Voight</strong> deleted and set it up to restore. The request names the owner, so I'll scope to <strong>his mailbox</strong> rather than searching the whole tenant.</p><p>1 · open his mailbox → 2 · search it → 3 · lock the restore point → 4 · configure → 5 · you review the summary and approve.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Spawning a mailbox-search agent', ms:300, spawn:{ task:'Search inside the scoped mailbox', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a mailbox-search agent', ms:300, spawn:{ task:'Search inside the scoped mailbox', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'inventory.open — All Mailboxes · John Voight', ms:600, chip:'5 folders',
           detail:[['path','contoso.onmicrosoft.com › All Mailboxes › John Voight']], result:'5 mail folders listed · the breadcrumb confirms the scope' },
         { kind:'tool',  label:'drill.search — “contract renewal” · all contents of this mailbox', ms:900, chip:'1 match',
@@ -68801,7 +68801,7 @@ function aiStepsMs365Offboard(){
     { trace: [
         { kind:'route', label:'Interpreting request — departed user, cross-service recovery', ms:400, chip:'2 services',
           detail:[['user','Mark Aldridge'],['goal','handoff to his manager'],['services','Mailbox · OneDrive']], result:'Departed-user recovery — check what backup still holds' },
-        { kind:'agent', label:'Spawning a departed-user recovery agent', ms:300, spawn:{ task:'Recover the departed user across services', granted:'Restore data · asks first', denied:'Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a departed-user recovery agent', ms:300, spawn:{ task:'Recover the departed user across services', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
         { kind:'tool',  label:'directory.lookup — Mark Aldridge · account state', ms:600, chip:'deprovisioned',
           detail:[['account','mark.aldridge@contoso.onmicrosoft.com'],['state','deprovisioned Apr 17']], result:'Account gone from the live tenant' },
         { kind:'tool',  label:'backup.coverage — Mailbox · OneDrive', ms:500, chip:'mailbox only',
@@ -68809,7 +68809,7 @@ function aiStepsMs365Offboard(){
       ],
       say: function(){ return "<p>Got it — recover <strong>Mark Aldridge's</strong> data so his manager can take it over. Checking what the backup still holds for him:</p><p>His <strong>mailbox</strong> was deprovisioned with his account on <strong>Apr 17</strong> — it's gone from the live tenant but <strong>fully restorable from backup</strong>.</p><p>His <strong>OneDrive</strong> isn't in the protected estate — it was never enrolled in backup — so there's nothing to recover there.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Spawning a cross-service search agent', ms:300, spawn:{ task:'Find the departed user’s data across the backed-up estate', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a cross-service search agent', ms:300, spawn:{ task:'Find the departed user’s data across the backed-up estate', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'inventory.search — “Mark Aldridge” · all contents', ms:800, chip:'0 hits',
           detail:[['query','“Mark Aldridge”'],['scope','all contents'],['range','Last 30 days']], result:'No mailbox surfaced inside the current window' },
         { kind:'tool',  label:'range.check — no hits inside Last 30 days', ms:300, chip:'out of window',
@@ -68955,13 +68955,13 @@ function aiStepsMs365SiteRollback(){
     { trace: [
         { kind:'route', label:'Interpreting request — point-in-time rollback of one SharePoint folder', ms:400, chip:'3 clues',
           detail:[['site','Retail Division'],['folder','Taxes'],['point','before yesterday’s bulk edit']], result:'Whole-folder rollback to the last clean point' },
-        { kind:'agent', label:'Spawning a SharePoint rollback agent', ms:300, spawn:{ task:'Roll the folder back to the chosen point in time', granted:'Restore data · asks first', denied:'Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a SharePoint rollback agent', ms:300, spawn:{ task:'Roll the folder back to the chosen point in time', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
         { kind:'tool',  label:'sharepoint.locate — Retail Division · Taxes', ms:500, chip:'located',
           detail:[['path','All SharePoint › Retail Division › Taxes']], result:'Folder present in backup at the pre-edit point' }
       ],
       say: function(){ return "<p>Got it — the <strong>Taxes</strong> folder on the <strong>Retail Division</strong> site was damaged by yesterday's bulk edit. I'll roll the whole folder back to the last clean point <strong>before</strong> the edit (" + DATE_LBL + "), replacing today's contents.</p><p>1 · open the folder → 2 · confirm the scope → 3 · lock the pre-edit restore point → 4 · configure → 5 · you review the summary and approve.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Spawning a folder-history agent', ms:300, spawn:{ task:'Search folder history in the backed-up estate', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a folder-history agent', ms:300, spawn:{ task:'Search folder history in the backed-up estate', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'inventory.search — “Taxes” · all contents · Type: Folder', ms:800, chip:'3 folders',
           detail:[['query','“Taxes”'],['filter','Type: Folder'],['scope','all contents']], result:'3 folders share the name — the path under each row tells them apart' }
       ],
@@ -69045,7 +69045,7 @@ function aiStepsMs365MassDelete(){
     { trace: [
         { kind:'route', label:'Interpreting request — anomaly investigation across OneDrive accounts', ms:400, chip:'estate-wide',
           detail:[['signal','unusual deletion activity'],['service','OneDrive'],['window','this morning']], result:'Genuinely estate-wide — a tenant-level scan is the right scope here' },
-        { kind:'agent', label:'Spawning a deletion-pattern agent', ms:300, spawn:{ task:'Rank OneDrive accounts by unusual deletion activity', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a deletion-pattern agent', ms:300, spawn:{ task:'Rank OneDrive accounts by unusual deletion activity', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'activity.scan — deletion events · OneDrive · last 12h', ms:900, chip:'412 events',
           detail:[['window','last 12 hours'],['service','OneDrive · 12 accounts']], result:'Deletion volume concentrated in a 20-minute window' },
         { kind:'tool',  label:'anomaly.rank — per-account deletion volume vs 30-day baseline', ms:700, chip:'3 accounts',
@@ -69053,7 +69053,7 @@ function aiStepsMs365MassDelete(){
       ],
       say: function(){ return "<p>On it — scanning this morning's <strong>deletion events across every OneDrive account</strong> and ranking them against each account's 30-day baseline.</p><p>Three accounts stand well outside their baseline: <strong>" + names.map(_aiEsc).join('</strong>, <strong>') + "</strong> — together they account for the bulk of this morning's deletions, concentrated in a 20-minute window. That pattern is consistent with a scripted or bulk action, not everyday cleanup.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Spawning an account-recovery agent', ms:300, spawn:{ task:'Open and restore the affected accounts', granted:'Restore data · asks first', denied:'Export · Configure policies' } },
+        { kind:'agent', label:'Spawning an account-recovery agent', ms:300, spawn:{ task:'Open and restore the affected accounts', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
         { kind:'tool',  label:'tree.open — All OneDrive', ms:400, chip:'13 drives',
           detail:[['path','contoso.onmicrosoft.com › All OneDrive']], result:'Every account in one table — the three affected are selectable here' }
       ],
@@ -69113,7 +69113,7 @@ function aiStepsMs365Overnight(){
     { trace: [
         { kind:'route', label:'Interpreting request — daily composite, exception-first', ms:400, chip:'composite',
           detail:[['scope','whole tenant · trailing 24h'],['mode','exception-first']], result:'Composite of coverage, sessions, threat, license and lifecycle signals' },
-        { kind:'agent', label:'Spawning a nightly-health agent', ms:300, spawn:{ task:'Compose the overnight picture, exceptions first', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a nightly-health agent', ms:300, spawn:{ task:'Compose the overnight picture, exceptions first', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'sessions.scan — trailing 24h · all policies', ms:900, chip:'42 sessions',
           detail:[['window','trailing 24h'],['policies','4 active']], result:'40 succeeded · 1 failed · 1 warning' },
         { kind:'tool',  label:'graph.query — policy staleness vs RPO', ms:600, chip:'1 stale',
@@ -69128,7 +69128,7 @@ function aiStepsMs365Overnight(){
         strip: [ ['Succeeded', 40, 'var(--chart-soft-green)'], ['Failed', 1, 'var(--chart-soft-red)'], ['Stale', 1, 'var(--chart-soft-gold)'] ],
         actions: [
           { tone:'bad', chip:'Critical', txt:'SharePoint Sites — Retail Division failed', sub:'Permission-drift signature · 3 same-named folders — SharePoint one selected', btn:'Recover the site', flow:'ms365SiteRollback', ack:'On it \u2014 recovering the Retail Division site. Nothing gets written until you approve the plan.' },   // was: btn 'Review session — Activity', nav activity-agent-overlay.html (insight→action bridge 2026-09-02); tightened 2026-09-21
-          { tone:'warn', chip:'Warning', txt:'Executive Mailboxes — 11h behind RPO', sub:'Schedule throttled — restore the 10-minute cadence', btn:'Fix the schedule', factId:'exec-mail-rpo', nav:'backup-policies-agent-overlay.html#edit/pol_gws_exec_mail', look:true, grant:'Configure policies' }
+          { tone:'warn', chip:'Warning', txt:'Executive Mailboxes — 11h behind RPO', sub:'Schedule throttled — restore the 10-minute cadence', btn:'Fix the schedule', factId:'exec-mail-rpo', nav:'backup-policies-agent-overlay.html#edit/pol_gws_exec_mail', look:true, grant:'Manage policies' }
         ],
         table: { label: 'Exceptions', cols: ['Exception', 'Detail', 'Status'], rows: [
           ['SharePoint Sites — Retail Division', 'Failed 3:12 AM · role/permission error — a known, documented signature', ['bad', 'Failed']],
@@ -69142,7 +69142,7 @@ function aiStepsMs365Coverage(){
     { trace: [
         { kind:'route', label:'Interpreting request — coverage, policy mapping, staleness vs RPO', ms:400, chip:'3 questions',
           detail:[['clauses','backed up? · which policies cover what? · behind schedule?']], result:'All three clauses answered in the headline' },
-        { kind:'agent', label:'Spawning a coverage-audit agent', ms:300, spawn:{ task:'Check coverage, policy mapping and staleness against RPO', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a coverage-audit agent', ms:300, spawn:{ task:'Check coverage, policy mapping and staleness against RPO', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'graph.query — VDC_BACKUP policies · scope by object type', ms:800, chip:'4 policies',
           detail:[['policies','Default · Executive Mailboxes · SharePoint Sites · Teams Files']], result:'Every service has a covering policy (Default is the catch-all)' },
         { kind:'tool',  label:'sessions.scan — last session age per policy', ms:700, chip:'1 stale',
@@ -69163,12 +69163,12 @@ function aiStepsMs365Coverage(){
             { label: 'SharePoint Sites', frac: 3/24, color: 'var(--chart-soft-green)', val: '3h / 24h' },
             { label: 'Teams Files', frac: 6/24, color: 'var(--chart-soft-green)', val: '6h / 24h' } ] },
         actions: [
-          { tone:'warn', chip:'Warning', txt:'Executive Mailboxes — 11h behind RPO', sub:'Schedule throttled — restore the 10-minute cadence', btn:'Fix the schedule', factId:'exec-mail-rpo', nav:'backup-policies-agent-overlay.html#edit/pol_gws_exec_mail', look:true, grant:'Configure policies' },
+          { tone:'warn', chip:'Warning', txt:'Executive Mailboxes — 11h behind RPO', sub:'Schedule throttled — restore the 10-minute cadence', btn:'Fix the schedule', factId:'exec-mail-rpo', nav:'backup-policies-agent-overlay.html#edit/pol_gws_exec_mail', look:true, grant:'Manage policies' },
           { tone:'bad', chip:'Critical', txt:'SharePoint Sites — Retail Division failed', sub:'Permission-drift signature · 3 same-named folders — SharePoint one selected', btn:'Recover the site', flow:'ms365SiteRollback', ack:'On it \u2014 recovering the Retail Division site. Nothing gets written until you approve the plan.' },   // was: btn 'Review session — Activity', nav activity-agent-overlay.html (insight→action bridge 2026-09-02)
           // the "any gaps?" clause — seeded gap facts, same tiles as the
           // estate health check's roll-up (2026-09-02 overflow staging)
-          { tone:'warn', chip:'Warning', txt:'2 mailbox types unsupported on Express', sub:'Draft a Flex policy — eDiscovery + Boardroom A/V', btn:'Draft the Flex policy', nav:'backup-policies-agent-overlay.html#new', look:true, grant:'Configure policies' },
-          { tone:'warn', chip:'Warning', txt:'Team Posts backup — off by default', sub:'One policy toggle closes the only coverage gap', btn:'Enable Team Posts backup', nav:'backup-policies-agent-overlay.html', look:true, grant:'Configure policies' }
+          { tone:'warn', chip:'Warning', txt:'2 mailbox types unsupported on Express', sub:'Draft a Flex policy — eDiscovery + Boardroom A/V', btn:'Draft the Flex policy', nav:'backup-policies-agent-overlay.html#new', look:true, grant:'Manage policies' },
+          { tone:'warn', chip:'Warning', txt:'Team Posts backup — off by default', sub:'One policy toggle closes the only coverage gap', btn:'Enable Team Posts backup', nav:'backup-policies-agent-overlay.html', look:true, grant:'Manage policies' }
         ],
         table: { label: 'Per-policy health', cols: ['Policy', 'Type · RPO', 'Last session', 'Result'], rows: [
           ['Default Policy — Bronze', 'Flex · 24h', '5h ago', ['ok', 'Success']],
@@ -69184,7 +69184,7 @@ function aiStepsMs365MailboxCov(){
     { trace: [
         { kind:'route', label:'Interpreting request — protected %, exclusions, license flags', ms:400, chip:'3 questions',
           detail:[['clauses','how many protected? · types excluded? · near a license limit?']], result:'All three clauses answered in the headline' },
-        { kind:'agent', label:'Spawning a mailbox-coverage agent', ms:300, spawn:{ task:'Count protected mailboxes, exclusions and license flags', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a mailbox-coverage agent', ms:300, spawn:{ task:'Count protected mailboxes, exclusions and license flags', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'graph.query — BACKUPED_MAILBOX · restore point in trailing 30d', ms:800, chip:'23 / 25',
           detail:[['rule','protected = restore point inside the trailing 30 days']], result:'23 of 25 mailboxes protected (92%)' },
         { kind:'tool',  label:'mailboxes.classify — type support on Express-Outlook', ms:600, chip:'2 excluded',
@@ -69204,13 +69204,13 @@ function aiStepsMs365MailboxCov(){
         // its limit-proximity bar lives with its finding below.
         // was: cap: { label: 'finance-shared', val: 47.2, max: 50, unit: 'GB', color: 'var(--chart-soft-gold)' },
         actions: [
-          { tone:'warn', chip:'Warning', txt:'2 mailbox types unsupported on Express', sub:'Draft a Flex policy — eDiscovery + Boardroom A/V', btn:'Draft the Flex policy', nav:'backup-policies-agent-overlay.html#new', look:true, grant:'Configure policies' },
+          { tone:'warn', chip:'Warning', txt:'2 mailbox types unsupported on Express', sub:'Draft a Flex policy — eDiscovery + Boardroom A/V', btn:'Draft the Flex policy', nav:'backup-policies-agent-overlay.html#new', look:true, grant:'Manage policies' },
           // 2026-09-02 FINAL: secondary claims get DESCRIPTIVE COPY, not a
           // second chart — the number folds into the finding text.
           // was: txt:'finance-shared is 2.8GB from consuming a license seat', sub:'Shared mailboxes consume a seat past 50GB', cap: { val: 47.2, max: 50, unit: 'GB', color: 'var(--chart-soft-gold)' },
           // flagged alongside the coverage answer — the seeded stale Express
           // policy is mailbox protection health (2026-09-02 overflow staging)
-          { tone:'bad', chip:'Critical', txt:'Executive Mailboxes — 11h behind RPO', sub:'Schedule throttled — restore the 10-minute cadence', btn:'Fix the schedule', factId:'exec-mail-rpo', nav:'backup-policies-agent-overlay.html#edit/pol_gws_exec_mail', look:true, grant:'Configure policies' }
+          { tone:'bad', chip:'Critical', txt:'Executive Mailboxes — 11h behind RPO', sub:'Schedule throttled — restore the 10-minute cadence', btn:'Fix the schedule', factId:'exec-mail-rpo', nav:'backup-policies-agent-overlay.html#edit/pol_gws_exec_mail', look:true, grant:'Manage policies' }
         ],
         table: { label: 'Exclusions & flags', cols: ['Mailbox', 'Type', 'Flag'], rows: [
           ['eDiscovery Search', 'Discovery-search', ['warn', 'Unsupported on Express']],
@@ -69228,7 +69228,7 @@ function aiStepsMs365Health(){
     { trace: [
         { kind:'route', label:'Interpreting request — full estate sweep, ranked by severity', ms:400, chip:'open-ended',
           detail:[['scope','sessions · policies · coverage · licenses · platform gaps']], result:'Broad prompt → aggregate every open issue, ranked by impact' },
-        { kind:'agent', label:'Spawning an estate-health agent', ms:300, spawn:{ task:'Sweep the estate and rank findings by severity', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
+        { kind:'agent', label:'Spawning an estate-health agent', ms:300, spawn:{ task:'Sweep the estate and rank findings by severity', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'sessions.review — trailing 24h across all policies', ms:700, chip:'1 failed · 1 stale',
           detail:[['failed','SharePoint Sites — Retail Division site'],['stale','Executive Mailboxes — 11h vs a 10-minute RPO']], result:'Two session-level issues need action now' },
         { kind:'tool',  label:'mailboxes.classify — type support on Express-Outlook', ms:500, chip:'2 excluded',
@@ -69248,9 +69248,9 @@ function aiStepsMs365Health(){
         insight: 'Ranked by blast radius: the <strong>failed SharePoint session</strong> and the <strong>stale Express policy</strong> are live data-loss exposure; everything below them costs money or coverage, not data. Each of these also appears in its focused report — this view is the roll-up. <strong>Also worth noting:</strong> finance-shared is at 94% of the 50GB seat threshold — 2.8GB of headroom before it consumes a license seat. Multi-geo teams may need a region review — Known 502 signature on multi-geo backups.',
         actions: [
           { tone:'bad',  chip:'Critical', txt:'SharePoint Sites — Retail Division failed', sub:'Permission-drift signature · 3 same-named folders — SharePoint one selected', btn:'Recover the site', flow:'ms365SiteRollback', ack:'On it \u2014 recovering the Retail Division site. Nothing gets written until you approve the plan.' },   // was: btn 'Review session — Activity', nav activity-agent-overlay.html (insight→action bridge 2026-09-02); tightened 2026-09-21
-          { tone:'bad',  chip:'Critical', txt:'Executive Mailboxes — 11h behind RPO', sub:'Schedule throttled — restore the 10-minute cadence', btn:'Fix the schedule', factId:'exec-mail-rpo', nav:'backup-policies-agent-overlay.html#edit/pol_gws_exec_mail', look:true, grant:'Configure policies' },
-          { tone:'warn', chip:'Warning', txt:'2 mailbox types unsupported on Express', sub:'Draft a Flex policy — eDiscovery + Boardroom A/V', btn:'Draft the Flex policy', nav:'backup-policies-agent-overlay.html#new', look:true, grant:'Configure policies' },
-          { tone:'warn', chip:'Warning', txt:'Team Posts backup — off by default', sub:'One policy toggle closes the only coverage gap', btn:'Enable Team Posts backup', nav:'backup-policies-agent-overlay.html', look:true, grant:'Configure policies' }
+          { tone:'bad',  chip:'Critical', txt:'Executive Mailboxes — 11h behind RPO', sub:'Schedule throttled — restore the 10-minute cadence', btn:'Fix the schedule', factId:'exec-mail-rpo', nav:'backup-policies-agent-overlay.html#edit/pol_gws_exec_mail', look:true, grant:'Manage policies' },
+          { tone:'warn', chip:'Warning', txt:'2 mailbox types unsupported on Express', sub:'Draft a Flex policy — eDiscovery + Boardroom A/V', btn:'Draft the Flex policy', nav:'backup-policies-agent-overlay.html#new', look:true, grant:'Manage policies' },
+          { tone:'warn', chip:'Warning', txt:'Team Posts backup — off by default', sub:'One policy toggle closes the only coverage gap', btn:'Enable Team Posts backup', nav:'backup-policies-agent-overlay.html', look:true, grant:'Manage policies' }
         ]
       }; } }
   ];
@@ -69260,7 +69260,7 @@ function aiStepsMs365TeamsGaps(){
     { trace: [
         { kind:'route', label:'Interpreting request — scope check + inherent platform gaps', ms:400, chip:'2 questions',
           detail:[['clauses','protected end-to-end? · what’s never backed up?']], result:'Both clauses answered in the headline' },
-        { kind:'agent', label:'Spawning a Teams-gap agent', ms:300, spawn:{ task:'Check Teams scope and inherent platform gaps', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a Teams-gap agent', ms:300, spawn:{ task:'Check Teams scope and inherent platform gaps', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'graph.query — BACKUPED_TEAM · policy scope', ms:700, chip:'6 teams',
           detail:[['policy','Teams Files (Flex) — Teams is Flex-only']], result:'All 6 teams covered' },
         { kind:'tool',  label:'docs.match — considerations & limitations (Teams)', ms:500, chip:'4 gaps',
@@ -69273,7 +69273,7 @@ function aiStepsMs365TeamsGaps(){
         // chart per the claim-shape rule; the 6/6 lives in the headline
         actionsLabel: 'Recommended actions',
         actions: [
-          { tone:'warn', chip:'Warning', txt:'Team Posts backup — off by default', sub:'One policy toggle closes the only coverage gap', btn:'Enable Team Posts backup', nav:'backup-policies-agent-overlay.html', look:true, grant:'Configure policies' }
+          { tone:'warn', chip:'Warning', txt:'Team Posts backup — off by default', sub:'One policy toggle closes the only coverage gap', btn:'Enable Team Posts backup', nav:'backup-policies-agent-overlay.html', look:true, grant:'Manage policies' }
         ],
         table: { label: 'Never backed up — regardless of configuration', cols: ['Content', 'Why'], rows: [
           ['1:1 and group chats', 'Outside team channels — never captured'],
@@ -69297,7 +69297,7 @@ function aiStepsGhGrowth(){
     { trace: [
         { kind:'route', label:'Interpreting request — growth rate + what’s driving it', ms:400, chip:'2 questions',
           detail:[['clauses','how fast is it growing? · what’s driving it?']], result:'Both clauses answered in the headline' },
-        { kind:'agent', label:'Spawning a growth-analysis agent', ms:300, spawn:{ task:'Measure growth and attribute it to its drivers', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a growth-analysis agent', ms:300, spawn:{ task:'Measure growth and attribute it to its drivers', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'footprint.series — protected data size, trailing 30 days', ms:800, chip:'+12%',
           detail:[['scope','acme-corp · 16 repositories']], result:'75 → 84 GB over the trailing 30 days' },
         { kind:'tool',  label:'repos.classify — growth attribution by repository', ms:600, chip:'top: data-pipeline',
@@ -69342,7 +69342,7 @@ function aiStepsAdoRpo(){
     { trace: [
         { kind:'route', label:'Interpreting request — every project vs its own backup window', ms:400, chip:'6 projects',
           detail:[['clauses','are all six inside their policy windows?']], result:'Answered per project in the headline + rows' },
-        { kind:'agent', label:'Spawning a policy-window agent', ms:300, spawn:{ task:'Compare each project with its own backup window', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a policy-window agent', ms:300, spawn:{ task:'Compare each project with its own backup window', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'graph.query — latest restore point per project', ms:800, chip:'6 checked',
           detail:[['scope','contoso-org · 6 projects']], result:'Ages range 3h to 13h' },
         { kind:'tool',  label:'policies.match — window per project', ms:500, chip:'1 behind',
@@ -69382,7 +69382,7 @@ function aiStepsPpCapacity(){
     { trace: [
         { kind:'route', label:'Interpreting request — capacity headroom per environment', ms:400, chip:'3 environments',
           detail:[['clauses','is any environment close to its Dataverse limit?']], result:'Answered with the nearest limit up front' },
-        { kind:'agent', label:'Spawning a capacity-headroom agent', ms:300, spawn:{ task:'Check Dataverse capacity per environment', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a capacity-headroom agent', ms:300, spawn:{ task:'Check Dataverse capacity per environment', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'capacity.check — Dataverse usage vs entitlement', ms:800, chip:'1 near limit',
           detail:[['rule','flag environments past 85% of entitled capacity']], result:'Contoso Production at 91% · EU Production 38% · Sandbox 22%' },
         { kind:'tool',  label:'growth.attribute — what’s consuming Production', ms:600, chip:'top: attachments',
@@ -69417,12 +69417,12 @@ function aiStepsInfraFailedJobs(){
     { trace: [
         { kind:'route', label:'Interpreting request — failures + affected VMs, trailing 24h', ms:400, chip:'62 sessions',
           detail:[['window','trailing 24h'],['mode','failure + retry clustering, resolved to protected VMs']], result:'7 failed of 62 sessions across 5 jobs' },
-        { kind:'agent', label:'Spawning a failure-analysis agent', ms:300, spawn:{ task:'Cluster the last 24 hours of failures', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a failure-analysis agent', ms:300, spawn:{ task:'Cluster the last 24 hours of failures', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'sessions.scan — trailing 24h · every job', ms:900, chip:'7 failed',
           detail:[['window','trailing 24h'],['jobs','7 total']], result:'49 succeeded · 5 warning · 7 failed · 1 running' },
         { kind:'tool',  label:'failures.cluster — group by failure message per job', ms:600, chip:'2 repeats',
           detail:[['rule','same job + same failure text across a scheduled retry']], result:'Production Sites and Finance VMs each failed twice on the same cause' },
-        { kind:'agent', label:'Spawning a job-membership agent', ms:300, spawn:{ task:'Resolve each failed job to the VMs behind it', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a job-membership agent', ms:300, spawn:{ task:'Resolve each failed job to the VMs behind it', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'job.members — resolve each failed job to its protected VMs', ms:500, chip:'8 VMs',
           detail:[['source','Virtual Machines inventory']], result:'All 8 protected VMs sit behind one of the 5 failing jobs' },
         { kind:'tool',  label:'repository.check — free space on the affected repository', ms:400, chip:'87% used',
@@ -69519,7 +69519,7 @@ function aiStepsInfraRetryFinanceVms(){
     { trace: [
         { kind:'route', label:'Retrying Weekly Replication — Finance VMs', ms:300, chip:'2 VMs',
           detail:[['cause','network timeout to dr-esx-01, both prior attempts']], result:'Safe to automate — a transient network fault, not a config error' },
-        { kind:'agent', label:'Spawning a retry agent', ms:250, spawn:{ task:'Restart the failed session after a transient network fault', granted:'Retry sessions · pre-approved for transient faults', denied:'Restore · Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a retry agent', ms:250, spawn:{ task:'Restart the failed session after a transient network fault', granted:'Retry sessions · pre-approved for transient faults', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'network.check — dr-esx-01 reachability', ms:500, chip:'reachable',
           detail:[['target','dr-esx-01']], result:'Target responds now — the timeout has cleared' },
         { kind:'tool',  label:'sessions.retry — Weekly Replication, Finance VMs', ms:600, chip:'queued',
@@ -69555,7 +69555,7 @@ function aiStepsInfraRetryEdgeSites(){
     { trace: [
         { kind:'route', label:'Retrying Daily Backup — Edge Sites', ms:300, chip:'2 VMs',
           detail:[['cause','edge proxy agent unreachable']], result:'Safe to automate — a one-off agent drop, not a config error' },
-        { kind:'agent', label:'Spawning a retry agent', ms:250, spawn:{ task:'Restart the failed session after an unreachable-agent fault', granted:'Retry sessions · pre-approved for transient faults', denied:'Restore · Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a retry agent', ms:250, spawn:{ task:'Restart the failed session after an unreachable-agent fault', granted:'Retry sessions · pre-approved for transient faults', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'agent.ping — edge proxy', ms:500, chip:'online',
           detail:[['proxy','edge-proxy-01']], result:'Agent responds now — it was offline only during the last run' },
         { kind:'tool',  label:'sessions.retry — Daily Backup, Edge Sites', ms:600, chip:'queued',
@@ -69586,7 +69586,7 @@ function aiStepsInfraLiveSessions(){
     { trace: [
         { kind:'route', label:'Interpreting request — live job states + why anything is queued', ms:400, chip:'7 jobs',
           detail:[['clauses','what’s running? · what’s queued? · what already finished?']], result:'All three answered from a live poll' },
-        { kind:'agent', label:'Spawning a live-session agent', ms:300, spawn:{ task:'Poll live job states and where sessions are waiting', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a live-session agent', ms:300, spawn:{ task:'Poll live job states and where sessions are waiting', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'jobs.poll — live status across all jobs', ms:700, chip:'3 running',
           detail:[['states','running · queued · finished · disabled']], result:'3 running · 2 queued · 1 finished with a warning · 1 disabled' },
         { kind:'tool',  label:'proxy.assignment — task slots per live session', ms:600, chip:'5 of 8 slots',
@@ -69635,7 +69635,7 @@ function aiStepsInfraRepoCapacity(){
     { trace: [
         { kind:'route', label:'Interpreting request — capacity headroom + an actionable plan', ms:400, chip:'3 repositories',
           detail:[['clauses','which repository is at risk? · what closes the gap?']], result:'One repository at risk, one clear move to fix it' },
-        { kind:'agent', label:'Spawning a capacity-planning agent', ms:300, spawn:{ task:'Project repository headroom and draft a plan', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a capacity-planning agent', ms:300, spawn:{ task:'Project repository headroom and draft a plan', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'repository.capacity — free space & growth per repository', ms:800, chip:'1 at risk',
           detail:[['repositories','veeam-repo-01 · nas-archive-01 · object-s3-vault']], result:'veeam-repo-01 is 87% full and growing 176 GB/day — full in about 18 days' },
         { kind:'tool',  label:'immutability.check — lock status per repository', ms:500, chip:'2 disabled',
@@ -69704,7 +69704,7 @@ function aiStepsInfraCapacityCharts(){
       say: function(){ return 'You asked for this in charts — here are three: veeam-repo-01’s growth trend, a capacity comparison across all three repositories, and their immutability posture.'; },
       noFb: true },
     { trace: [
-        { kind:'agent', label:'Spawning a capacity-charts agent', ms:300, spawn:{ task:'Chart repository capacity, growth and immutability', granted:'Access & visualize data', denied:'Restore · Export · Configure policies' } },
+        { kind:'agent', label:'Spawning a capacity-charts agent', ms:300, spawn:{ task:'Chart repository capacity, growth and immutability', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'repository.history — trailing 14-day usage, veeam-repo-01', ms:600, chip:'+2.3 TB',
           detail:[['window','trailing 14 days']], result:'18.6 TB → 20.9 TB over the window' }
       ],
@@ -69842,7 +69842,7 @@ function aiWizardTailSteps(noun, opts){
       ];
       return {
         trace: [
-          { kind:'agent', label:'Spawning a restore-point agent', ms:300, spawn:{ task:'Resolve restore points for the selection', granted:'Restore data · asks first', denied:'Export · Configure policies' } },
+          { kind:'agent', label:'Spawning a restore-point agent', ms:300, spawn:{ task:'Resolve restore points for the selection', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
           { kind:'tool',  label:'wizard.open — Select step', ms:500,
             detail:[['step','Select — review restore items']], result:'Cart items staged in the wizard' },
           { kind:'tool',  label:'restorepoint.set — ' + rpLabel, ms:400, chip:'locked',
@@ -71947,7 +71947,7 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
         if (!st || !st.spawn) return;
         var nm = String(st.label).replace(/^Spawning an? /, '');
         fresh.push({ agent: nm.charAt(0).toUpperCase() + nm.slice(1), task: st.spawn.task, granted: st.spawn.granted,
-          kind: /^Restore data/.test(st.spawn.granted) ? 'Restore' : (/^Configure policies/.test(st.spawn.granted) ? 'Review' : 'Question'),
+          kind: /^Restore data/.test(st.spawn.granted) ? 'Restore' : (/^Manage policies/.test(st.spawn.granted) ? 'Review' : 'Question'),
           wl: WL_NAME[(typeof state !== 'undefined' && state.wl) || ''] || 'All workloads', ts: Date.now(), dur: Math.max(1, Math.round((st.ms || 300) / 100) / 10) + 's' });
       });
     });

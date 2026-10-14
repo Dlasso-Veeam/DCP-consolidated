@@ -1599,9 +1599,9 @@ body.ai-open.ai-full #toast { right: 24px; }
 .sd-graph-btn span { padding: 0 8px; }
 .sd-graph-btn:hover { background: var(--black-5); }
 .sd-sec-hd { padding: 12px; font-size: 18px; line-height: 24px; font-weight: 500; color: var(--black-100); }
-.sd-cols { display: flex; margin: 0 12px 12px; border: 1px solid var(--border-light); border-radius: 8px; overflow: hidden; flex: 1 0 auto; }
+.sd-cols { display: flex; flex: 1 0 auto; } /* canonical: Identity Dashboard finding overview (.idd-cols) — two columns, no outer box */
 /* activity log panel — Figma 10845:113161 (40px rows + 12px connectors) */
-.sd-log { flex: 1.17; min-width: 0; padding: 16px; }
+.sd-log { flex: 1; min-width: 0; padding: 16px 24px 24px 16px; }
 .sd-log-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
 .sd-log-rows { }
 .sd-log-row { display: flex; align-items: center; gap: 8px; height: 40px; padding: 8px 8px 8px 0; box-sizing: border-box; }
@@ -1613,12 +1613,13 @@ body.ai-open.ai-full #toast { right: 24px; }
 .sd-log-dur { width: 112px; flex-shrink: 0; font-size: 16px; line-height: 22px; color: var(--black-100); }
 .sd-log-conn { height: 12px; margin-left: 13.5px; border-left: 1px solid var(--border-light); }
 /* properties panel — Figma 10845:113250 (258/258 label-value rows) */
-.sd-props { width: 45%; min-width: 320px; flex-shrink: 0; border-left: 1px solid var(--border-light); }
-.sd-props-hd { padding: 13px 12px; font-size: 16px; font-weight: 500; line-height: 22px; color: var(--black-100); }
+.sd-props { width: 440px; flex-shrink: 0; padding: 16px 16px 24px 24px; border-left: 1px solid var(--black-10); }
+@media (max-width: 1100px) { .sd-cols { flex-direction: column; } .sd-props { width: auto; border-left: none; border-top: 1px solid var(--black-10); } }
+.sd-props-hd { display: flex; align-items: center; min-height: 28px; margin-bottom: 4px; padding: 0; font-size: 18px; font-weight: 500; line-height: 22px; color: var(--black-100); }
 /* property row — Figma 10845:113255 (_Columns Data Grid) */
-.sd-prop-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0; align-items: center; min-height: 32px; margin: 0 12px 8px; }
-.sd-prop-row .k { font-size: 16px; line-height: 22px; color: var(--black-60); }
-.sd-prop-row .v { font-size: 16px; line-height: 22px; color: var(--black-100); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sd-prop-row { display: flex; align-items: center; gap: 12px; min-height: 40px; margin: 0; font-size: 16px; line-height: 22px; }
+.sd-prop-row .k { width: 150px; flex-shrink: 0; font-size: 16px; line-height: 22px; color: var(--black-60); }
+.sd-prop-row .v { flex: 1; min-width: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 16px; line-height: 22px; color: var(--black-100); overflow-wrap: anywhere; }
 /* value chips — Figma 10845:113261 (Chip, 28px r2 tinted) */
 .sd-chip { display: inline-flex; align-items: center; height: 28px; padding: 3px 8px; border-radius: 2px; background: var(--black-5); color: var(--black-100); font-size: 16px; font-weight: 500; line-height: 22px; box-sizing: border-box; }
 .sd-chip.ok { background: var(--em-green-tint); color: var(--em-green); }
