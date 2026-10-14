@@ -6609,6 +6609,7 @@ body.pol-drawer-open { overflow: hidden; }
    re-assert top-align later in the sheet, so multi-line values keep it. */
 .rd-compare-tbl td { vertical-align: middle; }
 .rw-preview-tbl td:first-child { font-weight: 500; color: var(--black-60); white-space: nowrap; width: 180px; }
+.rw-preview-tbl.rd-compare-tbl td:first-child { white-space: normal; overflow-wrap: break-word; } /* long attribute labels wrap inside their column instead of running into the value */
 
 /* Changed-row tint = the "N Changes" CHIP's fill — Securiti Orange S10, the
    intentional chip↔row alignment in the reference (Figma 10746:121320 row bg;
@@ -12657,6 +12658,78 @@ var RESOURCES = (function(){
       AI('ad-cfg-subnet-' + (i + 1), sn[0], 'Subnet', 'ad-cfg-subnets', sn[1], {adAttrs:[['Prefix', sn[0]],['Object class','subnet'],['Site', sn[1]],['Location', (SITES.filter(function(x){ return x[0] === sn[1]; })[0] || [0,''])[1]]]}); });
     [['Group Key Distribution Service','Key distribution for group managed service accounts'],['Windows NT','Directory Service and Netlogon settings'],['Public Key Services','Certificate templates, enrollment services and AIA'],['NetServices','Network service containers'],['RRAS','Routing and Remote Access'],['Microsoft Exchange','Exchange organization configuration'],['MS-SMS-SERVICES','Configuration Manager site publication'],['Claims Configuration','Dynamic Access Control claim types']].forEach(function(sv){
       AI('ad-cfg-svc-' + slug(sv[0]), sv[0], 'Service', 'ad-cfg-svcs', 'Services container', {adAttrs:[['Name', sv[0]],['Object class','container'],['Distinguished name','CN=' + sv[0] + ',CN=Services,CN=Configuration,' + DN],['Description', sv[1]]]}); });
+    // ── Change history: give attributes an OLDER value (3rd element of an adAttrs row) so restore points differ over time ──
+    (function(){
+      var MGRS = ['Dana Kovac','Mira Okafor','Tran Nguyen','Priya Natarajan','Marcus Reed'];
+      var OUNAMES = OUS.filter(function(o){ return o[0] !== 'ad-ou-groups' && o[0] !== 'ad-ou-workstations' && o[0] !== 'ad-ou-servers'; });
+      function setOld(r, label, oldVal, newVal){
+        for (var i = 0; i < r.adAttrs.length; i++) if (r.adAttrs[i][0] === label) {
+          if (newVal !== undefined) r.adAttrs[i][1] = newVal;
+          if (oldVal !== r.adAttrs[i][1]) r.adAttrs[i][2] = oldVal;
+          return;
+        }
+      }
+      function get(r, label){ for (var i = 0; i < r.adAttrs.length; i++) if (r.adAttrs[i][0] === label) return r.adAttrs[i][1]; return null; }
+      function day(m, lo, hi){ return m + ' ' + anum(lo, hi) + ', 2026'; }
+      list.forEach(function(r){
+        if (r.wl !== 'Active Directory' || !r.adAttrs) return;
+        var t = r.type, x = arnd();
+        if (t === 'User') {
+          var dept = get(r, 'Department'), title = get(r, 'Job title');
+          setOld(r, 'Last logon', day('Sep', 1, 28));
+          if (arnd() < 0.8) setOld(r, 'Password last set', day('Jun', 1, 28));
+          if (r.id === 'ad-user-j-alvarez') { setOld(r, 'Job title', 'Financial Analyst'); setOld(r, 'Manager', 'Priya Natarajan'); return; }
+          if (dept && TITLES[dept] && arnd() < 0.55) { var ot = apick(TITLES[dept]); if (ot !== title) setOld(r, 'Job title', ot); }
+          if (arnd() < 0.4) { var m1 = apick(MGRS), m2 = apick(MGRS); if (m1 === m2) m2 = MGRS[(MGRS.indexOf(m1) + 1) % MGRS.length]; setOld(r, 'Manager', m2, m1); }
+          if (get(r, 'Enabled') === 'No' && arnd() < 0.7) setOld(r, 'Enabled', 'Yes');
+          if (arnd() < 0.15) {   // moved between OUs
+            var other = apick(OUNAMES), dnv = get(r, 'Distinguished name'), cur = (/OU=([^,]+)/.exec(dnv) || [0, ''])[1];
+            if (cur && other[1] !== cur && other[3] !== dept) { setOld(r, 'Department', other[3]); setOld(r, 'Distinguished name', dnv.replace('OU=' + cur, 'OU=' + other[1])); }
+          }
+        } else if (t === 'Computer') {
+          setOld(r, 'Last logon', day('Sep', 1, 28));
+          var os = get(r, 'Operating system') || '';
+          if (/Windows 11/.test(os) && arnd() < 0.4) setOld(r, 'Operating system', 'Windows 10 Enterprise');
+          else if (/Server 2022/.test(os) && arnd() < 0.3) setOld(r, 'Operating system', 'Windows Server 2019 Standard');
+          if (arnd() < 0.25) setOld(r, 'Description', 'Unassigned');
+        } else if (t === 'Group') {
+          if (arnd() < 0.35) setOld(r, 'Description', (get(r, 'Description') || '').replace(/^All /, 'Legacy: all '));
+          if (arnd() < 0.3) { var gm = apick(MGRS); setOld(r, 'Managed by', 'MERIDIAN\\' + gm.toLowerCase().split(' ')[0].charAt(0) + '.' + gm.toLowerCase().split(' ')[1]); }
+          if (get(r, 'Scope') === 'Universal' && arnd() < 0.5) setOld(r, 'Scope', 'Global');
+        } else if (t === 'Organization' || t === 'Organizational Unit') {
+          if (arnd() < 0.4) setOld(r, 'Description', (get(r, 'Description') || '') + ' (legacy)');
+          if (arnd() < 0.4) setOld(r, 'Managed by', 'MERIDIAN\\' + apick(['p.natarajan','m.reed','d.kovac']));
+          var lg = parseInt(get(r, 'Linked GPOs'), 10); if (lg > 1 && arnd() < 0.5) setOld(r, 'Linked GPOs', String(lg - 1));
+          if (arnd() < 0.15) setOld(r, 'Protected from accidental deletion', 'No');
+        } else if (t === 'Group Policy Object') {
+          var ver = get(r, 'Version') || '', vm = /User (\d+) · Computer (\d+)/.exec(ver);
+          if (vm && (+vm[1] || +vm[2])) setOld(r, 'Version', 'User ' + Math.max(0, +vm[1] - (arnd() < 0.5 ? 1 : 0)) + ' · Computer ' + Math.max(0, +vm[2] - anum(1, 3)));
+          setOld(r, 'Modified', day('Mar', 1, 28));
+          if (arnd() < 0.2) setOld(r, 'Description', (get(r, 'Description') || '') + ' (draft)');
+          if (arnd() < 0.12) setOld(r, 'Status', 'User configuration disabled');
+        } else if (t === 'DNS Record') {
+          var dat = get(r, 'Data') || '';
+          if (/^\d+\.\d+\.\d+\.\d+$/.test(dat) && arnd() < 0.4) { var pp = dat.split('.'); pp[3] = String(((+pp[3] + anum(5, 40)) % 250) + 2); setOld(r, 'Data', pp.join('.')); }
+          if (arnd() < 0.3) setOld(r, 'TTL', '15 minutes');
+        } else if (t === 'DNS Zone') {
+          if (arnd() < 0.6) setOld(r, 'Dynamic updates', 'Nonsecure and secure');
+          if (arnd() < 0.3) setOld(r, 'Replication scope', 'All DNS servers in the forest');
+        } else if (t === 'Domain Controller') {
+          var dos = get(r, 'Operating system') || '';
+          if (/2022/.test(dos) && arnd() < 0.5) setOld(r, 'Operating system', 'Windows Server 2019 Standard');
+          else if (/2019/.test(dos) && arnd() < 0.5) setOld(r, 'Operating system', 'Windows Server 2016 Standard');
+          if (get(r, 'Global catalog') === 'Yes' && arnd() < 0.3) setOld(r, 'Global catalog', 'No');
+          if (get(r, 'FSMO roles') === '—' && arnd() < 0.15) setOld(r, 'FSMO roles', 'RID master');
+        } else if (t === 'Site') {
+          if (arnd() < 0.3) setOld(r, 'Location', 'Cambridge, MA');
+          var dc = parseInt(get(r, 'Domain controllers'), 10); if (dc > 1 && arnd() < 0.5) setOld(r, 'Domain controllers', String(dc - 1));
+        } else if (t === 'Subnet') {
+          if (arnd() < 0.4) { var cs = get(r, 'Site'); setOld(r, 'Site', cs === 'HQ-Boston' ? 'Default-First-Site-Name' : 'HQ-Boston'); }
+        } else if (t === 'Service' || t === 'Managed Service Account') {
+          if (arnd() < 0.3) setOld(r, 'Description', (get(r, 'Description') || '') + ' (v1)');
+        }
+      });
+    })();
     // ── Derive container meta from what is actually seeded ──
     (function(){
       var kids = {};
@@ -53542,7 +53615,7 @@ function _rdBuildStateForSelCore(resource, sel, baseFields) {
   // …) aren't in the generic rp.preview blob, so routing through preview would
   // collapse every Okta item to "No differences". Use the deterministic
   // snap/prod/diff drift map instead.
-  var _selIsOkta = resource && resource.wl === 'Okta WIC';
+  var _selIsOkta = resource && (resource.wl === 'Okta WIC' || resource.wl === 'Active Directory');   // AD rides the same authored snap→prod timeline
   // GENERIC PREVIEW GUARD (regression fix 2026-07-08): the preview blob only
   // counts when its keys actually ADDRESS this schema. GitHub repos moved to
   // API-style field keys (name / size / pushed_at, §7) while rp.preview still
@@ -54039,7 +54112,11 @@ function _buildResourceSnapshotFieldsCore(resource, hasDiff) {
   // ── Active Directory: attribute rows seeded on the resource (adAttrs); relationships ride the shared ledger ──
   if (wl === 'Active Directory' && r.adAttrs) {
     F.push({ section: r.type });
-    r.adAttrs.forEach(function(row){ F.push({ f: row[0], snap: row[1], prod: row[1] }); });
+    r.adAttrs.forEach(function(row){
+      var zw = function(v){ return (typeof v === 'string' && /^CN=|^OU=/.test(v)) ? v.replace(/,/g, ',\u200b') : v; };   // let long DNs wrap after a comma
+      var hasOld = row.length > 2 && row[2] !== row[1];
+      F.push({ f: row[0], snap: zw(hasOld ? row[2] : row[1]), prod: zw(row[1]), diff: hasOld });
+    });
     return F;
   }
 
@@ -57194,9 +57271,16 @@ function _oktaRelUniverse(r) {
 // the shared ledger's chevron+pill panel chrome rather than its add/
 // remove/modify diffing.
 // Active Directory: group members, a user's / computer's group memberships, a GPO's links.
-// Static (no join/leave drift modeled) — same shape as _gwsRelUniverse.
+// Items carry join/leave offsets so the ledger shows added/removed links between restore points.
 function _adRelUniverse(r) {
-  function st(name, payload){ return { name: name, joinOff: 9999, leaveOff: null, payload: payload || null }; }
+  // Membership changes over time (same model as the Okta ledger): most links are long-standing; some were added in
+  // the last weeks (joinOff = days ago), and a few were removed (leaveOff = days ago).
+  function st(name, payload){
+    var h = _relgHash(r.id + '|' + name), joinOff = 9999, leaveOff = null;
+    if (h % 4 === 0) joinOff = 3 + (h % 40);
+    else if (h % 11 === 0) leaveOff = 2 + (h % 20);
+    return { name: name, joinOff: joinOff, leaveOff: leaveOff, payload: payload || null };
+  }
   if (r.type === 'Group') return [{ key: 'members', label: 'Members', items: (r.members || []).map(function(m){ return st(m[0], m[1]); }) }];
   if (r.type === 'Group Policy Object') return [{ key: 'links', label: 'Linked to', items: (r.adLinks || []).map(function(n){ return st(n); }) }];
   var groups = RESOURCES.filter(function(g){
@@ -58784,7 +58868,7 @@ function renderRdBody() {
   var _isNone = !!(rightInfo && rightInfo.isNone);
   // Attribute column: 140px in the condensed 720px single-column drawer,
   // 180px at compare width. Checkbox column only with a fieldMask.
-  var _attrW = rdState.singleSnap ? '140px' : '180px';
+  var _attrW = '180px';
   var colGroup = (rdState.singleSnap || _isNone)
     ? (_hasMaskFields
       ? '<colgroup><col style="width:36px"><col style="width:' + _attrW + '"><col></colgroup>'
