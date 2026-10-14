@@ -3893,10 +3893,6 @@ body.ai-hx-transcript .ai-foot { display: none; }
 .ws-body-split .sb-badge.prog { background: var(--blue-light); color: var(--blue); }
 .ws-body-split .sb-badge svg { width: 14px; height: 14px; }
 .ws-step-pad { max-width: 780px; margin: 0 auto; padding: 32px 24px 48px; }
-/* Placeholder notice strip — aligned to the step content column (780 - 2x24 padding). DS Alert / Warning via .ws-alert-warn. */
-.ws-placeholder-banner { flex: 0 0 auto; padding: 16px 24px 0; }
-.ws-placeholder-banner .ws-alert { max-width: 732px; margin: 0 auto; }
-.ws-placeholder-banner .ws-alert > svg { width: 16px; height: 16px; margin-top: 2px; }
 /* Step header — title + description at the top of each step body,
    mirroring the connector wizard's per-step .form-title /
    .form-subtitle pattern. Keeps the step's purpose oriented above
@@ -4295,18 +4291,27 @@ body.ai-hx-transcript .ai-foot { display: none; }
    corner of the card so every selection card on the configure step
    anchors its radio in the same place. Extra right padding leaves
    clearance so the title doesn't collide with the dot. */
-.ws-cfg-choice { position: relative; display: flex; align-items: flex-start; gap: 12px; padding: 14px 36px 14px 16px; background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; cursor: pointer; text-align: left; font-family: inherit; transition: border-color 0.12s ease, background 0.12s ease; }
-.ws-cfg-choice:hover { border-color: var(--blue-30); }
-.ws-cfg-choice.is-selected { border-color: var(--blue); background: var(--blue-light); }
-.ws-cfg-choice.is-disabled { opacity: 0.5; cursor: not-allowed; background: var(--black-3); }
-.ws-cfg-choice.is-disabled:hover { border-color: var(--border-light); }
-.ws-cfg-radio { position: absolute; top: 12px; right: 12px; width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--black-30); background: var(--white); display: inline-flex; align-items: center; justify-content: center; transition: border-color 0.12s ease; }
-.ws-cfg-choice.is-selected .ws-cfg-radio { border-color: var(--blue); }
-.ws-cfg-choice.is-selected .ws-cfg-radio::after { content: ''; display: block; width: 8px; height: 8px; border-radius: 50%; background: var(--blue); }
-.ws-cfg-choice-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.ws-cfg-choice-title { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: var(--black-100); }
+/* ── Selection card (Figma DCP Consolidated 9590:66530, "_selectionCard") ──────────────────────────────────────
+   One component for every restore-wizard choice card (.ws-target-card destination cards and .ws-cfg-choice option
+   cards). wsNormalizeSelCards() gives each card its Header (grey band, 16px title, 24px radio) + Description (white,
+   14px) structure. Selected: 1px Veeam Green border, Green/S5 header, Bold green title. Radius 4. */
+.ws-target-card, .ws-cfg-choice { position: relative; display: flex; flex-direction: column; align-items: stretch; gap: 0; padding: 0; background: var(--white); border: 1px solid var(--black-10); border-radius: 4px; cursor: pointer; text-align: left; font-family: inherit; min-width: 0; }
+.ws-target-card:hover:not(.is-locked):not(.is-selected), .ws-cfg-choice:hover:not(.is-disabled):not(.is-selected) { border-color: var(--black-30); }
+.ws-target-card.is-selected, .ws-cfg-choice.is-selected { border-color: var(--em-green); }
+.ws-target-card.is-locked, .ws-cfg-choice.is-disabled { opacity: 0.5; cursor: not-allowed; }
+.sc-header { position: relative; display: flex; align-items: center; gap: 8px; min-height: 38px; padding: 8px 36px 8px 12px; background: var(--black-3); border-radius: 3px 3px 0 0; font-size: 16px; font-weight: 450; line-height: 22px; color: var(--black-100); }
+.is-selected > .sc-header { background: var(--em-green-tint); color: var(--em-green); font-weight: 700; line-height: 20px; }
+.sc-header .ws-target-card-title, .sc-header .ws-cfg-choice-title { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 0; font: inherit; color: inherit; }
+.sc-radio { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; color: var(--em-green); }
+.sc-radio svg { display: block; width: 24px; height: 24px; }
+.sc-radio .sc-on { display: none; }
+.is-selected > .sc-header .sc-radio .sc-on { display: block; }
+.is-selected > .sc-header .sc-radio .sc-off { display: none; }
+.sc-desc { flex: 1 1 auto; display: flex; flex-direction: column; gap: 4px; padding: 8px 12px; background: var(--white); border-radius: 0 0 3px 3px; font-size: 14px; font-weight: 450; line-height: 20px; color: var(--black-60); }
+.ws-target-card-meta { font-size: 14px; color: var(--black-100); font-weight: 500; line-height: 20px; }
+.ws-target-card-body, .ws-cfg-choice-body { font-size: 14px; color: var(--black-60); line-height: 20px; }
+.ws-target-card-consequence { margin-top: 4px; font-size: 14px; color: var(--black-60); line-height: 20px; }
 .ws-cfg-choice-badge { display: inline-flex; padding: 1px 8px; border-radius: 2px; /* Vision chip radius 2; was 100px pill */ background: var(--green-10); color: var(--green);  font-size: 14px; font-weight: 500; }
-.ws-cfg-choice-body { font-size: 14px; color: var(--black-60); line-height: 1.45; }
 /* Toggle rows (Wiki / Release assets / Git LFS) */
 .ws-cfg-toggles { display: flex; flex-direction: column; }
 .ws-cfg-toggle { display: flex; align-items: center; gap: 16px; padding: 12px 20px; border: none; background: var(--white); cursor: pointer; font-family: inherit; text-align: left; border-bottom: 1px solid var(--border-light); }
@@ -4376,6 +4381,20 @@ body.ai-hx-transcript .ai-foot { display: none; }
    room between section dividers. */
 .ws-cfg-sections { display: flex; flex-direction: column; }
 .ws-cfg-section { padding: 16px 0; }
+/* ── Advanced settings section (Figma DCP Consolidated 18047:18671) ─────────────────────────────────────────────
+   Collapsed by default, last in the step. Top rule Black/S10, 24px padding, 24px gap. Header = _Expand Icon (20px) +
+   18/24 Medium title; description 16/22 Black/S70; toggles = _Toggle (40x24) + 16/20 label + 20px info icon, 8px apart. */
+.ws-cfg-section.ws-adv { display: flex; flex-direction: column; gap: 24px; padding: 24px 0; border-top: 1px solid var(--black-10); }
+.ws-adv-hdr { display: flex; align-items: center; gap: 8px; width: 100%; padding: 0; border: none; background: transparent; font-family: inherit; cursor: pointer; text-align: left; }
+.ws-adv-hdr svg { flex: 0 0 20px; display: block; }
+.ws-adv-title { flex: 1; min-height: 24px; font-size: 18px; font-weight: 500; line-height: 24px; letter-spacing: -0.09px; color: var(--black-100); }
+.ws-adv-desc { font-size: 16px; font-weight: 450; line-height: 22px; color: var(--black-60); }
+.ws-adv-list { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.ws-adv-toggle { display: inline-flex; align-items: center; gap: 4px; padding: 0; border: none; background: transparent; font-family: inherit; cursor: pointer; text-align: left; }
+.ws-adv-toggle svg { display: block; flex: 0 0 auto; }
+.ws-adv-toggle .ws-adv-label { font-size: 16px; font-weight: 450; line-height: 20px; color: var(--black-100); }
+.ws-adv-toggle .ws-adv-info { display: inline-flex; width: 20px; height: 20px; }
+
 .ws-cfg-section:last-child { border-bottom: none; }
 /* Divided variant (export config): thin rules between sections so the
    step reads as a sequence of settings, not one run-on column. */
@@ -4463,16 +4482,6 @@ body.ai-hx-transcript .ai-foot { display: none; }
 /* Third-option card (GitHub's Export): three-up is too dense for this much
    body copy, so Export sits on its own full-width row below the pair. */
 .ws-target-card--wide { grid-column: 1 / -1; }
-.ws-target-card { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; cursor: pointer; text-align: left; font-family: inherit; position: relative; transition: border-color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease; }
-.ws-target-card:hover:not(.is-locked) { border-color: var(--blue-30); }
-.ws-target-card.is-selected { border-color: var(--blue); background: var(--blue-light); box-shadow: 0 0 0 1px var(--blue) inset; }
-.ws-target-card.is-locked { opacity: 0.5; cursor: not-allowed; }
-.ws-target-card-dot { position: absolute; top: 12px; right: 12px; width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--black-30); background: var(--white); display: inline-flex; align-items: center; justify-content: center; }
-.ws-target-card.is-selected .ws-target-card-dot { border-color: var(--blue); }
-.ws-target-card.is-selected .ws-target-card-dot::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--blue); }
-.ws-target-card-title { font-size: 14px; font-weight: 500; color: var(--black-100); padding-right: 28px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.ws-target-card-meta { font-size: 14px; color: var(--blue); font-weight: 500; }
-.ws-target-card-body { font-size: 14px; color: var(--black-60); line-height: 1.45; }
 /* Org picker lives inside the Different card. To keep both cards
    the same height regardless of selection, we always render the
    detail container — when Different isn't selected, it's
@@ -4495,9 +4504,7 @@ body.ai-hx-transcript .ai-foot { display: none; }
 /* G-pattern consequence line — each destination card states ITS OWN outcome
    (naming/merge/overwrite), so both futures read side-by-side before picking.
    Slightly dimmed on the unselected card; full strength when selected. */
-.ws-target-card-consequence { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border-light); font-size: 14px; color: var(--black-60); line-height: 1.45; opacity: 0.75; }
 .ws-target-card-consequence strong, .ws-target-card-consequence code { color: var(--black-100); }
-.ws-target-card.is-selected .ws-target-card-consequence { opacity: 1; }
 /* Destination-org display inside the Different card. Two variants:
    • Static info (when only one cross-org is available) — just shows
      the selected org's name + meta, no clickable element.
@@ -9664,6 +9671,8 @@ var RESOURCES = (function(){
       // address — a real Group has both, not just one collapsed field).
       email: opts.email || null,
       members: opts.members || null,
+      adAttrs: opts.adAttrs || null,   // Active Directory preview rows: [[label, value], …]
+      adLinks: opts.adLinks || null,   // GPO → names of the OUs / domain root it is linked to
       posting: opts.posting || null,
       joining: opts.joining || null,
       archive: opts.archive || null,
@@ -12370,29 +12379,300 @@ var RESOURCES = (function(){
     var AW = 'Active Directory', AT = 'meridian', AC = 'ad-forest', AR = 'ad-forest-corp-meridian-local';
     function AF(id, name, parent, meta){ list.push(R(id, name, 'Folder', AW, AT, AC, {parentId:parent, drillable:true, drillTarget:'children', meta:meta})); }
     function AI(id, name, type, parent, meta, opts){ opts = opts || {}; opts.parentId = parent; opts.meta = meta; list.push(R(id, name, type, AW, AT, AC, opts)); }
-    list.push(R(AR, 'corp.meridian.local', 'Forest', AW, AT, AC, {drillable:true, drillTarget:'children', meta:'1 domain · 4 domain controllers · 24,908 objects'}));
-    AF('ad-sec-ou',  'Organizational Units', AR, '4 OUs');
-    AF('ad-sec-gpo', 'Group Policy Objects', AR, '38 GPOs');
-    AF('ad-sec-dc',  'Domain Controllers',   AR, '4 domain controllers');
-    AF('ad-ou-finance', 'Finance',          'ad-sec-ou', '48 users · 6 groups');
-    AF('ad-ou-eng',     'Engineering',      'ad-sec-ou', '312 users · 18 groups');
-    AF('ad-ou-it',      'IT',               'ad-sec-ou', '27 users · 9 groups');
-    AF('ad-ou-svc',     'Service Accounts', 'ad-sec-ou', '41 accounts');
-    AI('ad-user-j-alvarez', 'MERIDIAN\\j.alvarez', 'User', 'ad-ou-finance', 'DELETED · Jordan Alvarez · OU=Finance', {existence:'deleted-in-live', rpGapDays:[0]});
-    AI('ad-user-m-okafor',  'MERIDIAN\\m.okafor',  'User', 'ad-ou-finance', 'ENABLED · Mira Okafor · manager of j.alvarez');
-    AI('ad-grp-finance',    'Finance-Staff',  'Group', 'ad-ou-finance', 'Global security group · 48 members');
-    AI('ad-grp-vpn',        'VPN-Users',      'Group', 'ad-ou-finance', 'Global security group · 1,204 members');
-    AI('ad-user-t-nguyen',  'MERIDIAN\\t.nguyen',  'User', 'ad-ou-eng', 'ENABLED · Tran Nguyen · OU=Engineering');
-    AI('ad-user-d-kovac',   'MERIDIAN\\d.kovac',   'User', 'ad-ou-it',  'ENABLED · Dana Kovac · OU=IT');
-    AI('ad-grp-domadmins',  'Domain Admins',  'Group', 'ad-ou-it', 'Global security group · 7 members');
-    AI('ad-user-svc-syncgw','MERIDIAN\\svc-syncgw','User', 'ad-ou-svc', 'ENABLED · Service account');
-    AI('ad-gpo-default',    'Default Domain Policy',            'Group Policy Object', 'ad-sec-gpo', 'Linked to the domain root');
-    AI('ad-gpo-dc',         'Default Domain Controllers Policy','Group Policy Object', 'ad-sec-gpo', 'Linked to Domain Controllers');
-    AI('ad-gpo-baseline',   'Workstation Security Baseline',    'Group Policy Object', 'ad-sec-gpo', 'Linked to Engineering, Finance');
-    AI('ad-dc-01', 'DC-01', 'Domain Controller', 'ad-sec-dc', 'PDC emulator · Windows Server 2022');
-    AI('ad-dc-02', 'DC-02', 'Domain Controller', 'ad-sec-dc', 'Windows Server 2022');
-    AI('ad-dc-03', 'DC-03', 'Domain Controller', 'ad-sec-dc', 'Windows Server 2019');
-    AI('ad-dc-04', 'DC-04', 'Domain Controller', 'ad-sec-dc', 'Windows Server 2019');
+    // Hierarchy mirrors the console tree of the reference product (no Deleted Objects container, by decision):
+    //   Forest → Domain → Users and Computers (default containers + OUs + Domain Controllers) · Group Policy Objects · Integrated DNS · Configuration Partition
+    // Enterprise-scale seed: generated deterministically (fixed seed), container meta counts are derived from what is actually seeded.
+    var DN = 'DC=corp,DC=meridian,DC=local', SIDP = 'S-1-5-21-3623811015-3361044348-30300820-';
+    var _adSeed = 20261014;
+    function arnd(){ _adSeed = (_adSeed * 1664525 + 1013904223) >>> 0; return _adSeed / 4294967296; }
+    function apick(a){ return a[Math.floor(arnd() * a.length)]; }
+    function anum(lo, hi){ return lo + Math.floor(arnd() * (hi - lo + 1)); }
+    function dnOf(cn, ouPath, cont){
+      var tail = ouPath && ouPath.length ? ouPath.slice().reverse().map(function(o){ return 'OU=' + o; }).join(',') + ',' : (cont ? 'CN=' + cont + ',' : '');
+      return 'CN=' + cn + ',' + tail + DN;
+    }
+    function slug(t){ return String(t).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+    function uAttrs(disp, logon, dept, title, ouPath, rid, extra){
+      extra = extra || {};
+      return [['Display name', disp], ['Logon name', logon], ['User principal name', logon + '@corp.meridian.local'], ['Email', logon + '@meridian.com'],
+        ['Department', dept], ['Job title', title], ['Enabled', extra.enabled || 'Yes'], ['Manager', extra.mgr || '—'],
+        ['Distinguished name', dnOf(disp, ouPath, extra.cont)], ['SID', SIDP + rid], ['Password last set', extra.pwd || 'Sep 12, 2026'], ['Last logon', extra.last || 'Oct 5, 2026'], ['Account expires', 'Never']];
+    }
+    list.push(R(AR, 'corp.meridian.local', 'Forest', AW, AT, AC, {drillable:true, drillTarget:'children', meta:'1 domain · 6 domain controllers'}));
+    list.push(R('ad-domain', 'corp.meridian.local', 'Domain', AW, AT, AC, {parentId:AR, drillable:true, drillTarget:'children', meta:'4 sections · NetBIOS MERIDIAN'}));
+    AF('ad-sec-uc',  'Users and Computers',  'ad-domain', '');
+    AF('ad-sec-gpo', 'Group Policy Objects', 'ad-domain', '');
+    AF('ad-sec-dns', 'Integrated DNS',       'ad-domain', '');
+    AF('ad-sec-cfg', 'Configuration Partition','ad-domain', '');
+    AF('ad-cont-computers', 'Computers',                 'ad-sec-uc', '');
+    AF('ad-sec-dc',         'Domain Controllers',        'ad-sec-uc', '');
+    AF('ad-cont-fsp',       'ForeignSecurityPrincipals', 'ad-sec-uc', '');
+    AF('ad-cont-keys',      'Keys',                      'ad-sec-uc', '');
+    AF('ad-cont-msa',       'Managed Service Accounts',  'ad-sec-uc', '');
+    AF('ad-cont-progdata',  'Program Data',              'ad-sec-uc', '');
+    AF('ad-cont-system',    'System',                    'ad-sec-uc', '');
+    AF('ad-cont-users',     'Users',                     'ad-sec-uc', '');
+
+    // ── People pools ──
+    var FIRST = ['Jordan','Mira','Tran','Dana','Priya','Diego','Emma','Noah','Yuki','Omar','Lena','Tom','Ana','Raj','Mei','Jack','Ines','Leo','Zoe','Sam','Chloe','Marcus','Aisha','Viktor','Hannah','Mateo','Ingrid','Kofi','Sofia','Ethan','Nadia','Luca','Grace','Arjun','Elena','Felix','Maya','Hugo','Aaliyah','Declan','Rosa','Jun','Keira','Amir','Tessa','Bruno','Imani','Oskar','Paloma','Wes'];
+    var LAST  = ['Alvarez','Okafor','Nguyen','Kovac','Patel','Silva','Wilson','Tanaka','Haddad','Fischer','Brooks','Iyer','Wong','Doyle','Moreau','Costa','Novak','Reed','Park','Kim','Martinez','Chen','Gonzalez','Natarajan','Schmidt','Rossi','Lindqvist','Adeyemi','Petrov','Nakamura','Bianchi','Hughes','Walker','Mensah','Larsen','Duarte','Ibrahim','Sullivan','Romero','Kowalski','Fraser','Ito','Delgado','Osei','Berg','Marino','Hassan','Lopez','Carter','Yamada'];
+    var usedLogon = { 'j.alvarez':1, 'm.okafor':1, 't.nguyen':1, 'd.kovac':1, 'svc-syncgw':1 };
+    var ridN = 1200;
+    var TITLES = {
+      Finance:['Financial Analyst','Senior Accountant','Controller','AP Specialist','AR Specialist','FP&A Manager'],
+      Engineering:['Software Engineer','Senior Engineer','Staff Engineer','Engineering Manager','SRE','QA Engineer'],
+      IT:['Systems Administrator','Network Engineer','Helpdesk Analyst','Infrastructure Engineer','IT Support Specialist'],
+      HR:['HR Generalist','Recruiter','HR Business Partner','Benefits Specialist','People Operations Lead'],
+      Sales:['Account Executive','Sales Engineer','Sales Manager','Business Development Rep','Solutions Consultant'],
+      Marketing:['Marketing Manager','Content Strategist','Demand Gen Specialist','Product Marketer','Designer'],
+      Legal:['Corporate Counsel','Paralegal','Compliance Analyst','Contracts Manager'],
+      Operations:['Operations Analyst','Program Manager','Facilities Coordinator','Logistics Lead','Procurement Specialist'],
+      Executive:['Chief Executive Officer','Chief Financial Officer','Chief Technology Officer','Executive Assistant','VP Operations'],
+      Security:['Security Analyst','SOC Analyst','Security Engineer','GRC Analyst','Incident Responder'],
+      Support:['Support Engineer','Customer Success Manager','Support Team Lead','Technical Account Manager'],
+      Contractors:['Contract Developer','Contract Analyst','Consultant','Contract Designer']
+    };
+    function newUser(first, last){
+      var base = (first.charAt(0) + '.' + last).toLowerCase().replace(/[^a-z.]/g, ''), lg = base, k = 2;
+      while (usedLogon[lg]) lg = base + (k++);
+      usedLogon[lg] = 1; return lg;
+    }
+    // ── OU plan: [id, name, parentOuId|null, dept, users, description, manager logon] ──
+    var OUS = [
+      ['ad-ou-finance','Finance',null,'Finance',22,'Finance department accounts and groups','m.okafor'],
+      ['ad-ou-eng','Engineering',null,'Engineering',6,'Engineering department','t.nguyen'],
+      ['ad-ou-eng-platform','Platform','ad-ou-eng','Engineering',26,'Platform engineering','t.nguyen'],
+      ['ad-ou-eng-data','Data','ad-ou-eng','Engineering',18,'Data engineering and analytics','t.nguyen'],
+      ['ad-ou-eng-qa','QA','ad-ou-eng','Engineering',12,'Quality assurance','t.nguyen'],
+      ['ad-ou-it','IT',null,'IT',5,'IT operations','d.kovac'],
+      ['ad-ou-it-helpdesk','Helpdesk','ad-ou-it','IT',14,'Tier 1 and 2 support','d.kovac'],
+      ['ad-ou-it-infra','Infrastructure','ad-ou-it','IT',11,'Systems and network','d.kovac'],
+      ['ad-ou-hr','HR',null,'HR',15,'People operations','d.kovac'],
+      ['ad-ou-sales','Sales',null,'Sales',4,'Sales organization','d.kovac'],
+      ['ad-ou-sales-amer','AMER','ad-ou-sales','Sales',24,'Americas sales','d.kovac'],
+      ['ad-ou-sales-emea','EMEA','ad-ou-sales','Sales',19,'EMEA sales','d.kovac'],
+      ['ad-ou-sales-apac','APAC','ad-ou-sales','Sales',13,'APAC sales','d.kovac'],
+      ['ad-ou-marketing','Marketing',null,'Marketing',17,'Marketing and brand','d.kovac'],
+      ['ad-ou-legal','Legal',null,'Legal',9,'Legal and compliance','d.kovac'],
+      ['ad-ou-ops','Operations',null,'Operations',21,'Business operations','d.kovac'],
+      ['ad-ou-exec','Executive',null,'Executive',8,'Executive leadership','d.kovac'],
+      ['ad-ou-security','Security',null,'Security',10,'Security operations','d.kovac'],
+      ['ad-ou-support','Support',null,'Support',23,'Customer support','d.kovac'],
+      ['ad-ou-contractors','Contractors',null,'Contractors',16,'External contractors','d.kovac'],
+      ['ad-ou-svc','Service Accounts',null,'IT',14,'Non-interactive service accounts','d.kovac'],
+      ['ad-ou-workstations','Workstations',null,'IT',0,'Domain-joined workstations','d.kovac'],
+      ['ad-ou-servers','Servers',null,'IT',0,'Member servers','d.kovac'],
+      ['ad-ou-groups','Groups',null,'IT',0,'Distribution and security groups','d.kovac'],
+      ['ad-ou-disabled','Disabled Accounts',null,'IT',7,'Accounts disabled pending removal','d.kovac']
+    ];
+    var ouById = {}; OUS.forEach(function(o){ ouById[o[0]] = o; });
+    function ouPathOf(id){ var out = [], c = ouById[id]; while (c) { out.push(c[1]); c = c[2] ? ouById[c[2]] : null; } return out.reverse(); }
+    var gpoCount = {};   // OU name → linked GPO count (filled below)
+    var ouUsers = {};    // ouId → [{name, logon, disp}]
+    OUS.forEach(function(o){
+      var id = o[0], nm = o[1], parent = o[2] ? o[2] : 'ad-sec-uc', dept = o[3];
+      list.push(R(id, nm, 'Organizational Unit', AW, AT, AC, {parentId:parent, drillable:true, drillTarget:'children', meta:'',
+        adAttrs:[['Name', nm], ['Distinguished name', dnOf('', ouPathOf(id)).replace(/^CN=,/, '')], ['Description', o[5]], ['Managed by', 'MERIDIAN\\' + o[6]],
+                 ['Protected from accidental deletion', 'Yes'], ['Linked GPOs', String(1 + (id.length % 3))]]}));
+    });
+    // Users per OU (the four anchor users keep their ids)
+    var ANCHOR = {
+      'ad-ou-finance': [['Jordan','Alvarez','j.alvarez','ad-user-j-alvarez','Senior Financial Analyst','1104','Mira Okafor'], ['Mira','Okafor','m.okafor','ad-user-m-okafor','Finance Manager','1087','Dana Kovac']],
+      'ad-ou-eng-platform': [['Tran','Nguyen','t.nguyen','ad-user-t-nguyen','Staff Engineer','1092','Dana Kovac']],
+      'ad-ou-it': [['Dana','Kovac','d.kovac','ad-user-d-kovac','IT Director','1101','']],
+      'ad-ou-svc': [['svc-syncgw','','svc-syncgw','ad-user-svc-syncgw','Service account','1133','Dana Kovac']]
+    };
+    OUS.forEach(function(o){
+      var id = o[0], nm = o[1], dept = o[3], path = ouPathOf(id), mine = [];
+      (ANCHOR[id] || []).forEach(function(a){
+        var disp = a[1] ? a[0] + ' ' + a[1] : a[0];
+        var isDel = a[2] === 'j.alvarez';
+        AI(a[3], 'MERIDIAN\\' + a[2], 'User', id, (isDel ? 'DELETED' : 'ENABLED') + ' · ' + disp + ' · OU=' + nm,
+          Object.assign({adAttrs: uAttrs(disp, a[2], dept, a[4], path, a[5], {mgr: a[6] || '—', last: isDel ? 'Oct 4, 2026' : undefined})}, isDel ? {existence:'deleted-in-live', rpGapDays:[0]} : {}));
+        mine.push({ name: 'MERIDIAN\\' + a[2], disp: disp });
+      });
+      var n = o[4] - (ANCHOR[id] || []).length;
+      for (var i = 0; i < n; i++) {
+        var f = apick(FIRST), l = apick(LAST), lg = newUser(f, l), disp = f + ' ' + l, rid = String(ridN++);
+        var off = (id === 'ad-ou-disabled'), svc = (id === 'ad-ou-svc');
+        if (svc) { lg = 'svc-' + apick(['backup','sql','web','mon','print','sccm','scan','ldap','jenkins','vault','nas','mail','dns','proxy','sync']) + anum(1, 99); if (usedLogon[lg]) continue; usedLogon[lg] = 1; disp = lg; }
+        var title = svc ? 'Service account' : apick(TITLES[dept] || ['Specialist']);
+        var dis = off || (!svc && arnd() < 0.05);
+        AI('ad-user-' + slug(lg), 'MERIDIAN\\' + lg, 'User', id, (dis ? 'DISABLED' : 'ENABLED') + ' · ' + disp + ' · OU=' + nm,
+          {adAttrs: uAttrs(disp, lg, dept, title, path, rid, {enabled: dis ? 'No' : 'Yes', mgr: svc ? 'Dana Kovac' : '—', last: dis ? 'Aug ' + anum(1, 28) + ', 2026' : 'Oct ' + anum(1, 6) + ', 2026'})});
+        mine.push({ name: 'MERIDIAN\\' + lg, disp: disp });
+      }
+      ouUsers[id] = mine;
+    });
+    // Groups: a department staff group per OU that holds people, a managers group, plus role groups in the Groups OU
+    function AG_(id, name, parent, ouPath, scope, type, desc, mgr, members, rid){
+      AI(id, name, 'Group', parent, scope + ' ' + type.toLowerCase() + ' group · ' + members.length + ' member' + (members.length === 1 ? '' : 's'),
+        {members: members.map(function(m){ return [m.name || m, m.role || 'User']; }),
+         adAttrs:[['Name', name],['Scope', scope],['Type', type],['Description', desc],['Managed by', mgr],['Distinguished name', dnOf(name, ouPath, ouPath ? '' : 'Users')],['SID', SIDP + rid]]});
+    }
+    OUS.forEach(function(o){
+      var us = ouUsers[o[0]]; if (!us.length) return;
+      var path = ouPathOf(o[0]);
+      var staffId = o[0] === 'ad-ou-finance' ? 'ad-grp-finance' : 'ad-grp-' + slug(o[1]) + '-staff';
+      AG_(staffId, o[1] + '-Staff', o[0], path, 'Global', 'Security', 'All ' + o[1] + ' staff', 'MERIDIAN\\' + o[6], us, String(ridN++));
+      if (us.length > 8) AG_('ad-grp-' + slug(o[1]) + '-managers', o[1] + '-Managers', o[0], path, 'Global', 'Security', o[1] + ' people managers', 'MERIDIAN\\' + o[6], us.slice(0, 3), String(ridN++));
+    });
+    var allPeople = []; OUS.forEach(function(o){ if (o[0] !== 'ad-ou-svc' && o[0] !== 'ad-ou-disabled') allPeople = allPeople.concat(ouUsers[o[0]]); });
+    var GP = ['ad-ou-groups'], gPath = ouPathOf('ad-ou-groups');
+    AG_('ad-grp-vpn', 'VPN-Users', 'ad-ou-groups', gPath, 'Global', 'Security', 'Remote access via corporate VPN', 'MERIDIAN\\d.kovac',
+      allPeople.filter(function(p, i){ return i % 3 === 0 || p.name === 'MERIDIAN\\j.alvarez' || p.name === 'MERIDIAN\\m.okafor'; }).slice(0, 40), '1121');
+    [['All-Employees','Distribution','Universal','Company-wide distribution list', allPeople.slice(0, 40)],
+     ['Finance-Approvers','Security','Global','Approve payments above threshold', (ouUsers['ad-ou-finance']||[]).slice(0, 6)],
+     ['Engineering-Prod-Access','Security','Global','Production access for engineering', (ouUsers['ad-ou-eng-platform']||[]).slice(0, 14)],
+     ['Helpdesk-Operators','Security','Domain local','Reset passwords, unlock accounts', (ouUsers['ad-ou-it-helpdesk']||[]).slice(0, 12)],
+     ['SOC-Analysts','Security','Global','Security operations center', (ouUsers['ad-ou-security']||[]).slice(0, 10)],
+     ['Contractors-Restricted','Security','Global','Limited-access contractor policy', (ouUsers['ad-ou-contractors']||[]).slice(0, 16)],
+     ['File-Share-Finance-RW','Security','Domain local','Read/write on \\\\fs-01\\Finance', (ouUsers['ad-ou-finance']||[]).slice(0, 10)],
+     ['File-Share-Eng-RW','Security','Domain local','Read/write on \\\\fs-01\\Engineering', (ouUsers['ad-ou-eng-platform']||[]).slice(0, 12)],
+     ['Executive-Staff','Distribution','Universal','Executive team distribution list', (ouUsers['ad-ou-exec']||[]).slice(0, 8)],
+     ['Sales-All','Distribution','Universal','All sales regions', (ouUsers['ad-ou-sales-amer']||[]).slice(0, 8).concat((ouUsers['ad-ou-sales-emea']||[]).slice(0, 8))],
+     ['Legal-Hold','Security','Global','Users under legal hold', (ouUsers['ad-ou-legal']||[]).slice(0, 5)],
+     ['MFA-Exempt','Security','Global','Temporary MFA exemptions', (ouUsers['ad-ou-ops']||[]).slice(0, 3)]
+    ].forEach(function(g){ AG_('ad-grp-dl-' + slug(g[0]), g[0], 'ad-ou-groups', gPath, g[2], g[1], g[3], 'MERIDIAN\\d.kovac', g[4], String(ridN++)); });
+    // Computers: Workstations OU, Servers OU, plus the default Computers container
+    function ACo(id, name, os, desc, last, parent, path, cont){
+      AI(id, name, 'Computer', parent, 'ENABLED · ' + os,
+        {adAttrs:[['Name', name],['DNS hostname', name.toLowerCase() + '.corp.meridian.local'],['Operating system', os],['Enabled','Yes'],['Description', desc],['Last logon', last],['Distinguished name', dnOf(name, path, cont)]]});
+    }
+    ACo('ad-comp-ws-0142', 'MERIDIAN-WS-0142', 'Windows 11 Enterprise', 'Finance workstation', 'Oct 5, 2026', 'ad-cont-computers', null, 'Computers');
+    ACo('ad-comp-ws-0377', 'MERIDIAN-WS-0377', 'Windows 11 Enterprise', 'Engineering workstation', 'Oct 5, 2026', 'ad-cont-computers', null, 'Computers');
+    ACo('ad-comp-fs-01',   'MERIDIAN-FS-01',   'Windows Server 2022 Standard', 'File server', 'Oct 6, 2026', 'ad-cont-computers', null, 'Computers');
+    for (var c = 0; c < 9; c++) { var cn = 'MERIDIAN-LT-' + String(100 + c * 13).padStart(4, '0'); ACo('ad-comp-' + slug(cn), cn, 'Windows 11 Enterprise', 'Laptop — unassigned', 'Oct ' + anum(1, 6) + ', 2026', 'ad-cont-computers', null, 'Computers'); }
+    var wsPath = ouPathOf('ad-ou-workstations');
+    for (var w = 0; w < 46; w++) { var wn = 'MERIDIAN-WS-' + String(1000 + w * 7); ACo('ad-comp-' + slug(wn), wn, arnd() < 0.8 ? 'Windows 11 Enterprise' : 'Windows 10 Enterprise', apick(['Finance','Engineering','Sales','Support','HR','Operations']) + ' workstation', 'Oct ' + anum(1, 6) + ', 2026', 'ad-ou-workstations', wsPath); }
+    var svPath = ouPathOf('ad-ou-servers');
+    ['SQL-01','SQL-02','SQL-03','WEB-01','WEB-02','WEB-03','APP-01','APP-02','APP-03','FS-02','FS-03','PRINT-01','SCCM-01','WSUS-01','CA-01','ADFS-01','EXCH-01','EXCH-02','BKP-01','BKP-02','MON-01','JUMP-01','VAULT-01','NPS-01'].forEach(function(sn, i){
+      var n2 = 'MERIDIAN-' + sn; ACo('ad-comp-' + slug(n2), n2, i % 4 === 3 ? 'Windows Server 2019 Standard' : 'Windows Server 2022 Standard', sn.replace(/-\d+$/, '') + ' server', 'Oct ' + anum(4, 7) + ', 2026', 'ad-ou-servers', svPath);
+    });
+    // Users container: well-known accounts and groups
+    function WK(id, name, type, meta, attrs, extra){ AI(id, name, type, 'ad-cont-users', meta, Object.assign({adAttrs: attrs}, extra || {})); }
+    WK('ad-user-administrator', 'MERIDIAN\\Administrator', 'User', 'ENABLED · Built-in administrator', uAttrs('Administrator', 'Administrator', '—', 'Built-in account', null, '500', {cont:'Users', pwd:'Jun 2, 2026'}));
+    WK('ad-user-guest', 'MERIDIAN\\Guest', 'User', 'DISABLED · Built-in guest', uAttrs('Guest', 'Guest', '—', 'Built-in account', null, '501', {cont:'Users', enabled:'No', last:'Never'}));
+    WK('ad-user-krbtgt', 'MERIDIAN\\krbtgt', 'User', 'DISABLED · Key Distribution Center', uAttrs('krbtgt', 'krbtgt', '—', 'Key Distribution Center service account', null, '502', {cont:'Users', enabled:'No', last:'Never'}));
+    function WG(id, name, scope, type, desc, members, rid){
+      AI(id, name, 'Group', 'ad-cont-users', scope + ' ' + type.toLowerCase() + ' group · ' + members.length + ' member' + (members.length === 1 ? '' : 's'),
+        {members: members.map(function(m){ return [m, 'User']; }),
+         adAttrs:[['Name', name],['Scope', scope],['Type', type],['Description', desc],['Managed by','—'],['Distinguished name', 'CN=' + name + ',CN=Users,' + DN],['SID', SIDP + rid]]});
+    }
+    WG('ad-grp-domadmins', 'Domain Admins', 'Global', 'Security', 'Designated administrators of the domain', ['MERIDIAN\\d.kovac','MERIDIAN\\svc-syncgw','MERIDIAN\\Administrator'], '512');
+    WG('ad-grp-domusers', 'Domain Users', 'Global', 'Security', 'All domain users', [], '513');
+    WG('ad-grp-domguests', 'Domain Guests', 'Global', 'Security', 'All domain guests', ['MERIDIAN\\Guest'], '514');
+    WG('ad-grp-domcomputers', 'Domain Computers', 'Global', 'Security', 'All workstations and servers joined to the domain', [], '515');
+    WG('ad-grp-domcontrollers', 'Domain Controllers', 'Global', 'Security', 'All domain controllers in the domain', [], '516');
+    WG('ad-grp-schemaadmins', 'Schema Admins', 'Universal', 'Security', 'Designated administrators of the schema', ['MERIDIAN\\Administrator'], '518');
+    WG('ad-grp-entadmins', 'Enterprise Admins', 'Universal', 'Security', 'Designated administrators of the enterprise', ['MERIDIAN\\Administrator','MERIDIAN\\d.kovac'], '519');
+    WG('ad-grp-gpcreators', 'Group Policy Creator Owners', 'Global', 'Security', 'Members can modify group policy for the domain', ['MERIDIAN\\Administrator'], '520');
+    WG('ad-grp-protected', 'Protected Users', 'Global', 'Security', 'Members get additional protections against credential theft', ['MERIDIAN\\d.kovac'], '525');
+    WG('ad-grp-certpub', 'Cert Publishers', 'Domain local', 'Security', 'Members can publish certificates', ['MERIDIAN\\svc-syncgw'], '517');
+    WG('ad-grp-dnsadmins', 'DnsAdmins', 'Domain local', 'Security', 'DNS Administrators group', ['MERIDIAN\\d.kovac'], '1102');
+    WG('ad-grp-dnsupdate', 'DnsUpdateProxy', 'Global', 'Security', 'DNS clients that can perform dynamic updates on behalf of others', [], '1103');
+    WG('ad-grp-ras', 'RAS and IAS Servers', 'Domain local', 'Security', 'Servers in this group can access remote access properties of users', [], '553');
+    WG('ad-grp-rodc', 'Allowed RODC Password Replication Group', 'Domain local', 'Security', 'Accounts whose passwords may replicate to read-only domain controllers', [], '571');
+    WG('ad-grp-keyadmins', 'Key Admins', 'Global', 'Security', 'Members can perform administrative actions on key objects', [], '526');
+    // ForeignSecurityPrincipals, System, Keys, Program Data
+    ['S-1-5-4','S-1-5-11','S-1-5-9','S-1-5-17','S-1-5-21-884412003-1109337421-3330211120-1015','S-1-5-21-884412003-1109337421-3330211120-1021'].forEach(function(sid, i){
+      AI('ad-fsp-' + i, sid, 'Foreign Security Principal', 'ad-cont-fsp', i < 4 ? 'Well-known security principal' : 'From trusted domain partner.example',
+        {adAttrs:[['Name', sid],['Principal type', i < 4 ? 'Well-known' : 'Trusted domain'],['Source', i < 4 ? 'NT AUTHORITY' : 'partner.example'],['Distinguished name', 'CN=' + sid + ',CN=ForeignSecurityPrincipals,' + DN]]});
+    });
+    function SO(prefix, parent, contName, names){ names.forEach(function(nm){ AI(prefix + slug(nm), nm, 'System Object', parent, 'System-managed container',
+      {adAttrs:[['Name', nm],['Object class','container'],['Distinguished name','CN=' + nm + ',CN=' + contName + ',' + DN]]}); }); }
+    SO('ad-sys-', 'ad-cont-system', 'System', ['AdminSDHolder','ComPartitions','ComPartitionSets','Default Domain Policy','Dfs-Configuration','DFSR-GlobalSettings','DomainUpdates','File Replication Service','FileLinks','IP Security','Meetings','MicrosoftDNS','Password Settings Container','Policies','RID Manager$','RpcServices','Server','WinsockServices','WMIPolicy']);
+    SO('ad-key-', 'ad-cont-keys', 'Keys', ['Master Root Key (2022-03-14)','Master Root Key (2025-09-02)']);
+    SO('ad-pd-', 'ad-cont-progdata', 'Program Data', ['Microsoft','Microsoft Exchange','Windows','ServiceConnectionPoints','Microsoft Exchange System Objects']);
+    // Managed Service Accounts
+    ['sql','web','backup','sccm','adfs','iis','exch','app'].forEach(function(k){
+      AI('ad-msa-' + k, 'svc-' + k + '$', 'Managed Service Account', 'ad-cont-msa', 'ENABLED · Group-managed',
+        {adAttrs:[['Name','svc-' + k],['Account name','svc-' + k + '$'],['Type','Group-managed service account'],['Enabled','Yes'],['DNS hostname','svc-' + k + '.corp.meridian.local'],['Description', k.toUpperCase() + ' service identity'],['Distinguished name','CN=svc-' + k + ',CN=Managed Service Accounts,' + DN]]});
+    });
+    // Domain Controllers (navigable level; DC computer objects are export-only)
+    [['DC-01','Default-First-Site-Name','Windows Server 2022 Standard','Yes','PDC emulator, RID master, Infrastructure master'],['DC-02','Default-First-Site-Name','Windows Server 2022 Standard','Yes','—'],
+     ['DC-03','HQ-Boston','Windows Server 2019 Standard','No','—'],['DC-04','HQ-Boston','Windows Server 2019 Standard','No','Schema master, Domain naming master'],
+     ['DC-05','DR-Dallas','Windows Server 2022 Standard','Yes','—'],['RODC-01','EMEA-London','Windows Server 2019 Standard','No','—']].forEach(function(d){
+      AI('ad-dc-' + (d[0] === 'RODC-01' ? 'rodc-01' : d[0].slice(3)), d[0], 'Domain Controller', 'ad-sec-dc', d[0] === 'DC-01' ? 'PDC emulator · ' + d[2].replace(' Standard','') : d[2].replace(' Standard',''),
+        {adAttrs:[['Name', d[0]],['DNS hostname', d[0].toLowerCase() + '.corp.meridian.local'],['Site', d[1]],['Operating system', d[2]],['Global catalog', d[3]],['FSMO roles', d[4]]]});
+    });
+    // Group Policy Objects (kept simple: identity, state, version, where it is linked)
+    var GPOS = [
+      ['Default Domain Policy','{31B2F340-016D-11D2-945F-00C04FB984F9}',['corp.meridian.local (domain root)'],'Password, lockout and Kerberos policy for the domain',[0,9]],
+      ['Default Domain Controllers Policy','{6AC1786C-016F-11D2-945F-00C04FB984F9}',['Domain Controllers'],'Baseline policy for domain controllers',[0,4]],
+      ['Workstation Security Baseline','{8F2D4C71-3B9A-4E0C-A5D1-6B7E92C0F314}',['Engineering','Finance'],'CIS-aligned workstation hardening',[2,11]],
+      ['Server Security Baseline',null,['Servers'],'CIS-aligned server hardening',[0,14]],['Windows Update — Workstations',null,['Workstations'],'WSUS targeting and deferral',[0,6]],
+      ['Windows Update — Servers',null,['Servers'],'Maintenance window enforcement',[0,5]],['BitLocker Enforcement',null,['Workstations'],'Require BitLocker on fixed drives',[0,7]],
+      ['Disable USB Storage',null,['Workstations','Contractors'],'Block removable storage',[0,3]],['Password Policy — Privileged',null,['IT','Security'],'Fine-grained policy for admins',[0,2]],
+      ['Screen Lock — 10 Minutes',null,['corp.meridian.local (domain root)'],'Inactivity lock timeout',[1,1]],['Drive Mapping — Finance',null,['Finance'],'Maps finance file shares',[3,0]],
+      ['Drive Mapping — Engineering',null,['Engineering'],'Maps engineering file shares',[2,0]],['Printer Deployment — HQ',null,['Workstations'],'Deploys HQ printers',[1,2]],
+      ['Office Apps Configuration',null,['Workstations'],'Microsoft 365 Apps baseline',[4,1]],['Browser Security Settings',null,['Workstations'],'Edge and Chrome policy',[3,0]],
+      ['Windows Defender Configuration',null,['Workstations','Servers'],'Defender AV and ASR rules',[0,12]],['Audit Policy — Advanced',null,['Domain Controllers','Servers'],'Advanced audit categories',[0,18]],
+      ['Firewall — Workstations',null,['Workstations'],'Windows Firewall profile',[0,8]],['Firewall — Servers',null,['Servers'],'Windows Firewall profile',[0,9]],
+      ['RDP Restrictions',null,['Servers'],'Limit RDP to Jump hosts',[0,4]],['LAPS Configuration',null,['Workstations','Servers'],'Local admin password rotation',[0,5]],
+      ['Legacy Protocol Disablement',null,['corp.meridian.local (domain root)'],'Disable SMBv1, NTLMv1',[0,6]],['Time Synchronization',null,['Domain Controllers'],'NTP source configuration',[0,2]],
+      ['Certificate Auto-Enrollment',null,['corp.meridian.local (domain root)'],'User and computer auto-enrollment',[2,2]],['Wi-Fi — Corporate',null,['Workstations'],'802.1X wireless profile',[0,3]],
+      ['Software Restriction — Contractors',null,['Contractors'],'Application allow-list',[1,4]],['Executive Workstation Policy',null,['Executive'],'Additional controls for executives',[2,5]],
+      ['Kiosk Mode — Support Floor',null,['Support'],'Shared kiosk lockdown',[3,2]],['Folder Redirection',null,['Finance','Sales','HR'],'Redirect Documents to file server',[4,0]],
+      ['Power Management',null,['Workstations'],'Sleep and hibernate settings',[0,3]],['Remote Assistance',null,['IT'],'Helpdesk remote assistance',[0,1]],
+      ['Login Banner',null,['corp.meridian.local (domain root)'],'Legal notice at logon',[0,1]],['Sales Laptop Policy',null,['Sales'],'Roaming laptop settings',[2,6]],
+      ['Legal Hold Retention',null,['Legal'],'Retention locks for legal hold',[1,1]],['Security Team Tooling',null,['Security'],'EDR and scanner deployment',[0,5]],
+      ['Disabled Accounts Lockdown',null,['Disabled Accounts'],'Deny logon for parked accounts',[0,1]],['Remote Desktop Licensing',null,['Servers'],'RD license server discovery',[0,2]],
+      ['Test — GPO Sandbox',null,[],'Unlinked testing policy',[0,0]]
+    ];
+    var gDates = ['Mar 14, 2023','Aug 21, 2026','Oct 1, 2026','Jun 9, 2025','Jan 27, 2026','Sep 3, 2026','Nov 18, 2024'];
+    GPOS.forEach(function(g, i){
+      var guid = g[1] || ('{' + (0x10000000 + i * 7919).toString(16).toUpperCase() + '-' + (0x3B9A + i * 13).toString(16).toUpperCase() + '-4E0C-A5D1-' + (0x6B7E92C0F314 + i * 104729).toString(16).toUpperCase() + '}');
+      var id = i === 0 ? 'ad-gpo-default' : i === 1 ? 'ad-gpo-dc' : i === 2 ? 'ad-gpo-baseline' : 'ad-gpo-' + slug(g[0]);
+      AI(id, g[0], 'Group Policy Object', 'ad-sec-gpo', g[2].length ? 'Linked to ' + g[2].join(', ') : 'Not linked',
+        {adLinks: g[2], adAttrs:[['Name', g[0]],['GUID', guid],['Status', i === 7 ? 'User configuration disabled' : (i === OUS.length * 0 + GPOS.length - 1 ? 'All settings disabled' : 'All settings enabled')],['Version','User ' + g[4][0] + ' · Computer ' + g[4][1]],['Created', gDates[(i * 3) % gDates.length]],['Modified', gDates[(i * 5 + 1) % gDates.length]],['Description', g[3]]]});
+    });
+    // Integrated DNS
+    function AZ(id, name, desc){ list.push(R(id, name, 'DNS Zone', AW, AT, AC, {parentId:'ad-sec-dns', drillable:true, drillTarget:'children', meta:'',
+      adAttrs:[['Name', name],['Zone type', desc],['Replication scope','All DNS servers in the domain'],['Dynamic updates', /in-addr/.test(name) ? 'Secure only' : 'Secure only']]})); }
+    AZ('ad-dns-zone-main', 'corp.meridian.local', 'Active Directory-integrated forward lookup zone');
+    AZ('ad-dns-zone-msdcs', '_msdcs.corp.meridian.local', 'Active Directory-integrated forward lookup zone');
+    AZ('ad-dns-zone-rev20', '20.10.in-addr.arpa', 'Active Directory-integrated reverse lookup zone');
+    AZ('ad-dns-zone-meridian', 'meridian.com', 'Active Directory-integrated forward lookup zone (internal)');
+    function ADr(zone, name, type, data, mode){ AI('ad-dns-rec-' + slug(zone) + '-' + slug(name) + '-' + slug(type) + slug(data).slice(0, 8), name, 'DNS Record', zone, type + ' · ' + data,
+      {adAttrs:[['Name', name],['Record type', type],['Data', data],['TTL', type === 'SRV' ? '10 minutes' : '1 hour'],['Type of entry', mode],['Zone', (list.filter(function(z){ return z.id === zone; })[0] || {}).name]]}); }
+    var Z1 = 'ad-dns-zone-main', Z2 = 'ad-dns-zone-msdcs', Z3 = 'ad-dns-zone-rev20', Z4 = 'ad-dns-zone-meridian';
+    [['dc-01','10.20.0.11'],['dc-02','10.20.0.12'],['dc-03','10.20.0.13'],['dc-04','10.20.0.14'],['dc-05','10.30.0.11'],['rodc-01','10.40.0.11']].forEach(function(r){ ADr(Z1, r[0], 'A', r[1], 'Static'); });
+    ['sql-01','sql-02','sql-03','web-01','web-02','web-03','app-01','app-02','fs-01','fs-02','print-01','sccm-01','ca-01','adfs-01','exch-01','bkp-01','mon-01','vault-01'].forEach(function(h, i){ ADr(Z1, 'meridian-' + h, 'A', '10.20.' + (1 + (i % 4)) + '.' + (20 + i), 'Static'); });
+    [['files','meridian-fs-01.corp.meridian.local'],['sql','meridian-sql-01.corp.meridian.local'],['intranet','meridian-web-01.corp.meridian.local'],['sccm','meridian-sccm-01.corp.meridian.local'],['sts','meridian-adfs-01.corp.meridian.local'],['print','meridian-print-01.corp.meridian.local']].forEach(function(r){ ADr(Z1, r[0], 'CNAME', r[1], 'Static'); });
+    for (var q = 0; q < 12; q++) ADr(Z1, 'meridian-ws-' + (1000 + q * 7), 'A', '10.20.' + (10 + q) + '.' + (40 + q), 'Dynamic');
+    ADr(Z1, '@', 'NS', 'dc-01.corp.meridian.local', 'Static'); ADr(Z1, '@', 'NS', 'dc-02.corp.meridian.local', 'Static'); ADr(Z1, '@', 'SOA', 'dc-01.corp.meridian.local', 'Static');
+    [['_ldap._tcp','SRV','dc-01.corp.meridian.local:389'],['_ldap._tcp','SRV','dc-02.corp.meridian.local:389'],['_kerberos._tcp','SRV','dc-01.corp.meridian.local:88'],['_kerberos._tcp','SRV','dc-02.corp.meridian.local:88'],['_kpasswd._tcp','SRV','dc-01.corp.meridian.local:464'],['_gc._tcp','SRV','dc-01.corp.meridian.local:3268']].forEach(function(r){ ADr(Z2, r[0], r[1], r[2], 'Static'); });
+    ADr(Z2, 'gc', 'CNAME', 'dc-01.corp.meridian.local', 'Static'); ADr(Z2, 'a3f1c2d4-8b9e-4c11-9f6a-0d4e7b2c5a18', 'CNAME', 'dc-01.corp.meridian.local', 'Static');
+    for (var pr = 0; pr < 14; pr++) ADr(Z3, (10 + pr) + '.0', 'PTR', 'meridian-ws-' + (1000 + pr * 7) + '.corp.meridian.local', pr % 3 === 0 ? 'Static' : 'Dynamic');
+    [['www','A','203.0.113.20'],['mail','A','203.0.113.25'],['vpn','A','203.0.113.30'],['@','MX','mail.meridian.com'],['autodiscover','CNAME','mail.meridian.com'],['portal','CNAME','www.meridian.com'],['api','A','203.0.113.40'],['sso','CNAME','sts.corp.meridian.local']].forEach(function(r){ ADr(Z4, r[0], r[1], r[2], 'Static'); });
+    // Configuration Partition (Sites · Subnets · Services)
+    AF('ad-cfg-sites',   'Sites',    'ad-sec-cfg', '');
+    AF('ad-cfg-subnets', 'Subnets',  'ad-sec-cfg', '');
+    AF('ad-cfg-svcs',    'Services', 'ad-sec-cfg', '');
+    var SITES = [['Default-First-Site-Name','Boston, MA',2],['HQ-Boston','Boston, MA',2],['DR-Dallas','Dallas, TX',1],['EMEA-London','London, UK',1]];
+    SITES.forEach(function(st){ AI('ad-cfg-site-' + slug(st[0]), st[0], 'Site', 'ad-cfg-sites', st[2] + ' domain controller' + (st[2] > 1 ? 's' : ''),
+      {adAttrs:[['Name', st[0]],['Object class','site'],['Distinguished name','CN=' + st[0] + ',CN=Sites,CN=Configuration,' + DN],['Location', st[1]],['Domain controllers', String(st[2])]]}); });
+    [['10.20.0.0/16','Default-First-Site-Name'],['10.20.64.0/18','HQ-Boston'],['10.30.0.0/16','HQ-Boston'],['10.40.0.0/16','EMEA-London'],['10.50.0.0/16','DR-Dallas'],['10.60.0.0/16','EMEA-London'],['172.16.10.0/24','HQ-Boston'],['172.16.20.0/24','DR-Dallas'],['192.168.50.0/24','Default-First-Site-Name'],['192.168.60.0/24','EMEA-London']].forEach(function(sn, i){
+      AI('ad-cfg-subnet-' + (i + 1), sn[0], 'Subnet', 'ad-cfg-subnets', sn[1], {adAttrs:[['Prefix', sn[0]],['Object class','subnet'],['Site', sn[1]],['Location', (SITES.filter(function(x){ return x[0] === sn[1]; })[0] || [0,''])[1]]]}); });
+    [['Group Key Distribution Service','Key distribution for group managed service accounts'],['Windows NT','Directory Service and Netlogon settings'],['Public Key Services','Certificate templates, enrollment services and AIA'],['NetServices','Network service containers'],['RRAS','Routing and Remote Access'],['Microsoft Exchange','Exchange organization configuration'],['MS-SMS-SERVICES','Configuration Manager site publication'],['Claims Configuration','Dynamic Access Control claim types']].forEach(function(sv){
+      AI('ad-cfg-svc-' + slug(sv[0]), sv[0], 'Service', 'ad-cfg-svcs', 'Services container', {adAttrs:[['Name', sv[0]],['Object class','container'],['Distinguished name','CN=' + sv[0] + ',CN=Services,CN=Configuration,' + DN],['Description', sv[1]]]}); });
+    // ── Derive container meta from what is actually seeded ──
+    (function(){
+      var kids = {};
+      list.forEach(function(x){ if (x.wl === 'Active Directory' && x.parentId) (kids[x.parentId] = kids[x.parentId] || []).push(x); });
+      var PL = { 'User':['user','users'], 'Group':['group','groups'], 'Computer':['computer','computers'], 'Organizational Unit':['OU','OUs'], 'Folder':['container','containers'],
+        'Managed Service Account':['account','accounts'], 'Domain Controller':['domain controller','domain controllers'], 'Group Policy Object':['GPO','GPOs'],
+        'DNS Zone':['zone','zones'], 'DNS Record':['record','records'], 'Site':['site','sites'], 'Subnet':['subnet','subnets'], 'Service':['service','services'],
+        'Foreign Security Principal':['principal','principals'], 'System Object':['object','objects'], 'Domain':['domain','domains'] };
+      list.forEach(function(x){
+        if (x.wl !== 'Active Directory' || x.type === 'Forest' || x.type === 'Domain') return;
+        var k = kids[x.id]; if (!k || !k.length) { if (x.drillable && x.type !== 'Folder' && x.type !== 'Organizational Unit' && x.type !== 'DNS Zone') return; if (x.drillable) x.meta = 'No objects'; return; }
+        var counts = {}; k.forEach(function(c){ counts[c.type] = (counts[c.type] || 0) + 1; });
+        var parts = Object.keys(counts).sort(function(a, b){ return counts[b] - counts[a]; }).slice(0, 3).map(function(t){ var n = counts[t], w = PL[t] || [t.toLowerCase(), t.toLowerCase() + 's']; return n.toLocaleString() + ' ' + (n === 1 ? w[0] : w[1]); });
+        x.meta = parts.join(' · ');
+      });
+    })();
   })();
 
   // R0 seed-enrichment: APP_GROUP rows with provenance + the BUILT_IN
@@ -16972,6 +17252,12 @@ function openChildrenDrill(parentId) {
         return;
       }
     }
+  }
+  // Active Directory: a forest whose only child is its root domain is a degenerate level (same name, one row) —
+  // drilling the forest lands directly on the domain's contents.
+  if (_okOrg && _okOrg.wl === 'Active Directory' && _okOrg.type === 'Forest') {
+    var _adForestKids = RESOURCES.filter(function(x){ return x.parentId === parentId; });
+    if (_adForestKids.length === 1 && _adForestKids[0].type === 'Domain') { openChildrenDrill(_adForestKids[0].id); return; }
   }
   // R6: the event grid reads newest-first by default (Published desc).
   if (parentId === 'okta-sl-log' || parentId === 'okta-sb-log') {
@@ -22639,6 +22925,9 @@ function _firstColEntityLabel(fallback) {
   // dominant-type rename to add value to, unlike every hierarchical
   // workload below.
   if (state && state.wl === 'hybrid-vms') return fallback;
+  // Active Directory containers hold mixed object types (OUs next to default containers, computers, groups):
+  // the dominant-type noun would mislabel most rows, so the drill column is plainly 'Name'.
+  if (state && state.wl === 'active-directory' && state.invMode === 'drill') return 'Name';
   // Custom first-column labels win (2026-08-12): only generic headers get
   // the dominant-type rename. PRD grids name their first column explicitly
   // ('#ID Title', 'Page', 'Tag', 'Key', 'Alert'…) — never override those.
@@ -26191,7 +26480,8 @@ function selectWl(label, id) {
   // and left-nav switch) gets it. The catalog landing keeps the plain section
   // title — reset in backToCatalog.
   var _pt = document.getElementById('pageTitle');
-  if (_pt && label) _pt.innerHTML = 'Protected Data<span class="page-title-badge">' + label + '</span>';
+  // The badge carries the release stage on every workload — the workload name is already shown by the picker below.
+  if (_pt && label) _pt.innerHTML = 'Protected Data<span class="page-title-badge">Private Preview</span>';
   // Breadcrumb tail follows the workload (user catch 2026-08-05: it read
   // "Protected Data › Protected Data" — the old workload setter lived only in
   // the retired enterWorkloadCatalog path, so nothing updated the tail).
@@ -33333,6 +33623,9 @@ function _treeIsContainer(r) {
     }
     return false;
   }
+  // Active Directory: the console tree is the nav — every level that can hold children expands (users, groups,
+  // computers, GPOs, DNS records and the like are table-only).
+  if (r && r.wl === 'Active Directory') return ['Forest','Domain','Folder','Organizational Unit','DNS Zone'].indexOf(r.type) >= 0;
   if (r && r.wl === 'Okta WIC') return r.type === 'Organization' || r.type === 'Folder' || r.type === 'Object Type';
   if (r && r.wl === 'Jira') return r.type === 'Jira Site' || r.type === 'Jira Project';
   if (r && r.wl === 'Confluence') return r.type === 'Confluence Site' || r.type === 'Space';
@@ -38908,7 +39201,13 @@ function _restoreAvailability(r) {
   // enabled express Restore on contoso.onmicrosoft.com in search results).
   if (r.type === 'Tenant') return 'context';
   // Entra ID / Active Directory: the forest root and the folder rows are navigation; every object restores as a unit.
-  if (r.wl === 'Entra ID' || r.wl === 'Active Directory') return (r.type === 'Forest' || r.type === 'Folder') ? 'context' : 'add';
+  if (r.wl === 'Active Directory') {
+    // Hierarchy nodes are navigation only. Domain Controller objects and system-managed containers (System, Keys, Program Data) are captured but not restorable (export only).
+    if (r.type === 'Forest' || r.type === 'Domain' || r.type === 'Folder') return 'context';
+    if (r.type === 'Domain Controller' || r.type === 'System Object') return 'export';
+    return 'add';
+  }
+  if (r.wl === 'Entra ID') return (r.type === 'Forest' || r.type === 'Folder') ? 'context' : 'add';
   // ── Google Workspace (workload-scoped) ─────────────────────────────────
   // User WAS context-only ("identity boundary, not restored — DCC never
   // recreates identities", PRD §3.1/§3.2, user ruling 2026-08-17) — REVERSED
@@ -41296,16 +41595,30 @@ function wsGetSteps() {
   return steps;
 }
 var WS_STEPS = wsGetSteps();
-// Active Directory restore is not designed yet: it renders the shared wizard, so say so on every step.
-function wsRenderPlaceholderBanner() {
-  var el = document.getElementById('wsPlaceholderBanner'); if (!el) return;
-  var wl = (typeof planActiveWorkload === 'function') ? planActiveWorkload() : null;
-  if (wl !== 'Active Directory') { el.style.display = 'none'; el.innerHTML = ''; return; }
-  var icon = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('alert-warning-outlined', 16)) || '<span></span>';
-  el.innerHTML = '<div class="ws-alert ws-alert-warn" role="note">' + icon
-    + '<div class="ws-alert-body"><div class="ws-alert-title">Placeholder content</div>'
-    + 'This wizard reuses restore flows from other workloads. It is not the final design for Active Directory restore.</div></div>';
-  el.style.display = '';
+// Selection card component (Figma DCP Consolidated 9590:66530): every .ws-target-card / .ws-cfg-choice the wizard
+// renders is rebuilt as Header (title + 24px radio) + Description, so one spec governs all workloads.
+var _SC_RADIO_ON  = '<svg class="sc-on" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 16C13.1067 16 14.05 15.61 14.83 14.83C15.61 14.05 16 13.1067 16 12C16 10.8933 15.61 9.95 14.83 9.17C14.05 8.39 13.1067 8 12 8C10.8933 8 9.95 8.39 9.17 9.17C8.39 9.95 8 10.8933 8 12C8 13.1067 8.39 14.05 9.17 14.83C9.95 15.61 10.8933 16 12 16ZM12 20C10.8933 20 9.85333 19.79 8.88 19.37C7.90667 18.95 7.06 18.38 6.34 17.66C5.62 16.94 5.05 16.0933 4.63 15.12C4.21 14.1467 4 13.1067 4 12C4 10.8933 4.21 9.85333 4.63 8.88C5.05 7.90667 5.62 7.06 6.34 6.34C7.06 5.62 7.90667 5.05 8.88 4.63C9.85333 4.21 10.8933 4 12 4C13.1067 4 14.1467 4.21 15.12 4.63C16.0933 5.05 16.94 5.62 17.66 6.34C18.38 7.06 18.95 7.90667 19.37 8.88C19.79 9.85333 20 10.8933 20 12C20 13.1067 19.79 14.1467 19.37 15.12C18.95 16.0933 18.38 16.94 17.66 17.66C16.94 18.38 16.0933 18.95 15.12 19.37C14.1467 19.79 13.1067 20 12 20ZM12 18.4C13.7867 18.4 15.3 17.78 16.54 16.54C17.78 15.3 18.4 13.7867 18.4 12C18.4 10.2133 17.78 8.7 16.54 7.46C15.3 6.22 13.7867 5.6 12 5.6C10.2133 5.6 8.7 6.22 7.46 7.46C6.22 8.7 5.6 10.2133 5.6 12C5.6 13.7867 6.22 15.3 7.46 16.54C8.7 17.78 10.2133 18.4 12 18.4Z" fill="currentColor"/></svg>';
+var _SC_RADIO_OFF = '<svg class="sc-off" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 20C10.8933 20 9.85333 19.79 8.88 19.37C7.90667 18.95 7.06 18.38 6.34 17.66C5.62 16.94 5.05 16.0933 4.63 15.12C4.21 14.1467 4 13.1067 4 12C4 10.8933 4.21 9.85333 4.63 8.88C5.05 7.90667 5.62 7.06 6.34 6.34C7.06 5.62 7.90667 5.05 8.88 4.63C9.85333 4.21 10.8933 4 12 4C13.1067 4 14.1467 4.21 15.12 4.63C16.0933 5.05 16.94 5.62 17.66 6.34C18.38 7.06 18.95 7.90667 19.37 8.88C19.79 9.85333 20 10.8933 20 12C20 13.1067 19.79 14.1467 19.37 15.12C18.95 16.0933 18.38 16.94 17.66 17.66C16.94 18.38 16.0933 18.95 15.12 19.37C14.1467 19.79 13.1067 20 12 20ZM12 18.4C13.7867 18.4 15.3 17.78 16.54 16.54C17.78 15.3 18.4 13.7867 18.4 12C18.4 10.2133 17.78 8.7 16.54 7.46C15.3 6.22 13.7867 5.6 12 5.6C10.2133 5.6 8.7 6.22 7.46 7.46C6.22 8.7 5.6 10.2133 5.6 12C5.6 13.7867 6.22 15.3 7.46 16.54C8.7 17.78 10.2133 18.4 12 18.4Z" fill="currentColor"/></svg>';
+function wsNormalizeSelCards(root) {
+  var scope = root || document;
+  Array.prototype.forEach.call(scope.querySelectorAll('.ws-target-card:not(.sc), .ws-cfg-choice:not(.sc)'), function(card) {
+    var isChoice = card.classList.contains('ws-cfg-choice');
+    var wrap = isChoice ? card.querySelector(':scope > .ws-cfg-choice-text') : null;
+    var holder = wrap || card;
+    var title = holder.querySelector(':scope > ' + (isChoice ? '.ws-cfg-choice-title' : '.ws-target-card-title'));
+    var rest = Array.prototype.filter.call(holder.children, function(el) {
+      return el !== title && !el.classList.contains('ws-target-card-dot') && !el.classList.contains('ws-cfg-radio');
+    });
+    var header = document.createElement('div'); header.className = 'sc-header';
+    if (title) header.appendChild(title);
+    var radio = document.createElement('span'); radio.className = 'sc-radio'; radio.innerHTML = _SC_RADIO_ON + _SC_RADIO_OFF;
+    header.appendChild(radio);
+    var desc = document.createElement('div'); desc.className = 'sc-desc';
+    rest.forEach(function(el) { desc.appendChild(el); });
+    while (card.firstChild) card.removeChild(card.firstChild);
+    card.appendChild(header); card.appendChild(desc);
+    card.classList.add('sc');
+  });
 }
 function wsRenderAll() {
   if (!ws.isOpen) return;
@@ -41315,11 +41628,11 @@ function wsRenderAll() {
   WS_STEPS = wsGetSteps();
   wsRenderTopbar();
   wsRenderSidebar();
-  wsRenderPlaceholderBanner();
   if (ws.step === 1) body.innerHTML = wsRenderConfigure();
   else if (ws.step === 2) body.innerHTML = wsRenderReview('dest');     // Destination
   else if (ws.step === 3) body.innerHTML = wsRenderReview('config');   // Configure
   else if (ws.step === 4) body.innerHTML = wsRenderProgress();         // Summary
+  wsNormalizeSelCards(body);
   wsRenderFooterV2();
   wsRenderHelpDrawer();
   // Step 1 basket: attach the IntersectionObserver to the sentinel
@@ -42855,6 +43168,8 @@ function wsIsOktaExport(){
   // into export vocabulary — titles, step labels, CTAs, launch animation —
   // exactly the Okta treatment (this helper feeds all of them).
   if (wl === 'Power Platform') return !!(ws.config && ws.config.ppDest === 'export');
+  // Active Directory's Export card (3rd peer card on Restore options).
+  if (wl === 'Active Directory') return !!(ws.config && ws.config.adDest === 'export');
   if (wl !== 'Okta WIC') return false;
   // A pinned-by-cart 'export' that outlived its export cart is stale state,
   // not a user choice — don't let it flag a restore cart as an export.
@@ -43388,6 +43703,76 @@ function wsRenderReviewJira(n, noun, cfg, part) {
   html += '</div>';
   return html;
 }
+// Shared Advanced-settings section (Figma 18047:18671): collapsed by default, rendered last. items: [{on, label, hint, fn}].
+var _ADV_EXP_OPEN   = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect width="20" height="20" rx="4" fill="#E4F6EE"/><path d="M6.175 7.08334L5 8.27261L10 13.3333L15 8.27261L13.825 7.08334L10 10.9464L6.175 7.08334Z" fill="#01804A"/></svg>';
+var _ADV_EXP_CLOSED = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M8.27258 5L7.08331 6.175L10.9463 10L7.08331 13.825L8.27258 15L13.3333 10L8.27258 5Z" fill="#1F2229"/></svg>';
+var _ADV_TOG_ON  = '<svg width="40" height="24" viewBox="0 0 40 24" fill="none" aria-hidden="true"><rect x="4" y="4" width="32" height="16" rx="8" fill="#01804A"/><rect x="24" y="8" width="8" height="8" rx="4" fill="white"/></svg>';
+var _ADV_TOG_OFF = '<svg width="40" height="24" viewBox="0 0 40 24" fill="none" aria-hidden="true"><rect x="4.5" y="4.5" width="31" height="15" rx="7.5" fill="#F4F6F8"/><rect x="4.5" y="4.5" width="31" height="15" rx="7.5" stroke="#01804A"/><rect x="8" y="8" width="8" height="8" rx="4" fill="#01804A"/></svg>';
+var _ADV_INFO = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M9.99984 1.66675C5.40817 1.66675 1.6665 5.40841 1.6665 10.0001C1.6665 14.5917 5.40817 18.3334 9.99984 18.3334C14.5915 18.3334 18.3332 14.5917 18.3332 10.0001C18.3332 5.40841 14.5915 1.66675 9.99984 1.66675ZM9.99984 16.6667C6.32484 16.6667 3.33317 13.6751 3.33317 10.0001C3.33317 6.32508 6.32484 3.33341 9.99984 3.33341C13.6748 3.33341 16.6665 6.32508 16.6665 10.0001C16.6665 13.6751 13.6748 16.6667 9.99984 16.6667ZM8.99984 6.58341C8.99984 6.07508 9.40817 5.66675 9.90817 5.66675C10.4165 5.66675 10.8248 6.07508 10.8248 6.58341C10.8248 7.09175 10.4165 7.50008 9.90817 7.50008C9.39984 7.50008 8.9915 7.09175 8.9915 6.58341H8.99984ZM12.3332 13.0001C12.3332 13.4584 11.9582 13.8334 11.4998 13.8334H8.49984C8.0415 13.8334 7.6665 13.4584 7.6665 13.0001C7.6665 12.5417 8.0415 12.1667 8.49984 12.1667H9.1665V10.0834H8.49984C8.0415 10.0834 7.6665 9.70842 7.6665 9.25008C7.6665 8.79175 8.0415 8.41675 8.49984 8.41675H9.99984C10.4582 8.41675 10.8332 8.79175 10.8332 9.25008V12.1667H11.4998C11.9582 12.1667 12.3332 12.5417 12.3332 13.0001Z" fill="#626469"/></svg>';
+function wsAdvancedSectionHtml(stateKey, toggleFn, desc, items) {
+  var open = !!ws[stateKey];
+  var html = '<div class="ws-cfg-section ws-adv">'
+    + '<button class="ws-adv-hdr" type="button" onclick="' + toggleFn + '" aria-expanded="' + (open ? 'true' : 'false') + '">'
+      + (open ? _ADV_EXP_OPEN : _ADV_EXP_CLOSED) + '<span class="ws-adv-title">Advanced settings</span></button>';
+  if (open) {
+    html += '<div class="ws-adv-desc">' + desc + '</div><div class="ws-adv-list">';
+    items.forEach(function(it) {
+      html += '<button class="ws-adv-toggle" type="button" role="switch" aria-checked="' + (it.on ? 'true' : 'false') + '" onclick="' + it.fn + '">'
+        + (it.on ? _ADV_TOG_ON : _ADV_TOG_OFF) + '<span class="ws-adv-label">' + it.label + '</span>'
+        + '<span class="ws-adv-info" data-tooltip="' + wsEscape(it.hint) + '">' + _ADV_INFO + '</span></button>';
+    });
+    html += '</div>';
+  }
+  return html + '</div>';
+}
+// ── Active Directory restore bodies ────────────────────────────────────
+// Restore options (step 2): Original location | Export — the Okta pattern (AD restores always land in the
+// source domain, so there is no destination picker). Configure (step 3): Conflict handling (Overwrite | Skip),
+// Advanced options (Keep relationships, Restore from AD Recycle Bin) and the shared reason/ticket block; an
+// Export pick swaps step 3 for the shared export body.
+function wsRenderReviewAD(n, noun, cfg, part) {
+  cfg = cfg || ws.config || (ws.config = {});
+  if (cfg.adDest !== 'export') cfg.adDest = 'original';
+  if (cfg.adMode !== 'skip') cfg.adMode = 'overwrite';
+  if (cfg.adKeepRelationships == null) cfg.adKeepRelationships = true;
+  if (cfg.adUseRecycleBin == null)     cfg.adUseRecycleBin = true;
+  if (cfg.adDest === 'export' && part !== 'dest') return wsRenderReviewExport(n, noun, cfg);
+  function choice(selected, fn, title, body) {
+    return '<button class="ws-cfg-choice' + (selected ? ' is-selected' : '') + '" type="button" onclick="' + fn + '">'
+      + '<span class="ws-cfg-radio"></span>'
+      + '<span class="ws-cfg-choice-text"><span class="ws-cfg-choice-title">' + title + '</span>'
+      + '<span class="ws-cfg-choice-body">' + body + '</span></span>'
+    + '</button>';
+  }
+  if (part === 'dest') {
+    return wsDestStepHtml('<div class="ws-cfg-choices">'
+      + choice(cfg.adDest === 'original', "wsSetAdDest('original')", 'Original location', 'Recover to the source location in its original structure.')
+      + choice(cfg.adDest === 'export',   "wsSetAdDest('export')",   'Export', 'Download the selected items instead of restoring them.')
+    + '</div>');
+  }
+  var html = '<div class="ws-step-pad">';
+  html += '<div class="ws-step-header">'
+    + '<div class="ws-step-title">Configure restore options</div>'
+    + '<div class="ws-step-description">Choose how conflicts are handled, then record why you&rsquo;re running it.</div>'
+  + '</div>';
+  var sections = [];
+  sections.push('<div class="ws-cfg-section"><div class="ws-cfg-section-hdr"><div class="ws-cfg-section-title">Conflict handling</div><div class="ws-cfg-section-sub">What to do when the target object already exists</div></div>'
+    + '<div class="ws-cfg-section-body"><div class="ws-cfg-choices">'
+      + choice(cfg.adMode === 'overwrite', "wsSetAdMode('overwrite')", 'Overwrite', 'Overwrite all data from the object.')
+      + choice(cfg.adMode === 'skip',      "wsSetAdMode('skip')",      'Skip', 'Skip objects if they already exist (do not update).')
+    + '</div></div></div>');
+  sections.push(wsReasonTicketSections(cfg));
+  sections.push(wsAdvancedSectionHtml('adAdvExpanded', 'wsAdToggleAdvanced()', 'Configure advanced settings', [
+    { on: cfg.adKeepRelationships, label: 'Keep relationships', hint: 'Including memberships, applications\u2026', fn: "wsAdToggle('adKeepRelationships')" },
+    { on: cfg.adUseRecycleBin, label: 'Restore from Active Directory Recycle Bin', hint: 'Restore from the AD Recycle Bin to maintain all properties when available.', fn: "wsAdToggle('adUseRecycleBin')" }
+  ]));
+  html += '<div class="ws-cfg-card"><div class="ws-cfg-sections">' + sections.join('') + '</div></div></div>';
+  return html;
+}
+function wsSetAdDest(v){ if(!ws.config) ws.config={}; ws.config.adDest=v; wsRenderAll(); }
+function wsSetAdMode(v){ if(!ws.config) ws.config={}; ws.config.adMode=v; wsRenderAll(); }
+function wsAdToggleAdvanced(){ ws.adAdvExpanded=!ws.adAdvExpanded; wsRenderAll(); }
+function wsAdToggle(k){ if(!ws.config) ws.config={}; ws.config[k]=!ws.config[k]; wsRenderAll(); }
 function wsJiraSetDest(v){ if(!ws.config) ws.config={}; ws.config.jiraDest=v; wsRenderAll(); }
 function wsJiraSetTargetProject(v){ if(!ws.config) ws.config={}; ws.config.jiraTargetProject=v; }
 function wsJiraSetTargetParent(v){ if(!ws.config) ws.config={}; ws.config.jiraTargetParent=v; }
@@ -43514,6 +43899,7 @@ function wsRenderReview(part) {
   // tenant destination, region banner, 6-section exclusions, recovery options,
   // required reason) — see wsRenderReviewOkta (restore spec §5.3–§5.8).
   if (wl === 'Okta WIC') return wsRenderReviewOkta(n, noun, cfg, part);
+  if (wl === 'Active Directory') return wsRenderReviewAD(n, noun, cfg, part);
   if (wl === 'Jira') return wsRenderReviewJira(n, noun, cfg, part);
   // ── Power Platform destination fork (spec 2026-07-30, restore-options-
   // environment-target-spec.md) ──────────────────────────────────────────
@@ -45620,7 +46006,7 @@ function wsReasonTicketSections(cfg) {
     + '<div class="ws-cfg-section-title">' + reasonTitle + '</div>'
     + '<div class="ws-cfg-section-sub">' + reasonSub + '</div></div>'
     + '<div class="ws-cfg-section-body"><div class="ws-reason-wrap">'
-    + '<textarea id="wsRestoreReason" class="ws-reason-input" maxlength="500" rows="3" placeholder="' + (_isExport ? 'Example: Quarterly SOC 2 evidence pull for the identity records' : 'Example: Recovering repositories deleted during the failed migration') + '" oninput="wsSetRestoreReason(this.value)">' + wsEscape(reasonVal) + '</textarea>'
+    + '<textarea id="wsRestoreReason" class="ws-reason-input" maxlength="500" rows="3" placeholder="' + (_isExport ? 'Example: Quarterly SOC 2 evidence pull for the identity records' : (_wl === 'Active Directory' ? 'Example: Recovering user accounts deleted during the failed offboarding script' : 'Example: Recovering repositories deleted during the failed migration')) + '" oninput="wsSetRestoreReason(this.value)">' + wsEscape(reasonVal) + '</textarea>'
     + '<div class="ws-reason-footer">'
       + (reasonRequired
           ? '<div id="wsReasonError" class="ws-reason-error" style="visibility:' + (reasonVal.trim().length < 10 ? 'visible' : 'hidden') + '">Enter at least 10 characters to continue.</div>'
@@ -47490,7 +47876,7 @@ function wsBuildConfigSummary() {
   // mode framing (the row mirrors the wizard's mode banner — both
   // hidden for PP and Confluence).
   var summaryPlanWlEarly = (typeof planActiveWorkload === 'function') ? planActiveWorkload() : null;
-  var summaryShowMode = summaryPlanWlEarly !== 'Power Platform' && summaryPlanWlEarly !== 'Confluence';
+  var summaryShowMode = summaryPlanWlEarly !== 'Power Platform' && summaryPlanWlEarly !== 'Confluence' && summaryPlanWlEarly !== 'Active Directory';
   if (summaryShowMode) rows.push({ label: 'Restore mode', value: modeLabels[restoreMode] });
   // Destination — follows the same noun-mapping as wsRenderReview so
   // the summary recap reads in the workload's native vocabulary (PP →
@@ -47526,10 +47912,18 @@ function wsBuildConfigSummary() {
   } else {
     destValue = 'Source ' + summaryContainerNoun;
   }
+  if (summaryPlanWl === 'Active Directory') {
+    rows.push({ label: 'Destination', value: cfg.adDest === 'export' ? 'Export \u2014 download only' : 'Source directory' });
+    if (cfg.adDest !== 'export') {
+      rows.push({ label: 'Conflict handling', value: cfg.adMode === 'skip' ? 'Skip \u2014 existing objects are left as they are' : 'Overwrite \u2014 existing objects are reverted to the backup' });
+      rows.push({ label: 'Keep relationships', value: cfg.adKeepRelationships === false ? 'Off' : 'On \u2014 memberships and applications included' });
+      rows.push({ label: 'AD Recycle Bin', value: cfg.adUseRecycleBin === false ? 'Not used' : 'Restore from Recycle Bin when available' });
+    }
+  } else
   if (summaryPlanWl !== 'Power Platform') rows.push({ label: 'Destination', value: destValue });
   // Conflict handling — only meaningful for additive (the doc forces
   // Override for in-place and there's no conflict possible for as-copy)
-  if (restoreMode === 'additive') {
+  if (restoreMode === 'additive' && summaryPlanWl !== 'Active Directory') {
     var conflictLabel = 'Skip conflicts';
     if (cfg.conflictMode === 'override') conflictLabel = 'Override existing items';
     else if (cfg.conflictMode === 'copy') conflictLabel = 'Restore as a copy alongside existing items';
@@ -53642,6 +54036,13 @@ function _buildResourceSnapshotFieldsCore(resource, hasDiff) {
     }
   }
 
+  // ── Active Directory: attribute rows seeded on the resource (adAttrs); relationships ride the shared ledger ──
+  if (wl === 'Active Directory' && r.adAttrs) {
+    F.push({ section: r.type });
+    r.adAttrs.forEach(function(row){ F.push({ f: row[0], snap: row[1], prod: row[1] }); });
+    return F;
+  }
+
   // ── Google Workspace (GWS PRD Phase 2 §C — envelope-only privacy
   // doctrine, user-approved 2026-08-17) ──────────────────────────────────
   // The preview drawer IS the metadata payload (ADO metadata-only preview
@@ -56792,6 +57193,17 @@ function _oktaRelUniverse(r) {
 // always-present (joinOff far in the past, no leaveOff) and just rides
 // the shared ledger's chevron+pill panel chrome rather than its add/
 // remove/modify diffing.
+// Active Directory: group members, a user's / computer's group memberships, a GPO's links.
+// Static (no join/leave drift modeled) — same shape as _gwsRelUniverse.
+function _adRelUniverse(r) {
+  function st(name, payload){ return { name: name, joinOff: 9999, leaveOff: null, payload: payload || null }; }
+  if (r.type === 'Group') return [{ key: 'members', label: 'Members', items: (r.members || []).map(function(m){ return st(m[0], m[1]); }) }];
+  if (r.type === 'Group Policy Object') return [{ key: 'links', label: 'Linked to', items: (r.adLinks || []).map(function(n){ return st(n); }) }];
+  var groups = RESOURCES.filter(function(g){
+    return g.wl === 'Active Directory' && g.type === 'Group' && (g.members || []).some(function(m){ return m[0] === r.name; });
+  });
+  return [{ key: 'groups', label: 'Member of', items: groups.map(function(g){ return st(g.name); }) }];
+}
 function _gwsRelUniverse(r) {
   if (r.type === 'Group') {
     return [{ key: 'members', label: 'Members', items: (r.members || []).map(function(m){
@@ -57542,6 +57954,12 @@ function renderRdBody() {
     if (resource.type !== 'User' || (_guUniv && _guUniv[0] && _guUniv[0].items.length)) {
       _relLedger = _rdGenericRelLedger(_guUniv || _gwsRelUniverse(resource), leftInfo, rightInfo);
     }
+  }
+  if (!_relLedger && resource && resource.wl === 'Active Directory'
+      && ['Group','Group Policy Object','User','Computer'].indexOf(resource.type) >= 0
+      && typeof _rdGenericRelLedger === 'function') {
+    var _adUniv = _adRelUniverse(resource);
+    if (_adUniv[0] && _adUniv[0].items.length) _relLedger = _rdGenericRelLedger(_adUniv, leftInfo, rightInfo);
   }
   var _relChangedTotal = _relLedger ? _relLedger.totalChanged : 0;
 
@@ -63576,8 +63994,6 @@ window.__devJumpResolve = function(h) {
     <div class="ws-body-split">
       <aside class="left-sidebar" id="wsSidebar"></aside>
       <main class="ws-main">
-        <!-- Placeholder notice (AD restore only, user 2026-10-13): shown on every step while the cart is Active Directory. -->
-        <div class="ws-placeholder-banner" id="wsPlaceholderBanner" style="display:none"></div>
         <div class="ws-body" id="wsBody"></div>
         <div class="ws-footer" id="wsFooter">
           <div class="ws-footer-inner" id="wsFooterInner"></div>
