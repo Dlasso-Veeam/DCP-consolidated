@@ -5918,19 +5918,35 @@ td.cb-col input:disabled, th.cb-col input:disabled { pointer-events: none; }
    their own bar above the section cards. #rdCompareHead was a dormant
    host (previously display:none !important). */
 #rdCompareHead { padding: 16px 24px 0; flex-shrink: 0; }   /* 8px header-bottom + 16px here = 24px gap to the entity header (user 2026-08-19: was ~34px) */
-.rd-ctrl-bar { display: flex; align-items: stretch; gap: 12px; background: var(--black-3); border: 1px solid var(--border-light); border-radius: 8px; padding: 8px 12px; }
-.rd-ctrl-col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; justify-content: center; }
-.rd-ctrl-side { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.rd-ctrl-side .rw-rp-picker-hdr { flex: 1; min-width: 0; }
-/* was: .rd-ctrl-bar .d365-compare-hdr-dot { display: inline-block; } — dot retired 2026-08-19 */
 /* Single mode: Select hugs the picker it acts on; Compare anchors right.
    (space-between floated Select mid-bar once the action slot gained a
    button — user 2026-07-14.) */
-.rd-ctrl-bar.rd-ctrl-single .rd-ctrl-side { justify-content: flex-start; }
-.rd-ctrl-bar.rd-ctrl-single .rd-ctrl-side .btn-outline { margin-left: auto; }
-.rd-ctrl-bar.rd-ctrl-single .rw-rp-picker-hdr { flex: 0 1 auto; }
-.rd-ctrl-vs { align-self: center; display: flex; align-items: center; color: var(--black-60); flex-shrink: 0; }
 .rd-ctrl-note { display: flex; justify-content: flex-end; }
+/* Header bar — Identity-dashboard header treatment on the Protected Data drawer (Attribute lead cell + one cell per restore point). */
+.rd-hbar { display: grid; grid-template-columns: 180px minmax(0,1fr) minmax(0,1fr); background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; overflow: hidden; }
+.rd-hbar.rd-hbar-single { grid-template-columns: 148px minmax(0,1fr) 152px; }   /* the comparison slot stays compact; the value column below is NOT tied to it, so long text keeps the full width */
+.rd-hc-lead { display: flex; align-items: center; padding: 12px 14px; font-size: 14px; font-weight: 500; color: var(--black-60); border-right: 1px solid var(--border-light); }
+.rd-hc { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 12px 14px; background: var(--black-3); }
+.rd-hc + .rd-hc { border-left: 1px solid var(--border-light); }
+.rd-hc.is-added { background: var(--em-green-tint); box-shadow: inset 0 3px 0 var(--em-green); }
+.rd-hc-pick { min-width: 0; display: flex; align-items: center; gap: 8px; } .rd-hc-pick > .rw-rp-picker { flex: 1; min-width: 0; }
+.rd-hc-clear { flex: 0 0 auto; width: 28px; height: 28px; }
+/* Comparison slot while viewing one point: holds the Compare button. */
+.rd-hc.rd-hc-ghost { background: var(--white); justify-content: center; align-items: center; }
+.rd-hc-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 28px; }
+/* Added = the light green Vision treatment (Green/S10 fill, Tertiary border, Green/S80 label); hover still turns to Remove. */
+.rd-hc .rw-added-toggle { background: var(--green-s10); color: var(--em-green); border: 1px solid var(--green-s60); }
+.rd-hc .rw-added-toggle:hover, .rd-hc .rw-added-toggle:focus-visible { background: var(--red); color: var(--white); border-color: var(--red); }
+.rd-hc .rw-added-toggle.just-added:hover { background: var(--green-s10); color: var(--em-green); border-color: var(--green-s60); }
+.rd-hc-cap { font-size: 14px; line-height: 20px; color: var(--black-60); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Pinned + simplified on scroll-down: the entity header and summary tuck away (existing); the bar compacts to one row (picker + action, no caption) and stays pinned with search. */
+.record-drawer.rd-hdr-tucked .rd-hc { flex-direction: row; align-items: center; padding-top: 8px; padding-bottom: 8px; }
+.record-drawer.rd-hdr-tucked .rd-hc-pick { flex: 1; }
+.record-drawer.rd-hdr-tucked .rd-hc-cap, .record-drawer.rd-hdr-tucked .rd-hc .rd-ctrl-note { display: none; }
+.record-drawer.rd-hdr-tucked .rd-hc-lead { padding-top: 8px; padding-bottom: 8px; }
+/* Column tints in the value tables: neutral by default, green on the column whose point is added to the restore job. */
+#rdBody .rd-compare-tbl:not(.rd-single-snap) tr td:nth-child(2), #rdBody .rd-compare-tbl:not(.rd-single-snap) tr td:nth-child(3) { background-image: linear-gradient(rgba(31,34,41,0.04), rgba(31,34,41,0.04)); }
+#rdBody[data-added="l"] .rd-compare-tbl:not(.rd-single-snap) tr td:nth-child(2), #rdBody[data-added="r"] .rd-compare-tbl:not(.rd-single-snap) tr td:nth-child(3) { background-image: linear-gradient(rgba(1,128,74,0.07), rgba(1,128,74,0.07)); }
 /* Headerless leading card (rows before the first PRD group divider) */
 .rd-sec-plain { margin-top: 16px; }
 /* A visible banner above the cards owns the gap — kill the first card's
@@ -52992,12 +53008,22 @@ function _rdDefaultCompareSel(srcSel, rps) {
   // rather than silently diffing latest vs the previous backup.
   return 'none';
 }
+// Normalise a column selection to a concrete restore-point id so 'prod' / 'snap' (both of which DISPLAY the latest
+// backup) can't slip past the "different points only" guards when the other side picks that same latest point.
+function _rdNormSel(resourceId, sel) {
+  if (!sel || sel === 'none') return sel;
+  if (sel !== 'prod' && sel !== 'snap') return sel;
+  var rps = (typeof generateRps === 'function' && resourceId) ? generateRps(resourceId) : null;
+  var latest = (typeof _v1LatestRp === 'function') ? _v1LatestRp() : null;
+  var id = (rps && rps.length) ? rps[0].id : (latest ? latest.id : null);
+  return id || sel;
+}
 function rdSelectSide(side, sel) {
   // Guard: the two columns must compare DIFFERENT points in time. Reject a
   // pick that equals the other side's current selection so the diff is never a
   // point against itself. The picker also disables that option visually (see
   // rdBuildSidePicker); this is the belt-and-suspenders state guard.
-  var otherSel = side === 'left' ? rdState.rightSel : rdState.leftSel;
+  var otherSel = _rdNormSel(rdState.resourceId, side === 'left' ? rdState.rightSel : rdState.leftSel);
   if (sel === otherSel) return;
   if (side === 'left')  { rdState.leftSel  = sel; rdState.leftDropOpen  = false; }
   if (side === 'right') { rdState.rightSel = sel; rdState.rightDropOpen = false; }
@@ -53792,7 +53818,7 @@ function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
   // current selection (orange dot, bottom-right), so the user can spot
   // changed days without opening every RP. Coexists with the green match dot.
   var diffDaySet = {};
-  var otherSel = side === 'left' ? rdState.rightSel : rdState.leftSel;
+  var otherSel = _rdNormSel(resource && resource.id, side === 'left' ? rdState.rightSel : rdState.leftSel);
   if (otherSel && resource && typeof rdBuildStateForSel === 'function') {
     var otherState = rdBuildStateForSel(resource, otherSel, baseFields).state || {};
     var otherKeys = Object.keys(otherState);
@@ -56575,7 +56601,7 @@ function rdAddFromPoint(side) {
   // 'snap' / unset = the item's latest backup.
   var chosen = (!sel || sel === 'snap' || sel === 'prod') ? itemRps[0] : (itemRps.find(function(p){ return p.id === sel; }) || itemRps[0]);
   var rr = RESOURCES.find(function(x){ return x.id === id; });
-  var nm = rr ? rr.name : 'This item';
+  var nm = rr ? rr.name : (rdState.title || 'This item');
   var _fmt = function(rpId){ return (typeof _cartRpLabel === 'function') ? _cartRpLabel(rpId) : String(rpId); };
   var refresh = function(){
     if (typeof updatePlanDock === 'function') updatePlanDock();
@@ -56811,8 +56837,10 @@ function rdBuildSideAction(side, sel, resource) {
     // side is a restore point of this item, so time intent is symmetric. The
     // footer's time-agnostic add is retired for restorable items in favor of
     // these (see _rdSyncCartBtn); export-only items keep the footer.
-    if (!resource || typeof _restoreAvailability !== 'function' || _restoreAvailability(resource) !== 'add') return '';
-    if (rdState.resourceId && String(rdState.resourceId).indexOf('rec-') === 0) return '';
+    // Record-level rows (Dynamics 365 records, rec-* ids) are not in RESOURCES but are restorable units like any other —
+    // they get the same per-point add as every other workload.
+    var _afIsRec = !!(rdState.resourceId && String(rdState.resourceId).indexOf('rec-') === 0);
+    if (!_afIsRec && (!resource || typeof _restoreAvailability !== 'function' || _restoreAvailability(resource) !== 'add')) return '';
     var _afLabels = rdCtaLabels();
     var _afInPlan = !!(rdState.resourceId && state.restorePlan && state.restorePlan.has(rdState.resourceId));
     if (_afInPlan) {
@@ -56833,7 +56861,7 @@ function rdBuildSideAction(side, sel, resource) {
       return _rwAddedToggleHtml('rdRemoveFromRestore()', _afLabels.addedCompact);
     }
     var _afBtnInner = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add to restore';
-    if (typeof _categoryLockBlocks === 'function' && _categoryLockBlocks(resource)) {
+    if (resource && typeof _categoryLockBlocks === 'function' && _categoryLockBlocks(resource)) {
       return '<span class="icon-dtip" data-tooltip="' + _categoryLockMsg().replace(/"/g, '&quot;') + '">' +
         '<button class="rw-use-side-btn" disabled aria-disabled="true" style="pointer-events:none;opacity:.5">' + _afBtnInner + '</button></span>';
     }
@@ -58450,7 +58478,7 @@ function renderRdBody() {
         + 'Compare</button>'
       : '';
     var _rmCmpBtn = rdState.singleSnap ? '' :
-      '<button type="button" class="btn-icon" style="flex-shrink:0;width:28px;height:28px" data-tooltip="Remove comparison" aria-label="Remove comparison" onclick="rdRemoveComparison()">'
+      '<button type="button" class="btn-icon rd-hc-clear" data-tooltip="Stop comparing" aria-label="Stop comparing" onclick="rdRemoveComparison()">'
       + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
     leftHdr  = hdrCell(leftColCls,  (leftInfo.isProd  ? 'prod' : (_rdChanged ? 'snap' : 'nochange')), leftPicker,  (leftAction || '') + _addCmpBtn,  _leftNote);
     rightHdr = hdrCell(rightColCls, (rightInfo.isProd ? 'prod' : (_rdChanged ? 'snap' : 'nochange')), rightPicker, (rightAction || '') + _rmCmpBtn, _rightNote);
@@ -58868,7 +58896,7 @@ function renderRdBody() {
   var _isNone = !!(rightInfo && rightInfo.isNone);
   // Attribute column: 140px in the condensed 720px single-column drawer,
   // 180px at compare width. Checkbox column only with a fieldMask.
-  var _attrW = '180px';
+  var _attrW = rdState.singleSnap ? '148px' : '180px';   // condensed 640px drawer: narrower label column so the two header slots fit
   var colGroup = (rdState.singleSnap || _isNone)
     ? (_hasMaskFields
       ? '<colgroup><col style="width:36px"><col style="width:' + _attrW + '"><col></colgroup>'
@@ -58887,21 +58915,39 @@ function renderRdBody() {
     function _dot(info) {
       return '<span class="d365-compare-hdr-dot ' + (info.isProd ? 'prod' : (_rdChanged ? 'snap' : 'nochange')) + '" style="flex-shrink:0"></span>';
     }
-    var leftCol = '<div class="rd-ctrl-col"><div class="rd-ctrl-side">'
-      + (rdState.singleSnap ? '' : _dot(leftInfo))
-      + leftPicker + (leftAction || '') + _addCmpBtn
-      + '</div>'
-      + (_leftNote ? '<div class="rd-ctrl-note">' + _leftNote + '</div>' : '')
+    // Header bar (aligned with the Identity dashboard's comparison header): an "Attribute" lead cell over the label
+    // column, then one cell per restore point. The date picker (the existing picker + popover, unchanged) names the
+    // column; a grey caption says how old the point is; the add action sits on its own row. The green accent appears
+    // only on the column whose point has been added to the restore job.
+    var _addedL = /rw-added-toggle/.test(leftAction || '');
+    var _addedR = !rdState.singleSnap && /rw-added-toggle/.test(rightAction || '');
+    function _hcCap(info) {
+      if (!info) return '';
+      if (info.isProd) return 'Live now';
+      if (!info.rp || !allRps || !allRps.length) return '';
+      if (info.rp.id === allRps[0].id) return 'Latest backup';
+      var dd = Math.round((allRps[0].ts - info.rp.ts) / 86400000);
+      return dd < 1 ? 'Earlier today' : dd + ' day' + (dd === 1 ? '' : 's') + ' earlier';
+    }
+    // The second slot is the dedicated comparison column: a Compare button while viewing one point (it mounts the column
+    // and opens its date picker at once), the real picker once a comparison exists.
+    function _hcGhost() {
+      return '<div class="rd-hc rd-hc-ghost" data-side="right">' + _addCmpBtn + '</div>';
+    }
+    function _hcCell(side, picker, action, info, note, added, clearBtn) {
+      return '<div class="rd-hc' + (added ? ' is-added' : '') + '" data-side="' + side + '">'
+        + '<div class="rd-hc-pick">' + picker + (clearBtn || '') + '</div>'
+        + '<div class="rd-hc-meta"><span class="rd-hc-cap">' + _hcCap(info) + '</span>' + (action || '') + '</div>'
+        + (note ? '<div class="rd-ctrl-note">' + note + '</div>' : '')
+        + '</div>';
+    }
+    host.innerHTML = '<div class="rd-hbar' + (rdState.singleSnap ? ' rd-hbar-single' : '') + '">'
+      + '<div class="rd-hc-lead">Attribute</div>'
+      + _hcCell('left', leftPicker, leftAction, leftInfo, _leftNote, _addedL)
+      + (rdState.singleSnap ? _hcGhost() : _hcCell('right', rightPicker, rightAction, rightInfo, _rightNote, _addedR, _rmCmpBtn))
       + '</div>';
-    var rightCol = rdState.singleSnap ? '' :
-      '<div class="rd-ctrl-vs" aria-label="compared with"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9.4575 15.6001H3.9C3.645 15.6001 3.43125 15.5138 3.25875 15.3413C3.08625 15.1688 3 14.9551 3 14.7001C3 14.4451 3.08625 14.2313 3.25875 14.0588C3.43125 13.8863 3.645 13.8001 3.9 13.8001H9.4575L7.77 12.1126C7.605 11.9476 7.5225 11.7413 7.5225 11.4938C7.5225 11.2463 7.605 11.0326 7.77 10.8526C7.95 10.6726 8.16375 10.5826 8.41125 10.5826C8.65875 10.5826 8.8725 10.6726 9.0525 10.8526L12.27 14.0701C12.36 14.1601 12.4238 14.2576 12.4613 14.3626C12.4988 14.4676 12.5175 14.5801 12.5175 14.7001C12.5175 14.8201 12.4988 14.9326 12.4613 15.0376C12.4238 15.1426 12.36 15.2401 12.27 15.3301L9.03 18.5701C8.85 18.7501 8.64 18.8363 8.4 18.8288C8.16 18.8213 7.95 18.7276 7.77 18.5476C7.605 18.3676 7.51875 18.1576 7.51125 17.9176C7.50375 17.6776 7.59 17.4676 7.77 17.2876L9.4575 15.6001ZM14.5425 10.2001L16.23 11.8876C16.395 12.0526 16.4775 12.2588 16.4775 12.5063C16.4775 12.7538 16.395 12.9676 16.23 13.1476C16.05 13.3276 15.8363 13.4176 15.5888 13.4176C15.3413 13.4176 15.1275 13.3276 14.9475 13.1476L11.73 9.9301C11.64 9.8401 11.5763 9.7426 11.5388 9.6376C11.5013 9.5326 11.4825 9.4201 11.4825 9.3001C11.4825 9.1801 11.5013 9.0676 11.5388 8.9626C11.5763 8.8576 11.64 8.7601 11.73 8.6701L14.97 5.4301C15.15 5.2501 15.36 5.16385 15.6 5.17135C15.84 5.17885 16.05 5.2726 16.23 5.4526C16.395 5.6326 16.4813 5.8426 16.4888 6.0826C16.4963 6.3226 16.41 6.5326 16.23 6.7126L14.5425 8.4001H20.1C20.355 8.4001 20.5688 8.48635 20.7413 8.65885C20.9138 8.83135 21 9.0451 21 9.3001C21 9.5551 20.9138 9.76885 20.7413 9.94135C20.5688 10.1138 20.355 10.2001 20.1 10.2001H14.5425Z"/></svg></div>'
-      + '<div class="rd-ctrl-col"><div class="rd-ctrl-side">'
-      + _dot(rightInfo)
-      + rightPicker + (rightAction || '') + _rmCmpBtn
-      + '</div>'
-      + (_rightNote ? '<div class="rd-ctrl-note">' + _rightNote + '</div>' : '')
-      + '</div>';
-    host.innerHTML = '<div class="rd-ctrl-bar' + (rdState.singleSnap ? ' rd-ctrl-single' : '') + '">' + leftCol + rightCol + '</div>';
+    var _rb = document.getElementById('rdBody');
+    if (_rb) _rb.setAttribute('data-added', _addedL ? 'l' : (_addedR ? 'r' : ''));
     host.style.display = '';
   })();
 

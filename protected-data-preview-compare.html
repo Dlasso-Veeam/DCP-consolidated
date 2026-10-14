@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview and Compare Options</title>
+<style>
+@font-face { font-family: 'Circular Pro'; src: url('./fonts/CircularPro-Book.otf')   format('opentype'); font-weight: 450; font-display: swap; }
+@font-face { font-family: 'Circular Pro'; src: url('./fonts/CircularPro-Medium.otf') format('opentype'); font-weight: 500; font-display: swap; }
+@font-face { font-family: 'Circular Pro'; src: url('./fonts/CircularPro-Bold.otf')   format('opentype'); font-weight: 700; font-display: swap; }
+
+:root {
+  --black-100: #1f2229; --black-70: #626469; --black-60: #626469; --black-30: #bcbdbf; --black-20: #d2d3d4; --black-10: #e9e9ea; --black-5: #f8f8f9;
+  --white: #ffffff; --page-bg: #edf0f0;
+  --em-green: #01804a; --em-green-accent: #1a9e66; --em-green-tint: #f6fbf9; --green-s10: #e4f6ee; --green-50: #6fc4a0;
+  --orange: #f6772c; --orange-10: #fef1ea; --red: #ed2c3d; --red-10: #fde8e9;
+  --border: #d2d3d4; --border-light: #e9e9ea;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page-bg); color: var(--black-100); font-family: 'Circular Pro', system-ui, sans-serif; font-size: 16px; font-weight: 450; line-height: 22px; }
+button { font-family: inherit; }
+svg { display: block; }
+
+/* ── Page chrome (prototype only) ── */
+.pg { max-width: 1240px; margin: 0 auto; padding: 24px 16px 48px; display: flex; flex-direction: column; gap: 24px; }
+.pg h1 { margin: 0; font-size: 24px; line-height: 32px; font-weight: 500; }
+.pg-sub { margin: 4px 0 0; color: var(--black-70); max-width: 80ch; }
+.ctl { background: var(--white); border-radius: 8px; padding: 16px; display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 24px; }
+.ctl fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.ctl legend { padding: 0; font-size: 14px; font-weight: 500; color: var(--black-70); margin-bottom: 8px; }
+.opt { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; }
+.opt input { margin: 3px 0 0; accent-color: var(--em-green); }
+.opt b { display: block; font-weight: 500; } .opt span { display: block; font-size: 14px; line-height: 20px; color: var(--black-70); }
+.stage { background: var(--black-10); border-radius: 8px; padding: 24px; display: flex; justify-content: center; }
+.note { font-size: 14px; line-height: 20px; color: var(--black-70); background: var(--white); border-radius: 8px; padding: 12px 16px; }
+.note b { color: var(--black-100); font-weight: 500; }
+
+/* ── The drawer ── */
+.drw { width: 880px; max-width: 100%; background: var(--white); border-radius: 8px; box-shadow: 0 8px 24px rgba(31,34,41,0.14); padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+.drw-top { display: flex; align-items: flex-start; gap: 12px; }
+.drw-ttl { flex: 1; min-width: 0; }
+.drw-ttl .n { display: flex; align-items: center; gap: 12px; font-size: 24px; line-height: 32px; font-weight: 500; }
+.drw-ttl .s { color: var(--black-70); font-size: 16px; line-height: 22px; }
+.chip { display: inline-flex; align-items: center; height: 28px; padding: 0 8px; border-radius: 2px; background: var(--black-5); font-size: 16px; font-weight: 500; }
+.x { width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); display: inline-flex; align-items: center; justify-content: center; color: var(--black-100); cursor: pointer; flex-shrink: 0; }
+.x svg { width: 20px; height: 20px; fill: currentColor; }
+
+/* summary row (Identity dashboard) */
+.sum { display: flex; align-items: center; gap: 12px; flex-wrap: nowrap; font-size: 16px; line-height: 22px; padding: 4px 0; }
+.badge { display: inline-flex; align-items: center; height: 28px; padding: 3px 8px; background: var(--orange-10); color: var(--orange); border-radius: 2px; font-weight: 500; }
+.badge.ok { background: var(--green-s10); color: var(--em-green); }
+.sp { flex: 1; min-width: 0; } .sum > span:not(.sp):not(.badge) { min-width: 0; } .sum .badge, .sum .more { flex-shrink: 0; white-space: nowrap; }
+.more { height: 28px; padding: 0 8px; border: none; background: none; font-size: 14px; font-weight: 500; color: var(--em-green); cursor: pointer; border-radius: 4px; }
+.more:hover { background: var(--em-green-tint); }
+.srch { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px 0 12px; border: 1px solid var(--black-20); border-radius: 4px; background: var(--white); }
+.srch:focus-within { background: var(--em-green-tint); border-color: var(--em-green); }
+.srch svg { width: 16px; height: 16px; fill: var(--black-70); flex-shrink: 0; }
+.srch input { border: 0; outline: 0; background: transparent; font: inherit; color: var(--black-100); min-width: 0; width: 100%; }
+.srch.full { width: 100%; }
+
+/* header bar (Identity dashboard .idd-rp-bar) */
+.bar { display: grid; border: 1px solid var(--border-light); border-radius: 8px 8px 0 0; overflow: hidden; background: var(--white); }
+.bar.c3 { grid-template-columns: 220px minmax(0,1fr) minmax(0,1fr); }
+.bar.c2 { grid-template-columns: 220px minmax(0,1fr); }
+.bar > div { padding: 10px 14px; min-width: 0; }
+.bar > .lead { border-right: 1px solid var(--border-light); display: flex; flex-direction: column; justify-content: center; gap: 4px; }
+.hd.now { background: var(--black-5); }
+.hd.aft { background: var(--em-green-tint); box-shadow: inset 0 3px 0 var(--em-green); }
+.hd-t { font-size: 16px; font-weight: 500; line-height: 22px; }
+.hd-s { font-size: 14px; line-height: 20px; color: var(--black-70); }
+.hd-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 28px; margin-bottom: 4px; } .hd-top .btns { display: flex; gap: 8px; }
+.hd-stack { min-width: 0; display: flex; flex-direction: column; }
+.lead .attr { font-size: 14px; font-weight: 500; color: var(--black-70); }
+.lead .items { font-size: 14px; line-height: 18px; color: var(--black-70); }
+.wl { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+.tile { width: 28px; height: 28px; border-radius: 4px; background: var(--green-s10); color: var(--em-green); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.tile svg { width: 20px; height: 20px; fill: currentColor; }
+.lead .idn { font-size: 16px; font-weight: 500; line-height: 22px; overflow-wrap: anywhere; }
+.lead .idn-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+
+/* pickers + buttons */
+.pick { position: relative; display: inline-flex; align-items: center; max-width: 100%; }
+.pick select { appearance: none; -webkit-appearance: none; height: 28px; padding: 0 28px 0 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font: inherit; font-weight: 500; color: var(--black-100); cursor: pointer; max-width: 100%; }
+.pick select:hover { border-color: var(--black-60); }
+.pick svg { position: absolute; right: 6px; width: 16px; height: 16px; fill: var(--black-60); pointer-events: none; }
+.pick.plain select { border-color: transparent; background: transparent; padding-left: 0; }
+.btn { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 12px; border-radius: 4px; font-size: 16px; font-weight: 500; cursor: pointer; white-space: nowrap; border: 1px solid transparent; background: none; }
+.btn svg { width: 16px; height: 16px; fill: currentColor; }
+.btn.pri { background: var(--em-green); color: var(--white); } .btn.pri:hover { background: var(--em-green-accent); }
+.btn.ter { background: var(--em-green-tint); border-color: var(--green-50); color: var(--em-green); } .btn.ter:hover { background: var(--green-s10); }
+.btn.sec { background: var(--white); border-color: var(--border); color: var(--black-100); } .btn.sec:hover { background: var(--black-5); }
+.lnk { display: inline-flex; align-items: center; gap: 4px; font-weight: 500; color: var(--em-green); text-decoration: none; cursor: pointer; }
+
+/* sections + cards */
+.sec { display: flex; flex-direction: column; gap: 6px; }
+.sech { font-size: 16px; font-weight: 500; line-height: 22px; padding: 4px 0; display: flex; align-items: center; gap: 8px; }
+.sech .ct { font-size: 14px; font-weight: 500; background: var(--black-5); border-radius: 2px; padding: 0 8px; height: 22px; display: inline-flex; align-items: center; }
+.card { background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; overflow: hidden; }
+.card.attach { border-top: 0; border-radius: 0 0 8px 8px; }
+.card table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.card td { padding: 8px 14px; line-height: 22px; vertical-align: middle; border-top: 1px solid var(--border-light); overflow-wrap: anywhere; }
+.card tr:first-child td { border-top: 0; }
+.card td.a { width: 220px; font-weight: 500; color: var(--black-60); }
+.card.tint td.col-n { background-image: linear-gradient(rgba(31,34,41,0.05), rgba(31,34,41,0.05)); }
+.card.tint td.col-g { background-image: linear-gradient(rgba(1,128,74,0.07), rgba(1,128,74,0.07)); }
+.card tr.diff td { background-color: var(--orange-10); }
+.card tr.diff td.l { color: var(--orange); font-weight: 500; }
+.tag { display: inline-flex; height: 22px; align-items: center; padding: 0 8px; border-radius: 2px; font-size: 14px; font-weight: 500; margin-left: 8px; }
+.tag.add { background: var(--green-s10); color: var(--em-green); } .tag.rem { background: var(--red-10); color: var(--red); }
+.dash { color: var(--black-30); } .none { color: var(--black-70); }
+.empty { padding: 24px 14px; text-align: center; color: var(--black-70); }
+@media (max-width: 960px) { .ctl { grid-template-columns: 1fr; } .drw { padding: 16px; } .bar.c3 { grid-template-columns: 140px minmax(0,1fr) minmax(0,1fr); } .card td.a { width: 140px; } }
+
+/* A2 */
+.field { position: relative; display: flex; width: 100%; }
+.field select { appearance: none; -webkit-appearance: none; width: 100%; height: 36px; padding: 0 36px 0 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font: inherit; font-weight: 500; color: var(--black-100); cursor: pointer; }
+.field select:hover { border-color: var(--black-60); }
+.field select:focus-visible { outline: 0; box-shadow: 0 0 0 2px #fff, 0 0 0 4px #008436; }
+.field svg { position: absolute; right: 8px; top: 8px; width: 20px; height: 20px; fill: var(--black-60); pointer-events: none; }
+.hd2 { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; }
+.hd2-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 28px; }
+.hd2-cap { font-size: 14px; line-height: 20px; color: var(--black-70); }
+.btn.added { background: var(--em-green); color: var(--white); } .btn.added .la, .btn.added .lr { display: inline-flex; align-items: center; gap: 6px; } .btn.added .lr { display: none; } .btn.added:hover { background: var(--red); } .btn.added:hover .la { display: none; } .btn.added:hover .lr { display: inline-flex; }
+.bar.solo { border-radius: 8px; }
+.urow { display: flex; align-items: center; gap: 8px; } .lead2 .attr { font-size: 14px; font-weight: 500; color: var(--black-70); }
+.lead2 { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 4px; }
+.lead2 .more { padding: 0; height: auto; line-height: 20px; }
+.lead2 .more:hover { background: none; text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="pg">
+  <header>
+    <h1>Preview and compare — convergence options</h1>
+    <p class="pg-sub">The Protected Data record preview and the Identity dashboard's restore-point comparison show the same thing in two different layouts. Three ways to bring the preview closer to the dashboard's header treatment. The data is seeded with changes over time so the comparisons are real.</p>
+  </header>
+
+  <section class="ctl" aria-label="Prototype controls">
+    <fieldset>
+      <legend>Option</legend>
+      <label class="opt"><input type="radio" name="v" value="A2" checked><div><b>A2 · Decluttered header</b><span>The previous A with the crowding fixed: the date picker is the column title, the lead cell carries the differences badge and toggle, and each column gets two clean rows.</span></div></label>
+      <label class="opt"><input type="radio" name="v" value="A"><div><b>A · Previous round (for reference)</b><span>Title, date picker and Add to restore competing for one row in each column.</span></div></label>
+    </fieldset>
+    <fieldset>
+      <legend>Object</legend>
+      <label class="opt"><input type="radio" name="o" value="comp" checked><div><b>Computer</b><span>MERIDIAN-FS-01 · attribute changes</span></div></label>
+      <label class="opt"><input type="radio" name="o" value="user"><div><b>User</b><span>j.alvarez · attributes and group memberships</span></div></label>
+      <label class="opt"><input type="radio" name="o" value="group"><div><b>Group</b><span>VPN-Users · members join and leave</span></div></label>
+    </fieldset>
+    <fieldset>
+      <legend>State</legend>
+      <label class="opt"><input type="radio" name="s" value="one"><div><b>One restore point</b><span>The preview before anyone clicks Compare.</span></div></label>
+      <label class="opt"><input type="radio" name="s" value="two" checked><div><b>Comparing</b><span>Two restore points, differences highlighted.</span></div></label>
+    </fieldset>
+  </section>
+
+  <div class="stage"><div id="drawer"></div></div>
+  <div class="note" id="note"></div>
+</div>
+
+<script>
+var ICONS = {"search-outlined":{"viewBox":"0 0 20 20","paths":["M12.8626 11.7191H12.2603L12.0469 11.5132C12.794 10.6442 13.2438 9.51591 13.2438 8.28855C13.2438 5.55174 11.0253 3.33333 8.28855 3.33333C5.55174 3.33333 3.33333 5.55174 3.33333 8.28855C3.33333 11.0253 5.55174 13.2438 8.28855 13.2438C9.51591 13.2438 10.6442 12.794 11.5132 12.0469L11.7191 12.2603V12.8626L15.5308 16.6667L16.6667 15.5308L12.8626 11.7191ZM8.28855 11.7191C6.39032 11.7191 4.85801 10.1868 4.85801 8.28855C4.85801 6.39032 6.39032 4.85801 8.28855 4.85801C10.1868 4.85801 11.7191 6.39032 11.7191 8.28855C11.7191 10.1868 10.1868 11.7191 8.28855 11.7191Z"]},"close-outlined":{"viewBox":"0 0 20 20","paths":["M10 11.4195L5.03169 16.3878C4.8458 16.5737 4.60921 16.6667 4.32193 16.6667C4.03464 16.6667 3.79806 16.5737 3.61217 16.3878C3.42628 16.2019 3.33333 15.9654 3.33333 15.6781C3.33333 15.3908 3.42628 15.1542 3.61217 14.9683L8.58048 10L3.61217 5.03169C3.42628 4.8458 3.33333 4.60921 3.33333 4.32193C3.33333 4.03464 3.42628 3.79806 3.61217 3.61217C3.79806 3.42628 4.03464 3.33333 4.32193 3.33333C4.60921 3.33333 4.8458 3.42628 5.03169 3.61217L10 8.58048L14.9683 3.61217C15.1542 3.42628 15.3908 3.33333 15.6781 3.33333C15.9654 3.33333 16.2019 3.42628 16.3878 3.61217C16.5737 3.79806 16.6667 4.03464 16.6667 4.32193C16.6667 4.60921 16.5737 4.8458 16.3878 5.03169L11.4195 10L16.3878 14.9683C16.5737 15.1542 16.6667 15.3908 16.6667 15.6781C16.6667 15.9654 16.5737 16.2019 16.3878 16.3878C16.2019 16.5737 15.9654 16.6667 15.6781 16.6667C15.3908 16.6667 15.1542 16.5737 14.9683 16.3878L10 11.4195Z"]},"add-outlined":{"viewBox":"0 0 24 24","paths":["M10.8571 13.1429H5.14286C4.81905 13.1429 4.54762 13.0333 4.32857 12.8143C4.10952 12.5952 4 12.3238 4 12C4 11.6762 4.10952 11.4048 4.32857 11.1857C4.54762 10.9667 4.81905 10.8571 5.14286 10.8571H10.8571V5.14286C10.8571 4.81905 10.9667 4.54762 11.1857 4.32857C11.4048 4.10952 11.6762 4 12 4C12.3238 4 12.5952 4.10952 12.8143 4.32857C13.0333 4.54762 13.1429 4.81905 13.1429 5.14286V10.8571H18.8571C19.181 10.8571 19.4524 10.9667 19.6714 11.1857C19.8905 11.4048 20 11.6762 20 12C20 12.3238 19.8905 12.5952 19.6714 12.8143C19.4524 13.0333 19.181 13.1429 18.8571 13.1429H13.1429V18.8571C13.1429 19.181 13.0333 19.4524 12.8143 19.6714C12.5952 19.8905 12.3238 20 12 20C11.6762 20 11.4048 19.8905 11.1857 19.6714C10.9667 19.4524 10.8571 19.181 10.8571 18.8571V13.1429Z"]},"compare-arrows-outlined":{"viewBox":"0 0 24 24","paths":["M9.4575 15.6001H3.9C3.645 15.6001 3.43125 15.5138 3.25875 15.3413C3.08625 15.1688 3 14.9551 3 14.7001C3 14.4451 3.08625 14.2313 3.25875 14.0588C3.43125 13.8863 3.645 13.8001 3.9 13.8001H9.4575L7.77 12.1126C7.605 11.9476 7.5225 11.7413 7.5225 11.4938C7.5225 11.2463 7.605 11.0326 7.77 10.8526C7.95 10.6726 8.16375 10.5826 8.41125 10.5826C8.65875 10.5826 8.8725 10.6726 9.0525 10.8526L12.27 14.0701C12.36 14.1601 12.4237 14.2576 12.4613 14.3626C12.4988 14.4676 12.5175 14.5801 12.5175 14.7001C12.5175 14.8201 12.4988 14.9326 12.4613 15.0376C12.4237 15.1426 12.36 15.2401 12.27 15.3301L9.03 18.5701C8.85 18.7501 8.64 18.8363 8.4 18.8288C8.16 18.8213 7.95 18.7276 7.77 18.5476C7.605 18.3676 7.51875 18.1576 7.51125 17.9176C7.50375 17.6776 7.59 17.4676 7.77 17.2876L9.4575 15.6001ZM14.5425 10.2001L16.23 11.8876C16.395 12.0526 16.4775 12.2588 16.4775 12.5063C16.4775 12.7538 16.395 12.9676 16.23 13.1476C16.05 13.3276 15.8363 13.4176 15.5888 13.4176C15.3413 13.4176 15.1275 13.3276 14.9475 13.1476L11.73 9.9301C11.64 9.8401 11.5763 9.7426 11.5388 9.6376C11.5013 9.5326 11.4825 9.4201 11.4825 9.3001C11.4825 9.1801 11.5013 9.0676 11.5388 8.9626C11.5763 8.8576 11.64 8.7601 11.73 8.6701L14.97 5.4301C15.15 5.2501 15.36 5.16385 15.6 5.17135C15.84 5.17885 16.05 5.2726 16.23 5.4526C16.395 5.6326 16.4813 5.8426 16.4888 6.0826C16.4963 6.3226 16.41 6.5326 16.23 6.7126L14.5425 8.4001H20.1C20.355 8.4001 20.5688 8.48635 20.7413 8.65885C20.9138 8.83135 21 9.0451 21 9.3001C21 9.5551 20.9138 9.76885 20.7413 9.94135C20.5688 10.1138 20.355 10.2001 20.1 10.2001H14.5425Z"]},"keyboard-arrow-down-outlined":{"viewBox":"0 0 20 20","paths":["M10 12.9372C9.88042 12.9372 9.76831 12.9185 9.66368 12.8812C9.55904 12.8438 9.46188 12.7803 9.3722 12.6906L5.24664 8.56502C5.08221 8.4006 5 8.19133 5 7.93722C5 7.68311 5.08221 7.47384 5.24664 7.30942C5.41106 7.14499 5.62033 7.06278 5.87444 7.06278C6.12855 7.06278 6.33782 7.14499 6.50224 7.30942L10 10.8072L13.4978 7.30942C13.6622 7.14499 13.8714 7.06278 14.1256 7.06278C14.3797 7.06278 14.5889 7.14499 14.7534 7.30942C14.9178 7.47384 15 7.68311 15 7.93722C15 8.19133 14.9178 8.4006 14.7534 8.56502L10.6278 12.6906C10.5381 12.7803 10.441 12.8438 10.3363 12.8812C10.2317 12.9185 10.1196 12.9372 10 12.9372Z"]},"restore-point-outlined":{"viewBox":"0 0 20.002 20.0041","paths":["M11.11 19.9441C10.73 19.9841 10.35 20.0041 9.98 20.0041C7.72 20.0041 5.55 19.2441 3.76 17.8141C1.68 16.1541 0.36 13.7741 0.07 11.1141C0.01 10.5641 0.4 10.0741 0.95 10.0041C1.5 9.95414 1.99 10.3341 2.06 10.8841C2.3 13.0041 3.35 14.9141 5.02 16.2441C6.69 17.5741 8.77 18.1841 10.9 17.9441C15.28 17.4541 18.45 13.4841 17.96 9.10414C17.72 6.98414 16.67 5.07414 15 3.74414C13.33 2.41414 11.24 1.80414 9.12 2.04414C6.55 2.33414 4.35 3.81414 3.1 5.99414H6.01C6.56 5.99414 7.01 6.44414 7.01 6.99414C7.01 7.54414 6.56 7.99414 6.01 7.99414H1C0.45 7.99414 0 7.54414 0 6.99414V2.00414C0 1.45414 0.45 1.00414 1 1.00414C1.55 1.00414 2 1.45414 2 2.00414V4.00414C3.62 1.83414 6.08 0.38414 8.89 0.0641401C11.54 -0.23586 14.15 0.52414 16.24 2.18414C18.33 3.85414 19.64 6.23414 19.94 8.88414C20.55 14.3641 16.59 19.3241 11.12 19.9341L11.11 19.9441ZM10 12.0041C8.9 12.0041 8 11.1041 8 10.0041C8 8.90414 8.9 8.00414 10 8.00414C11.1 8.00414 12 8.90414 12 10.0041C12 11.1041 11.1 12.0041 10 12.0041Z"]},"open-in-new-outlined":{"viewBox":"0 0 20 20","paths":["M 15 20 L 5 20 C 2.24 20 0 17.76 0 15 L 0 5 C 0 2.24 2.24 0 5 0 L 15 0 C 17.76 0 20 2.24 20 5 L 20 15 C 20 17.76 17.76 20 15 20 Z M 5 2 C 3.35 2 2 3.35 2 5 L 2 15 C 2 16.65 3.35 18 5 18 L 15 18 C 16.65 18 18 16.65 18 15 L 18 5 C 18 3.35 16.65 2 15 2 L 5 2 Z M 13 14 C 12.45 14 12 13.55 12 13 L 12 9.41 L 7.71 13.7 C 7.32 14.09 6.69 14.09 6.3 13.7 C 5.91 13.31 5.91 12.68 6.3 12.29 L 10.59 8 L 7 8 C 6.45 8 6 7.55 6 7 C 6 6.45 6.45 6 7 6 L 13 6 C 13.13 6 13.26 6.03 13.38 6.08 C 13.5 6.13 13.61 6.2 13.71 6.3 C 13.81 6.4 13.88 6.51 13.93 6.63 C 13.98 6.75 14.01 6.87 14.01 7.01 L 14.01 13.01 C 14.01 13.56 13.56 14.01 13.01 14.01 L 13 14 Z"]},"dc-computers":{"viewBox":"0 0 20 20","paths":["M6.44737 4.86842C6.11842 4.86842 5.83882 4.98355 5.60855 5.21382C5.37829 5.44408 5.26316 5.72368 5.26316 6.05263C5.26316 6.38158 5.37829 6.66118 5.60855 6.89145C5.83882 7.12171 6.11842 7.23684 6.44737 7.23684C6.77632 7.23684 7.05592 7.12171 7.28618 6.89145C7.51645 6.66118 7.63158 6.38158 7.63158 6.05263C7.63158 5.72368 7.51645 5.44408 7.28618 5.21382C7.05592 4.98355 6.77632 4.86842 6.44737 4.86842ZM6.44737 12.7632C6.11842 12.7632 5.83882 12.8783 5.60855 13.1086C5.37829 13.3388 5.26316 13.6184 5.26316 13.9474C5.26316 14.2763 5.37829 14.5559 5.60855 14.7862C5.83882 15.0164 6.11842 15.1316 6.44737 15.1316C6.77632 15.1316 7.05592 15.0164 7.28618 14.7862C7.51645 14.5559 7.63158 14.2763 7.63158 13.9474C7.63158 13.6184 7.51645 13.3388 7.28618 13.1086C7.05592 12.8783 6.77632 12.7632 6.44737 12.7632ZM3.68421 2.5H16.3158C16.5395 2.5 16.727 2.57566 16.8783 2.72697C17.0296 2.87829 17.1053 3.06579 17.1053 3.28947V8.81579C17.1053 9.03947 17.0296 9.22697 16.8783 9.37829C16.727 9.5296 16.5395 9.60526 16.3158 9.60526H3.68421C3.46053 9.60526 3.27303 9.5296 3.12171 9.37829C2.97039 9.22697 2.89474 9.03947 2.89474 8.81579V3.28947C2.89474 3.06579 2.97039 2.87829 3.12171 2.72697C3.27303 2.57566 3.46053 2.5 3.68421 2.5ZM4.47368 4.07895V8.02632H15.5263V4.07895H4.47368ZM3.68421 10.3947H16.3158C16.5395 10.3947 16.727 10.4704 16.8783 10.6217C17.0296 10.773 17.1053 10.9605 17.1053 11.1842V16.7105C17.1053 16.9342 17.0296 17.1217 16.8783 17.273C16.727 17.4243 16.5395 17.5 16.3158 17.5H3.68421C3.46053 17.5 3.27303 17.4243 3.12171 17.273C2.97039 17.1217 2.89474 16.9342 2.89474 16.7105V11.1842C2.89474 10.9605 2.97039 10.773 3.12171 10.6217C3.27303 10.4704 3.46053 10.3947 3.68421 10.3947ZM4.47368 11.9737V15.9211H15.5263V11.9737H4.47368Z"]}};
+function ico(name, size) {
+  var d = ICONS[name]; if (!d) return '';
+  return '<svg width="' + (size || 20) + '" height="' + (size || 20) + '" viewBox="' + d.viewBox + '" aria-hidden="true">' + d.paths.map(function(p){ return '<path d="' + p + '"/>'; }).join('') + '</svg>';
+}
+function esc(s) { return String(s).replace(/[&<>"]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+/* ── Seed: 14 restore points, newest first ── */
+var RPS = []; (function(){
+  var t = new Date(2026, 9, 14, 3, 15), step = [1, 2, 2, 3, 2, 2, 3, 2, 2, 3, 2, 2, 1];
+  RPS.push({ ts: +t }); step.forEach(function(d){ t = new Date(+t - d * 86400000); RPS.push({ ts: +t }); });
+  RPS.forEach(function(r){ var d = new Date(r.ts); r.label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' · ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }); });
+})();
+function D(m, d, h) { return +new Date(2026, m, d, h || 9, 0); }
+function at(tl, ts) { var v = tl[0][1]; tl.forEach(function(e){ if (e[0] <= ts) v = e[1]; }); return v; }
+function dayBefore(ts, n) { return new Date(ts - n * 86400000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+function K(v) { return [[0, v]]; }
+
+var OBJS = {
+  comp: { name: 'MERIDIAN-FS-01', type: 'Computer', sub: 'Computer · meridian', items: 'MERIDIAN-FS-01 · Computer',
+    attrs: [
+      ['Name', K('MERIDIAN-FS-01')], ['DNS hostname', K('meridian-fs-01.corp.meridian.local')],
+      ['Operating system', [[0, 'Windows Server 2019 Standard'], [D(8, 24), 'Windows Server 2022 Standard']]],
+      ['Enabled', K('Yes')],
+      ['Location', [[0, 'Boston DC1 · Rack 12'], [D(8, 20), 'Boston DC2 · Rack 4']]],
+      ['Description', [[0, 'File server'], [D(9, 2), 'File server — Finance and Engineering shares']]],
+      ['Last logon', 'derived'],
+      ['Distinguished name', K('CN=MERIDIAN-FS-01,CN=Computers,DC=corp,DC=meridian,DC=local')]
+    ], rel: null },
+  user: { name: 'MERIDIAN\\j.alvarez', type: 'User', sub: 'User · meridian', items: 'MERIDIAN\\j.alvarez · User account',
+    attrs: [
+      ['Display name', K('Jordan Alvarez')], ['Logon name', K('j.alvarez')], ['Email', K('j.alvarez@meridian.com')],
+      ['Department', K('Finance')],
+      ['Job title', [[0, 'Financial Analyst'], [D(8, 28), 'Senior Financial Analyst']]],
+      ['Manager', [[0, 'Priya Natarajan'], [D(8, 28), 'Mira Okafor']]],
+      ['Enabled', K('Yes')], ['Password last set', K('Sep 12, 2026')], ['Last logon', 'derived'],
+      ['Distinguished name', K('CN=Jordan Alvarez,OU=Finance,DC=corp,DC=meridian,DC=local')]
+    ],
+    rel: { title: 'Member of', items: [['Domain Users', null, null], ['Finance-Staff', null, null], ['VPN-Users', D(9, 1), null], ['Finance-Approvers', null, D(8, 22)]] } },
+  group: { name: 'VPN-Users', type: 'Group', sub: 'Group · meridian', items: 'VPN-Users · Global security group',
+    attrs: [
+      ['Name', K('VPN-Users')], ['Scope', K('Global')], ['Type', K('Security')],
+      ['Description', [[0, 'Remote access via corporate VPN'], [D(9, 6), 'Remote access via corporate VPN — all staff']]],
+      ['Managed by', [[0, 'MERIDIAN\\d.kovac'], [D(9, 6), 'MERIDIAN\\m.reed']]],
+      ['Distinguished name', K('CN=VPN-Users,OU=Groups,DC=corp,DC=meridian,DC=local')]
+    ],
+    rel: { title: 'Members', items: [['MERIDIAN\\j.alvarez', null, null], ['MERIDIAN\\m.okafor', null, null], ['MERIDIAN\\t.nguyen', null, null], ['MERIDIAN\\d.kovac', null, null],
+      ['MERIDIAN\\e.ibrahim', D(9, 2), null], ['MERIDIAN\\k.okafor', D(9, 9), null], ['MERIDIAN\\r.chen', D(9, 12), null], ['MERIDIAN\\l.kovac', null, D(8, 26)], ['MERIDIAN\\o.alvarez', null, D(9, 4)]] } }
+};
+function valOf(o, a, ts) { return a[1] === 'derived' ? dayBefore(ts, 1) : at(a[1], ts); }
+function present(it, ts) { return (it[1] == null || ts >= it[1]) && (it[2] == null || ts < it[2]); }
+
+/* ── State ── */
+var S = { v: 'A2', o: 'comp', s: 'two', l: 0, r: 9, added: { l: false, r: false }, only: true, q: '' };
+function rp(i) { return RPS[i]; }
+function pickerHtml(side, idx, plain) {
+  return '<span class="pick' + (plain ? ' plain' : '') + '"><select data-side="' + side + '" aria-label="Restore point">' + RPS.map(function(r, i){ return '<option value="' + i + '"' + (i === idx ? ' selected' : '') + '>' + esc(r.label) + '</option>'; }).join('') + '</select>' + ico('keyboard-arrow-down-outlined', 16) + '</span>';
+}
+function fieldPicker(side, idx) {
+  return '<span class="field"><select data-side="' + side + '" aria-label="Restore point">' + RPS.map(function(r, i){ return '<option value="' + i + '"' + (i === idx ? ' selected' : '') + '>' + esc(r.label) + '</option>'; }).join('') + '</select>' + ico('keyboard-arrow-down-outlined', 20) + '</span>';
+}
+function capFor(i) { if (i === 0) return 'Latest backup'; var d = Math.round((RPS[0].ts - RPS[i].ts) / 86400000); return d + ' day' + (d === 1 ? '' : 's') + ' earlier'; }
+var CHECK = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
+var CROSS = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+function addBtn(side) {
+  return S.added[side]
+    ? '<button type="button" class="btn added" data-add="' + side + '" aria-label="Added to restore, activate to remove"><span class="la">' + CHECK + 'Added</span><span class="lr">' + CROSS + 'Remove</span></button>'
+    : '<button type="button" class="btn ter" data-add="' + side + '">Add to restore</button>';
+}
+function addTer() { return '<button type="button" class="btn ter">Add to restore</button>'; }
+function colCell(side, idx) {
+  return '<div class="hd ' + (S.added[side] ? 'aft' : 'now') + ' hd2">' + fieldPicker(side, idx) + '<div class="hd2-meta"><span class="hd2-cap">' + capFor(idx) + '</span>' + addBtn(side) + '</div></div>';
+}
+function viewA2(o) {
+  var lts = rp(S.l).ts, rts = rp(S.r).ts;
+  var lead = '<div class="lead lead2"><span class="attr">Attribute</span></div>';
+  if (S.s === 'one') {
+    return topBlock(o, true)
+      + '<div class="bar c2 solo">' + lead + colCell('l', S.l) + '</div>'
+      + '<div class="urow">' + srchField() + '<button type="button" class="btn sec" data-compare="1">' + ico('compare-arrows-outlined', 16) + 'Compare</button></div>'
+      + cardOne(o, lts);
+  }
+  var c = cardTwo(o, lts, rts, '');
+  return topBlock(o, true) + summary(c.changed, lts, rts, false)
+    + '<div class="bar c3 solo">' + lead + colCell('l', S.l) + colCell('r', S.r) + '</div>'
+    + '<div class="urow">' + srchField() + '</div>'
+    + c.html;
+}
+function srchField() { return '<label class="srch" style="flex:1">' + ico('search-outlined', 16) + '<input type="search" placeholder="Search this record" value="' + esc(S.q) + '" data-q="1"></label>'; }
+function hdCell(cls, title, side, idx, btns) {
+  return '<div class="hd ' + cls + '"><div class="hd-top"><div class="hd-t">' + title + '</div><div class="btns">' + (btns || add()) + '</div></div>' + pickerHtml(side, idx, true) + '</div>';
+}
+function cmpBtn() { return '<button type="button" class="btn sec" data-compare="1">' + ico('compare-arrows-outlined', 16) + 'Compare</button>'; }
+function add() { return '<button type="button" class="btn pri">' + ico('add-outlined', 16) + 'Add to restore</button>'; }
+
+/* Rows: [label, leftVal, rightVal, changed] */
+function rowsFor(o, lts, rts) {
+  var rows = o.attrs.map(function(a){ var l = valOf(o, a, lts), r = valOf(o, a, rts); return [a[0], l, r, l !== r && a[0] !== 'Last logon']; });
+  return rows;
+}
+function relRows(o, lts, rts) {
+  if (!o.rel) return [];
+  return o.rel.items.map(function(it){ var l = present(it, lts), r = present(it, rts); return { name: it[0], l: l, r: r, changed: l !== r }; })
+    .filter(function(x){ return x.l || x.r; });
+}
+function matchQ(s) { return !S.q || String(s).toLowerCase().indexOf(S.q.toLowerCase()) >= 0; }
+
+function tintCls(side) { return S.added[side] ? 'col-g' : 'col-n'; }
+function cardTwo(o, lts, rts, cols3) {
+  var rows = rowsFor(o, lts, rts), nChanged = rows.filter(function(r){ return r[3]; }).length;
+  var rel = relRows(o, lts, rts), relChanged = rel.filter(function(x){ return x.changed; }).length;
+  var vis = rows.filter(function(r){ return (!S.only || r[3]) && matchQ(r[0] + ' ' + r[1] + ' ' + r[2]); });
+  var relVis = rel.filter(function(x){ return (!S.only || x.changed) && matchQ(x.name); });
+  var html = '';
+  html += '<div class="sec"><div class="sech">' + esc(o.type) + '</div><div class="card tint' + (cols3 === 'attach' ? ' attach' : '') + '"><table>'
+    + (vis.length ? vis.map(function(r){ return '<tr' + (r[3] ? ' class="diff"' : '') + '><td class="a">' + esc(r[0]) + '</td><td class="' + (r[3] ? 'l ' : '') + tintCls('l') + '">' + esc(r[1]) + '</td><td class="' + tintCls('r') + '">' + esc(r[2]) + '</td></tr>'; }).join('')
+      : '<tr><td colspan="3" class="empty">' + (S.only ? 'No changed attributes between these points.' : 'No attributes match.') + '</td></tr>') + '</table></div></div>';
+  if (o.rel) {
+    html += '<div class="sec"><div class="sech">' + esc(o.rel.title) + '<span class="ct">' + rel.filter(function(x){ return x.r; }).length + '</span></div><div class="card tint"><table>'
+      + (relVis.length ? relVis.map(function(x){
+          return '<tr' + (x.changed ? ' class="diff"' : '') + '><td class="a">' + esc(x.name) + '</td><td class="' + tintCls('l') + '">' + (x.l ? 'Member' : '<span class="none">Not a member</span>') + '</td><td class="' + tintCls('r') + '">' + (x.r ? 'Member' : '<span class="none">Not a member</span>') + '</td></tr>'; }).join('')
+        : '<tr><td colspan="3" class="empty">No changes in ' + esc(o.rel.title.toLowerCase()) + ' between these points.</td></tr>') + '</table></div></div>';
+  }
+  return { html: html, changed: nChanged + relChanged };
+}
+function cardOne(o, ts) {
+  var rows = o.attrs.map(function(a){ return [a[0], valOf(o, a, ts)]; }).filter(function(r){ return matchQ(r[0] + ' ' + r[1]); });
+  var rel = o.rel ? o.rel.items.filter(function(it){ return present(it, ts) && matchQ(it[0]); }) : [];
+  var h = '<div class="sec"><div class="sech">' + esc(o.type) + '</div><div class="card"><table>' + rows.map(function(r){ return '<tr><td class="a">' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</table></div></div>';
+  if (o.rel) h += '<div class="sec"><div class="sech">' + esc(o.rel.title) + '<span class="ct">' + o.rel.items.filter(function(it){ return present(it, ts); }).length + '</span></div><div class="card"><table>' + rel.map(function(it){ return '<tr><td class="a">' + esc(it[0]) + '</td><td>Member</td></tr>'; }).join('') + '</table></div></div>';
+  return h;
+}
+function summary(changed, lts, rts, withSearch, withClose) {
+  return '<div class="sum">' + (changed ? '<span class="badge">' + changed + ' difference' + (changed > 1 ? 's' : '') + '</span>' : '<span class="badge ok">No differences</span>')
+    + '<span>between <b>' + esc(rp(S.l).label) + '</b> and <b>' + esc(rp(S.r).label) + '</b></span><span class="sp"></span>'
+    + (withSearch ? '<label class="srch" style="width:180px">' + ico('search-outlined', 16) + '<input type="search" placeholder="Search" value="' + esc(S.q) + '" data-q="1"></label>' : '')
+    + '<button type="button" class="more" data-only="1">' + (S.only ? 'Show all' : 'Show changes only') + '</button>'
+    + (withClose ? '<button type="button" class="x" style="width:28px;height:28px" aria-label="Close">' + ico('close-outlined', 16) + '</button>' : '') + '</div>';
+}
+function topBlock(o, withClose) {
+  return '<div class="drw-top"><div class="drw-ttl"><div class="n">' + esc(o.name) + '<span class="chip">Private Preview</span></div><div class="s">' + esc(o.sub) + '</div></div>' + (withClose ? '<button type="button" class="x" aria-label="Close">' + ico('close-outlined', 20) + '</button>' : '') + '</div>';
+}
+function srchFull() { return '<label class="srch full">' + ico('search-outlined', 16) + '<input type="search" placeholder="Search this record" value="' + esc(S.q) + '" data-q="1"></label>'; }
+function wlTile() { return '<span class="tile">' + ico('dc-computers', 20) + '</span>'; }
+
+/* ── Variants ── */
+function viewA(o) {
+  if (S.s === 'one') {
+    return topBlock(o, true)
+      + '<div class="bar c2"><div class="lead"><span class="attr">Attribute</span></div>' + hdCell('now', 'Restore point', 'l', S.l, cmpBtn() + add()) + '</div>'
+      + '<div class="card attach"><table>' + o.attrs.map(function(a){ return '<tr><td class="a">' + esc(a[0]) + '</td><td>' + esc(valOf(o, a, rp(S.l).ts)) + '</td></tr>'; }).join('') + '</table></div>'
+      + (o.rel ? cardOne({ type: '', attrs: [], rel: o.rel }, rp(S.l).ts).replace('<div class="sec"><div class="sech"></div><div class="card"><table></table></div></div>', '') : '')
+      + srchFull();
+  }
+  var lts = rp(S.l).ts, rts = rp(S.r).ts, c = cardTwo(o, lts, rts, 'attach');
+  return topBlock(o, true) + summary(c.changed, lts, rts, false)
+    + '<div class="bar c3"><div class="lead"><span class="attr">Attribute</span></div>'
+    + '' + hdCell('now', (S.l === 0 ? 'Latest backup' : 'Restore point'), 'l', S.l) + ''
+    + '' + hdCell('aft', 'Restore point', 'r', S.r) + '</div>'
+    + c.html.replace('<div class="sec"><div class="sech">' + esc(o.type) + '</div>', '<div class="sec">')
+    + srchFull();
+}
+function viewB(o) {
+  var lts = rp(0).ts, rts = rp(S.r).ts, c = cardTwo(o, lts, rts, 'attach');
+  return topBlock(o, true) + summary(c.changed, lts, rts, false)
+    + '<div class="bar c3"><div class="lead"><span class="attr">Attribute</span></div>'
+    + '<div class="hd now"><div class="hd-t">Now</div><div class="hd-s">Latest backup · ' + esc(rp(0).label) + '</div><div class="hd-s">Includes any change since</div></div>'
+    + '' + hdCell('aft', 'After restore', 'r', S.r) + '</div>'
+    + c.html.replace('<div class="sec"><div class="sech">' + esc(o.type) + '</div>', '<div class="sec">')
+    + srchFull();
+}
+function viewC(o) {
+  var lead = '<div class="lead"><div class="idn-top"><span class="wl">' + wlTile() + '<span style="white-space:nowrap">Active Directory</span></span></div>'
+    + '<div class="idn">' + esc(o.name) + '</div><div class="items">' + esc(o.type) + ' · meridian</div></div>';
+  if (S.s === 'one') {
+    return '<div class="bar c2" style="border-radius:8px 8px 0 0">' + lead
+      + '' + hdCell('now', 'Restore point', 'l', S.l, cmpBtn() + add() + '<button type="button" class="x" style="width:28px;height:28px" aria-label="Close">' + ico('close-outlined', 16) + '</button>') + '</div>'
+      + '<div class="card attach"><table>' + o.attrs.map(function(a){ return '<tr><td class="a">' + esc(a[0]) + '</td><td>' + esc(valOf(o, a, rp(S.l).ts)) + '</td></tr>'; }).join('') + '</table></div>'
+      + (o.rel ? cardOne({ type: '', attrs: [], rel: o.rel }, rp(S.l).ts).replace('<div class="sec"><div class="sech"></div><div class="card"><table></table></div></div>', '') : '');
+  }
+  var lts = rp(S.l).ts, rts = rp(S.r).ts, c = cardTwo(o, lts, rts, 'attach');
+  return summary(c.changed, lts, rts, true, true)
+    + '<div class="bar c3">' + lead
+    + '' + hdCell('now', (S.l === 0 ? 'Latest backup' : 'Restore point'), 'l', S.l) + ''
+    + '' + hdCell('aft', 'Restore point', 'r', S.r) + '</div>'
+    + c.html.replace('<div class="sec"><div class="sech">' + esc(o.type) + '</div>', '<div class="sec">');
+}
+var NOTES = {
+  A2: '<b>Header:</b> the first cell just says Attribute. The date picker is the column title, with a grey caption for how old the point is, and Add to restore on its own row. <b>Green accent:</b> only appears on the column whose point has been added to restore (try Add to restore, then hover the button to see Remove). Only one point can be pinned per item, so adding the other side moves it. <b>Order:</b> the changes summary sits above the header bar and search sits below it, as in the current drawer.',
+  A: '<b>What changes:</b> the picker bar, the "N fields differ" line and the toggle are replaced by the dashboard\'s summary row and column-header bar, and the column tints and tinted changed rows come across. <b>What stays:</b> the drawer title, both sides user-chosen, and an Add to restore on each. <b>Trade-off:</b> the green column accent implies a restore target, but in this layout either side can be restored.',
+  B: '<b>What changes:</b> the comparison always reads "Now vs After restore", the way the dashboard does, so there is one question to answer: what would restoring this point change. <b>Trade-off:</b> you lose arbitrary point-to-point comparison (say, last Tuesday against last Friday). The One restore point state is the same view with the right side defaulted to the latest backup, so Compare would disappear as a separate step.',
+  C: '<b>What changes:</b> the object\'s identity (workload tile, name, type) moves into the bar\'s first cell, which is exactly how the dashboard\'s header reads, and the drawer title block disappears. In the one-point state the same bar carries Compare. <b>Trade-off:</b> the close button now lives inside the bar, and the 220px identity cell takes width from the values.'
+};
+function render() {
+  var o = OBJS[S.o];
+  var h = S.v === 'A2' ? viewA2(o) : viewA(o);
+  var wrap = document.getElementById('drawer');
+  var focus = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute('data-q');
+  wrap.innerHTML = '<div class="drw">' + h + '</div>';
+  if (focus) { var i = wrap.querySelector('[data-q]'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }
+  document.getElementById('note').innerHTML = NOTES[S.v] + '';
+}
+document.addEventListener('change', function(e) {
+  var t = e.target;
+  if (t.name === 'v') S.v = t.value; else if (t.name === 'o') S.o = t.value; else if (t.name === 's') S.s = t.value;
+  else if (t.getAttribute('data-side')) { S[t.getAttribute('data-side')] = +t.value; S.added[t.getAttribute('data-side')] = false; }
+  else return;
+  render();
+});
+document.addEventListener('input', function(e) { if (e.target.getAttribute('data-q')) { S.q = e.target.value; render(); } });
+document.addEventListener('click', function(e) {
+  var b = e.target.closest('[data-only],[data-compare],[data-add]'); if (!b) return;
+  if (b.hasAttribute('data-add')) { var sd = b.getAttribute('data-add'); var was = S.added[sd]; S.added = { l: false, r: false }; S.added[sd] = !was; }
+  else if (b.hasAttribute('data-only')) S.only = !S.only; else { S.s = 'two'; document.querySelector('input[name=s][value=two]').checked = true; }
+  render();
+});
+render();
+</script>
+</body>
+</html>
