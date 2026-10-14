@@ -5923,9 +5923,12 @@ td.cb-col input:disabled, th.cb-col input:disabled { pointer-events: none; }
    button — user 2026-07-14.) */
 .rd-ctrl-note { display: flex; justify-content: flex-end; }
 /* Header bar — Identity-dashboard header treatment on the Protected Data drawer (Attribute lead cell + one cell per restore point). */
-.rd-hbar { display: grid; grid-template-columns: 180px minmax(0,1fr) minmax(0,1fr); background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; overflow: hidden; }
-.rd-hbar.rd-hbar-single { grid-template-columns: 148px minmax(0,1fr) 152px; }   /* the comparison slot stays compact; the value column below is NOT tied to it, so long text keeps the full width */
-.rd-hc-lead { display: flex; align-items: center; padding: 12px 14px; font-size: 14px; font-weight: 500; color: var(--black-60); border-right: 1px solid var(--border-light); }
+.rd-hbar { display: grid; grid-template-columns: 180px minmax(0,1fr); background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; overflow: hidden; }   /* one continuous bar; the first cell is the header row's label */
+/* The header row is a row like any other: its label cell names what the row holds (same type as the attribute labels below), vertically centred in the header. */
+.rd-hc-rowlabel { display: flex; align-items: center; padding: 12px 14px; font-size: 16px; font-weight: 500; line-height: 22px; color: var(--black-60); background: var(--white); border-right: 1px solid var(--border-light); }
+.rd-hbar.rd-hbar-single { grid-template-columns: 148px minmax(0,1fr); }
+.rd-hcs { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); background: var(--white); }
+.rd-hbar-single .rd-hcs { grid-template-columns: minmax(0,1fr) 152px; }   /* the comparison slot stays compact; the value column below is NOT tied to it, so long text keeps the full width */
 .rd-hc { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 12px 14px; background: var(--black-3); }
 .rd-hc + .rd-hc { border-left: 1px solid var(--border-light); }
 .rd-hc.is-added { background: var(--em-green-tint); box-shadow: inset 0 3px 0 var(--em-green); }
@@ -5943,9 +5946,8 @@ td.cb-col input:disabled, th.cb-col input:disabled { pointer-events: none; }
 .record-drawer.rd-hdr-tucked .rd-hc { flex-direction: row; align-items: center; padding-top: 8px; padding-bottom: 8px; }
 .record-drawer.rd-hdr-tucked .rd-hc-pick { flex: 1; }
 .record-drawer.rd-hdr-tucked .rd-hc-cap, .record-drawer.rd-hdr-tucked .rd-hc .rd-ctrl-note { display: none; }
-.record-drawer.rd-hdr-tucked .rd-hc-lead { padding-top: 8px; padding-bottom: 8px; }
-/* Column tints in the value tables: neutral by default, green on the column whose point is added to the restore job. */
-#rdBody .rd-compare-tbl:not(.rd-single-snap) tr td:nth-child(2), #rdBody .rd-compare-tbl:not(.rd-single-snap) tr td:nth-child(3) { background-image: linear-gradient(rgba(31,34,41,0.04), rgba(31,34,41,0.04)); }
+.record-drawer.rd-hdr-tucked .rd-hc-rowlabel { padding-top: 8px; padding-bottom: 8px; }
+/* Column tint in the value tables: none by default (changed cells keep their orange); green only on the column whose point is added to the restore job. */
 #rdBody[data-added="l"] .rd-compare-tbl:not(.rd-single-snap) tr td:nth-child(2), #rdBody[data-added="r"] .rd-compare-tbl:not(.rd-single-snap) tr td:nth-child(3) { background-image: linear-gradient(rgba(1,128,74,0.07), rgba(1,128,74,0.07)); }
 /* Headerless leading card (rows before the first PRD group divider) */
 .rd-sec-plain { margin-top: 16px; }
@@ -58942,10 +58944,10 @@ function renderRdBody() {
         + '</div>';
     }
     host.innerHTML = '<div class="rd-hbar' + (rdState.singleSnap ? ' rd-hbar-single' : '') + '">'
-      + '<div class="rd-hc-lead">Attribute</div>'
+      + '<div class="rd-hc-rowlabel">' + (rdState.singleSnap ? 'Restore point' : 'Restore points') + '</div><div class="rd-hcs">'
       + _hcCell('left', leftPicker, leftAction, leftInfo, _leftNote, _addedL)
       + (rdState.singleSnap ? _hcGhost() : _hcCell('right', rightPicker, rightAction, rightInfo, _rightNote, _addedR, _rmCmpBtn))
-      + '</div>';
+      + '</div></div>';
     var _rb = document.getElementById('rdBody');
     if (_rb) _rb.setAttribute('data-added', _addedL ? 'l' : (_addedR ? 'r' : ''));
     host.style.display = '';
