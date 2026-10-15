@@ -833,21 +833,18 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
 .pol-status-seg-btn.active.is-active-tab .dot { background: var(--green); }
 
 /* === TOAST === */
-/* Toast — DS spec per mock 9001-135876 (user 2026-08-14): TOP-RIGHT
-   corner, tinted card w/ 1px matching border (alert pattern: tint +
-   border from the same scale), radius 8, bold title + black body, green
-   close ✕ at the card's top-right. No leading icon badge (was: white
-   center-top card with circular tone icon). Slides in from the right. */
-.toast-stack { position: fixed; top: calc(24px + var(--devjump-h)); right: 24px; z-index: 200; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; pointer-events: none; }
-.toast { display: flex; align-items: flex-start; gap: 12px; min-width: 320px; max-width: 380px; padding: 12px 16px; border-radius: 8px; font-size: 14px; line-height: 20px; color: var(--black-100); pointer-events: auto; opacity: 0; transform: translateX(16px); transition: opacity 200ms ease, transform 200ms ease; box-shadow: 0 4px 14px rgba(31,34,41,0.10); }
-.toast.show { opacity: 1; transform: translateX(0); }
-.toast.toast-success { background: var(--val-green-bg); border: 1px solid color-mix(in srgb, var(--val-green) 40%, white); }
-.toast.toast-info { background: var(--val-blue-bg); border: 1px solid color-mix(in srgb, var(--val-blue) 40%, white); }
-.toast-title { font-weight: 700; color: var(--black-100); margin-bottom: 2px; }
-.toast-body { font-weight: 450; color: var(--black-100); }
-.toast-body a, .toast-body .toast-link { color: var(--em-green); text-decoration: none; } /* was underlined — Vision Link */
-.toast-close { margin-left: auto; cursor: pointer; color: var(--btn-success); display: flex; align-items: center; padding: 2px; flex-shrink: 0; }
-.toast-close:hover { color: var(--em-green); }
+/* Toast — same component as Protected Data (inventory-V1-agent-overlay.html .toast): TOP-RIGHT, tinted card with a matching 1px border, radius 8,
+   16px / 500 title (a single-line message takes the headline style), 14px body, green close. Stacked here so several can show at once. */
+.toast-stack { position: fixed; top: calc(16px + var(--devjump-h, 0px)); right: 24px; z-index: 10000; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; pointer-events: none; }
+.toast { max-width: 420px; min-width: 320px; border: 1px solid; border-radius: 8px; padding: 16px 18px; display: flex; gap: 16px; align-items: flex-start; box-shadow: 0 4px 16px rgba(0,0,0,0.08); transform: translateY(-12px); opacity: 0; transition: opacity 0.2s, transform 0.2s; pointer-events: none; }
+.toast.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
+.toast.toast-success { background: var(--green-bg); border-color: var(--green-30); }
+.toast.toast-info { background: var(--blue-light, var(--val-blue-bg)); border-color: var(--blue-30, var(--val-blue)); }
+.toast-title { font-size: 16px; font-weight: 500; color: var(--black-100); line-height: 1.4; }
+.toast-body { font-size: 14px; font-weight: 450; color: var(--black-100); line-height: 1.5; margin-top: 4px; }
+.toast-body a { color: var(--blue); text-decoration: underline; cursor: pointer; }
+.toast-close { background: none; border: none; padding: 0; margin: 2px 0 0 auto; cursor: pointer; flex-shrink: 0; align-self: flex-start; display: flex; color: var(--green); }
+.toast-close svg { width: 16px; height: 16px; display: block; stroke-width: 2.5; }
 /* was: .toast-icon circular tone badge — retired (mock has no icon). */
 
 /* === ACTIVATE CONFIRM DIALOG === */
@@ -2226,7 +2223,6 @@ button.ov-rs-row:hover .ov-rs-lbl { text-decoration: underline; text-decoration-
 .ss-dlg-b ul { margin: 8px 0 0 20px; padding: 0; }
 .ss-dlg-f { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; }
 </style>
-<style>.ss-toast{position:fixed;right:24px;bottom:24px;z-index:9900;padding:12px 16px;border:1px solid var(--green-30);border-radius:4px;background:var(--em-green-tint);font-size:16px;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:none}.ss-toast.on{opacity:1;transform:none}</style>
 <style id="ss2-style">
 /* List pages in settings (pattern: System Settings > Access Management > Users) */
 .ss-list { border: 1px solid var(--border-light); border-radius: 4px; background: var(--white); }
@@ -2819,15 +2815,16 @@ td.as-td-actions { position: relative; }
   </div>
 </div><!-- /app -->
 
-<div class="ss-dlg-scrim" id="ssDlg" role="dialog" aria-modal="true" aria-label="Confirm higher autonomy"><div class="ss-dlg"><div class="ss-dlg-t" id="ssDlgT">Raise autonomy?</div><div class="ss-dlg-b"><span id="ssDlgIntro">These capabilities will act without asking you first:</span><ul id="ssDlgList"></ul></div><div class="ss-dlg-f"><button type="button" class="plv-btn plv-btn-secondary" onclick="ssDlgClose(false)">Cancel</button><button type="button" class="plv-btn plv-btn-primary" onclick="ssDlgClose(true)">Confirm and save</button></div></div></div>
+<div class="ss-dlg-scrim" id="ssDlg" role="dialog" aria-modal="true" aria-label="Confirm higher autonomy"><div class="ss-dlg"><div class="ss-dlg-t" id="ssDlgT">Raise autonomy?</div><div class="ss-dlg-b"><span id="ssDlgIntro">These capabilities will act without asking you first:</span><ul id="ssDlgList"></ul></div><div class="ss-dlg-f"><button type="button" class="plv-btn plv-btn-secondary" id="ssDlgNo" onclick="ssDlgClose(false)">Cancel</button><button type="button" class="plv-btn plv-btn-primary" id="ssDlgYes" onclick="ssDlgClose(true)">Confirm and save</button></div></div></div>
 <div class="ss-menu" id="ssMenu" role="menu"></div>
-<div class="ss-md-scrim" id="ssPgScrim" onclick="ssDrClose()"></div>
+<div class="ss-md-scrim" id="ssPgScrim" onclick="ssDrAsk()"></div>
 <div class="ss-md" id="ssPg" role="dialog" aria-modal="true" aria-label="Configure skill">
   <div class="ss-md-hd" id="ssPgHd"></div>
   <div class="ss-md-body" id="ssPgMain"></div>
   <div class="ss-md-ft"><div class="ss-md-col"><span class="ss-md-hint" id="ssPgHint"></span><button type="button" class="plv-btn plv-btn-secondary" id="ssDrCancel" onclick="ssDrClose()">Cancel</button><button type="button" class="plv-btn plv-btn-primary" id="ssDrSave" onclick="ssDrSave()">Save</button></div></div>
 </div>
-<div id="ssToast" class="ss-toast" aria-live="polite"></div>
+<!-- Toasts: the shared top-right stack (same component and look as Policies; was a bottom-right #ssToast). -->
+<div class="toast-stack" id="toast-stack" aria-live="polite"></div>
 
 <div id="passwordGate" style="
   position:fixed;inset:0;z-index:9999;
@@ -2908,7 +2905,18 @@ td.as-td-actions { position: relative; }
 // Page shims so the copied shell code stays verbatim and diffable (Activity's helpers → this page's own).
 function _dsStoreIconSvg(name, size){ var e = (window.__SECURITI_ICONS || {})[name]; if (!e || !e.paths) return ''; return '<svg width="' + (size || 16) + '" height="' + (size || 16) + '" viewBox="' + e.viewBox + '" fill="currentColor" aria-hidden="true">' + e.paths.map(function(p){ return '<path d="' + p + '"/>'; }).join('') + '</svg>'; }
 function _sdIc(name, size){ return _dsStoreIconSvg(name, size); }
-function showToast(msg){ var t = document.getElementById('ssToast'); if (!t) return; t.textContent = msg; t.classList.add('on'); setTimeout(function(){ t.classList.remove('on'); }, 2400); }
+function showToast(opts){
+  if (typeof opts === 'string') opts = { tone:'success', title: opts };   // the copied panel code passes plain strings
+  var stack = document.getElementById('toast-stack'); if (!stack || !opts) return;
+  var t = document.createElement('div');
+  t.className = 'toast ' + (opts.tone === 'success' ? 'toast-success' : 'toast-info');
+  t.innerHTML = '<div style="flex:1;min-width:0"><div class="toast-title">' + opts.title + '</div>' + (opts.body ? '<div class="toast-body">' + opts.body + '</div>' : '') + '</div>'
+    + '<div class="toast-close" onclick="dismissToast(this.parentElement)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>';
+  stack.appendChild(t);
+  requestAnimationFrame(function(){ t.classList.add('show'); });
+  setTimeout(function(){ dismissToast(t); }, 5000);
+}
+function dismissToast(t){ if (!t || !t.parentElement) return; t.classList.remove('show'); setTimeout(function(){ if (t.parentElement) t.parentElement.removeChild(t); }, 250); }
 /* ══════════════════════════════════════════════════════════════════════════
    RESILIENCE ASSISTANT — CONVERSATION-LED HANDOFF ONLY (2026-09-18). This
    page never launches its own scenarios: it hydrates a transcript carried
@@ -4402,7 +4410,7 @@ function hydrateDefaultPolicyForm(wl) {
   var state = load(), savedAvail = loadAvail(), draftAvail = savedAvail, view = 'settings';
 
   // ── toast + menu ──
-  function toast(msg){ var t = document.getElementById('ssToast'); t.textContent = msg; t.classList.add('on'); setTimeout(function(){ t.classList.remove('on'); }, 2400); }
+  function toast(msg){ showToast({ tone:'success', title: msg }); }
   function closeMenu(){ var m = document.getElementById('ssMenu'); if (m) m.classList.remove('open'); }
   window.ssMenu = function(ev, items){
     ev.stopPropagation();
@@ -4480,8 +4488,9 @@ function hydrateDefaultPolicyForm(wl) {
     return why;
   }
   var _pending = null;
-  function confirmAuto(title, intro, names, onOk){
+  function confirmAuto(title, intro, names, onOk, labels){
     document.getElementById('ssDlgT').textContent = title; document.getElementById('ssDlgIntro').textContent = intro;
+    document.getElementById('ssDlgYes').textContent = (labels && labels.yes) || 'Confirm and save'; document.getElementById('ssDlgNo').textContent = (labels && labels.no) || 'Cancel';
     document.getElementById('ssDlgList').innerHTML = names.map(function(n){ return '<li>' + esc(n) + '</li>'; }).join('');
     _pending = onOk; document.getElementById('ssDlg').classList.add('open');
   }
@@ -4539,7 +4548,7 @@ function hydrateDefaultPolicyForm(wl) {
   function pgHead(){
     var c = pgC();
     document.getElementById('ssPgHd').innerHTML = '<span class="tile">' + ic('ai-sparkle', 20) + '</span><span class="ti">' + esc(c.name) + '</span>'
-      + '<button type="button" class="x" aria-label="Close" onclick="ssDrClose()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
+      + '<button type="button" class="x" aria-label="Close" onclick="ssDrAsk()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
   }
   function secOverview(c){
     return '<div class="ss-md-top"><div class="ss-md-tt"><h2 class="ss-md-h1">Configure ' + esc(c.name) + ' skill</h2><p class="ss-md-lead">' + esc(c.sub) + '</p></div>'
@@ -4550,26 +4559,18 @@ function hydrateDefaultPolicyForm(wl) {
     var ok = wlApplies(c.id), fixed = ok.length < WLS.length;
     if (fixed) return '<div class="ss-readrow"><span><strong>Workloads</strong> \u00b7 Only available on ' + esc(ok.map(wlName).join(', ')) + '</span></div>';
     var open = !!dr.wlOpen && dr.on, all = dr.wl === 'all';
-    return '<div class="ss-readrow' + (open ? ' is-editing' : '') + '"><span><strong>Workloads</strong>' + (open ? '' : ' \u00b7 ' + esc(wlSummary(dr.wl, c.id))) + '</span>' + (open ? '' : '<button type="button" class="plv-btn plv-btn-secondary" onclick="ssWlToggle()"' + (dr.on ? '' : ' disabled') + '>Edit</button>') + '</div>'
+    return '<div class="ss-readrow' + (open ? ' is-editing' : '') + '"><span><strong>Workloads</strong>' + (open ? '' : ' \u00b7 ' + ((dr.wl !== 'all' && !dr.wl.length) ? 'None selected' : esc(wlSummary(dr.wl, c.id)))) + '</span><button type="button" class="plv-btn plv-btn-secondary" onclick="ssWlToggle()"' + (dr.on ? '' : ' disabled') + '>' + (open ? 'Collapse' : 'Edit') + '</button></div>'
       + (open ? '<div class="ss-readedit" id="ssWlIn"><p class="ss-pg-d" style="margin:0">Where the agent may use this skill.</p>'
         + '<span class="ss-seg" role="group" aria-label="Workload scope"><button type="button" class="' + (all ? 'on' : '') + '" onclick="ssDrWlMode(true)">All workloads</button><button type="button" class="' + (all ? '' : 'on') + '" onclick="ssDrWlMode(false)">Specific workloads</button></span>'
         + (all ? '<div class="ss-note">Includes workloads added later.</div>' : '<div id="ssWp"></div>')
         + '</div>' : '');
   }
-  function wlClone(w){ return w === 'all' ? 'all' : w.slice(); }
-  window.ssWlToggle = function(){   // Edit
-    if (!dr || dr.wlOpen) return;
-    dr.wlBackup = wlClone(dr.wl); dr.wlOpen = true; pgMain(); pgSync(); slide(document.getElementById('ssWlIn'), true);
-  };
-  window.ssWlCancel = function(){   // drop the edits made since Edit
+  // Expanding / collapsing the workloads picker is a VIEW toggle only. Edits are part of the skill's draft; the pinned footer's Save commits the whole skill
+  // (status, autonomy and workloads together) and closes the page, exactly as it does when workloads aren't touched.
+  window.ssWlToggle = function(){
     if (!dr) return;
-    slide(document.getElementById('ssWlIn'), false, function(){ dr.wl = wlClone(dr.wlBackup); dr.wlOpen = false; dr.wlq = ''; pgMain(); pgSync(); });
-  };
-  window.ssWlSave = function(){     // Save workloads: commits just the scope, then collapses. At least one workload is required.
-    if (!dr || dr.wl !== 'all' && !dr.wl.length) return;
-    var wl = (dr.wl === 'all' || dr.wl.length === WLS.length) && wlApplies(dr.id).length === WLS.length ? 'all' : dr.wl.slice();
-    state[dr.id].wl = wl; persist(); dr.wl = wlClone(wl);
-    slide(document.getElementById('ssWlIn'), false, function(){ dr.wlOpen = false; dr.wlq = ''; ssRenderCaps(); pgMain(); pgSync(); toast('Workloads updated'); });
+    if (dr.wlOpen){ slide(document.getElementById('ssWlIn'), false, function(){ dr.wlOpen = false; dr.wlq = ''; pgMain(); pgSync(); }); }
+    else { dr.wlOpen = true; pgMain(); pgSync(); slide(document.getElementById('ssWlIn'), true); }
   };
   function secLevel(c){
     if (!c.levels) return '';
@@ -4620,27 +4621,27 @@ function hydrateDefaultPolicyForm(wl) {
   window.ssWlFold = function(i){ dr.closed = dr.closed || {}; dr.closed[i] = !dr.closed[i]; pgWp(); };
   window.ssWlFoldAll = function(close){ dr.closed = {}; if (close) WL_CATS.forEach(function(c, i){ dr.closed[i] = true; }); dr.wlq = ''; pgWp(); };
   window.ssWlGrp = function(i, on){ WLS.filter(function(w){ return w.cat === WL_CATS[i]; }).forEach(function(w){ var k = dr.wl.indexOf(w.id); if (on && k < 0) dr.wl.push(w.id); if (!on && k >= 0) dr.wl.splice(k, 1); }); pgWp(); pgSync(); };
+  // dirty = anything on the page differs from what is saved (independent of whether it is currently valid)
+  function drDirty(){
+    if (!dr) return false;
+    return dr.on !== state[dr.id].on || dr.level !== state[dr.id].level || JSON.stringify(wlKey(dr.wl)) !== JSON.stringify(wlKey(state[dr.id].wl));
+  }
   function pgSync(){
     var sv = document.getElementById('ssDrSave'); if (!sv) return;
     var cc = pgC(), dlv = lvlOf(cc, dr.level), raise = dr.on && dlv && dlv.confirm && !(state[dr.id].on && state[dr.id].level === dr.level);
-    var cw = state[dr.id].wl, same = JSON.stringify(wlKey(dr.wl)) === JSON.stringify(wlKey(cw)), noneChosen = dr.wl !== 'all' && !dr.wl.length;
-    var changed = (dr.on !== state[dr.id].on || dr.level !== state[dr.id].level || !same) && !noneChosen;
+    var noneChosen = dr.wl !== 'all' && !dr.wl.length, dirty = drDirty(), changed = dirty && !noneChosen;
+    if (dirty) dr.saved = false;
     sv.disabled = !changed; sv.textContent = raise ? 'Review and save' : 'Save';
-    var hint = document.getElementById('ssPgHint'); if (hint) hint.textContent = noneChosen ? 'Choose at least one workload to save.' : '';
-    // While the workloads editor is open the PINNED footer carries its actions (so Save is never scrolled out of sight): Cancel drops the edits, Save workloads commits them.
-    var fc = document.getElementById('ssDrCancel');
-    if (dr.wlOpen){
-      sv.textContent = 'Save workloads'; sv.disabled = noneChosen; sv.setAttribute('onclick', 'ssWlSave()');
-      if (fc){ fc.setAttribute('onclick', 'ssWlCancel()'); }
-      if (hint){ hint.textContent = noneChosen ? 'Choose at least one workload to save.' : 'Editing workloads'; hint.style.color = noneChosen ? '' : 'var(--black-60)'; }   // orange is reserved for the validation message
-    } else {
-      if (hint) hint.style.color = '';
-      sv.setAttribute('onclick', 'ssDrSave()'); if (fc) fc.setAttribute('onclick', 'ssDrClose()');
+    var fc = document.getElementById('ssDrCancel'); if (fc) fc.textContent = dirty ? 'Cancel' : 'Close';   // nothing pending → the exit is labelled Close
+    var hint = document.getElementById('ssPgHint');
+    if (hint){
+      hint.textContent = noneChosen ? 'Choose at least one workload to save.' : (dr.saved && !dirty ? 'All changes saved' : '');
+      hint.style.color = (dr.saved && !dirty && !noneChosen) ? 'var(--black-60)' : '';
     }
   }
   function wlKey(w){ return w === 'all' ? w : w.slice().sort(); }
   function pgAll(){ pgHead(); pgMain(); pgSync(); }
-  window.ssDrOn = function(){ dr.on = !dr.on; if (!dr.on && dr.wlOpen){ dr.wl = wlClone(dr.wlBackup); dr.wlOpen = false; } pgAll(); };
+  window.ssDrOn = function(){ dr.on = !dr.on; if (!dr.on) dr.wlOpen = false; pgAll(); };
   window.ssDrLevel = function(id){ dr.level = id; pgMain(); pgSync(); };
   window.ssDrWlMode = function(all){ dr.wl = all ? 'all' : []; dr.wlq = ''; dr.wlCat = 0; dr.closed = {}; pgMain(); pgSync(); };
   window.ssDrWl = function(id){ var i = dr.wl.indexOf(id); if (i >= 0) dr.wl.splice(i, 1); else dr.wl.push(id); pgWp(); pgSync(); };
@@ -4648,9 +4649,16 @@ function hydrateDefaultPolicyForm(wl) {
   window.ssWlCat = function(i){ dr.wlCat = i; dr.wlq = ''; pgWp(); };
   window.ssWlAll = function(){ var q = (dr.wlq || '').trim(); (q ? WLS.filter(wlMatches) : WLS.filter(function(w){ return w.cat === WL_CATS[dr.wlCat]; })).forEach(function(w){ if (dr.wl.indexOf(w.id) < 0) dr.wl.push(w.id); }); pgWp(); pgSync(); };
   window.ssWlNone = function(){ dr.wl = []; pgWp(); pgSync(); };
+  window.ssDrAsk = function(){   // × / scrim / Esc: closes at once when nothing is pending, otherwise checks first
+    if (dr && drDirty()) confirmAuto('Discard unsaved changes?', 'Your changes to this skill haven\u2019t been saved.', [], function(){ ssDrClose(); }, { yes:'Discard changes', no:'Keep editing' });
+    else ssDrClose();
+  };
   window.ssDrClose = function(){ dr = null; document.getElementById('ssPg').classList.remove('open'); document.getElementById('ssPgScrim').classList.remove('open'); };
   function commitDr(){
-    state[dr.id] = { on:dr.on, level:dr.level, tier:tierOf(capById(dr.id), dr.level), wl:(dr.wl === 'all' || dr.wl.length === WLS.length) && wlApplies(dr.id).length === WLS.length ? 'all' : dr.wl }; persist(); var n = capById(dr.id).name; ssDrClose(); ssRenderCaps(); renderAvail(); toast(n + ' updated');
+    var wl = (dr.wl === 'all' || dr.wl.length === WLS.length) && wlApplies(dr.id).length === WLS.length ? 'all' : dr.wl.slice();
+    state[dr.id] = { on:dr.on, level:dr.level, tier:tierOf(capById(dr.id), dr.level), wl:wl }; persist();
+    dr.wl = wl === 'all' ? 'all' : wl.slice(); dr.wlOpen = false; dr.wlq = ''; dr.saved = true;   // Save commits and STAYS: the page re-renders clean, so another section can be edited straight away
+    var n = capById(dr.id).name; ssRenderCaps(); renderAvail(); pgAll(); toast(n + ' updated');
   }
   window.ssDrSave = function(){
     var _c = capById(dr.id), _l = lvlOf(_c, dr.level);
@@ -4659,7 +4667,7 @@ function hydrateDefaultPolicyForm(wl) {
     }
     commitDr();
   };
-  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && dr && !document.getElementById('ssDlg').classList.contains('open')) ssDrClose(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && dr && !document.getElementById('ssDlg').classList.contains('open')) ssDrAsk(); });
 
   function boot(){
     var h = (location.hash || '').replace('#', ''); view = (h === 'skills' || h === 'capabilities' || h === 'access' || h === 'caps') ? 'caps' : 'settings';
