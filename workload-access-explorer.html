@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent workload access — pattern explorer</title>
+<style>
+@font-face { font-family: 'Circular Pro'; src: url('./fonts/CircularPro-Book.otf')   format('opentype'); font-weight: 450; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Circular Pro'; src: url('./fonts/CircularPro-Medium.otf') format('opentype'); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Circular Pro'; src: url('./fonts/CircularPro-Bold.otf')   format('opentype'); font-weight: 700; font-style: normal; font-display: swap; }
+:root {
+  --white: #ffffff; --page-bg: #edf0f0; --form-bg: #f8f8f8;
+  --black-3: #fafafa; --black-5: #f8f8f9; --black-10: #e9e9ea; --black-20: #d2d3d4; --black-30: #bcbdbf; --black-40: #a5a7a9; --black-60: #626469; --black-80: #4c4e54; --black-100: #1f2229;
+  --border-light: #e9e9ea;
+  --em-green: #01804a; --em-green-tint: #f6fbf9; --em-green-accent: #1a9e66; --green-s10: #e4f6ee; --green-30: #9cd8be;
+  --val-blue: #1ca8dd; --val-blue-bg: #e8f6fc;
+  --red: #d75645; --red-10: #fbeeec;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page-bg); color: var(--black-100); font-family: 'Circular Pro', system-ui, sans-serif; font-weight: 450; font-size: 16px; line-height: 22px; }
+button, input { font-family: inherit; font-size: inherit; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+h1 { margin: 0; font-size: 24px; line-height: 32px; font-weight: 500; }
+.lede { margin: 4px 0 0; color: var(--black-60); max-width: 780px; }
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding: 12px 16px; background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; }
+.grp { display: flex; align-items: center; gap: 8px; }
+.grp > .lbl { font-size: 14px; color: var(--black-60); }
+.seg { display: inline-flex; border: 1px solid var(--black-20); border-radius: 4px; overflow: hidden; background: var(--white); }
+.seg button { height: 36px; padding: 0 12px; border: 0; border-left: 1px solid var(--black-20); background: var(--white); color: var(--black-100); cursor: pointer; white-space: nowrap; }
+.seg button:first-child { border-left: 0; }
+.seg button:hover { background: var(--black-5); }
+.seg button[aria-pressed="true"] { background: var(--em-green-tint); color: var(--em-green); font-weight: 500; box-shadow: inset 0 -2px 0 var(--em-green); }
+.btn { height: 36px; padding: 0 16px; border-radius: 4px; border: 1px solid var(--black-20); background: var(--white); color: var(--black-100); cursor: pointer; }
+.btn:hover { background: var(--black-5); }
+.btn.primary { background: var(--em-green); border-color: var(--em-green); color: var(--white); font-weight: 500; }
+.btn.primary:hover { background: var(--em-green-accent); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn.sm { height: 28px; padding: 0 8px; font-size: 14px; }
+.link { border: 0; background: none; color: var(--em-green); cursor: pointer; padding: 0; font-size: 14px; }
+.link:hover { text-decoration: underline; }
+svg { display: block; }
+
+/* the card context: Agent availability (Status card anatomy) */
+.card { background: var(--white); border: 1px solid var(--em-green); border-radius: 4px; }   /* no overflow clip: the search dropdown has to be able to extend past the card */
+.card-hd { border-radius: 3px 3px 0 0; padding: 8px 12px; min-height: 38px; display: flex; align-items: center; background: var(--em-green-tint); color: var(--em-green); font-weight: 700; line-height: 20px; }
+.card-bd { padding: 8px 12px 12px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 20px; color: var(--black-60); }
+.sw { display: inline-block; vertical-align: middle; width: 32px; height: 16px; border-radius: 99px; border: 1px solid var(--em-green); background: var(--em-green); position: relative; margin: 4px; }
+.sw::after { content: ''; position: absolute; top: 3px; left: 19px; width: 8px; height: 8px; border-radius: 50%; background: var(--white); }
+.statusrow { display: flex; align-items: center; gap: 4px; font-size: 16px; color: var(--black-100); }
+.readrow { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 12px; border-top: 1px solid var(--border-light); font-size: 16px; color: var(--black-100); }
+.picker { display: flex; flex-direction: column; gap: 12px; }
+.pfoot { display: flex; align-items: center; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border-light); }
+.pfoot .hint { margin-right: auto; font-size: 14px; color: var(--black-60); }
+.pfoot .hint.warn { color: var(--red); }
+.pfoot .spacer { flex: 1; }
+
+/* shared controls */
+.modeseg { align-self: flex-start; }
+.search { position: relative; }
+.search input { width: 100%; height: 36px; padding: 0 36px 0 12px; border: 1px solid var(--black-20); border-radius: 4px; background: var(--form-bg); color: var(--black-100); }
+.search input:focus { outline: none; background: var(--em-green-tint); border-color: var(--em-green); }
+.search .ic { position: absolute; right: 10px; top: 8px; color: var(--black-60); pointer-events: none; }
+.search .ic svg { width: 20px; height: 20px; }
+.ck { display: flex; align-items: center; gap: 8px; min-height: 32px; padding: 0 8px; cursor: pointer; font-size: 16px; line-height: 22px; color: var(--black-100); border-radius: 4px; }
+.ck:hover { background: var(--black-5); }
+.ck input { width: 16px; height: 16px; margin: 0; accent-color: var(--em-green); flex-shrink: 0; }
+.ck .n { margin-left: auto; font-size: 14px; color: var(--black-60); }
+.note { font-size: 14px; color: var(--black-60); }
+.chip { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 4px 0 8px; border-radius: 2px; font-size: 14px; font-weight: 500; background: var(--val-blue-bg); color: var(--val-blue); white-space: nowrap; }
+.chip.ex { background: var(--red-10); color: var(--red); }
+.chip button { border: 0; background: none; color: inherit; width: 20px; height: 20px; padding: 0; cursor: pointer; border-radius: 2px; display: inline-flex; align-items: center; justify-content: center; }
+.chip button:hover { background: color-mix(in srgb, currentColor 14%, transparent); }
+.chip button svg { width: 14px; height: 14px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 8px; border: 1px solid var(--black-20); border-radius: 4px; background: var(--white); font-size: 14px; cursor: pointer; color: var(--black-100); }
+.pill:hover { background: var(--black-5); }
+.pill svg { width: 16px; height: 16px; }
+.pill .c { color: var(--black-60); }
+
+/* A · list by category (current) */
+.pa { display: grid; grid-template-columns: 220px minmax(0, 1fr); border: 1px solid var(--border-light); border-radius: 4px; height: 316px; overflow: hidden; }
+.pa .cats { border-right: 1px solid var(--border-light); overflow: auto; background: var(--black-3); }
+.pa .cat { width: 100%; display: flex; justify-content: space-between; gap: 8px; padding: 10px 12px; border: 0; border-bottom: 1px solid var(--border-light); background: none; text-align: left; cursor: pointer; font-size: 16px; color: var(--black-100); }
+.pa .cat .n { font-size: 14px; color: var(--black-60); white-space: nowrap; }
+.pa .cat.on { background: var(--white); box-shadow: inset 2px 0 0 var(--em-green); font-weight: 500; }
+.pa .right { display: flex; flex-direction: column; min-width: 0; }
+.pa .rs { padding: 8px; border-bottom: 1px solid var(--border-light); }
+.pa .list { flex: 1; overflow: auto; padding: 4px 4px; }
+.pa .rf { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-top: 1px solid var(--border-light); font-size: 14px; color: var(--black-60); }
+.pa .rf span:last-child { display: inline-flex; gap: 12px; }
+
+/* B · grouped list */
+.pb { border: 1px solid var(--border-light); border-radius: 4px; overflow: hidden; }
+.pb .tools { display: flex; align-items: center; gap: 12px; padding: 8px; border-bottom: 1px solid var(--border-light); }
+.pb .tools .search { flex: 1; }
+.pb .body { max-height: 316px; overflow: auto; }
+.pb .grphd { display: flex; align-items: center; gap: 4px; padding: 0 8px 0 4px; min-height: 40px; background: var(--black-3); border-bottom: 1px solid var(--border-light); position: sticky; top: 0; z-index: 1; }
+.pb .grphd .tw { width: 28px; height: 28px; border: 0; background: none; border-radius: 4px; cursor: pointer; color: var(--black-60); display: inline-flex; align-items: center; justify-content: center; }
+.pb .grphd .tw svg { width: 20px; height: 20px; transition: transform .15s; }
+.pb .grphd .tw.closed svg { transform: rotate(-90deg); }
+.pb .grphd .ck { flex: 1; font-weight: 500; }
+.pb .items { padding: 2px 4px 4px 36px; }
+
+/* C · transfer */
+.pc { display: grid; grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr); gap: 8px; align-items: stretch; }
+.pc .col { border: 1px solid var(--border-light); border-radius: 4px; display: flex; flex-direction: column; height: 316px; min-width: 0; }
+.pc .col .hd { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 12px 0; font-weight: 500; }
+.pc .col .hd .n { font-size: 14px; color: var(--black-60); font-weight: 450; }
+.pc .col .s { padding: 8px; }
+.pc .col .l { flex: 1; overflow: auto; padding: 0 4px 4px; }
+.pc .ghd { padding: 6px 8px 2px; font-size: 12px; color: var(--black-60); text-transform: uppercase; letter-spacing: .04em; }
+.pc .mid { display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+.pc .mid .btn { height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+.pc .mid .btn svg { width: 20px; height: 20px; }
+.pc .empty { padding: 24px 12px; text-align: center; font-size: 14px; color: var(--black-60); }
+
+/* D · chips + combobox */
+.pd .box { border: 1px solid var(--black-20); border-radius: 4px; background: var(--form-bg); padding: 8px; display: flex; flex-direction: column; gap: 8px; }
+.pd .box:focus-within { background: var(--em-green-tint); border-color: var(--em-green); }
+.pd .cbwrap { position: relative; }
+.pd .cbwrap input { width: 100%; height: 32px; border: 0; background: transparent; padding: 0 4px; outline: none; color: var(--black-100); }
+.pd .dd { position: absolute; z-index: 5; left: -9px; right: -9px; top: 38px; max-height: 240px; overflow: auto; background: var(--white); border: 1px solid var(--black-20); border-radius: 8px; box-shadow: 0 8px 24px rgba(31,34,41,.13); padding: 4px; }
+.pd .dd .gh { padding: 8px 8px 2px; font-size: 12px; color: var(--black-60); text-transform: uppercase; letter-spacing: .04em; }
+.pd .dd .opt { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-radius: 4px; cursor: pointer; }
+.pd .dd .opt:hover { background: var(--black-5); }
+.pd .dd .opt.on { color: var(--black-60); }
+.pd .shortcuts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.pd .shortcuts .lbl { font-size: 14px; color: var(--black-60); }
+.pd .empty { font-size: 14px; color: var(--black-60); padding: 4px; }
+
+/* E · all, with exceptions */
+.pe .opt { display: flex; gap: 12px; padding: 12px; border: 1px solid var(--black-10); border-radius: 4px; cursor: pointer; }
+.pe .opt.on { border-color: var(--em-green); background: var(--em-green-tint); }
+.pe .opt input { accent-color: var(--em-green); margin-top: 3px; }
+.pe .opt .t { font-weight: 500; color: var(--black-100); }
+.pe .opt .d { font-size: 14px; color: var(--black-60); }
+.pe .ex { margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--border-light); display: flex; flex-direction: column; gap: 8px; cursor: default; }
+.pe .exhd { font-size: 14px; font-weight: 500; color: var(--black-100); }
+
+/* info panels */
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.box { background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; padding: 12px 16px; }
+.box h3 { margin: 0 0 4px; font-size: 16px; font-weight: 500; }
+.box p { margin: 0; font-size: 14px; line-height: 20px; color: var(--black-60); }
+.box.head { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
+.box.head h2 { margin: 0; font-size: 20px; line-height: 28px; font-weight: 500; }
+.result { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: baseline; }
+.result strong { font-weight: 500; }
+.result .m { color: var(--black-60); font-size: 14px; }
+@media (max-width: 900px) { .grid3 { grid-template-columns: 1fr; } .pa { grid-template-columns: 1fr; height: auto; } .pc { grid-template-columns: 1fr; } .pc .mid { flex-direction: row; justify-content: center; } }
+</style>
+<script src="securiti-icons-data.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <h1>Agent workload access — pattern explorer</h1>
+    <p class="lede">Five ways for an admin to grant the agent access to all workloads or specific ones, each inside the Agent availability card it would live in. The catalog is today’s 37 workloads and grows toward ~100, so use the size toggle to see how each pattern scales.</p>
+  </div>
+  <div class="bar">
+    <div class="grp"><span class="lbl">Pattern</span><div class="seg" id="patSeg"></div></div>
+    <div class="grp"><span class="lbl">Catalog</span><div class="seg" id="sizeSeg"><button type="button" data-size="37" aria-pressed="true">37 workloads</button><button type="button" data-size="100" aria-pressed="false">~100 workloads</button></div></div>
+    <button type="button" class="btn" id="resetBtn" style="margin-left:auto">Reset sample data</button>
+  </div>
+  <div id="stage"></div>
+  <div class="grid3" id="info"></div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  function ic(name, size){ var e = (window.__SECURITI_ICONS || {})[name]; if (!e || !e.paths) return ''; return '<svg width="' + size + '" height="' + size + '" viewBox="' + e.viewBox + '" fill="currentColor" aria-hidden="true">' + e.paths.map(function(p){ return '<path d="' + p + '"/>'; }).join('') + '</svg>'; }
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // ── catalog: today's 37 (from Agent Settings) + synthetic extras to ~100 ───────────────────────────
+  var CATS = ['SaaS applications', 'Identity', 'Developer tools', 'Cloud infrastructure', 'Datacenter'];
+  var BASE = {
+    'SaaS applications': ['Microsoft 365','Dynamics 365','Google Workspace','Salesforce','Box','Slack','Zoom','ServiceNow','Workday','Power Platform','Power BI','Jira','Confluence'],
+    'Identity': ['Okta','Ping Identity','Microsoft Entra ID'],
+    'Developer tools': ['GitHub','Azure DevOps','GitLab','Bitbucket'],
+    'Cloud infrastructure': ['AWS EC2','AWS S3','AWS RDS','Azure Virtual Machines','Azure SQL','Google Compute Engine','Kubernetes'],
+    'Datacenter': ['Virtual Machines','VMware vSphere','Microsoft Hyper-V','Nutanix AHV','Computers','Files','Unstructured Data','NAS','SQL Server','Oracle Database']
+  };
+  var EXTRA = {
+    'SaaS applications': ['HubSpot','Zendesk','Shopify','NetSuite','SAP SuccessFactors','DocuSign','Dropbox','Notion','Asana','Monday.com','Smartsheet','Trello','Intercom','Freshdesk','Gusto','Airtable','Miro','Figma','Calendly','Mailchimp','Stripe','Xero','QuickBooks','Coupa','Concur'],
+    'Identity': ['OneLogin','JumpCloud','CyberArk','Duo Security','Auth0','Active Directory','Entra Domain Services'],
+    'Developer tools': ['Jenkins','CircleCI','JFrog Artifactory','Terraform Cloud','Sentry','Bitbucket Server','GitHub Enterprise Server','SonarQube','Harbor','Nexus Repository'],
+    'Cloud infrastructure': ['Google BigQuery','Google Cloud Storage','Azure Blob Storage','Azure Cosmos DB','AWS DynamoDB','AWS Lambda','AWS EKS','Google GKE','Azure AKS','Azure Files','AWS EFS','Cloud SQL','Azure Key Vault','AWS Secrets Manager','Azure Data Lake'],
+    'Datacenter': ['Proxmox VE','Red Hat Virtualization','IBM Db2','PostgreSQL','MySQL','MongoDB','SAP HANA','NetApp ONTAP','Dell PowerScale','Pure Storage','Exchange Server','SharePoint Server','Cohesity','Linux Servers','Windows Servers','Oracle RAC','Veeam Backup for AHV','Hitachi VSP']
+  };
+  function catalog(n){
+    var out = [];
+    CATS.forEach(function(c){
+      var names = BASE[c].slice(); if (n > 37) names = names.concat(EXTRA[c]);
+      names.forEach(function(nm){ out.push({ id: c.slice(0,3) + ':' + nm, name: nm, cat: c }); });
+    });
+    return out;
+  }
+  var ALL = catalog(37);
+
+  // ── state ─────────────────────────────────────────────────────────────
+  var PATS = [
+    { id:'list', label:'A · List by category (current)' },
+    { id:'tree', label:'B · Grouped list' },
+    { id:'xfer', label:'C · Transfer list' },
+    { id:'chips', label:'D · Search + chips' },
+    { id:'except', label:'E · All, with exceptions' }
+  ];
+  function idOf(name){ var w = ALL.filter(function(x){ return x.name === name; })[0]; return w && w.id; }
+  function sample(){
+    return { mode: 'specific', sel: new Set(['Microsoft 365','Dynamics 365','Salesforce'].map(idOf)), exc: new Set(['Slack','Zoom'].map(idOf)),
+      q:'', cat:0, closed:{}, tqa:'', tqg:'', ta:new Set(), tg:new Set(), cq:'', dd:false, focus:null };
+  }
+  var S = { pat:'list', size:37 }, M = sample(), BASEL = snapshot();
+  function snapshot(){ return JSON.stringify({ m:M.mode, s:[].slice.call(M.sel).sort(), e:[].slice.call(M.exc).sort() }); }
+  function nameOf(id){ var w = ALL.filter(function(x){ return x.id === id; })[0]; return w ? w.name : id; }
+  function byCat(list){ return CATS.map(function(c){ return { cat:c, items:list.filter(function(w){ return w.cat === c; }) }; }).filter(function(g){ return g.items.length; }); }
+  function match(w, q){ q = (q || '').trim().toLowerCase(); return !q || w.name.toLowerCase().indexOf(q) >= 0 || w.cat.toLowerCase().indexOf(q) >= 0; }
+  function granted(){ if (S.pat === 'except') return ALL.filter(function(w){ return !M.exc.has(w.id); }); return M.mode === 'all' ? ALL.slice() : ALL.filter(function(w){ return M.sel.has(w.id); }); }
+  function valid(){ return S.pat === 'except' ? true : (M.mode === 'all' || M.sel.size > 0); }
+
+  // ── shared pieces ──────────────────────────────────────────────────
+  function modeSeg(){ return '<div class="seg modeseg" role="group" aria-label="Workload scope"><button type="button" data-act="mode" data-v="all" aria-pressed="' + (M.mode === 'all') + '">All workloads</button><button type="button" data-act="mode" data-v="specific" aria-pressed="' + (M.mode === 'specific') + '">Specific workloads</button></div>'; }
+  function allNote(){ return '<div class="note">The agent can read every workload, including ones added later. Switch to “Specific workloads” to choose.</div>'; }
+  function searchBox(id, val, ph){ return '<div class="search"><input type="text" id="' + id + '" data-input="' + id + '" value="' + esc(val) + '" placeholder="' + esc(ph) + '" aria-label="' + esc(ph) + '"><span class="ic">' + ic('search-outlined', 20) + '</span></div>'; }
+  function ck(id, name, on, extra){ return '<label class="ck"><input type="checkbox" data-act="tog" data-id="' + esc(id) + '"' + (on ? ' checked' : '') + '><span>' + esc(name) + '</span>' + (extra || '') + '</label>'; }
+
+  // ── A · list by category ─────────────────────────────────────────────
+  function pA(){
+    if (M.mode === 'all') return modeSeg() + allNote();
+    var q = M.q.trim(), gs = byCat(ALL), cur = gs[Math.min(M.cat, gs.length - 1)];
+    var shown = q ? ALL.filter(function(w){ return match(w, q); }) : cur.items;
+    var cats = gs.map(function(g, i){ var n = g.items.filter(function(w){ return M.sel.has(w.id); }).length; return '<button type="button" class="cat' + (!q && i === M.cat ? ' on' : '') + '" data-act="cat" data-v="' + i + '"><span>' + esc(g.cat) + '</span><span class="n">' + n + ' of ' + g.items.length + '</span></button>'; }).join('');
+    var list = shown.map(function(w){ return ck(w.id, w.name, M.sel.has(w.id)); }).join('') || '<div class="note" style="padding:24px;text-align:center">No workloads match.</div>';
+    return modeSeg() + '<div class="pa"><div class="cats">' + cats + '</div><div class="right"><div class="rs">' + searchBox('q', M.q, 'Search all workloads') + '</div><div class="list">' + list + '</div>'
+      + '<div class="rf"><span>' + M.sel.size + ' of ' + ALL.length + ' selected</span><span><button type="button" class="link" data-act="selview">Select all' + (q ? ' results' : ' in category') + '</button><button type="button" class="link" data-act="clear">Clear all</button></span></div></div></div>';
+  }
+
+  // ── B · grouped list ────────────────────────────────────────────────
+  function pB(){
+    if (M.mode === 'all') return modeSeg() + allNote();
+    var q = M.q.trim(), gs = byCat(ALL.filter(function(w){ return match(w, q); }));
+    var body = gs.map(function(g){
+      var all = byCat(ALL).filter(function(x){ return x.cat === g.cat; })[0].items, n = all.filter(function(w){ return M.sel.has(w.id); }).length, state = n === 0 ? 'none' : (n === all.length ? 'all' : 'some'), open = q ? true : !M.closed[g.cat];
+      return '<div class="grp-b"><div class="grphd"><button type="button" class="tw' + (open ? '' : ' closed') + '" data-act="fold" data-v="' + esc(g.cat) + '" aria-label="' + (open ? 'Collapse ' : 'Expand ') + esc(g.cat) + '" aria-expanded="' + open + '">' + ic('keyboard-arrow-down-outlined', 20) + '</button>'
+        + '<label class="ck"><input type="checkbox" data-act="grp" data-v="' + esc(g.cat) + '"' + (state === 'all' ? ' checked' : '') + (state === 'some' ? ' data-indet="1"' : '') + '><span>' + esc(g.cat) + '</span><span class="n">' + n + ' of ' + all.length + '</span></label></div>'
+        + (open ? '<div class="items">' + g.items.map(function(w){ return ck(w.id, w.name, M.sel.has(w.id)); }).join('') + '</div>' : '') + '</div>';
+    }).join('') || '<div class="note" style="padding:24px;text-align:center">No workloads match.</div>';
+    return modeSeg() + '<div class="pb"><div class="tools">' + searchBox('q', M.q, 'Search all workloads') + '<button type="button" class="link" data-act="foldall" data-v="open">Expand all</button><button type="button" class="link" data-act="foldall" data-v="close">Collapse all</button></div><div class="body">' + body + '</div></div>'
+      + '<div class="note">' + M.sel.size + ' of ' + ALL.length + ' selected · tick a category to select everything in it</div>';
+  }
+
+  // ── C · transfer list ───────────────────────────────────────────────
+  function xferList(list, set, sideKey){
+    if (!list.length) return '<div class="empty">' + (sideKey === 'a' ? 'Nothing left to add.' : 'No workloads granted yet.') + '</div>';
+    return byCat(list).map(function(g){ return '<div class="ghd">' + esc(g.cat) + '</div>' + g.items.map(function(w){ return '<label class="ck"><input type="checkbox" data-act="xsel" data-side="' + sideKey + '" data-id="' + esc(w.id) + '"' + (set.has(w.id) ? ' checked' : '') + '><span>' + esc(w.name) + '</span></label>'; }).join(''); }).join('');
+  }
+  function pC(){
+    if (M.mode === 'all') return modeSeg() + allNote();
+    var avail = ALL.filter(function(w){ return !M.sel.has(w.id) && match(w, M.tqa); }), gr = ALL.filter(function(w){ return M.sel.has(w.id) && match(w, M.tqg); });
+    var totalAvail = ALL.length - M.sel.size;
+    return modeSeg() + '<div class="pc"><div class="col"><div class="hd"><span>Available</span><span class="n">' + totalAvail + '</span></div><div class="s">' + searchBox('tqa', M.tqa, 'Search available') + '</div><div class="l">' + xferList(avail, M.ta, 'a') + '</div></div>'
+      + '<div class="mid"><button type="button" class="btn" data-act="xadd" aria-label="Add selected" data-tooltip="Add"' + (M.ta.size ? '' : ' disabled') + ' style="transform:none">' + '<span style="transform:rotate(-90deg);display:inline-flex">' + ic('keyboard-arrow-down-outlined', 20) + '</span></button>'
+      + '<button type="button" class="btn" data-act="xrem" aria-label="Remove selected"' + (M.tg.size ? '' : ' disabled') + '><span style="transform:rotate(90deg);display:inline-flex">' + ic('keyboard-arrow-down-outlined', 20) + '</span></button></div>'
+      + '<div class="col"><div class="hd"><span>Granted to the agent</span><span class="n">' + M.sel.size + '</span></div><div class="s">' + searchBox('tqg', M.tqg, 'Search granted') + '</div><div class="l">' + xferList(gr, M.tg, 'g') + '</div></div></div>'
+      + '<div class="note"><button type="button" class="link" data-act="xaddall">Add all ' + totalAvail + ' available</button> · <button type="button" class="link" data-act="clear">Remove all</button> · tick rows, then use the arrows</div>';
+  }
+
+  // ── D · search + chips ──────────────────────────────────────────────
+  function ddHtml(excludeSet, onAct){
+    var matches = ALL.filter(function(w){ return match(w, M.cq); }), gs = byCat(matches);
+    if (!gs.length) return '<div class="dd"><div class="empty" style="padding:12px">No workloads match “' + esc(M.cq) + '”.</div></div>';
+    return '<div class="dd" role="listbox">' + gs.map(function(g){ return '<div class="gh">' + esc(g.cat) + '</div>' + g.items.map(function(w){ var on = excludeSet.has(w.id); return '<div class="opt' + (on ? ' on' : '') + '" role="option" aria-selected="' + on + '" data-down="' + onAct + '" data-id="' + esc(w.id) + '"><span>' + esc(w.name) + '</span>' + (on ? '<span class="note">' + (onAct === 'cbexc' ? 'Excluded' : 'Added') + '</span>' : '') + '</div>'; }).join(''); }).join('') + '</div>';
+  }
+  function shortcuts(set, label, act){
+    return '<div class="shortcuts"><span class="lbl">' + label + '</span>' + CATS.map(function(c){ var items = ALL.filter(function(w){ return w.cat === c; }), n = items.filter(function(w){ return set.has(w.id); }).length; return '<button type="button" class="pill" data-act="' + act + '" data-v="' + esc(c) + '">' + ic('add-outlined', 16) + esc(c) + ' <span class="c">' + n + '/' + items.length + '</span></button>'; }).join('') + '</div>';
+  }
+  function pD(){
+    if (M.mode === 'all') return modeSeg() + allNote();
+    var chips = ALL.filter(function(w){ return M.sel.has(w.id); }).map(function(w){ return '<span class="chip">' + esc(w.name) + '<button type="button" data-act="rm" data-id="' + esc(w.id) + '" aria-label="Remove ' + esc(w.name) + '">' + ic('close-outlined', 14) + '</button></span>'; }).join('') || '<span class="empty">No workloads yet — search or use a shortcut below.</span>';
+    return modeSeg() + '<div class="pd"><div class="box"><div class="chips">' + chips + '</div><div class="cbwrap"><input type="text" id="cq" data-input="cq" value="' + esc(M.cq) + '" placeholder="Search workloads to add…" autocomplete="off" aria-label="Search workloads to add">' + (M.dd ? ddHtml(M.sel, 'cbadd') : '') + '</div></div>'
+      + '<div style="margin-top:12px">' + shortcuts(M.sel, 'Add a whole category', 'addcat') + '</div></div>'
+      + '<div class="note">' + M.sel.size + ' of ' + ALL.length + ' selected · <button type="button" class="link" data-act="clear">Clear all</button></div>';
+  }
+
+  // ── E · all, with exceptions ────────────────────────────────────────
+  function pE(){
+    var chips = ALL.filter(function(w){ return M.exc.has(w.id); }).map(function(w){ return '<span class="chip ex">' + esc(w.name) + '<button type="button" data-act="exrm" data-id="' + esc(w.id) + '" aria-label="Include ' + esc(w.name) + ' again">' + ic('close-outlined', 14) + '</button></span>'; }).join('') || '<span class="empty">No exceptions — the agent can read everything.</span>';
+    return '<div class="pe"><div class="opt on"><input type="radio" checked aria-label="All workloads"><div style="flex:1;min-width:0"><div class="t">All workloads, including ones added later</div><div class="d">New workloads are covered automatically — the way to keep access current as the catalog grows.</div>'
+      + '<div class="ex"><div class="exhd">Except these (' + M.exc.size + ')</div><div class="chips">' + chips + '</div><div class="pd"><div class="box" style="padding:4px 8px"><div class="cbwrap"><input type="text" id="cq" data-input="cq" value="' + esc(M.cq) + '" placeholder="Search workloads to exclude…" autocomplete="off" aria-label="Search workloads to exclude">' + (M.dd ? ddHtml(M.exc, 'cbexc') : '') + '</div></div></div>'
+      + shortcuts(M.exc, 'Exclude a whole category', 'exccat') + '</div></div></div></div>';
+  }
+
+  // ── render ───────────────────────────────────────────────────────────
+  function picker(){ return { list:pA, tree:pB, xfer:pC, chips:pD, except:pE }[S.pat](); }
+  function render(){
+    var dirty = snapshot() !== BASEL, ok = valid(), g = granted();
+    var hint = !ok ? 'Choose at least one workload to save.' : '';
+    document.getElementById('stage').innerHTML =
+      '<div class="card"><div class="card-hd">Agent availability</div><div class="card-bd">'
+      + '<span>Control whether AI agents are available to your organization. This applies to every user.</span>'
+      + '<div class="statusrow"><span class="sw"></span>Active</div>'
+      + '<div class="readrow"><strong style="font-weight:500">Data it can read</strong></div>'
+      + '<div class="picker">' + picker() + '<div class="pfoot"><span class="hint' + (ok ? '' : ' warn') + '">' + hint + '</span><button type="button" class="btn" data-act="cancel"' + (dirty ? '' : ' disabled') + '>Cancel</button><button type="button" class="btn primary" data-act="save"' + (dirty && ok ? '' : ' disabled') + '>Save</button></div></div>'
+      + '</div></div>';
+    [].forEach.call(document.querySelectorAll('[data-indet]'), function(e){ e.indeterminate = true; });
+    renderInfo(g);
+    if (M.focus){ var f = document.getElementById(M.focus); if (f){ f.focus(); try { f.setSelectionRange(f.value.length, f.value.length); } catch(e){} } }
+  }
+  var NOTES = {
+    list: { how:'Categories on the left, a checklist on the right, with a global search that spans categories. One category at a time.', best:'A short catalog and an admin who thinks in categories. Familiar and compact.', watch:'You can’t see everything you’ve selected at once — selections are spread across categories — and every category hop is a click. Gets laborious past ~50.' },
+    tree: { how:'Every category on one scrolling list, each with a tri-state checkbox and a collapse arrow; search filters across them and opens matching groups.', best:'Choosing by category with a few exceptions: one tick grants a whole group, and the partial state shows what’s mixed.', watch:'A long scroll at ~100, and the total selection is still only visible by opening each group.' },
+    xfer: { how:'Two lists side by side — Available and Granted — moved with arrows. Each has its own search.', best:'Auditing and reviewing: the Granted column is always the complete answer to “what can the agent read?”.', watch:'The most space and the most clicks (tick, then move). Heavy for “almost everything”.' },
+    chips: { how:'A search box that adds workloads as removable chips, plus one-click shortcuts that add a whole category.', best:'Small grants (a handful of workloads) and large catalogs: typing is faster than scrolling, and the chips are the full selection.', watch:'Poor for “most but not all”, and a wall of chips when many are chosen. No at-a-glance view of what’s not selected.' },
+    except: { how:'Starts from “everything, including workloads added later”, then carves out exceptions with the same search and category shortcuts.', best:'Orgs that want the agent broadly available and a short deny-list. Future workloads are covered by default — and that is the trade-off to decide on.', watch:'Defaults to broad access: a newly added workload is readable until someone excludes it. Pair with an approval or alert on new workloads if that matters.' }
+  };
+  function renderInfo(g){
+    var n = NOTES[S.pat], tot = ALL.length, label = PATS.filter(function(p){ return p.id === S.pat; })[0].label;
+    var summary = S.pat === 'except' ? (M.exc.size ? 'All except ' + M.exc.size : 'All workloads') + ' · includes workloads added later' : (M.mode === 'all' ? 'All workloads · includes workloads added later' : g.length + ' of ' + tot + ' workloads · new workloads are not included');
+    document.getElementById('info').innerHTML =
+      '<div class="box head"><h2>' + esc(label) + '</h2></div>'
+      + '<div class="box result"><span><strong>Resulting grant:</strong> ' + esc(summary) + '</span><span class="m">' + g.length + ' of ' + tot + ' readable</span></div>'
+      + '<div class="box"><h3>How it works</h3><p>' + n.how + '</p></div><div class="box"><h3>Best for</h3><p>' + n.best + '</p></div><div class="box"><h3>Watch out</h3><p>' + n.watch + '</p></div>';
+  }
+
+  // ── events ──────────────────────────────────────────────────────────
+  function toggle(set, id){ if (set.has(id)) set.delete(id); else set.add(id); }
+  document.addEventListener('mousedown', function(e){
+    var o = e.target.closest('[data-down]'); if (!o) return;
+    e.preventDefault(); var id = o.getAttribute('data-id'), a = o.getAttribute('data-down');
+    if (a === 'cbadd') toggle(M.sel, id); else toggle(M.exc, id);
+    M.focus = 'cq'; render();
+  });
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('[data-act],[data-size],[data-pat]'); if (!b) return;
+    if (b.dataset.size){ S.size = Number(b.dataset.size); ALL = catalog(S.size); M = sample(); BASEL = snapshot(); [].forEach.call(document.querySelectorAll('#sizeSeg button'), function(x){ x.setAttribute('aria-pressed', String(x === b)); }); render(); return; }
+    if (b.dataset.pat){ S.pat = b.dataset.pat; M.q = M.cq = ''; M.dd = false; M.focus = null; syncPat(); render(); return; }
+    var a = b.dataset.act, v = b.dataset.v, id = b.dataset.id;
+    if (a === 'mode'){ M.mode = v; }
+    else if (a === 'cat'){ M.cat = Number(v); M.q = ''; }
+    else if (a === 'tog'){ return; }   // handled on change
+    else if (a === 'selview'){ var q = M.q.trim(); (q ? ALL.filter(function(w){ return match(w, q); }) : byCat(ALL)[M.cat].items).forEach(function(w){ M.sel.add(w.id); }); }
+    else if (a === 'clear'){ M.sel.clear(); M.ta.clear(); M.tg.clear(); }
+    else if (a === 'fold'){ M.closed[v] = !M.closed[v]; }
+    else if (a === 'foldall'){ CATS.forEach(function(c){ M.closed[c] = v === 'close'; }); }
+    else if (a === 'xadd'){ M.ta.forEach(function(i){ M.sel.add(i); }); M.ta.clear(); }
+    else if (a === 'xrem'){ M.tg.forEach(function(i){ M.sel.delete(i); }); M.tg.clear(); }
+    else if (a === 'xaddall'){ ALL.forEach(function(w){ M.sel.add(w.id); }); M.ta.clear(); }
+    else if (a === 'rm'){ M.sel.delete(id); }
+    else if (a === 'exrm'){ M.exc.delete(id); }
+    else if (a === 'addcat'){ ALL.filter(function(w){ return w.cat === v; }).forEach(function(w){ M.sel.add(w.id); }); }
+    else if (a === 'exccat'){ ALL.filter(function(w){ return w.cat === v; }).forEach(function(w){ M.exc.add(w.id); }); }
+    else if (a === 'cancel'){ var o = JSON.parse(BASEL); M.mode = o.m; M.sel = new Set(o.s); M.exc = new Set(o.e); }
+    else if (a === 'save'){ BASEL = snapshot(); }
+    else return;
+    render();
+  });
+  document.addEventListener('change', function(e){
+    var t = e.target, a = t.getAttribute && t.getAttribute('data-act'); if (!a) return;
+    var id = t.getAttribute('data-id');
+    if (a === 'tog'){ if (t.checked) M.sel.add(id); else M.sel.delete(id); }
+    else if (a === 'grp'){ var cat = t.getAttribute('data-v'); ALL.filter(function(w){ return w.cat === cat; }).forEach(function(w){ if (t.checked) M.sel.add(w.id); else M.sel.delete(w.id); }); }
+    else if (a === 'xsel'){ var set = t.getAttribute('data-side') === 'a' ? M.ta : M.tg; if (t.checked) set.add(id); else set.delete(id); }
+    else return;
+    render();
+  });
+  document.addEventListener('input', function(e){
+    var k = e.target.getAttribute && e.target.getAttribute('data-input'); if (!k) return;
+    if (k === 'q') M.q = e.target.value; else if (k === 'tqa') M.tqa = e.target.value; else if (k === 'tqg') M.tqg = e.target.value; else if (k === 'cq'){ M.cq = e.target.value; M.dd = true; }
+    M.focus = k; render();
+  });
+  document.addEventListener('focusin', function(e){ if (e.target.id === 'cq' && !M.dd){ M.dd = true; M.focus = 'cq'; render(); } });
+  document.addEventListener('focusout', function(e){ if (e.target.id === 'cq'){ setTimeout(function(){ if (document.activeElement && document.activeElement.id === 'cq') return; M.dd = false; M.focus = null; render(); }, 120); } });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && M.dd){ M.dd = false; render(); } });
+  var SHORT = { list:'A · List by category', tree:'B · Grouped list', xfer:'C · Transfer list', chips:'D · Search + chips', except:'E · All, with exceptions' };
+  function syncPat(){ document.getElementById('patSeg').innerHTML = PATS.map(function(p){ return '<button type="button" data-pat="' + p.id + '" aria-pressed="' + (p.id === S.pat) + '">' + esc(SHORT[p.id]) + '</button>'; }).join(''); }
+  document.getElementById('resetBtn').addEventListener('click', function(){ M = sample(); BASEL = snapshot(); render(); });
+  window.__wlx = { S: S, get M(){ return M; }, render: render, get ALL(){ return ALL; } };
+  syncPat(); render();
+})();
+</script>
+</body>
+</html>

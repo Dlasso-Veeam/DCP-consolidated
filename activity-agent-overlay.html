@@ -666,7 +666,9 @@ a.vn-fly-link:hover { color: var(--blue); }
    left:0, name-col at left:var(--cb-col-w) — both pinned, shadow on the
    name column's outer edge. */
 #actTable thead th.cb-col,
-#actTable tbody td.cb-col {
+#actTable tbody td.cb-col,
+#agentsTable thead th.cb-col,
+#agentsTable tbody td.cb-col {
   position: sticky; left: 0; background: var(--white); z-index: 3; overflow: visible;
   /* deterministic width: auto table layout shrank this cell to 32px while
      name-col pins at --cb-col-w (42) — a 10px seam let scrolled content
@@ -674,38 +676,61 @@ a.vn-fly-link:hover { color: var(--blue); }
   width: var(--cb-col-w, 42px); min-width: var(--cb-col-w, 42px); max-width: var(--cb-col-w, 42px); box-sizing: border-box;
 }
 #actTable thead th.name-col,
-#actTable tbody td.name-col {
+#actTable tbody td.name-col,
+#agentsTable thead th.name-col,
+#agentsTable tbody td.name-col {
   position: sticky; left: var(--cb-col-w, 42px); background: var(--white); z-index: 3; overflow: visible;
 }
-#actTable thead th.cb-col, #actTable thead th.name-col { z-index: 31; }
+#actTable thead th.cb-col,
+#actTable thead th.name-col,
+#agentsTable thead th.cb-col,
+#agentsTable thead th.name-col { z-index: 31; }
 #actTable thead th:last-child,
-#actTable tbody td:last-child {
+#actTable tbody td:last-child,
+#agentsTable thead th:last-child,
+#agentsTable tbody td:last-child {
   position: sticky; right: 0; background: var(--white); z-index: 4; overflow: visible;
 }
 #actTable tbody td.name-col .cell-name,
-#actTable tbody td.name-col .cell-meta {
+#actTable tbody td.name-col .cell-meta,
+#agentsTable tbody td.name-col .cell-name,
+#agentsTable tbody td.name-col .cell-meta {
   max-width: 300px; overflow: hidden; text-overflow: ellipsis;
 }
 #actTable tbody td.name-col::after,
-#actTable thead th.name-col::after {
+#actTable thead th.name-col::after,
+#agentsTable tbody td.name-col::after,
+#agentsTable thead th.name-col::after {
   content: ''; position: absolute; top: 0; right: -8px; bottom: 0; width: 8px;
   background: linear-gradient(to right, rgba(0,0,0,0.10), rgba(0,0,0,0));
   pointer-events: none; opacity: 0; transition: opacity 0.18s ease;
 }
 #actTable tbody td:last-child::before,
-#actTable thead th:last-child::before {
+#actTable thead th:last-child::before,
+#agentsTable tbody td:last-child::before,
+#agentsTable thead th:last-child::before {
   content: ''; position: absolute; top: 0; left: -8px; bottom: 0; width: 8px;
   background: linear-gradient(to left, rgba(0,0,0,0.10), rgba(0,0,0,0));
   pointer-events: none; opacity: 0; transition: opacity 0.18s ease;
 }
+/* Agent Sessions: the activity title is a sentence, so its pinned column is wide enough to read on one line (two at most). */
+#agentsTable thead th.name-col, #agentsTable tbody td.name-col { width: 460px; min-width: 460px; max-width: 460px; box-sizing: border-box; }
+#agentsTable tbody td.name-col .cell-name { max-width: 100%; white-space: normal; overflow: visible; }
 .table-wrap.has-h-scroll-left #actTable tbody td.name-col::after,
-.table-wrap.has-h-scroll-left #actTable thead th.name-col::after { opacity: 1; }
+.table-wrap.has-h-scroll-left #actTable thead th.name-col::after,
+.table-wrap.has-h-scroll-left #agentsTable tbody td.name-col::after,
+.table-wrap.has-h-scroll-left #agentsTable thead th.name-col::after { opacity: 1; }
 .table-wrap.has-h-scroll-right #actTable tbody td:last-child::before,
-.table-wrap.has-h-scroll-right #actTable thead th:last-child::before { opacity: 1; }
+.table-wrap.has-h-scroll-right #actTable thead th:last-child::before,
+.table-wrap.has-h-scroll-right #agentsTable tbody td:last-child::before,
+.table-wrap.has-h-scroll-right #agentsTable thead th:last-child::before { opacity: 1; }
 /* Hover sync so the pinned cells don't break the row's hover colour. */
 #actTable tbody tr:hover td.cb-col,
 #actTable tbody tr:hover td.name-col,
-#actTable tbody tr:hover td:last-child { background: var(--blue-light); }
+#actTable tbody tr:hover td:last-child,
+#agentsTable tbody tr:hover td.cb-col,
+#agentsTable tbody tr:hover td.name-col,
+#agentsTable tbody tr:hover td:last-child { background: var(--blue-light); }
 table { width: 100%; border-collapse: collapse; min-width: 900px; }
 /* DS Table organism (verified live 2026-07-09; ported from inventory-V1):
    WHITE header, 14px/450 labels (the uppercase 12px band is retired), single
@@ -1502,6 +1527,12 @@ body.ai-open.ai-full #toast { right: 24px; }
 .sd-tab-close { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: none; border-radius: 4px; background: none; color: var(--black-100); cursor: pointer; padding: 4px; flex-shrink: 0; }
 .sd-tab-close:hover { background: var(--black-5); }
 .sd-tabs-actions { margin-left: auto; display: flex; gap: 4px; }
+/* additional (unselected) overlay tabs — same box as the Selected Tab above, flattened into the strip; the Figma Selected Tab is the only spec on file */
+.sd-tab.is-inactive { background: transparent; border-color: transparent; cursor: pointer; }
+.sd-tab.is-inactive .sd-tab-label { color: var(--black-60); }
+.sd-tab.is-inactive .sd-tab-tile { background: var(--black-5); color: var(--black-60); }
+.sd-tab.is-inactive:hover { background: var(--black-10); }
+.sd-tab.is-inactive:hover .sd-tab-label { color: var(--black-100); }
 /* action button — Figma 10845:113123 (New Components / Action Buttons 36) */
 .sd-act-btn { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); color: var(--black-100); cursor: pointer; padding: 8px; box-sizing: border-box; }
 .sd-act-btn:hover { background: var(--black-5); }
@@ -1757,7 +1788,7 @@ body.ai-full #aiWorkingGlow { display: none; }
 .ai-msg.user { justify-content: flex-end; }
 .ai-bubble { max-width: 88%; font-size: 14px; line-height: 1.55; border-radius: 8px; padding: 8px 12px; }
 .ai-msg.agent .ai-bubble { background: none; border: none; padding: 0; border-radius: 0; max-width: 100%; flex: 1; color: var(--black-100); }
-.ai-msg.user .ai-bubble { background: var(--blue); color: var(--white); border-top-right-radius: 4px; }
+.ai-msg.user .ai-bubble { background: var(--em-green-tint); color: var(--black-100); border-top-right-radius: 4px; }
 .ai-bubble strong { font-weight: 600; }
 .ai-bubble p + p { margin-top: 8px; }
 .ai-action { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; color: var(--black-60); }
@@ -1765,22 +1796,28 @@ body.ai-full #aiWorkingGlow { display: none; }
 .ai-action.run { color: var(--blue-dark); }
 .ai-action.run .ai-action-ic { color: var(--blue); }
 /* verbatim clone of inventory-V1-agent-overlay.html's .ai-gate question/approval component */
-.ai-gate { margin-top: 10px; border-top: 1px solid var(--black-5); padding-top: 10px; }
-.ai-gate-q { font-size: 14px; color: var(--black-100); margin-bottom: 10px; }
+.ai-gate { margin-top: 10px; border: 1px solid var(--border-light); border-radius: 8px; padding: 12px 16px; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+.ai-gate-q { font-size: 16px; line-height: 22px; color: var(--black-100); margin-bottom: 10px; }
 .ai-gate-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-.ai-gate-btn { height: 28px; padding: 0 12px; border-radius: 4px; font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; border: 1px solid var(--border); background: var(--white); color: var(--black-100); }
+.ai-gate-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px; border-radius: 4px; font-size: 16px; font-weight: 450; line-height: 22px; font-family: inherit; cursor: pointer; border: 1px solid var(--border); background: var(--white); color: var(--black-100); box-sizing: border-box; }
 .ai-gate-btn:hover { background: var(--black-5); }
 .ai-gate-btn.primary { background: var(--blue); border-color: var(--blue); color: var(--white); }
 .ai-gate-btn.primary:hover { background: var(--em-green-accent); border-color: var(--em-green-accent); color: var(--white); filter: none; }
 /* verbatim clone of inventory-V1-agent-overlay.html's .ai-approval decision-unit component
    (Figma Veeam Vision card surface; actions = Figma Vision Button set 228:10477) */
-.ai-approval { margin-top: 10px; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
-.ai-approval-title { font-size: 14px; font-weight: 700; }
-.ai-approval-row { display: flex; gap: 10px; padding: 5px 0; font-size: 14px; line-height: 1.45; }
-.ai-approval-k { width: 92px; flex-shrink: 0; color: var(--black-60); }
+.ai-approval { margin-top: 10px; border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); padding: 12px 16px; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+.ai-approval-title { font-size: 16px; line-height: 22px; font-weight: 500; color: var(--black-100); }
+.ai-approval-row { display: flex; gap: 8px; padding: 3px 0; font-size: 14px; line-height: 19px; }
+.ai-approval-k { width: 72px; flex-shrink: 0; color: var(--black-60); }
 .ai-approval-v { color: var(--black-100); min-width: 0; }
 .ai-approval .ai-gate-btns { margin-top: 10px; }
-.ai-approval-done { display: none; font-size: 14px; color: var(--em-green); font-weight: 500; margin-top: 8px; }
+.ai-approval-done { display: none; margin-top: 8px; font-size: 13px; font-weight: 500; color: var(--em-green); }
+/* panel gate cards: identical to Protected Data (single spec for every page the assistant appears on) */
+.ai-approval-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.ai-approval-auto { margin-left: auto; font-size: 12px; font-weight: 500; color: var(--black-60); background: var(--black-5); border-radius: 2px; padding: 2px 6px; cursor: help; }
+.ai-approval:not(.resolved):hover { border-color: var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.ai-gate:not(.resolved):hover { border-color: var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.ai-gate-btn svg { flex-shrink: 0; width: 14px; height: 14px; }
 .ai-approval.resolved .ai-approval-done { display: block; }
 .ai-approval.resolved .ai-gate-btns { display: none; }
 .ai-gate.resolved .ai-gate-btns { display: none; }
@@ -1967,6 +2004,26 @@ body.ai-full #aiWorkingGlow { display: none; }
 .ai-replay-progress { font-size: 13px; color: var(--black-50); font-variant-numeric: tabular-nums; }
 .ai-replay-play { margin-left: auto; border: none; background: none; padding: 0; font-family: inherit; font-size: 13px; font-weight: 500; color: var(--em-green); cursor: pointer; }
 .ai-replay-play:hover { color: var(--em-green-accent); text-decoration: underline; }
+/* Rail AI launcher — ported verbatim from inventory-V1-agent-overlay.html (.vn-ai-launcher,
+   user 2026-09-29/30, verified against the live QA "Gencore Assistant" tile):
+   borderless soft rainbow glow (--ai-grad, 14px blur, kept inside the 72px
+   rail) behind a 24px white sparkle that pulses in size while rotating. */
+.vn-ai-launcher { position: relative; width: 40px; height: 40px; padding: 0; margin-bottom: 16px; border: none; background: none; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.vn-ai-launcher::before { content: ""; position: absolute; inset: -6px; background: var(--ai-grad); filter: blur(14px); opacity: 0.85; animation: vnAiSpin 6s linear infinite; }
+.vn-ai-launcher svg { position: relative; z-index: 1; width: 24px; height: 24px; display: block; transform-origin: center; animation: vnAiSparklePulse 2.4s ease-in-out infinite; }
+@keyframes vnAiSpin { to { transform: rotate(360deg); } }
+@keyframes vnAiSparklePulse {
+  0% { transform: scale(0.85) rotate(0deg); }
+  50% { transform: scale(1.2) rotate(180deg); }
+  100% { transform: scale(0.85) rotate(360deg); }
+}
+/* Decorative ambient loops exempted from any file-wide reduced-motion reset
+   (same call as inventory-V1-agent-overlay.html). */
+@media (prefers-reduced-motion: reduce) {
+  .vn-ai-launcher::before { animation-duration: 6s !important; animation-iteration-count: infinite !important; }
+  .vn-ai-launcher svg { animation-duration: 2.4s !important; animation-iteration-count: infinite !important; }
+}
+.vn-sys { display: flex; flex-direction: column; gap: 16px; align-items: center; margin-bottom: 16px; }
 </style>
 <style id="ag-style">
 :root { --ag-plum: #98269b; }   /* Base/Plum (Vision chip Purple) — the spawned-agent node */
@@ -1999,6 +2056,23 @@ body.ai-full #aiWorkingGlow { display: none; }
 .ag-menu button { display: block; width: 100%; height: 36px; padding: 0 16px; border: 0; background: none; text-align: left; font: inherit; font-size: 16px; color: var(--black-100); cursor: pointer; }
 .ag-menu button:hover { background: var(--black-5); }
 .sd-blk { margin-bottom: 24px; }
+.ag-eh { display: flex; align-items: flex-start; gap: 16px; padding: 16px 20px; border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light); }
+.ag-eh .tile { width: 48px; height: 48px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ag-eh .tile svg { width: 28px; height: 28px; }
+.ag-eh .ttl { font-size: 18px; line-height: 24px; font-weight: 500; color: var(--black-100); }
+.ag-eh .desc { font-size: 16px; line-height: 22px; color: var(--black-60); }
+.ag-etbl-wrap { padding: 0 0 24px; }
+.ag-etbl { width: 100%; border-collapse: collapse; min-width: 0; }
+.ag-etbl th { text-align: left; padding: 12px 20px; font-size: 14px; font-weight: 500; color: var(--black-60); border-bottom: 1px solid var(--border-light); white-space: nowrap; }
+.ag-etbl td { padding: 12px 20px; font-size: 16px; line-height: 22px; border-bottom: 1px solid var(--border-light); vertical-align: top; }
+.ag-etbl tr:last-child td { border-bottom: 0; }
+.ag-etbl td.ag-eact { width: 48px; padding-left: 8px; padding-right: 20px; text-align: right; vertical-align: middle; }
+.ag-eact-b { display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; color: var(--black-100); }
+.ag-etbl .nm { font-weight: 500; color: var(--black-100); }
+.ag-etbl .sub { display: block; font-size: 14px; line-height: 20px; color: var(--black-60); }
+.ag-efoot { padding: 12px 20px 0; font-size: 14px; color: var(--black-60); }
+.ag-link { color: var(--blue); font-weight: 500; cursor: pointer; }
+.ag-link:hover { color: var(--em-green-accent); }
 .ag-sum { margin: 0; font-size: 16px; line-height: 22px; color: var(--black-100); }
 .ag-hist { }
 .ag-hist-row { display: flex; gap: 16px; padding: 8px 0; border-top: 1px solid var(--border-light); font-size: 16px; line-height: 22px; }
@@ -2006,7 +2080,7 @@ body.ai-full #aiWorkingGlow { display: none; }
 .ag-tools { display: flex; align-items: center; gap: 8px; padding: 12px 12px 0; }
 .ag-btn { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font: inherit; font-size: 16px; cursor: pointer; }
 .ag-btn:hover { background: var(--black-5); }
-.ag-graph { position: relative; margin: 8px 12px 0; border-bottom: 1px solid var(--border-light); overflow: hidden; }
+.ag-graph { flex-shrink: 0; position: relative; margin: 8px 12px 0; border-bottom: 1px solid var(--border-light); overflow: hidden; }
 .ag-graph.is-hidden { display: none; }
 .ag-zoom { position: absolute; left: 0; bottom: 12px; display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 4px; background: var(--white); z-index: 2; }
 .ag-zoom button { width: 44px; height: 44px; border: 0; border-bottom: 1px solid var(--border-light); background: none; font-size: 20px; cursor: pointer; }
@@ -2137,6 +2211,9 @@ body.ai-full #aiWorkingGlow { display: none; }
 </g></svg></button>
       <div class="vn-stack" id="vnStack"></div>
       <div style="flex:1"></div>
+      <!-- Rail AI launcher — same as inventory-V1-agent-overlay.html / backup-policies-agent-overlay.html:
+           the one AI entry point (the header 'Veeam AI' button is retired). -->
+      <button class="vn-ai-launcher" type="button" onclick="aiOpen()" data-fly="Veeam AI" aria-label="Open the Veeam AI assistant"><svg viewBox="0 0 36 36" aria-hidden="true"><path fill="#fff" d="M18 9.75C18.5502 9.75 19.0272 10.1307 19.1492 10.6672L19.8013 13.5349C20.1029 14.8613 21.1387 15.8971 22.4651 16.1987L25.3328 16.8508C25.8693 16.9728 26.25 17.4498 26.25 18C26.25 18.5502 25.8693 19.0272 25.3328 19.1492L22.4651 19.8013C21.1387 20.1029 20.1029 21.1387 19.8013 22.4651L19.1492 25.3328C19.0272 25.8693 18.5502 26.25 18 26.25C17.4498 26.25 16.9728 25.8693 16.8508 25.3328L16.1987 22.4651C15.8971 21.1387 14.8613 20.1029 13.5349 19.8013L10.6672 19.1492C10.1307 19.0272 9.75 18.5502 9.75 18C9.75 17.4498 10.1307 16.9728 10.6672 16.8508L13.5349 16.1987C14.8613 15.8971 15.8971 14.8613 16.1987 13.5349L16.8508 10.6672C16.9728 10.1307 17.4498 9.75 18 9.75Z"/></svg></button>
       <!-- System nav (production reference 2026-07-13): help videos,
            what's-new gift w/ badge, feedback chat — real Unified Icons
            assets (Help Videos 4774:1119, What's New set, Message 4774:877). -->
@@ -2178,10 +2255,10 @@ body.ai-full #aiWorkingGlow { display: none; }
           <button type="button" role="tab" aria-selected="false" class="act-type-tab" id="actViewTabAudit" onclick="setActView('audit')">Audit log</button>
         </div>
         <div class="topbar-actions">
-          <!-- Resilience Assistant launcher (2026-09-18) — see the shell CSS/JS
-               near the end of this file; verbatim .btn-veeam-ai/.vai-tile from
-               inventory-V1-agent-overlay.html, ported via backup-policies-agent-overlay.html's precedent. -->
-          <button class="btn-veeam-ai" type="button" onclick="aiOpen()" aria-label="Open the Veeam AI assistant">
+          <!-- Header "Veeam AI" button RETIRED (user 2026-10-01, same call as backup-policies-agent-overlay.html):
+               the rail's .vn-ai-launcher is the one AI entry point. Hidden, not deleted — aiOpen()/the
+               pending-badge logic still reference .btn-veeam-ai and #vaiTileGlyph. -->
+          <button class="btn-veeam-ai" type="button" onclick="aiOpen()" aria-label="Open the Veeam AI assistant" style="display:none">
             <span class="vai-tile" id="vaiTileGlyph" aria-hidden="true"></span>Veeam AI
           </button>
           <button class="btn btn-outline btn-sm">Save View</button>
@@ -2760,7 +2837,7 @@ body.ai-full #aiWorkingGlow { display: none; }
              control; exactly one of the two options is always selected. -->
         <div class="act-wl-picker" id="actSessPicker">
           <button type="button" class="act-wl-btn" id="actSessBtn" aria-haspopup="listbox" onclick="actSessToggle(event)">
-            Session state
+            <span id="actSessLbl">Session state</span>
             <span class="awb-chip"><span id="actSessCur">Active</span></span>
             <span class="awb-chev"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
           </button>
@@ -6933,7 +7010,6 @@ var FILTER_CONFIG = {
     // mirroring the audit view's pinned-filter grammar.
     attrs: [
       { id: 'agent',   label: 'Agent',   pinnedOnly: true },
-      { id: 'outcome', label: 'Outcome', pinnedOnly: true },
       { id: 'trigger', label: 'Trigger', pinnedOnly: true }
     ],
     stateKey: 'agentsFilters',
@@ -10140,9 +10216,28 @@ function _actSessOutside(e) {
   var host = document.getElementById('actSessPicker');
   if (host && !host.contains(e.target)) { host.classList.remove('is-open'); document.removeEventListener('click', _actSessOutside); }
 }
+// Agent Sessions anchors on STATUS (not Session state): one status at a time, Pending approval first — the sessions to act on.
+var AG_STATUS_ORDER = ['pending', 'running', 'scheduled', 'success', 'warning', 'failed', 'cancelled'];
+var _AG_TERMINAL = { success: 1, warning: 1, failed: 1, cancelled: 1 };
+function _agStatusSel() { return state.agentsStatus || 'pending'; }
+function _agStatusLabel(k) { return k === 'all' ? 'All statuses' : (AG_STATUS_LBL[k] || k); }
+function _actSessSync() {
+  var ag = state.actView === 'agents';
+  var l = document.getElementById('actSessLbl'); if (l) l.textContent = ag ? 'Status' : 'Session state';
+  var c = document.getElementById('actSessCur'); if (c) c.textContent = ag ? _agStatusLabel(_agStatusSel()) : (_actSessState() === 'completed' ? 'Completed' : 'Active');
+}
 function actSessRenderList() {
   var list = document.getElementById('actSessList');
   if (!list) return;
+  if (state.actView === 'agents') {
+    var pool = _agAll(), cur = _agStatusSel();
+    list.innerHTML = ['all'].concat(AG_STATUS_ORDER).map(function(k){
+      var n = k === 'all' ? pool.length : pool.filter(function(r){ return _agStatus(r) === k; }).length, sel = k === cur;
+      return '<button type="button" role="menuitemradio" aria-checked="' + sel + '" class="act-wl-opt' + (sel ? ' is-current' : '') + '" onclick="actSessPick(\'' + k + '\')">'
+        + '<span style="display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%"><span>' + _agStatusLabel(k) + '</span><span style="font-size:14px;color:var(--black-60);font-weight:450">' + n + '</span></span></button>';
+    }).join('');
+    return;
+  }
   var cur = _actSessState();
   list.innerHTML = [
     { v: 'active',    label: 'Active',    sub: 'Running or queued now' },
@@ -10155,6 +10250,14 @@ function actSessRenderList() {
   }).join('');
 }
 function actSessPick(v) {
+  if (state.actView === 'agents') {
+    if (AG_STATUS_ORDER.indexOf(v) < 0 && v !== 'all') return;
+    state.agentsStatus = v; _actSessSync();
+    var hostA = document.getElementById('actSessPicker'); if (hostA) hostA.classList.remove('is-open');
+    document.removeEventListener('click', _actSessOutside);
+    state.agentsPage = 1; renderAgentsTable();
+    return;
+  }
   delete state._actPinnedDuringWatch;   // a manual lens change ends any leftover AI-watch pin
   state.actSessState = (v === 'completed') ? 'completed' : 'active';   // never null — one option is always selected
   var cur = document.getElementById('actSessCur');
@@ -10284,6 +10387,7 @@ function actWlPickCategory(cat, jobWls) {
   document.removeEventListener('click', _actWlOutside);
   if (state.actView === 'ir' && typeof renderIrTable === 'function') { state.irPage = 1; renderIrTable(); }
   else if (state.actView === 'audit' && typeof renderAuditTable === 'function') { state.auditPage = 1; renderAuditTable(); }
+  else if (state.actView === 'agents' && typeof renderAgentsTable === 'function') { state.agentsPage = 1; renderAgentsTable(); }
   else renderActTable();
   if (typeof _actRenderPinnedJobType === 'function') _actRenderPinnedJobType();
 }
@@ -10304,6 +10408,7 @@ function actWlPick(wl) {
   document.removeEventListener('click', _actWlOutside);
   if (state.actView === 'ir' && typeof renderIrTable === 'function') { state.irPage = 1; renderIrTable(); }
   else if (state.actView === 'audit' && typeof renderAuditTable === 'function') { state.auditPage = 1; renderAuditTable(); }
+  else if (state.actView === 'agents' && typeof renderAgentsTable === 'function') { state.agentsPage = 1; renderAgentsTable(); }
   else renderActTable();
   if (typeof _actRenderPinnedJobType === 'function') _actRenderPinnedJobType();
 }
@@ -10501,7 +10606,7 @@ function _auditFromRot() {
     var e = AE('ag-rot2', 0, 0, 0, 'd.lasso@veeam.com', 'backup_policy_created', 'backup_policy', 'Backup',
       'ROT policy \u201c' + NAME + '\u201d ' + (pol.active === false ? 'saved (inactive)' : 'created and activated') + ' by d.lasso@veeam.com from a Veeam Intelligence recommendation', INTEG, 'Microsoft 365',
       { source: 'agent', imp: true,
-        details: { agent: 'Veeam Intelligence', authorization: 'Reviewed and saved by the user', approver: 'd.lasso@veeam.com', capability: 'Manage policies \u00b7 Recommend' },
+        details: { agent: 'Veeam Intelligence', authorization: (s.how === 'quick' ? 'Activated from the policy list summary, without opening the draft' : 'Reviewed and saved by the user'), approver: 'd.lasso@veeam.com', capability: 'Manage policies \u00b7 Recommend' },
         changed: [['status', '\u2014', 'Active'], ['data_scope', '\u2014', 'SharePoint \u00b7 Retail Taxes, Retail Archive, Retail Ops'], ['scope_query', '\u2014', pol.crit || 'SharePoint files in Retail Taxes, Retail Archive, Retail Ops \u00b7 not modified in 36 months'], ['actions', '\u2014', pol.actionText || 'Flag for review; Exclude from backup after a 30-day review window'], ['severity', '\u2014', pol.severity || 'Low']] });
     e.ts = new Date(s.ts || Date.now()); out.push(e);
   } else if (s.rec === 'dismissed') {
@@ -10656,24 +10761,77 @@ function setAuditPageSize(v) {
 // of Jobs/Audit. Operational "what the agents did"; the accountable record lives
 // in the Audit lens. Clones the audit grammar: shared range + search + sortable
 // table + pager. Reuses _actRangeBounds / _actRangeLabel / _actFmtFull / sortArrowSvg.
+// A browser REFRESH restarts the scenario: decisions made on held tasks (and the policy recommendation) are forgotten, so the pending
+// sessions are waiting again. Navigating between pages keeps them, so Activity, Policies and the assistant stay consistent.
+try { var _agNav = performance.getEntriesByType('navigation')[0]; if (_agNav && _agNav.type === 'reload') { localStorage.removeItem('vdc-agent-task-overrides'); localStorage.removeItem('vdc-rot-state'); var _br = JSON.parse(localStorage.getItem('dcc-jobs-bridge')) || []; localStorage.setItem('dcc-jobs-bridge', JSON.stringify(_br.filter(function(b){ return b.origin !== 'agent'; }))); } } catch (e) {}
 var AGENT_RUNS = (function(){
   var H = 36e5, D = 24 * H, now = Date.now();
   var runs = [
-    { agent:'Capacity-headroom agent', parent:'Veeam Intelligence', capability:'Check repository capacity headroom', kind:'Report', wl:'All workloads', trigger:'Scheduled · Sarah Chen', started:new Date(now - 0.3*H), dur:'38s', outcome:'Running', granted:'Access & visualize data' },
-    { agent:'Nightly-health agent', parent:'Veeam Intelligence', capability:'Compose the overnight picture, exceptions first', kind:'Report', wl:'Microsoft 365', trigger:'Scheduled · Alex Kim', started:new Date(now - 2*H), dur:'12s', outcome:'Success', granted:'Access & visualize data' },
+    { agent:'Capacity-headroom agent', parent:'Veeam Intelligence', capability:'Check repository capacity headroom', kind:'Report', wl:'All workloads', trigger:'Scheduled · Sarah Chen', started:new Date(now - 0.3*H), dur:'38s', outcome:'Running', granted:'Read access' },
+    { agent:'Nightly-health agent', parent:'Veeam Intelligence', capability:'Compose the overnight picture, exceptions first', kind:'Report', wl:'Microsoft 365', trigger:'Scheduled · Alex Kim', started:new Date(now - 2*H), dur:'12s', outcome:'Success', granted:'Read access' },
     { agent:'Mailbox recovery agent', parent:'Veeam Intelligence', capability:'Recover deleted email — contract renewal', kind:'Restore', wl:'Microsoft 365', trigger:'On demand · James Park', started:new Date(now - 3*H), dur:'1m 24s', outcome:'Success', granted:'Restore data · asks first' },
-    { agent:'Mailbox-search agent', parent:'Veeam Intelligence', capability:'Search the scoped mailbox for the contract renewal email', kind:'Question', wl:'Microsoft 365', trigger:'On demand · James Park', started:new Date(now - 3.2*H), dur:'9s', outcome:'Success', granted:'Access & visualize data' },
-    { agent:'Deletion-pattern agent', parent:'Veeam Intelligence', capability:'Rank OneDrive accounts by unusual deletion activity', kind:'Analysis', wl:'Microsoft 365', trigger:'Detection · system', started:new Date(now - 9*H), dur:'52s', outcome:'Warning', granted:'Access & visualize data' },
-    { agent:'Coverage-audit agent', parent:'Veeam Intelligence', capability:'Check coverage, policy mapping and staleness against RPO', kind:'Review', wl:'Microsoft 365', trigger:'On demand · Maria Gonzalez', started:new Date(now - 20*H), dur:'6s', outcome:'Success', granted:'Access & visualize data' },
+    { agent:'Mailbox-search agent', parent:'Veeam Intelligence', capability:'Search the scoped mailbox for the contract renewal email', kind:'Question', wl:'Microsoft 365', trigger:'On demand · James Park', started:new Date(now - 3.2*H), dur:'9s', outcome:'Success', granted:'Read access' },
+    { agent:'Deletion-pattern agent', parent:'Veeam Intelligence', capability:'Rank OneDrive accounts by unusual deletion activity', kind:'Analysis', wl:'Microsoft 365', trigger:'Detection · system', started:new Date(now - 9*H), dur:'52s', outcome:'Warning', granted:'Read access' },
+    { agent:'Coverage-audit agent', parent:'Veeam Intelligence', capability:'Check coverage, policy mapping and staleness against RPO', kind:'Review', wl:'Microsoft 365', trigger:'On demand · Maria Gonzalez', started:new Date(now - 20*H), dur:'6s', outcome:'Success', granted:'Read access' },
     { agent:'Departed-user recovery agent', parent:'Veeam Intelligence', capability:'Recover Mark Aldridge across mailbox and OneDrive', kind:'Restore', wl:'Microsoft 365', trigger:'On demand · James Park', started:new Date(now - 1*D), dur:'3m 12s', outcome:'Success', granted:'Restore data · asks first' },
-    { agent:'Cross-service search agent', parent:'Veeam Intelligence', capability:'Find the departed user’s data across the backed-up estate', kind:'Question', wl:'Microsoft 365', trigger:'On demand · James Park', started:new Date(now - 1*D + 0.1*H), dur:'14s', outcome:'Success', granted:'Access & visualize data' },
-    { agent:'Mailbox-coverage agent', parent:'Veeam Intelligence', capability:'Count protected mailboxes, exclusions and license flags', kind:'Review', wl:'Microsoft 365', trigger:'Scheduled · Alex Kim', started:new Date(now - 1*D + 6*H), dur:'8s', outcome:'Success', granted:'Access & visualize data' },
+    { agent:'Cross-service search agent', parent:'Veeam Intelligence', capability:'Find the departed user’s data across the backed-up estate', kind:'Question', wl:'Microsoft 365', trigger:'On demand · James Park', started:new Date(now - 1*D + 0.1*H), dur:'14s', outcome:'Success', granted:'Read access' },
+    { agent:'Mailbox-coverage agent', parent:'Veeam Intelligence', capability:'Count protected mailboxes, exclusions and license flags', kind:'Review', wl:'Microsoft 365', trigger:'Scheduled · Alex Kim', started:new Date(now - 1*D + 6*H), dur:'8s', outcome:'Success', granted:'Read access' },
     { agent:'SharePoint rollback agent', parent:'Veeam Intelligence', capability:'Roll the Retail Division Taxes folder back to yesterday', kind:'Restore', wl:'Microsoft 365', trigger:'On demand · Sarah Chen', started:new Date(now - 2*D), dur:'2m 03s', outcome:'Error', granted:'Restore data · asks first' },
-    { agent:'Folder-history agent', parent:'Veeam Intelligence', capability:'Search folder history in the backed-up estate', kind:'Question', wl:'Microsoft 365', trigger:'On demand · Sarah Chen', started:new Date(now - 2*D + 0.1*H), dur:'11s', outcome:'Success', granted:'Access & visualize data' },
-    { agent:'Teams-gap agent', parent:'Veeam Intelligence', capability:'Check Teams scope and inherent platform gaps', kind:'Review', wl:'Microsoft 365', trigger:'On demand · Maria Gonzalez', started:new Date(now - 4*D), dur:'7s', outcome:'Success', granted:'Access & visualize data' },
-    { agent:'Estate-health agent', parent:'Veeam Intelligence', capability:'Sweep the estate and rank findings by severity', kind:'Analysis', wl:'Microsoft 365', trigger:'Scheduled · Sarah Chen', started:new Date(now - 5*D), dur:'2m 58s', outcome:'Success', granted:'Access & visualize data' },
-    { agent:'Retry agent', parent:'Veeam Intelligence', capability:'Restart Weekly Replication — Finance VMs', kind:'Backup', wl:'Virtual Machines', trigger:'Approved · Darren Lasso', started:new Date(now - 6*D), dur:'41s', outcome:'Success', granted:'Retry sessions · pre-approved for transient faults' }
+    { agent:'Folder-history agent', parent:'Veeam Intelligence', capability:'Search folder history in the backed-up estate', kind:'Question', wl:'Microsoft 365', trigger:'On demand · Sarah Chen', started:new Date(now - 2*D + 0.1*H), dur:'11s', outcome:'Success', granted:'Read access' },
+    { agent:'Teams-gap agent', parent:'Veeam Intelligence', capability:'Check Teams scope and inherent platform gaps', kind:'Review', wl:'Microsoft 365', trigger:'On demand · Maria Gonzalez', started:new Date(now - 4*D), dur:'7s', outcome:'Success', granted:'Read access' },
+    { agent:'Estate-health agent', parent:'Veeam Intelligence', capability:'Sweep the estate and rank findings by severity', kind:'Analysis', wl:'Microsoft 365', trigger:'Scheduled · Sarah Chen', started:new Date(now - 5*D), dur:'2m 58s', outcome:'Success', granted:'Read access' },
+    { agent:'Retry agent', parent:'Veeam Intelligence', capability:'Restart Weekly Replication — Finance VMs', kind:'Backup', wl:'VMware vSphere', trigger:'Approved · Darren Lasso', started:new Date(now - 6*D), dur:'41s', outcome:'Success', granted:'Retry sessions · pre-approved for transient faults' }
   ];
+  // Seeded per workload so every pick in the Workload picker shows its own sessions (estate-wide sessions above are 'All workloads').
+  var RD = 'Restore data \u00b7 asks first', RDATA = 'Read access', RPOL = 'Manage policies \u00b7 Recommend', RJOB = 'Backup jobs \u00b7 asks first';
+  function R(agent, cap, kind, wl, who, ago, dur, outcome, granted){ return { agent:agent, parent:'Veeam Intelligence', capability:cap, kind:kind, wl:wl, trigger:who, started:new Date(now - ago), dur:dur, outcome:outcome, granted:granted }; }
+  [
+    R('Drive restore agent','Restore the HR shared drive to Tuesday','Restore','Google Workspace','On demand \u00b7 Priya Nair',5*H,'2m 11s','Success',RD),
+    R('Shared-drive search agent','Find files shared outside the company from Finance','Question','Google Workspace','On demand \u00b7 Priya Nair',5.1*H,'10s','Success',RDATA),
+    R('Drive restore agent','Restore the Marketing shared drive \u2014 campaign assets','Restore','Google Workspace','On demand \u00b7 Priya Nair',0.2*H,'55s','Running',RD),
+    R('Mailbox-coverage agent','Check Gmail coverage and exclusions','Review','Google Workspace','Scheduled \u00b7 Alex Kim',26*H,'7s','Success',RDATA),
+    R('Deletion-pattern agent','Rank users by unusual Drive deletions','Analysis','Google Workspace','Detection \u00b7 system',3.2*D,'48s','Warning',RDATA),
+    R('Policy-gap agent','Recommend a policy for unprotected shared drives','Review','Google Workspace','Detection \u00b7 system',4.5*D,'15s','Success',RPOL),
+    R('Record rollback agent','Roll Account records back to Monday','Restore','Dynamics 365','On demand \u00b7 Sarah Chen',4*H,'1m 40s','Success',RD),
+    R('Table-compare agent','Compare the Opportunity table between two restore points','Analysis','Dynamics 365','On demand \u00b7 Sarah Chen',4.2*H,'33s','Success',RDATA),
+    R('Environment-coverage agent','Check sandbox and production protection','Review','Dynamics 365','Scheduled \u00b7 Maria Gonzalez',30*H,'9s','Success',RDATA),
+    R('Record rollback agent','Restore Contact fields \u2014 Retail pipeline','Restore','Dynamics 365','On demand \u00b7 James Park',3*D,'2m 20s','Error',RD),
+    R('Retry agent','Re-run failed Dynamics 365 backup \u2014 contoso-prod','Backup','Dynamics 365','Approved \u00b7 Darren Lasso',5*D,'36s','Success',RJOB),
+    R('Repository recovery agent','Recover the deleted repository payments-service','Restore','GitHub','On demand \u00b7 Alex Kim',7*H,'1m 05s','Success',RD),
+    R('Repository recovery agent','Recover the archived repository billing-ledger','Restore','GitHub','On demand \u00b7 Alex Kim',0.1*H,'40s','Running',RD),
+    R('Branch-protection agent','Check protected-branch coverage across organizations','Review','GitHub','Scheduled \u00b7 Alex Kim',1*D,'11s','Success',RDATA),
+    R('Repo-search agent','Find repositories without a backup policy','Question','GitHub','On demand \u00b7 Maria Gonzalez',2*D,'8s','Success',RDATA),
+    R('Retry agent','Restart nightly backup \u2014 acme-corp','Backup','GitHub','Approved \u00b7 Darren Lasso',3*D,'52s','Success',RJOB),
+    R('Policy-gap agent','Recommend a policy for untagged production repositories','Review','GitHub','Detection \u00b7 system',5*D,'14s','Success',RPOL),
+    R('Project-coverage agent','Check forks and mirrors coverage','Review','GitLab','Scheduled \u00b7 Alex Kim',6*H,'9s','Success',RDATA),
+    R('Retry agent','Retry GitLab group backup \u2014 acme-corp','Backup','GitLab','Approved \u00b7 Sarah Chen',2*D,'1m 02s','Warning',RJOB),
+    R('Repo-search agent','Find projects with no recent push','Question','GitLab','On demand \u00b7 Maria Gonzalez',4*D,'7s','Success',RDATA),
+    R('Pipeline recovery agent','Restore the Core Services repository','Restore','Azure DevOps','On demand \u00b7 James Park',8*H,'1m 52s','Success',RD),
+    R('Project-gap agent','Check Legacy projects against retention','Review','Azure DevOps','Scheduled \u00b7 Maria Gonzalez',2*D,'6s','Success',RDATA),
+    R('Repo-search agent','Find pipelines changed in the last 30 days','Question','Azure DevOps','On demand \u00b7 Alex Kim',3*D,'12s','Success',RDATA),
+    R('Retry agent','Re-run Azure DevOps backup \u2014 acme-eng','Backup','Azure DevOps','Approved \u00b7 Darren Lasso',6*D,'44s','Error',RJOB),
+    R('Project recovery agent','Restore the SECOPS project','Restore','Jira','On demand \u00b7 Sarah Chen',10*H,'2m 30s','Success',RD),
+    R('Project-history agent','Search issue history for legal holds','Question','Jira','On demand \u00b7 Maria Gonzalez',10.2*H,'13s','Success',RDATA),
+    R('Coverage-audit agent','Check project and label coverage','Review','Jira','Scheduled \u00b7 Alex Kim',3*D,'8s','Success',RDATA),
+    R('Space recovery agent','Restore the Legal space','Restore','Confluence','On demand \u00b7 Maria Gonzalez',1.5*D,'1m 18s','Success',RD),
+    R('Page-search agent','Find pages deleted this week','Question','Confluence','On demand \u00b7 Sarah Chen',2*D,'9s','Success',RDATA),
+    R('Directory rollback agent','Restore deleted groups Finance-Admins and AppSec-Reviewers','Restore','Okta WIC','On demand \u00b7 Sarah Chen',6*H,'54s','Success',RD),
+    R('Access-review agent','Rank group changes by risk','Analysis','Okta WIC','Detection \u00b7 system',6.1*H,'41s','Warning',RDATA),
+    R('Group-change agent','Summarize group membership changes this week','Question','Okta WIC','Scheduled \u00b7 Alex Kim',2*D,'10s','Success',RDATA),
+    R('Policy-gap agent','Recommend a policy for unprotected tenants','Review','Okta WIC','Detection \u00b7 system',4*D,'12s','Success',RPOL),
+    R('Identity-gap agent','Check user-group coverage','Review','Ping','Scheduled \u00b7 Maria Gonzalez',1*D,'6s','Success',RDATA),
+    R('Directory-search agent','Find users removed from privileged groups','Question','Ping','On demand \u00b7 Sarah Chen',3*D,'9s','Success',RDATA),
+    R('Flow restore agent','Restore the expense-approval flow','Restore','Power Platform','On demand \u00b7 Priya Nair',9*H,'1m 12s','Success',RD),
+    R('Environment-coverage agent','Check environment protection','Review','Power Platform','Scheduled \u00b7 Alex Kim',2*D,'7s','Success',RDATA),
+    R('Flow restore agent','Roll back the Retail intake app','Restore','Power Platform','On demand \u00b7 James Park',4*D,'2m 05s','Error',RD),
+    R('VM restore agent','Restore sql-prod-02 to a new host','Restore','VMware vSphere','On demand \u00b7 James Park',12*H,'3m 40s','Success',RD),
+    R('Capacity agent','Check datastore capacity headroom','Report','VMware vSphere','Scheduled \u00b7 Sarah Chen',2*D,'14s','Success',RDATA)
+  ].forEach(function(r){ runs.push(r); });
+  // One agent per request: Veeam Intelligence delegates a task to a single agent of a general kind (recovery / analysis / retry), not a
+  // role per tool. A request that used to read as two agents (a recovery agent plus a search agent) is one run.
+  var KIND_AGENT = { Restore:'Recovery agent', Backup:'Retry agent' };
+  runs.forEach(function(r){ r.agent = KIND_AGENT[r.kind] || 'Analysis agent'; });
+  runs = runs.filter(function(r, i){ return !runs.some(function(q, j){ return j < i && q.wl === r.wl && q.trigger === r.trigger && Math.abs(q.started - r.started) <= 0.35 * H && q.outcome !== 'Running'; }); });
   runs.forEach(function(r, i){ r.id = 'ar' + (i + 1); });
   // Agents spawned live by Veeam Intelligence in the Protected Data conversation
   // (writer: inventory-V1-agent-overlay.html, localStorage 'vdc-agent-spawns').
@@ -10684,6 +10842,11 @@ var AGENT_RUNS = (function(){
         started:new Date(x.ts), dur:x.dur || '\u2013', outcome:'Success', granted:x.granted, id:'sp' + i });
     });
   } catch (e) {}
+  // Spawns logged before the one-agent-per-request rule keep their old role names in storage: normalize them on read, and fold
+  // the pairs a single request used to produce (a recovery agent plus a search agent) into one run.
+  runs.forEach(function(r){ r.agent = KIND_AGENT[r.kind] || 'Analysis agent'; });
+  runs = runs.filter(function(r, i){ return !runs.some(function(q, j){ return j < i && q.wl === r.wl && q.trigger === r.trigger && Math.abs(q.started - r.started) <= 0.35 * H && q.outcome !== 'Running'; }); });
+  runs.forEach(function(r, i){ r.id = r.id && /^sp/.test(r.id) ? r.id : 'ar' + (i + 1); });
   return runs;
 })();
 // ── TASK QUEUE (realignment 2026-09-10): the pre-job lifecycle the Jobs
@@ -10697,7 +10860,12 @@ var AGENT_TASKS_SEED = (function(){
   return [
     { id:'at1', title:'Nightly backup-health sweep — all workloads', agent:'Veeam Intelligence', status:'scheduled', when:'Tonight · 2:00 AM', kind:'Report', wl:'All workloads', trigger:'Scheduled · Sarah Chen', source:'Standing schedule', started: at(2, 0, true) },
     { id:'at2', title:'Repository capacity watch',                   agent:'Veeam Intelligence', status:'scheduled', when:'Tonight · 3:30 AM', kind:'Report', wl:'All workloads', trigger:'Scheduled · Maria Gonzalez', source:'Standing schedule', started: at(3, 30, true) },
-    { id:'at3', title:'Re-run failed SharePoint Sites backup — Retail Division', agent:'Veeam Intelligence', status:'awaiting', when:'Paused since 3:12 AM', kind:'Backup', wl:'Microsoft 365', trigger:'Scheduled · Sarah Chen', source:'Overnight run — holding at the approval', started: at(3, 12, false) }
+    { id:'at3', title:'Re-run failed SharePoint Sites backup — Retail Division', agent:'Veeam Intelligence', status:'awaiting', when:'Paused since 3:12 AM', kind:'Backup', wl:'Microsoft 365', trigger:'Scheduled · Sarah Chen', source:'Overnight run — holding at the approval', started: at(3, 12, false) },
+    { id:'at4', title:'Weekly Okta group-change review', agent:'Veeam Intelligence', status:'scheduled', when:'Tomorrow \u00b7 6:00 AM', kind:'Report', wl:'Okta WIC', trigger:'Scheduled \u00b7 Alex Kim', source:'Standing schedule', started: at(6, 0, true) },
+    { id:'at5', title:'Restore Account records \u2014 Dynamics 365 sandbox', agent:'Veeam Intelligence', status:'awaiting', when:'Paused since 7:40 AM', kind:'Restore', wl:'Dynamics 365', trigger:'On demand \u00b7 Sarah Chen', source:'Holding at the approval', started: at(7, 40, false) },
+    { id:'at6', title:'Nightly GitHub backup-health check', agent:'Veeam Intelligence', status:'scheduled', when:'Tonight \u00b7 1:00 AM', kind:'Report', wl:'GitHub', trigger:'Scheduled \u00b7 Alex Kim', source:'Standing schedule', started: at(1, 0, true) },
+    { id:'at7', title:'Check Power Platform environment coverage', agent:'Veeam Intelligence', status:'scheduled', when:'Tonight \u00b7 4:30 AM', kind:'Report', wl:'Power Platform', trigger:'Scheduled \u00b7 Maria Gonzalez', source:'Standing schedule', started: at(4, 30, true) },
+    { id:'at8', title:'Retry failed Azure DevOps backup \u2014 acme-eng', agent:'Veeam Intelligence', status:'awaiting', when:'Paused since 5:10 AM', kind:'Backup', wl:'Azure DevOps', trigger:'Scheduled \u00b7 Sarah Chen', source:'Overnight run \u2014 holding at the approval', started: at(5, 10, false) }
   ];
 })();
 // SPEC PILL (user 2026-09-10 — no invented chips, EVER): the one status
@@ -10931,7 +11099,7 @@ var AGENTS_COLUMNS = [
   { key:'trigger',    label:'Trigger' },
   { key:'started',    label:'Started' },
   { key:'dur',        label:'Duration' },
-  { key:'outcome',    label:'Outcome' }
+  { key:'outcome',    label:'Status' }
 ];
 var _AGENTS_PINNED = [ /* was: agent + outcome + trigger pins — retired 2026-08-18 (user); all three stay in the "+" picker */ ];
 function _agentsRenderPinned(){
@@ -10970,7 +11138,15 @@ function setAgentsSort(key){
   renderAgentsTable();
 }
 // ═══ AGENT SESSIONS: navigator + KPI strip + entity header (borrowed from the Data System catalog) ═══
-function _agAll(){ return _agentTaskRows().concat(AGENT_RUNS); }
+// The chrome-row Workload picker scopes this view: one workload shows that workload's sessions; a category scope (All SaaS) shows its members'
+// plus estate-wide ('All workloads') sessions.
+function _agWlOk(r){
+  var f = (state.actFilters || []).filter(function(x){ return x.attr === 'workload'; })[0];
+  if (!f || !f.values || !f.values.length) return true;
+  if (f.values.indexOf(r.wl) >= 0) return true;
+  return r.wl === 'All workloads' && !!state._actWlCat;
+}
+function _agAll(){ return _agentTaskRows().concat(AGENT_RUNS).filter(_agWlOk); }
 function _agStatus(r){
   var o = r.outcome;
   if (r._task) return (o === 'awaiting' || o === 'waiting') ? 'pending' : (o === 'running' ? 'running' : ((o === 'scheduled' || o === 'queued') ? 'scheduled' : (o === 'done' ? 'success' : 'cancelled')));
@@ -10981,7 +11157,7 @@ var AG_STATUS_ICON = { pending:'lock-outlined', running:'play-circle-outlined', 
 function _agCap(r){ return r._task ? null : String(r.granted || '').split(' · ')[0] || null; }
 function renderAgentKpis(){
   var host = document.getElementById('agKpis'); if (!host) return;
-  var all = _agAll(), runs = AGENT_RUNS;
+  var all = _agAll(), runs = AGENT_RUNS.filter(_agWlOk);
   var pend = all.filter(function(r){ return _agStatus(r) === 'pending'; }).length;
   var gated = runs.filter(function(r){ return r.kind === 'Restore' || r.kind === 'Review'; }).length;
   var secs = function(s){ var m = /(\d+)m/.exec(s || ''), x = /(\d+)s/.exec(s || ''); return (m ? +m[1] * 60 : 0) + (x ? +x[1] : 0); };
@@ -10996,9 +11172,9 @@ function renderAgentsThead(){
   var html = '<tr>';
   // multi-select (Sessions parity, user 2026-09-10)
   html += '<th class="cb-col"><input type="checkbox" id="agentsSelAll" aria-label="Select all rows on this page" onchange="toggleAgentsSelAll(this)"></th>';
-  AGENTS_COLUMNS.forEach(function(col){
+  AGENTS_COLUMNS.forEach(function(col, ci){
     var active = state.agentsSort.key === col.key;
-    html += '<th class="sort-th' + (active ? ' sort-active' : '') + '" onclick="setAgentsSort(\'' + col.key + '\')">' + col.label + sortArrowSvg(active ? state.agentsSort.dir : 'asc') + '</th>';
+    html += '<th class="sort-th' + (ci === 0 ? ' name-col' : '') + (active ? ' sort-active' : '') + '" onclick="setAgentsSort(\'' + col.key + '\')">' + col.label + sortArrowSvg(active ? state.agentsSort.dir : 'asc') + '</th>';
   });
   html += colToggleHeaderCell('agents', false) + '</tr>';
   thead.innerHTML = html;
@@ -11014,15 +11190,14 @@ function renderAgentsTable(){
   // Active = the queue (scheduled/queued/in-progress/gated tasks + runs in
   // flight, no time window — it's "now"); Completed = the record (finished
   // runs + this session's finished tasks, windowed by the shared range).
-  var _activeLens = _actSessState() === 'active';
+  var _stSel = _agStatusSel();
   var _rc = document.getElementById('actRangeChip');
-  if (_rc && state.actView === 'agents') _rc.style.display = _activeLens ? 'none' : '';
+  if (_rc && state.actView === 'agents') _rc.style.display = (_stSel === 'all' || _AG_TERMINAL[_stSel]) ? '' : 'none';   // the time range only applies to finished work
   var _TASK_ACTIVE = { scheduled:1, queued:1, running:1, awaiting:1, waiting:1 };
-  var pool = _agentTaskRows().filter(function(t){ return !!_TASK_ACTIVE[t.outcome] === _activeLens; })
-    .concat(AGENT_RUNS.filter(function(r){ return (r.outcome === 'Running') === _activeLens; }));
+  var pool = _agentTaskRows().concat(AGENT_RUNS).filter(_agWlOk).filter(function(r){ return _stSel === 'all' || _agStatus(r) === _stSel; });
   var rows = pool.filter(function(r){
     var t = r.started.getTime();
-    if (!_activeLens && (t < b.startTs || t > b.endTs)) return false;
+    if (_AG_TERMINAL[_agStatus(r)] && (t < b.startTs || t > b.endTs)) return false;
     for (var i = 0; i < (state.agentsFilters || []).length; i++) {
       var f = state.agentsFilters[i];
       if (f.attr === 'agent'   && f.values.indexOf(r.agent)   < 0) return false;
@@ -11058,19 +11233,19 @@ function renderAgentsTable(){
     + '</div></td>';
     if (r._task){
       return '<tr style="cursor:pointer" onclick="openAgentTaskModal(\'' + r.id + '\')">' + cb
-        + '<td><div class="cell-name">' + esc(r.capability) + '</div></td>'
+        + '<td class="name-col"><div class="cell-name" style="color:var(--blue)">' + esc(r.capability) + '</div></td>'
         + '<td><span class="act-type-chip">' + esc(r.kind || '—') + '</span></td>'
         + '<td>' + esc(r.agent) + '</td>'
         + '<td style="font-size:16px">' + esc(r.wl || '—') + '</td>'
         + '<td>' + esc(r.trigger) + '</td>'
-        + '<td style="white-space:nowrap">' + esc(r.whenLbl) + '</td>'
+        + '<td style="white-space:nowrap">' + esc(_actFmtFull(r.started)) + '</td>'
         + '<td style="white-space:nowrap">' + esc(r.dur) + '</td>'
         + '<td>' + _agentTaskPill(r.outcome, r.id) + '</td>'
         + acts
       + '</tr>';
     }
     return '<tr style="cursor:pointer" onclick="openAgentRunDrawer(\'' + r.id + '\')">' + cb
-      + '<td><div class="cell-name" style="color:var(--blue)">' + esc(r.capability) + '</div></td>'
+      + '<td class="name-col"><div class="cell-name" style="color:var(--blue)">' + esc(r.capability) + '</div></td>'
       + '<td><span class="act-type-chip">' + esc(r.kind || '—') + '</span></td>'
       + '<td>' + esc(r.agent) + (r.parent ? '<div style="font-size:14px;color:var(--black-60)">Spawned by ' + esc(r.parent) + '</div>' : '') + '</td>'
       + '<td style="font-size:16px">' + esc(r.wl || '—') + '</td>'
@@ -11082,7 +11257,7 @@ function renderAgentsTable(){
       + '<td>' + _agentRunPill(r.outcome) + '</td>'
       + acts
     + '</tr>';
-  }).join('') || '<tr><td colspan="10"><div class="inv-empty-state" style="padding:32px;text-align:center;color:var(--black-60)">' + (_activeLens ? 'Nothing active — no tasks queued or running.' : 'No completed runs match.') + '</div></td></tr>';
+  }).join('') || '<tr><td colspan="10"><div class="inv-empty-state" style="padding:32px;text-align:center;color:var(--black-60)">' + (_stSel === 'all' ? 'No sessions match.' : 'No sessions are ' + _agStatusLabel(_stSel).toLowerCase() + ' for this workload scope.') + '</div></td></tr>';
   // selection bookkeeping (Sessions convention): prune to the scoped set,
   // sync the header checkbox, render the bulk bar
   _agentsLastPageIds = pageRows.map(function(r){ return r.id; });
@@ -11094,13 +11269,7 @@ function renderAgentsTable(){
   _agentsRenderBulkBar();
   var sub = document.getElementById('agentsTableSub');
   if (sub){
-    if (_activeLens){
-      var _sched = rows.filter(function(r){ return r._task && r.outcome === 'scheduled'; }).length;
-      var _now = rows.length - _sched;
-      sub.textContent = _now + ' active · ' + _sched + ' scheduled';
-    } else {
-      sub.textContent = rows.length + ' run' + (rows.length === 1 ? '' : 's');
-    }
+    sub.textContent = rows.length + ' session' + (rows.length === 1 ? '' : 's') + (_stSel === 'all' ? '' : ' \u00b7 ' + _agStatusLabel(_stSel));
   }
   var lbl = document.getElementById('agentsRangeLabel');
   if (lbl) lbl.textContent = _actRangeLabel().replace(/^Sessions/, 'Runs');
@@ -11161,12 +11330,13 @@ var AG_NODE = {
   capability:   { c: 'var(--status-blue)',   icon: 'integration-widget-outlined', lbl: 'Capability' },
   tool:         { c: 'var(--black-60)',      icon: 'securiti-graph',             lbl: 'Tool' },
   approval:     { c: 'var(--orange)',        icon: 'lock-outlined',              lbl: 'Approval' },
-  output:       { c: 'var(--red)',           icon: 'policy-outlined',            lbl: 'Output' }
+  output:       { c: 'var(--red)',           icon: 'policy-outlined',            lbl: 'Output' },
+  session:      { c: 'var(--em-green-accent)', icon: 'sd-session-log',          lbl: 'Session' }
 };
 function _agentGraphModel(r){
   var nodes = [], edges = [], id = 0;
   var add = function(type, name, col){ var n = { id: 'n' + (++id), type: type, name: name, col: col }; nodes.push(n); return n; };
-  var capName = String(r.granted || 'Access & visualize data').split(' · ')[0];
+  var capName = String(r.granted || 'Read access').split(' · ')[0];
   var gated = (r.kind === 'Restore' || r.kind === 'Review');
   var toolsBy = { Restore: ['Restore Job Server','Protected Data Server'], Review: ['Policy Server','Protected Data Server'], Backup: ['Restore Job Server'], Report: ['Protected Data Server','Activity & Audit Server'], Analysis: ['Protected Data Server'], Question: ['Protected Data Server'] };
   var tools = r.tools || toolsBy[r.kind] || ['Protected Data Server'];
@@ -11177,19 +11347,23 @@ function _agentGraphModel(r){
   var appr = gated ? add('approval', 'd.lasso@veeam.com', 2) : null;
   var tnodes = tools.map(function(t){ return add('tool', t, 3); });
   var out = add('output', outName, 4);
+  var _jobT = r.kind === 'Restore' ? 'Restore' : (r.kind === 'Backup' ? 'Backup' : null), _ses = null;
+  if (_jobT && typeof _actAllJobs === 'function') _ses = _actAllJobs().filter(function(j){ return j.wl === r.wl && j.type === _jobT && Math.abs(j.started - r.started) <= 3 * 36e5; }).sort(function(a, z){ return Math.abs(a.started - r.started) - Math.abs(z.started - r.started); })[0] || null;
   edges.push([orch.id, ag.id], [ag.id, cap.id]);
   if (appr) edges.push([ag.id, appr.id]);
   tnodes.forEach(function(t){ edges.push([cap.id, t.id]); edges.push([t.id, out.id]); });
   if (appr) edges.push([appr.id, out.id]);
+  if (_ses){ var sn = add('session', _ses.type + ' session', 5); sn.session = _ses.id; edges.push([out.id, sn.id]); }
   // positions: 5 columns, nodes centred per column
-  var W = 1000, H = 300, colX = [130, 320, 515, 710, 880];
-  [0,1,2,3,4].forEach(function(c){
+  var W = 1000, H = 300, colX = _ses ? [90, 250, 415, 580, 745, 910] : [130, 320, 515, 710, 880];
+  [0,1,2,3,4,5].forEach(function(c){
     var col = nodes.filter(function(n){ return n.col === c; });
     col.forEach(function(n, i){ n.x = colX[c]; n.y = H / 2 - 20 + (i - (col.length - 1) / 2) * 110; });
   });
   return { nodes: nodes, edges: edges, W: W, H: H, denied: r.kind === 'Review' ? 'Restore · Export' : (r.kind === 'Restore' ? 'Export · Manage policies' : '') };
 }
 function _agentGraphSvg(m){
+  if (m.ent) return _entGraphSvg(m);
   var by = {}; m.nodes.forEach(function(n){ by[n.id] = n; });
   var esc = function(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); };
   var rad = 10;
@@ -11201,7 +11375,7 @@ function _agentGraphSvg(m){
   }).join('');
   var nodes = m.nodes.map(function(n){
     var t = AG_NODE[n.type];
-    return '<g class="ag-node" data-type="' + n.type + '" onclick="agGraphHL(\'' + n.type + '\')">'
+    return '<g class="ag-node" data-type="' + n.type + '" onclick="' + (n.session ? 'agOpenSession(\'' + n.session + '\')' : 'agGraphHL(\'' + n.type + '\')') + '"' + (n.session ? ' style="cursor:pointer"' : '') + '>'
       + '<circle cx="' + n.x + '" cy="' + n.y + '" r="28" fill="' + t.c + '"/>'
       + '<g transform="translate(' + (n.x - 12) + ',' + (n.y - 12) + ')" style="color:#fff;pointer-events:none">' + (_sdIc(t.icon, 24) || '') + '</g>'
       + '<text class="ag-node-lbl" x="' + n.x + '" y="' + (n.y + 50) + '">' + esc(t.lbl) + '</text>'
@@ -11220,6 +11394,7 @@ function agGraphToggle(){
   if (b) b.querySelector('span').textContent = hide ? 'Show Graph' : 'Hide Graph';
 }
 function agGraphHL(type){
+  if (window._agPane && window._agPane.model && window._agPane.model.ent){ agShowEntity(type); return; }
   var svg = document.getElementById('agSvg'); if (!svg) return;
   svg.classList.toggle('has-hl', !!type);
   [].forEach.call(svg.querySelectorAll('g.ag-node'), function(n){ n.classList.toggle('hl', !!type && n.getAttribute('data-type') === type); });
@@ -11244,15 +11419,9 @@ function openAgentRunModal(runId){
     + '<div><div class="sd-hd-eyebrow">Agent Run</div><div class="sd-hd-title">' + esc(r.capability) + '</div></div>';
   // ── Session detail (borrowed from the entity graph screen): related-object list with counts on the left;
   // the SPAWN GRAPH, then Properties, in the main pane. ──
-  var model = _agentGraphModel(r);
+  var model = _agEntFromRun(r);
   window._agGraph = model;
-  var typeRows = [['agent','Agent','my-ai-agents-outlined'],['capability','Capability','integration-widget-outlined'],['tool','Tool','securiti-graph'],['approval','Approval','lock-outlined'],['output','Output','policy-outlined']];
-  var side = '<button type="button" class="sd-side-item active" id="agSideAll" onclick="agGraphHL(null)"><span class="sd-side-tile">' + _sdIc('sd-session-log', 20) + '</span><span class="lbl">Overview</span></button>';
-  typeRows.forEach(function(t){
-    var n = model.nodes.filter(function(x){ return x.type === t[0]; }).length;
-    if (n) side += '<button type="button" class="sd-side-item" data-agt="' + t[0] + '" onclick="agGraphHL(\'' + t[0] + '\')"><span class="sd-side-tile">' + (_sdIc(t[2], 20) || '') + '</span><span class="lbl">' + t[1] + '</span><span class="sd-side-count">' + n + '</span></button>';
-  });
-  document.getElementById('sdSide').innerHTML = side;
+  document.getElementById('sdSide').innerHTML = _agSideHtml(model);
   var logRows = _agentRunSteps(r).map(function(e, i){
     var glyph = (e.status === 'success') ? _sdIc('sd-log-check', 20) : (_JOB_STATUS_ICON[e.status] || _sdIc('sd-log-check', 20));
     var dur = e.e != null ? _sdFmtDur(e.e - e.s) : '–';
@@ -11272,7 +11441,7 @@ function openAgentRunModal(runId){
     + prow('End Time', running ? 'In progress' : esc(_actFmtFull(new Date(r.started.getTime() + 58000))))
     + prow('Trigger', '<span class="sd-chip">' + esc(r.trigger) + '</span>')
     + prow('Duration', running ? 'In progress' : esc(r.dur))
-    + prow('Granted', esc(r.granted || 'Access & visualize data'))
+    + prow('Granted', esc(r.granted || 'Read access'))
     + prow('Lifetime', 'Retired when the task completed')
     + (denied ? prow('Not granted', esc(denied)) : prow('Not granted', 'Restore · Export · Manage policies'))
     + prow('Human-in-the-loop', (r.kind === 'Restore' || r.kind === 'Review') ? 'Required before anything is written' : 'Not required — read-only')
@@ -11283,6 +11452,7 @@ function openAgentRunModal(runId){
     +   '<div class="ag-zoom"><button type="button" aria-label="Zoom in" onclick="agGraphZoom(1.2)">+</button><button type="button" aria-label="Zoom out" onclick="agGraphZoom(1/1.2)">−</button><button type="button" aria-label="Fit" onclick="agGraphZoom(0)">⤢</button></div></div>'
     + '<div class="sd-cols"><div class="sd-log"><div class="sd-props-hd">Run log</div><div class="sd-log-rows">' + logRows + '</div></div>'
     +   '<div class="sd-props"><div class="sd-props-hd">Properties</div>' + props + '</div></div>';
+  _agPaneInit(model);   // keeps the graph on top; the part below it swaps between Overview and an entity list
   document.getElementById('sdOverlay').classList.add('open');
   document.getElementById('sdModal').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -11318,17 +11488,20 @@ function openAgentTaskModal(taskId){
     : (t.outcome === 'scheduled' ? 'Runs on its standing schedule; the run log lands here once it starts.'
     : (t.outcome === 'cancelled' ? 'Cancelled before it ran — nothing was changed.' : 'Waiting its turn in the queue — tasks run one at a time.'));
   var rot = (t.id === 'rot1'), rs = t.rs || {};
+  var tov = {}; try { tov = (JSON.parse(localStorage.getItem('vdc-agent-task-overrides')) || {})[t.id] || {}; } catch (e) {}
+  var ses = (!rot && t.outcome === 'done' && tov.session) ? tov.session : null;
   if (rot && t.outcome === 'done') note = 'Created by ' + (rs.by || 'Darren Lasso') + ' from this recommendation' + (rs.policy ? ' \u2014 \u201c' + rs.policy.name + '\u201d' + (rs.policy.active ? ', active.' : ', saved inactive.') : '.');
+  if (ses) note = 'Approved by Darren Lasso. It started the ' + ses.type.toLowerCase() + ' session \u201c' + ses.job + '\u201d \u2014 follow it in Resilience Sessions.';
   if (rot && t.outcome === 'cancelled') note = 'Dismissed by ' + (rs.by || 'Darren Lasso') + '. No policy was created.' + (rs.note ? ' Note: \u201c' + rs.note + '\u201d' : '');
   var initials = t.agent.split(/\s+/).map(function(w){ return w[0]; }).join('').slice(0, 2).toUpperCase();
-  var capName = t.kind === 'Review' ? 'Manage policies' : (t.kind === 'Backup' ? 'Restore data' : 'Access & visualize data');
+  var capName = t.kind === 'Review' ? 'Manage policies' : (t.kind === 'Backup' ? 'Backup jobs' : (t.kind === 'Restore' ? 'Restore data' : 'Read access'));
   var goHref = t.href || ('inventory-V1-agent-overlay.html#agentgate/' + t.id);
   // ── header: type + status chip, title, then the actions (the Finding page's grammar: primary decision button
   // + an Actions menu at the top right; a pending approval leads with the decision) ──
   var acts = [];
   if (rot && pending) acts.push(['Open the draft in Policies', "window.location.href='backup-policies-agent-overlay.html#rot-review'"]);
   if (rot && t.outcome === 'done') acts.push(['Open File ROT policies', "window.location.href='backup-policies-agent-overlay.html#rot'"]);
-  if (pending && !rot) acts.push(['Open in the assistant', "window.location.href='inventory-V1-agent-overlay.html#agentgate/" + t.id + "'"]);
+  if (pending && !rot) acts.push(['Open in the assistant', "agReviewInConversation('" + t.id + "')"]);
   acts.push(['View in the audit trail', "window.location.href='activity-agent-overlay.html#audit'"]);
   acts.push(['Copy link', "agCopyTaskLink('" + t.id + "')"]);
   var chev = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>';
@@ -11336,47 +11509,30 @@ function openAgentTaskModal(taskId){
     '<span class="sd-hd-tile">' + _sdIc('sd-session-log', 28) + '</span>'
     + '<div class="sd-hd-main"><div class="sd-hd-meta"><span class="sd-hd-eyebrow">' + (rot ? 'Agent Recommendation' : 'Agent Task') + '</span>' + _agentTaskPill(t.outcome, t.id) + '</div><div class="sd-hd-title">' + esc(t.capability) + '</div></div>'
     + '<div class="sd-hd-acts"><span class="sd-hd-upd">Last updated ' + esc(_actFmtFull(t.started)) + '</span>'
-    + (pending ? '<button type="button" class="ag-pbtn" onclick="window.location.href=\'' + esc(goHref) + '\'">' + esc(t.cta || 'Review in the conversation') + '</button>' : (rot && t.outcome === 'done' ? '<button type="button" class="ag-pbtn" onclick="window.location.href=\'backup-policies-agent-overlay.html#rot\'">Open policy</button>' : ''))
+    + (pending ? '<button type="button" class="ag-pbtn" onclick="' + (rot ? 'window.location.href=\'' + esc(goHref) + '\'' : 'agReviewInConversation(\'' + t.id + '\')') + '">' + esc(t.cta || 'Review in the conversation') + '</button>' : (rot && t.outcome === 'done' ? '<button type="button" class="ag-pbtn" onclick="window.location.href=\'backup-policies-agent-overlay.html#rot\'">Open policy</button>' : (ses ? '<button type="button" class="ag-pbtn" onclick="agOpenSession(\'' + ses.id + '\')">Open session</button>' : '')))
     + '<span class="ag-menu-wrap"><button type="button" class="ag-abtn" aria-haspopup="true" onclick="agTaskMenu(event)"><span>Actions</span>' + chev + '</button>'
     + '<div class="ag-menu" id="agTaskMenu" role="menu">' + acts.map(function(x){ return '<button type="button" role="menuitem" onclick="' + esc(x[1]) + '">' + esc(x[0]) + '</button>'; }).join('') + '</div></span></div>';
   // ── related-object list (left) + graph (what is held, and by whom), like the run page ──
-  var model = (function(){
-    var nodes = [], edges = [], id = 0;
-    var add = function(type, name, col){ var n = { id:'n' + (++id), type:type, name:name, col:col }; nodes.push(n); return n; };
-    var o = add('orchestrator', 'Veeam Intelligence', 0), c = add('capability', capName, 1);
-    var ap = pending ? add('approval', 'd.lasso@veeam.com', 2) : null;
-    var tl = add('tool', t.kind === 'Review' ? 'Policy Server' : 'Protected Data Server', 3);
-    var ou = add('output', t.id === 'rot1' ? 'ROT policy (not created)' : 'Task result', 4);
-    edges.push([o.id, c.id]);
-    if (ap){ edges.push([c.id, ap.id], [ap.id, tl.id]); } else edges.push([c.id, tl.id]);
-    edges.push([tl.id, ou.id]);
-    var W = 1000, H = 220, colX = [130, 320, 515, 710, 880];
-    nodes.forEach(function(n){ n.x = colX[n.col]; n.y = H / 2 - 20; });
-    return { nodes:nodes, edges:edges, W:W, H:H, denied:'' };
-  })();
+  var model = _agEntFromTask(t, ses, pending);
   window._agGraph = model;
-  var typeRows = [['orchestrator','Orchestrator','my-ai-agents-outlined'],['capability','Capability','integration-widget-outlined'],['approval','Approval','lock-outlined'],['tool','Tool','securiti-graph'],['output','Output','policy-outlined']];
-  var side = '<button type="button" class="sd-side-item active" id="agSideAll" onclick="agGraphHL(null)"><span class="sd-side-tile">' + _sdIc('sd-session-log', 20) + '</span><span class="lbl">Overview</span></button>';
-  typeRows.forEach(function(r){
-    var n = model.nodes.filter(function(x){ return x.type === r[0]; }).length;
-    if (n) side += '<button type="button" class="sd-side-item" data-agt="' + r[0] + '" onclick="agGraphHL(\'' + r[0] + '\')"><span class="sd-side-tile">' + (_sdIc(r[2], 20) || '') + '</span><span class="lbl">' + r[1] + '</span><span class="sd-side-count">' + n + '</span></button>';
-  });
-  document.getElementById('sdSide').innerHTML = side;
+  document.getElementById('sdSide').innerHTML = _agSideHtml(model);
   function prow(k, v){ return '<div class="sd-prop-row"><span class="k">' + k + '</span><span class="v">' + v + '</span></div>'; }
   var props = prow('Status', _agentTaskPill(t.outcome, t.id))
     + prow('Agent', '<span class="sd-init"><span class="sd-init-av">' + esc(initials) + '</span>' + esc(t.agent) + '</span>')
     + prow('Source', esc(t.trigger))
     + prow('Capability', esc(capName))
     + (rot ? prow('Decision', t.outcome === 'done' ? 'Created by ' + esc(rs.by || 'Darren Lasso') : (t.outcome === 'cancelled' ? 'Dismissed by ' + esc(rs.by || 'Darren Lasso') : 'Awaiting your review')) : '')
-    + prow('Scheduled / started', esc(t.whenLbl))
+    + (ses ? prow('Resulting session', '<a class="ag-link" onclick="agOpenSession(\'' + ses.id + '\')">' + esc(ses.job) + '</a>') : '')
+    + prow(t.outcome === 'scheduled' ? 'Scheduled for' : 'Started', esc(_actFmtFull(t.started)))
     + prow('Data touched', 'Per the capability’s grant — nothing writes without an approval')
     + prow('Guardrails', 'LLM Firewall · logged to the audit trail');
   var hist = [];
   hist.push([esc(_actFmtFull(t.started)), (t.id === 'rot1' ? 'Veeam Intelligence proposed the policy' : 'Task created for Veeam Intelligence')]);
-  if (rot && t.outcome === 'done') hist.push([esc(_actFmtFull(new Date(rs.ts || Date.now()))), 'Created by ' + esc(rs.by || 'Darren Lasso') + ' after review']);
+  if (rot && t.outcome === 'done') hist.push([esc(_actFmtFull(new Date(rs.ts || Date.now()))), (rs.how === 'quick' ? 'Activated by ' + esc(rs.by || 'Darren Lasso') + ' from the policy list' : 'Created by ' + esc(rs.by || 'Darren Lasso') + ' after review')]);
   else if (rot && t.outcome === 'cancelled') hist.push([esc(_actFmtFull(new Date(rs.ts || Date.now()))), 'Dismissed by ' + esc(rs.by || 'Darren Lasso') + (rs.note ? ' \u2014 \u201c' + esc(rs.note) + '\u201d' : '')]);
-  else if (pending) hist.push([esc(t.whenLbl), rot ? 'Waiting for your review \u2014 nothing is created until you create the policy' : 'Waiting for an approval — nothing runs until it is answered']);
-  else hist.push([esc(t.whenLbl), esc(t.outcome === 'scheduled' ? 'Scheduled' : (t.outcome === 'cancelled' ? 'Cancelled' : 'Updated'))]);
+  else if (ses) hist.push([esc(_actFmtFull(new Date(tov.ts || Date.now()))), 'Approved \u2014 started the ' + esc(ses.type.toLowerCase()) + ' session \u201c' + esc(ses.job) + '\u201d']);
+  else if (pending) hist.push(['Now', rot ? 'Waiting for your review \u2014 nothing is created until you create the policy' : 'Waiting for an approval — nothing runs until it is answered']);
+  else hist.push([esc(_actFmtFull(t.started)), esc(t.outcome === 'scheduled' ? 'Scheduled' : (t.outcome === 'cancelled' ? 'Cancelled' : 'Updated'))]);
   document.getElementById('sdMain').innerHTML =
       '<div class="ag-tools"><button type="button" class="ag-btn" id="agHideBtn" onclick="agGraphToggle()">' + (_sdIc('sd-visibility', 20) || '') + '<span>Hide Graph</span></button></div>'
     + '<div class="ag-graph" id="agGraphWrap">' + _agentGraphSvg(model)
@@ -11387,6 +11543,7 @@ function openAgentTaskModal(taskId){
       +   '<div class="sd-blk"><div class="sd-props-hd">History</div><div class="ag-hist">' + hist.map(function(h){ return '<div class="ag-hist-row"><span class="w">' + h[0] + '</span><span>' + h[1] + '</span></div>'; }).join('') + '</div></div></div>'
       + '<div class="sd-props"><div class="sd-props-hd">Properties</div>' + props + '</div>'
     + '</div>';
+  _agPaneInit(model);   // keeps the graph on top; the part below it swaps between Overview and an entity list
   document.getElementById('sdOverlay').classList.add('open');
   document.getElementById('sdModal').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -11506,6 +11663,7 @@ function setActView(v) {
     var el = document.getElementById(p[0]); if (el) el.classList.toggle('is-view-active', view === p[1]);
   });
   var show = function(id, on){ var el = document.getElementById(id); if (el) el.style.display = on ? '' : 'none'; };
+  if (typeof _actSessSync === 'function') _actSessSync();
   show('filterBar-act', view === 'jobs');
   show('actJobsBody', view === 'jobs');
   show('filterBar-agents', view === 'agents');
@@ -11540,6 +11698,27 @@ function setActView(v) {
     if (_rbLbl && typeof _actRangeLabel === 'function') _rbLbl.textContent = _actRangeLabel();
   }
   state._rangeViewCur = view;
+  // Workload scope is remembered per view: Agent Sessions opens on All SaaS; the other views keep their own pick.
+  (function(){
+    var snap = function(){ var f = (state.actFilters || []).filter(function(x){ return x.attr === 'workload'; })[0]; return { cat: state._actWlCat || null, values: f && f.values ? f.values.slice() : null }; };
+    var apply = function(sn){
+      state.actFilters = (state.actFilters || []).filter(function(x){ return x.attr !== 'workload'; });
+      if (sn.values) state.actFilters.push({ attr: 'workload', values: sn.values.slice() });
+      state._actWlCat = sn.cat;
+      var chip = document.getElementById('actWlCur'), ci = document.getElementById('actWlCurIcon');
+      if (sn.cat){ if (chip) chip.textContent = 'All ' + ({ 'SaaS platforms': 'SaaS' }[sn.cat] || sn.cat); if (ci){ ci.innerHTML = ''; ci.style.display = 'none'; } }
+      else if (sn.values && sn.values.length === 1){ var reg = null; for (var k in _ACT_WL_JOBWL){ if (_ACT_WL_JOBWL[k] === sn.values[0]) reg = k; } var rw = (window.WorkloadPickerDS ? WorkloadPickerDS.WORKLOADS : []).filter(function(w){ return w.id === reg; })[0]; if (chip) chip.textContent = rw ? rw.name : sn.values[0]; if (ci){ ci.innerHTML = _actWlChipIcon(sn.values[0], 16); ci.style.display = ''; } }
+    };
+    var wasAg = _rbPrev === 'agents', isAg = view === 'agents';
+    if (isAg && !wasAg){
+      state._wlOther = snap();
+      var saas = (window.WorkloadPickerDS ? WorkloadPickerDS.WORKLOADS : []).filter(function(w){ return w.cat === 'SaaS platforms' && !w.disabled && _ACT_WL_JOBWL[w.id]; }).map(function(w){ return _ACT_WL_JOBWL[w.id]; });
+      apply(state._wlAgents || { cat: 'SaaS platforms', values: saas });
+    } else if (wasAg && !isAg){
+      state._wlAgents = snap();
+      if (state._wlOther) apply(state._wlOther);
+    }
+  })();
   if (view === 'audit') { renderFilterBar('audit'); renderAuditTable(); _auditRenderPinned(); }
   else if (view === 'agents') { renderFilterBar('agents'); renderAgentsTable(); _agentsRenderPinned(); }   // was: + renderAgentTasks() — queue panel retired same day
   else if (view === 'ir') { renderFilterBar('ir'); if (typeof renderIrTable === 'function') renderIrTable(); if (typeof _irRenderPinned === 'function') _irRenderPinned(); }
@@ -11724,7 +11903,7 @@ function _actBridgeJobs() {
       itemCount: (typeof b.itemCount === 'number') ? b.itemCount : undefined,
       tenant: b.tenant, status: status, started: new Date(b.startedTs),
       duration: duration, dest: b.dest || '', owner: b.owner || '',
-      error: null,
+      error: null, agentTask: b.agentTask || null,
       artifact: (finished && b.artifact) ? { file: b.artifact.file, format: b.artifact.format, size: b.artifact.size, expires: expires } : null
     };
   });
@@ -12132,9 +12311,9 @@ function renderActTable() {
   // Time Range is a HISTORICAL control (user 2026-08-19): visible only on the
   // Completed lens. Active = point-in-time "running now" — no window applies.
   var _sessActiveLens = _actSessState() === 'active';
-  if (state.actView !== 'audit') {   // audit owns the range chip (always visible there)
+  if (state.actView !== 'audit') {   // audit owns the range chip (always visible there); Agent Sessions owns it by Status (renderAgentsTable)
     var _rc = document.getElementById('actRangeChip');
-    if (_rc) _rc.style.display = _sessActiveLens ? 'none' : '';
+    if (_rc && state.actView !== 'agents') _rc.style.display = _sessActiveLens ? 'none' : '';
     var _pn = document.getElementById('actPlaneNote');
     if (_pn) _pn.textContent = (typeof _actPlaneNoteText === 'function' ? _actPlaneNoteText() : '');
   }
@@ -13073,6 +13252,7 @@ function openSessionModal(jobId) {
   var props = prow('Process Name', '<span data-tooltip="' + _jobGuid('session:' + j.id) + '">' + _jobGuid('session:' + j.id) + '</span>')
     + prow('Object Types', '<span class="sd-chip">' + esc(_jobObjectTypes(j)) + '</span>')
     + prow('Initiator', '<span class="sd-init"><span class="sd-init-av">' + esc(initials) + '</span>' + esc(initiator) + '</span>')
+    + (j.agentTask ? prow('Agent task', '<a class="ag-link" onclick="openAgentTaskModal(\'' + esc(j.agentTask) + '\')">' + esc((_agentTaskRows().filter(function(x){ return x.id === j.agentTask; })[0] || {}).capability || 'Open the task') + '</a>') : '')
     + prow('Status', _jobStatusPill(j.status))
     + prow('Start Time', esc(_actFmtFull(j.started)))
     + prow('End Time', _fin ? esc(_actFmtFull(_fin)) : (j.status === 'queued' ? 'Not started' : 'In progress'))
@@ -14272,9 +14452,9 @@ function aiRender(){
           return '<div class="ai-approval-row"><span class="ai-approval-k">'+_aiEsc(r[0])+'</span><span class="ai-approval-v">'+r[1]+'</span></div>';
         }).join('');
         gate = '<div class="ai-approval'+(m.gate.resolved?' resolved':'')+'">'
-          + '<div class="ai-approval-title">Approval required</div>'
+          + '<div class="ai-approval-hd"><span class="ai-approval-title">Approval required</span></div>'
           + apRows + btns
-          + '<div class="ai-approval-done">✓ '+_aiEsc(m.gate.choice||'Approved')+' · you</div>'
+          + '<div class="ai-approval-done">\u2713 '+_aiEsc(m.gate.choice||'Approved')+' \u00b7 you'+(m.gate.decidedAt?' \u00b7 '+m.gate.decidedAt:'')+'</div>'
           + '</div>';
       } else {
       gate = '<div class="ai-gate'+(m.gate.resolved?' resolved':'')+'">'
@@ -14299,7 +14479,7 @@ function aiPushAgent(html, gate){
 function aiGateClick(i){
   var m = aiAgent.activeGate; if(!m || !m.gate || m.gate.resolved) return;
   var btn = m.gate.buttons[i]; if(!btn) return;
-  m.gate.resolved = true; m.gate.choice = btn.choice || btn.label;
+  m.gate.resolved = true; m.gate.choice = btn.choice || btn.label; m.gate.decidedAt = new Date().toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
   aiAgent.activeGate = null; aiRender();
   if(typeof btn.fn === 'function') btn.fn();
 }
@@ -14484,6 +14664,7 @@ window.addEventListener('focus', function(){ if (document.body.classList.contain
 window.addEventListener('storage', function(e){ if (e.key === 'vdc-facts' && typeof aiRender === 'function' && !aiAgent.busy) aiRender(); });
 function aiacToggleInsight(i){ var m = aiAgent.msgs[i]; if(!m || m.role !== 'card') return; m.insightOpen = !m.insightOpen; aiRender(); }
 function aiacToggleActs(i){ var m = aiAgent.msgs[i]; if(!m || m.role !== 'card') return; m.actsOpen = !m.actsOpen; aiRender(); }
+function aiacToggleTable(i){ var m = aiAgent.msgs[i]; if(!m || m.role !== 'card') return; m.tblOpen = !m.tblOpen; aiAgent._scrollAnchor = m.tblOpen ? { reveal: '[data-aiac="' + i + '"] .ov-more-row' } : 'keep'; aiRender(); }
 // Local routing: nav carries the handoff marker so the target page can pick
 // the conversation up (works for both directions — forward to a page that
 // has this same shell, or back to inventory-V1-agent-overlay.html); a flow is approved
@@ -14518,7 +14699,7 @@ function aiacAcceptAll(){
   try {
     var _mk = sessionStorage.getItem('vdc-ai-handoff');
     if (_mk) sessionStorage.removeItem('vdc-ai-handoff');
-    if (_mk !== 'activity.html') return;
+    if (_mk !== 'activity.html' && _mk !== 'activity-agent-overlay.html') return;   // the overlay file's own name (nav carries the destination filename); was activity.html only — a carry from Protected Data never hydrated here
     var raw = JSON.parse(localStorage.getItem('vdc-ai-transcript'));
     if (!raw || !Array.isArray(raw.msgs) || !raw.msgs.length) return;
     raw.msgs.forEach(function(r){
@@ -14734,7 +14915,7 @@ body.ai-open { --ai-w: min(665px, 46vw); }
 body.ai-open .app { padding-right: 0; }
 body.ai-open .ws-overlay { right: 0; }
 body.ai-open .ws-modal { right: 24px; }
-body.ai-open .record-drawer { right: 16px; max-width: calc(100vw - 32px); }
+body.ai-open .record-drawer.open { right: 16px; max-width: calc(100vw - 32px); }   /* only when open — the closed drawer parks off-screen, and this rule used to pull it into view behind the assistant */
 /* scrim — white wash, page stays legible but inert (Figma: ~80% wash) */
 #aiScrim { display: none; position: fixed; inset: 0; z-index: 9590; background: rgba(255,255,255,0.78); }
 body.ai-open #aiScrim { display: block; }
@@ -14773,8 +14954,8 @@ body.ai-full #aiExpandBtn, #aiExpandBtn { display: none; }
 .ov-prose p { margin: 0; } .ov-prose p + p { margin-top: 12px; }
 .ov-prose { color: var(--black-100); }
 .ov-card { border: 1px solid var(--border-light); border-radius: 4px; background: var(--white); padding: 12px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-.ov-card-hd { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.ov-card-title { font-size: 16px; line-height: 22px; font-weight: 500; }
+.ov-card-hd { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }   /* flex-start (was center): a title that wraps to 2 lines pulled the button off the top-right corner */
+.ov-card-title { font-size: 16px; line-height: 22px; font-weight: 500; margin-top: 3px; }   /* 3px = (28px button − 22px line) / 2 — keeps a one-line title centred on the button */
 .ov-btn { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font-family: inherit; font-size: 14px; color: var(--black-100); cursor: pointer; white-space: nowrap; flex-shrink: 0; }
 .ov-btn:hover { background: var(--black-5); }
 .ov-btn svg { width: 16px; height: 16px; }
@@ -14788,8 +14969,8 @@ body.ai-full #aiExpandBtn, #aiExpandBtn { display: none; }
 .ov-block .v { font-size: 14px; color: var(--black-80); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ov-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 14px; color: var(--black-60); }
 .ov-legend .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; background: var(--c); }
-.ov-bars { display: flex; flex-direction: column; gap: 8px; }
-.ov-bar { display: grid; grid-template-columns: minmax(80px, 28%) 1fr auto; align-items: center; gap: 12px; font-size: 14px; }
+.ov-bars { display: grid; grid-template-columns: minmax(80px, 28%) 1fr auto; column-gap: 12px; row-gap: 8px; align-items: center; }   /* shared columns: each row used to size its own value column, so tracks differed in width per row */
+.ov-bar { display: grid; grid-template-columns: subgrid; grid-column: 1 / -1; align-items: center; font-size: 14px; }
 .ov-bar .lbl { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ov-bar .track { height: 12px; border-radius: 2px; background: var(--black-5); overflow: hidden; }
 .ov-bar .track > span { display: block; height: 100%; border-radius: 2px; }
@@ -14798,10 +14979,11 @@ body.ai-full #aiExpandBtn, #aiExpandBtn { display: none; }
 .ov-cap-fig small { font-size: 14px; font-weight: 400; color: var(--black-60); letter-spacing: 0; margin-left: 4px; }
 .ov-card .aiac-trend { margin-top: 0; }
 .ov-table-wrap { border: 1px solid var(--border-light); border-radius: 4px; overflow-x: auto; }
-.ov-table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 20px; }
+.ov-table { width: 100%; min-width: 0; border-collapse: collapse; font-size: 14px; line-height: 20px; }   /* min-width:0 beats the global table{min-width:900px} */
 .ov-table th { text-align: left; font-size: 12px; font-weight: 400; color: var(--black-60); padding: 8px 12px; background: var(--ov-form-bg); }
 .ov-table td { padding: 8px 12px; vertical-align: top; border-top: 1px solid var(--border-light); }
 .ov-table td:first-child { font-weight: 500; }
+.ov-more-row { text-align: center; margin-top: -4px; }   /* the table card's "Show all N" toggle */
 .ov-badge { display: inline-block; padding: 0 8px; border-radius: 2px; font-size: 14px; line-height: 22px; font-weight: 500; }
 .ov-badge.ok { background: var(--em-green-tint); color: var(--em-green); }
 .ov-badge.warn { background: var(--orange-10); color: var(--orange); }
@@ -14832,6 +15014,7 @@ body.ai-full #aiExpandBtn, #aiExpandBtn { display: none; }
 .ov-rs-head svg.caret { margin-left: auto; flex-shrink: 0; color: var(--black-60); transition: transform 0.15s ease; }
 .ov-rs.is-open .ov-rs-head svg.caret { transform: rotate(180deg); }
 .ov-rs.is-collapsed { padding: 8px 12px; }
+.ov-rs-cur { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ov-rs-list { display: flex; flex-direction: column; gap: 4px; }
 .ov-rs.is-collapsed .ov-rs-list { display: none; }
 .ov-rs.is-collapsed.is-open .ov-rs-list { display: flex; margin-top: 8px; }
@@ -14880,13 +15063,12 @@ button.ov-rs-row:hover .ov-rs-lbl { text-decoration: underline; text-decoration-
 .ov-consent-tool { display: flex; align-items: center; gap: 8px; font-size: 16px; line-height: 24px; font-weight: 500; margin-bottom: 4px; }
 .ov-consent-tool svg { width: 16px; height: 16px; flex-shrink: 0; }
 .ov-consent-card .ai-approval-row { font-size: 14px; }
-.ov-consent-btns { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.ov-consent-btns { display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 8px; margin-top: 8px; }
 .ov-consent-note { width: 100%; min-height: 72px; margin-top: 8px; padding: 8px 12px; border: 1px solid var(--em-green); border-radius: 4px; background: var(--em-green-tint); font: inherit; font-size: 14px; resize: vertical; }
 .ov-danger { background: var(--red); border-color: var(--red); color: var(--white); }
 .ov-consent-done { margin-top: 8px; font-size: 14px; color: var(--em-green); font-weight: 500; }
 .ov-consent-done.is-denied { color: var(--red); }
 .ai-approval .ov-consent-sub { margin: -2px 0 4px; }
-.ai-approval .ai-gate-btns { justify-content: flex-end; }
 </style>
 <script id="ov-shims">
 (function(){
@@ -14950,14 +15132,19 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
     return '<div class="ov-bars"><div class="ov-bar" style="grid-template-columns:1fr auto"><span class="track"><span style="width:' + Math.min(100, Math.round(c.val / c.max * 100)) + '%;background:' + c.color + '"></span></span>'
       + '<span class="val">' + esc(c.val + ' / ' + c.max + ' ' + c.unit) + '</span></div></div>';
   }
-  function table(t){
+  // t.collapse = rows shown before the "Show all N" toggle (card state m.tblOpen, flipped by aiacToggleTable)
+  function table(t, m, i){
     var head = '<tr>' + t.cols.map(function(c){ return '<th>' + esc(c) + '</th>'; }).join('') + '</tr>';
-    var body = t.rows.map(function(r){
+    var capped = t.collapse && t.rows.length > t.collapse, open = !!(m && m.tblOpen);
+    var body = (capped && !open ? t.rows.slice(0, t.collapse) : t.rows).map(function(r){
       return '<tr>' + r.map(function(c){
         return '<td>' + (Array.isArray(c) ? '<span class="ov-badge ' + c[0] + '">' + esc(c[1]) + '</span>' : esc(c)) + '</td>';
       }).join('') + '</tr>';
     }).join('');
-    return '<div class="ov-table-wrap"><table class="ov-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>';
+    return '<div class="ov-table-wrap"><table class="ov-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>'
+      + (capped ? '<div class="ov-more-row"><button type="button" class="aiac-details-btn' + (open ? ' open' : '') + '" aria-expanded="' + open + '" onclick="aiacToggleTable(' + i + ')">'
+        + (open ? 'Show fewer' : 'Show all ' + t.rows.length + (t.noun ? ' ' + esc(t.noun) : ''))
+        + '<span class="chev"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></span></button></div>' : '');
   }
   // ONE next-steps concept (Figma: "What I can do next" + sparkle pills such as
   // "Restore all deleted files"). Every next step is a pill: agent-runnable
@@ -15051,12 +15238,12 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
     var s = m.card, h = '<div class="ov-ans" data-aiac="' + i + '">';
     h += '<h3 class="ov-title">' + s.headline + '</h3>';
     if (s.headsub) h += '<div class="ov-prose"><p>' + s.headsub + '</p></div>';
-    var charted = false, acts = s.actions || [];
+    var charted = false, acts = s.actions || [], stripLate = '';   // stripLate: stripLast puts the composition panel after the bars
     if (s.strip){
       charted = true;
       var tot = s.strip.reduce(function(a, x){ return a + x[1]; }, 0);
       var body = (s.unit ? '<div class="ov-stat"><span class="rule"></span><span><span class="num">' + fmt(tot) + '</span><span class="unit">' + esc(s.unit) + '</span></span></div>' : '') + blocks(s.strip, s.unit);
-      h += card(s.stripTitle || 'Breakdown', body, 'widget');
+      if (s.stripLast) stripLate = card(s.stripTitle || 'Breakdown', body, 'widget'); else h += card(s.stripTitle || 'Breakdown', body, 'widget');
     }
     if (s.vrows){
       charted = true;
@@ -15070,12 +15257,13 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
       charted = true;
       h += card(s.trend.caption || 'Trend', _aiacTrendHtml(s.trend), 'widget');
     }
+    h += stripLate;
     if (!charted && acts.length >= 2){
       var counts = {}; acts.forEach(function(a){ counts[a.tone] = (counts[a.tone] || 0) + 1; });
       var items = ['bad', 'warn', 'ok', 'n'].filter(function(t){ return counts[t]; }).map(function(t){ return [TONE_LBL[t], counts[t], TONE[t]]; });
       h += card('Findings by severity', blocks(items, ''), 'widget');
     }
-    if (s.table && s.table.label !== s.stripTitle) h += card(s.table.label, table(s.table), 'export');
+    if (s.table && s.table.label !== s.stripTitle) h += card(s.table.label, table(s.table, m, i), 'export');
     if (s.insight) h += '<div class="ov-prose"><p>' + s.insight + '</p></div>';
     if (s.lookLink)
       h += '<button type="button" class="ov-look" onclick="aiacGo(\'nav\', \'' + esc(s.lookLink.nav).replace(/'/g, '') + '\')">' + esc(s.lookLink.label) + ic('open-in-new-outlined', 16) + '</button>';
@@ -15160,7 +15348,7 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
     var steps = m.steps || [];
     if (!steps.length) return '<div class="ov-rs ov-rs-wait-wrap" data-mi="' + i + '"><div class="ov-rs-wait">Processing request</div></div>';
     var live = !m.done;
-    var open = live ? (m._userToggled ? !!m.open : true) : !!m.open;
+    var open = !!m.open;   // collapsed until the user expands it — while thinking, the header carries the current step
     var total = null;
     if (m.named && steps.every(function(s){ return s && s.ms; })) total = (steps.reduce(function(a, s){ return a + s.ms; }, 0) / 1000).toFixed(1);
     else if (m.ms) total = Math.max(1, Math.round(m.ms / 1000));
@@ -15178,12 +15366,15 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
         + '<span class="ov-rs-badge ' + (running ? 'run' : 'ok') + '">' + (running ? 'In progress' : 'Complete') + '</span></' + close + '>'
         + (expanded && hasSub ? '<div class="ov-rs-sub">' + rsSubs(o) + '</div>' : '');
     }).join('');
-    var head = '';
-    if (!live){
-      head = '<button type="button" class="ov-rs-head" onclick="aiToggleReason(' + i + ')" aria-expanded="' + open + '">Thought for ' + (total || 1) + 's \u00b7 ' + steps.length + ' step' + (steps.length === 1 ? '' : 's')
-        + '<svg class="caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>';
+    var caret = '<svg class="caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+    var head;
+    if (live){
+      var cur = steps[steps.length - 1], curO = typeof cur === 'string' ? { label: cur, kind: 'tool' } : cur;
+      head = '<button type="button" class="ov-rs-head" onclick="aiToggleReason(' + i + ')" aria-expanded="' + open + '"><span class="ov-rs-ico"><span class="disc-spinner"></span></span><span class="ov-rs-cur">' + esc(rsLabel(curO)) + '</span>' + caret + '</button>';
+    } else {
+      head = '<button type="button" class="ov-rs-head" onclick="aiToggleReason(' + i + ')" aria-expanded="' + open + '">Thought for ' + (total || 1) + 's \u00b7 ' + steps.length + ' step' + (steps.length === 1 ? '' : 's') + caret + '</button>';
     }
-    return '<div class="ov-rs' + (live ? '' : ' is-collapsed') + (open ? ' is-open' : '') + '" data-mi="' + i + '">' + head + '<div class="ov-rs-list">' + rows + '</div></div>';
+    return '<div class="ov-rs is-collapsed' + (open ? ' is-open' : '') + '" data-mi="' + i + '">' + head + '<div class="ov-rs-list">' + rows + '</div></div>';
   }
   function swapReasoning(){
     var body = document.getElementById('aiBody'); if (!body) return;
@@ -15211,7 +15402,7 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
       var t = card.querySelector('.ai-approval-title'), bar = card.querySelector('.ai-gate-btns'); if (!t || !bar) return;
       t.textContent = 'User consent required';
       var sub = document.createElement('div'); sub.className = 'ov-consent-sub'; sub.textContent = 'Veeam Intelligence needs your approval before it can continue:';
-      t.parentNode.insertBefore(sub, t.nextSibling);
+      var hd = t.closest('.ai-approval-hd') || t; hd.parentNode.insertBefore(sub, hd.nextSibling);
       var btns = [].slice.call(bar.querySelectorAll('.ai-gate-btn'));
       btns.filter(function(b){ return !b.classList.contains('primary'); }).forEach(function(b){
         b.textContent = 'Deny'; bar.insertBefore(b, bar.firstChild);
@@ -15259,6 +15450,326 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
     else if (msgs.some(function(m){ return m.role === 'user'; })) txt = 'New conversation';
     t.textContent = txt;
     paintDock();
+  };
+})();
+</script>
+
+<script id="ag-conv">
+// "Review in conversation" — opens THIS page's assistant on the held task, pre-populated: the request, the agent's reasoning,
+// its summary, and the approval card. The decision writes the same task override the Protected Data gate does.
+(function(){
+  var E = function(x){ return (typeof _aiEsc === 'function') ? _aiEsc(x) : String(x); };
+  var CONV = {
+    at3: { user:'Why did last night\u2019s SharePoint Sites backup fail for Retail Division?', topic:'failed SharePoint Sites backup',
+      steps:[['route','Interpreting request \u2014 failed backup on Retail Division SharePoint',[['scope','SharePoint Sites \u00b7 last night'],['mode','read-only analysis']],'A failed session at 3:12 AM'],
+             ['tool','sessions.get \u2014 job history for Retail Division',[['window','last 24 hours']],'2 of 41 sites did not complete'],
+             ['tool','errors.classify \u2014 failure cause',[['code','HTTP 429 \u00b7 throttling']],'Transient \u2014 Microsoft 365 throttled the job']],
+      summary:'<p>The SharePoint Sites backup for Retail Division stopped at <b>3:12 AM</b>. Microsoft 365 throttled the job (HTTP 429), so <b>2 of 41 sites</b> did not complete. This kind of failure is transient and a re-run normally succeeds.</p><p>Starting a job needs your approval, so I\u2019ve queued the re-run and paused here.</p>',
+      rows:[['Action','Re-run the SharePoint Sites backup job'],['Scope','Microsoft 365 \u00b7 2 sites that failed (Retail Taxes, Retail Ops)'],['Evidence','HTTP 429 throttling at 3:12 AM \u2014 transient, no data at risk'],['Reversal','Stop the job at any time; nothing is restored or deleted']],
+      primary:'Approve re-run', approved:'Approved \u2014 re-running the backup now.', denied:'Understood \u2014 I won\u2019t re-run it. The failed session stays in the record.' },
+    at5: { user:'Restore the Account records in the Dynamics 365 sandbox back to Monday.', topic:'Dynamics 365 Account restore',
+      steps:[['route','Interpreting request \u2014 roll Account records back in the sandbox',[['scope','Dynamics 365 \u00b7 contoso-sandbox'],['table','Account']],'A record-level restore to Monday\u2019s restore point'],
+             ['tool','restorepoints.resolve \u2014 Monday, Oct 12',[['point','3:15 AM']],'Restore point found'],
+             ['tool','records.diff \u2014 Account changes since Monday',[['changed','1,240 records']],'1,240 records differ from Monday']],
+      summary:'<p>I found <b>1,240 Account records</b> in the sandbox that changed since Monday\u2019s restore point (<b>Oct 12, 3:15 AM</b>). Rolling them back replaces their current values, so this is an in-place restore and always needs your approval.</p>',
+      rows:[['Action','Restore Account records in place'],['Scope','Dynamics 365 \u00b7 contoso-sandbox \u00b7 1,240 records'],['Evidence','Changed since the Mon, Oct 12, 3:15 AM restore point'],['Reversal','Prior values stay in backup \u2014 restore them again to undo']],
+      primary:'Approve restore', approved:'Approved \u2014 restoring the Account records now.', denied:'Understood \u2014 nothing was restored. Tell me if you want a new copy instead.' },
+    at8: { user:'Retry the Azure DevOps backup that failed overnight.', topic:'Azure DevOps backup retry',
+      steps:[['route','Interpreting request \u2014 retry the failed Azure DevOps backup',[['scope','Azure DevOps \u00b7 acme-eng']],'A failed session at 5:10 AM'],
+             ['tool','sessions.get \u2014 overnight run',[['repositories','14']],'The run failed before any repository completed'],
+             ['tool','errors.classify \u2014 failure cause',[['code','service connection timeout']],'Transient \u2014 the service connection timed out']],
+      summary:'<p>The Azure DevOps backup for <b>acme-eng</b> failed at <b>5:10 AM</b> when a service connection timed out before any of its <b>14 repositories</b> were captured. It looks transient, so a retry is the right next step. It needs your approval because it starts a job.</p>',
+      rows:[['Action','Retry the Azure DevOps backup job'],['Scope','Azure DevOps \u00b7 acme-eng \u00b7 14 repositories'],['Evidence','Service connection timeout at 5:10 AM \u2014 transient'],['Reversal','Stop the job at any time; nothing is restored or deleted']],
+      primary:'Approve retry', approved:'Approved \u2014 retrying the backup now.', denied:'Understood \u2014 I won\u2019t retry it.' }
+  };
+  function generic(t){
+    return { user:'What is ' + t.capability + ' waiting on?', topic:t.capability,
+      steps:[['route','Interpreting request \u2014 ' + t.capability,[['workload',t.wl || '\u2014']],'A held task awaiting approval']],
+      summary:'<p>\u201c' + E(t.capability) + '\u201d is paused at an approval. Nothing runs until you answer it.</p>',
+      rows:[['Action',E(t.capability)],['Scope',E(t.wl || '\u2014')],['Evidence','Requested by ' + E(t.trigger || '\u2014')],['Reversal','Nothing runs until you approve it']],
+      primary:'Approve', approved:'Approved \u2014 continuing.', denied:'Understood \u2014 I won\u2019t go ahead.' };
+  }
+  // An approved action becomes a real session on the Resilience Sessions table (via the same cross-page job bridge the restore wizard
+  // uses), attributed to the agent and the approver, and linked both ways with the agent task.
+  var JOBS = {
+    at3: { type:'Backup', job:'backup-retry-retail-sharepoint', resource:'Retail Division \u00b7 SharePoint Sites (2 sites)', wl:'Microsoft 365', tenant:'contoso', runForMs:14 * 60000, itemCount:2, dest:'' },
+    at5: { type:'Restore', job:'restore-account-records-d365-sandbox', resource:'Account \u00b7 1,240 records', wl:'Dynamics 365', tenant:'contoso-sandbox', runForMs:6 * 3600000, itemCount:1240, dest:'Original location (in place)' },
+    at8: { type:'Backup', job:'backup-retry-acme-eng', resource:'acme-eng \u00b7 14 repositories', wl:'Azure DevOps', tenant:'acme-eng', runForMs:9 * 60000, itemCount:14, dest:'' }
+  };
+  function startSession(taskId){
+    var d = JOBS[taskId]; if (!d) return null;
+    var job = { id:'br-ag-' + taskId + '-' + Date.now().toString(36), type:d.type, job:d.job, resource:d.resource, wl:d.wl, tenant:d.tenant, status:'running', startedTs:Date.now(),
+      runForMs:d.runForMs, dest:d.dest, owner:'Veeam Intelligence \u2014 approved by you', itemCount:d.itemCount, artifact:null, origin:'agent', agentTask:taskId };
+    try { var list = JSON.parse(localStorage.getItem('dcc-jobs-bridge')) || []; list.unshift(job); localStorage.setItem('dcc-jobs-bridge', JSON.stringify(list.slice(0, 40))); } catch (e) {}
+    return job;
+  }
+  window.agOpenSession = function(id){
+    if (typeof aiClose === 'function') aiClose();
+    if (typeof closeSessionModal === 'function') closeSessionModal();
+    if (typeof setActView === 'function') setActView('jobs');
+    setTimeout(function(){ if (typeof openSessionModal === 'function') openSessionModal(id); }, 200);
+  };
+  function decide(id, status, session){
+    try { var ov = JSON.parse(localStorage.getItem('vdc-agent-task-overrides')) || {}; ov[id] = { status:status, when: status === 'done' ? 'Approved by Darren Lasso' : 'Denied by Darren Lasso', session: session ? { id:session.id, type:session.type, job:session.job } : null, ts: Date.now() }; localStorage.setItem('vdc-agent-task-overrides', JSON.stringify(ov)); } catch(e){}
+    if (typeof renderAgentsTable === 'function') renderAgentsTable();
+  }
+  window.agReviewInConversation = function(taskId){
+    var t = (typeof _agentTaskRows === 'function' ? _agentTaskRows() : []).filter(function(x){ return x.id === taskId; })[0]; if (!t) return;
+    var c = CONV[taskId] || generic(t);
+    if (typeof closeSessionModal === 'function') closeSessionModal();
+    aiAgent.msgs = []; aiAgent.activeGate = null; aiAgent.thinking = false; aiAgent.greeted = true;
+    if (typeof aiSetBusy === 'function') aiSetBusy(false);
+    aiOpen();
+    aiAgent.msgs.push({ role:'user', html:c.user });
+    var rs = aiPushReasoning(); rs.named = true; rs.open = false;
+    c.steps.forEach(function(st){ rs.steps.push({ kind:st[0], label:st[1], ms:600, detail:st[2], result:st[3] }); });
+    rs.t0 = Date.now() - 4000; aiFinishReasoning(rs);
+    var resolved = t.outcome !== 'awaiting' && t.outcome !== 'waiting';
+    var rows = c.rows.map(function(r){ return [r[0], r[1]]; });
+    aiPushAgent(c.summary, resolved ? null : { q:'', approval:{ rows:rows }, buttons:[
+      { label:'Deny', choice:'Denied', fn:function(){ decide(t.id, 'cancelled'); aiPushAgent('<p>' + c.denied + '</p>'); } },
+      { label:c.primary, primary:true, choice:'Approved', fn:function(){
+        var job = startSession(t.id); decide(t.id, 'done', job);
+        var pill = job ? '<div class="ov-sugg" style="margin-top:12px"><button type="button" class="ov-pill" onclick="agOpenSession(\'' + job.id + '\')">' + (typeof _sdIc === 'function' ? _sdIc('sd-session-log', 16) : '') + '<span class="lbl"><span class="t">View the ' + job.type.toLowerCase() + ' session</span><span class="ctx">' + E(job.job) + ' \u00b7 In progress \u00b7 Resilience Sessions</span></span></button></div>' : '';
+        aiPushAgent('<p>' + c.approved + '</p>' + (job ? '<p>I started the ' + job.type.toLowerCase() + ' session <b>' + E(job.job) + '</b>. It\u2019s running now \u2014 you can follow it in Resilience Sessions, and it lists this approval as the agent task that started it.</p>' : '') + pill);
+      } } ] });
+    if (resolved) aiPushAgent('<p>This request has already been answered \u2014 its status is in Agent Sessions.</p>');
+  };
+})();
+</script>
+
+<script id="ag-ent">
+// ── Session graph: ENTITY types related to one another (the Identity Dashboard finding graph grammar) — not the machinery that ran it.
+// Workload → Connection → Objects ← Policy; Objects → Restore point / failed Session → the Agent task ← Approval; the task → the Session it started.
+var ENT_STYLE = {
+  'Workload':{ c:'var(--ag-plum)', icon:'workload-outlined' }, 'Connection':{ c:'var(--ag-plum)', icon:'integration-widget-outlined' },
+  'Policy':{ c:'var(--status-blue)', icon:'policy-outlined' }, 'Proposed policy':{ c:'var(--status-blue)', icon:'policy-outlined' },
+  'Objects':{ c:'var(--orange)', icon:'objects-outlined' }, 'Restore point':{ c:'var(--orange)', icon:'restore-point-outlined' },
+  'Session':{ c:'var(--em-green-accent)', icon:'history-outlined' }, 'Approval':{ c:'var(--black-60)', icon:'user-outlined' }
+};
+var AG_CONN = { 'Microsoft 365':'contoso.onmicrosoft.com', 'Dynamics 365':'contoso-sandbox', 'Google Workspace':'acme.com', 'GitHub':'acme-corp', 'GitLab':'acme-corp.gitlab.com', 'Azure DevOps':'acme-eng', 'Jira':'acme.atlassian.net', 'Confluence':'acme.atlassian.net', 'Okta WIC':'meridian.okta.com', 'Ping':'acme-ping', 'Power Platform':'contoso-prod', 'VMware vSphere':'vcenter-01' };
+var AG_POLICY = { 'Microsoft 365':'Daily backup — Gold', 'Dynamics 365':'Production CRM', 'Google Workspace':'Executive Mailboxes', 'GitHub':'Production — Compliance', 'GitLab':'Mainline Repos', 'Azure DevOps':'Core Services Repos', 'Jira':'SecOps Project', 'Confluence':'Default Policy', 'Okta WIC':'Org backup', 'Ping':'Default Policy', 'Power Platform':'Default Policy', 'VMware vSphere':'Weekly Replication — Finance VMs' };
+var AG_NOUN = { 'Microsoft 365':'items', 'Dynamics 365':'records', 'Google Workspace':'files', 'GitHub':'repositories', 'GitLab':'projects', 'Azure DevOps':'repositories', 'Jira':'issues', 'Confluence':'pages', 'Okta WIC':'groups', 'Ping':'users', 'Power Platform':'flows', 'VMware vSphere':'VMs' };
+var AG_TASK_ENT = {
+  at3: { wl:'Microsoft 365', n:2, noun:'sites', fail:'SharePoint Sites backup', stype:'Backup' },
+  at5: { wl:'Dynamics 365', n:1240, noun:'records', point:'Oct 12, 3:15 AM', stype:'Restore' },
+  at8: { wl:'Azure DevOps', n:14, noun:'repositories', fail:'Azure DevOps backup', stype:'Backup' },
+  rot1: { wl:'Microsoft 365', n:3, noun:'sites', rot:true }
+};
+function _agHash(str){ var h = 0; for (var i = 0; i < str.length; i++) h = ((h << 5) - h + str.charCodeAt(i)) | 0; return Math.abs(h); }
+// spec: { hubType, hubVal, wl, objN, objNoun, point, failed, approver, session:{id,type,job}, proposed, policyN }
+function _agEntModel(spec){
+  var N = [], E = [], add = function(key, type, val, count, extra){ var n = { id:key, type:type, v:val, c:count || 1 }; if (extra) for (var k in extra) n[k] = extra[k]; N.push(n); return n; };
+  var wl = spec.wl;
+  add('wl', 'Workload', wl);
+  add('cn', 'Connection', AG_CONN[wl] || wl);
+  add('ob', 'Objects', spec.objN === 1 ? '1 ' + (spec.objNoun || 'item').replace(/s$/, '') : spec.objN.toLocaleString('en-US') + ' ' + spec.objNoun, spec.objN);
+  add('po', 'Policy', spec.policyN > 1 ? spec.policyN + ' ROT policies' : (AG_POLICY[wl] || 'Default Policy'), spec.policyN || 1);
+  E.push(['wl','cn'], ['cn','ob'], ['po','ob']);
+  var feed = 'ob';
+  if (spec.point){ add('rp', 'Restore point', spec.point); E.push(['ob','rp']); feed = 'rp'; }
+  if (spec.failed){ add('fs', 'Session', spec.failed + ' (failed)'); E.push(['ob','fs']); feed = 'fs'; }
+  add('hub', 'Agent task', spec.hubVal, 1, { hub:true, htype:spec.hubType });
+  E.push([feed, 'hub']);
+  if (spec.approver){ add('ap', 'Approval', spec.approver); E.push(['ap','hub']); }
+  if (spec.session){ add('se', 'Session', spec.session.type + ' session', 1, { session:spec.session.id }); E.push(['hub','se']); }
+  if (spec.proposed){ add('np', 'Proposed policy', spec.proposed, 1); E.push(['hub','np']); }
+  // layer = longest path from a source; an input-less node sits one column before the first node it feeds (the identity-graph rule)
+  var layer = {}; N.forEach(function(n){ layer[n.id] = 0; });
+  for (var i = 0; i < N.length; i++) E.forEach(function(e){ if (layer[e[1]] < layer[e[0]] + 1) layer[e[1]] = layer[e[0]] + 1; });
+  N.forEach(function(n){ if (!E.some(function(e){ return e[1] === n.id; })){ var outs = E.filter(function(e){ return e[0] === n.id; }).map(function(e){ return layer[e[1]]; }); if (outs.length) layer[n.id] = Math.min.apply(null, outs) - 1; } });
+  var top = Math.max.apply(null, N.map(function(n){ return layer[n.id]; }));
+  var W = 1000, H = 300, x0 = 90, x1 = 910;
+  for (var c = 0; c <= top; c++){
+    var col = N.filter(function(n){ return layer[n.id] === c; }), k = col.length;
+    col.forEach(function(n, j){ n.x = x0 + (top ? (x1 - x0) * c / top : 0); n.y = H * (k === 1 ? 0.5 : k === 2 ? [0.3, 0.7][j] : [0.2, 0.5, 0.8][j] || 0.5); });
+  }
+  var types = [], seen = {}; N.forEach(function(n){ var t = n.hub ? 'Agent task' : n.type; if (!seen[t]){ seen[t] = 1; types.push([t, N.filter(function(x){ return (x.hub ? 'Agent task' : x.type) === t; }).reduce(function(a, x){ return a + (x.c || 1); }, 0)]); } });
+  return { ent:true, nodes:N, edges:E, W:W, H:H, types:types, rows:spec.rows || {} };
+}
+function _entGraphSvg(m){
+  var by = {}; m.nodes.forEach(function(n){ by[n.id] = n; });
+  var esc = function(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }, R = 26;
+  var edges = m.edges.map(function(e){
+    var a = by[e[0]], b = by[e[1]], x1 = a.x + (a.hub ? 34 : R), y1 = a.y, x2 = b.x - (b.hub ? 34 : R), y2 = b.y, xm = (x1 + x2) / 2;
+    return '<path class="ag-edge" data-a="' + a.id + '" data-b="' + b.id + '" d="M' + x1 + ' ' + y1 + ' C' + xm + ' ' + y1 + ',' + xm + ' ' + y2 + ',' + x2 + ' ' + y2 + '"/>';
+  }).join('');
+  var nodes = m.nodes.map(function(n){
+    var st = ENT_STYLE[n.type] || { c:'var(--black-60)', icon:'objects-outlined' }, v = String(n.v || ''), vv = v.length > 26 ? v.slice(0, 25) + '…' : v;
+    var tp = n.hub ? 'Agent task' : n.type, click = n.session ? 'agOpenSession(\'' + n.session + '\')' : 'agGraphHL(\'' + tp + '\')';
+    var circle = n.hub
+      ? '<circle cx="' + n.x + '" cy="' + n.y + '" r="34" fill="var(--status-blue-5)" stroke="#9dd3ee" stroke-width="2"/><g transform="translate(' + (n.x - 12) + ',' + (n.y - 12) + ')" style="color:var(--status-blue);pointer-events:none">' + (_sdIc('ai-sparkle', 24) || '') + '</g>'
+      : '<circle cx="' + n.x + '" cy="' + n.y + '" r="' + R + '" fill="' + st.c + '"/><g transform="translate(' + (n.x - 12) + ',' + (n.y - 12) + ')" style="color:#fff;pointer-events:none">' + (_sdIc(st.icon, 24) || '') + '</g>';
+    var badge = (!n.hub && n.c > 1) ? '<circle cx="' + (n.x + 20) + '" cy="' + (n.y - 20) + '" r="10" fill="var(--white)" stroke="var(--border)"/><text x="' + (n.x + 20) + '" y="' + (n.y - 16) + '" text-anchor="middle" style="font-size:11px;font-weight:500;fill:var(--black-100)">' + (n.c > 999 ? '999+' : n.c) + '</text>' : '';
+    var dy = n.hub ? 54 : 46;
+    return '<g class="ag-node" data-type="' + tp + '" onclick="' + click + '"' + (n.session ? ' style="cursor:pointer"' : '') + '>' + circle + badge
+      + '<text class="ag-node-lbl" x="' + n.x + '" y="' + (n.y + dy) + '">' + esc(n.hub ? 'Agent task' : n.type) + '</text><text class="ag-node-name" x="' + n.x + '" y="' + (n.y + dy + 18) + '">' + esc(vv) + '</text></g>';
+  }).join('');
+  return '<svg class="ag-svg" id="agSvg" viewBox="0 0 ' + m.W + ' ' + m.H + '" style="aspect-ratio:' + m.W + '/' + m.H + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Relationship graph"><g id="agSvgG">' + edges + nodes + '</g></svg>';
+}
+function _agSideHtml(model){
+  var ico = { 'Workload':'workload-outlined', 'Connection':'integration-widget-outlined', 'Policy':'policy-outlined', 'Proposed policy':'policy-outlined', 'Objects':'objects-outlined', 'Restore point':'restore-point-outlined', 'Session':'history-outlined', 'Approval':'user-outlined', 'Agent task':'ai-sparkle' };
+  var side = '<button type="button" class="sd-side-item active" id="agSideAll" onclick="agGraphHL(null)"><span class="sd-side-tile">' + _sdIc('sd-session-log', 20) + '</span><span class="lbl">Overview</span></button>';
+  model.types.forEach(function(t){
+    side += '<button type="button" class="sd-side-item" data-agt="' + t[0] + '" onclick="agGraphHL(\'' + t[0] + '\')"><span class="sd-side-tile">' + (_sdIc(ico[t[0]] || 'objects-outlined', 20) || '') + '</span><span class="lbl">' + t[0] + '</span><span class="sd-side-count">' + (t[1] > 9999 ? '9999+' : t[1].toLocaleString('en-US')) + '</span></button>';
+  });
+  return side;
+}
+var AG_ROT_POLICIES = ['Default Retention Policy - 7 Years - Hyperscalers', 'Default Retention Policy - 5 Years - Hyperscalers', 'Default Retention Policy - 3 Years - Hyperscalers', 'System Defined Default Duplicate Files Policy'];
+function _agBuildRows(spec, ctx){
+  var wl = spec.wl, R = {}, link = function(id, label){ return { html: '<a class="ag-link" onclick="agOpenSession(\'' + id + '\')">' + label + '</a>' }; };
+  R['Workload'] = { cols:['Name', 'Connections', 'Health'], rows:[[wl, '1 connection', 'Healthy']] };
+  R['Connection'] = { cols:['Name', 'Workload', 'Status'], rows:[[AG_CONN[wl] || wl, wl, 'Healthy']] };
+  R['Objects'] = _agObjRows({ wl:wl, objNoun:spec.objNoun, objN:spec.objN, rot:!!spec.proposed }, ctx.objState);
+  R['Policy'] = spec.policyN > 1
+    ? { cols:['Name', 'Type', 'Covers these sites'], rows: AG_ROT_POLICIES.map(function(n){ return [n, 'File ROT', 'No']; }), total:spec.policyN }
+    : { cols:['Name', 'Type', 'Status'], rows:[[AG_POLICY[wl] || 'Default Policy', 'Resilience', 'Active']] };
+  if (spec.point) R['Restore point'] = { cols:['Restore point', 'Type', 'Workload'], rows:[[spec.point, 'Scheduled backup', wl]] };
+  var ss = [];
+  if (spec.failed) ss.push([spec.failed, 'Backup', 'Failed', ctx.failedWhen || '—']);
+  if (spec.session) ss.push([link(spec.session.id, spec.session.job || (spec.session.type + ' session')), spec.session.type, 'In progress', ctx.sessionWhen || 'Just now']);
+  if (ss.length) R['Session'] = { cols:['Name', 'Type', 'Status', 'Started'], rows:ss };
+  if (spec.approver) R['Approval'] = { cols:['Approver', 'Decision', 'When'], rows:[[spec.approver, ctx.decision, ctx.decisionWhen]] };
+  R['Agent task'] = { cols:['Task', 'Agent', 'Status', 'Started'], rows:[[ctx.title, spec.hubVal, ctx.status, ctx.started]] };
+  if (spec.proposed) R['Proposed policy'] = { cols:['Name', 'Scope', 'Actions', 'Status'], rows:[[spec.proposed.replace(/ \(draft\)$/, ''), 'Retail Taxes, Retail Archive, Retail Ops · not modified in 36 months', 'Flag for review; exclude from backup after a 30-day review window', ctx.policyStatus || 'Draft — not created']] };
+  return R;
+}
+function _agEntFromTask(t, ses, pending){
+  var d = AG_TASK_ENT[t.id] || { wl: (t.wl && t.wl !== '—' ? t.wl : 'Microsoft 365'), n:1, noun:(AG_NOUN[t.wl] || 'items') };
+  var rot = !!d.rot, rs = {}, tov = {}; try { rs = JSON.parse(localStorage.getItem('vdc-rot-state')) || {}; } catch (e) {} try { tov = (JSON.parse(localStorage.getItem('vdc-agent-task-overrides')) || {})[t.id] || {}; } catch (e) {}
+  var KA = { Restore:'Recovery agent', Backup:'Retry agent' }, fmt = function(ts){ return typeof _actFmtFull === 'function' ? _actFmtFull(new Date(ts)) : String(ts); };
+  var approvalNeeded = pending || !!ses || t.outcome === 'cancelled' || (rot && !!rs.rec);
+  var spec = { hubType:'task', hubVal: KA[t.kind] || 'Analysis agent', wl:d.wl, objN:d.n, objNoun:d.noun, policyN: rot ? 4 : 0, point:d.point || null, failed:d.fail || null,
+    approver: approvalNeeded ? 'Darren Lasso' : null, session: ses ? { id:ses.id, type:ses.type, job:ses.job } : null, proposed: rot ? 'Stale SharePoint content' + (rs.rec === 'approved' ? '' : ' (draft)') : null };
+  var decided = rot ? (rs.rec ? fmt(rs.ts) : null) : (tov.ts ? fmt(tov.ts) : null);
+  spec.rows = _agBuildRows(spec, { objState: rot ? 'No ROT policy covers it' : (d.point ? 'Changed since Monday' : (d.fail ? 'Failed' : 'In scope')),
+    failedWhen: d.fail ? fmt(t.started) : null, sessionWhen: tov.ts ? fmt(tov.ts) : null, title: t.capability, status: _agStatusLabel ? '' : '', started: fmt(t.started),
+    decision: t.outcome === 'cancelled' ? 'Denied' : (decided ? (rot && rs.rec === 'dismissed' ? 'Dismissed' : 'Approved') : 'Awaiting your decision'), decisionWhen: decided || '—',
+    policyStatus: rs.rec === 'approved' ? 'Created' : (rs.rec === 'dismissed' ? 'Dismissed' : 'Draft — not created') });
+  var st = { awaiting:'Pending approval', waiting:'Waiting on you', scheduled:'Scheduled', queued:'Queued', running:'In progress', done:(rot ? 'Created' : 'Done'), cancelled:(rot ? 'Dismissed' : 'Cancelled') }[t.outcome] || t.outcome;
+  spec.rows['Agent task'].rows[0][2] = st;
+  return _agEntModel(spec);
+}
+function _agEntFromRun(r){
+  var ses = null, jt = r.kind === 'Restore' ? 'Restore' : (r.kind === 'Backup' ? 'Backup' : null);
+  if (jt && typeof _actAllJobs === 'function') ses = _actAllJobs().filter(function(j){ return j.wl === r.wl && j.type === jt && Math.abs(j.started - r.started) <= 3 * 36e5; }).sort(function(a, z){ return Math.abs(a.started - r.started) - Math.abs(z.started - r.started); })[0] || null;
+  var wl = (r.wl && r.wl !== 'All workloads') ? r.wl : 'Microsoft 365', h = _agHash(r.id || r.capability), fmt = function(ts){ return typeof _actFmtFull === 'function' ? _actFmtFull(new Date(ts)) : String(ts); };
+  var n = /(\d[\d,]*)\s+(?:records|mailboxes|sites|repositories|items|accounts)/i.exec(r.capability); var objN = n ? parseInt(n[1].replace(/,/g, ''), 10) : (r.kind === 'Restore' ? 1 + h % 4 : 8 + h % 40);
+  var who = /(?:Approved|On demand|Scheduled)\s+·\s+(.+)$/.exec(r.trigger || ''), gated = (r.kind === 'Restore' || r.kind === 'Backup' || /Manage policies/.test(r.granted || ''));
+  var pt = null; if (r.kind === 'Restore'){ var d0 = new Date(r.started.getTime() - 86400000); pt = d0.toLocaleDateString('en-US', { month:'short', day:'numeric' }) + ', 3:15 AM'; }
+  var spec = { hubType:'run', hubVal:r.agent, wl:wl, objN:objN, objNoun:AG_NOUN[wl] || 'items', policyN:0, point:pt, failed:(r.kind === 'Backup' ? 'Backup session' : null),
+    approver: gated ? (who ? who[1] : 'Darren Lasso') : null, session: ses ? { id:ses.id, type:ses.type, job:ses.job } : null };
+  spec.rows = _agBuildRows(spec, { objState: r.kind === 'Restore' ? 'Restored' : (r.kind === 'Backup' ? 'Retried' : 'Read'), failedWhen: fmt(r.started), sessionWhen: ses ? fmt(ses.started) : null, title: r.capability,
+    started: fmt(r.started), decision: 'Approved', decisionWhen: fmt(r.started) });
+  spec.rows['Agent task'].cols[0] = 'Run'; spec.rows['Agent task'].rows[0][2] = ({ Success:'Succeeded', Warning:'Warning', Error:'Failed', Running:'In progress' })[r.outcome] || r.outcome;
+  return _agEntModel(spec);
+}
+</script>
+
+<script id="ag-entpane">
+// Entity pane: picking an entity type (graph node or the list on the left) swaps the Overview for that type's entities —
+// a header (tile, name, count) and a table — the same move the Identity Dashboard finding makes. Overview brings the graph back.
+var AG_ENT_ICON = { 'Workload':'workload-outlined', 'Connection':'integration-widget-outlined', 'Policy':'policy-outlined', 'Proposed policy':'policy-outlined', 'Objects':'objects-outlined', 'Restore point':'restore-point-outlined', 'Session':'history-outlined', 'Approval':'user-outlined', 'Agent task':'ai-sparkle' };
+var AG_ENT_DESC = {
+  'Workload':'A workload is a protected platform or service, such as Microsoft 365 or GitHub, that Veeam backs up and restores.',
+  'Connection':'A connection links Veeam to one tenant, organization or account of a workload so it can discover and protect its data.',
+  'Objects':'An object is an item inside a workload \u2014 a mailbox, site, repository or record \u2014 that can be protected and restored.',
+  'Policy':'A policy defines what is protected, how often, and how long backups are kept.',
+  'Proposed policy':'A proposed policy is a draft the agent configured for you to review. Nothing exists until you create it.',
+  'Restore point':'A restore point is a backup captured at a point in time that data can be restored from.',
+  'Session':'A session is a single run of a backup, restore or export job.',
+  'Approval':'An approval is a person\u2019s decision on an action the agent proposed, made before it can run.',
+  'Agent task':'An agent task is a unit of work Veeam Intelligence hands to one agent, bounded by the access it was granted.'
+};
+var AG_ENT_TITLE = { 'Workload':'Workloads', 'Connection':'Connections', 'Policy':'Policies', 'Proposed policy':'Proposed policy', 'Objects':'Objects', 'Restore point':'Restore points', 'Session':'Sessions', 'Approval':'Approvals', 'Agent task':'Agent task' };
+function _agPaneInit(model){
+  var m = document.getElementById('sdMain'), h = m.innerHTML, i = h.indexOf('<div class="sd-cols">');
+  if (i < 0){ window._agPane = null; return; }
+  m.innerHTML = h.slice(0, i) + '<div id="agBottom">' + h.slice(i) + '</div>';
+  window._agPane = { model: model, overview: h.slice(i) };
+}
+function agShowEntity(type){
+  var P = window._agPane; if (!P) return;
+  var bottom = document.getElementById('agBottom'); if (!bottom) return;
+  [].forEach.call(document.querySelectorAll('#sdSide .sd-side-item'), function(b){ b.classList.toggle('active', type ? b.getAttribute('data-agt') === type : b.id === 'agSideAll'); });
+  if (!type){ bottom.innerHTML = P.overview; return; }
+  var d = (P.model.rows || {})[type]; if (!d){ bottom.innerHTML = P.overview; return; }
+  var esc = function(x){ return String(x == null ? '' : x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+  var stl = ENT_STYLE[type] || { c:'var(--black-60)', icon:'objects-outlined' };
+  bottom.innerHTML = '<div class="ag-eh"><span class="tile" style="background:color-mix(in srgb, ' + stl.c + ' 12%, white);color:' + stl.c + '">' + (_sdIc(AG_ENT_ICON[type] || 'objects-outlined', 28) || '') + '</span><div><div class="ttl">' + esc(type) + '</div><div class="desc">' + esc(AG_ENT_DESC[type] || '') + '</div></div></div>'
+    + '<div class="ag-etbl-wrap"><table class="ag-etbl"><thead><tr>' + d.cols.map(function(c){ return '<th>' + esc(c) + '</th>'; }).join('') + (typeof colToggleHeaderCell === 'function' ? colToggleHeaderCell('ent', true) : '') + '</tr></thead><tbody>'
+    + d.rows.map(function(r){ return '<tr>' + r.map(function(c, i){ return '<td>' + (c && c.html != null ? c.html : (i === 0 ? '<span class="nm">' + esc(c) + '</span>' : esc(c))) + '</td>'; }).join('') + '<td class="ag-eact"><span class="ag-eact-b" aria-hidden="true">' + (_sdIc('metadata-explorer-outlined', 20) || '') + '</span></td></tr>'; }).join('')
+    + '</tbody></table>' + (d.total != null && d.total > d.rows.length ? '<div class="ag-efoot">Showing 1\u2013' + d.rows.length + ' of ' + d.total.toLocaleString('en-US') + '</div>' : '') + '</div>';
+}
+// Sample object names — deterministic, so a task shows the same items every time.
+var AG_SAMPLE = {
+  'records': ['Contoso Retail', 'Northwind Traders', 'Fabrikam Inc', 'Adventure Works', 'Litware', 'Wingtip Toys', 'Tailspin Travel', 'Proseware', 'Coho Winery', 'Lucerne Publishing'],
+  'sites': ['Retail Taxes', 'Retail Archive', 'Retail Ops', 'Retail Finance', 'Retail HR'],
+  'repositories': ['payments-service', 'billing-ledger', 'core-api', 'web-app', 'mobile-ios', 'mobile-android', 'infra-terraform', 'data-pipelines', 'docs-site', 'auth-service', 'search-index', 'notifications', 'reporting', 'sandbox'],
+  'items': ['Contract renewal.msg', 'Q3 forecast.xlsx', 'Board minutes.docx', 'Vendor list.xlsx', 'Roadmap.pptx', 'Budget FY27.xlsx', 'Offer letter.docx', 'Policy draft.docx'],
+  'groups': ['Finance-Admins', 'AppSec-Reviewers', 'Platform-SRE', 'Support-L2', 'Data-Engineering'], 'files': ['Campaign assets', 'HR handbook', 'Finance Q3', 'Legal templates'],
+  'flows': ['expense-approval', 'retail-intake', 'it-onboarding'], 'projects': ['payments', 'platform', 'mobile'], 'issues': ['SECOPS-101', 'SECOPS-204'], 'pages': ['Legal hub', 'Policies'], 'users': ['j.rivera', 'm.chen'], 'VMs': ['sql-prod-02', 'app-web-01', 'file-srv-03']
+};
+function _agObjRows(spec, state){
+  var noun = spec.objNoun, names = AG_SAMPLE[noun] || ['Item'], total = spec.objN, show = Math.min(total, 10), rows = [];
+  var typ = noun.replace(/s$/, '').replace(/^./, function(c){ return c.toUpperCase(); });
+  for (var i = 0; i < show; i++){
+    var nm = names[i % names.length] + (total > names.length && i >= names.length ? ' ' + (i + 1) : '');
+    if (spec.rot) rows.push([nm, typ, ['2.6 TB', '1.9 TB', '2.2 TB'][i % 3] + ' backed up', ['1.9 TB', '1.7 TB', '0.6 TB'][i % 3] + ' untouched 36+ months']);
+    else rows.push([nm, typ, spec.wl, state]);
+  }
+  return { cols: spec.rot ? ['Name', 'Type', 'Backed up', 'Untouched'] : ['Name', 'Type', 'Workload', 'State'], rows: rows, total: total };
+}
+</script>
+<script id="sd-tabs">
+/* ══ OVERLAY TABS (2026-10-15) — a run, task or session opened FROM INSIDE the overlay becomes another tab in the strip instead of replacing it or
+   navigating to the Sessions view (user: "it should open as a tab at the top of the overlay"). Opening from the page tables still starts a fresh
+   single-tab overlay. Wraps the three openers + closeSessionModal + agOpenSession; their own bodies are untouched. */
+(function(){
+  var stack = [], active = -1, adding = false, switching = false;
+  function esc(v){ return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function isOpen(){ var m = document.getElementById('sdModal'); return !!(m && m.classList.contains('open')); }
+  function render(){
+    var el = document.getElementById('sdTabs'); if (!el) return;
+    el.innerHTML = stack.map(function(t, i){
+      var on = i === active;
+      return '<div class="sd-tab' + (on ? '' : ' is-inactive') + '"' + (on ? '' : ' role="tab" tabindex="0" onclick="_sdTabGo(' + i + ')" onkeydown="if(event.key===\'Enter\')_sdTabGo(' + i + ')"') + '>'
+        + '<span class="sd-tab-tile">' + _sdIc('sd-tab-store', 16) + '</span><span class="sd-tab-label">' + esc(t.label) + '</span>'
+        + '<button class="sd-tab-close" type="button" aria-label="Close tab" onclick="event.stopPropagation();_sdTabClose(' + i + ')">' + _sdIc('sd-close', 20) + '</button></div>';
+    }).join('')
+      + '<div class="sd-tabs-actions"><button class="sd-act-btn" type="button" data-tooltip="Close" aria-label="Close" onclick="closeSessionModal()">' + _sdIc('sd-close', 20) + '</button></div>';
+  }
+  function track(key, label, reopen){
+    var i = -1; stack.forEach(function(t, k){ if (t.key === key) i = k; });
+    if (adding || switching){ if (i < 0){ stack.push({ key:key, label:label, reopen:reopen }); i = stack.length - 1; } active = i; }
+    else { stack = [{ key:key, label:label, reopen:reopen }]; active = 0; }
+    render();
+  }
+  function wrap(name, keyOf, labelOf){
+    var orig = window[name];
+    window[name] = function(id){
+      var r = orig.apply(this, arguments);
+      if (isOpen()){ try { track(keyOf(id), labelOf(id), function(){ switching = true; try { window[name](id); } finally { switching = false; } }); } catch(e){} }
+      return r;
+    };
+  }
+  wrap('openAgentRunModal',  function(id){ return 'run:' + id; },  function(id){ var r = (window.AGENT_RUNS || []).filter(function(x){ return x.id === id; })[0]; return r ? r.capability : 'Agent run'; });
+  wrap('openAgentTaskModal', function(id){ return 'task:' + id; }, function(id){ var t = (typeof _agentTaskRows === 'function' ? _agentTaskRows() : []).filter(function(x){ return x.id === id; })[0]; return t ? t.capability : 'Agent task'; });
+  wrap('openSessionModal',   function(id){ return 'ses:' + id; },  function(id){ var j = (typeof _actAllJobs === 'function' ? _actAllJobs() : []).filter(function(x){ return x.id === id; })[0]; return j ? j.job : 'Session'; });
+  window._sdTabGo = function(i){ var t = stack[i]; if (t) t.reopen(); };
+  window._sdTabClose = function(i){
+    if (stack.length <= 1){ closeSessionModal(); return; }
+    var wasActive = i === active; stack.splice(i, 1);
+    if (wasActive){ active = Math.min(i, stack.length - 1); stack[active].reopen(); }
+    else { if (i < active) active--; render(); }
+  };
+  var _close = window.closeSessionModal;
+  window.closeSessionModal = function(){ stack = []; active = -1; return _close.apply(this, arguments); };
+  // a session link clicked inside the overlay adds a tab; from anywhere else (the conversation panel) it keeps its old route to the Sessions view
+  var _openSes = window.agOpenSession;
+  window.agOpenSession = function(id){
+    if (isOpen()){ adding = true; try { window.openSessionModal(id); } finally { adding = false; } return; }
+    return _openSes.apply(this, arguments);
   };
 })();
 </script>

@@ -63861,6 +63861,12 @@ var AI_SCENARIOS = [
   { id:'ms365MailboxCov',    wl:'ms365', menu:'Mailbox protection coverage',    prompt:'How many users are protected? Are any mailbox types silently excluded, and is anyone near a license limit?' },
   { id:'ms365Health',        wl:'ms365', menu:'Estate health check',            prompt:'Give me a full health check of my Microsoft 365 estate — what needs my attention?' },
   { id:'ms365TeamsGaps',     wl:'ms365', menu:'Teams protection & known gaps',  prompt:'Is Teams protected end-to-end? What’s never backed up regardless of configuration?' },
+  // IRO exposure set (2026-10-15, IRO_Scenarios.xlsx rows 7–11) — the staged scenarios on the ms365 home.
+  { id:'ms365OrgWide',        wl:'ms365', menu:'Org-wide file exposure',          prompt:'How many files can the entire organization access, and is that growing?' },
+  { id:'ms365ExtSites',       wl:'ms365', menu:'Externally shareable sensitive sites', prompt:'Which sites can share sensitive content outside the organization?' },
+  { id:'ms365AgentVolume',    wl:'ms365', menu:'Agent-accessible data volume',    prompt:'How much of our data can the agent reach, and through which skills?' },
+  { id:'ms365AgentSensitive', wl:'ms365', menu:'Agent-accessible sensitive data', prompt:'Which sensitive categories and file formats can the agent reach?' },
+  { id:'ms365AgentWrites',    wl:'ms365', menu:'Agent changes to data',           prompt:'What can the agent modify or delete, and what has it changed?' },
   // Cross-workload estate Q&A (2026-09-02): one scenario per remaining
   // claim-shape vis form, so every form in the system has a live demo —
   // GitHub = trend hero, ADO = comparison rows, Power Platform = cap row.
@@ -64216,6 +64222,11 @@ function aiFinishReasoning(m){
   if (m._autoOpen && !m._userToggled) m.open = false;
   aiRender();
 }
+// One agent per request: Veeam Intelligence delegates to a single task agent for the whole turn, so a trace that already spawned one
+// does not spawn another (the scenario step and the wizard step used to each add a recovery agent).
+function _aiSecondAgent(reason, en){
+  return !!(en && en.kind === 'agent' && en.spawn && (reason.steps || []).some(function(s){ return s && s.kind === 'agent' && s.spawn; }));
+}
 function aiToggleReason(i){
   var m = aiAgent.msgs[i]; if(!m || m.role !== 'reasoning') return;
   m.open = !m.open; m._userToggled = true;
@@ -64266,7 +64277,7 @@ function aiRenderHome(){
   // guided card under AI_HOME_CARDS['hybrid-vms'] instead, same as any other
   // workload-specific scenario.
   var ask = (cfg ? cfg.ask : []).concat(cfg && cfg.noEstateCard ? [] : [['estate', 'Backup volume', 'How much total space am I consuming?']])
-    .concat([
+    .concat(cfg && cfg.noInfraCards ? [] : [
       ['infraLiveSessions', 'Live job states', 'What’s running right now, and what’s queued or finished?'],
       ['infraRepoCapacity', 'Repository capacity', 'Give me a repository capacity plan.'],
       ['infraCapacityCharts', 'Repository capacity — in charts', 'Give me a comprehensive analysis of repository capacity — in charts.']
@@ -64307,23 +64318,29 @@ var AI_HOME_CARDS = {
     // ms365; the watch-card mechanism itself is untouched for reuse
     // elsewhere. was: watch: ['ms365Offboard', 'Show me a guided restore',
     // "Recover Mark Aldridge's mailbox — and show me each step on screen"],
-    guided: [
-      ['ms365DeletedMail', 'Deleted email recovery', "Find the contract renewal email John Voight deleted"],
-      ['ms365Offboard', 'Departed-user handoff', "Recover Mark Aldridge's mailbox for his manager"],
-      ['ms365SiteRollback', 'SharePoint folder rollback', 'Roll the Retail Division Taxes folder back to yesterday'],
-      // moved from "ask" — it ends in a cart + wizard, so it IS guided restore
-      ['ms365MassDelete', 'Deletion sweep', 'Investigate unusual OneDrive deletion activity']
-    ],
+    // was (removed from the home 2026-10-15 — the staged list is the IRO exposure set only;
+    // the scenarios stay registered in AI_SCENARIOS and ms365SiteRollback is still launched
+    // from the "Agents modifying data" answer):
+    // ['ms365DeletedMail', 'Deleted email recovery', "Find the contract renewal email John Voight deleted"],
+    // ['ms365Offboard', 'Departed-user handoff', "Recover Mark Aldridge's mailbox for his manager"],
+    // ['ms365SiteRollback', 'SharePoint folder rollback', 'Roll the Retail Division Taxes folder back to yesterday'],
+    // ['ms365MassDelete', 'Deletion sweep', 'Investigate unusual OneDrive deletion activity']  (moved from "ask" — it ends in a cart + wizard, so it IS guided restore)
+    guided: [],
+    // was (reset 2026-10-15 to the IRO exposure set): the PRD estate-Q&A asks —
+    // ['ms365Overnight', 'Overnight backup health', 'How did everything back up overnight?'],
+    // ['ms365Coverage', 'Coverage & policy health', 'Is my tenant backed up successfully? Any gaps?'],
+    // ['ms365MailboxCov', 'Mailbox protection coverage', 'How many users are protected? Any exclusions?'],
+    // ['ms365TeamsGaps', 'Teams protection & known gaps', 'Is Teams protected end-to-end?'],
+    // ['ms365Health', 'Estate health check', 'Give me a full health check — what needs attention?']
+    // (scenarios stay registered in AI_SCENARIOS — only the home list changed)
     ask: [
-      // PRD estate-Q&A (answer cards): the 016 composite leads
-      ['ms365Overnight', 'Overnight backup health', 'How did everything back up overnight?'],
-      ['ms365Coverage', 'Coverage & policy health', 'Is my tenant backed up successfully? Any gaps?'],
-      ['ms365MailboxCov', 'Mailbox protection coverage', 'How many users are protected? Any exclusions?'],
-      ['ms365TeamsGaps', 'Teams protection & known gaps', 'Is Teams protected end-to-end?'],
-      // Many-recommendation exemplar (2026-09-02): aggregates every seeded
-      // issue into one card to demo severity sort + 'Show all N' truncation
-      ['ms365Health', 'Estate health check', 'Give me a full health check — what needs attention?']
+      ['ms365OrgWide', 'Org-wide file exposure', 'How many files can the entire organization access, and is it growing?'],
+      ['ms365ExtSites', 'Externally shareable sensitive sites', 'Which sites can share sensitive content outside the organization?'],
+      ['ms365AgentVolume', 'Agent-accessible data volume', 'How much of our data can the agent reach, and through which skills?'],
+      ['ms365AgentSensitive', 'Agent-accessible sensitive data', 'Which sensitive categories and file formats can the agent reach?'],
+      ['ms365AgentWrites', 'Agent changes to data', 'What can the agent modify or delete, and what has it changed?']
     ],
+    noInfraCards: true,   // the staged list is exactly the five above — skip the universal infra cards
     noEstateCard: true   // its own ask set is full — skip the universal volume card
   },
   // Estate Q&A on more workloads (2026-09-02): each demos a different
@@ -65336,6 +65353,12 @@ function aiApprTrailToggle(i){
   var m = aiAgent.msgs[i]; if(!m || !m.gate) return;
   m.gate._trailOpen = !m.gate._trailOpen;
   aiAgent._scrollAnchor = m.gate._trailOpen ? { reveal: '.ai-appr-trail' } : 'keep';
+  aiRender();
+}
+function aiacToggleTable(i){
+  var m = aiAgent.msgs[i]; if(!m || m.role !== 'card') return;
+  m.tblOpen = !m.tblOpen;
+  aiAgent._scrollAnchor = m.tblOpen ? { reveal: '[data-aiac="' + i + '"] .ov-more-row' } : 'keep';
   aiRender();
 }
 function aiacToggleActs(i){
@@ -66901,13 +66924,13 @@ function aiDashFlow(){
   var tr = [
     { kind:'route', label:'Interpreting request — estate-wide volume summary', ms:400, chip:'estate-wide',
       detail:[['scope','all repositories · every workload']], result:'A tenant-level aggregate is the right scope here' },
-    { kind:'agent', label:'Spawning a volume-analysis agent', ms:300, spawn:{ task:'Total and per-repository consumption, trailing 30 days', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
+    { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Total and per-repository consumption, trailing 30 days', granted:'Read access', denied:'Restore · Export · Manage policies' } },
     { kind:'tool',  label:'repos.query — capacity and used space', ms:800, chip:'6 repositories',
       detail:[['metric','used vs provisioned per repository']], result:'427 TB used of 760 TB provisioned (56%)' },
     { kind:'tool',  label:'growth.aggregate — trailing 30 days', ms:700, chip:'+9.0%',
       detail:[['window','trailing 30 days']], result:'Fastest-growing: Primary repository' }
   ];
-  tr.forEach(function(en, ti){ setTimeout(function(){ reason.steps.push(en); aiRender(); }, 350 + ti * 700); });
+  tr.forEach(function(en, ti){ setTimeout(function(){ if (!_aiSecondAgent(reason, en)) reason.steps.push(en); aiRender(); }, 350 + ti * 700); });
   setTimeout(function(){
     aiFinishReasoning(reason);
     aiPushCard({
@@ -67235,7 +67258,7 @@ function aiNext(){
     step.trace.forEach(function(en, ti){
       var _lbl = (typeof en === 'string') ? en : (en && en.label);
       if (aiAgent.showing === false && _aiIsActivity(_lbl)) return;   // activity, not thought
-      setTimeout(function(){ if ((aiAgent._epoch || 0) !== _ep) return; reason.steps.push(en); aiRender(); }, 350 + ti * 700);
+      setTimeout(function(){ if ((aiAgent._epoch || 0) !== _ep) return; if (!_aiSecondAgent(reason, en)) reason.steps.push(en); aiRender(); }, 350 + ti * 700);
     });
   }
   var _settle = function(){
@@ -68374,6 +68397,11 @@ function aiBuildSteps(){
   if (sc === 'ms365MailboxCov')    return aiStepsMs365MailboxCov();
   if (sc === 'ms365Health')        return aiStepsMs365Health();
   if (sc === 'ms365TeamsGaps')     return aiStepsMs365TeamsGaps();
+  if (sc === 'ms365OrgWide')        return aiStepsMs365OrgWide();
+  if (sc === 'ms365ExtSites')       return aiStepsMs365ExtSites();
+  if (sc === 'ms365AgentVolume')    return aiStepsMs365AgentVolume();
+  if (sc === 'ms365AgentSensitive') return aiStepsMs365AgentSensitive();
+  if (sc === 'ms365AgentWrites')    return aiStepsMs365AgentWrites();
   if (sc === 'ghGrowth')           return aiStepsGhGrowth();
   if (sc === 'adoRpo')             return aiStepsAdoRpo();
   if (sc === 'ppCapacity')         return aiStepsPpCapacity();
@@ -68402,13 +68430,12 @@ function aiStepsManufacturing(){
     { trace: [
         { kind:'route', label:'Interpreting request — spans backup inventory and record contents', ms:400, chip:'2 clues',
           detail:[['topic','“Manufacturing”'],['tier','records + field values']], result:'Query reaches into record contents — a field-value search, not a name search' },
-        { kind:'agent', label:'Spawning a Dynamics 365 recovery agent', ms:300, spawn:{ task:'Restore the manufacturing records you select', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
+        { kind:'agent', label:'Spawning a recovery agent', ms:300, spawn:{ task:'Restore the manufacturing records you select', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
         { kind:'tool',  label:'catalog.lookup — field-value index for “Manufacturing”', ms:700, chip:'index hit',
           detail:[['index','backed-up field values'],['term','“Manufacturing”']], result:'Term present in the index — a scoped search will land' }
       ],
       say: function(){ return "<p>Got it — find the Dynamics 365 <strong>records that mention “Manufacturing”</strong> and set them up to restore. I'll search the backed-up field values, see where the term actually lands, and walk you through it.</p><p>Here's how I'll work, right here in your console:</p><p>1 · search &amp; filter → 2 · select the matches → 3 · review &amp; lock the restore point → 4 · configure → 5 · you review the summary and approve.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Spawning a record-search agent', ms:300, spawn:{ task:'Find matching records in the backed-up estate', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'inventory.search — “Manufacturing” · in: Field values · all contents', ms:900, chip: m.n + ' records',
           detail:[['query','“Manufacturing”'],['token','in: Field values'],['scope','all contents']], result: m.n + ' records carry matching field values — every match lands on the Industry field' },
         { kind:'tool',  label:'filters.apply — Type: Records', ms:300, chip:'Type: Records',
@@ -68508,11 +68535,10 @@ function aiStepsOwnerFields(){
     { trace: [
         { kind:'route', label:'Interpreting request — field-level rollback to a fixed date', ms:400, chip:'2 clues',
           detail:[['field','Owner'],['target date', DATE_LBL]], result:'Only the Owner value reverts — every other field stays as it is today' },
-        { kind:'agent', label:'Spawning a field-rollback agent', ms:300, spawn:{ task:'Roll the Owner fields back to the fixed date', granted:'Restore data · asks first', denied:'Export · Manage policies' } }
+        { kind:'agent', label:'Spawning a recovery agent', ms:300, spawn:{ task:'Roll the Owner fields back to the fixed date', granted:'Restore data · asks first', denied:'Export · Manage policies' } }
       ],
       say: function(){ return "<p>Got it — roll the <strong>Owner</strong> field on <strong>every record</strong> back to its <strong>"+DATE_LBL+"</strong> value, leaving every other field exactly as it is today. The usual fix after a bad bulk reassignment.</p><p>Here's how I'll work, right here in your console:</p><p>1 · search the backup for the <strong>Owner field</strong> → 2 · narrow the table to just those fields → 3 · select them → 4 · set the restore point to "+DATE_LBL+" and configure → 5 · you review the summary and approve.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Spawning a field-comparison agent', ms:300, spawn:{ task:'Compare Owner fields at the fixed date', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'inventory.search — “Owner” · in: Field names · all contents', ms:900, chip: m.n + ' fields',
           detail:[['query','“Owner”'],['token','in: Field names — matches the COLUMN, not values'],['scope','all contents']], result: m.n + ' Owner fields across Accounts, Cases and Opportunities' },
         { kind:'tool',  label:'filters.apply — Type: Field', ms:300, chip:'Type: Field',
@@ -68634,11 +68660,10 @@ function aiStepsDeletedRecovery(){
     { trace: [
         { kind:'route', label:'Interpreting request — recover recently deleted objects', ms:400, chip:'1 lens',
           detail:[['state','deleted in live · intact in backup'],['scope','all of Dynamics 365']], result:'An existence-filter job — the inventory has a lens for exactly this' },
-        { kind:'agent', label:'Spawning a Dynamics 365 recovery agent', ms:300, spawn:{ task:'Recover the recently deleted objects', granted:'Restore data · asks first', denied:'Export · Manage policies' } }
+        { kind:'agent', label:'Spawning a recovery agent', ms:300, spawn:{ task:'Recover the recently deleted objects', granted:'Restore data · asks first', denied:'Export · Manage policies' } }
       ],
       say: function(){ return "<p>Got it — find everything <strong>recently deleted</strong> from Dynamics 365 and bring it back. Deleted objects are gone from your live org but still intact in backup.</p><p>Here's how I'll work: 1 · filter the inventory to deleted objects → 2 · select them → 3 · review the restore point → 4 · configure → 5 · you review the summary and approve.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Spawning a deletion-lookup agent', ms:300, spawn:{ task:'Filter the inventory to recent deletions', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'filters.apply — Existence: Deleted', ms:600, chip: m.n + ' objects',
           detail:[['filter','Existence = Deleted in live'],['meaning','in backup · gone from production']], result: m.n + ' recoverable objects — each row carries its dated Deleted badge' }
       ],
@@ -68734,13 +68759,12 @@ function aiStepsMs365DeletedMail(){
     { trace: [
         { kind:'route', label:'Interpreting request — owner: John Voight · topic: “contract renewal” · state: deleted', ms:400, chip:'3 clues',
           detail:[['owner','John Voight'],['topic','“contract renewal”'],['state','deleted']], result:'Scope derivable from the request — no tenant-wide sweep needed' },
-        { kind:'agent', label:'Spawning a mailbox recovery agent', ms:300, spawn:{ task:'Recover the deleted email you select', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
+        { kind:'agent', label:'Spawning a recovery agent', ms:300, spawn:{ task:'Recover the deleted email you select', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
         { kind:'tool',  label:'scope.set — John Voight’s mailbox (named in the request)', ms:200, chip:'scoped',
           detail:[['container','All Mailboxes › John Voight'],['reason','owner named in the request']], result:'Search will sweep 1 mailbox instead of 12' }
       ],
       say: function(){ return "<p>Got it — find the <strong>contract renewal</strong> email <strong>John Voight</strong> deleted and set it up to restore. The request names the owner, so I'll scope to <strong>his mailbox</strong> rather than searching the whole tenant.</p><p>1 · open his mailbox → 2 · search it → 3 · lock the restore point → 4 · configure → 5 · you review the summary and approve.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Spawning a mailbox-search agent', ms:300, spawn:{ task:'Search inside the scoped mailbox', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'inventory.open — All Mailboxes · John Voight', ms:600, chip:'5 folders',
           detail:[['path','contoso.onmicrosoft.com › All Mailboxes › John Voight']], result:'5 mail folders listed · the breadcrumb confirms the scope' },
         { kind:'tool',  label:'drill.search — “contract renewal” · all contents of this mailbox', ms:900, chip:'1 match',
@@ -68802,7 +68826,7 @@ function aiStepsMs365Offboard(){
     { trace: [
         { kind:'route', label:'Interpreting request — departed user, cross-service recovery', ms:400, chip:'2 services',
           detail:[['user','Mark Aldridge'],['goal','handoff to his manager'],['services','Mailbox · OneDrive']], result:'Departed-user recovery — check what backup still holds' },
-        { kind:'agent', label:'Spawning a departed-user recovery agent', ms:300, spawn:{ task:'Recover the departed user across services', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
+        { kind:'agent', label:'Spawning a recovery agent', ms:300, spawn:{ task:'Recover the departed user across services', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
         { kind:'tool',  label:'directory.lookup — Mark Aldridge · account state', ms:600, chip:'deprovisioned',
           detail:[['account','mark.aldridge@contoso.onmicrosoft.com'],['state','deprovisioned Apr 17']], result:'Account gone from the live tenant' },
         { kind:'tool',  label:'backup.coverage — Mailbox · OneDrive', ms:500, chip:'mailbox only',
@@ -68810,7 +68834,6 @@ function aiStepsMs365Offboard(){
       ],
       say: function(){ return "<p>Got it — recover <strong>Mark Aldridge's</strong> data so his manager can take it over. Checking what the backup still holds for him:</p><p>His <strong>mailbox</strong> was deprovisioned with his account on <strong>Apr 17</strong> — it's gone from the live tenant but <strong>fully restorable from backup</strong>.</p><p>His <strong>OneDrive</strong> isn't in the protected estate — it was never enrolled in backup — so there's nothing to recover there.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Spawning a cross-service search agent', ms:300, spawn:{ task:'Find the departed user’s data across the backed-up estate', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'inventory.search — “Mark Aldridge” · all contents', ms:800, chip:'0 hits',
           detail:[['query','“Mark Aldridge”'],['scope','all contents'],['range','Last 30 days']], result:'No mailbox surfaced inside the current window' },
         { kind:'tool',  label:'range.check — no hits inside Last 30 days', ms:300, chip:'out of window',
@@ -68956,13 +68979,12 @@ function aiStepsMs365SiteRollback(){
     { trace: [
         { kind:'route', label:'Interpreting request — point-in-time rollback of one SharePoint folder', ms:400, chip:'3 clues',
           detail:[['site','Retail Division'],['folder','Taxes'],['point','before yesterday’s bulk edit']], result:'Whole-folder rollback to the last clean point' },
-        { kind:'agent', label:'Spawning a SharePoint rollback agent', ms:300, spawn:{ task:'Roll the folder back to the chosen point in time', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
+        { kind:'agent', label:'Spawning a recovery agent', ms:300, spawn:{ task:'Roll the folder back to the chosen point in time', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
         { kind:'tool',  label:'sharepoint.locate — Retail Division · Taxes', ms:500, chip:'located',
           detail:[['path','All SharePoint › Retail Division › Taxes']], result:'Folder present in backup at the pre-edit point' }
       ],
       say: function(){ return "<p>Got it — the <strong>Taxes</strong> folder on the <strong>Retail Division</strong> site was damaged by yesterday's bulk edit. I'll roll the whole folder back to the last clean point <strong>before</strong> the edit (" + DATE_LBL + "), replacing today's contents.</p><p>1 · open the folder → 2 · confirm the scope → 3 · lock the pre-edit restore point → 4 · configure → 5 · you review the summary and approve.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Spawning a folder-history agent', ms:300, spawn:{ task:'Search folder history in the backed-up estate', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'inventory.search — “Taxes” · all contents · Type: Folder', ms:800, chip:'3 folders',
           detail:[['query','“Taxes”'],['filter','Type: Folder'],['scope','all contents']], result:'3 folders share the name — the path under each row tells them apart' }
       ],
@@ -69046,7 +69068,7 @@ function aiStepsMs365MassDelete(){
     { trace: [
         { kind:'route', label:'Interpreting request — anomaly investigation across OneDrive accounts', ms:400, chip:'estate-wide',
           detail:[['signal','unusual deletion activity'],['service','OneDrive'],['window','this morning']], result:'Genuinely estate-wide — a tenant-level scan is the right scope here' },
-        { kind:'agent', label:'Spawning a deletion-pattern agent', ms:300, spawn:{ task:'Rank OneDrive accounts by unusual deletion activity', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
+        { kind:'agent', label:'Spawning a recovery agent', ms:300, spawn:{ task:'Rank OneDrive accounts by unusual deletion activity, then open and restore the affected accounts', granted:'Read access · Restore data · asks first', denied:'Export · Manage policies' } },
         { kind:'tool',  label:'activity.scan — deletion events · OneDrive · last 12h', ms:900, chip:'412 events',
           detail:[['window','last 12 hours'],['service','OneDrive · 12 accounts']], result:'Deletion volume concentrated in a 20-minute window' },
         { kind:'tool',  label:'anomaly.rank — per-account deletion volume vs 30-day baseline', ms:700, chip:'3 accounts',
@@ -69054,7 +69076,6 @@ function aiStepsMs365MassDelete(){
       ],
       say: function(){ return "<p>On it — scanning this morning's <strong>deletion events across every OneDrive account</strong> and ranking them against each account's 30-day baseline.</p><p>Three accounts stand well outside their baseline: <strong>" + names.map(_aiEsc).join('</strong>, <strong>') + "</strong> — together they account for the bulk of this morning's deletions, concentrated in a 20-minute window. That pattern is consistent with a scripted or bulk action, not everyday cleanup.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Spawning an account-recovery agent', ms:300, spawn:{ task:'Open and restore the affected accounts', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
         { kind:'tool',  label:'tree.open — All OneDrive', ms:400, chip:'13 drives',
           detail:[['path','contoso.onmicrosoft.com › All OneDrive']], result:'Every account in one table — the three affected are selectable here' }
       ],
@@ -69114,7 +69135,7 @@ function aiStepsMs365Overnight(){
     { trace: [
         { kind:'route', label:'Interpreting request — daily composite, exception-first', ms:400, chip:'composite',
           detail:[['scope','whole tenant · trailing 24h'],['mode','exception-first']], result:'Composite of coverage, sessions, threat, license and lifecycle signals' },
-        { kind:'agent', label:'Spawning a nightly-health agent', ms:300, spawn:{ task:'Compose the overnight picture, exceptions first', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Compose the overnight picture, exceptions first', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'sessions.scan — trailing 24h · all policies', ms:900, chip:'42 sessions',
           detail:[['window','trailing 24h'],['policies','4 active']], result:'40 succeeded · 1 failed · 1 warning' },
         { kind:'tool',  label:'graph.query — policy staleness vs RPO', ms:600, chip:'1 stale',
@@ -69143,7 +69164,7 @@ function aiStepsMs365Coverage(){
     { trace: [
         { kind:'route', label:'Interpreting request — coverage, policy mapping, staleness vs RPO', ms:400, chip:'3 questions',
           detail:[['clauses','backed up? · which policies cover what? · behind schedule?']], result:'All three clauses answered in the headline' },
-        { kind:'agent', label:'Spawning a coverage-audit agent', ms:300, spawn:{ task:'Check coverage, policy mapping and staleness against RPO', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Check coverage, policy mapping and staleness against RPO', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'graph.query — VDC_BACKUP policies · scope by object type', ms:800, chip:'4 policies',
           detail:[['policies','Default · Executive Mailboxes · SharePoint Sites · Teams Files']], result:'Every service has a covering policy (Default is the catch-all)' },
         { kind:'tool',  label:'sessions.scan — last session age per policy', ms:700, chip:'1 stale',
@@ -69185,7 +69206,7 @@ function aiStepsMs365MailboxCov(){
     { trace: [
         { kind:'route', label:'Interpreting request — protected %, exclusions, license flags', ms:400, chip:'3 questions',
           detail:[['clauses','how many protected? · types excluded? · near a license limit?']], result:'All three clauses answered in the headline' },
-        { kind:'agent', label:'Spawning a mailbox-coverage agent', ms:300, spawn:{ task:'Count protected mailboxes, exclusions and license flags', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Count protected mailboxes, exclusions and license flags', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'graph.query — BACKUPED_MAILBOX · restore point in trailing 30d', ms:800, chip:'23 / 25',
           detail:[['rule','protected = restore point inside the trailing 30 days']], result:'23 of 25 mailboxes protected (92%)' },
         { kind:'tool',  label:'mailboxes.classify — type support on Express-Outlook', ms:600, chip:'2 excluded',
@@ -69229,7 +69250,7 @@ function aiStepsMs365Health(){
     { trace: [
         { kind:'route', label:'Interpreting request — full estate sweep, ranked by severity', ms:400, chip:'open-ended',
           detail:[['scope','sessions · policies · coverage · licenses · platform gaps']], result:'Broad prompt → aggregate every open issue, ranked by impact' },
-        { kind:'agent', label:'Spawning an estate-health agent', ms:300, spawn:{ task:'Sweep the estate and rank findings by severity', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Sweep the estate and rank findings by severity', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'sessions.review — trailing 24h across all policies', ms:700, chip:'1 failed · 1 stale',
           detail:[['failed','SharePoint Sites — Retail Division site'],['stale','Executive Mailboxes — 11h vs a 10-minute RPO']], result:'Two session-level issues need action now' },
         { kind:'tool',  label:'mailboxes.classify — type support on Express-Outlook', ms:500, chip:'2 excluded',
@@ -69261,7 +69282,7 @@ function aiStepsMs365TeamsGaps(){
     { trace: [
         { kind:'route', label:'Interpreting request — scope check + inherent platform gaps', ms:400, chip:'2 questions',
           detail:[['clauses','protected end-to-end? · what’s never backed up?']], result:'Both clauses answered in the headline' },
-        { kind:'agent', label:'Spawning a Teams-gap agent', ms:300, spawn:{ task:'Check Teams scope and inherent platform gaps', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Check Teams scope and inherent platform gaps', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'graph.query — BACKUPED_TEAM · policy scope', ms:700, chip:'6 teams',
           detail:[['policy','Teams Files (Flex) — Teams is Flex-only']], result:'All 6 teams covered' },
         { kind:'tool',  label:'docs.match — considerations & limitations (Teams)', ms:500, chip:'4 gaps',
@@ -69288,6 +69309,211 @@ function aiStepsMs365TeamsGaps(){
       }; } }
   ];
 }
+// ── IRO exposure scenarios (2026-10-15, from IRO_Scenarios.xlsx rows 7–11) ──
+// The five staged Q&A scenarios on the Microsoft 365 home. Same answer
+// contract as the estate Q&A above (headline + sub answer every prompt
+// clause · ONE vis shaped like the claim · findings are words + at most one
+// action · insight behind Show more); the sheet's acceptance criteria are
+// carried as card/trace behaviours (zero vs unscanned, label mismatch,
+// attribution, No Data ≠ no access, write vs performed). Graph node names
+// live ONLY in trace tool labels. Agents/sites/people are the seeded
+// contoso tenant's (Retail Division · Finance Group · R&D Projects …).
+// Remediation writes are NOT staged — no skill grants them (Agent Settings
+// has Restore / Export / Manage policies only); the one agent action is the
+// existing, approval-gated SharePoint rollback (agents modifying data).
+function _aiExpoDay(n){
+  var d = new Date(Date.now() - n * 86400000);
+  return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()] + ' ' + d.getDate();
+}
+function _aiExpoSpawn(task){ return { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:task, granted:'Read access', denied:'Restore · Export · Manage policies' } }; }
+// 1 · Files accessible by the entire organization — the claim is a TREND.
+function aiStepsMs365OrgWide(){
+  var jump = _aiExpoDay(8);
+  var pts = [902, 909, 916, 923, 930, 937, 944, 951, 958, 965, 972, 979, 986, 993, 1000, 1007, 1014, 1021, 1028, 1035, 1042, 1275, 1276, 1278, 1279, 1280, 1281, 1282, 1283, 1284];
+  return [
+    { trace: [
+        { kind:'route', label:'Interpreting request — current count, 30-day trend, and what changed', ms:400, chip:'3 questions',
+          detail:[['clauses','how many? · which way is it moving? · any sharp change?']], result:'All three answered in the headline' },
+        _aiExpoSpawn('Count org-wide accessible files and characterize the trend'),
+        { kind:'tool',  label:'graph.query — FILEEXT · is_public_internal = true', ms:800, chip:'1,284 files',
+          detail:[['node','FILEEXT'],['filter','is_public_internal = true'],['source','VDC-onboarded files']], result:'1,284 files readable by the whole organization — 1,046 in SharePoint · 238 in OneDrive' },
+        { kind:'tool',  label:'series.trend — org-wide file count, trailing 30 days', ms:700, chip:'+42%',
+          detail:[['window','trailing 30 days'],['rule','sharp = a one-day step far above the daily run-rate']], result:'Rising — 902 → 1,284, with a one-day step of +233 files on ' + jump },
+        { kind:'tool',  label:'scan.coverage — data scan completeness per source', ms:600, chip:'1 unverified',
+          detail:[['rule','a zero only counts as zero once the data scan has finished']], result:'SharePoint and OneDrive fully scanned · Teams files 64% scanned — its 0 is unverified, not a genuine zero' }
+      ],
+      card: function(){ return {
+        headline: '1,284 files are open to the entire organization — up 42% in 30 days, with a sharp jump on ' + jump + '.',
+        headsub: 'Rising · 1,046 in SharePoint, 238 in OneDrive · Teams files read 0, but that scan is only 64% complete, so the zero is unverified, not clean',
+        trend: { points: pts, color: 'var(--chart-soft-red)', unit: 'files', days: 30, caption: 'Files accessible by the entire organization · last 30 days' },
+        table: { label: 'Org-wide files by source', cols: ['Source', 'Org-wide files', 'Data scan'], rows: [
+          ['SharePoint', '1,046', ['ok', 'Complete']],
+          ['OneDrive', '238', ['ok', 'Complete']],
+          ['Teams files', '0', ['warn', '64% — zero unverified']] ] },
+        insight: 'Org-wide access is the <strong>most common over-sharing pattern</strong>: anyone in the tenant — and the agent acting for them — can open these files. The step on ' + jump + ' is <strong>233 files in Finance Group — Board Packs</strong> whose link scope changed to everyone in the organization in a single day, not gradual drift — the place to start. <strong>Also worth noting:</strong> Teams reads 0 only because its data scan has not finished; that flat line is unverified until it does.',
+        suggest: [ { label:'Which sites can share sensitive content externally?', sc:'ms365ExtSites' } ]
+      }; } }
+  ];
+}
+// 2 · Sensitive, externally sharable sites — per-site comparison → vrows.
+function aiStepsMs365ExtSites(){
+  var C = { red:'var(--chart-soft-red)', green:'var(--chart-soft-green)' };
+  return [
+    { trace: [
+        { kind:'route', label:'Interpreting request — sites that can share sensitive content externally', ms:400, chip:'2 questions',
+          detail:[['clauses','which sites? · is the sharing broader than the label implies?']], result:'Both answered in the headline' },
+        _aiExpoSpawn('List externally sharable sites holding sensitive data and check labels against sharing'),
+        { kind:'tool',  label:'graph.query — SITE · sharingCapabilities in (ExternalUserSharingOnly, ExternalUserAndGuestSharing, ExistingExternalUserSharingOnly)', ms:900, chip:'4 sites',
+          detail:[['node','DATA_ELEMENT › FILEEXT › SITE'],['filter','external sharing enabled · holds classified data']], result:'4 of 6 sites can share externally and hold sensitive data' },
+        { kind:'tool',  label:'labels.compare — sharing capability vs sensitivity label', ms:600, chip:'2 mismatches',
+          detail:[['rule','flag when sharing is broader than the applied label implies']], result:'R&D Projects and Finance Group allow anyone-links under Highly Confidential / Confidential labels' },
+        { kind:'tool',  label:'scan.coverage — site inventory completeness', ms:400, chip:'6 of 6',
+          detail:[['rule','an empty list is only “none” when the scan finished']], result:'All 6 sites scanned — this list is exhaustive' }
+      ],
+      card: function(){ return {
+        headline: '4 sites can share sensitive content outside the organization — 2 allow broader sharing than their sensitivity label implies.',
+        headsub: 'Ranked by sensitivity, then breadth of sharing · all 6 sites scanned, so the list is complete · each finding names its owner and URL',
+        stripTitle: 'Sites by sharing vs label',
+        strip: [ ['Broader than label implies', 2, C.red], ['Matches label', 2, C.green] ],
+        table: { label: 'Externally shareable sensitive sites', cols: ['Site', 'Owner', 'Sharing', 'Label'], rows: [
+          ['R&D Projects', 'Abe Jefferson', ['bad', 'Anyone links'], 'Highly Confidential'],
+          ['Finance Group', 'Jewell Riddle', ['bad', 'Anyone links'], 'Confidential'],
+          ['Customer-NW', 'John Voight', ['ok', 'Existing guests'], 'Confidential'],
+          ['Sales Department', 'Mary Isabel', ['ok', 'New & existing guests'], 'Internal'] ] },
+        insight: 'A sensitivity label <strong>suggests protection the site’s sharing settings do not enforce</strong> — R&D Projects and Finance Group are labelled Highly Confidential and Confidential yet let anyone with a link in. Customer-NW (Confidential, existing guests only) and Sales Department (Internal, new and existing guests) match. Each owner is named, so the fix has an addressee rather than a queue.',
+        suggest: [ { label:'How much of our data can the agent reach?', sc:'ms365AgentVolume' } ]
+      }; } }
+  ];
+}
+// 3 · What the agent can reach — composition of the whole estate → strip.
+// Model: ONE orchestration agent (Veeam Intelligence); task agents are spun
+// up per task and inherit only the skill they were spawned under, so reach
+// is attributed to SKILLS (Agent Settings), never to a roster of agents.
+function aiStepsMs365AgentVolume(){
+  var C = { blue:'var(--chart-soft-blue)', green:'var(--chart-soft-green)', gold:'var(--chart-soft-gold)' };
+  return [
+    { trace: [
+        { kind:'route', label:'Interpreting request — what the agent can reach, as a share of the estate, and through which skills', ms:400, chip:'3 questions',
+          detail:[['clauses','how much? · what share of the estate? · through which skills?']], result:'All three answered in the headline' },
+        _aiExpoSpawn('Total the data within the agent’s reach and attribute it to skills'),
+        { kind:'tool',  label:'graph.query — AIAGENT › AI_AGENT_HAS_FULL_READ_ACCESS_TO_FILES › FILEEXT', ms:900, chip:'17.1 TB',
+          detail:[['node','AIAGENT (Veeam Intelligence) → FILEEXT'],['relationship','AI_AGENT_HAS_FULL_READ_ACCESS_TO_FILES'],['source','VDC-onboarded data systems']], result:'17.1 TB readable — SharePoint 11.2 · OneDrive 5.0 · Teams 0.9' },
+        { kind:'tool',  label:'volume.share — reachable vs total estate', ms:600, chip:'93%',
+          detail:[['total','18.4 TB'],['rule','at or near 100% is a critical finding']], result:'93% of 18.4 TB — critical' },
+        { kind:'tool',  label:'report.diff — vs the previous report run', ms:500, chip:'+6 pts',
+          detail:[['previous','87%']], result:'Up 6 points — Restore data was widened to all of Microsoft 365 (+1.1 TB)' },
+        { kind:'tool',  label:'skills.attribute — reach per skill', ms:600, chip:'3 skills',
+          detail:[['rule','reach is never reported without the skills behind it'],['task agents','inherit only the skill they were spawned under']], result:'Read access 17.1 TB · Restore data 17.1 TB · Export data 11.2 TB' }
+      ],
+      card: function(){ return {
+        headline: '93% of your Microsoft 365 data — 17.1 of 18.4 TB — is within the agent’s reach, a critical level up 6 points since the last report.',
+        headsub: 'Everything the agent can read is within its read access — and its Restore data and Export data skills (both ask first) act on the same data. Task agents it spins up inherit only the access of the skill they were spawned for · SharePoint is 96% reachable',
+        stripTitle: 'Microsoft 365 data by agent access', unit: 'TB',
+        strip: [ ['SharePoint', 11.2, C.blue], ['OneDrive', 5.0, C.green], ['Teams', 0.9, C.gold], ['Not reachable', 1.3, 'var(--black-10)'] ],
+        table: { label: 'Reach by access and skill', collapse: 3, noun: 'entries', cols: ['Access or skill', 'Access', 'Reaches', 'Autonomy'], rows: [
+          ['Read access (baseline)', 'Read', '17.1 TB', ['ok', 'Always on']],
+          ['Restore data', 'Write \u00b7 restores data', '17.1 TB', ['warn', 'Ask first']],
+          ['Export data', 'Write \u00b7 produces files', '11.2 TB', ['warn', 'Ask first']],
+          ['Monitor & report', 'Read', '17.1 TB', ['ok', 'Observe']],
+          ['Manage policies', 'Write \u00b7 policy settings', '\u2014', ['ok', 'Recommend']],
+          ['Backup jobs', 'Write \u00b7 runs jobs', '\u2014', ['warn', 'Ask first']],
+          ['Findings and alerts', 'Write \u00b7 finding status', '\u2014', ['ok', 'Summarize']],
+          ['Assist with integrations', 'Assist only', '\u2014', ['ok', 'Prefill']] ] },
+        actions: [
+          { tone:'n', chip:'Info', txt:'Reach is set in Agent Settings', sub:'Narrow its read access, or a skill’s workloads, to narrow what its task agents can touch', btn:'Review in Agent Settings', nav:'agent-settings-overlay.html#skills', look:true }
+        ],
+        insight: 'This answers <strong>“what could the agent actually surface or change?”</strong> — nearly all of it, because its read access covers every connected workload. The agent’s reach is its read access — a workload scope in Agent Settings that can be narrowed but never switched off on its own — and each skill can be narrowed further. A task agent can only touch what the skill it was spawned under reaches. The four skills at the bottom of the table act on policies, jobs, findings and setup rather than file content, so they reach no data volume. The source split matters too: <strong>SharePoint</strong> is collaborative content shared widely, <strong>OneDrive</strong> is personal drives. The <strong>6-point rise</strong> since the last report is Restore data being widened to all of Microsoft 365 (+1.1 TB).',
+        suggest: [ { label:'Which sensitive categories can it reach?', sc:'ms365AgentSensitive' } ]
+      }; } }
+  ];
+}
+// 4 · Sensitive data within the agent's reach — per-category share → vrows,
+// plus the file-format mix as proportional blocks.
+function aiStepsMs365AgentSensitive(){
+  var C = { red:'var(--chart-soft-red)', gold:'var(--chart-soft-gold)', blue:'var(--chart-soft-blue)', green:'var(--chart-soft-green)' };
+  return [
+    { trace: [
+        { kind:'route', label:'Interpreting request — sensitive categories and file formats within the agent’s reach', ms:400, chip:'2 questions',
+          detail:[['clauses','which categories? · which formats, and what do they imply?']], result:'Both answered in the headline and panels' },
+        _aiExpoSpawn('Count agent-reachable sensitive elements by category and file format'),
+        { kind:'tool',  label:'graph.query — DATASYSTEM › DATASYSTEM_HAS_FILES › FILEEXT › AI_AGENT_HAS_FULL_READ_ACCESS_TO_FILES › AIAGENT', ms:900, chip:'5 categories',
+          detail:[['node','DATASYSTEM (vdc_m365 · sharepoint_online · onedrive) → FILEEXT → AIAGENT'],['group','data element category']], result:'Reachable elements in all 5 classification categories' },
+        { kind:'tool',  label:'policy.check — categories designated never agent-accessible', ms:500, chip:'2 barred',
+          detail:[['policy','Credentials & secrets · Health records']], result:'Both barred categories are reachable — 1,840 credentials · 3,900 health records' },
+        { kind:'tool',  label:'classification.share — reachable vs overall distribution', ms:600, chip:'75–91%',
+          detail:[['rule','proportion of each category that is agent-reachable']], result:'Between 75% and 91% of every category sits inside the agent’s scope' },
+        { kind:'tool',  label:'files.format — agent-readable files by format', ms:600, chip:'212 files',
+          detail:[['formats','Spreadsheets 38% · Word Processing 27% · PDF 18% · Archives & config 9% · Other 8%']], result:'212 credential-bearing files (.env · .pem · .pfx) — 140 that classification alone missed' },
+        { kind:'tool',  label:'scan.coverage — categories with no data returned', ms:400, chip:'1 unverified',
+          detail:[['rule','No Data is reported as unverified, never as no agent access']], result:'Payment-card scan has no data for Customer-NW yet — unverified, not clear' }
+      ],
+      card: function(){ return {
+        headline: 'The agent can reach sensitive data in all 5 categories — 2 are barred by your policy, including 1,840 credentials.',
+        headsub: 'Reached through its read access · 75–91% of each category sits inside its scope · Customer-NW’s payment-card scan returned no data, which is unverified, not no access',
+        vrows: {
+          title: 'Agent-reachable share of each category',
+          legend: [ ['Never agent-accessible under policy', C.red], ['Allowed with controls', C.gold] ],
+          rows: [
+            { label: 'Credentials & secrets', frac: 0.80, color: C.red,  val: '80%' },
+            { label: 'Health records',        frac: 0.75, color: C.red,  val: '75%' },
+            { label: 'National IDs',          frac: 0.91, color: C.gold, val: '91%' },
+            { label: 'Financial accounts',    frac: 0.89, color: C.gold, val: '89%' },
+            { label: 'Contact details',       frac: 0.80, color: C.gold, val: '80%' } ] },
+        // second panel per the sheet (files by format, a treemap there): composition → proportional blocks
+        stripTitle: 'Agent-readable files by format', stripLast: true,
+        strip: [ ['Spreadsheets', 38, C.blue], ['Word Processing', 27, C.green], ['PDF', 18, C.gold], ['Archives & config', 9, C.red], ['Other', 8, 'var(--black-10)'] ],
+        table: { label: 'Reachable sensitive data by category', cols: ['Category', 'Reachable', 'Total', 'Policy'], rows: [
+          ['Credentials & secrets', '1,840', '2,300', ['bad', 'Barred']],
+          ['Health records', '3,900', '5,200', ['bad', 'Barred']],
+          ['National IDs', '8,200', '9,000', ['warn', 'Allowed']],
+          ['Financial accounts', '12,600', '14,100', ['warn', 'Allowed']],
+          ['Contact details', '96,000', '120,000', ['warn', 'Allowed']] ] },
+        actions: [
+          { tone:'bad', chip:'Critical', txt:'Credentials and health records are within reach', sub:'Both are barred from the agent — narrow the workloads its skills cover', btn:'Review skills in Agent Settings', nav:'agent-settings-overlay.html#skills', look:true }
+        ],
+        insight: 'This separates <strong>tolerable</strong> access from <strong>unacceptable</strong> access — the two red categories are the ones to pull out of the agent’s scope first. Format adds what classification misses: <strong>spreadsheets and Word documents</strong> carry most of the reachable files, while <strong>archives and config files</strong> are where keys and credentials hide — 212 credential files (.env · .pem · .pfx), 140 of them missed by classification. A category with no data returned is reported as unverified, never as safe.',
+        suggest: [ { label:'What has the agent changed?', sc:'ms365AgentWrites' } ]
+      }; } }
+  ];
+}
+// 5 · What the agent can change, and what its task agents have changed —
+// counts of write sessions by outcome → strip; the writes come from Activity
+// > Agents (seeded runs): restores are the only data-modifying skill.
+function aiStepsMs365AgentWrites(){
+  var C = { green:'var(--chart-soft-green)', red:'var(--chart-soft-red)' };
+  return [
+    { trace: [
+        { kind:'route', label:'Interpreting request — what the agent can change vs what it has changed', ms:400, chip:'3 questions',
+          detail:[['clauses','what can it write? · what has it modified or deleted? · is it recoverable?']], result:'Write capability and performed changes are kept as separate figures' },
+        _aiExpoSpawn('Separate the skills that can write from the writes task agents actually made'),
+        { kind:'tool',  label:'graph.query — AIAGENT · write / full-control access to files', ms:800, chip:'1 skill',
+          detail:[['node','AIAGENT (Veeam Intelligence)'],['relationship','AI_AGENT_HAS_FULL_WRITE_ACCESS_TO_FILES · AI_AGENT_HAS_FULL_CONTROL_ACCESS_TO_FILES']], result:'Restore data is the one skill that modifies data · Export data writes files, Manage policies writes settings — neither changes your data' },
+        { kind:'tool',  label:'graph.query — AIAGENT › AI_AGENT_PERFORMED_ACTIVITY › ACTIVITY_LOG_EXT · activityType in (modify, delete)', ms:900, chip:'3 sessions',
+          detail:[['node','AIAGENT → ACTIVITY_LOG_EXT'],['filter','activityType in (modify, delete)'],['window','trailing 30 days']], result:'3 write sessions — 2 completed, 1 stopped on an error · 0 deletions' },
+        { kind:'tool',  label:'approvals.check — approver and grant per write', ms:500, chip:'all approved',
+          detail:[['rule','a write with no named approver or standing grant is flagged']], result:'Every write had a named approver — Restore data is set to Ask first, no standing automatic grants' },
+        { kind:'tool',  label:'restorepoints.check — pre-change data vs backup', ms:600, chip:'reversible',
+          detail:[['rule','restores write new versions; the pre-change data stays in backup']], result:'All 3 targets keep a pre-change restore point' }
+      ],
+      card: function(){ return {
+        headline: 'One skill can change your data — Restore data — and its task agents ran 3 restores in 30 days: 2 completed, 1 stopped on an error. None deleted anything.',
+        headsub: 'Every write ran after a named approval — no standing automatic grants · restores write new versions, so the pre-change data stays in backup · Export data and Manage policies write files and settings, not your data',
+        stripTitle: 'Write sessions by outcome',
+        strip: [ ['Completed', 2, C.green], ['Stopped on error', 1, C.red] ],
+        table: { label: 'Writes by task agents', cols: ['Task agent', 'Target', 'When', 'Outcome', 'Approved by'], rows: [
+          ['Mailbox recovery agent', 'John Voight · 1 email', 'Today', ['ok', 'Restored'], 'James Park'],
+          ['Departed-user recovery agent', 'Mark Aldridge · mailbox + OneDrive', 'Yesterday', ['ok', 'Restored'], 'James Park'],
+          ['SharePoint rollback agent', 'Retail Division › Taxes', '2 days ago', ['bad', 'Error'], 'Sarah Chen'] ] },
+        actions: [
+          { tone:'warn', chip:'Warning', txt:'SharePoint rollback stopped on an error', sub:'Retail Division › Taxes · 2 days ago · asks before writing', btn:'Re-run the Taxes rollback', flow:'ms365SiteRollback', ack:'On it — re-running the Retail Division Taxes rollback. Nothing gets written until you approve the plan.' },
+          { tone:'n', chip:'Info', txt:'Every write is in Activity', sub:'Each task agent, its target and its outcome', btn:'See the runs in Activity', nav:'activity-agent-overlay.html#agents', look:true },
+          { tone:'n', chip:'Info', txt:'Write access is set per skill', sub:'Restore data · Export data · Manage policies', btn:'Review skills in Agent Settings', nav:'agent-settings-overlay.html#skills', look:true }
+        ],
+        insight: 'Reading is an <strong>exposure</strong> question; writing is a <strong>data-loss</strong> one — read together with the agent’s reach this tells the two apart. Only <strong>Restore data</strong> modifies your data, and in-place rollbacks always ask first. Each write is traced to its task agent, target, time and outcome, which is the audit trail for “did the agent change this?”. Because a restore writes new versions, the data it replaced is still in backup.',
+        suggest: [ { label:'How many files can the entire organization access?', sc:'ms365OrgWide' } ]
+      }; } }
+  ];
+}
 // ── Cross-workload estate Q&A (2026-09-02) — one scenario per remaining
 // claim-shape vis form. Same answer contract as the ms365 set: tier 1
 // answers every prompt clause + ONE vis backing the headline's primary
@@ -69298,7 +69524,7 @@ function aiStepsGhGrowth(){
     { trace: [
         { kind:'route', label:'Interpreting request — growth rate + what’s driving it', ms:400, chip:'2 questions',
           detail:[['clauses','how fast is it growing? · what’s driving it?']], result:'Both clauses answered in the headline' },
-        { kind:'agent', label:'Spawning a growth-analysis agent', ms:300, spawn:{ task:'Measure growth and attribute it to its drivers', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Measure growth and attribute it to its drivers', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'footprint.series — protected data size, trailing 30 days', ms:800, chip:'+12%',
           detail:[['scope','acme-corp · 16 repositories']], result:'75 → 84 GB over the trailing 30 days' },
         { kind:'tool',  label:'repos.classify — growth attribution by repository', ms:600, chip:'top: data-pipeline',
@@ -69343,7 +69569,7 @@ function aiStepsAdoRpo(){
     { trace: [
         { kind:'route', label:'Interpreting request — every project vs its own backup window', ms:400, chip:'6 projects',
           detail:[['clauses','are all six inside their policy windows?']], result:'Answered per project in the headline + rows' },
-        { kind:'agent', label:'Spawning a policy-window agent', ms:300, spawn:{ task:'Compare each project with its own backup window', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Compare each project with its own backup window', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'graph.query — latest restore point per project', ms:800, chip:'6 checked',
           detail:[['scope','contoso-org · 6 projects']], result:'Ages range 3h to 13h' },
         { kind:'tool',  label:'policies.match — window per project', ms:500, chip:'1 behind',
@@ -69383,7 +69609,7 @@ function aiStepsPpCapacity(){
     { trace: [
         { kind:'route', label:'Interpreting request — capacity headroom per environment', ms:400, chip:'3 environments',
           detail:[['clauses','is any environment close to its Dataverse limit?']], result:'Answered with the nearest limit up front' },
-        { kind:'agent', label:'Spawning a capacity-headroom agent', ms:300, spawn:{ task:'Check Dataverse capacity per environment', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Check Dataverse capacity per environment', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'capacity.check — Dataverse usage vs entitlement', ms:800, chip:'1 near limit',
           detail:[['rule','flag environments past 85% of entitled capacity']], result:'Contoso Production at 91% · EU Production 38% · Sandbox 22%' },
         { kind:'tool',  label:'growth.attribute — what’s consuming Production', ms:600, chip:'top: attachments',
@@ -69418,12 +69644,11 @@ function aiStepsInfraFailedJobs(){
     { trace: [
         { kind:'route', label:'Interpreting request — failures + affected VMs, trailing 24h', ms:400, chip:'62 sessions',
           detail:[['window','trailing 24h'],['mode','failure + retry clustering, resolved to protected VMs']], result:'7 failed of 62 sessions across 5 jobs' },
-        { kind:'agent', label:'Spawning a failure-analysis agent', ms:300, spawn:{ task:'Cluster the last 24 hours of failures', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Cluster the last 24 hours of failures and resolve each failed job to the VMs behind it', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'sessions.scan — trailing 24h · every job', ms:900, chip:'7 failed',
           detail:[['window','trailing 24h'],['jobs','7 total']], result:'49 succeeded · 5 warning · 7 failed · 1 running' },
         { kind:'tool',  label:'failures.cluster — group by failure message per job', ms:600, chip:'2 repeats',
           detail:[['rule','same job + same failure text across a scheduled retry']], result:'Production Sites and Finance VMs each failed twice on the same cause' },
-        { kind:'agent', label:'Spawning a job-membership agent', ms:300, spawn:{ task:'Resolve each failed job to the VMs behind it', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'job.members — resolve each failed job to its protected VMs', ms:500, chip:'8 VMs',
           detail:[['source','Virtual Machines inventory']], result:'All 8 protected VMs sit behind one of the 5 failing jobs' },
         { kind:'tool',  label:'repository.check — free space on the affected repository', ms:400, chip:'87% used',
@@ -69587,7 +69812,7 @@ function aiStepsInfraLiveSessions(){
     { trace: [
         { kind:'route', label:'Interpreting request — live job states + why anything is queued', ms:400, chip:'7 jobs',
           detail:[['clauses','what’s running? · what’s queued? · what already finished?']], result:'All three answered from a live poll' },
-        { kind:'agent', label:'Spawning a live-session agent', ms:300, spawn:{ task:'Poll live job states and where sessions are waiting', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Poll live job states and where sessions are waiting', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'jobs.poll — live status across all jobs', ms:700, chip:'3 running',
           detail:[['states','running · queued · finished · disabled']], result:'3 running · 2 queued · 1 finished with a warning · 1 disabled' },
         { kind:'tool',  label:'proxy.assignment — task slots per live session', ms:600, chip:'5 of 8 slots',
@@ -69636,7 +69861,7 @@ function aiStepsInfraRepoCapacity(){
     { trace: [
         { kind:'route', label:'Interpreting request — capacity headroom + an actionable plan', ms:400, chip:'3 repositories',
           detail:[['clauses','which repository is at risk? · what closes the gap?']], result:'One repository at risk, one clear move to fix it' },
-        { kind:'agent', label:'Spawning a capacity-planning agent', ms:300, spawn:{ task:'Project repository headroom and draft a plan', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Project repository headroom and draft a plan', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'repository.capacity — free space & growth per repository', ms:800, chip:'1 at risk',
           detail:[['repositories','veeam-repo-01 · nas-archive-01 · object-s3-vault']], result:'veeam-repo-01 is 87% full and growing 176 GB/day — full in about 18 days' },
         { kind:'tool',  label:'immutability.check — lock status per repository', ms:500, chip:'2 disabled',
@@ -69705,7 +69930,7 @@ function aiStepsInfraCapacityCharts(){
       say: function(){ return 'You asked for this in charts — here are three: veeam-repo-01’s growth trend, a capacity comparison across all three repositories, and their immutability posture.'; },
       noFb: true },
     { trace: [
-        { kind:'agent', label:'Spawning a capacity-charts agent', ms:300, spawn:{ task:'Chart repository capacity, growth and immutability', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Chart repository capacity, growth and immutability', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'repository.history — trailing 14-day usage, veeam-repo-01', ms:600, chip:'+2.3 TB',
           detail:[['window','trailing 14 days']], result:'18.6 TB → 20.9 TB over the window' }
       ],
@@ -69843,7 +70068,7 @@ function aiWizardTailSteps(noun, opts){
       ];
       return {
         trace: [
-          { kind:'agent', label:'Spawning a restore-point agent', ms:300, spawn:{ task:'Resolve restore points for the selection', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
+          { kind:'agent', label:'Spawning a recovery agent', ms:300, spawn:{ task:'Resolve restore points for the selection', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
           { kind:'tool',  label:'wizard.open — Select step', ms:500,
             detail:[['step','Select — review restore items']], result:'Cart items staged in the wizard' },
           { kind:'tool',  label:'restorepoint.set — ' + rpLabel, ms:400, chip:'locked',
@@ -71663,7 +71888,7 @@ body.ai-open { --ai-w: min(665px, 46vw); }
 body.ai-open .app { padding-right: 0; }
 body.ai-open .ws-overlay { right: 0; }
 body.ai-open .ws-modal { right: 24px; }
-body.ai-open .record-drawer { right: 16px; max-width: calc(100vw - 32px); }
+body.ai-open .record-drawer.open { right: 16px; max-width: calc(100vw - 32px); }   /* only when open — the closed drawer parks off-screen, and this rule used to pull it into view behind the assistant */
 /* scrim — white wash, page stays legible but inert (Figma: ~80% wash) */
 #aiScrim { display: none; position: fixed; inset: 0; z-index: 9590; background: rgba(255,255,255,0.78); }
 body.ai-open #aiScrim { display: block; }
@@ -71702,8 +71927,8 @@ body.ai-full #aiExpandBtn, #aiExpandBtn { display: none; }
 .ov-prose p { margin: 0; } .ov-prose p + p { margin-top: 12px; }
 .ov-prose { color: var(--black-100); }
 .ov-card { border: 1px solid var(--border-light); border-radius: 4px; background: var(--white); padding: 12px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-.ov-card-hd { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.ov-card-title { font-size: 16px; line-height: 22px; font-weight: 500; }
+.ov-card-hd { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }   /* flex-start (was center): a title that wraps to 2 lines pulled the button off the top-right corner */
+.ov-card-title { font-size: 16px; line-height: 22px; font-weight: 500; margin-top: 3px; }   /* 3px = (28px button − 22px line) / 2 — keeps a one-line title centred on the button */
 .ov-btn { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font-family: inherit; font-size: 14px; color: var(--black-100); cursor: pointer; white-space: nowrap; flex-shrink: 0; }
 .ov-btn:hover { background: var(--black-5); }
 .ov-btn svg { width: 16px; height: 16px; }
@@ -71717,8 +71942,8 @@ body.ai-full #aiExpandBtn, #aiExpandBtn { display: none; }
 .ov-block .v { font-size: 14px; color: var(--black-80); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ov-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 14px; color: var(--black-60); }
 .ov-legend .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; background: var(--c); }
-.ov-bars { display: flex; flex-direction: column; gap: 8px; }
-.ov-bar { display: grid; grid-template-columns: minmax(80px, 28%) 1fr auto; align-items: center; gap: 12px; font-size: 14px; }
+.ov-bars { display: grid; grid-template-columns: minmax(80px, 28%) 1fr auto; column-gap: 12px; row-gap: 8px; align-items: center; }   /* shared columns: each row used to size its own value column, so tracks differed in width per row */
+.ov-bar { display: grid; grid-template-columns: subgrid; grid-column: 1 / -1; align-items: center; font-size: 14px; }
 .ov-bar .lbl { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ov-bar .track { height: 12px; border-radius: 2px; background: var(--black-5); overflow: hidden; }
 .ov-bar .track > span { display: block; height: 100%; border-radius: 2px; }
@@ -71727,10 +71952,11 @@ body.ai-full #aiExpandBtn, #aiExpandBtn { display: none; }
 .ov-cap-fig small { font-size: 14px; font-weight: 400; color: var(--black-60); letter-spacing: 0; margin-left: 4px; }
 .ov-card .aiac-trend { margin-top: 0; }
 .ov-table-wrap { border: 1px solid var(--border-light); border-radius: 4px; overflow-x: auto; }
-.ov-table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 20px; }
+.ov-table { width: 100%; min-width: 0; border-collapse: collapse; font-size: 14px; line-height: 20px; }   /* min-width:0 beats the global table{min-width:900px} — without it every answer table scrolled sideways inside the 570px card */
 .ov-table th { text-align: left; font-size: 12px; font-weight: 400; color: var(--black-60); padding: 8px 12px; background: var(--ov-form-bg); }
 .ov-table td { padding: 8px 12px; vertical-align: top; border-top: 1px solid var(--border-light); }
 .ov-table td:first-child { font-weight: 500; }
+.ov-more-row { text-align: center; margin-top: -4px; }   /* the table card's "Show all N" toggle (same button as the recommendations list) */
 .ov-badge { display: inline-block; padding: 0 8px; border-radius: 2px; font-size: 14px; line-height: 22px; font-weight: 500; }
 .ov-badge.ok { background: var(--em-green-tint); color: var(--em-green); }
 .ov-badge.warn { background: var(--orange-10); color: var(--orange); }
@@ -71761,6 +71987,7 @@ body.ai-full #aiExpandBtn, #aiExpandBtn { display: none; }
 .ov-rs-head svg.caret { margin-left: auto; flex-shrink: 0; color: var(--black-60); transition: transform 0.15s ease; }
 .ov-rs.is-open .ov-rs-head svg.caret { transform: rotate(180deg); }
 .ov-rs.is-collapsed { padding: 8px 12px; }
+.ov-rs-cur { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ov-rs-list { display: flex; flex-direction: column; gap: 4px; }
 .ov-rs.is-collapsed .ov-rs-list { display: none; }
 .ov-rs.is-collapsed.is-open .ov-rs-list { display: flex; margin-top: 8px; }
@@ -71809,13 +72036,12 @@ button.ov-rs-row:hover .ov-rs-lbl { text-decoration: underline; text-decoration-
 .ov-consent-tool { display: flex; align-items: center; gap: 8px; font-size: 16px; line-height: 24px; font-weight: 500; margin-bottom: 4px; }
 .ov-consent-tool svg { width: 16px; height: 16px; flex-shrink: 0; }
 .ov-consent-card .ai-approval-row { font-size: 14px; }
-.ov-consent-btns { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.ov-consent-btns { display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 8px; margin-top: 8px; }
 .ov-consent-note { width: 100%; min-height: 72px; margin-top: 8px; padding: 8px 12px; border: 1px solid var(--em-green); border-radius: 4px; background: var(--em-green-tint); font: inherit; font-size: 14px; resize: vertical; }
 .ov-danger { background: var(--red); border-color: var(--red); color: var(--white); }
 .ov-consent-done { margin-top: 8px; font-size: 14px; color: var(--em-green); font-weight: 500; }
 .ov-consent-done.is-denied { color: var(--red); }
 .ai-approval .ov-consent-sub { margin: -2px 0 4px; }
-.ai-approval .ai-gate-btns { justify-content: flex-end; }
 </style>
 <script id="ov-script">
 /* ══ AGENT OVERLAY — answer renderer + panel behavior ═══════════════════════
@@ -71865,14 +72091,19 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
     return '<div class="ov-bars"><div class="ov-bar" style="grid-template-columns:1fr auto"><span class="track"><span style="width:' + Math.min(100, Math.round(c.val / c.max * 100)) + '%;background:' + c.color + '"></span></span>'
       + '<span class="val">' + esc(c.val + ' / ' + c.max + ' ' + c.unit) + '</span></div></div>';
   }
-  function table(t){
+  // t.collapse = rows shown before the "Show all N" toggle (card state m.tblOpen, flipped by aiacToggleTable)
+  function table(t, m, i){
     var head = '<tr>' + t.cols.map(function(c){ return '<th>' + esc(c) + '</th>'; }).join('') + '</tr>';
-    var body = t.rows.map(function(r){
+    var capped = t.collapse && t.rows.length > t.collapse, open = !!(m && m.tblOpen);
+    var body = (capped && !open ? t.rows.slice(0, t.collapse) : t.rows).map(function(r){
       return '<tr>' + r.map(function(c){
         return '<td>' + (Array.isArray(c) ? '<span class="ov-badge ' + c[0] + '">' + esc(c[1]) + '</span>' : esc(c)) + '</td>';
       }).join('') + '</tr>';
     }).join('');
-    return '<div class="ov-table-wrap"><table class="ov-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>';
+    return '<div class="ov-table-wrap"><table class="ov-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>'
+      + (capped ? '<div class="ov-more-row"><button type="button" class="aiac-details-btn' + (open ? ' open' : '') + '" aria-expanded="' + open + '" onclick="aiacToggleTable(' + i + ')">'
+        + (open ? 'Show fewer' : 'Show all ' + t.rows.length + (t.noun ? ' ' + esc(t.noun) : ''))
+        + '<span class="chev"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></span></button></div>' : '');
   }
   // ONE next-steps concept (Figma: "What I can do next" + sparkle pills such as
   // "Restore all deleted files"). Every next step is a pill: agent-runnable
@@ -71966,12 +72197,12 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
     var s = m.card, h = '<div class="ov-ans" data-aiac="' + i + '">';
     h += '<h3 class="ov-title">' + s.headline + '</h3>';
     if (s.headsub) h += '<div class="ov-prose"><p>' + s.headsub + '</p></div>';
-    var charted = false, acts = s.actions || [];
+    var charted = false, acts = s.actions || [], stripLate = '';   // stripLate: a card whose headline claim is the bars (vrows) sets stripLast so the secondary composition panel follows them
     if (s.strip){
       charted = true;
       var tot = s.strip.reduce(function(a, x){ return a + x[1]; }, 0);
       var body = (s.unit ? '<div class="ov-stat"><span class="rule"></span><span><span class="num">' + fmt(tot) + '</span><span class="unit">' + esc(s.unit) + '</span></span></div>' : '') + blocks(s.strip, s.unit);
-      h += card(s.stripTitle || 'Breakdown', body, 'widget');
+      if (s.stripLast) stripLate = card(s.stripTitle || 'Breakdown', body, 'widget'); else h += card(s.stripTitle || 'Breakdown', body, 'widget');
     }
     if (s.vrows){
       charted = true;
@@ -71985,12 +72216,13 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
       charted = true;
       h += card(s.trend.caption || 'Trend', _aiacTrendHtml(s.trend), 'widget');
     }
+    h += stripLate;
     if (!charted && acts.length >= 2){
       var counts = {}; acts.forEach(function(a){ counts[a.tone] = (counts[a.tone] || 0) + 1; });
       var items = ['bad', 'warn', 'ok', 'n'].filter(function(t){ return counts[t]; }).map(function(t){ return [TONE_LBL[t], counts[t], TONE[t]]; });
       h += card('Findings by severity', blocks(items, ''), 'widget');
     }
-    if (s.table && s.table.label !== s.stripTitle) h += card(s.table.label, table(s.table), 'export');
+    if (s.table && s.table.label !== s.stripTitle) h += card(s.table.label, table(s.table, m, i), 'export');
     if (s.insight) h += '<div class="ov-prose"><p>' + s.insight + '</p></div>';
     if (s.lookLink)
       h += '<button type="button" class="ov-look" onclick="aiacGo(\'nav\', \'' + esc(s.lookLink.nav).replace(/'/g, '') + '\')">' + esc(s.lookLink.label) + ic('open-in-new-outlined', 16) + '</button>';
@@ -72075,7 +72307,7 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
     var steps = m.steps || [];
     if (!steps.length) return '<div class="ov-rs ov-rs-wait-wrap" data-mi="' + i + '"><div class="ov-rs-wait">Processing request</div></div>';
     var live = !m.done;
-    var open = live ? (m._userToggled ? !!m.open : true) : !!m.open;
+    var open = !!m.open;   // collapsed until the user expands it — while thinking, the header carries the current step
     var total = null;
     if (m.named && steps.every(function(s){ return s && s.ms; })) total = (steps.reduce(function(a, s){ return a + s.ms; }, 0) / 1000).toFixed(1);
     else if (m.ms) total = Math.max(1, Math.round(m.ms / 1000));
@@ -72093,12 +72325,15 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
         + '<span class="ov-rs-badge ' + (running ? 'run' : 'ok') + '">' + (running ? 'In progress' : 'Complete') + '</span></' + close + '>'
         + (expanded && hasSub ? '<div class="ov-rs-sub">' + rsSubs(o) + '</div>' : '');
     }).join('');
-    var head = '';
-    if (!live){
-      head = '<button type="button" class="ov-rs-head" onclick="aiToggleReason(' + i + ')" aria-expanded="' + open + '">Thought for ' + (total || 1) + 's \u00b7 ' + steps.length + ' step' + (steps.length === 1 ? '' : 's')
-        + '<svg class="caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>';
+    var caret = '<svg class="caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+    var head;
+    if (live){
+      var cur = steps[steps.length - 1], curO = typeof cur === 'string' ? { label: cur, kind: 'tool' } : cur;
+      head = '<button type="button" class="ov-rs-head" onclick="aiToggleReason(' + i + ')" aria-expanded="' + open + '"><span class="ov-rs-ico"><span class="disc-spinner"></span></span><span class="ov-rs-cur">' + esc(rsLabel(curO)) + '</span>' + caret + '</button>';
+    } else {
+      head = '<button type="button" class="ov-rs-head" onclick="aiToggleReason(' + i + ')" aria-expanded="' + open + '">Thought for ' + (total || 1) + 's \u00b7 ' + steps.length + ' step' + (steps.length === 1 ? '' : 's') + caret + '</button>';
     }
-    return '<div class="ov-rs' + (live ? '' : ' is-collapsed') + (open ? ' is-open' : '') + '" data-mi="' + i + '">' + head + '<div class="ov-rs-list">' + rows + '</div></div>';
+    return '<div class="ov-rs is-collapsed' + (open ? ' is-open' : '') + '" data-mi="' + i + '">' + head + '<div class="ov-rs-list">' + rows + '</div></div>';
   }
   function swapReasoning(){
     var body = document.getElementById('aiBody'); if (!body) return;

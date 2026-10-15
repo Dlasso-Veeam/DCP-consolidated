@@ -1679,6 +1679,494 @@ body.ai-full #aiWorkingGlow { display: none; }
 .as-pending + .as-pending { margin-top: 8px; }
 .as-pending-link { margin-top: 4px; padding: 0; border: 0; background: none; font: inherit; font-size: 14px; color: var(--em-green); cursor: pointer; text-align: left; }
 </style>
+<style id="ai-shell-style">
+/* tokens the carried answer cards read (values as declared on Activity's :root) */
+:root { --chart-green: #01804a; --chart-orange: #f6772c; --chart-red: #ed2c3d; --status-blue: #1ca8dd; --status-blue-10: #e8f6fc; }
+/* Rail AI launcher — ported verbatim from inventory-V1-agent-overlay.html (.vn-ai-launcher,
+   user 2026-09-29/30, verified against the live QA "Gencore Assistant" tile):
+   borderless soft rainbow glow (--ai-grad, 14px blur, kept inside the 72px
+   rail) behind a 24px white sparkle that pulses in size while rotating. */
+.vn-ai-launcher { position: relative; width: 40px; height: 40px; padding: 0; margin-bottom: 16px; border: none; background: none; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.vn-ai-launcher::before { content: ""; position: absolute; inset: -6px; background: var(--ai-grad); filter: blur(14px); opacity: 0.85; animation: vnAiSpin 6s linear infinite; }
+.vn-ai-launcher svg { position: relative; z-index: 1; width: 24px; height: 24px; display: block; transform-origin: center; animation: vnAiSparklePulse 2.4s ease-in-out infinite; }
+@keyframes vnAiSpin { to { transform: rotate(360deg); } }
+@keyframes vnAiSparklePulse {
+  0% { transform: scale(0.85) rotate(0deg); }
+  50% { transform: scale(1.2) rotate(180deg); }
+  100% { transform: scale(0.85) rotate(360deg); }
+}
+/* Decorative ambient loops exempted from any file-wide reduced-motion reset
+   (same call as inventory-V1-agent-overlay.html). */
+@media (prefers-reduced-motion: reduce) {
+  .vn-ai-launcher::before { animation-duration: 6s !important; animation-iteration-count: infinite !important; }
+  .vn-ai-launcher svg { animation-duration: 2.4s !important; animation-iteration-count: infinite !important; }
+}
+.vn-sys { display: flex; flex-direction: column; gap: 16px; align-items: center; margin-bottom: 16px; }
+/* ══════════════════════════════════════════════════════════════════════════
+   RESILIENCE ASSISTANT SHELL (2026-09-18) — cloned from backup-policies-agent-overlay.html's
+   own clone of inventory-V1-agent-overlay.html's panel: CONVERSATION-LED HANDOFF only (user
+   2026-09-18: "once i arrive on the activity page, the panel should remain
+   open with all the conversation context intact"). This page never launches
+   its own scenarios or answers free-form questions — it only hydrates and
+   displays a transcript carried from inventory-V1-agent-overlay.html (see
+   _aiHandoffHydrate below) and forwards any approved flow back there to run.
+   .disc-spinner and --ai-grad already exist on this page (not re-declared).
+   Token substitutions (no new hex, raw-hex ratchet): --blue-dark → var(--blue)
+   (this page has no darker blue step; --blue is already the emerald-flip
+   accent, so this reads correctly themed); --status-blue-5 → var(--status-blue-10)
+   (nearest existing step). */
+/* Carried cards' .aiac-strip reads --chart-soft-* (inventory-V1-agent-overlay.html's
+   medium-pastel segment fills); this page never defined them, so the strip rendered with NO
+   fill color at all (2026-09-21 catch: "the data vis has disappeared").
+   Derived via color-mix from this page's own chart tokens — no new hex,
+   same technique already used for the blue→emerald flip above. */
+:root {
+  --chart-soft-green: color-mix(in srgb, var(--chart-green) 55%, white);
+  --chart-soft-gold: color-mix(in srgb, var(--chart-orange) 55%, white);
+  --chart-soft-red: color-mix(in srgb, var(--chart-red) 55%, white);
+  --chart-soft-blue: color-mix(in srgb, var(--status-blue) 55%, white);
+}
+:root { --ai-w: 0px; --blue-dark: var(--blue); --status-blue-5: var(--status-blue-10); }
+body.ai-open { --ai-w: 420px; }
+#aiWorkingGlow {
+  position: fixed; top: var(--devjump-h, 0px); left: 0; bottom: 0; right: 0;
+  pointer-events: none; z-index: 9500;
+  opacity: 0; transition: opacity 0.35s ease;
+}
+body.ai-open #aiWorkingGlow { right: var(--ai-w); }
+#aiWorkingGlow.on { opacity: 1; }
+#aiWorkingGlow::before {
+  content: ""; position: absolute; inset: 0;
+  background: var(--ai-grad);
+  -webkit-mask:
+    linear-gradient(to right,  black, transparent 40px),
+    linear-gradient(to left,   black, transparent 40px),
+    linear-gradient(to bottom, black, transparent 40px),
+    linear-gradient(to top,    black, transparent 40px);
+          mask:
+    linear-gradient(to right,  black, transparent 40px),
+    linear-gradient(to left,   black, transparent 40px),
+    linear-gradient(to bottom, black, transparent 40px),
+    linear-gradient(to top,    black, transparent 40px);
+  filter: blur(26px) saturate(1.35);
+  animation: aiGlowBreathe 2.4s ease-in-out infinite;
+}
+@keyframes aiGlowBreathe {
+  0%, 100% { opacity: 0.9;  filter: blur(26px) saturate(1.35) hue-rotate(0deg); }
+  50%      { opacity: 0.55; filter: blur(30px) saturate(1.35) hue-rotate(24deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #aiWorkingGlow::before { animation: none; }
+}
+body.ai-open .app { transition: padding-right 0.24s ease; padding-right: var(--ai-w); }
+.ai-panel {
+  position: fixed; top: var(--devjump-h, 0px); right: 0; bottom: 0;
+  width: var(--ai-w); z-index: 950; overflow: hidden;
+  background: var(--white); border-left: 1px solid var(--border-light);
+  box-shadow: -8px 0 24px rgba(31,34,41,0.08);
+  display: flex; flex-direction: column; transition: width 0.24s ease;
+}
+/* verbatim clone of inventory-V1-agent-overlay.html's .ai-head panel-header component */
+.ai-head { display: flex; align-items: center; gap: 4px; padding: 12px 16px; background: var(--white); flex-shrink: 0; }
+.ai-head-text { flex: 1; min-width: 0; }
+.ai-head-title { font-size: 16px; font-weight: 500; color: var(--black-100); }
+.ai-head-btn { width: 28px; height: 28px; border: none; background: none; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ai-head-btn:hover { background: var(--black-5); color: var(--black-100); }
+body.ai-open.ai-full { --ai-w: 100vw; overflow: hidden; }
+body.ai-full .ai-head, body.ai-full .ai-body, body.ai-full .ai-foot { padding-left: max(16px, calc((100vw - 720px) / 2)); padding-right: max(16px, calc((100vw - 720px) / 2)); }
+body.ai-full #aiWorkingGlow { display: none; }
+.ai-body { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: var(--white); }
+.ai-msg { display: flex; flex-wrap: wrap; }
+.ai-msg.user { justify-content: flex-end; }
+.ai-bubble { max-width: 88%; font-size: 14px; line-height: 1.55; border-radius: 8px; padding: 8px 12px; }
+.ai-msg.agent .ai-bubble { background: none; border: none; padding: 0; border-radius: 0; max-width: 100%; flex: 1; color: var(--black-100); }
+.ai-msg.user .ai-bubble { background: var(--em-green-tint); color: var(--black-100); border-top-right-radius: 4px; }
+.ai-bubble strong { font-weight: 600; }
+.ai-bubble p + p { margin-top: 8px; }
+.ai-action { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; color: var(--black-60); }
+.ai-action .ai-action-ic { width: 16px; height: 16px; flex-shrink: 0; color: var(--green); display: inline-flex; }
+.ai-action.run { color: var(--blue-dark); }
+.ai-action.run .ai-action-ic { color: var(--blue); }
+/* verbatim clone of inventory-V1-agent-overlay.html's .ai-gate question/approval component */
+.ai-gate { margin-top: 10px; border: 1px solid var(--border-light); border-radius: 8px; padding: 12px 16px; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+.ai-gate-q { font-size: 16px; line-height: 22px; color: var(--black-100); margin-bottom: 10px; }
+.ai-gate-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.ai-gate-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px; border-radius: 4px; font-size: 16px; font-weight: 450; line-height: 22px; font-family: inherit; cursor: pointer; border: 1px solid var(--border); background: var(--white); color: var(--black-100); box-sizing: border-box; }
+.ai-gate-btn:hover { background: var(--black-5); }
+.ai-gate-btn.primary { background: var(--blue); border-color: var(--blue); color: var(--white); }
+.ai-gate-btn.primary:hover { background: var(--em-green-accent); border-color: var(--em-green-accent); color: var(--white); filter: none; }
+/* verbatim clone of inventory-V1-agent-overlay.html's .ai-approval decision-unit component
+   (Figma Veeam Vision card surface; actions = Figma Vision Button set 228:10477) */
+.ai-approval { margin-top: 10px; border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); padding: 12px 16px; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+.ai-approval-title { font-size: 16px; line-height: 22px; font-weight: 500; color: var(--black-100); }
+.ai-approval-row { display: flex; gap: 8px; padding: 3px 0; font-size: 14px; line-height: 19px; }
+.ai-approval-k { width: 72px; flex-shrink: 0; color: var(--black-60); }
+.ai-approval-v { color: var(--black-100); min-width: 0; }
+.ai-approval .ai-gate-btns { margin-top: 10px; }
+.ai-approval-done { display: none; margin-top: 8px; font-size: 13px; font-weight: 500; color: var(--em-green); }
+/* panel gate cards: identical to Protected Data (single spec for every page the assistant appears on) */
+.ai-approval-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.ai-approval-auto { margin-left: auto; font-size: 12px; font-weight: 500; color: var(--black-60); background: var(--black-5); border-radius: 2px; padding: 2px 6px; cursor: help; }
+.ai-approval:not(.resolved):hover { border-color: var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.ai-gate:not(.resolved):hover { border-color: var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.ai-gate-btn svg { flex-shrink: 0; width: 14px; height: 14px; }
+.ai-approval.resolved .ai-approval-done { display: block; }
+.ai-approval.resolved .ai-gate-btns { display: none; }
+.ai-gate.resolved .ai-gate-btns { display: none; }
+.ai-gate-done { font-size: 12px; color: var(--green); font-weight: 500; display: none; }
+.ai-gate.resolved .ai-gate-done { display: block; }
+.ai-thinking { align-self: flex-start; display: inline-flex; gap: 4px; align-items: center; padding: 12px; background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; border-top-left-radius: 4px; }
+.ai-thinking span { width: 6px; height: 6px; border-radius: 50%; background: var(--black-30); animation: aiPulse 1.2s infinite ease-in-out; }
+.ai-thinking span:nth-child(2) { animation-delay: 0.18s; }
+.ai-thinking span:nth-child(3) { animation-delay: 0.36s; }
+@keyframes aiPulse { 0%, 60%, 100% { opacity: 0.3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
+.ai-foot { flex-shrink: 0; padding: 12px 16px; background: var(--white); }
+.ai-chips { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.ai-chips:empty { display: none; }
+.ai-chip { font-size: 14px; text-align: left; border: 1px solid var(--blue-30); background: var(--blue-10); color: var(--blue-dark); border-radius: 4px; padding: 8px 12px; cursor: pointer; font-family: inherit; line-height: 1.4; }
+.ai-chip:hover { background: var(--blue-30); }
+/* verbatim clone of inventory-V1-agent-overlay.html's .ai-home empty-state component */
+.ai-home { display: flex; flex-direction: column; gap: 8px; padding: 44px 8px 8px; }
+.ai-home-glyph {
+  position: relative;
+  width: 44px; height: 44px; border-radius: 8px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid transparent; margin-bottom: 8px;
+  background:
+    linear-gradient(var(--white), var(--white)) padding-box,
+    var(--ai-grad) border-box;
+}
+.ai-home-glyph::before { content: ""; position: absolute; inset: 2px; border-radius: 6px; background: var(--ai-grad); }
+.ai-home-glyph svg { position: relative; z-index: 1; width: 40px; height: 40px; display: block; }
+.ai-home-glyph svg, .vai-tile svg { color: var(--white); }
+.ai-home-title { font-size: 16px; font-weight: 500; color: var(--black-100); line-height: 1.4; }
+.ai-home-sub { font-size: 12px; color: var(--black-60); line-height: 1.5; }
+.ai-home-label { font-size: 12px; font-weight: 500; color: var(--black-60); margin-top: 16px; }
+.ai-home-card { text-align: left; border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); padding: 12px; cursor: pointer; font-family: inherit; }
+.ai-home-card:hover { border-color: var(--blue-30); background: var(--blue-light); }
+.ai-home-card-t { font-size: 14px; font-weight: 500; color: var(--black-100); }
+.ai-home-card-p { font-size: 12px; color: var(--black-60); margin-top: 2px; line-height: 1.4; }
+/* verbatim clone of inventory-V1-agent-overlay.html's .ai-composer input component */
+.ai-composer { display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--border); border-radius: 8px; background: var(--white); padding: 8px 8px 8px 12px; }
+.ai-composer:focus-within { border-color: var(--blue); background: var(--em-green-tint); box-shadow: none; }
+.ai-composer-input { border: none; outline: none; resize: none; background: transparent; font-family: inherit; font-size: 14px; line-height: 20px; color: var(--black-100); min-height: 20px; max-height: 96px; padding: 4px 0; }
+.ai-composer-input::placeholder { color: var(--black-60); }
+.ai-composer-row { display: flex; align-items: center; gap: 4px; }
+.ai-composer-tool { width: 28px; height: 28px; border: none; background: none; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.ai-composer-tool:hover { background: var(--black-5); color: var(--black-100); }
+.ai-composer-tool.is-rec { background: var(--red-10); color: var(--red); }
+.ai-composer-tool svg { width: 18px; height: 18px; }
+.ai-send-fab { width: 36px; height: 36px; border: none; border-radius: 50%; background: none; padding: 0; color: var(--black-100); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ai-send-fab:hover { color: var(--blue); }
+.ai-send-fab svg { width: 36px; height: 36px; }
+.ai-send-fab:disabled { color: var(--black-30); cursor: default; }
+.ai-attach-strip { display: flex; flex-wrap: wrap; gap: 4px; }
+.ai-attach-strip:empty { display: none; }
+.ai-attach-chip { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 8px; border: 1px solid var(--border); border-radius: 2px; background: var(--black-5); font-size: 12px; color: var(--black-100); }
+.ai-attach-chip button { border: none; background: none; cursor: pointer; color: var(--black-60); display: inline-flex; padding: 0; font-size: 14px; line-height: 1; }
+/* verbatim clone of inventory-V1-agent-overlay.html's .ai-reason "Thought for Ns" component */
+.ai-reason { align-self: stretch; border: 1px solid var(--border-light); border-radius: 8px; background: var(--black-3); padding: 8px 12px; }
+.ai-reason-head { display: flex; align-items: center; gap: 8px; width: 100%; border: none; background: none; padding: 0; font-family: inherit; font-size: 14px; color: var(--black-60); cursor: pointer; text-align: left; }
+.ai-reason-head .disc-spinner { width: 14px; height: 14px; flex-shrink: 0; }
+.ai-reason-head .ai-reason-caret { margin-left: auto; transition: transform 0.15s; color: var(--black-60); }
+.ai-reason.open .ai-reason-caret { transform: rotate(180deg); }
+.ai-reason-steps { display: none; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-light); }
+.ai-reason.open .ai-reason-steps { display: block; }
+.ai-reason-step { font-size: 12px; color: var(--black-60); line-height: 1.5; padding: 2px 0; }
+.ai-fb { display: flex; align-items: center; gap: 4px; margin-top: 4px; flex-basis: 100%; }
+.ai-fb button { width: 28px; height: 28px; border: none; background: none; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.ai-fb button:hover { background: var(--black-5); color: var(--black-100); }
+.ai-fb button.active { color: var(--blue); background: var(--blue-light); }
+.ai-fb button svg { width: 16px; height: 16px; }
+@media (max-width: 860px) {
+  body.ai-open { --ai-w: 100vw; }
+  body.ai-open .app { padding-right: 0; }
+  body.ai-open #aiWorkingGlow { display: none; }
+}
+.btn-veeam-ai {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 36px; padding: 0 12px 0 6px;
+  border: 1px solid transparent; border-radius: 4px;
+  background: linear-gradient(var(--white), var(--white)) padding-box, var(--ai-grad) border-box;
+  font-family: inherit; font-size: 16px; font-weight: 500; color: var(--black-100); cursor: pointer;
+}
+.btn-veeam-ai:hover { box-shadow: 0 1px 4px rgba(31, 34, 41, 0.16); }
+.vai-tile { width: 20px; height: 20px; border-radius: 4px; background: var(--ai-grad); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.vai-tile svg { width: 18px; height: 18px; display: block; }
+
+/* ANSWER CARD (carried transcript) — VERBATIM copy of inventory-V1's .aiac
+   block (see inventory-V1-agent-overlay.html for full provenance). Single source rule:
+   edit inventory, then re-copy here. */
+.aiac { border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); width: 100%; overflow: hidden; }
+.aiac-head { padding: 14px 14px 0; }
+.aiac-headline { font-size: 16px; font-weight: 500; line-height: 22px; color: var(--black-100); }
+.aiac-headsub { font-size: 14px; color: var(--black-60); line-height: 20px; margin-top: 2px; }
+.aiac-strip { display: flex; height: 6px; border-radius: 2px; overflow: hidden; margin-top: 10px; }
+.aiac-strip span { height: 100%; }
+.aiac-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; font-size: 12px; color: var(--black-60); }
+.aiac-legend .li { display: inline-flex; align-items: center; gap: 5px; }
+.aiac-legend .dot { width: 10px; height: 3px; border-radius: 1.5px; flex-shrink: 0; }
+.aiac-vrows { display: flex; flex-direction: column; gap: 7px; margin-top: 10px; }
+.aiac-vrow { display: grid; grid-template-columns: 128px 1fr 74px; gap: 10px; align-items: center; font-size: 12px; color: var(--black-80); }
+.aiac-vrow .lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aiac-vrow .track { height: 4px; border-radius: 2px; background: var(--black-5); overflow: hidden; display: flex; }
+.aiac-vrow .track span { height: 100%; }
+.aiac-vrow .val { text-align: right; color: var(--black-60); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.aiac-trend { display: block; position: relative; margin-top: 10px; }
+.aiac-trend svg { display: block; width: 100%; }
+.aiac-trend .axis { display: flex; justify-content: space-between; font-size: 12px; color: var(--black-60); margin-top: 4px; }
+.aiac-trend-readout { position: absolute; z-index: 5; pointer-events: none; background: var(--white); color: var(--black-100); border: 1px solid var(--border-light); font-size: 14px; line-height: 1.35; font-weight: 450; padding: 4px 8px; border-radius: 4px; box-shadow: 0 4px 14px rgba(0,0,0,0.22); white-space: nowrap; }
+.aiac-sec { padding: 10px 14px; }
+.aiac-sec-label { font-size: 14px; font-weight: 500; color: var(--black-100); margin-bottom: 6px; }
+/* verbatim clone of inventory-V1-agent-overlay.html's .aiac-act finding-tile component
+   (DS chip Figma 10746:122213 + button Figma 13218:113044 inside it) */
+.aiac-act { position: relative; padding: 12px 16px; border: 1px solid var(--border-light); border-radius: 8px; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+.aiac-exec { position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; border: none; border-radius: 4px; padding: 0; display: inline-flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; background: var(--ai-grad); color: var(--white); }
+.aiac-exec svg { width: 34px; height: 34px; margin: -5px; display: block; flex-shrink: 0; }
+.aiac-exec.off { background: var(--black-5); color: var(--black-50); overflow: visible; }
+.aiac-exec.off .aiac-exec-lock { position: absolute; right: -6px; bottom: -6px; width: 16px; height: 16px; border-radius: 50%; background: var(--white); border: 1px solid var(--border-light); display: inline-flex; align-items: center; justify-content: center; color: var(--black-60); }
+.aiac-exec.off .aiac-exec-lock svg { width: 11px; height: 11px; margin: 0; }
+.aiac-act + .aiac-act { margin-top: 8px; }
+.aiac-act:hover { border-color: var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.aiac-chip { display: inline-block; max-width: 100%; height: 28px; padding: 3px 8px; border-radius: 2px; font-size: 16px; font-weight: 500; line-height: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; box-sizing: border-box; margin-bottom: 4px; }
+.aiac-chip.ok { background: var(--em-green-tint); color: var(--em-green); }
+.aiac-chip.warn { background: var(--orange-10); color: var(--orange); }
+.aiac-chip.bad { background: var(--red-10); color: var(--red); }
+.aiac-chip.n { background: var(--status-blue-5); color: var(--status-blue); }
+.aiac-act-txt { display: block; font-size: 16px; line-height: 22px; color: var(--black-100); }
+.aiac-act-txt small { display: block; font-size: 14px; line-height: 20px; color: var(--black-60); margin-top: 2px; }
+.aiac-act-vis { display: grid; grid-template-columns: 1fr 74px; gap: 10px; align-items: center; margin-top: 6px; max-width: 240px; font-size: 12px; }
+.aiac-act-vis .track { height: 4px; border-radius: 2px; background: var(--black-5); overflow: hidden; display: flex; }
+.aiac-act-vis .track span { height: 100%; }
+.aiac-act-vis .val { text-align: right; color: var(--black-60); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.aiac-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font-family: inherit; font-size: 16px; font-weight: 450; line-height: 22px; color: var(--black-100); cursor: pointer; box-sizing: border-box; margin-top: 8px; }
+.aiac-btn.primary { background: var(--blue); border-color: var(--blue); color: var(--white); font-weight: 500; }
+.aiac-btn.primary:hover { background: var(--em-green-accent); border-color: var(--em-green-accent); color: var(--white); filter: none; }
+.aiac-btn svg { flex-shrink: 0; }
+.aiac-btn:hover { background: var(--black-5); color: var(--black-80); }
+.aiac-btn:active { background: var(--black-10); }
+.aiac-tbl { width: 100%; min-width: 0; border-collapse: collapse; font-size: 14px; }
+.aiac-tbl th { text-align: left; font-weight: 500; font-size: 14px; color: var(--black-50); padding: 4px 8px 4px 0; border-bottom: 1px solid var(--black-10); }
+.aiac-tbl td { padding: 6px 8px 6px 0; border-bottom: 1px solid var(--black-5); color: var(--black-100); vertical-align: top; line-height: 20px; font-size: 14px; }
+.aiac-tbl tr:last-child td { border-bottom: none; }
+.aiac-insight { font-size: 12px; color: var(--black-60); line-height: 17px; }
+.aiac-insight strong { color: var(--black-100); font-weight: 500; }
+.aiac-insightx { font-size: 14px; color: var(--black-60); line-height: 20px; margin-top: 6px; }
+.aiac-insightx strong { color: var(--black-100); font-weight: 500; }
+.aiac-more { display: inline; border: none; background: none; padding: 0; font-family: inherit; font-size: 14px; font-weight: 450; line-height: 20px; color: var(--blue); cursor: pointer; }
+.aiac-more:hover { color: var(--em-green-accent); }
+.aiac-agent-note { display: flex; align-items: center; gap: 4px; margin-top: 4px; font-size: 12px; line-height: 16px; color: var(--black-50); }
+.aiac-agent-note svg { width: 12px; height: 12px; flex-shrink: 0; }
+.aiac-accept-row { padding: 8px 14px 12px; }
+.aiac-act.sealed { opacity: 0.72; }
+.aiac-act.sealed .aiac-act-txt { color: var(--black-60); }
+.aiac-act-done { display: block; margin-top: 8px; font-size: 13px; line-height: 18px; font-weight: 450; color: var(--em-green); }
+.aiac-details-row { border-top: 1px solid var(--border-light); padding: 4px 14px; text-align: center; }
+.aiac-details-btn { display: inline-flex; align-items: center; gap: 6px; height: 28px; border: none; background: transparent; font-family: inherit; font-size: 14px; font-weight: 450; line-height: 22px; color: var(--black-100); padding: 4px 12px; cursor: pointer; border-radius: 4px; }
+.aiac-details-btn:hover { color: var(--black-80); }
+.aiac-details-btn:active { background: var(--black-10); }
+.aiac-details-btn .chev { display: inline-flex; transition: transform 0.15s; }
+.aiac-details-btn.open .chev { transform: rotate(180deg); }
+/* was: 4px top/bottom — read squished (user 2026-09-21 catch); kept in sync
+   with inventory-V1-agent-overlay.html's copy */
+.aiac-sec.aiac-looklink { padding-top: 12px; padding-bottom: 12px; }
+.aiac-sec.aiac-looklink .aiac-btn { margin-top: 0; }
+/* LINEAR TIMED STEP LIST (2026-09-21) — verbatim port of inventory-V1-agent-overlay.html's
+   .ai-rsteps family (the settled "Show me" walkthrough grammar: one step at
+   a time, each on a dwell timer with a loading bar) — NOT a bespoke one-off.
+   Provenance/citation lives with the original in inventory-V1-agent-overlay.html; ported
+   here so activity.html's own watch flow (_aiRestartOnActivity) stays
+   visually consistent with every other flow's "Show me" instead of
+   inventing a second pattern. See inventory-V1-agent-overlay.html for the fill-mechanism
+   rationale (transform computed at paint time, no CSS animation/transition —
+   a rebuild must never restart an in-progress bar). */
+.ai-rsteps { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; }
+/* verbatim port of inventory-V1-agent-overlay.html's .ai-rstep step-row component */
+.ai-rstep { position: relative; display: flex; align-items: flex-start; gap: 8px; width: 100%; padding: 5px 6px 7px; border: none; background: none; border-radius: 4px; font-family: inherit; font-size: 12px; line-height: 16px; text-align: left; color: var(--black-60); cursor: pointer; }
+.ai-rstep:hover { background: var(--black-3); }
+.ai-rstep-ic { width: 16px; height: 16px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; color: var(--green); }
+.ai-rstep.is-next { color: var(--black-40); }
+.ai-rstep.is-next .ai-rstep-ic::before { content: ''; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--black-30); }
+.ai-rstep.is-current { color: var(--black-100); font-weight: 500; }
+.ai-rstep-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--em-green); }
+.ai-rstep-bar { position: absolute; left: 6px; right: 6px; bottom: 1px; height: 2px; border-radius: 1px; background: var(--black-5); overflow: hidden; }
+.ai-rstep-bar span { display: block; height: 100%; width: 100%; background: var(--em-green); transform: scaleX(0); transform-origin: left center; }
+/* verbatim port of inventory-V1-agent-overlay.html's .ai-replay-ctrls Play/Pause row */
+.ai-replay-ctrls { align-items: center; margin-top: 8px; }
+.ai-replay-progress { font-size: 13px; color: var(--black-50); font-variant-numeric: tabular-nums; }
+.ai-replay-play { margin-left: auto; border: none; background: none; padding: 0; font-family: inherit; font-size: 13px; font-weight: 500; color: var(--em-green); cursor: pointer; }
+.ai-replay-play:hover { color: var(--em-green-accent); text-decoration: underline; }
+</style>
+<style id="ov-style">
+/* ══ AGENT OVERLAY (inventory-V1-agent-overlay.html) ═══════════════════════
+   The single-agent experience re-skinned onto the legacy product language
+   (Gencore Contextual Assistant 80:107287 · DCP Hybrid SaaS Phase 1 5710:266643):
+   a right-hand OVERLAY over a washed-out page (nothing is pushed), header =
+   history · new · centered title · close, flat prose answers with outlined
+   result cards that each carry their own chart, grey composer. No follow-along:
+   the page is covered, so the agent reports in the conversation.
+   Everything below is an override of the pushed-rail panel defined earlier. */
+:root { --ov-form-bg: #f8f8f8; }
+body.ai-open { --ai-w: min(665px, 46vw); }
+/* nothing is pushed any more */
+body.ai-open .app { padding-right: 0; }
+body.ai-open .ws-overlay { right: 0; }
+body.ai-open .ws-modal { right: 24px; }
+body.ai-open .record-drawer.open { right: 16px; max-width: calc(100vw - 32px); }   /* only when open — the closed drawer parks off-screen, and this rule used to pull it into view behind the assistant */
+/* scrim — white wash, page stays legible but inert (Figma: ~80% wash) */
+#aiScrim { display: none; position: fixed; inset: 0; z-index: 9590; background: rgba(255,255,255,0.78); }
+body.ai-open #aiScrim { display: block; }
+.ai-panel { z-index: 9600; box-shadow: -12px 0 32px rgba(31,34,41,0.10); }
+#aiWorkingGlow, body.ai-open #aiWorkingGlow { display: none !important; }
+body.ai-full #aiExpandBtn, #aiExpandBtn { display: none; }
+/* NO follow-along: hide every "watch the agent drive the page" door */
+.ai-gate-btn[onclick^="aiShowStart"], .ai-board-btn[onclick*="aiBoardWatch"],
+.aiac-btn[onclick*="_aiWatchOnActivity"], .ai-scrub { display: none !important; }
+
+/* header: [history][new] ··· title ··· [close] — 36px outlined icon buttons */
+.ai-head { padding: 20px 24px 12px; gap: 8px; }
+.ai-head-text { order: 3; text-align: center; padding: 0 8px; }
+.ai-head-title { font-size: 16px; line-height: 22px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#aiHxBtn { order: 1; } #aiNewChatBtn { order: 2; } .ai-head > button[aria-label="Close assistant"] { order: 4; }
+.ai-head-btn { width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); color: var(--black-100); }
+.ai-head-btn:hover, .ai-head-btn.is-on { background: var(--black-5); }
+.ai-head-btn svg { width: 20px; height: 20px; }
+
+/* transcript: 16/24 flat prose, user message = grey outlined bubble */
+.ai-body { padding: 8px 24px 16px; gap: 16px; }
+.ai-bubble { font-size: 16px; line-height: 24px; }
+.ai-msg.user .ai-bubble { background: var(--ov-form-bg); border: 1px solid var(--border-light); border-radius: 4px; padding: 8px 12px; max-width: 85%; }
+
+/* composer: grey field, send = solid black disc */
+.ai-foot { padding: 8px 24px 24px; }
+.ai-composer { background: var(--ov-form-bg); border-radius: 4px; padding: 12px 12px 8px 16px; min-height: 96px; gap: 8px; }
+.ai-composer-input { font-size: 16px; line-height: 24px; max-height: 144px; }
+.ai-composer-input::placeholder { color: var(--black-60); }
+.ai-composer .ai-composer-row { margin-top: auto; }
+.ai-send-fab { color: var(--black-100); } .ai-send-fab:hover { color: var(--black-80); }
+
+/* ── answer document ── */
+.ov-ans { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+.ov-title { margin: 0; font-size: 20px; line-height: 28px; font-weight: 500; letter-spacing: -0.015em; color: var(--black-100); }
+.ov-prose p { margin: 0; } .ov-prose p + p { margin-top: 12px; }
+.ov-prose { color: var(--black-100); }
+.ov-card { border: 1px solid var(--border-light); border-radius: 4px; background: var(--white); padding: 12px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.ov-card-hd { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }   /* flex-start (was center): a title that wraps to 2 lines pulled the button off the top-right corner */
+.ov-card-title { font-size: 16px; line-height: 22px; font-weight: 500; margin-top: 3px; }   /* 3px = (28px button − 22px line) / 2 — keeps a one-line title centred on the button */
+.ov-btn { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font-family: inherit; font-size: 14px; color: var(--black-100); cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+.ov-btn:hover { background: var(--black-5); }
+.ov-btn svg { width: 16px; height: 16px; }
+.ov-stat { display: flex; align-items: center; gap: 12px; padding: 16px; border-radius: 4px; background: var(--green-s10); }
+.ov-stat .rule { width: 4px; height: 44px; border-radius: 2px; background: var(--em-green); flex-shrink: 0; }
+.ov-stat .num { font-size: 40px; line-height: 44px; font-weight: 500; letter-spacing: -0.03em; }
+.ov-stat .unit { font-size: 16px; color: var(--black-60); margin-left: 4px; }
+.ov-blocks { display: flex; gap: 2px; height: 96px; }
+.ov-block { min-width: 0; padding: 8px; border-radius: 2px; background: color-mix(in srgb, var(--c) 38%, var(--white)); border: 1px solid color-mix(in srgb, var(--c) 70%, var(--white)); }
+.ov-block .n { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ov-block .v { font-size: 14px; color: var(--black-80); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ov-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 14px; color: var(--black-60); }
+.ov-legend .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; background: var(--c); }
+.ov-bars { display: grid; grid-template-columns: minmax(80px, 28%) 1fr auto; column-gap: 12px; row-gap: 8px; align-items: center; }   /* shared columns: each row used to size its own value column, so tracks differed in width per row */
+.ov-bar { display: grid; grid-template-columns: subgrid; grid-column: 1 / -1; align-items: center; font-size: 14px; }
+.ov-bar .lbl { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ov-bar .track { height: 12px; border-radius: 2px; background: var(--black-5); overflow: hidden; }
+.ov-bar .track > span { display: block; height: 100%; border-radius: 2px; }
+.ov-bar .val { color: var(--black-60); font-variant-numeric: tabular-nums; }
+.ov-cap-fig { font-size: 24px; line-height: 28px; font-weight: 500; letter-spacing: -0.02em; }
+.ov-cap-fig small { font-size: 14px; font-weight: 400; color: var(--black-60); letter-spacing: 0; margin-left: 4px; }
+.ov-card .aiac-trend { margin-top: 0; }
+.ov-table-wrap { border: 1px solid var(--border-light); border-radius: 4px; overflow-x: auto; }
+.ov-table { width: 100%; min-width: 0; border-collapse: collapse; font-size: 14px; line-height: 20px; }   /* min-width:0 beats the global table{min-width:900px} */
+.ov-table th { text-align: left; font-size: 12px; font-weight: 400; color: var(--black-60); padding: 8px 12px; background: var(--ov-form-bg); }
+.ov-table td { padding: 8px 12px; vertical-align: top; border-top: 1px solid var(--border-light); }
+.ov-table td:first-child { font-weight: 500; }
+.ov-more-row { text-align: center; margin-top: -4px; }   /* the table card's "Show all N" toggle */
+.ov-badge { display: inline-block; padding: 0 8px; border-radius: 2px; font-size: 14px; line-height: 22px; font-weight: 500; }
+.ov-badge.ok { background: var(--em-green-tint); color: var(--em-green); }
+.ov-badge.warn { background: var(--orange-10); color: var(--orange); }
+.ov-badge.bad { background: var(--red-10); color: var(--red); }
+.ov-badge.n { background: var(--black-5); color: var(--black-100); }
+.ov-look { align-self: flex-start; display: inline-flex; align-items: center; gap: 4px; padding: 0; border: 0; background: none; font: inherit; color: var(--em-green); cursor: pointer; }
+.ov-look:hover { text-decoration: underline; }
+.ov-next-hd { font-size: 16px; line-height: 22px; font-weight: 500; margin-top: 4px; }
+.ov-next { display: flex; flex-direction: column; gap: 4px; margin-top: -8px; }
+.ov-next-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+.ov-next-row .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--black-30); align-self: flex-start; margin-top: 8px; }
+.ov-next-row .dot.bad { background: var(--red); } .ov-next-row .dot.warn { background: var(--orange); } .ov-next-row .dot.ok { background: var(--em-green); }
+.ov-next-txt { flex: 1; min-width: 0; }
+.ov-next-txt .t { display: block; }
+.ov-next-txt small { display: block; font-size: 14px; line-height: 20px; color: var(--black-60); }
+.ov-next-row .aiac-btn { margin-top: 0; flex-shrink: 0; }
+.ai-body .aiac-exec { position: relative; top: auto; right: auto; }
+.ov-next-row { position: relative; }
+.ov-next-row .aiac-exec { position: relative; top: auto; right: auto; flex-shrink: 0; align-self: flex-start; margin-top: 2px; }
+.ov-next-row.sealed .t { color: var(--black-60); }
+.ov-next-row .aiac-act-done { flex-shrink: 0; font-size: 14px; color: var(--em-green); }
+.ov-next-row .aiac-trend, .ov-next-row .ov-bars { margin-top: 8px; }
+@container ai-panel (max-width: 520px) { .ov-next-row { flex-wrap: wrap; } .ov-next-row .aiac-btn { margin-left: 20px; } }
+/* reasoning = Gencore checklist: bordered card, per-step state icon + label + In progress / Complete badge, active step expands to tool sub-rows */
+.ov-rs { border: 1px solid var(--border-light); border-radius: 4px; background: var(--white); padding: 12px 8px 12px 12px; width: 100%; }
+.ov-rs-wait { font-size: 16px; line-height: 24px; color: var(--black-60); padding: 4px; }
+.ov-rs-head { display: flex; align-items: center; gap: 8px; width: 100%; padding: 4px; border: 0; background: none; font: inherit; font-size: 16px; line-height: 24px; font-weight: 500; color: var(--black-100); text-align: left; cursor: pointer; }
+.ov-rs-head svg.caret { margin-left: auto; flex-shrink: 0; color: var(--black-60); transition: transform 0.15s ease; }
+.ov-rs.is-open .ov-rs-head svg.caret { transform: rotate(180deg); }
+.ov-rs.is-collapsed { padding: 8px 12px; }
+.ov-rs-cur { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ov-rs-list { display: flex; flex-direction: column; gap: 4px; }
+.ov-rs.is-collapsed .ov-rs-list { display: none; }
+.ov-rs.is-collapsed.is-open .ov-rs-list { display: flex; margin-top: 8px; }
+.ov-rs-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 4px 4px 4px 4px; border: 0; background: none; font: inherit; text-align: left; color: var(--black-100); }
+button.ov-rs-row { cursor: pointer; }
+button.ov-rs-row:hover .ov-rs-lbl { text-decoration: underline; text-decoration-color: var(--border); text-underline-offset: 3px; }
+.ov-rs-ico { width: 16px; height: 16px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
+.ov-rs-ico.done { color: var(--em-green); }
+.ov-rs-ico .disc-spinner { width: 14px; height: 14px; margin: 0; }
+.ov-rs-lbl { flex: 1; min-width: 0; font-size: 16px; line-height: 24px; font-weight: 500; }
+.ov-rs-lbl b { font-weight: 500; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 14px; }
+.ov-rs-badge { flex-shrink: 0; padding: 0 8px; border-radius: 2px; font-size: 16px; line-height: 24px; font-weight: 450; }
+.ov-rs-badge.run { background: var(--status-blue-5); color: var(--status-blue); }
+.ov-rs-badge.ok { background: var(--em-green-tint); color: var(--em-green); }
+.ov-rs-sub { margin: 4px 0 8px 7px; padding-left: 20px; border-left: 1px solid var(--border-light); display: flex; flex-direction: column; gap: 12px; }
+.ov-rs-t { display: flex; align-items: center; gap: 8px; font-size: 14px; line-height: 20px; color: var(--black-60); }
+.ov-rs-t i { font-style: normal; letter-spacing: 1px; color: var(--black-40, var(--black-60)); }
+.ov-rs-d { display: flex; align-items: flex-start; gap: 8px; font-size: 16px; line-height: 24px; color: var(--black-100); }
+.ov-rs-d svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 4px; color: var(--black-80); }
+/* welcome = Gencore greeting (plain prose + wave), staged-scenario tiles kept */
+.ai-home-glyph { display: none; }
+.ai-home-title { font-size: 16px; line-height: 24px; font-weight: 400; letter-spacing: 0; margin: 0; }
+.ai-home-sub { font-size: 16px; line-height: 24px; color: var(--black-100); margin: 12px 0 24px; }
+/* recommended responses — Figma 'sparkle' pills (DCP Hybrid SaaS: Restore all deleted files) */
+.ov-sugg-lead { margin-top: 4px; }
+.ov-pill.is-quiet, .ov-pill.is-link { background: var(--white); border-color: var(--border); }
+.ov-pill.is-quiet { font-weight: 400; color: var(--black-60); }
+.ov-pill.is-link:hover, .ov-pill.is-quiet:hover { background: var(--black-5); }
+.ov-pill.is-done { cursor: default; color: var(--em-green); }
+.ov-pill:disabled { cursor: default; }
+.ov-pill .lbl { display: flex; flex-direction: column; min-width: 0; }
+.ov-pill .ctx { font-size: 14px; line-height: 20px; font-weight: 400; color: var(--black-60); }
+.ov-pill .dot { display: none; }
+.ov-sugg { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: -8px; }
+.ov-pill { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; min-height: 36px; padding: 6px 12px; border: 1px solid transparent; border-radius: 4px; font-family: inherit; font-size: 16px; line-height: 22px; font-weight: 500; color: var(--black-100); text-align: left; cursor: pointer;
+  background: linear-gradient(var(--white), var(--white)) padding-box, var(--ai-grad) border-box; }
+.ov-pill:hover { background: linear-gradient(var(--black-5), var(--black-5)) padding-box, var(--ai-grad) border-box; }
+.ov-pill svg { width: 16px; height: 16px; flex-shrink: 0; }
+.ov-pill { text-align: left; }
+.ov-pill > svg, .ov-pill > .disc-spinner { align-self: flex-start; margin-top: 3px; }
+.ov-consent { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.ov-consent-lead { font-size: 16px; line-height: 24px; font-weight: 500; }
+.ov-consent-sub { font-size: 16px; line-height: 24px; }
+.ov-consent-card { border: 1px solid var(--em-green); border-radius: 4px; padding: 12px; background: var(--white); display: flex; flex-direction: column; gap: 4px; }
+.ov-consent-card.is-resolved { border-color: var(--border-light); }
+.ov-consent-tool { display: flex; align-items: center; gap: 8px; font-size: 16px; line-height: 24px; font-weight: 500; margin-bottom: 4px; }
+.ov-consent-tool svg { width: 16px; height: 16px; flex-shrink: 0; }
+.ov-consent-card .ai-approval-row { font-size: 14px; }
+.ov-consent-btns { display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 8px; margin-top: 8px; }
+.ov-consent-note { width: 100%; min-height: 72px; margin-top: 8px; padding: 8px 12px; border: 1px solid var(--em-green); border-radius: 4px; background: var(--em-green-tint); font: inherit; font-size: 14px; resize: vertical; }
+.ov-danger { background: var(--red); border-color: var(--red); color: var(--white); }
+.ov-consent-done { margin-top: 8px; font-size: 14px; color: var(--em-green); font-weight: 500; }
+.ov-consent-done.is-denied { color: var(--red); }
+.ai-approval .ov-consent-sub { margin: -2px 0 4px; }
+</style>
 <style id="ss-style">
 /* Agent Settings (System Settings › AI Agents) — Figma DCP-Consolidated-Platform 17944:14495 */
 .ss-shell { display: flex; min-height: calc(100vh - 140px); border-top: 1px solid var(--border-light); }
@@ -1726,6 +2214,7 @@ body.ai-full #aiWorkingGlow { display: none; }
 .ss-foot { margin-top: 24px; }
 .ss-link { color: var(--em-green); font-size: 16px; text-decoration: none; }
 .ss-link:hover { text-decoration: underline; }
+.ss-nmlink { font-weight: 500; line-height: 22px; }   /* skill name in the table — opens that skill's settings */
 .ss-wide.is-off .ss-tbl-wrap, .ss-wide.is-off .ss-note { opacity: 0.45; pointer-events: none; }
 .ss-save { }
 .plv-btn:disabled.ss-save { background: var(--green-30); color: var(--white); cursor: not-allowed; }
@@ -1792,6 +2281,27 @@ body.ai-full #aiWorkingGlow { display: none; }
 .ss-md-ft .ss-md-col { display: flex; justify-content: flex-end; align-items: center; gap: 8px; }
 .ss-md-hint { margin-right: auto; font-size: 14px; line-height: 20px; color: var(--orange); }
 .ss-st { display: inline-flex; align-items: center; gap: 12px; font-size: 16px; line-height: 22px; cursor: pointer; }
+/* Status card — full width under the title, same anatomy as the autonomy cards below (.sc-header bar + .sc-desc body; selected = green tint header + green border) */
+.ss-md-top { display: block; margin-bottom: 32px; }
+.ss-md-tt { margin-bottom: 24px; }
+.ss-md-top .ss-md-lead { margin-bottom: 0; }
+.ss-md-stat { width: 100%; display: flex; flex-direction: column; border: 1px solid var(--black-10); border-radius: 4px; background: var(--white); box-sizing: border-box; }
+.ss-md-stat.is-selected { border-color: var(--em-green); }
+.ss-md-stat .sc-desc { gap: 8px; }
+.ss-md-stat .plv-switch { width: 32px; height: 16px; margin: 4px; border-radius: 99px; box-sizing: border-box; border: 1px solid var(--green-30); background: var(--form-bg); }
+.ss-md-stat .plv-switch::after { top: 3px; left: 3px; width: 8px; height: 8px; box-shadow: none; background: var(--em-green); }
+.ss-md-stat .plv-switch.on { background: var(--em-green); border-color: var(--em-green); }
+.ss-md-stat .plv-switch.on::after { left: 19px; background: var(--white); }
+.ss-md-stat .ss-st { gap: 4px; font-size: 16px; line-height: 20px; font-weight: 450; color: var(--black-100); }
+.ss-avail { margin-bottom: 0; }
+.ss-readrow { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--border-light); color: var(--black-100); font-size: 16px; line-height: 22px; }
+.ss-readrow.is-editing { border-top: 1px solid var(--border-light); }
+.ss-readedit { display: flex; flex-direction: column; gap: 12px; padding-top: 4px; }
+.ss-readedit .ss-pg-sec { margin: 0; padding: 0; border: 0; }
+.ss-readft { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border-light); }
+.ss-readft .ss-md-hint { margin-right: auto; }
+.ss-skills { transition: opacity 0.2s ease; }
+.ss-skills.is-off #ssViewCaps { opacity: 0.5; user-select: none; }   /* saved state stays visible, just unavailable */
 .ss-md-h1 { margin: 0 0 8px; font-size: 24px; line-height: 32px; font-weight: 500; letter-spacing: -0.01em; }
 .ss-md-lead { margin: 0 0 32px; font-size: 18px; line-height: 26px; color: var(--black-60); }
 .ss-md-body { flex: 1; min-height: 0; overflow-y: auto; padding: 24px; }
@@ -1846,6 +2356,21 @@ body.ai-full #aiWorkingGlow { display: none; }
 .ss-wp-ft button { height: 28px; padding: 0 8px; border: 0; border-radius: 2px; background: none; font: inherit; font-size: 14px; color: var(--em-green); cursor: pointer; }
 .ss-wp-ft button:hover { background: var(--em-green-tint); }
 .ss-rl-s { color: var(--black-60); font-size: 14px; margin-left: 4px; }
+.ss-wpb { margin-top: 16px; border: 1px solid var(--border-light); border-radius: 8px; overflow: hidden; }
+.ss-wpb-tools { display: flex; align-items: center; gap: 4px; padding-right: 12px; border-bottom: 1px solid var(--border-light); }
+.ss-wpb-tools .ss-wp-s { flex: 1; border-bottom: 0; }
+.ss-wpb-tools > button { height: 28px; padding: 0 8px; border: 0; border-radius: 2px; background: none; font: inherit; font-size: 14px; color: var(--em-green); cursor: pointer; white-space: nowrap; }
+.ss-wpb-tools > button:hover { background: var(--em-green-tint); }
+.ss-wpb-body { max-height: 340px; overflow-y: auto; }
+.ss-wpb-hd { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 4px; min-height: 40px; padding: 0 12px 0 4px; background: var(--black-3); border-bottom: 1px solid var(--border-light); }
+.ss-wpb-hd .ss-ck { flex: 1; font-weight: 500; height: 36px; }
+.ss-wpb-hd .ss-ck .n { margin-left: auto; font-size: 14px; font-weight: 450; color: var(--black-60); }
+.ss-wpb-tw { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 0; border-radius: 4px; background: none; color: var(--black-60); cursor: pointer; flex-shrink: 0; }
+.ss-wpb-tw:hover { background: var(--black-5); }
+.ss-wpb-tw svg { width: 20px; height: 20px; transition: transform 0.15s; }
+.ss-wpb-tw.closed svg { transform: rotate(-90deg); }
+.ss-wpb-items { padding: 2px 12px 4px 40px; }
+.ss-wpb-items .ss-ck { height: 36px; }
 .ss-ck { display: flex; align-items: center; gap: 8px; font-size: 16px; cursor: pointer; }
 .ss-ck input { width: 16px; height: 16px; margin: 0; accent-color: var(--em-green); }
 .ss-seg { flex-shrink: 0; display: inline-flex; gap: 2px; padding: 2px; border-radius: 4px; background: var(--black-5); }
@@ -1934,6 +2459,9 @@ body.ai-full #aiWorkingGlow { display: none; }
 </g></svg></button>
       <div class="vn-stack" id="vnStack"></div>
       <div style="flex:1"></div>
+      <!-- Rail AI launcher — same as inventory-V1-agent-overlay.html / backup-policies-agent-overlay.html:
+           the one AI entry point (the header 'Veeam AI' button is retired). -->
+      <button class="vn-ai-launcher" type="button" onclick="aiOpen()" data-fly="Veeam AI" aria-label="Open the Veeam AI assistant"><svg viewBox="0 0 36 36" aria-hidden="true"><path fill="#fff" d="M18 9.75C18.5502 9.75 19.0272 10.1307 19.1492 10.6672L19.8013 13.5349C20.1029 14.8613 21.1387 15.8971 22.4651 16.1987L25.3328 16.8508C25.8693 16.9728 26.25 17.4498 26.25 18C26.25 18.5502 25.8693 19.0272 25.3328 19.1492L22.4651 19.8013C21.1387 20.1029 20.1029 21.1387 19.8013 22.4651L19.1492 25.3328C19.0272 25.8693 18.5502 26.25 18 26.25C17.4498 26.25 16.9728 25.8693 16.8508 25.3328L16.1987 22.4651C15.8971 21.1387 14.8613 20.1029 13.5349 19.8013L10.6672 19.1492C10.1307 19.0272 9.75 18.5502 9.75 18C9.75 17.4498 10.1307 16.9728 10.6672 16.8508L13.5349 16.1987C14.8613 15.8971 15.8971 14.8613 16.1987 13.5349L16.8508 10.6672C16.9728 10.1307 17.4498 9.75 18 9.75Z"/></svg></button>
       <!-- System nav (production reference 2026-07-13): help videos,
            what's-new gift w/ badge, feedback chat — real Unified Icons
            assets (Help Videos 4774:1119, What's New set, Message 4774:877). -->
@@ -2268,29 +2796,20 @@ td.as-td-actions { position: relative; }
             <div class="plv-actions" id="ssActs"></div>
           </div>
         </div>
-        <!-- 1. Agent Settings: a FORM (availability) with a page-level Save -->
+        <!-- Agent Settings — ONE page (2026-10-15): availability + read scope on top, the skills list below. Availability is a form (page-level Save);
+             while it is Inactive the skills section is dimmed and inert and keeps its saved state. -->
         <div id="ssViewSettings">
-          <div class="ss-card">
-            <div class="ss-col">
-              <div class="ss-h">Agent Availability</div>
-              <div class="ss-sub">Control whether AI agents are available to your organization. This applies to every user.</div>
-              <label class="ss-radio"><input type="radio" name="ssAvail" value="active" onchange="ssAvail(this.value)"><span class="ss-rd"></span><span class="ss-rl">Active</span></label>
-              <div class="ss-rd-sub">Users can access and run agents across the platform, based on their role permissions.</div>
-              <label class="ss-radio"><input type="radio" name="ssAvail" value="inactive" onchange="ssAvail(this.value)"><span class="ss-rd"></span><span class="ss-rl">Inactive</span></label>
-              <div class="ss-rd-sub">Agents are unavailable to all users.</div>
-              <div class="ss-h" style="margin-top:40px">Orchestration agent</div>
-              <div class="ss-sub" style="margin-bottom:12px">Veeam Intelligence is the one agent users talk to. For each task it spawns a purpose-built agent that receives only the part of its access that task needs, and retires it when the task completes.</div>
-              <a class="ss-link" href="#capabilities" onclick="ssGo('caps');return false">Manage capabilities and workloads →</a>
+          <div id="ssAvailHost"></div>
+          <div class="ss-skills" id="ssSkills">
+            <h2 class="ss-h" style="margin:32px 0 4px">Skills</h2>
+            <p class="ss-sub" style="margin:0 0 16px">What the agent may do, and how far it goes on its own. Each skill works within the agent’s read access.</p>
+            <div id="ssSkillsOff" hidden></div>
+            <div class="ss-list" id="ssViewCaps">
+              <div class="ss-fb"><button class="ss-add" type="button" title="Add filter">+</button><span>Filters appear here. Start by adding one.</span></div>
+              <div class="ss-srch"><input type="text" id="ssCapSearch" placeholder="Search by skill name" oninput="ssRenderCaps()"><span class="ss-srch-ic" id="ssCapSrchIc"></span></div>
+              <div class="ss-stats" id="ssCapStats"></div>
+              <div class="ss-scroll" id="ssCapScroll"><table class="ss-tbl"><thead><tr><th class="ss-sw">Status</th><th>Skill</th><th>Access</th><th>Workloads</th><th>Autonomy</th><th>Runs (30d)</th><th class="ss-pin"></th></tr></thead><tbody id="ssCapBody"></tbody></table></div>
             </div>
-          </div>
-        </div>
-        <!-- 2. Access & Capabilities: LIST page (filter bar, search, stats, table with pinned actions) -->
-        <div id="ssViewCaps" hidden>
-          <div class="ss-list">
-            <div class="ss-fb"><button class="ss-add" type="button" title="Add filter">+</button><span>Filters appear here. Start by adding one.</span></div>
-            <div class="ss-srch"><input type="text" id="ssCapSearch" placeholder="Search by capability name" oninput="ssRenderCaps()"><span class="ss-srch-ic" id="ssCapSrchIc"></span></div>
-            <div class="ss-stats" id="ssCapStats"></div>
-            <div class="ss-scroll" id="ssCapScroll"><table class="ss-tbl"><thead><tr><th class="ss-sw">Status</th><th>Capability</th><th>Access</th><th>Workloads</th><th>Autonomy</th><th>Runs (30d)</th><th class="ss-pin"></th></tr></thead><tbody id="ssCapBody"></tbody></table></div>
           </div>
         </div>
       </section>
@@ -2301,7 +2820,7 @@ td.as-td-actions { position: relative; }
 <div class="ss-dlg-scrim" id="ssDlg" role="dialog" aria-modal="true" aria-label="Confirm higher autonomy"><div class="ss-dlg"><div class="ss-dlg-t" id="ssDlgT">Raise autonomy?</div><div class="ss-dlg-b"><span id="ssDlgIntro">These capabilities will act without asking you first:</span><ul id="ssDlgList"></ul></div><div class="ss-dlg-f"><button type="button" class="plv-btn plv-btn-secondary" onclick="ssDlgClose(false)">Cancel</button><button type="button" class="plv-btn plv-btn-primary" onclick="ssDlgClose(true)">Confirm and save</button></div></div></div>
 <div class="ss-menu" id="ssMenu" role="menu"></div>
 <div class="ss-md-scrim" id="ssPgScrim" onclick="ssDrClose()"></div>
-<div class="ss-md" id="ssPg" role="dialog" aria-modal="true" aria-label="Configure capability">
+<div class="ss-md" id="ssPg" role="dialog" aria-modal="true" aria-label="Configure skill">
   <div class="ss-md-hd" id="ssPgHd"></div>
   <div class="ss-md-body" id="ssPgMain"></div>
   <div class="ss-md-ft"><div class="ss-md-col"><span class="ss-md-hint" id="ssPgHint"></span><button type="button" class="plv-btn plv-btn-secondary" onclick="ssDrClose()">Cancel</button><button type="button" class="plv-btn plv-btn-primary" id="ssDrSave" onclick="ssDrSave()">Save</button></div></div>
@@ -2351,7 +2870,857 @@ td.as-td-actions { position: relative; }
     >Continue</button>
   </div>
 </div>
+<!-- RESILIENCE ASSISTANT SHELL — cloned from activity-agent-overlay.html (conversation-led handoff; one panel, same design language on every page) -->
+<!-- RESILIENCE ASSISTANT SHELL markup (2026-09-18) — see the CSS/JS block
+     near the end of this file for provenance. -->
+<div id="aiScrim" aria-hidden="true"></div>
+<div id="aiWorkingGlow" aria-hidden="true"></div>
+<aside class="ai-panel" id="aiPanel" aria-label="Veeam assistant" aria-hidden="true">
+  <div class="ai-head">
+    <button class="ai-head-btn" type="button" id="aiHxBtn" onclick="showToast('Chat history is not part of this page\u2019s prototype')" data-tooltip="Chat history" aria-label="Chat history"></button>
+    <button class="ai-head-btn" type="button" id="aiNewChatBtn" onclick="aiNewChat()" data-tooltip="New chat" aria-label="New chat"></button>
+    <div class="ai-head-text"><div class="ai-head-title">Veeam Intelligence</div></div>
+    <button class="ai-head-btn" type="button" onclick="aiClose()" data-tooltip="Close" aria-label="Close assistant">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <span id="aiSparkleTpl" hidden aria-hidden="true"></span>
+  <div class="ai-body" id="aiBody"></div>
+  <div class="ai-foot">
+    <div class="ai-chips" id="aiChips"></div>
+    <div class="ai-composer" id="aiComposer">
+      <div class="ai-attach-strip" id="aiAttachStrip"></div>
+      <textarea id="aiInput" class="ai-composer-input" placeholder="Type your message" rows="1" autocomplete="off"
+             onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();aiSendFromInput();}"></textarea>
+      <div class="ai-composer-row">
+        <button class="ai-composer-tool" type="button" id="aiAttachBtn" onclick="aiAttach()" data-tooltip="Attach a file" aria-label="Attach a file"></button>
+        <button class="ai-composer-tool" type="button" id="aiMicBtn" onclick="aiVoice()" data-tooltip="Voice input" aria-label="Voice input"></button>
+        <span style="flex:1"></span>
+        <button class="ai-send-fab" type="button" id="aiSend" onclick="aiSendFromInput()" data-tooltip="Send" aria-label="Send"></button>
+      </div>
+    </div>
+  </div>
+</aside>
 <script src="securiti-icons-data.js?v=20260910a"></script>
+<script id="ai-shell">
+// Page shims so the copied shell code stays verbatim and diffable (Activity's helpers → this page's own).
+function _dsStoreIconSvg(name, size){ var e = (window.__SECURITI_ICONS || {})[name]; if (!e || !e.paths) return ''; return '<svg width="' + (size || 16) + '" height="' + (size || 16) + '" viewBox="' + e.viewBox + '" fill="currentColor" aria-hidden="true">' + e.paths.map(function(p){ return '<path d="' + p + '"/>'; }).join('') + '</svg>'; }
+function _sdIc(name, size){ return _dsStoreIconSvg(name, size); }
+function showToast(msg){ var t = document.getElementById('ssToast'); if (!t) return; t.textContent = msg; t.classList.add('on'); setTimeout(function(){ t.classList.remove('on'); }, 2400); }
+/* ══════════════════════════════════════════════════════════════════════════
+   RESILIENCE ASSISTANT — CONVERSATION-LED HANDOFF ONLY (2026-09-18). This
+   page never launches its own scenarios: it hydrates a transcript carried
+   from inventory-V1-agent-overlay.html (_aiHandoffHydrate below) and renders it at full
+   card fidelity so "the panel remains open with all the conversation
+   context intact" across the click-through (user 2026-09-18). A `flow`
+   action approved here is forwarded back to inventory-V1-agent-overlay.html, where the
+   run machinery lives — same division of labor as backup-policies-agent-overlay.html's
+   earlier port of this same shell. A typed message gets a short, honest
+   reply pointing back to Protected Data rather than a duplicated Q&A engine.
+   Single-source rule: aiacCardHtml/_aiacTrendHtml/toggles are verbatim
+   copies of inventory-V1-agent-overlay.html's — edit there, then re-copy here.
+   ══════════════════════════════════════════════════════════════════════════ */
+var aiAgent = { greeted:false, busy:false, thinking:false, msgs:[] };
+function aiOpen(){
+  document.body.classList.add('ai-open');
+  aiComposerIcons();
+  var p = document.getElementById('aiPanel'); if (p) p.setAttribute('aria-hidden','false');
+  if (!aiAgent.greeted){ aiAgent.greeted = true; aiRenderHome(); }
+  setTimeout(function(){ var i=document.getElementById('aiInput'); if(i && !aiAgent.busy) i.focus(); }, 280);
+}
+function aiToggleFull(){
+  var on = document.body.classList.toggle('ai-full');
+  var b = document.getElementById('aiExpandBtn');
+  if (b){
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    b.setAttribute('data-tooltip', on ? 'Exit full screen' : 'Expand to full screen');
+    b.setAttribute('aria-label', on ? 'Exit full screen' : 'Expand to full screen');
+  }
+}
+function aiClose(){
+  document.body.classList.remove('ai-open');
+  document.body.classList.remove('ai-full');
+  var p = document.getElementById('aiPanel'); if (p) p.setAttribute('aria-hidden','true');
+}
+function aiSetBusy(b){
+  aiAgent.busy = b;
+  var s=document.getElementById('aiSend'), i=document.getElementById('aiInput');
+  if(s) s.disabled = b; if(i) i.disabled = b;
+}
+function aiRenderChips(list){
+  var el=document.getElementById('aiChips'); if(!el) return;
+  el.innerHTML = (list||[]).map(function(t){ return '<button type="button" class="ai-chip" onclick="aiSend(this.getAttribute(\'data-q\'))" data-q="'+t.replace(/"/g,'&quot;')+'">'+t+'</button>'; }).join('');
+}
+function aiComposerIcons(){
+  var m = [['aiAttachBtn','attachment-outlined',18],['aiMicBtn','settings-voice-outlined',18],['aiSend','arrow-circle-up-filled',36],['aiExpandBtn','zoom-out-map-outlined',16]];
+  m.forEach(function(x){
+    var el = document.getElementById(x[0]);
+    if (el && !el.firstChild){ var svg = _dsStoreIconSvg(x[1], x[2]); if (svg) el.innerHTML = svg; }
+  });
+  var tpl = document.getElementById('aiSparkleTpl');
+  if (tpl && !tpl.firstChild) tpl.innerHTML = _dsStoreIconSvg('ai-sparkle', 40) || '';
+  var vt = document.getElementById('vaiTileGlyph');
+  if (vt && !vt.firstChild) vt.innerHTML = _dsStoreIconSvg('ai-sparkle', 18) || '';
+}
+var AI_ATTACH = [];
+var AI_ATTACH_SAMPLES = ['restore-scope.csv', 'audit-extract.json', 'incident-notes.pdf'];
+function aiAttach(){ AI_ATTACH.push(AI_ATTACH_SAMPLES[AI_ATTACH.length % AI_ATTACH_SAMPLES.length]); aiRenderAttach(); }
+function aiRenderAttach(){
+  var el = document.getElementById('aiAttachStrip'); if(!el) return;
+  el.innerHTML = AI_ATTACH.map(function(fname, i){
+    return '<span class="ai-attach-chip">' + _aiEsc(fname) + '<button type="button" aria-label="Remove ' + _aiEsc(fname) + '" onclick="aiRemoveAttach(' + i + ')">&times;</button></span>';
+  }).join('');
+}
+function aiRemoveAttach(i){ AI_ATTACH.splice(i, 1); aiRenderAttach(); }
+var AI_REC = null;
+function aiVoice(){
+  var btn = document.getElementById('aiMicBtn'), inp = document.getElementById('aiInput');
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (AI_REC){ try{ AI_REC.stop(); }catch(e){} AI_REC = null; btn.classList.remove('is-rec'); return; }
+  if (SR){
+    var r = new SR(); AI_REC = r; btn.classList.add('is-rec');
+    r.onresult = function(ev){ var t = ev.results[0][0].transcript; inp.value = (inp.value ? inp.value + ' ' : '') + t; inp.focus(); };
+    r.onend = function(){ AI_REC = null; btn.classList.remove('is-rec'); };
+    r.start();
+  } else {
+    btn.classList.add('is-rec');
+    setTimeout(function(){ btn.classList.remove('is-rec'); inp.value = (inp.value ? inp.value + ' ' : '') + 'Take me back to Protected Data'; inp.focus(); }, 1200);
+  }
+}
+function _aiToast(msg){ if (typeof showToast === 'function') showToast(msg); }
+function aiFb(i, dir){
+  var m = aiAgent.msgs[i]; if(!m) return;
+  m.fb = (m.fb === dir) ? null : dir; aiRender();
+  if (m.fb) _aiToast(dir === 'up' ? 'Thanks — glad that helped' : 'Thanks — feedback recorded');
+}
+function aiRead(i){
+  var m = aiAgent.msgs[i]; if(!m) return;
+  if (window.speechSynthesis && speechSynthesis.speaking){ speechSynthesis.cancel(); return; }
+  var d = document.createElement('div'); d.innerHTML = m.html;
+  var text = (d.textContent || '').replace(/\s+/g, ' ').trim();
+  if (window.speechSynthesis && text){ speechSynthesis.speak(new SpeechSynthesisUtterance(text)); }
+  else _aiToast('Read-aloud is not available in this browser');
+}
+function aiFbRow(i){
+  var m = aiAgent.msgs[i];
+  function ic(name, sz){ return _dsStoreIconSvg(name, sz) || ''; }
+  return '<div class="ai-fb">'
+    + '<button type="button" class="fb-up' + (m.fb === 'up' ? ' active' : '') + '" data-tooltip="Good response" aria-label="Good response" onclick="aiFb(' + i + ',\'up\')">' + ic('thumb-up-outlined', 16) + '</button>'
+    + '<button type="button" class="fb-down' + (m.fb === 'down' ? ' active' : '') + '" data-tooltip="Poor response" aria-label="Poor response" onclick="aiFb(' + i + ',\'down\')">' + ic('thumb-down-outlined', 16) + '</button>'
+    + '<button type="button" data-tooltip="Read aloud" aria-label="Read this response aloud" onclick="aiRead(' + i + ')">' + ic('volume-up-outlined', 16) + '</button>'
+    + '</div>';
+}
+function aiPushReasoning(){
+  var m = { role: 'reasoning', steps: [], t0: Date.now(), done: false, open: false };
+  aiAgent.msgs.push(m); aiRender();
+  return m;
+}
+function aiFinishReasoning(m){ if (!m || m.done) return; m.done = true; m.ms = Date.now() - m.t0; aiRender(); }
+function aiToggleReason(i){ var m = aiAgent.msgs[i]; if(!m || m.role !== 'reasoning') return; m.open = !m.open; aiRender(); }
+function aiRenderHome(){
+  // Empty state only shows on a manual open with no carried transcript —
+  // the handoff path sets aiAgent.greeted before aiOpen ever runs this.
+  var body = document.getElementById('aiBody'); if(!body) return;
+  var glyphSrc = document.getElementById('aiSparkleTpl');
+  body.innerHTML = '<div class="ai-home">'
+    + '<span class="ai-home-glyph" aria-hidden="true">' + (glyphSrc ? glyphSrc.innerHTML : '') + '</span>'
+    + '<div class="ai-home-title">Veeam Intelligence</div>'
+    + '<div class="ai-home-sub">This panel picks up a conversation carried from Protected Data — open the assistant there and click through to Agent Settings to see it in context here.</div>'
+    + '</div>';
+}
+function _aiEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function aiRender(){
+  var body=document.getElementById('aiBody'); if(!body) return;
+  var html = aiAgent.msgs.map(function(m, i){
+    if(m.role==='user') return '<div class="ai-msg user"><div class="ai-bubble">'+_aiEsc(m.html)+'</div></div>';
+    if(m.role==='card' && typeof aiacCardHtml === 'function') return '<div class="ai-msg agent"><div class="ai-bubble" style="max-width:100%">' + aiacCardHtml(m, i) + '</div></div>';
+    if(m.role==='reasoning'){
+      var label = m.done ? ('Thought for ' + Math.max(1, Math.round((m.ms||0)/1000)) + 's') : (m.steps.length ? m.steps[m.steps.length-1] : 'Thinking…');
+      var head = m.done
+        ? '<svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+        : '<span class="disc-spinner"></span>';
+      return '<div class="ai-reason'+(m.open?' open':'')+'" data-mi="'+i+'">'
+        + '<button type="button" class="ai-reason-head" onclick="aiToggleReason('+i+')" aria-expanded="'+(m.open?'true':'false')+'">'
+        + head + '<span>' + _aiEsc(label) + '</span>'
+        + '<svg class="ai-reason-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>'
+        + '</button>'
+        + '<div class="ai-reason-steps">' + m.steps.map(function(st){ return '<div class="ai-reason-step">' + _aiEsc(st) + '</div>'; }).join('') + '</div>'
+        + '</div>';
+    }
+    var gate='';
+    if(m.gate){
+      var btns = m.gate.resolved
+        ? ''
+        : '<div class="ai-gate-btns">'+m.gate.buttons.map(function(b,j){ return '<button type="button" class="ai-gate-btn'+(b.primary?' primary':'')+'" onclick="aiGateClick('+j+')">'+_aiEsc(b.label)+'</button>'; }).join('')+'</div>';
+      if (m.gate.approval){
+        var apRows = m.gate.approval.rows.map(function(r){
+          return '<div class="ai-approval-row"><span class="ai-approval-k">'+_aiEsc(r[0])+'</span><span class="ai-approval-v">'+r[1]+'</span></div>';
+        }).join('');
+        gate = '<div class="ai-approval'+(m.gate.resolved?' resolved':'')+'">'
+          + '<div class="ai-approval-hd"><span class="ai-approval-title">Approval required</span></div>'
+          + apRows + btns
+          + '<div class="ai-approval-done">\u2713 '+_aiEsc(m.gate.choice||'Approved')+' \u00b7 you'+(m.gate.decidedAt?' \u00b7 '+m.gate.decidedAt:'')+'</div>'
+          + '</div>';
+      } else {
+      gate = '<div class="ai-gate'+(m.gate.resolved?' resolved':'')+'">'
+        + '<div class="ai-gate-q">'+m.gate.q+'</div>'
+        + btns
+        + '<div class="ai-gate-done">✓ '+_aiEsc(m.gate.choice||'Approved')+'</div>'
+        + '</div>';
+      }
+    }
+    return '<div class="ai-msg agent"><div class="ai-bubble">'+m.html+gate+'</div>'+aiFbRow(i)+'</div>';
+  }).join('');
+  if(aiAgent.thinking) html += '<div class="ai-thinking"><span></span><span></span><span></span></div>';
+  body.innerHTML = html;
+  if (typeof _aiacTrendDraw === 'function') _aiacTrendDraw(body);
+  body.scrollTop = body.scrollHeight;
+}
+function aiPushAgent(html, gate){
+  var m = { role:'agent', html: html };
+  if(gate){ m.gate = { q:gate.q, buttons:gate.buttons, approval:gate.approval||null, resolved:false, choice:null }; aiAgent.activeGate = m; }
+  aiAgent.msgs.push(m); aiRender();
+}
+function aiGateClick(i){
+  var m = aiAgent.activeGate; if(!m || !m.gate || m.gate.resolved) return;
+  var btn = m.gate.buttons[i]; if(!btn) return;
+  m.gate.resolved = true; m.gate.choice = btn.choice || btn.label; m.gate.decidedAt = new Date().toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+  aiAgent.activeGate = null; aiRender();
+  if(typeof btn.fn === 'function') btn.fn();
+}
+function aiAction(label, running){
+  var ic = running
+    ? '<span class="ai-action-ic"><span class="disc-spinner" style="width:14px;height:14px"></span></span>'
+    : '<span class="ai-action-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>';
+  return '<div class="ai-action'+(running?' run':'')+'">'+ic+'<span>'+_aiEsc(label)+'</span></div>';
+}
+function aiGlow(on){ var g = document.getElementById('aiWorkingGlow'); if (g) g.classList.toggle('on', !!on); }
+function aiSendFromInput(){
+  var i=document.getElementById('aiInput'); if(!i) return;
+  var t=(i.value||'').trim(); if(!t || aiAgent.busy) return;
+  if (AI_ATTACH.length){ t += '  [attached: ' + AI_ATTACH.join(', ') + ']'; AI_ATTACH = []; aiRenderAttach(); }
+  i.value=''; aiSend(t);
+}
+// No duplicated Q&A engine on this page (out of scope for the handoff ask) —
+// a typed message gets one honest, short reply naming where full capability
+// lives, rather than faked intelligence detached from any real model.
+function aiSend(text){
+  if(aiAgent.busy) return;
+  aiAgent.msgs.push({ role: 'user', html: text }); aiRenderChips([]); aiRender();
+  aiSetBusy(true); aiAgent.thinking = true; aiRender();
+  setTimeout(function(){
+    aiAgent.thinking = false;
+    aiPushAgent('<p>I can keep showing you this conversation here, but I only act and answer new questions back on <strong>Protected Data</strong>.</p>', {
+      q: '', buttons: [
+        { label: 'Take me to Protected Data', primary:true, choice:'Returned to Protected Data', fn: function(){
+            try { sessionStorage.setItem('vdc-ai-handoff', 'inventory-V1-agent-overlay.html'); } catch(e){}
+            window.location.href = 'inventory-V1-agent-overlay.html';
+          } }
+      ] });
+    aiSetBusy(false);
+  }, 500);
+}
+/* ── CARRIED ANSWER-CARD RENDERER — verbatim copy of inventory-V1's
+   aiacCardHtml / trend vis / toggles (plus the lookLink self-adaptation),
+   so a conversation carried onto this page keeps its full card fidelity. */
+function _aiacTrendHtml(t){
+  return '<div class="aiac-trend" data-points="' + t.points.join(',') + '" data-color="' + _aiEsc(t.color) + '"'
+    + ' data-unit="' + _aiEsc(t.unit || '') + '" data-days="' + (t.days || 30) + '"></div>';
+}
+function _aiacTrendDraw(root){
+  var hosts = root.querySelectorAll('.aiac-trend[data-points]');
+  for (var hi = 0; hi < hosts.length; hi++){ (function(host){
+    if (host._drawn) return; host._drawn = true;
+    var pts = host.getAttribute('data-points').split(',').map(Number);
+    var color = host.getAttribute('data-color'), unit = host.getAttribute('data-unit');
+    var days = Number(host.getAttribute('data-days')) || 30;
+    var w = host.clientWidth || 300, h = 48, n = pts.length;
+    var mx = Math.max.apply(null, pts), mn = Math.min.apply(null, pts);
+    var xy = pts.map(function(v, i){ return [ (i / (n - 1)) * (w - 8) + 4, h - 6 - ((v - mn) / Math.max(1e-9, mx - mn)) * (h - 16) ]; });
+    var line = xy.map(function(p){ return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' ');
+    var area = '4,' + (h - 2) + ' ' + line + ' ' + (w - 4) + ',' + (h - 2);
+    var last = xy[n - 1];
+    var MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var now = Date.now();
+    var dates = pts.map(function(_, i){ var d = new Date(now - (days - i * (days / (n - 1))) * 86400000); return MO[d.getMonth()] + ' ' + d.getDate(); });
+    dates[n - 1] = 'Today';
+    host.innerHTML = '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" aria-hidden="true">'
+      + '<polygon points="' + area + '" fill="' + color + '" opacity="0.25"/>'
+      + '<polyline points="' + line + '" fill="none" stroke="' + color + '" stroke-width="1.5"/>'
+      + '<line class="aiac-trend-guide" x1="0" x2="0" y1="4" y2="' + (h - 2) + '" stroke="var(--border)" stroke-width="1" style="display:none"/>'
+      + '<circle class="aiac-trend-dot" cx="' + last[0].toFixed(1) + '" cy="' + last[1].toFixed(1) + '" r="2.5" fill="' + color + '"/>'
+      + '</svg>'
+      + '<div class="axis"><span>' + _aiEsc(dates[0]) + '</span><span>Today</span></div>'
+      + '<div class="aiac-trend-readout" hidden></div>';
+    var guide = host.querySelector('.aiac-trend-guide'), dot = host.querySelector('.aiac-trend-dot'), ro = host.querySelector('.aiac-trend-readout');
+    function reset(){ ro.hidden = true; guide.style.display = 'none'; dot.setAttribute('cx', last[0].toFixed(1)); dot.setAttribute('cy', last[1].toFixed(1)); }
+    host.addEventListener('mousemove', function(e){
+      var x = e.clientX - host.getBoundingClientRect().left;
+      var i = Math.max(0, Math.min(n - 1, Math.round((x - 4) / (w - 8) * (n - 1))));
+      guide.style.display = ''; guide.setAttribute('x1', xy[i][0].toFixed(1)); guide.setAttribute('x2', xy[i][0].toFixed(1));
+      dot.setAttribute('cx', xy[i][0].toFixed(1)); dot.setAttribute('cy', xy[i][1].toFixed(1));
+      var delta = pts[i] - pts[0], sign = delta >= 0 ? '+' : '−';
+      ro.textContent = dates[i] + ' · ' + pts[i] + (unit ? ' ' + unit : '')
+        + (i > 0 ? ' · ' + sign + Math.abs(Math.round(delta * 10) / 10) + (unit ? ' ' + unit : '') + ' since ' + dates[0] : '');
+      ro.hidden = false;
+      var rw = ro.offsetWidth;
+      ro.style.left = Math.max(0, Math.min(w - rw, xy[i][0] - rw / 2)) + 'px';
+      ro.style.top = (xy[i][1] - 34) + 'px';
+    });
+    host.addEventListener('mouseleave', reset);
+  })(hosts[hi]); }
+}
+function _aiFactResolved(id){
+  if (!id) return null;
+  try { var f = (JSON.parse(localStorage.getItem('vdc-facts')) || {})[id]; return (f && f.resolved) ? f : null; } catch(e){ return null; }
+}
+function aiacCardHtml(m, i){
+  var s = m.card;
+  var html = '<div class="aiac" data-aiac="' + i + '">';
+  var moreLink = s.insight
+    ? ' <button type="button" class="aiac-more" aria-expanded="' + !!m.insightOpen + '" onclick="aiacToggleInsight(' + i + ')">' + (m.insightOpen ? 'Show less' : 'Show more') + '</button>'
+    : '';
+  html += '<div class="aiac-head"><div class="aiac-headline">' + s.headline + '</div>'
+    + (s.headsub ? '<div class="aiac-headsub">' + s.headsub + (m.insightOpen ? '' : moreLink) + '</div>' : '')
+    + (s.insight && m.insightOpen ? '<div class="aiac-insightx">' + s.insight + moreLink + '</div>' : '');
+  if (s.strip){
+    var tot = s.strip.reduce(function(a, x){ return a + x[1]; }, 0);
+    html += '<div class="aiac-strip">' + s.strip.map(function(x){ return '<span style="width:' + Math.max(2, Math.round(x[1] / tot * 100)) + '%;background:' + x[2] + '"></span>'; }).join('') + '</div>'
+      + '<div class="aiac-legend">' + s.strip.map(function(x){ return '<span class="li"><span class="dot" style="background:' + x[2] + '"></span>' + x[1] + ' ' + _aiEsc(x[0]).toLowerCase() + '</span>'; }).join('') + '</div>';
+  }
+  if (s.vrows){
+    html += (s.vrows.legend ? '<div class="aiac-legend" style="margin-top:10px">' + s.vrows.legend.map(function(l){ return '<span class="li"><span class="dot" style="background:' + l[1] + '"></span>' + _aiEsc(l[0]) + '</span>'; }).join('') + '</div>' : '')
+      + '<div class="aiac-vrows">' + s.vrows.rows.map(function(r){
+          return '<div class="aiac-vrow"><span class="lbl" data-tooltip="' + _aiEsc(r.label) + '">' + _aiEsc(r.label) + '</span>'
+            + '<span class="track"><span style="width:' + Math.min(100, Math.max(2, Math.round(r.frac * 100))) + '%;background:' + r.color + '"></span></span>'
+            + '<span class="val">' + _aiEsc(r.val) + '</span></div>';
+        }).join('') + '</div>';
+  }
+  if (s.cap){
+    html += '<div class="aiac-vrows" style="margin-top:10px"><div class="aiac-vrow">'
+      + '<span class="lbl" data-tooltip="' + _aiEsc(s.cap.label) + '">' + _aiEsc(s.cap.label) + '</span>'
+      + '<span class="track"><span style="width:' + Math.min(100, Math.round(s.cap.val / s.cap.max * 100)) + '%;background:' + s.cap.color + '"></span></span>'
+      + '<span class="val">' + _aiEsc(s.cap.val + '/' + s.cap.max + ' ' + s.cap.unit) + '</span></div></div>';
+  }
+  if (s.trend){ html += _aiacTrendHtml(s.trend); }
+  html += '</div>';
+  if (s.lookLink){
+    // ALWAYS FORWARD (2026-09-21, was: SELF-ADAPTING 2026-09-18) — matches
+    // inventory-V1's copy: the card never mutates its own history. The
+    // "Back to Protected Data" affordance is now its OWN new turn, appended
+    // by _aiHandoffHydrate below rather than rewriting this button.
+    var _llIcon = _dsStoreIconSvg('open-in-new-outlined', 16) || '';
+    html += '<div class="aiac-sec aiac-looklink"><button type="button" class="aiac-btn" onclick="aiacGo(\'nav\', \'' + _aiEsc(s.lookLink.nav).replace(/'/g, '') + '\')">' + _aiEsc(s.lookLink.label) + _llIcon + '</button></div>';
+  }
+  if (s.actions && s.actions.length){
+    // AGENTIC-FIRST within the same tone (2026-09-21) — mirrors
+    // inventory-V1-agent-overlay.html's copy; see its comment for the full rationale.
+    var rank = { bad: 0, warn: 1, ok: 2, n: 3 };
+    var acts = s.actions.map(function(a, ai){ return [a, ai]; })
+      .sort(function(x, y){ return (rank[x[0].tone] - rank[y[0].tone]) || ((x[0].flow ? 0 : 1) - (y[0].flow ? 0 : 1)) || (x[1] - y[1]); })
+      .map(function(p){ return p[0]; });
+    var CAP = 2;
+    var shown = (m.actsOpen || acts.length <= CAP) ? acts : acts.slice(0, CAP);
+    html += '<div class="aiac-sec aiac-acts"><div class="aiac-sec-label">' + _aiEsc(s.actionsLabel || 'Recommended actions') + '</div>'
+      + shown.map(function(a){
+          var _exec = '';
+          var _sparkle = _dsStoreIconSvg('ai-sparkle', 16) || '';
+          if (a.flow) _exec = '<button type="button" class="aiac-exec" data-tooltip="The agent can run this — review its grants in Agentic Studio" onclick="window.location.href=\'agent-studio-agent-overlay.html#cfg\'">' + _sparkle + '</button>';
+          else if (a.grant) _exec = '<button type="button" class="aiac-exec off" data-tooltip="Yours to do — ' + _aiEsc(a.grant) + ' is off in Agentic Studio; click to review the grant" onclick="window.location.href=\'agent-studio-agent-overlay.html#cfg\'">' + _sparkle
+            + '<span class="aiac-exec-lock">' + (_dsStoreIconSvg('lock-filled', 11) || '') + '</span></button>';
+          var _sealed = _aiFactResolved(a.factId) || ((a.flow && (aiAgent._recAccepted || {})[a.flow] === 'done') ? { note: 'the agent ran this' } : null);
+          if (_sealed){
+            return '<div class="aiac-act sealed">'
+              + '<span class="aiac-chip ' + a.tone + '">' + _aiEsc(a.chip) + '</span>'
+              + '<span class="aiac-act-txt">' + _aiEsc(a.txt) + (a.sub ? '<small>' + _aiEsc(a.sub) + '</small>' : '') + '</span>'
+              + '<span class="aiac-act-done">' + '✓ Resolved · ' + _aiEsc(_sealed.note || 'the workspace no longer shows this') + '</span>'
+              + '</div>';
+          }
+          return '<div class="aiac-act">' + _exec
+            + '<span class="aiac-chip ' + a.tone + '">' + _aiEsc(a.chip) + '</span>'
+            + '<span class="aiac-act-txt">' + _aiEsc(a.txt) + (a.sub ? '<small>' + _aiEsc(a.sub) + '</small>' : '') + '</span>'
+            + (a.cap ? '<span class="aiac-act-vis"><span class="track"><span style="width:' + Math.min(100, Math.round(a.cap.val / a.cap.max * 100)) + '%;background:' + a.cap.color + '"></span></span><span class="val">' + _aiEsc(a.cap.val + '/' + a.cap.max + ' ' + a.cap.unit) + '</span></span>' : '')
+            + (a.trend ? _aiacTrendHtml(a.trend) : '')
+            + (a.btn ? (
+                a.look
+                  ? '<button type="button" class="aiac-btn" onclick="aiacGo(\'nav\', \'' + _aiEsc(a.nav).replace(/'/g, '') + '\')">' + _aiEsc(a.btn) + (_dsStoreIconSvg('open-in-new-outlined', 16) || '') + '</button>'
+                  : '<button type="button" class="aiac-btn' + (a.flow ? ' primary' : '') + '" onclick="aiacGo(\'' + (a.flow ? 'flow' : (a.nav ? 'nav' : 'toast')) + '\', \'' + _aiEsc(a.flow || a.nav || a.toast || 'Queued').replace(/'/g, '') + '\')">' + _aiEsc(a.btn) + '</button>'
+              ) : '')
+            // SHOW ME, ON THE TILE ITSELF — mirrors inventory-V1's copy. This
+            // page IS the watch destination, so the click runs the walkthrough
+            // directly (_aiWatchHere below) instead of navigating again.
+            + (a.flow && a.watchJob
+                ? ' <button type="button" class="aiac-btn" onclick="_aiWatchHere(\'' + _aiEsc(a.flow).replace(/'/g, '') + '\', \'' + _aiEsc(a.watchJob).replace(/'/g, '') + '\')">Watch</button>'
+                : '')
+            + '</div>';
+        }).join('')
+      + '</div>';
+    if (acts.length > CAP){
+      html += '<div class="aiac-details-row">'
+        + '<button type="button" class="aiac-details-btn" aria-expanded="' + !!m.actsOpen + '" onclick="aiacToggleActs(' + i + ')">'
+        + (m.actsOpen ? 'Show fewer' : 'Show all ' + acts.length + ' recommendations')
+        + '<span class="chev"' + (m.actsOpen ? ' style="transform:rotate(180deg)"' : '') + '><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></span>'
+        + '</button></div>';
+    }
+  }
+  return html + '</div>';
+}
+window.addEventListener('focus', function(){ if (document.body.classList.contains('ai-open') && typeof aiRender === 'function' && !aiAgent.busy) aiRender(); });
+window.addEventListener('storage', function(e){ if (e.key === 'vdc-facts' && typeof aiRender === 'function' && !aiAgent.busy) aiRender(); });
+function aiacToggleInsight(i){ var m = aiAgent.msgs[i]; if(!m || m.role !== 'card') return; m.insightOpen = !m.insightOpen; aiRender(); }
+function aiacToggleActs(i){ var m = aiAgent.msgs[i]; if(!m || m.role !== 'card') return; m.actsOpen = !m.actsOpen; aiRender(); }
+function aiacToggleTable(i){ var m = aiAgent.msgs[i]; if(!m || m.role !== 'card') return; m.tblOpen = !m.tblOpen; aiAgent._scrollAnchor = m.tblOpen ? { reveal: '[data-aiac="' + i + '"] .ov-more-row' } : 'keep'; aiRender(); }
+// Local routing: nav carries the handoff marker so the target page can pick
+// the conversation up (works for both directions — forward to a page that
+// has this same shell, or back to inventory-V1-agent-overlay.html); a flow is approved
+// here but runs where the run machinery lives (inventory-V1-agent-overlay.html), via a
+// one-shot directive the inventory boot consumes.
+function aiacGo(kind, arg){
+  if (kind === 'nav'){
+    try { sessionStorage.setItem('vdc-ai-handoff', String(arg).split('#')[0].split('?')[0]); } catch(e){}
+    window.location.href = arg; return;
+  }
+  if (kind === 'flow'){
+    try {
+      sessionStorage.setItem('vdc-ai-flow', arg);
+      sessionStorage.setItem('vdc-ai-handoff', 'inventory-V1-agent-overlay.html');
+    } catch(e){}
+    window.location.href = 'inventory-V1-agent-overlay.html'; return;
+  }
+  if (typeof showToast === 'function') showToast(arg);
+}
+function aiacAcceptAll(){
+  try { sessionStorage.setItem('vdc-ai-handoff', 'inventory-V1-agent-overlay.html'); } catch(e){}
+  window.location.href = 'inventory-V1-agent-overlay.html';
+}
+// ── CONVERSATION-LED HANDOFF (2026-09-18, same contract as backup-policies'
+// 2026-09-11 port): inventory-V1's aiacGo('nav') flushes its transcript
+// (localStorage vdc-ai-transcript) and sets a ONE-SHOT sessionStorage marker
+// = the destination filename. This page consumes the marker, hydrates its
+// own panel with the carried transcript at FULL card fidelity (the ported
+// aiacCardHtml above), and opens it. No marker (plain load, refresh) = no
+// carry — the panel stays closed until the user opens it themselves.
+(function _aiHandoffHydrate(){
+  try {
+    var _mk = sessionStorage.getItem('vdc-ai-handoff');
+    if (_mk) sessionStorage.removeItem('vdc-ai-handoff');
+    if (_mk !== 'agent-settings-overlay.html') return;
+    var raw = JSON.parse(localStorage.getItem('vdc-ai-transcript'));
+    if (!raw || !Array.isArray(raw.msgs) || !raw.msgs.length) return;
+    raw.msgs.forEach(function(r){
+      if (r.role === 'card' && r.card){
+        aiAgent.msgs.push({ role: 'card', card: r.card, _accepted: !!r._accepted, actsOpen: false, insightOpen: false });
+        return;
+      }
+      if (r.role === 'user' || r.role === 'agent'){
+        var m = { role: r.role, html: r.html };
+        if (r.gate){
+          m.gate = { q: r.gate.approval ? (r.gate.approval.action || 'Approval') : (r.gate.q || ''),
+            buttons: [], resolved: true,
+            choice: r.gate.choice || (r.gate.superseded ? 'Superseded' : 'Approved') };
+        }
+        aiAgent.msgs.push(m);
+      }
+    });
+    aiAgent.greeted = true;   // the carried conversation never re-greets over itself
+    // Top-anchor the CARD, not the trailing note (same contract as
+    // aiPushCard/aiPushAgent in inventory-V1-agent-overlay.html) — the headline/chart is
+    // what matters first; the short "now viewing" line can be reached by
+    // scrolling the rest of the way.
+    var _hoCardIdx = -1; for (var _hi = aiAgent.msgs.length - 1; _hi >= 0; _hi--) if (aiAgent.msgs[_hi].role === 'card') { _hoCardIdx = _hi; break; }
+    if (_hoCardIdx >= 0) aiAgent._scrollAnchor = { reveal: '[data-aiac="' + _hoCardIdx + '"]' };
+    function boot(){
+      aiOpen(); aiRender();
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+    else boot();
+  } catch(e){}
+})();
+</script>
+<script id="ov-shims">
+(function(){
+  function ic(n, z){ return (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg(n, z || 16)) || ''; }
+  window.aiQuickPromptGo = function(btn){ if (typeof aiSend === 'function') aiSend(btn.getAttribute('data-q')); };
+  window.aiToggleReasonStep = function(i, si){ var m = aiAgent.msgs[i]; if (!m) return; m.stepOpen = m.stepOpen || {}; m.stepOpen[si] = !m.stepOpen[si]; aiRender(); };
+  window.aiNewChat = function(){
+    aiAgent.msgs = []; aiAgent.activeGate = null; aiAgent.thinking = false; if (typeof aiSetBusy === 'function') aiSetBusy(false);
+    var t = document.querySelector('.ai-head-title'); if (t) t.textContent = 'Veeam Intelligence';
+    if (typeof aiRenderHome === 'function') aiRenderHome();
+  };
+  function icons(){ ['aiHxBtn','aiNewChatBtn'].forEach(function(id){ var b = document.getElementById(id); if (b && !b.firstChild) b.innerHTML = ic(id === 'aiHxBtn' ? 'history-outlined' : 'add-outlined', 16); }); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', icons); else setTimeout(icons, 0);
+})();
+</script>
+<script id="ov-script">
+/* ══ AGENT OVERLAY — answer renderer + panel behavior ═══════════════════════
+   Replaces aiacCardHtml (summary → strip → tiles template) with a flowing
+   answer: title · prose · result cards (each carries the chart that fits its
+   data, plus Export / Create dashboard widget) · "What I can do next".
+   Chart choice is by data shape, not by a fixed slot:
+     strip  → stat tile (when it has a unit) + proportional blocks
+     vrows  → horizontal bars      cap   → used/limit figure + bar
+     trend  → area chart           table → result table (+ Export)
+   A card with none of those but 2+ findings gets a findings-by-severity chart
+   derived from its own actions, so every multi-finding answer has a chart. */
+_AI_W_MAX = 800; _AI_W_DEFAULT = 665;
+aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   // default width on every open (old pushed-rail preference does not apply)
+(function(){
+  var TONE = { bad: 'var(--chart-soft-red)', warn: 'var(--chart-soft-gold)', ok: 'var(--chart-soft-green)', n: 'var(--black-10)' };
+  var TONE_LBL = { bad: 'Critical', warn: 'Needs review', ok: 'Healthy', n: 'Info' };
+  function ic(name, sz){ return (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg(name, sz || 16)) || ''; }
+  function esc(s){ return _aiEsc(String(s)); }
+  function fmt(n){ return (Math.round(n * 10) / 10).toLocaleString('en-US'); }
+  function card(title, body, btn){
+    var b = btn === 'export'
+      ? '<button type="button" class="ov-btn" onclick="showToast(\'Export started — CSV will download shortly\')">' + ic('download-outlined', 16) + 'Export</button>'
+      : btn === 'widget'
+        ? '<button type="button" class="ov-btn" onclick="showToast(\'Widget added to your dashboard\')">' + ic('dashboard-outlined', 16) + 'Create dashboard widget</button>' : '';
+    return '<div class="ov-card"><div class="ov-card-hd"><span class="ov-card-title">' + esc(title) + '</span>' + b + '</div>' + body + '</div>';
+  }
+  function blocks(items, unit){
+    var tot = items.reduce(function(a, x){ return a + x[1]; }, 0);
+    var h = '<div class="ov-blocks">' + items.map(function(x){
+      return '<div class="ov-block" style="flex:' + Math.max(x[1], tot * 0.09).toFixed(2) + ' 1 0;--c:' + x[2] + '" data-tooltip="' + esc(x[0] + ' · ' + fmt(x[1]) + (unit ? ' ' + unit : '')) + '">'
+        + '<div class="n">' + esc(x[0]) + '</div><div class="v">' + fmt(x[1]) + (unit ? ' ' + esc(unit) : '') + '</div></div>';
+    }).join('') + '</div>';
+    h += '<div class="ov-legend">' + items.map(function(x){
+      return '<span style="--c:' + x[2] + '"><span class="dot"></span>' + esc(x[0]) + ' · ' + Math.round(x[1] / tot * 100) + '%</span>';
+    }).join('') + '</div>';
+    return h;
+  }
+  function bars(rows){
+    return '<div class="ov-bars">' + rows.map(function(r){
+      return '<div class="ov-bar"><span class="lbl" data-tooltip="' + esc(r.label) + '">' + esc(r.label) + '</span>'
+        + '<span class="track"><span style="width:' + Math.min(100, Math.max(2, Math.round(r.frac * 100))) + '%;background:' + r.color + '"></span></span>'
+        + '<span class="val">' + esc(r.val) + '</span></div>';
+    }).join('') + '</div>';
+  }
+  function capBar(c){
+    return '<div class="ov-bars"><div class="ov-bar" style="grid-template-columns:1fr auto"><span class="track"><span style="width:' + Math.min(100, Math.round(c.val / c.max * 100)) + '%;background:' + c.color + '"></span></span>'
+      + '<span class="val">' + esc(c.val + ' / ' + c.max + ' ' + c.unit) + '</span></div></div>';
+  }
+  // t.collapse = rows shown before the "Show all N" toggle (card state m.tblOpen, flipped by aiacToggleTable)
+  function table(t, m, i){
+    var head = '<tr>' + t.cols.map(function(c){ return '<th>' + esc(c) + '</th>'; }).join('') + '</tr>';
+    var capped = t.collapse && t.rows.length > t.collapse, open = !!(m && m.tblOpen);
+    var body = (capped && !open ? t.rows.slice(0, t.collapse) : t.rows).map(function(r){
+      return '<tr>' + r.map(function(c){
+        return '<td>' + (Array.isArray(c) ? '<span class="ov-badge ' + c[0] + '">' + esc(c[1]) + '</span>' : esc(c)) + '</td>';
+      }).join('') + '</tr>';
+    }).join('');
+    return '<div class="ov-table-wrap"><table class="ov-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>'
+      + (capped ? '<div class="ov-more-row"><button type="button" class="aiac-details-btn' + (open ? ' open' : '') + '" aria-expanded="' + open + '" onclick="aiacToggleTable(' + i + ')">'
+        + (open ? 'Show fewer' : 'Show all ' + t.rows.length + (t.noun ? ' ' + esc(t.noun) : ''))
+        + '<span class="chev"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></span></button></div>' : '');
+  }
+  // ONE next-steps concept (Figma: "What I can do next" + sparkle pills such as
+  // "Restore all deleted files"). Every next step is a pill: agent-runnable
+  // actions and follow-up questions get the sparkle/gradient pill; a step that
+  // hands you to another page is an outlined pill with the open-in-new glyph.
+  // Finding-linked actions carry a quiet context line inside the pill.
+  function step(a){
+    var spark = ic('prompt-ai-filled', 16), tone = a.tone ? '<span class="dot ' + a.tone + '"></span>' : '';
+    var ctx = a.txt ? '<span class="ctx">' + esc(a.txt) + (a.sub ? ' \u00b7 ' + esc(a.sub) : '') + '</span>' : '';
+    var accepted = a.flow ? ((aiAgent._recAccepted || {})[a.flow] || null) : null;
+    var inner = function(icon, label){ return icon + '<span class="lbl"><span class="t">' + esc(label) + '</span>' + ctx + '</span>'; };
+    if (accepted === 'working')
+      return '<button type="button" class="ov-pill is-quiet" disabled aria-disabled="true"><span class="disc-spinner" style="width:14px;height:14px;margin-top:0"></span><span class="lbl"><span class="t">Working\u2026</span>' + ctx + '</span></button>';
+    var sealed = _aiFactResolved(a.factId) || (accepted === 'done' ? { note: 'the agent ran this' } : null);
+    if (sealed)
+      return '<div class="ov-pill is-quiet is-done"><span class="lbl"><span class="t">\u2713 Resolved \u00b7 ' + esc(sealed.note || 'the workspace no longer shows this') + '</span>' + ctx + '</span></div>';
+    if (!a.btn) return '';
+    var tip = a.grant ? ' data-tooltip="Yours to do \u2014 ' + esc(a.grant) + ' is off in Agentic Studio"' : '';
+    if (a.look || !a.flow)
+      return '<button type="button" class="ov-pill is-link"' + tip + ' onclick="aiacGo(\'' + (a.nav ? 'nav' : 'toast') + '\', \'' + esc(a.nav || a.toast || 'Queued').replace(/'/g, '') + '\')">' + inner(ic('open-in-new-outlined', 16), a.btn) + '</button>';
+    return '<button type="button" class="ov-pill" onclick="aiacGo(\'flow\', \'' + esc(a.flow).replace(/'/g, '') + '\')">' + inner(spark, a.btn) + '</button>';
+  }
+  // Recommended responses: the card's own suggest:[…] (authored per scenario),
+  // else this map keyed by the answer's headline. Each pill SENDS its label as
+  // the user's turn and launches the scripted scenario it names (sc).
+  var SUGG = [
+    [/^You\u2019re consuming 427 TB/, [{label:'Which repository is closest to full?', sc:'infraRepoCapacity'}, {label:'Show me repository capacity in charts', sc:'infraCapacityCharts'}]],
+    [/^Nearly everything backed up clean/, [{label:'Is my tenant backed up successfully? Any gaps?', sc:'ms365Coverage'}, {label:'Give me a full health check \u2014 what needs attention?', sc:'ms365Health'}]],
+    [/^Yes \u2014 every service is covered/, [{label:'How many users are protected? Any exclusions?', sc:'ms365MailboxCov'}, {label:'Is Teams protected end-to-end?', sc:'ms365TeamsGaps'}]],
+    [/^23 of 25 mailboxes/, [{label:'Is Teams protected end-to-end?', sc:'ms365TeamsGaps'}, {label:'Give me a full health check \u2014 what needs attention?', sc:'ms365Health'}]],
+    [/^All 6 teams are protected/, [{label:'Give me a full health check \u2014 what needs attention?', sc:'ms365Health'}, {label:'How did everything back up overnight?', sc:'ms365Overnight'}]],
+    [/^Your estate is mostly healthy/, [{label:'How did everything back up overnight?', sc:'ms365Overnight'}, {label:'How many users are protected? Any exclusions?', sc:'ms365MailboxCov'}]],
+    [/^Seven failures came from five jobs/, [{label:'What\u2019s running right now, and what\u2019s queued or finished?', sc:'infraLiveSessions'}, {label:'Give me a repository capacity plan.', sc:'infraRepoCapacity'}]],
+    [/^Three jobs are running/, [{label:'Show me the latest job runs with failures over the past 24 hours', sc:'infraFailedJobs'}, {label:'Give me a repository capacity plan.', sc:'infraRepoCapacity'}]],
+    [/^Your protected footprint is 84 GB/, [{label:'Are all six projects backing up within their policy windows?', sc:'adoRpo'}, {label:'Are any environments close to their Dataverse capacity limits?', sc:'ppCapacity'}]],
+    [/^No \u2014 5 of 6 projects/, [{label:'How fast is our GitHub backup footprint growing?', sc:'ghGrowth'}, {label:'Are any environments close to their Dataverse capacity limits?', sc:'ppCapacity'}]],
+    [/^Yes \u2014 Contoso Production is at 91%/, [{label:'How fast is our GitHub backup footprint growing?', sc:'ghGrowth'}, {label:'Are all six projects backing up within their policy windows?', sc:'adoRpo'}]],
+    [/^Of the three, veeam-repo-01|^veeam-repo-01 has climbed|^Only one of the three/, [{label:'What\u2019s causing this, and how do I fix it?', sc:'infraRepoCapacity'}]]
+  ];
+  function suggestFor(s){
+    if (s.suggest && s.suggest.length) return s.suggest;
+    var hl = String(s.headline || '').replace(/<[^>]+>/g, '');
+    for (var k = 0; k < SUGG.length; k++) if (SUGG[k][0].test(hl)) return SUGG[k][1];
+    return null;
+  }
+  aiRenderQuickPrompts = function(){};   // the dock chip row is replaced by in-answer pills
+  // In-thread suggestions (user 2026-10-13: "peppered within the conversation
+  // flow", not pinned or on the welcome screen). Every answer that has them ends
+  // with the lead-in + sparkle pills; once the conversation moves on, an older
+  // answer's pills stay in the thread but quiet down (.is-old).
+  function paintDock(){ var el = document.getElementById('aiChips'); if (el && el.querySelector('.ov-sugg')) el.innerHTML = ''; }
+  function questionPills(s, m, max){
+    var list = suggestFor(s); if (!list) return '';
+    var cards = (aiAgent.msgs || []).filter(function(x){ return x.role === 'card'; });
+    var old = cards[cards.length - 1] !== m || (aiAgent.msgs[aiAgent.msgs.length - 1] !== m);
+    var spark = ic('prompt-ai-filled', 16);
+    return list.slice(0, max).map(function(q){
+      var lbl = typeof q === 'string' ? q : q.label, sc = typeof q === 'string' ? '' : (q.sc || '');
+      return '<button type="button" class="ov-pill' + (old ? ' is-quiet' : '') + '" data-q="' + esc(lbl) + '" data-sc="' + esc(sc) + '" onclick="aiQuickPromptGo(this)">' + spark + '<span class="lbl"><span class="t">' + esc(lbl) + '</span></span></button>';
+    }).join('');
+  }
+  var _busy = aiSetBusy;
+  aiSetBusy = function(b){ _busy.apply(this, arguments); paintDock();
+    if (!b && (aiAgent.msgs || []).length && typeof aiRender === 'function'){ aiAgent._scrollAnchor = 'keep'; aiRender(); } };   // next steps land the moment the turn settles   // pills appear the moment the run settles
+  // Every spawned agent leaves a run in Activity > Agent activity (read there from localStorage).
+  var WL_NAME = { ms365:'Microsoft 365', d365:'Dynamics 365', github:'GitHub', 'azure-devops':'Azure DevOps', powerplatform:'Power Platform', 'hybrid-vms':'Virtual Machines' };
+  function logSpawns(){
+    var fresh = [];
+    (aiAgent.msgs || []).forEach(function(m){
+      if (m.role !== 'reasoning' || !m.done || m._spawnLogged) return;
+      m._spawnLogged = true;
+      (m.steps || []).forEach(function(st){
+        if (!st || !st.spawn) return;
+        var nm = String(st.label).replace(/^Spawning an? /, '');
+        fresh.push({ agent: nm.charAt(0).toUpperCase() + nm.slice(1), task: st.spawn.task, granted: st.spawn.granted,
+          kind: /^Restore data/.test(st.spawn.granted) ? 'Restore' : (/^Manage policies/.test(st.spawn.granted) ? 'Review' : 'Question'),
+          wl: WL_NAME[(typeof state !== 'undefined' && state.wl) || ''] || 'All workloads', ts: Date.now(), dur: Math.max(1, Math.round((st.ms || 300) / 100) / 10) + 's' });
+      });
+    });
+    if (!fresh.length) return;
+    try { var all = JSON.parse(localStorage.getItem('vdc-agent-spawns')) || []; localStorage.setItem('vdc-agent-spawns', JSON.stringify(all.concat(fresh).slice(-60))); } catch (e) {}
+  }
+  var _home = aiRenderHome;
+  aiRenderHome = function(){
+    _home.apply(this, arguments);
+    var t = document.querySelector('.ai-home-title'), sb = document.querySelector('.ai-home-sub');
+    if (t) t.textContent = 'Welcome! \uD83D\uDC4B';
+    if (sb) sb.textContent = 'Ask me anything about your protected data \u2014 I\u2019ll answer from your estate, and I\u2019m happy to run restores in the background. Nothing gets written until you approve.';
+  };
+  aiacCardHtml = function(m, i){
+    var s = m.card, h = '<div class="ov-ans" data-aiac="' + i + '">';
+    h += '<h3 class="ov-title">' + s.headline + '</h3>';
+    if (s.headsub) h += '<div class="ov-prose"><p>' + s.headsub + '</p></div>';
+    var charted = false, acts = s.actions || [], stripLate = '';   // stripLate: stripLast puts the composition panel after the bars
+    if (s.strip){
+      charted = true;
+      var tot = s.strip.reduce(function(a, x){ return a + x[1]; }, 0);
+      var body = (s.unit ? '<div class="ov-stat"><span class="rule"></span><span><span class="num">' + fmt(tot) + '</span><span class="unit">' + esc(s.unit) + '</span></span></div>' : '') + blocks(s.strip, s.unit);
+      if (s.stripLast) stripLate = card(s.stripTitle || 'Breakdown', body, 'widget'); else h += card(s.stripTitle || 'Breakdown', body, 'widget');
+    }
+    if (s.vrows){
+      charted = true;
+      h += card(s.vrows.title || 'Comparison', (s.vrows.legend ? '<div class="ov-legend">' + s.vrows.legend.map(function(l){ return '<span style="--c:' + l[1] + '"><span class="dot"></span>' + esc(l[0]) + '</span>'; }).join('') + '</div>' : '') + bars(s.vrows.rows), 'widget');
+    }
+    if (s.cap){
+      charted = true;
+      h += card(s.cap.label, '<div class="ov-cap-fig">' + esc(s.cap.val) + '<small>of ' + esc(s.cap.max) + ' ' + esc(s.cap.unit) + '</small></div>' + capBar(s.cap), 'widget');
+    }
+    if (s.trend){
+      charted = true;
+      h += card(s.trend.caption || 'Trend', _aiacTrendHtml(s.trend), 'widget');
+    }
+    h += stripLate;
+    if (!charted && acts.length >= 2){
+      var counts = {}; acts.forEach(function(a){ counts[a.tone] = (counts[a.tone] || 0) + 1; });
+      var items = ['bad', 'warn', 'ok', 'n'].filter(function(t){ return counts[t]; }).map(function(t){ return [TONE_LBL[t], counts[t], TONE[t]]; });
+      h += card('Findings by severity', blocks(items, ''), 'widget');
+    }
+    if (s.table && s.table.label !== s.stripTitle) h += card(s.table.label, table(s.table, m, i), 'export');
+    if (s.insight) h += '<div class="ov-prose"><p>' + s.insight + '</p></div>';
+    if (s.lookLink)
+      h += '<button type="button" class="ov-look" onclick="aiacGo(\'nav\', \'' + esc(s.lookLink.nav).replace(/'/g, '') + '\')">' + esc(s.lookLink.label) + ic('open-in-new-outlined', 16) + '</button>';
+    // ONE next-steps section per TURN. A scripted answer can push several cards
+    // back to back (e.g. "capacity in charts" = trend + comparison + immutability);
+    // only the last card of the turn carries the section, gathering every card's
+    // actions, and it waits until the turn has settled so it never flickers on
+    // an earlier card while later ones are still arriving.
+    var msgs = aiAgent.msgs || [], mi = msgs.indexOf(m), t0 = -1;
+    for (var q0 = mi; q0 >= 0; q0--) if (msgs[q0].role === 'user') { t0 = q0; break; }
+    var turnCards = [];
+    for (var q1 = t0 + 1; q1 < msgs.length; q1++){ if (msgs[q1].role === 'user' && q1 > mi) break; if (msgs[q1].role === 'card') turnCards.push(msgs[q1]); }
+    var isLast = turnCards[turnCards.length - 1] === m;
+    var working = Object.keys(aiAgent._recAccepted || {}).some(function(k){ return aiAgent._recAccepted[k] === 'working'; });
+    if (isLast && (!aiAgent.busy || working)){
+      var allActs = [], seen = {};
+      turnCards.forEach(function(c){ ((c.card && c.card.actions) || []).forEach(function(a){ var k = a.txt + '|' + (a.flow || a.nav || a.toast || ''); if (!seen[k]){ seen[k] = 1; allActs.push(a); } }); });
+      var rank = { bad: 0, warn: 1, ok: 2, n: 3 };
+      var stepsHtml = allActs.map(function(a, k){ return [a, k]; }).sort(function(x, y){ return (rank[x[0].tone] - rank[y[0].tone]) || ((x[0].flow ? 0 : 1) - (y[0].flow ? 0 : 1)) || (x[1] - y[1]); }).map(function(p){ return step(p[0]); }).join('');
+      var sCard = null;
+      for (var q2 = turnCards.length - 1; q2 >= 0; q2--) if (suggestFor(turnCards[q2].card)) { sCard = turnCards[q2]; break; }
+      var qHtml = sCard ? questionPills(sCard.card, m, allActs.length >= 3 ? 1 : 2) : '';
+      if (stepsHtml || qHtml){
+        h += '<div class="ov-next-hd">What I can do next</div><div class="ov-sugg">' + stepsHtml + qHtml + '</div>';
+        var flows = allActs.filter(function(a){ return a.flow; }).length;
+        if (flows >= 2 && !m._accepted)
+          h += '<button type="button" class="aiac-btn" style="margin-top:0;align-self:flex-start" onclick="aiacAcceptAll(' + i + ')">Approve all ' + flows + ' agent actions</button>';
+      }
+    }
+    return h + '</div>';
+  };
+
+
+  // ── Reasoning module (Figma Gencore: "Processing request" → In progress → Complete) ──
+  function rsIcon(kind){
+    var nm = kind === 'agent' ? 'my-ai-agents-outlined' : kind === 'route' ? 'workflow-outlined' : 'search-outlined';
+    return ic(nm, 16);
+  }
+  // One pair per call (Figma 3886:150030): grey title = the action's name,
+  // line below = how it was executed ("Using <tool> with k=v, …"). A step's
+  // outcome, when it has one, is its own closing pair.
+  function titleCase(s){ return String(s).replace(/[._-]+/g, ' ').replace(/\b[a-z]/g, function(c){ return c.toUpperCase(); }); }
+  function rsSubs(st){
+    var kv = (st.detail || []).map(function(r){ return r[0] + '=' + r[1]; }).join(', ');
+    var parts = String(st.label || '').split(' \u2014 '), sig = parts[0], rest = parts.slice(1).join(' \u2014 ');
+    var pairs = [];
+    if (st.kind === 'tool'){
+      pairs.push([titleCase(sig), 'Using ' + sig + (kv ? ' with ' + kv : (rest ? ' \u2014 ' + rest : ''))]);
+    } else if (st.kind === 'agent' && st.spawn){
+      var sn = String(st.label).replace(/^Spawning an? /, '');
+      pairs.push([sn.charAt(0).toUpperCase() + sn.slice(1), st.spawn.task]);
+      pairs.push(['Granted', st.spawn.granted + ' \u2014 not granted: ' + st.spawn.denied]);
+      pairs.push(['Lifetime', 'Retired when the task completes']);
+      pairs.push(['Activity', 'Logged as a run of this agent in Agent activity']);
+    } else if (st.kind === 'agent'){
+      var nm = /(?:Delegating to )?([A-Za-z&][A-Za-z& ]*? Agent)/.exec(sig);
+      pairs.push([nm ? nm[1] : 'Delegation', kv ? 'Handing off with ' + kv : (rest || sig)]);
+    } else {
+      pairs.push(['Interpret request', (rest ? 'Interpreting ' + rest : sig) + (kv ? ' with ' + kv : '')]);
+    }
+    if (st.result) pairs.push(['Result', st.result]);
+    return pairs.map(function(r){
+      return '<div><div class="ov-rs-t"><i>\u00b7\u00b7\u00b7</i>' + esc(r[0]) + '</div><div class="ov-rs-d">' + rsIcon(st.kind) + '<span>' + esc(r[1]) + '</span></div></div>';
+    }).join('') + ((st.kind === 'agent' && st.spawn) ? '<button type="button" class="ov-look" onclick="aiacGo(\'nav\', \'activity-agent-overlay.html#agents\')">View in Agent activity' + ic('open-in-new-outlined', 16) + '</button>' : '');
+  }
+  // Row = a one-line SUMMARY of the step in plain language (Figma: "Collecting node
+  // details"); the tool name and execution live inside the expanded pair.
+  var RS_VERB = { select:'Selecting', query:'Querying', scan:'Scanning', search:'Searching', apply:'Applying', retry:'Retrying', capacity:'Reading', history:'Reading', series:'Reading',
+    match:'Matching', classify:'Classifying', check:'Checking', open:'Opening', sweep:'Sweeping', locate:'Locating', review:'Reviewing', set:'Setting', group:'Grouping',
+    assignment:'Reviewing', sample:'Sampling', poll:'Polling', members:'Resolving', attribute:'Attributing', aggregate:'Aggregating', cluster:'Clustering',
+    lookup:'Looking up', gaps:'Finding', coverage:'Checking', rank:'Ranking', ping:'Pinging', reassign:'Reassigning', coverage_:'Checking' };
+  function rsLabel(o){
+    var parts = String(o.label || '').split(' \u2014 '), sig = parts[0], rest = parts.slice(1).join(' \u2014 ');
+    if (o.kind === 'route') return 'Interpreting request';
+    if (o.kind === 'tool' && /^[a-z]+\.[a-z_]+$/.test(sig)){
+      var bits = sig.split('.'), verb = RS_VERB[bits[1]] || 'Running', subj = bits[0].replace(/[-_]/g, ' ');
+      return verb + ' ' + subj + (rest ? ': ' + rest : '');
+    }
+    return o.label;
+  }
+  function reasonHtml(m, i){
+    var steps = m.steps || [];
+    if (!steps.length) return '<div class="ov-rs ov-rs-wait-wrap" data-mi="' + i + '"><div class="ov-rs-wait">Processing request</div></div>';
+    var live = !m.done;
+    var open = !!m.open;   // collapsed until the user expands it — while thinking, the header carries the current step
+    var total = null;
+    if (m.named && steps.every(function(s){ return s && s.ms; })) total = (steps.reduce(function(a, s){ return a + s.ms; }, 0) / 1000).toFixed(1);
+    else if (m.ms) total = Math.max(1, Math.round(m.ms / 1000));
+    var rows = steps.map(function(st, si){
+      var o = typeof st === 'string' ? { label: st, kind: 'tool' } : st;
+      var running = live && si === steps.length - 1;
+      var expanded = running || !!(m.stepOpen && m.stepOpen[si]);
+      var lbl = esc(rsLabel(o));
+      var hasSub = !!(o.detail || o.result || o.spawn);
+      var tag = hasSub ? 'button type="button" onclick="aiToggleReasonStep(' + i + ',' + si + ')" aria-expanded="' + expanded + '"' : 'div';
+      var close = hasSub ? 'button' : 'div';
+      return '<' + tag + ' class="ov-rs-row">'
+        + '<span class="ov-rs-ico' + (running ? '' : ' done') + '">' + (running ? '<span class="disc-spinner"></span>' : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>') + '</span>'
+        + '<span class="ov-rs-lbl">' + lbl + '</span>'
+        + '<span class="ov-rs-badge ' + (running ? 'run' : 'ok') + '">' + (running ? 'In progress' : 'Complete') + '</span></' + close + '>'
+        + (expanded && hasSub ? '<div class="ov-rs-sub">' + rsSubs(o) + '</div>' : '');
+    }).join('');
+    var caret = '<svg class="caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+    var head;
+    if (live){
+      var cur = steps[steps.length - 1], curO = typeof cur === 'string' ? { label: cur, kind: 'tool' } : cur;
+      head = '<button type="button" class="ov-rs-head" onclick="aiToggleReason(' + i + ')" aria-expanded="' + open + '"><span class="ov-rs-ico"><span class="disc-spinner"></span></span><span class="ov-rs-cur">' + esc(rsLabel(curO)) + '</span>' + caret + '</button>';
+    } else {
+      head = '<button type="button" class="ov-rs-head" onclick="aiToggleReason(' + i + ')" aria-expanded="' + open + '">Thought for ' + (total || 1) + 's \u00b7 ' + steps.length + ' step' + (steps.length === 1 ? '' : 's') + caret + '</button>';
+    }
+    return '<div class="ov-rs is-collapsed' + (open ? ' is-open' : '') + '" data-mi="' + i + '">' + head + '<div class="ov-rs-list">' + rows + '</div></div>';
+  }
+  function swapReasoning(){
+    var body = document.getElementById('aiBody'); if (!body) return;
+    var nodes = body.querySelectorAll('.ai-reason[data-mi]'); if (!nodes.length) return;
+    var pinned = body.scrollTop + body.clientHeight >= body.scrollHeight - 6;
+    for (var k = 0; k < nodes.length; k++){
+      var mi = Number(nodes[k].getAttribute('data-mi')), m = aiAgent.msgs[mi];
+      if (!m || m.role !== 'reasoning') continue;
+      var tmp = document.createElement('div'); tmp.innerHTML = reasonHtml(m, mi);
+      nodes[k].parentNode.replaceChild(tmp.firstChild, nodes[k]);
+    }
+    if (pinned) body.scrollTop = body.scrollHeight;
+  }
+  // '#assistant' (Agent Studio's "Start new conversation") opens the panel on arrival.
+  if (location.hash === '#assistant') document.addEventListener('DOMContentLoaded', function(){ setTimeout(function(){ if (typeof aiOpen === 'function') aiOpen(); }, 400); });
+
+  // ── Tool-consent pattern on the existing approval gates (Gencore Figma 4597:219009) ──
+  // "User consent required" + a one-line ask; non-primary actions read "Deny" and open an
+  // optional note ("tell the agent what to do differently"); the primary keeps its own
+  // label. "Allow for this session" is deliberately NOT offered here: these gates guard
+  // restores and in-place changes, which always ask.
+  function consentize(){
+    var body = document.getElementById('aiBody'); if (!body) return;
+    [].forEach.call(body.querySelectorAll('.ai-approval:not(.resolved)'), function(card){
+      var t = card.querySelector('.ai-approval-title'), bar = card.querySelector('.ai-gate-btns'); if (!t || !bar) return;
+      t.textContent = 'User consent required';
+      var sub = document.createElement('div'); sub.className = 'ov-consent-sub'; sub.textContent = 'Veeam Intelligence needs your approval before it can continue:';
+      var hd = t.closest('.ai-approval-hd') || t; hd.parentNode.insertBefore(sub, hd.nextSibling);
+      var btns = [].slice.call(bar.querySelectorAll('.ai-gate-btn'));
+      btns.filter(function(b){ return !b.classList.contains('primary'); }).forEach(function(b){
+        b.textContent = 'Deny'; bar.insertBefore(b, bar.firstChild);
+        var orig = b.getAttribute('onclick'); b.removeAttribute('onclick');
+        b.addEventListener('click', function(){
+          var box = document.createElement('div');
+          box.innerHTML = '<textarea class="ov-consent-note" rows="3" placeholder="Optional \u2013 Tell the agent what to do differently"></textarea><div class="ov-consent-btns"><button type="button" class="ai-gate-btn ov-danger">Deny</button><button type="button" class="ai-gate-btn">Cancel</button></div>';
+          bar.style.display = 'none'; bar.parentNode.insertBefore(box, bar.nextSibling);
+          var ta = box.querySelector('textarea'); ta.focus();
+          box.querySelector('.ov-danger').addEventListener('click', function(){
+            var note = ta.value.trim();
+            (new Function(orig)).call(b);
+            if (note) setTimeout(function(){ aiPushAgent('<p>Noted: \u201c' + _aiEsc(note) + '\u201d \u2014 I won\u2019t go ahead with this, and I\u2019ll factor that in.</p>', null, true); }, 450);
+          });
+          box.querySelectorAll('.ai-gate-btn')[1].addEventListener('click', function(){ box.remove(); bar.style.display = ''; });
+        });
+      });
+    });
+  }
+  // Header title = the conversation's topic (Figma: "Backup Job Analysis").
+  var _render = aiRender;
+  aiRender = function(){
+    _render.apply(this, arguments);
+    swapReasoning();
+    consentize();
+    logSpawns();
+    var t = document.querySelector('.ai-head-title'); if (!t) return;
+    // Title = how the agent read the request: the first delegation-trace
+    // 'Interpreting request — <topic>' step. Until that step lands, the user's
+    // own words; if a run has no trace, the answer's headline. Never a clause
+    // cut out of an answer ("Yes").
+    var msgs = aiAgent.msgs || [], txt = 'Veeam Intelligence', topic = null;
+    msgs.some(function(m){
+      if (m.role !== 'reasoning') return false;
+      return (m.steps || []).some(function(st){
+        var l = typeof st === 'string' ? st : st.label, mm = /^Interpreting request\s*[\u2014-]\s*(.+)$/.exec(l || '');
+        if (mm){ topic = mm[1]; return true; } return false;
+      });
+    });
+    var firstUser = msgs.filter(function(m){ return m.role === 'user' && m.html; })[0];
+    var firstCard = msgs.filter(function(m){ return m.role === 'card' && m.card && m.card.headline; })[0];
+    if (topic) txt = topic.charAt(0).toUpperCase() + topic.slice(1);
+    else if (firstUser && String(firstUser.html).trim().length > 8) txt = String(firstUser.html).replace(/<[^>]+>/g, '').trim();
+    else if (firstCard) txt = String(firstCard.card.headline).replace(/<[^>]+>/g, '').trim();
+    else if (msgs.some(function(m){ return m.role === 'user'; })) txt = 'New conversation';
+    t.textContent = txt;
+    paintDock();
+  };
+})();
+</script>
+
 <script>
 (function() {
   'use strict';
@@ -2921,9 +4290,11 @@ function hydrateDefaultPolicyForm(wl) {
   // to acting on its own. level.kind: read | prepare (nothing executes) | ask (needs your approval) | auto (acts without asking;
   // confirm:true makes raising to it a confirmed change). chip = the short label shown in the table.
   var CAPS = [
-    { id:'data', name:'Access & visualize data', sub:'Read estate data, answer questions, render charts and custom views.', access:'Read', scope:'All connected workloads', runs:214 , levels:[
-      { id:'ask',   chip:'Answer', kind:'read', label:'When asked', sub:'Answers questions and draws charts from backed-up data when you ask.', does:['Answer questions about protection coverage, health, growth and RPO','Render charts and custom views from backed-up metadata'] },
-      { id:'sweep', chip:'Report', kind:'read', label:'Also while you\u2019re away', sub:'Also monitors protection in the background and reports what needs attention.', does:['Everything in When asked','Monitor health across workloads in the background and report exceptions'] } ], def:'sweep' },
+    // Baseline, NOT a skill (2026-10-15): what the agent can read. Scope only — no on/off (off = the agent itself, see Agent availability). Shown on the availability card, hidden from the skills table.
+    { id:'read', baseline:true, name:'Read access', sub:'The workloads the agent can read to answer questions and draw charts. Every skill works within this.', access:'Read', scope:'All connected workloads', runs:0, def:null, levels:null },
+    { id:'monitor', name:'Monitor & report', sub:'Watch protection in the background and report what needs attention.', access:'Read', scope:'All connected workloads', runs:38, def:'report', levels:[
+      { id:'report', chip:'Report', kind:'read', label:'Report on its own', sub:'Monitors protection in the background and reports what needs attention. Changes nothing.', does:['Monitor health across workloads in the background','Report exceptions to Activity and the conversation'] },
+      { id:'recommend', chip:'Recommend', kind:'prepare', label:'Report and recommend', sub:'Also raises a recommendation for each exception it finds. You review it; nothing is created or changed.', does:['Everything in Report on its own','Raise a recommendation for each exception for you to review — creates and changes nothing'] } ] },
     { id:'restore', name:'Restore data', sub:'Prepare or run restore jobs from backup. In-place rollbacks always ask.', access:'Write · restores data', scope:'Any restorable item or container', runs:15, def:'ask', levels:[
       { id:'prepare', chip:'Prepare',   kind:'prepare', label:'Prepare the restore', sub:'Builds the plan and the cart. You start the job.', does:['Select items, resolve restore points and destination','Assemble the restore plan for you to run'] },
       { id:'ask',     chip:'Ask first', kind:'ask',     label:'Ask before running', sub:'Runs the restore after you approve it.', does:['Everything in Prepare','Run restores that create new copies (production untouched) after your approval','Run in-place rollbacks — always gated','Post job receipts and hand tracking to Activity'] },
@@ -2931,15 +4302,15 @@ function hydrateDefaultPolicyForm(wl) {
     { id:'exportd', name:'Export data', sub:'Prepare or run exports. Files leave the platform.', access:'Write · produces files', scope:'Export-eligible items', runs:6, def:'ask', note:'There is no automatic level: an exported file cannot be recalled.', levels:[
       { id:'prepare', chip:'Prepare',   kind:'prepare', label:'Prepare the export', sub:'Builds the package. You run it.', does:['Select items and assemble the export package'] },
       { id:'ask',     chip:'Ask first', kind:'ask',     label:'Ask before exporting', sub:'Runs the export after you approve it.', does:['Everything in Prepare','Build and run export jobs after your approval'] } ] },
-    { id:'policies', name:'Manage policies', sub:'Spot gaps and recommend, create or edit backup and ROT policies and their scopes.', access:'Write · policy settings', scope:'Policies', runs:3, def:'recommend', needs:['data'], levels:[
+    { id:'policies', name:'Manage policies', sub:'Spot gaps and recommend, create or edit backup and ROT policies and their scopes.', access:'Write · policy settings', scope:'Policies', runs:3, def:'recommend', levels:[
       { id:'recommend', chip:'Recommend',       kind:'prepare', label:'Recommend', sub:'Spots a gap and drafts a policy for you to review. You create it.', does:['Compare content age, duplication and policy coverage across sites','Draft a policy with its scope, criteria, effect, evidence and reversal','Raise it on the Policies page and in the conversation — creates nothing'] },
       { id:'create',    chip:'Ask to activate', kind:'ask',     label:'Create, ask before activating', sub:'Creates the policy as an inactive draft, then asks before it turns on.', does:['Everything in Recommend','Create the policy inactive and edit scope rules as new versions','Ask before activating it'] },
       { id:'activate',  chip:'Automatic',       kind:'auto', confirm:true, label:'Create and activate', sub:'Builds and turns on policies itself. Policies that exclude or delete data still ask.', does:['Everything in Create','Activate policies without asking, citing this standing grant in the audit trail'] } ] },
-    { id:'jobs', name:'Backup jobs', sub:'Recommend, retry or re-run failed backup sessions.', access:'Write \u00b7 runs jobs', scope:'Backup jobs and sessions', runs:0, def:'ask', needs:['data'], levels:[
+    { id:'jobs', name:'Backup jobs', sub:'Recommend, retry or re-run failed backup sessions.', access:'Write \u00b7 runs jobs', scope:'Backup jobs and sessions', runs:0, def:'ask', levels:[
       { id:'prepare', chip:'Recommend',   kind:'prepare', label:'Recommend', sub:'Spots failed sessions and suggests which to retry. You run them.', does:['Group failed sessions by cause and workload','Suggest which sessions to retry or re-run'] },
       { id:'ask',     chip:'Ask first',   kind:'ask',     label:'Ask before running', sub:'Retries or re-runs a session after you approve it.', does:['Everything in Recommend','Retry or re-run failed sessions after your approval'] },
       { id:'auto',    chip:'Automatic',   kind:'auto', confirm:true, label:'Retry transient faults automatically', sub:'Retries sessions that failed for transient reasons without asking. Everything else asks.', does:['Everything in Ask before running','Retry transient failures without asking, citing this standing grant in the receipt'] } ] },
-    { id:'findings', name:'Findings and alerts', sub:'Summarize findings and triage them: set status and assign owners.', access:'Write \u00b7 finding status', scope:'Findings and incidents', runs:0, def:'read', needs:['data'], levels:[
+    { id:'findings', name:'Findings and alerts', sub:'Summarize findings and triage them: set status and assign owners.', access:'Write \u00b7 finding status', scope:'Findings and incidents', runs:0, def:'read', levels:[
       { id:'read',  chip:'Summarize',     kind:'read', label:'Summarize', sub:'Explains findings, groups related ones and suggests next steps. Changes nothing.', does:['Explain a finding and group related findings','Suggest next steps'] },
       { id:'ask',   chip:'Ask first',     kind:'ask',  label:'Triage after approval', sub:'Sets status or assigns an owner after you approve it.', does:['Everything in Summarize','Set finding status and assign owners after your approval'] },
       { id:'auto',  chip:'Automatic',     kind:'auto', confirm:true, label:'Triage low-severity findings automatically', sub:'Acts on Low and Informational findings without asking. Medium and above still ask.', does:['Everything in Triage after approval','Triage Low and Informational findings without asking, citing this standing grant in the history'] } ] },
@@ -2949,7 +4320,7 @@ function hydrateDefaultPolicyForm(wl) {
   ];
   // Product AREAS, read-only labels: which part of the product a capability touches (shown in its drawer).
   var AREAS = [
-    { id:'protected',    name:'Protected Data',   perm:'Read',               used:['data','policies'] },
+    { id:'protected',    name:'Protected Data',   perm:'Read',               used:['monitor','policies'] },
     { id:'restore',      name:'Restore jobs',     perm:'Read & write',       used:['restore'] },
     { id:'exports',      name:'Exports',          perm:'Read & write',       used:['exportd'] },
     { id:'policies',     name:'Policies',         perm:'Read & write',       used:['policies'] },
@@ -2957,7 +4328,7 @@ function hydrateDefaultPolicyForm(wl) {
     { id:'audit',        name:'Activity & Audit', perm:'Read & append only', used:['every capability'], locked:true }
   ];
   // Which areas each capability touches.
-  var CAP_AREAS = { data:['protected'], restore:['restore','protected'], exportd:['exports'], policies:['policies','protected'], integrations:['integrations'] };
+  var CAP_AREAS = { monitor:['protected'], read:['protected'], restore:['restore','protected'], exportd:['exports'], policies:['policies','protected'], integrations:['integrations'] };
   // WORKLOADS a capability can be limited to (a sample of the catalog, which grows toward ~100). Grouped by category. A capability is either available on all of them or on a chosen few;
   // CAP_WL lists the workloads each capability can apply to at all.
   var WL_CATS = ['SaaS applications', 'Identity', 'Developer tools', 'Cloud infrastructure', 'Datacenter'];
@@ -3005,6 +4376,7 @@ function hydrateDefaultPolicyForm(wl) {
   function wlName(id){ return WLS.filter(function(w){ return w.id === id; })[0].name; }
   var NAV = ['Organizational','Deployment','Integrations','Data Access Governance','Security','Support','Data Classification','Tag Management','Policy Center','Privacy Notice Management','AI Agents'];
   var KEYC = 'vdcAgentAutonomy', KEYA = 'vdcAgentAvailability';
+  function skills(){ return CAPS.filter(function(c){ return !c.baseline; }); }   // the table, counts and Reset exclude the Read-access baseline
   function capById(id){ return CAPS.filter(function(c){ return c.id === id; })[0]; }
   function normWl(w, id){ var ok = wlApplies(id); if (!Array.isArray(w)) return ok.length === WLS.length ? 'all' : ok.slice(); var f = w.filter(function(x){ return ok.indexOf(x) >= 0; }); return f.length ? f : ok.slice(); }
   function lvlOf(c, id){ return c.levels ? (c.levels.filter(function(l){ return l.id === id; })[0] || null) : null; }
@@ -3042,12 +4414,12 @@ function hydrateDefaultPolicyForm(wl) {
   document.addEventListener('click', closeMenu);
 
   // ── navigation ──
-  var VIEWS = { settings:['Agent Settings','ssViewSettings'], caps:['Access & Capabilities','ssViewCaps'] };
+  var VIEWS = { settings:['Agent Settings','ssViewSettings'] };   // one page now; 'caps' / #skills are aliases that scroll to the skills section
   function renderNav(){
     var chev = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg>';
     document.getElementById('ssNav').innerHTML = NAV.map(function(n){
       var open = n === 'AI Agents';
-      var kids = open ? ['settings','caps'].map(function(k){ return '<button type="button" class="ss-nav-item ss-nav-child' + (view === k ? ' is-active' : '') + '"' + (view === k ? ' aria-current="page"' : '') + ' onclick="ssGo(\'' + k + '\')">' + VIEWS[k][0] + '</button>'; }).join('')
+      var kids = open ? ['settings'].map(function(k){ return '<button type="button" class="ss-nav-item ss-nav-child' + (view === k ? ' is-active' : '') + '"' + (view === k ? ' aria-current="page"' : '') + ' onclick="ssGo(\'' + k + '\')">' + VIEWS[k][0] + '</button>'; }).join('')
         + '<button type="button" class="ss-nav-item ss-nav-child is-off" data-plv-tip="Not part of this prototype">LLM Providers</button><button type="button" class="ss-nav-item ss-nav-child is-off" data-plv-tip="Not part of this prototype">Agent Traces</button>' : '';
       return '<button type="button" class="ss-nav-item' + (open ? ' is-open' : '') + '"' + (open ? '' : ' data-plv-tip="Not part of this prototype"') + '>' + chev + esc(n) + '</button>' + kids;
     }).join('');
@@ -3057,26 +4429,64 @@ function hydrateDefaultPolicyForm(wl) {
     document.querySelector('.plv-title').textContent = VIEWS[view][0];
     var help = '<button class="plv-btn plv-btn-secondary" type="button" aria-label="Help" style="width:36px;padding:0;justify-content:center">' + ic('help-circle-outlined', 20) + '</button>';
     var kebab = '<button class="plv-btn plv-btn-secondary" type="button" aria-label="More" style="width:36px;padding:0;justify-content:center">' + KEBAB + '</button>';
-    var acts = view === 'settings' ? '<button class="plv-btn plv-btn-primary ss-save" type="button" id="ssSaveBtn" onclick="ssSave()">Save</button>' + help
-      : view === 'caps' ? '<button class="plv-btn plv-btn-secondary" type="button" onclick="ssResetAll()">Reset to defaults</button>' + kebab + help
-      : help;
+    var acts = '<button class="plv-btn plv-btn-secondary" type="button" id="ssResetBtn" onclick="ssResetAll()">Reset skills to defaults</button><button class="plv-btn plv-btn-primary ss-save" type="button" id="ssSaveBtn" onclick="ssSave()">Save</button>' + help;
     document.getElementById('ssActs').innerHTML = acts;
     
     syncSave();
   }
   window.ssGo = function(v){
-    view = v; Object.keys(VIEWS).forEach(function(k){ document.getElementById(VIEWS[k][1]).hidden = k !== v; });
-    renderNav(); renderHeader();
-    if (v === 'caps'){ ssRenderCaps(); } if (v === 'settings') renderAvail();
-    try { history.replaceState(null, '', v === 'settings' ? location.pathname : '#' + v); } catch(e){}
-    window.scrollTo(0, 0);
+    var toSkills = v === 'caps'; view = 'settings';
+    document.getElementById('ssViewSettings').hidden = false;
+    renderNav(); renderHeader(); renderAvail(); ssRenderCaps();
+    try { history.replaceState(null, '', toSkills ? '#skills' : location.pathname); } catch(e){}
+    if (toSkills){ var el = document.getElementById('ssSkills'); if (el) el.scrollIntoView({ block:'start' }); } else window.scrollTo(0, 0);
   };
 
   // ── 1. Agent Settings (form + Save) ──
-  function renderAvail(){ [].forEach.call(document.querySelectorAll('input[name=ssAvail]'), function(r){ r.checked = r.value === draftAvail; }); syncSave(); }
+  function renderAvail(){
+    var on = draftAvail === 'active', host = document.getElementById('ssAvailHost'); if (!host) return;
+    var rs = state.read ? wlSummary(state.read.wl, 'read') : 'All workloads';
+    host.innerHTML = '<div class="ss-md-stat ss-avail' + (on ? ' is-selected' : '') + '"><div class="sc-header"><span class="sc-t">Agent availability</span></div>'
+      + '<div class="sc-desc"><span>Control whether AI agents are available to your organization. This applies to every user.</span>'
+      + '<label class="ss-st">' + sw(on, 'Agent availability', 'ssAvailToggle()') + '<span>' + (on ? 'Active' : 'Inactive') + '</span></label>'
+      + '<span>Veeam Intelligence is the one agent users talk to. For each task it spawns a purpose-built agent that receives only the part of its access that task needs, and retires it when the task completes.</span>'
+      + (readEditing
+        ? '<div class="ss-readrow is-editing"><span><strong>Data it can read</strong></span></div>'
+          + '<div class="ss-readedit" id="ssReadEdit"><div id="ssReadInline"></div><div class="ss-readft"><span class="ss-md-hint" id="ssReadHint"></span><button type="button" class="plv-btn plv-btn-secondary" onclick="ssReadCancel()">Cancel</button><button type="button" class="plv-btn plv-btn-primary" id="ssReadSave" onclick="ssReadSave()">Save</button></div></div>'
+        : '<div class="ss-readrow"><span><strong>Data it can read</strong> · ' + esc(rs) + '</span><button type="button" class="plv-btn plv-btn-secondary" onclick="ssReadEdit()"' + (on ? '' : ' disabled') + '>Edit</button></div>')
+      + '</div></div>';
+    if (readEditing && dr && dr.inline){ pgMain(); pgSync(); }
+    var sk = document.getElementById('ssSkills'), note = document.getElementById('ssSkillsOff');
+    if (sk){ sk.classList.toggle('is-off', !on); sk.inert = !on; }
+    if (note){ note.hidden = on; note.innerHTML = on ? '' : '<div class="alert alert-info" style="margin-bottom:16px"><div class="alert-title">' + ic('alert-warning-outlined', 16) + 'The agent is inactive</div><div class="alert-body">Its skills are unavailable. Their settings are kept and return when you turn the agent back on.</div></div>'; }
+    var rb = document.getElementById('ssResetBtn'); if (rb) rb.disabled = !on;
+    syncSave();
+  }
   function syncSave(){ var b = document.getElementById('ssSaveBtn'); if (b) b.disabled = draftAvail === savedAvail; }
-  window.ssAvail = function(v){ draftAvail = v; syncSave(); };
-  window.ssSave = function(){ try { localStorage.setItem(KEYA, draftAvail); } catch(e){} savedAvail = draftAvail; syncSave(); toast('Agent settings saved'); };
+  window.ssAvail = function(v){ draftAvail = v; renderAvail(); };
+  window.ssAvailToggle = function(){ draftAvail = draftAvail === 'active' ? 'inactive' : 'active'; if (draftAvail === 'inactive' && readEditing){ readEditing = false; dr = null; } renderAvail(); };
+  // Read access edits in place: the availability card grows to show the workload picker, then collapses again on Save / Cancel.
+  var readEditing = false;
+  function slide(el, open, done){
+    if (!el || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)){ if (done) done(); return; }
+    el.style.overflow = 'hidden';
+    var h = el.scrollHeight, a = el.animate(open ? [{ height: '0px', opacity: 0 }, { height: h + 'px', opacity: 1 }] : [{ height: h + 'px', opacity: 1 }, { height: '0px', opacity: 0 }], { duration: open ? 260 : 200, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: open ? 'none' : 'forwards' });
+    a.onfinish = function(){ el.style.overflow = ''; if (done) done(); };
+  }
+  window.ssReadEdit = function(){
+    if (readEditing || draftAvail !== 'active') return;
+    var c = capById('read'); dr = { kind:'cap', id:'read', on:true, level:null, wl:(state.read.wl === 'all' ? 'all' : state.read.wl.slice()), wlq:'', wlCat:0, sec:'overview', inline:true };
+    readEditing = true; renderAvail(); slide(document.getElementById('ssReadEdit'), true);
+  };
+  window.ssReadCancel = function(){ slide(document.getElementById('ssReadEdit'), false, function(){ readEditing = false; dr = null; renderAvail(); }); };
+  window.ssReadSave = function(){
+    if (!dr || !dr.inline) return;
+    var none = dr.wl !== 'all' && !dr.wl.length; if (none) return;
+    var wl = (dr.wl === 'all' || dr.wl.length === WLS.length) && wlApplies('read').length === WLS.length ? 'all' : dr.wl.slice();
+    state.read = { on:true, level:null, tier:'ask', wl:wl }; persist();
+    slide(document.getElementById('ssReadEdit'), false, function(){ readEditing = false; dr = null; ssRenderCaps(); renderAvail(); toast('Read access updated'); });
+  };
+  window.ssSave = function(){ try { localStorage.setItem(KEYA, draftAvail); } catch(e){} savedAvail = draftAvail; syncSave(); toast(draftAvail === 'active' ? 'Agent settings saved' : 'Agent is now inactive'); };
   window.addEventListener('beforeunload', function(e){ if (draftAvail !== savedAvail){ e.preventDefault(); e.returnValue = ''; } });
 
   // ── shared list helpers ──
@@ -3101,35 +4511,35 @@ function hydrateDefaultPolicyForm(wl) {
   var RANK = { read:'Observe', prepare:'Recommend', ask:'Ask first', auto:'Automatic' };
   window.ssRenderCaps = function(){
     var q = (document.getElementById('ssCapSearch').value || '').trim().toLowerCase();
-    var on = CAPS.filter(function(c){ return state[c.id].on; }).length, kindN = function(k){ return CAPS.filter(function(c){ var l = curLvl(c); return state[c.id].on && l && l.kind === k; }).length; };
-    document.getElementById('ssCapStats').innerHTML = statCell('Total Capabilities', CAPS.length) + statCell('Enabled', on) + statCell('Acts without asking', kindN('auto')) + statCell('Needs your approval', kindN('ask'));
+    var on = skills().filter(function(c){ return state[c.id].on; }).length, kindN = function(k){ return skills().filter(function(c){ var l = curLvl(c); return state[c.id].on && l && l.kind === k; }).length; };
+    document.getElementById('ssCapStats').innerHTML = statCell('Total Skills', skills().length) + statCell('Enabled', on) + statCell('Acts without asking', kindN('auto')) + statCell('Needs your approval', kindN('ask'));
     document.getElementById('ssCapSrchIc').innerHTML = ic('search-outlined', 20);
-    document.getElementById('ssCapBody').innerHTML = CAPS.filter(function(c){ return !q || c.name.toLowerCase().indexOf(q) >= 0; }).map(function(c){
+    document.getElementById('ssCapBody').innerHTML = skills().filter(function(c){ return !q || c.name.toLowerCase().indexOf(q) >= 0; }).map(function(c){
       var s = state[c.id], why = unavailable(c);
       return '<tr><td class="ss-sw">' + sw(s.on, c.name + ' enabled', "ssCapToggle('" + c.id + "')") + '</td>'
-        + '<td><span class="ss-nmc">' + esc(c.name) + '<small>' + esc(c.sub) + '</small>' + (s.on && why.length ? '<span class="ss-warn">Unavailable — ' + esc(why.join(', ')) + ' is off</span>' : '') + '</span></td>'
+        + '<td><span class="ss-nmc"><a href="#" class="ss-link ss-nmlink" onclick="ssOpen(\'' + c.id + '\');return false">' + esc(c.name) + '</a><small>' + esc(c.sub) + '</small>' + (s.on && why.length ? '<span class="ss-warn">Unavailable — ' + esc(why.join(', ')) + ' is off</span>' : '') + '</span></td>'
         + '<td><span class="ss-chip">' + esc(c.access) + '</span></td><td>' + esc(wlSummary(s.wl, c.id)) + '</td>'
         + '<td>' + (s.on ? '<span class="ss-chip">' + RANK[curLvl(c) ? curLvl(c).kind : 'read'] + '</span>' : '<span style="color:var(--black-40, var(--black-60))">—</span>') + '</td><td>' + (c.runs > 0 ? c.runs : '—') + '</td>'
         + '<td class="ss-pin"><button type="button" class="ss-ib" aria-label="Configure ' + esc(c.name) + '" data-plv-tip="Configure" onclick="ssOpen(\'' + c.id + '\')">' + ic('edit-outlined', 18) + '</button>'
         + '<button type="button" class="ss-ib" aria-label="More actions" onclick="ssMenu(event, [[\'Configure\', function(){ ssOpen(\'' + c.id + '\'); }], [\'View in Agent activity\', function(){ location.href = \'activity-agent-overlay.html#agents\'; }]])">' + KEBAB + '</button></td></tr>';
-    }).join('') || '<tr><td colspan="7" style="padding:32px;color:var(--black-60)">No capabilities match your search.</td></tr>';
+    }).join('') || '<tr><td colspan="7" style="padding:32px;color:var(--black-60)">No skills match your search.</td></tr>';
     bindScroll('ssCapScroll');
   };
   function wlSummary(w, id){ if (w === 'all') return 'All workloads'; if (w.length === wlApplies(id).length && wlApplies(id).length === WLS.length) return 'All workloads'; return w.length <= 2 ? w.map(wlName).join(', ') : w.length + ' workloads'; }
   window.ssCapToggle = function(id){
     var s = state[id], c = capById(id);
     if (s.on){ s.on = false; persist(); ssRenderCaps(); return; }
-    var cl = curLvl(c); if (cl && cl.confirm){ confirmAuto('Turn on an automatic capability?', 'This capability acts without asking you first:', [c.name + ' \u2014 ' + cl.label], function(){ s.on = true; persist(); ssRenderCaps(); }); return; }
+    var cl = curLvl(c); if (cl && cl.confirm){ confirmAuto('Turn on an automatic skill?', 'This skill acts without asking you first:', [c.name + ' \u2014 ' + cl.label], function(){ s.on = true; persist(); ssRenderCaps(); }); return; }
     s.on = true; persist(); ssRenderCaps();
   };
-  window.ssResetAll = function(){ CAPS.forEach(function(c){ state[c.id] = norm(null, c); }); persist(); ssRenderCaps(); toast('Capabilities reset to defaults'); };
+  window.ssResetAll = function(){ skills().forEach(function(c){ state[c.id] = norm(null, c); }); persist(); ssRenderCaps(); toast('Skills reset to defaults'); };
 
   // ── capability page (full-page view) ──
   var dr = null;
   var WHO = {
     restore:{ prepare:'Agent plans · you start the job', ask:'Agent runs · you approve each one', auto:'Agent runs new-copy restores · no approval' },
     exportd:{ prepare:'Agent packages · you run it', ask:'Agent runs · you approve each one' },
-    data:{ ask:'Agent answers when you ask', sweep:'Agent also reports on its own' },
+    monitor:{ report:'Agent reports on its own', recommend:'Agent reports and recommends \u00b7 you decide' },
     jobs:{ prepare:'Agent suggests \u00b7 you run it', ask:'Agent runs \u00b7 you approve each one', auto:'Agent retries transient faults \u00b7 you review Activity' },
     findings:{ read:'Agent explains \u00b7 you act', ask:'Agent triages \u00b7 you approve each one', auto:'Agent triages low severity \u00b7 you review the history' },
     policies:{ recommend:'Agent drafts · you create it', create:'Agent creates it inactive · you activate', activate:'Agent creates and activates · you review the audit trail' },
@@ -3151,9 +4561,9 @@ function hydrateDefaultPolicyForm(wl) {
       + '<button type="button" class="x" aria-label="Close" onclick="ssDrClose()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
   }
   function secOverview(c){
-    return '<h2 class="ss-md-h1">Configure ' + esc(c.name) + ' capability</h2><p class="ss-md-lead">' + esc(c.sub) + '</p>'
-      + '<section class="ss-pg-sec" id="ssSec_overview"><h3 class="ss-pg-h">Status</h3>'
-      + '<label class="ss-st">' + sw(dr.on, 'Enabled', 'ssDrOn()') + '<span>' + (dr.on ? 'Enabled' : 'Off') + '</span></label></section>';
+    if (c.baseline) return '<div class="ss-md-top"><div class="ss-md-tt"><h2 class="ss-md-h1">Configure ' + esc(c.name) + '</h2><p class="ss-md-lead">' + esc(c.sub) + '</p></div></div>';
+    return '<div class="ss-md-top"><div class="ss-md-tt"><h2 class="ss-md-h1">Configure ' + esc(c.name) + ' skill</h2><p class="ss-md-lead">' + esc(c.sub) + '</p></div>'
+      + '<div class="ss-md-stat' + (dr.on ? ' is-selected' : '') + '"><div class="sc-header"><span class="sc-t">Status</span></div><div class="sc-desc"><span>Can Agents access this skill?</span><label class="ss-st">' + sw(dr.on, 'Active', 'ssDrOn()') + '<span>' + (dr.on ? 'Active' : 'Inactive') + '</span></label></div></div></div>';
   }
   function secLevel(c){
     if (!c.levels) return '';
@@ -3175,31 +4585,51 @@ function hydrateDefaultPolicyForm(wl) {
   }
   function secWl(c){
     var ok = wlApplies(c.id), fixed = ok.length < WLS.length, all = dr.wl === 'all';
-    var head = '<section class="ss-pg-sec" id="ssSec_wl"><h3 class="ss-pg-h">Workloads</h3>';
+    var head = '<section class="ss-pg-sec" id="ssSec_wl">' + (dr.inline ? '' : '<h3 class="ss-pg-h">Workloads</h3>');
     if (fixed) return head + '<p class="ss-pg-d">Only available on ' + esc(ok.map(wlName).join(', ')) + '.</p></section>';
-    return head + '<p class="ss-pg-d">Where the agent may use this capability.</p>'
+    return head + '<p class="ss-pg-d">' + (c.baseline ? 'Which workloads the agent can read.' : 'Where the agent may use this skill.') + '</p>'
       + '<span class="ss-seg" role="group" aria-label="Workload scope"><button type="button" class="' + (all ? 'on' : '') + '" onclick="ssDrWlMode(true)">All workloads</button><button type="button" class="' + (all ? '' : 'on') + '" onclick="ssDrWlMode(false)">Specific workloads</button></span>'
       + (all ? '<div class="ss-note">Includes workloads added later.</div>' : '<div id="ssWp"></div>') + '</section>';
   }
   function pgMain(){
+    if (dr && dr.inline){ var ih = document.getElementById('ssReadInline'); if (ih) ih.innerHTML = secWl(pgC()); pgWp(); return; }   // Read access edits inside the availability card, not the full-page editor
     var m = document.getElementById('ssPgMain'), top = m.scrollTop, c = pgC();
     m.style.scrollBehavior = 'auto'; m.innerHTML = '<div class="ss-md-col">' + secOverview(c) + secLevel(c) + secWl(c) + '</div>'; m.scrollTop = top; m.style.scrollBehavior = '';
     pgWp();
   }
   function wlMatches(w){ var q = (dr.wlq || '').trim().toLowerCase(); return !q || w.name.toLowerCase().indexOf(q) >= 0; }
+  // Workload picker — GROUPED LIST (2026-10-15, pattern B from workload-access-explorer.html): every category on one scrolling list, each with a tri-state
+  // checkbox (tick = the whole category) and a collapse arrow; the search filters across categories and opens the groups that match.
+  // Shared by the Read-access card and every skill's Workloads section.
   function pgWp(){
     var host = document.getElementById('ssWp'); if (!host || dr.wl === 'all') return;
+    dr.closed = dr.closed || {};
     var sel = dr.wl, q = (dr.wlq || '').trim();
-    var cats = WL_CATS.map(function(cat, i){ var all = WLS.filter(function(w){ return w.cat === cat; }), n = all.filter(function(w){ return sel.indexOf(w.id) >= 0; }).length; return '<button type="button" class="' + (!q && dr.wlCat === i ? 'is-active' : '') + '" onclick="ssWlCat(' + i + ')"><span>' + esc(cat) + '</span><span class="n">' + n + ' of ' + all.length + '</span></button>'; }).join('');
-    var shown = q ? WLS.filter(wlMatches) : WLS.filter(function(w){ return w.cat === WL_CATS[dr.wlCat]; });
-    var list = shown.map(function(w){ return '<label class="ss-ck"><input type="checkbox"' + (sel.indexOf(w.id) >= 0 ? ' checked' : '') + ' onchange="ssDrWl(\'' + w.id + '\')"><span>' + esc(w.name) + '</span></label>'; }).join('') || '<div class="ss-note" style="text-align:center;padding:24px 0">No workloads match.</div>';
+    var groups = WL_CATS.map(function(cat, i){ var all = WLS.filter(function(w){ return w.cat === cat; }); return { i:i, cat:cat, all:all, shown:all.filter(wlMatches) }; }).filter(function(g){ return g.shown.length; });
+    var body = groups.map(function(g){
+      var n = g.all.filter(function(w){ return sel.indexOf(w.id) >= 0; }).length, st = n === 0 ? 'none' : (n === g.all.length ? 'all' : 'some'), open = q ? true : !dr.closed[g.i];
+      return '<div class="ss-wpb-g"><div class="ss-wpb-hd"><button type="button" class="ss-wpb-tw' + (open ? '' : ' closed') + '" aria-expanded="' + open + '" aria-label="' + (open ? 'Collapse ' : 'Expand ') + esc(g.cat) + '" onclick="ssWlFold(' + g.i + ')">' + ic('keyboard-arrow-down-outlined', 20) + '</button>'
+        + '<label class="ss-ck"><input type="checkbox"' + (st === 'all' ? ' checked' : '') + (st === 'some' ? ' data-indet="1"' : '') + ' onchange="ssWlGrp(' + g.i + ', this.checked)"><span>' + esc(g.cat) + '</span><span class="n">' + n + ' of ' + g.all.length + '</span></label></div>'
+        + (open ? '<div class="ss-wpb-items">' + g.shown.map(function(w){ return '<label class="ss-ck"><input type="checkbox"' + (sel.indexOf(w.id) >= 0 ? ' checked' : '') + ' onchange="ssDrWl(\'' + w.id + '\')"><span>' + esc(w.name) + '</span></label>'; }).join('') + '</div>' : '') + '</div>';
+    }).join('') || '<div class="ss-note" style="text-align:center;padding:24px 0">No workloads match.</div>';
     var sf = document.getElementById('ssWlQ'), had = sf && document.activeElement === sf;
-    host.innerHTML = '<div class="ss-wp"><div class="ss-wp-cats">' + cats + '</div><div class="ss-wp-r"><div class="ss-wp-s"><input type="text" id="ssWlQ" placeholder="Search all workloads" value="' + esc(dr.wlq) + '" oninput="ssWlSearch(this.value)" aria-label="Search workloads"><span class="ss-wp-ic">' + ic('search-outlined', 20) + '</span></div>'
-      + '<div class="ss-wp-list">' + (q ? '<div class="ss-wp-ghd">Results across all categories</div>' : '') + list + '</div>'
-      + '<div class="ss-wp-ft"><span class="' + (sel.length ? '' : 'is-warn') + '">' + (sel.length ? sel.length + ' of ' + WLS.length + ' selected' : 'Choose at least one workload') + '</span><span><button type="button" onclick="ssWlAll()">Select all' + (q ? ' results' : ' in category') + '</button><button type="button" onclick="ssWlNone()">Clear all</button></span></div></div></div>';
+    host.innerHTML = '<div class="ss-wpb"><div class="ss-wpb-tools"><div class="ss-wp-s"><input type="text" id="ssWlQ" placeholder="Search all workloads" value="' + esc(dr.wlq) + '" oninput="ssWlSearch(this.value)" aria-label="Search workloads"><span class="ss-wp-ic">' + ic('search-outlined', 20) + '</span></div>'
+      + '<button type="button" onclick="ssWlFoldAll(false)">Expand all</button><button type="button" onclick="ssWlFoldAll(true)">Collapse all</button></div>'
+      + '<div class="ss-wpb-body">' + body + '</div>'
+      + '<div class="ss-wp-ft"><span>' + sel.length + ' of ' + WLS.length + ' selected \u00b7 tick a category to select everything in it</span><span><button type="button" onclick="ssWlNone()">Clear all</button></span></div></div>';
+    [].forEach.call(host.querySelectorAll('[data-indet]'), function(e){ e.indeterminate = true; });
     if (had){ var nf = document.getElementById('ssWlQ'); nf.focus(); nf.setSelectionRange(nf.value.length, nf.value.length); }
   }
+  window.ssWlFold = function(i){ dr.closed = dr.closed || {}; dr.closed[i] = !dr.closed[i]; pgWp(); };
+  window.ssWlFoldAll = function(close){ dr.closed = {}; if (close) WL_CATS.forEach(function(c, i){ dr.closed[i] = true; }); dr.wlq = ''; pgWp(); };
+  window.ssWlGrp = function(i, on){ WLS.filter(function(w){ return w.cat === WL_CATS[i]; }).forEach(function(w){ var k = dr.wl.indexOf(w.id); if (on && k < 0) dr.wl.push(w.id); if (!on && k >= 0) dr.wl.splice(k, 1); }); pgWp(); pgSync(); };
   function pgSync(){
+    if (dr && dr.inline){
+      var rsv = document.getElementById('ssReadSave'), rh = document.getElementById('ssReadHint'); if (!rsv) return;
+      var same0 = JSON.stringify(wlKey(dr.wl)) === JSON.stringify(wlKey(state[dr.id].wl)), none0 = dr.wl !== 'all' && !dr.wl.length;
+      rsv.disabled = same0 || none0; if (rh) rh.textContent = none0 ? 'Choose at least one workload to save.' : '';
+      return;
+    }
     var sv = document.getElementById('ssDrSave'); if (!sv) return;
     var cc = pgC(), dlv = lvlOf(cc, dr.level), raise = dr.on && dlv && dlv.confirm && !(state[dr.id].on && state[dr.id].level === dr.level);
     var cw = state[dr.id].wl, same = JSON.stringify(wlKey(dr.wl)) === JSON.stringify(wlKey(cw)), noneChosen = dr.wl !== 'all' && !dr.wl.length;
@@ -3211,27 +4641,27 @@ function hydrateDefaultPolicyForm(wl) {
   function pgAll(){ pgHead(); pgMain(); pgSync(); }
   window.ssDrOn = function(){ dr.on = !dr.on; pgAll(); };
   window.ssDrLevel = function(id){ dr.level = id; pgMain(); pgSync(); };
-  window.ssDrWlMode = function(all){ dr.wl = all ? 'all' : []; dr.wlq = ''; dr.wlCat = 0; pgMain(); pgSync(); };
+  window.ssDrWlMode = function(all){ dr.wl = all ? 'all' : []; dr.wlq = ''; dr.wlCat = 0; dr.closed = {}; pgMain(); pgSync(); };
   window.ssDrWl = function(id){ var i = dr.wl.indexOf(id); if (i >= 0) dr.wl.splice(i, 1); else dr.wl.push(id); pgWp(); pgSync(); };
   window.ssWlSearch = function(v){ dr.wlq = v; pgWp(); };
   window.ssWlCat = function(i){ dr.wlCat = i; dr.wlq = ''; pgWp(); };
   window.ssWlAll = function(){ var q = (dr.wlq || '').trim(); (q ? WLS.filter(wlMatches) : WLS.filter(function(w){ return w.cat === WL_CATS[dr.wlCat]; })).forEach(function(w){ if (dr.wl.indexOf(w.id) < 0) dr.wl.push(w.id); }); pgWp(); pgSync(); };
   window.ssWlNone = function(){ dr.wl = []; pgWp(); pgSync(); };
-  window.ssDrClose = function(){ dr = null; document.getElementById('ssPg').classList.remove('open'); document.getElementById('ssPgScrim').classList.remove('open'); };
+  window.ssDrClose = function(){ if (dr && dr.inline){ ssReadCancel(); return; } dr = null; document.getElementById('ssPg').classList.remove('open'); document.getElementById('ssPgScrim').classList.remove('open'); };
   function commitDr(){
-    state[dr.id] = { on:dr.on, level:dr.level, tier:tierOf(capById(dr.id), dr.level), wl:(dr.wl === 'all' || dr.wl.length === WLS.length) && wlApplies(dr.id).length === WLS.length ? 'all' : dr.wl }; persist(); var n = capById(dr.id).name; ssDrClose(); ssRenderCaps(); toast(n + ' updated');
+    state[dr.id] = { on:dr.on, level:dr.level, tier:tierOf(capById(dr.id), dr.level), wl:(dr.wl === 'all' || dr.wl.length === WLS.length) && wlApplies(dr.id).length === WLS.length ? 'all' : dr.wl }; persist(); var n = capById(dr.id).name; ssDrClose(); ssRenderCaps(); renderAvail(); toast(n + ' updated');
   }
   window.ssDrSave = function(){
     var _c = capById(dr.id), _l = lvlOf(_c, dr.level);
     if (dr.on && _l && _l.confirm && !(state[dr.id].on && state[dr.id].level === dr.level)){
-      confirmAuto('Raise autonomy?', 'This capability will act without asking you first:', [_c.name + ' — ' + _l.label], commitDr); return;
+      confirmAuto('Raise autonomy?', 'This skill will act without asking you first:', [_c.name + ' — ' + _l.label], commitDr); return;
     }
     commitDr();
   };
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && dr && !document.getElementById('ssDlg').classList.contains('open')) ssDrClose(); });
 
   function boot(){
-    var h = (location.hash || '').replace('#', ''); view = (h === 'capabilities' || h === 'access') ? 'caps' : 'settings';
+    var h = (location.hash || '').replace('#', ''); view = (h === 'skills' || h === 'capabilities' || h === 'access' || h === 'caps') ? 'caps' : 'settings';
     ssGo(view);
     if (typeof VN_ICONS !== 'undefined') VN_ICONS.agentstudio = ic('ai-sparkle', 24) || '';
   }

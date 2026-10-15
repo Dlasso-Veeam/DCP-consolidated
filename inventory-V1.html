@@ -1530,8 +1530,8 @@ tbody tr.rec-diff-row-unchanged .diff-dot { background: var(--black-30); }
 /* Top = the as-of/anchor (reference, muted); bottom = the compared-to value
    (showcased). The compared-to always sits in the showcased bottom slot so the
    slot's meaning is stable regardless of which date is older. */
-.rec-ba .rec-ba-top    { display: block; font-size: 14px; font-weight: 450; color: var(--black-60); }
-.rec-ba .rec-ba-bottom { display: block; font-size: 14px; font-weight: 500; color: var(--black-100); }
+.rec-ba .rec-ba-top    { display: block; font-size: 16px; font-weight: 450; color: var(--black-60); }
+.rec-ba .rec-ba-bottom { display: block; font-size: 16px; font-weight: 500; color: var(--black-100); }
 .rec-ba .rec-ba-date   { display: block; font-size: 10px; font-weight: 450; color: var(--black-30); line-height: 1.2; margin-bottom: 4px; }
 
 /* Long-text columns (e.g. Description) — aggressively truncate to ~2 lines in
@@ -24469,15 +24469,15 @@ function _childRenderRecords() {
           // Top = anchor/as-of (v, muted) with its date; bottom = the
           // compared-to value (_bef, showcased) with its date. Each value
           // clamps independently for long-text columns.
-          return '<td class="rec-diff-cell-changed rec-ba' + _ltCls + '" style="font-size:14px">'
+          return '<td class="rec-diff-cell-changed rec-ba' + _ltCls + '">'
             + '<span class="rec-ba-top">' + _clampLT(q ? _hlKind(v, q, 'field') : v, v) + '</span>'
             + '<span class="rec-ba-date">' + _baAfterDate + '</span>'
             + '<span class="rec-ba-bottom">' + _clampLT(q ? _hlKind(_bef, q, 'field') : _bef, _bef) + '</span>'
             + '<span class="rec-ba-date">' + _baBeforeDate + '</span></td>';
         }
-        return '<td class="rec-diff-cell-changed' + _ltCls + '" style="font-size:14px">' + _clampLT(q ? _hlKind(v, q, 'field') : v, v) + '</td>';
+        return '<td class="rec-diff-cell-changed' + _ltCls + '">' + _clampLT(q ? _hlKind(v, q, 'field') : v, v) + '</td>';
       }
-      return '<td' + (_ltCls ? ' class="' + _ltCls.trim() + '"' : '') + ' style="font-size:14px">' + _clampLT(q ? _hlKind(v, q, 'field') : v, v) + '</td>';
+      return '<td' + (_ltCls ? ' class="' + _ltCls.trim() + '"' : '') + '>' + _clampLT(q ? _hlKind(v, q, 'field') : v, v) + '</td>';
     }).join('');
     var rowSelected = isCovered ? true : isInPlan('rec-' + r._id);
     var rowClasses = [];
@@ -24806,13 +24806,13 @@ function _childRenderFields() {
     var _fldBef = _isChanged ? _recBeforeVal(resolved.schemaKey, resolved.idx, f.name, f.value) : null;
     if (_isChanged && _fldBef != null) {
       var _fBefHl = q ? _hlText(String(_fldBef), q) : wsEscape(String(_fldBef));
-      valueCell = '<td class="rec-diff-cell-changed rec-ba" style="font-size:14px">'
+      valueCell = '<td class="rec-diff-cell-changed rec-ba">'
         + '<span class="rec-ba-top">' + _fVal + '</span>'
         + '<span class="rec-ba-date">' + _baAfterDate + '</span>'
         + '<span class="rec-ba-bottom">' + _fBefHl + '</span>'
         + '<span class="rec-ba-date">' + _baBeforeDate + '</span></td>';
     } else {
-      valueCell = '<td class="' + _valueChangedCls.trim() + '" style="font-size:14px">' + _fVal + '</td>';
+      valueCell = '<td class="' + _valueChangedCls.trim() + '">' + _fVal + '</td>';
     }
     var modifiedCell = '<td style="font-size:16px;color:var(--black-60);white-space:nowrap">' + wsEscape(modified) + '</td>';
     var actions =

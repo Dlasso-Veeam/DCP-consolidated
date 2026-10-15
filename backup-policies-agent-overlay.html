@@ -1370,6 +1370,11 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
 #pol-tbody .rank-num[data-plv-tip]:hover::after,
 #pol-tbody .drag-handle[data-plv-tip]:hover::after,
 #pol-tbody tr:first-child [data-plv-tip]:hover::after { bottom: auto; top: calc(100% + 6px); }
+/* File ROT list: the pinned actions column anchors its bubbles to the right edge (they would grow into the scroll container's clip), and the
+   recommendation's status switch shows its bubble to the SIDE so it never sits on top of the control it describes. */
+#rot-table td:last-child [data-plv-tip]:hover::after { left: auto; right: 0; }
+.rot-swtip { display: inline-flex; }   /* the tip sits on a wrapper: .plv-switch draws its knob with ::after, which a tooltip on the switch itself would replace */
+#rot-table .rot-swtip[data-plv-tip]:hover::after { bottom: auto; top: 50%; left: calc(100% + 8px); transform: translateY(-50%); }
 
 /* ═══ CANONICAL WORKLOAD PICKER (tnwl, ported verbatim from
    inventory-V1-agent-overlay.html's chrome-row variant, user 2026-08-13) ═══
@@ -1789,17 +1794,17 @@ body.ai-full #aiWorkingGlow { display: none; }
 /* Agent responses sit flat on the white panel, full width; only the user's
    messages keep bubble chrome, right-aligned. */
 .ai-msg.agent .ai-bubble { background: none; border: none; padding: 0; border-radius: 0; max-width: 100%; flex: 1; color: var(--black-100); }
-.ai-msg.user .ai-bubble { background: var(--blue); color: var(--white); border-top-right-radius: 4px; }
+.ai-msg.user .ai-bubble { background: var(--em-green-tint); color: var(--black-100); border-top-right-radius: 4px; }
 .ai-bubble strong { font-weight: 600; }
 .ai-bubble p + p { margin-top: 8px; }
 .ai-action { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; color: var(--black-60); }
 .ai-action .ai-action-ic { width: 16px; height: 16px; flex-shrink: 0; color: var(--green); display: inline-flex; }
 .ai-action.run { color: var(--blue-dark); }
 .ai-action.run .ai-action-ic { color: var(--blue); }
-.ai-gate { margin-top: 10px; border-top: 1px solid var(--black-5); padding-top: 10px; }
-.ai-gate-q { font-size: 14px; color: var(--black-100); margin-bottom: 10px; }
+.ai-gate { margin-top: 10px; border: 1px solid var(--border-light); border-radius: 8px; padding: 12px 16px; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+.ai-gate-q { font-size: 16px; line-height: 22px; color: var(--black-100); margin-bottom: 10px; }
 .ai-gate-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-.ai-gate-btn { height: 28px; padding: 0 12px; border-radius: 4px; font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; border: 1px solid var(--border); background: var(--white); color: var(--black-100); }
+.ai-gate-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px; border-radius: 4px; font-size: 16px; font-weight: 450; line-height: 22px; font-family: inherit; cursor: pointer; border: 1px solid var(--border); background: var(--white); color: var(--black-100); box-sizing: border-box; }
 .ai-gate-btn:hover { background: var(--black-5); }
 .ai-gate-btn.primary { background: var(--blue); border-color: var(--blue); color: var(--white); }
 /* Vision Primary hover = Green/S70 (was filter-brightness — the off-spec
@@ -1810,13 +1815,19 @@ body.ai-full #aiWorkingGlow { display: none; }
    Vision card surface, actions = Figma Vision Button set 228:10477 — same
    provenance as the source component) for the non-collaborative slice. Headless variant: the card CONTAINS
    its evidence — rows the workspace used to vouch for, the card vouches for. */
-.ai-approval { margin-top: 10px; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
-.ai-approval-title { font-size: 14px; font-weight: 700; }
-.ai-approval-row { display: flex; gap: 10px; padding: 5px 0; font-size: 14px; line-height: 1.45; }
-.ai-approval-k { width: 92px; flex-shrink: 0; color: var(--black-60); }
+.ai-approval { margin-top: 10px; border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); padding: 12px 16px; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+.ai-approval-title { font-size: 16px; line-height: 22px; font-weight: 500; color: var(--black-100); }
+.ai-approval-row { display: flex; gap: 8px; padding: 3px 0; font-size: 14px; line-height: 19px; }
+.ai-approval-k { width: 72px; flex-shrink: 0; color: var(--black-60); }
 .ai-approval-v { color: var(--black-100); min-width: 0; }
 .ai-approval .ai-gate-btns { margin-top: 10px; }
-.ai-approval-done { display: none; font-size: 14px; color: var(--em-green); font-weight: 500; margin-top: 8px; }
+.ai-approval-done { display: none; margin-top: 8px; font-size: 13px; font-weight: 500; color: var(--em-green); }
+/* panel gate cards: identical to Protected Data (single spec for every page the assistant appears on) */
+.ai-approval-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.ai-approval-auto { margin-left: auto; font-size: 12px; font-weight: 500; color: var(--black-60); background: var(--black-5); border-radius: 2px; padding: 2px 6px; cursor: help; }
+.ai-approval:not(.resolved):hover { border-color: var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.ai-gate:not(.resolved):hover { border-color: var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.ai-gate-btn svg { flex-shrink: 0; width: 14px; height: 14px; }
 .ai-approval.resolved .ai-approval-done { display: block; }
 .ai-approval.resolved .ai-gate-btns { display: none; }
 .ai-gate.resolved .ai-gate-btns { display: none; }
@@ -10385,9 +10396,9 @@ function aiRender(){
           return '<div class="ai-approval-row"><span class="ai-approval-k">'+_aiEsc(r[0])+'</span><span class="ai-approval-v">'+r[1]+'</span></div>';
         }).join('');
         gate = '<div class="ai-approval'+(m.gate.resolved?' resolved':'')+'">'
-          + '<div class="ai-approval-title">Approval required</div>'
+          + '<div class="ai-approval-hd"><span class="ai-approval-title">Approval required</span></div>'
           + apRows + btns
-          + '<div class="ai-approval-done">✓ '+_aiEsc(m.gate.choice||'Approved')+' · you</div>'
+          + '<div class="ai-approval-done">\u2713 '+_aiEsc(m.gate.choice||'Approved')+' \u00b7 you'+(m.gate.decidedAt?' \u00b7 '+m.gate.decidedAt:'')+'</div>'
           + '</div>';
       } else {
       gate = '<div class="ai-gate'+(m.gate.resolved?' resolved':'')+'">'
@@ -10412,7 +10423,7 @@ function aiPushAgent(html, gate){
 function aiGateClick(i){
   var m = aiAgent.activeGate; if(!m || !m.gate || m.gate.resolved) return;
   var btn = m.gate.buttons[i]; if(!btn) return;
-  m.gate.resolved = true; m.gate.choice = btn.choice || btn.label;
+  m.gate.resolved = true; m.gate.choice = btn.choice || btn.label; m.gate.decidedAt = new Date().toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
   aiAgent.activeGate = null; aiRender();
   if(typeof btn.fn === 'function') btn.fn();
 }
@@ -10760,7 +10771,7 @@ else aiComposerIcons();
   try {
     var _mk = sessionStorage.getItem('vdc-ai-handoff');
     if (_mk) sessionStorage.removeItem('vdc-ai-handoff');   // one-shot, always consumed
-    if (_mk !== '1' && _mk !== 'backup-policies.html') return;
+    if (_mk !== '1' && _mk !== 'backup-policies.html' && _mk !== 'backup-policies-agent-overlay.html') return;   // + the overlay file's own name — nav carries the destination filename
     var raw = JSON.parse(localStorage.getItem('vdc-ai-transcript'));
     if (!raw || !Array.isArray(raw.msgs) || !raw.msgs.length) return;
     raw.msgs.forEach(function(r){
@@ -11163,6 +11174,7 @@ function aiacToggleActs(i){
   m.actsOpen = !m.actsOpen;
   aiRender();
 }
+function aiacToggleTable(i){ var m = aiAgent.msgs[i]; if(!m || m.role !== 'card') return; m.tblOpen = !m.tblOpen; aiAgent._scrollAnchor = m.tblOpen ? { reveal: '[data-aiac="' + i + '"] .ov-more-row' } : 'keep'; aiRender(); }
 // Local routing: nav stays a nav (with the handoff marker so the target
 // page can pick the conversation up); a FLOW is approved here but runs
 // where the run machinery lives — back on inventory, via a one-shot
@@ -11268,7 +11280,7 @@ body.ai-open { --ai-w: min(665px, 46vw); }
 body.ai-open .app { padding-right: 0; }
 body.ai-open .ws-overlay { right: 0; }
 body.ai-open .ws-modal { right: 24px; }
-body.ai-open .record-drawer { right: 16px; max-width: calc(100vw - 32px); }
+body.ai-open .record-drawer.open { right: 16px; max-width: calc(100vw - 32px); }   /* only when open — the closed drawer parks off-screen, and this rule used to pull it into view behind the assistant */
 /* scrim — white wash, page stays legible but inert (Figma: ~80% wash) */
 #aiScrim { display: none; position: fixed; inset: 0; z-index: 9590; background: rgba(255,255,255,0.78); }
 body.ai-open #aiScrim { display: block; }
@@ -11307,8 +11319,8 @@ body.ai-full #aiExpandBtn, #aiExpandBtn { display: none; }
 .ov-prose p { margin: 0; } .ov-prose p + p { margin-top: 12px; }
 .ov-prose { color: var(--black-100); }
 .ov-card { border: 1px solid var(--border-light); border-radius: 4px; background: var(--white); padding: 12px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-.ov-card-hd { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.ov-card-title { font-size: 16px; line-height: 22px; font-weight: 500; }
+.ov-card-hd { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }   /* flex-start (was center): a title that wraps to 2 lines pulled the button off the top-right corner */
+.ov-card-title { font-size: 16px; line-height: 22px; font-weight: 500; margin-top: 3px; }   /* 3px = (28px button − 22px line) / 2 — keeps a one-line title centred on the button */
 .ov-btn { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font-family: inherit; font-size: 14px; color: var(--black-100); cursor: pointer; white-space: nowrap; flex-shrink: 0; }
 .ov-btn:hover { background: var(--black-5); }
 .ov-btn svg { width: 16px; height: 16px; }
@@ -11322,8 +11334,8 @@ body.ai-full #aiExpandBtn, #aiExpandBtn { display: none; }
 .ov-block .v { font-size: 14px; color: var(--black-80); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ov-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 14px; color: var(--black-60); }
 .ov-legend .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; background: var(--c); }
-.ov-bars { display: flex; flex-direction: column; gap: 8px; }
-.ov-bar { display: grid; grid-template-columns: minmax(80px, 28%) 1fr auto; align-items: center; gap: 12px; font-size: 14px; }
+.ov-bars { display: grid; grid-template-columns: minmax(80px, 28%) 1fr auto; column-gap: 12px; row-gap: 8px; align-items: center; }   /* shared columns: each row used to size its own value column, so tracks differed in width per row */
+.ov-bar { display: grid; grid-template-columns: subgrid; grid-column: 1 / -1; align-items: center; font-size: 14px; }
 .ov-bar .lbl { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ov-bar .track { height: 12px; border-radius: 2px; background: var(--black-5); overflow: hidden; }
 .ov-bar .track > span { display: block; height: 100%; border-radius: 2px; }
@@ -11332,10 +11344,11 @@ body.ai-full #aiExpandBtn, #aiExpandBtn { display: none; }
 .ov-cap-fig small { font-size: 14px; font-weight: 400; color: var(--black-60); letter-spacing: 0; margin-left: 4px; }
 .ov-card .aiac-trend { margin-top: 0; }
 .ov-table-wrap { border: 1px solid var(--border-light); border-radius: 4px; overflow-x: auto; }
-.ov-table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 20px; }
+.ov-table { width: 100%; min-width: 0; border-collapse: collapse; font-size: 14px; line-height: 20px; }   /* min-width:0 beats the global table{min-width:900px} */
 .ov-table th { text-align: left; font-size: 12px; font-weight: 400; color: var(--black-60); padding: 8px 12px; background: var(--ov-form-bg); }
 .ov-table td { padding: 8px 12px; vertical-align: top; border-top: 1px solid var(--border-light); }
 .ov-table td:first-child { font-weight: 500; }
+.ov-more-row { text-align: center; margin-top: -4px; }   /* the table card's "Show all N" toggle */
 .ov-badge { display: inline-block; padding: 0 8px; border-radius: 2px; font-size: 14px; line-height: 22px; font-weight: 500; }
 .ov-badge.ok { background: var(--em-green-tint); color: var(--em-green); }
 .ov-badge.warn { background: var(--orange-10); color: var(--orange); }
@@ -11366,6 +11379,7 @@ body.ai-full #aiExpandBtn, #aiExpandBtn { display: none; }
 .ov-rs-head svg.caret { margin-left: auto; flex-shrink: 0; color: var(--black-60); transition: transform 0.15s ease; }
 .ov-rs.is-open .ov-rs-head svg.caret { transform: rotate(180deg); }
 .ov-rs.is-collapsed { padding: 8px 12px; }
+.ov-rs-cur { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ov-rs-list { display: flex; flex-direction: column; gap: 4px; }
 .ov-rs.is-collapsed .ov-rs-list { display: none; }
 .ov-rs.is-collapsed.is-open .ov-rs-list { display: flex; margin-top: 8px; }
@@ -11427,6 +11441,44 @@ button.ov-rs-row:hover .ov-rs-lbl { text-decoration: underline; text-decoration-
 .rot-chip.ok { background: var(--em-green-tint); color: var(--em-green); }
 .rot-chip.n { background: var(--black-5); color: var(--black-100); }
 .rot-new td { background: var(--em-green-tint); }
+/* Recommendation row: not an "active" row — a soft AI-colour wash that fades out to the right, dashed rules (provisional), gradient sparkle tile. */
+#rot-table tbody tr.rot-prop-row { background: linear-gradient(90deg, rgba(17,158,231,0.09), rgba(216,61,207,0.06) 45%, rgba(255,255,255,0) 90%); }
+#rot-table tbody tr.rot-prop-row td { background: transparent; border-top: 1px dashed var(--black-30); border-bottom: 1px dashed var(--black-30); }
+#rot-table tbody tr.rot-prop-row td:last-child { background: var(--white); }
+#rot-table tbody tr.rot-prop-row:hover td:last-child { background: var(--white); }
+.rot-reco-ic { width: 16px; height: 16px; border-radius: 3px; background: var(--ai-grad); color: var(--white); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.rot-reco-ic svg { width: 12px; height: 12px; display: block; }
+/* Row entrance (2026-10-15, from policy-recommendation-animation-explorer.html style E · Spotlight cascade): driven by playRow() with the Web
+   Animations API — the rows below step down in a wave (bottom first) to open the slot, the recommendation drops into it, then a shimmer travels left
+   to right along its edge while every other row recedes (dimmed + desaturated) until it has passed. #rotScroll is the shimmer's positioning context. */
+#rotScroll { position: relative; }
+.rot-ring { position: absolute; z-index: 3; pointer-events: none; border: 2px solid transparent; border-radius: 4px; opacity: 0;
+  background: linear-gradient(90deg, transparent 0%, transparent 38%, rgb(17, 158, 231) 46%, rgb(216, 61, 207) 50%, transparent 62%, transparent 100%) border-box; background-size: 300% 100%; background-position: 100% 0;
+  -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) padding-box exclude, linear-gradient(#000 0 0); }   /* outline only: the padding box is masked out so the row stays legible */
+.rot-ring.is-ok { background: linear-gradient(90deg, transparent 0%, transparent 38%, rgb(26, 158, 102) 46%, rgb(1, 128, 74) 50%, transparent 62%, transparent 100%) border-box; background-size: 300% 100%; background-position: 100% 0; }   /* acceptance: the same shimmer in brand green */
+/* was (pop + slide keyframes, retired 2026-10-15 — scale/clip reveal on a spring that overshoot, rows below slid on a separate curve):
+/ * Row entrance: the recommendation pops into the top slot with a spring overshoot, and the rows below slide down on the SAME curve and duration
+   (once per page load). --rot-spring is the shared easing. * /
+#rot-table { --rot-spring: cubic-bezier(0.34, 1.56, 0.64, 1); --rot-dur: 0.9s; }
+@keyframes rotRowPop { 0% { opacity: 0; clip-path: inset(0 0 100% 0); transform: scaleY(0.4); } 25% { opacity: 1; } 100% { opacity: 1; clip-path: inset(0 0 0 0); transform: none; } }
+@keyframes rotRowSlide { 0% { transform: translateY(-48px); } 100% { transform: none; } }
+@keyframes rotRowWash { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+#rot-table tbody tr.rot-prop-row.is-entering { transform-origin: 50% 0; animation: rotRowPop var(--rot-dur) var(--rot-spring) both, rotRowWash 2s ease-out 0.5s both; background-size: 220% 100%; }
+#rot-table.is-sliding tbody tr:not(.rot-prop-row) { animation: rotRowSlide var(--rot-dur) var(--rot-spring) both; animation-delay: var(--rot-delay, 0ms); }
+@media (prefers-reduced-motion: reduce) { #rot-table tbody tr.rot-prop-row.is-entering, #rot-table.is-sliding tbody tr:not(.rot-prop-row) { animation: none; } }
+*/
+/* Why-it-was-recommended tooltip: AI-styled (gradient hairline, tinted wash, gradient title) so it reads as the agent speaking. */
+.rot-ai-tip { position: fixed; z-index: 9800; width: 340px; max-width: calc(100vw - 24px); padding: 12px; border: 1px solid transparent; border-radius: 8px; background: linear-gradient(135deg, #f1f9fe, #fdf3fc 60%, #ffffff) padding-box, var(--ai-grad) border-box; box-shadow: 0 8px 24px rgba(31,34,41,0.16); pointer-events: none; opacity: 0; transform: translateY(-4px); transition: opacity 0.12s ease, transform 0.12s ease; }
+.rot-ai-tip.is-on { opacity: 1; transform: none; }
+.rot-ai-tip-h { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 14px; line-height: 20px; font-weight: 500; }
+.rot-ai-tip-h span.t { color: var(--black-100); }
+.rot-ai-tip ul { margin: 0; padding-left: 16px; font-size: 14px; line-height: 20px; color: var(--black-100); }
+.rot-ai-tip li + li { margin-top: 4px; }
+.rot-ai-tip-f { margin-top: 8px; font-size: 12px; line-height: 16px; color: var(--black-60); }.rot-reco-chip { display: inline-flex; align-items: center; gap: 6px; padding-left: 6px; background: var(--white); color: var(--black-100); border: 1px solid var(--black-20); margin-left: 8px; vertical-align: middle; cursor: default; }
+.rot-ibtn-act { border: 0; background: none; padding: 0; color: var(--black-100); cursor: pointer; border-radius: 4px; }
+.rot-ibtn-act:hover { background: var(--black-5); }
+.rot-ibtn-bad { color: var(--red); }
+.rot-ibtn-bad:hover { background: var(--red-10); }
 .rot-sub { font-size: 14px; color: var(--black-60); }
 .rot-banner { display: flex; align-items: center; gap: 12px; margin: 16px 24px 0; padding: 8px 12px; border: 1px solid var(--border-light); border-radius: 4px; background: var(--white); font-size: 14px; line-height: 20px; }
 .rot-banner[hidden] { display: none; }
@@ -11439,7 +11491,7 @@ button.ov-rs-row:hover .ov-rs-lbl { text-decoration: underline; text-decoration-
 .ov-consent-tool { display: flex; align-items: center; gap: 8px; font-size: 16px; line-height: 24px; font-weight: 500; margin-bottom: 4px; }
 .ov-consent-tool svg { width: 16px; height: 16px; flex-shrink: 0; }
 .ov-consent-card .ai-approval-row { font-size: 14px; }
-.ov-consent-btns { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.ov-consent-btns { display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 8px; margin-top: 8px; }
 .ov-consent-note { width: 100%; min-height: 72px; margin-top: 8px; padding: 8px 12px; border: 1px solid var(--em-green); border-radius: 4px; background: var(--em-green-tint); font: inherit; font-size: 14px; resize: vertical; }
 .ov-danger { background: var(--red); border-color: var(--red); color: var(--white); }
 .ov-consent-done { margin-top: 8px; font-size: 14px; color: var(--em-green); font-weight: 500; }
@@ -11637,14 +11689,19 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
     return '<div class="ov-bars"><div class="ov-bar" style="grid-template-columns:1fr auto"><span class="track"><span style="width:' + Math.min(100, Math.round(c.val / c.max * 100)) + '%;background:' + c.color + '"></span></span>'
       + '<span class="val">' + esc(c.val + ' / ' + c.max + ' ' + c.unit) + '</span></div></div>';
   }
-  function table(t){
+  // t.collapse = rows shown before the "Show all N" toggle (card state m.tblOpen, flipped by aiacToggleTable)
+  function table(t, m, i){
     var head = '<tr>' + t.cols.map(function(c){ return '<th>' + esc(c) + '</th>'; }).join('') + '</tr>';
-    var body = t.rows.map(function(r){
+    var capped = t.collapse && t.rows.length > t.collapse, open = !!(m && m.tblOpen);
+    var body = (capped && !open ? t.rows.slice(0, t.collapse) : t.rows).map(function(r){
       return '<tr>' + r.map(function(c){
         return '<td>' + (Array.isArray(c) ? '<span class="ov-badge ' + c[0] + '">' + esc(c[1]) + '</span>' : esc(c)) + '</td>';
       }).join('') + '</tr>';
     }).join('');
-    return '<div class="ov-table-wrap"><table class="ov-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>';
+    return '<div class="ov-table-wrap"><table class="ov-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>'
+      + (capped ? '<div class="ov-more-row"><button type="button" class="aiac-details-btn' + (open ? ' open' : '') + '" aria-expanded="' + open + '" onclick="aiacToggleTable(' + i + ')">'
+        + (open ? 'Show fewer' : 'Show all ' + t.rows.length + (t.noun ? ' ' + esc(t.noun) : ''))
+        + '<span class="chev"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></span></button></div>' : '');
   }
   // ONE next-steps concept (Figma: "What I can do next" + sparkle pills such as
   // "Restore all deleted files"). Every next step is a pill: agent-runnable
@@ -11738,12 +11795,12 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
     var s = m.card, h = '<div class="ov-ans" data-aiac="' + i + '">';
     h += '<h3 class="ov-title">' + s.headline + '</h3>';
     if (s.headsub) h += '<div class="ov-prose"><p>' + s.headsub + '</p></div>';
-    var charted = false, acts = s.actions || [];
+    var charted = false, acts = s.actions || [], stripLate = '';   // stripLate: stripLast puts the composition panel after the bars
     if (s.strip){
       charted = true;
       var tot = s.strip.reduce(function(a, x){ return a + x[1]; }, 0);
       var body = (s.unit ? '<div class="ov-stat"><span class="rule"></span><span><span class="num">' + fmt(tot) + '</span><span class="unit">' + esc(s.unit) + '</span></span></div>' : '') + blocks(s.strip, s.unit);
-      h += card(s.stripTitle || 'Breakdown', body, 'widget');
+      if (s.stripLast) stripLate = card(s.stripTitle || 'Breakdown', body, 'widget'); else h += card(s.stripTitle || 'Breakdown', body, 'widget');
     }
     if (s.vrows){
       charted = true;
@@ -11757,12 +11814,13 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
       charted = true;
       h += card(s.trend.caption || 'Trend', _aiacTrendHtml(s.trend), 'widget');
     }
+    h += stripLate;
     if (!charted && acts.length >= 2){
       var counts = {}; acts.forEach(function(a){ counts[a.tone] = (counts[a.tone] || 0) + 1; });
       var items = ['bad', 'warn', 'ok', 'n'].filter(function(t){ return counts[t]; }).map(function(t){ return [TONE_LBL[t], counts[t], TONE[t]]; });
       h += card('Findings by severity', blocks(items, ''), 'widget');
     }
-    if (s.table && s.table.label !== s.stripTitle) h += card(s.table.label, table(s.table), 'export');
+    if (s.table && s.table.label !== s.stripTitle) h += card(s.table.label, table(s.table, m, i), 'export');
     if (s.insight) h += '<div class="ov-prose"><p>' + s.insight + '</p></div>';
     if (s.lookLink)
       h += '<button type="button" class="ov-look" onclick="aiacGo(\'nav\', \'' + esc(s.lookLink.nav).replace(/'/g, '') + '\')">' + esc(s.lookLink.label) + ic('open-in-new-outlined', 16) + '</button>';
@@ -11847,7 +11905,7 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
     var steps = m.steps || [];
     if (!steps.length) return '<div class="ov-rs ov-rs-wait-wrap" data-mi="' + i + '"><div class="ov-rs-wait">Processing request</div></div>';
     var live = !m.done;
-    var open = live ? (m._userToggled ? !!m.open : true) : !!m.open;
+    var open = !!m.open;   // collapsed until the user expands it — while thinking, the header carries the current step
     var total = null;
     if (m.named && steps.every(function(s){ return s && s.ms; })) total = (steps.reduce(function(a, s){ return a + s.ms; }, 0) / 1000).toFixed(1);
     else if (m.ms) total = Math.max(1, Math.round(m.ms / 1000));
@@ -11865,12 +11923,15 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
         + '<span class="ov-rs-badge ' + (running ? 'run' : 'ok') + '">' + (running ? 'In progress' : 'Complete') + '</span></' + close + '>'
         + (expanded && hasSub ? '<div class="ov-rs-sub">' + rsSubs(o) + '</div>' : '');
     }).join('');
-    var head = '';
-    if (!live){
-      head = '<button type="button" class="ov-rs-head" onclick="aiToggleReason(' + i + ')" aria-expanded="' + open + '">Thought for ' + (total || 1) + 's \u00b7 ' + steps.length + ' step' + (steps.length === 1 ? '' : 's')
-        + '<svg class="caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>';
+    var caret = '<svg class="caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+    var head;
+    if (live){
+      var cur = steps[steps.length - 1], curO = typeof cur === 'string' ? { label: cur, kind: 'tool' } : cur;
+      head = '<button type="button" class="ov-rs-head" onclick="aiToggleReason(' + i + ')" aria-expanded="' + open + '"><span class="ov-rs-ico"><span class="disc-spinner"></span></span><span class="ov-rs-cur">' + esc(rsLabel(curO)) + '</span>' + caret + '</button>';
+    } else {
+      head = '<button type="button" class="ov-rs-head" onclick="aiToggleReason(' + i + ')" aria-expanded="' + open + '">Thought for ' + (total || 1) + 's \u00b7 ' + steps.length + ' step' + (steps.length === 1 ? '' : 's') + caret + '</button>';
     }
-    return '<div class="ov-rs' + (live ? '' : ' is-collapsed') + (open ? ' is-open' : '') + '" data-mi="' + i + '">' + head + '<div class="ov-rs-list">' + rows + '</div></div>';
+    return '<div class="ov-rs is-collapsed' + (open ? ' is-open' : '') + '" data-mi="' + i + '">' + head + '<div class="ov-rs-list">' + rows + '</div></div>';
   }
   function swapReasoning(){
     var body = document.getElementById('aiBody'); if (!body) return;
@@ -11944,6 +12005,7 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
     desc:'Retail Taxes, Retail Archive and Retail Ops hold 4.2 TB (63% of their backed-up volume) that has not been modified in 36 months. No ROT policy covers these sites. Created from a Veeam Intelligence recommendation.',
     severity:'Low', sites:['Retail Taxes','Retail Archive','Retail Ops'], months:'36', size:'1 MB',
     actions:['Flag for review','Exclude from backup after a 30-day review window'] };
+  var PROP_TS = Date.now() - 2 * 36e5;   // when the agent raised it (matches the Activity task)
   var ACTION_LIB = ['Notify owners','Flag for review','Exclude from backup after a 30-day review window','Move to archive tier'];
   function queryText(p){ return 'SharePoint files in ' + p.sites.join(', ') + ' \u00b7 not modified in ' + p.months + ' months' + (p.size && p.size !== 'Any size' ? ' \u00b7 larger than ' + p.size : ''); }
   // The recommendation is about Microsoft 365 (SharePoint): only an admin working in that workload
@@ -11954,17 +12016,29 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
   function rows(){
     var s = st(), off = s.off || {}, r = SEED.map(function(x){ var y = {}; for (var k in x) y[k] = x[k]; y.inactive = !!off[x.name]; return y; });
     if (s.rec === 'approved' && s.policy) r.unshift({ name:s.policy.name, files:'\u2014', vol:'\u2014', date:nowLbl(s.ts), isNew:true, inactive:!!off[s.policy.name] || (off[s.policy.name] === undefined && !s.policy.active) });
+    if (!s.rec && relevant()) r.unshift({ prop:true, name:PROPOSED.name, files:COUNT, vol:'4.2 TB', date:'Proposed ' + nowLbl(PROP_TS) });
     return r;
   }
   window.rotToggle = function(i){
-    var r = rows(), x = r[i]; if (!x) return;
+    var r = rows(), x = r[i]; if (!x || x.prop) return;
     var s = st(); s.off = s.off || {}; s.off[x.name] = !x.inactive; save(s); rotRender();
   };
+  // The recommendation as a line in the list: same columns as its neighbours, uniquely styled (tinted, sparkle tile, Recommended chip),
+  // with the decision in the row — Review opens the draft, Activate creates it active from this summary, X dismisses it.
+  function propRow(x){
+    return '<tr class="rot-prop-row"><td class="plv-col-status"><span class="rot-swtip" data-plv-tip="Turn on to create and activate this policy"><button type="button" class="plv-switch" role="switch" aria-checked="false" aria-label="Activate recommended policy" onclick="rotActivate()"></button></span></td>'
+      + '<td><span class="row-name">' + esc(x.name) + '</span><span class="plv-chip rot-reco-chip" tabindex="0" data-rot-why="1"><span class="rot-reco-ic" aria-hidden="true">' + ic('ai-sparkle', 12) + '</span>Recommended</span></td>'
+      + '<td><span class="rot-bar">' + x.files + '</span></td><td><span class="rot-bar">' + x.vol + '</span></td>'
+      + '<td><span class="plv-chip plv-chip-scope">Files&nbsp;' + ic('insights-outlined', 16) + '</span></td><td style="white-space:nowrap">' + esc(x.date) + '</td>'
+      + '<td><span class="rot-rowact"><button type="button" class="rot-ibtn rot-ibtn-act" onclick="rotOpenDetail()" data-plv-tip="Details" aria-label="Open recommended policy details">' + ic('policy-outlined', 20) + '</button>'
+      + '<button type="button" class="rot-ibtn rot-ibtn-act rot-ibtn-bad" onclick="rotDismissAsk()" data-plv-tip="Dismiss" aria-label="Dismiss recommendation">' + ic('thumb-down-outlined', 20) + '</button></span></td></tr>';
+  }
   function list(){
-    var s = st(), r = rows(), act = r.filter(function(x){ return !x.inactive; }).length;
+    var s = st(), all = rows(), r = all.filter(function(x){ return !x.prop; }), act = r.filter(function(x){ return !x.inactive; }).length;
     var stats = '<div class="plv-stats"><div class="plv-stat"><div class="plv-stat-lbl">Total Policies</div><div class="plv-stat-val">' + r.length + '</div></div><div class="plv-stat"><div class="plv-stat-lbl">Active Policies</div><div class="plv-stat-val">' + act + '</div></div></div>';
     var tbl = '<div class="plv-table-row"><div class="table-scroll" id="rotScroll"><table class="data-table" id="rot-table"><thead><tr><th class="plv-col-status" style="width:56px">Status</th><th>Policy Name</th><th>Files</th><th>Total Volume</th><th>Data Scope</th><th>Date Modified</th><th class="plv-col-actions"></th></tr></thead><tbody>'
-      + r.map(function(x, ri){
+      + all.map(function(x, ri){
+        if (x.prop) return propRow(x);
         return '<tr' + (x.isNew ? ' class="rot-new"' : '') + '><td class="plv-col-status"><button type="button" class="plv-switch' + (x.inactive ? '' : ' on') + '" role="switch" aria-checked="' + !x.inactive + '" aria-label="' + (x.inactive ? 'Activate' : 'Deactivate') + '" onclick="rotToggle(' + ri + ')"></button></td><td><span class="row-name">' + esc(x.name) + '</span></td><td><span class="rot-bar">' + x.files + '</span></td><td><span class="rot-bar">' + x.vol + '</span></td>'
           + '<td><span class="plv-chip plv-chip-scope">Files&nbsp;' + ic('insights-outlined', 16) + '</span></td><td style="white-space:nowrap">' + esc(x.date) + '</td>'
           + '<td><span class="rot-rowact"><span class="rot-ibtn" aria-hidden="true">' + ic('policy-outlined', 20) + '</span><span class="rot-ibtn" aria-hidden="true">' + KEBAB + '</span></span></td></tr>';
@@ -11979,6 +12053,7 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
   window.rotRender = function(){
     var host = document.getElementById('rotView'); if (!host) return;
     host.innerHTML = list();
+    playRow();
     var sc = document.getElementById('rotScroll');
     if (sc){ var upd = function(){ sc.classList.toggle('has-h-scroll-right', sc.scrollLeft + sc.clientWidth < sc.scrollWidth - 1); }; sc.addEventListener('scroll', upd); setTimeout(upd, 0); window.addEventListener('resize', upd); }
     var ct = document.getElementById('catCtRot'); if (ct) ct.textContent = rows().length;
@@ -11987,7 +12062,7 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
     var bn = document.getElementById('rotRecBanner');
     if (bn){
       var wasHidden = bn.hidden;
-      bn.hidden = !open || !!document.getElementById('rotEditor').classList.contains('open');
+      bn.hidden = true;   // retired: the recommendation is now a line in the File ROT list (see propRow); markup kept, never shown
       var wlNow = ''; try { wlNow = activeWl; } catch(e){}
       if (!open){ delete bn.dataset.seen; }
       else if (wasHidden && !bn.hidden && bn.dataset.seen !== wlNow){
@@ -12105,6 +12180,99 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
   window.rotOpenDetail = function(){ rotShowView(false, true); };
   window.rotCreateBlank = function(){ openEditor(true); };
   window.rotAsk = function(){ if (typeof aiOpen === 'function') aiOpen(); setTimeout(function(){ rotGapFlow(); }, 320); };
+  // Why-recommended tooltip (one shared element, positioned from the badge).
+  var WHY = '<div class="rot-ai-tip-h"><span class="rot-reco-ic" aria-hidden="true">' + '@@IC@@' + '</span><span class="t">Why Veeam Intelligence recommended this</span></div>'
+    + '<ul><li>4.2 TB (63%) of backed-up content in Retail Taxes, Retail Archive and Retail Ops has not been modified in 36 months.</li><li>No ROT policy covers these three sites today.</li><li>Flagging it and excluding it after a 30-day review window would stop it counting toward protected volume.</li></ul>'
+    + '<div class="rot-ai-tip-f">Based on content age across your Microsoft 365 sites. Nothing changes until you turn the policy on.</div>';
+  function whyShow(el){
+    var t = document.getElementById('rotAiTip');
+    if (!t){ t = document.createElement('div'); t.id = 'rotAiTip'; t.className = 'rot-ai-tip'; t.setAttribute('role', 'tooltip'); t.innerHTML = WHY.replace('@@IC@@', ic('ai-sparkle', 12)); document.body.appendChild(t); }
+    var r = el.getBoundingClientRect(), w = 340, left = Math.max(12, Math.min(r.left, window.innerWidth - w - 12));
+    var top = r.bottom + 8; if (top + t.offsetHeight > window.innerHeight - 12) top = Math.max(12, r.top - t.offsetHeight - 8);   // flip above when there is no room below
+    t.style.left = left + 'px'; t.style.top = top + 'px';
+    requestAnimationFrame(function(){ t.classList.add('is-on'); });
+  }
+  function whyHide(){ var t = document.getElementById('rotAiTip'); if (t) t.classList.remove('is-on'); }
+  document.addEventListener('mouseover', function(e){ var c = e.target.closest && e.target.closest('[data-rot-why]'); if (c) whyShow(c); });
+  document.addEventListener('mouseout', function(e){ var c = e.target.closest && e.target.closest('[data-rot-why]'); if (c && !c.contains(e.relatedTarget)) whyHide(); });
+  document.addEventListener('focusin', function(e){ var c = e.target.closest && e.target.closest('[data-rot-why]'); if (c) whyShow(c); });
+  document.addEventListener('focusout', function(e){ if (e.target.closest && e.target.closest('[data-rot-why]')) whyHide(); });
+  // The row pops in whenever it newly appears in a visible list (page load, opening File ROT, switching to Microsoft 365 while the list is open).
+  // A re-render during the ~2.6s animation re-applies it at the elapsed time instead of cutting it off.
+  var rowWas = false, rowStart = 0, ROW_MS = 2600, rowAnims = [];
+  function rowStop(){ rowAnims.forEach(function(a){ try { a.cancel(); } catch(e){} }); rowAnims = []; [].forEach.call(document.querySelectorAll('.rot-ring'), function(r){ r.remove(); }); }
+  // Entrance = explorer style E · Spotlight cascade. Timeline (ms): below-rows step down bottom-first (30ms apart, 560ms, restrained spring) → the row
+  // drops in once the slot is open → 180ms later the shimmer starts (1300ms, linear) → neighbours are dimmed from frame 1 until the shimmer has passed.
+  function playRow(){
+    var ed = document.getElementById('rotEditor'), tr = document.querySelector('.rot-prop-row'), v = document.getElementById('rotView');
+    var vis = !!tr && v && !v.hidden && !(ed && ed.classList.contains('open'));
+    if (!vis){ rowWas = false; return; }
+    if (!rowWas){ rowWas = true; rowStart = Date.now(); }
+    var el = Date.now() - rowStart; if (el >= ROW_MS) return;
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    rowStop();
+    var tb = tr.parentNode, tbl = document.getElementById('rot-table'), sc = document.getElementById('rotScroll');
+    var rows = [].filter.call(tb.children, function(n){ return n.tagName === 'TR'; });
+    var ri = rows.indexOf(tr), above = rows.slice(0, ri), below = rows.slice(ri + 1), others = above.concat(below), H = tr.offsetHeight, n = below.length;
+    var SOFT = 'cubic-bezier(0.22, 1.25, 0.36, 1)', STEP = 30;
+    function go(node, kf, opt){ var a = node.animate(kf, Object.assign({ fill: 'both' }, opt)); a.currentTime = el; rowAnims.push(a); return a; }
+    below.forEach(function(r, i){ go(r, [{ transform: 'translateY(-' + H + 'px)', easing: SOFT }, { transform: 'none' }], { duration: 560, delay: (n - 1 - i) * STEP }); });
+    above.forEach(function(r, i){ go(r, [{ transform: 'none' }, { transform: 'translateY(-3px)', offset: .4 }, { transform: 'none' }], { duration: 460, delay: 120 + i * 20, easing: 'ease-in-out' }); });
+    var start = (n - 1) * STEP + 260;
+    go(tr, [{ opacity: 0, transform: 'translateY(-14px)', easing: SOFT }, { opacity: 1, transform: 'none' }], { duration: 420, delay: start });
+    var shimDelay = start + 180, shimDur = 1300;
+    if (sc && tbl){
+      var ring = document.createElement('div'); ring.className = 'rot-ring';
+      ring.style.cssText = 'top:' + (tbl.offsetTop + tr.offsetTop - 1) + 'px;left:' + (tbl.offsetLeft - 1) + 'px;width:' + (tbl.offsetWidth + 2) + 'px;height:' + (H + 2) + 'px';
+      sc.appendChild(ring);
+      go(ring, [{ backgroundPosition: '100% 0' }, { backgroundPosition: '0% 0' }], { duration: shimDur, delay: shimDelay, easing: 'linear' });
+      go(ring, [{ opacity: 0 }, { opacity: 1, offset: .08 }, { opacity: 1, offset: .88 }, { opacity: 0 }], { duration: shimDur, delay: shimDelay, easing: 'linear' });
+    }
+    var total = shimDelay + shimDur + 500, dimIn = 260 / total, dimOut = (shimDelay + shimDur) / total;
+    others.forEach(function(r){ go(r, [{ opacity: 1, filter: 'saturate(1)' }, { opacity: .42, filter: 'saturate(.45)', offset: dimIn }, { opacity: .42, filter: 'saturate(.45)', offset: dimOut }, { opacity: 1, filter: 'saturate(1)' }], { duration: total, easing: 'ease' }); });
+    clearTimeout(window._rotRowT);
+    window._rotRowT = setTimeout(rowStop, ROW_MS - el + 60);   // leave no fill-mode styles behind
+  }
+  // ACCEPT FROM THE LISTING (2026-10-15): the recommendation row used to snap into the green "new policy" row on re-render. Now it hands over in three beats —
+  //   1 · the switch slides on  2 · the AI wash turns green, dashed rules soften, the Recommended chip folds away  3 · the list commits and the new row
+  //   gets a one-pass green shimmer, its changed cells and the stat strip settle in. State is committed once, after beat 2 (~460ms); reduced motion commits at once.
+  var accBusy = false;
+  function rotCommitAccept(animated){
+    var s = st(); if (s.rec) { accBusy = false; return; }
+    var d = JSON.parse(JSON.stringify(PROPOSED)); d.owner = 'Daren Lasso'; d.active = true;
+    s.policy = { name:d.name, desc:d.desc, severity:d.severity, owner:d.owner, active:true, sites:d.sites, months:d.months, size:d.size, actions:d.actions, crit:queryText(d), actionText:d.actions.join('; ') };
+    s.rec = 'approved'; s.by = 'Darren Lasso'; s.ts = Date.now(); s.scope = 'once'; s.how = 'quick'; save(s); rotRender();
+    if (animated) rotAcceptSettle();
+    accBusy = false;
+    if (typeof showToast === 'function') showToast({ tone:'success', title:'Policy activated', body:'\u201c' + esc(d.name) + '\u201d is active and runs for the first time tonight.' });
+  }
+  function rotAcceptSettle(){
+    var tr = document.querySelector('#rot-table tbody tr.rot-new'), tbl = document.getElementById('rot-table'), sc = document.getElementById('rotScroll'); if (!tr) return;
+    var tds = [].slice.call(tr.children);
+    [2, 3, 5].forEach(function(i){ if (tds[i]) tds[i].animate([{ opacity: .3 }, { opacity: 1 }], { duration: 340, easing: 'ease-out' }); });
+    [].forEach.call(document.querySelectorAll('.plv-stat-val'), function(v){ v.animate([{ opacity: .2, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 380, easing: 'cubic-bezier(0.22, 1.25, 0.36, 1)' }); });
+    if (sc && tbl){
+      var H = tr.offsetHeight, ring = document.createElement('div'); ring.className = 'rot-ring is-ok';
+      ring.style.cssText = 'top:' + (tbl.offsetTop + tr.offsetTop - 1) + 'px;left:' + (tbl.offsetLeft - 1) + 'px;width:' + (tbl.offsetWidth + 2) + 'px;height:' + (H + 2) + 'px';
+      sc.appendChild(ring);
+      var sweep = { duration: 1000, easing: 'linear', fill: 'both' };
+      ring.animate([{ backgroundPosition: '100% 0' }, { backgroundPosition: '0% 0' }], sweep);
+      var fade = ring.animate([{ opacity: 0 }, { opacity: 1, offset: .1 }, { opacity: 1, offset: .85 }, { opacity: 0 }], sweep);
+      fade.onfinish = function(){ ring.remove(); };
+    }
+  }
+  window.rotActivate = function(){
+    var s = st(); if (s.rec || accBusy) return;
+    var tr = document.querySelector('.rot-prop-row');
+    var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!tr || reduced){ rotCommitAccept(false); return; }
+    accBusy = true; rowStop(); clearTimeout(window._rotRowT);
+    var sw = tr.querySelector('.plv-switch'); if (sw){ sw.classList.add('on'); sw.setAttribute('aria-checked', 'true'); }                      // beat 1 — the switch's own 150ms transition
+    var tds = [].slice.call(tr.children), chip = tr.querySelector('.rot-reco-chip');
+    tds.forEach(function(td){ td.animate([{ backgroundColor: getComputedStyle(td).backgroundColor, borderTopColor: 'var(--black-30)', borderBottomColor: 'var(--black-30)' }, { backgroundColor: 'var(--em-green-tint)', borderTopColor: 'var(--border-light)', borderBottomColor: 'var(--border-light)' }], { duration: 320, delay: 140, easing: 'ease-out', fill: 'both' }); });   // beat 2 — wash → green, rules soften
+    if (chip) chip.animate([{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(.85)' }], { duration: 240, delay: 140, easing: 'ease-in', fill: 'both' });
+    setTimeout(function(){ rotCommitAccept(true); }, 460);                                                                                         // beat 3 — commit, then settle
+  };
   window.rotDismiss = function(note){ var s = st(); if (s.rec) return; s.rec = 'dismissed'; s.by = 'Darren Lasso'; s.note = note || ''; s.ts = Date.now(); save(s); rotRender(); };
   // Declining is a decision, so it asks for an optional note and is recorded (audit trail + the Activity task).
   window.rotDismissAsk = function(){
@@ -12138,10 +12306,9 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
     var rs = aiPushReasoning(); rs.named = true; rs.open = false;
     var steps = [
       { kind:'route', label:'Interpreting request — retention gap on Retail Division SharePoint', ms:400, detail:[['scope','Retail Division sites · ROT policies'],['mode','read-only analysis']], result:'A coverage gap against the four active ROT policies' },
-      { kind:'agent', label:'Spawning a retention-gap analysis agent', ms:300, spawn:{ task:'Measure untouched and duplicate content per Retail site against the active ROT policies', granted:'Access & visualize data', denied:'Restore · Export · Manage policies' } },
+      { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Measure untouched and duplicate content per Retail site against the active ROT policies, then draft a ROT policy for the uncovered sites', granted:'Read access · Manage policies · Recommend', denied:'Restore · Export' } },
       { kind:'tool', label:'content.age — last-modified distribution per site', ms:800, detail:[['sites','5 in Retail Division'],['threshold','36 months']], result:'4.2 TB untouched across 3 sites' },
       { kind:'tool', label:'policies.match — which ROT policies cover which sites', ms:600, detail:[['policies','4 active']], result:'None cover Retail Taxes, Retail Archive or Retail Ops' },
-      { kind:'agent', label:'Spawning a policy-proposal agent', ms:300, spawn:{ task:'Configure a ROT policy for the three uncovered sites', granted:'Manage policies · asks first', denied:'Restore · Export' } }
     ];
     steps.forEach(function(en, i){ setTimeout(function(){ rs.steps.push(en); aiRender(); }, 350 + i * 700); });
     setTimeout(function(){
