@@ -69403,26 +69403,25 @@ function aiStepsMs365AgentVolume(){
         { kind:'tool',  label:'report.diff — vs the previous report run', ms:500, chip:'+6 pts',
           detail:[['previous','87%']], result:'Up 6 points — Restore data was widened to all of Microsoft 365 (+1.1 TB)' },
         { kind:'tool',  label:'skills.attribute — reach per skill', ms:600, chip:'3 skills',
-          detail:[['rule','reach is never reported without the skills behind it'],['task agents','inherit only the skill they were spawned under']], result:'Read access 17.1 TB · Restore data 17.1 TB · Export data 11.2 TB' }
+          detail:[['rule','reach is never reported without the skills behind it'],['task agents','inherit only the skill they were spawned under']], result:'Monitor & report 17.1 TB · Restore data 17.1 TB · Export data 11.2 TB' }
       ],
       card: function(){ return {
         headline: '93% of your Microsoft 365 data — 17.1 of 18.4 TB — is within the agent’s reach, a critical level up 6 points since the last report.',
-        headsub: 'Everything the agent can read is within its read access — and its Restore data and Export data skills (both ask first) act on the same data. Task agents it spins up inherit only the access of the skill they were spawned for · SharePoint is 96% reachable',
+        headsub: 'Its reach is the union of its enabled skills’ workloads — Monitor & report and Restore data cover the whole estate, Export data most of it. Task agents it spins up inherit only the scope of the skill they were spawned for · SharePoint is 96% reachable',
         stripTitle: 'Microsoft 365 data by agent access', unit: 'TB',
         strip: [ ['SharePoint', 11.2, C.blue], ['OneDrive', 5.0, C.green], ['Teams', 0.9, C.gold], ['Not reachable', 1.3, 'var(--black-10)'] ],
-        table: { label: 'Reach by access and skill', collapse: 3, noun: 'entries', cols: ['Access or skill', 'Access', 'Reaches', 'Autonomy'], rows: [
-          ['Read access (baseline)', 'Read', '17.1 TB', ['ok', 'Always on']],
+        table: { label: 'Reach by skill', collapse: 3, noun: 'skills', cols: ['Skill', 'Access', 'Reaches', 'Autonomy'], rows: [
+          ['Monitor & report', 'Read', '17.1 TB', ['ok', 'Observe']],
           ['Restore data', 'Write \u00b7 restores data', '17.1 TB', ['warn', 'Ask first']],
           ['Export data', 'Write \u00b7 produces files', '11.2 TB', ['warn', 'Ask first']],
-          ['Monitor & report', 'Read', '17.1 TB', ['ok', 'Observe']],
           ['Manage policies', 'Write \u00b7 policy settings', '\u2014', ['ok', 'Recommend']],
           ['Backup jobs', 'Write \u00b7 runs jobs', '\u2014', ['warn', 'Ask first']],
           ['Findings and alerts', 'Write \u00b7 finding status', '\u2014', ['ok', 'Summarize']],
           ['Assist with integrations', 'Assist only', '\u2014', ['ok', 'Prefill']] ] },
         actions: [
-          { tone:'n', chip:'Info', txt:'Reach is set in Agent Settings', sub:'Narrow its read access, or a skill’s workloads, to narrow what its task agents can touch', btn:'Review in Agent Settings', nav:'agent-settings-overlay.html#skills', look:true }
+          { tone:'n', chip:'Info', txt:'Reach is set per skill in Agent Settings', sub:'Narrow a skill’s workloads to narrow what its task agents can touch', btn:'Review skills in Agent Settings', nav:'agent-settings-overlay.html#skills', look:true }
         ],
-        insight: 'This answers <strong>“what could the agent actually surface or change?”</strong> — nearly all of it, because its read access covers every connected workload. The agent’s reach is its read access — a workload scope in Agent Settings that can be narrowed but never switched off on its own — and each skill can be narrowed further. A task agent can only touch what the skill it was spawned under reaches. The four skills at the bottom of the table act on policies, jobs, findings and setup rather than file content, so they reach no data volume. The source split matters too: <strong>SharePoint</strong> is collaborative content shared widely, <strong>OneDrive</strong> is personal drives. The <strong>6-point rise</strong> since the last report is Restore data being widened to all of Microsoft 365 (+1.1 TB).',
+        insight: 'This answers <strong>“what could the agent actually surface or change?”</strong> — nearly all of it, because Monitor & report and Restore data both cover every connected workload. Each skill carries its own workload scope in Agent Settings, and the agent’s reach is the union of the scopes of the skills that are on — narrow a skill and its share of the reach shrinks. A task agent can only touch what the skill it was spawned under reaches. The four skills at the bottom of the table act on policies, jobs, findings and setup rather than file content, so they reach no data volume. The source split matters too: <strong>SharePoint</strong> is collaborative content shared widely, <strong>OneDrive</strong> is personal drives. The <strong>6-point rise</strong> since the last report is Restore data being widened to all of Microsoft 365 (+1.1 TB).',
         suggest: [ { label:'Which sensitive categories can it reach?', sc:'ms365AgentSensitive' } ]
       }; } }
   ];
@@ -69449,7 +69448,7 @@ function aiStepsMs365AgentSensitive(){
       ],
       card: function(){ return {
         headline: 'The agent can reach sensitive data in all 5 categories — 2 are barred by your policy, including 1,840 credentials.',
-        headsub: 'Reached through its read access · 75–91% of each category sits inside its scope · Customer-NW’s payment-card scan returned no data, which is unverified, not no access',
+        headsub: 'Reached through its skills’ workload scopes · 75–91% of each category sits inside its scope · Customer-NW’s payment-card scan returned no data, which is unverified, not no access',
         vrows: {
           title: 'Agent-reachable share of each category',
           legend: [ ['Never agent-accessible under policy', C.red], ['Allowed with controls', C.gold] ],

@@ -2298,6 +2298,7 @@ button.ov-rs-row:hover .ov-rs-lbl { text-decoration: underline; text-decoration-
 .ss-readrow.is-editing { border-top: 1px solid var(--border-light); }
 .ss-readedit { display: flex; flex-direction: column; gap: 12px; padding-top: 4px; }
 .ss-readedit .ss-pg-sec { margin: 0; padding: 0; border: 0; }
+.ss-readedit > .ss-seg { align-self: flex-start; width: auto; }   /* the All / Specific control hugs its two buttons instead of stretching the card's width */
 .ss-readft { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border-light); }
 .ss-readft .ss-md-hint { margin-right: auto; }
 .ss-skills { transition: opacity 0.2s ease; }
@@ -4290,8 +4291,6 @@ function hydrateDefaultPolicyForm(wl) {
   // to acting on its own. level.kind: read | prepare (nothing executes) | ask (needs your approval) | auto (acts without asking;
   // confirm:true makes raising to it a confirmed change). chip = the short label shown in the table.
   var CAPS = [
-    // Baseline, NOT a skill (2026-10-15): what the agent can read. Scope only — no on/off (off = the agent itself, see Agent availability). Shown on the availability card, hidden from the skills table.
-    { id:'read', baseline:true, name:'Read access', sub:'The workloads the agent can read to answer questions and draw charts. Every skill works within this.', access:'Read', scope:'All connected workloads', runs:0, def:null, levels:null },
     { id:'monitor', name:'Monitor & report', sub:'Watch protection in the background and report what needs attention.', access:'Read', scope:'All connected workloads', runs:38, def:'report', levels:[
       { id:'report', chip:'Report', kind:'read', label:'Report on its own', sub:'Monitors protection in the background and reports what needs attention. Changes nothing.', does:['Monitor health across workloads in the background','Report exceptions to Activity and the conversation'] },
       { id:'recommend', chip:'Recommend', kind:'prepare', label:'Report and recommend', sub:'Also raises a recommendation for each exception it finds. You review it; nothing is created or changed.', does:['Everything in Report on its own','Raise a recommendation for each exception for you to review — creates and changes nothing'] } ] },
@@ -4328,7 +4327,7 @@ function hydrateDefaultPolicyForm(wl) {
     { id:'audit',        name:'Activity & Audit', perm:'Read & append only', used:['every capability'], locked:true }
   ];
   // Which areas each capability touches.
-  var CAP_AREAS = { monitor:['protected'], read:['protected'], restore:['restore','protected'], exportd:['exports'], policies:['policies','protected'], integrations:['integrations'] };
+  var CAP_AREAS = { monitor:['protected'], restore:['restore','protected'], exportd:['exports'], policies:['policies','protected'], integrations:['integrations'] };
   // WORKLOADS a capability can be limited to (a sample of the catalog, which grows toward ~100). Grouped by category. A capability is either available on all of them or on a chosen few;
   // CAP_WL lists the workloads each capability can apply to at all.
   var WL_CATS = ['SaaS applications', 'Identity', 'Developer tools', 'Cloud infrastructure', 'Datacenter'];
@@ -4376,7 +4375,7 @@ function hydrateDefaultPolicyForm(wl) {
   function wlName(id){ return WLS.filter(function(w){ return w.id === id; })[0].name; }
   var NAV = ['Organizational','Deployment','Integrations','Data Access Governance','Security','Support','Data Classification','Tag Management','Policy Center','Privacy Notice Management','AI Agents'];
   var KEYC = 'vdcAgentAutonomy', KEYA = 'vdcAgentAvailability';
-  function skills(){ return CAPS.filter(function(c){ return !c.baseline; }); }   // the table, counts and Reset exclude the Read-access baseline
+  function skills(){ return CAPS; }
   function capById(id){ return CAPS.filter(function(c){ return c.id === id; })[0]; }
   function normWl(w, id){ var ok = wlApplies(id); if (!Array.isArray(w)) return ok.length === WLS.length ? 'all' : ok.slice(); var f = w.filter(function(x){ return ok.indexOf(x) >= 0; }); return f.length ? f : ok.slice(); }
   function lvlOf(c, id){ return c.levels ? (c.levels.filter(function(l){ return l.id === id; })[0] || null) : null; }
@@ -4445,17 +4444,12 @@ function hydrateDefaultPolicyForm(wl) {
   // ── 1. Agent Settings (form + Save) ──
   function renderAvail(){
     var on = draftAvail === 'active', host = document.getElementById('ssAvailHost'); if (!host) return;
-    var rs = state.read ? wlSummary(state.read.wl, 'read') : 'All workloads';
     host.innerHTML = '<div class="ss-md-stat ss-avail' + (on ? ' is-selected' : '') + '"><div class="sc-header"><span class="sc-t">Agent availability</span></div>'
       + '<div class="sc-desc"><span>Control whether AI agents are available to your organization. This applies to every user.</span>'
       + '<label class="ss-st">' + sw(on, 'Agent availability', 'ssAvailToggle()') + '<span>' + (on ? 'Active' : 'Inactive') + '</span></label>'
       + '<span>Veeam Intelligence is the one agent users talk to. For each task it spawns a purpose-built agent that receives only the part of its access that task needs, and retires it when the task completes.</span>'
-      + (readEditing
-        ? '<div class="ss-readrow is-editing"><span><strong>Data it can read</strong></span></div>'
-          + '<div class="ss-readedit" id="ssReadEdit"><div id="ssReadInline"></div><div class="ss-readft"><span class="ss-md-hint" id="ssReadHint"></span><button type="button" class="plv-btn plv-btn-secondary" onclick="ssReadCancel()">Cancel</button><button type="button" class="plv-btn plv-btn-primary" id="ssReadSave" onclick="ssReadSave()">Save</button></div></div>'
-        : '<div class="ss-readrow"><span><strong>Data it can read</strong> · ' + esc(rs) + '</span><button type="button" class="plv-btn plv-btn-secondary" onclick="ssReadEdit()"' + (on ? '' : ' disabled') + '>Edit</button></div>')
       + '</div></div>';
-    if (readEditing && dr && dr.inline){ pgMain(); pgSync(); }
+      + '</div></div>';
     var sk = document.getElementById('ssSkills'), note = document.getElementById('ssSkillsOff');
     if (sk){ sk.classList.toggle('is-off', !on); sk.inert = !on; }
     if (note){ note.hidden = on; note.innerHTML = on ? '' : '<div class="alert alert-info" style="margin-bottom:16px"><div class="alert-title">' + ic('alert-warning-outlined', 16) + 'The agent is inactive</div><div class="alert-body">Its skills are unavailable. Their settings are kept and return when you turn the agent back on.</div></div>'; }
@@ -4464,28 +4458,14 @@ function hydrateDefaultPolicyForm(wl) {
   }
   function syncSave(){ var b = document.getElementById('ssSaveBtn'); if (b) b.disabled = draftAvail === savedAvail; }
   window.ssAvail = function(v){ draftAvail = v; renderAvail(); };
-  window.ssAvailToggle = function(){ draftAvail = draftAvail === 'active' ? 'inactive' : 'active'; if (draftAvail === 'inactive' && readEditing){ readEditing = false; dr = null; } renderAvail(); };
-  // Read access edits in place: the availability card grows to show the workload picker, then collapses again on Save / Cancel.
-  var readEditing = false;
+  window.ssAvailToggle = function(){ draftAvail = draftAvail === 'active' ? 'inactive' : 'active'; renderAvail(); };
+  // slide(): expand / collapse a block in place (used by the skill page's workload picker)
   function slide(el, open, done){
     if (!el || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)){ if (done) done(); return; }
     el.style.overflow = 'hidden';
     var h = el.scrollHeight, a = el.animate(open ? [{ height: '0px', opacity: 0 }, { height: h + 'px', opacity: 1 }] : [{ height: h + 'px', opacity: 1 }, { height: '0px', opacity: 0 }], { duration: open ? 260 : 200, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: open ? 'none' : 'forwards' });
     a.onfinish = function(){ el.style.overflow = ''; if (done) done(); };
   }
-  window.ssReadEdit = function(){
-    if (readEditing || draftAvail !== 'active') return;
-    var c = capById('read'); dr = { kind:'cap', id:'read', on:true, level:null, wl:(state.read.wl === 'all' ? 'all' : state.read.wl.slice()), wlq:'', wlCat:0, sec:'overview', inline:true };
-    readEditing = true; renderAvail(); slide(document.getElementById('ssReadEdit'), true);
-  };
-  window.ssReadCancel = function(){ slide(document.getElementById('ssReadEdit'), false, function(){ readEditing = false; dr = null; renderAvail(); }); };
-  window.ssReadSave = function(){
-    if (!dr || !dr.inline) return;
-    var none = dr.wl !== 'all' && !dr.wl.length; if (none) return;
-    var wl = (dr.wl === 'all' || dr.wl.length === WLS.length) && wlApplies('read').length === WLS.length ? 'all' : dr.wl.slice();
-    state.read = { on:true, level:null, tier:'ask', wl:wl }; persist();
-    slide(document.getElementById('ssReadEdit'), false, function(){ readEditing = false; dr = null; ssRenderCaps(); renderAvail(); toast('Read access updated'); });
-  };
   window.ssSave = function(){ try { localStorage.setItem(KEYA, draftAvail); } catch(e){} savedAvail = draftAvail; syncSave(); toast(draftAvail === 'active' ? 'Agent settings saved' : 'Agent is now inactive'); };
   window.addEventListener('beforeunload', function(e){ if (draftAvail !== savedAvail){ e.preventDefault(); e.returnValue = ''; } });
 
@@ -4561,10 +4541,24 @@ function hydrateDefaultPolicyForm(wl) {
       + '<button type="button" class="x" aria-label="Close" onclick="ssDrClose()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
   }
   function secOverview(c){
-    if (c.baseline) return '<div class="ss-md-top"><div class="ss-md-tt"><h2 class="ss-md-h1">Configure ' + esc(c.name) + '</h2><p class="ss-md-lead">' + esc(c.sub) + '</p></div></div>';
     return '<div class="ss-md-top"><div class="ss-md-tt"><h2 class="ss-md-h1">Configure ' + esc(c.name) + ' skill</h2><p class="ss-md-lead">' + esc(c.sub) + '</p></div>'
-      + '<div class="ss-md-stat' + (dr.on ? ' is-selected' : '') + '"><div class="sc-header"><span class="sc-t">Status</span></div><div class="sc-desc"><span>Can Agents access this skill?</span><label class="ss-st">' + sw(dr.on, 'Active', 'ssDrOn()') + '<span>' + (dr.on ? 'Active' : 'Inactive') + '</span></label></div></div></div>';
+      + '<div class="ss-md-stat' + (dr.on ? ' is-selected' : '') + '"><div class="sc-header"><span class="sc-t">Status</span></div><div class="sc-desc"><span>Can Agents access this skill?</span><label class="ss-st">' + sw(dr.on, 'Active', 'ssDrOn()') + '<span>' + (dr.on ? 'Active' : 'Inactive') + '</span></label>' + wlRow(c) + '</div></div></div>';
   }
+  // Workloads live in the Status card (2026-10-15) — a summary row that expands in place to the picker, the same pattern the availability card used for its read scope.
+  function wlRow(c){
+    var ok = wlApplies(c.id), fixed = ok.length < WLS.length;
+    if (fixed) return '<div class="ss-readrow"><span><strong>Workloads</strong> \u00b7 Only available on ' + esc(ok.map(wlName).join(', ')) + '</span></div>';
+    var open = !!dr.wlOpen && dr.on, all = dr.wl === 'all';
+    return '<div class="ss-readrow' + (open ? ' is-editing' : '') + '"><span><strong>Workloads</strong>' + (open ? '' : ' \u00b7 ' + esc(wlSummary(dr.wl, c.id))) + '</span><button type="button" class="plv-btn plv-btn-secondary" onclick="ssWlToggle()"' + (dr.on ? '' : ' disabled') + '>' + (open ? 'Done' : 'Edit') + '</button></div>'
+      + (open ? '<div class="ss-readedit" id="ssWlIn"><p class="ss-pg-d" style="margin:0">Where the agent may use this skill.</p>'
+        + '<span class="ss-seg" role="group" aria-label="Workload scope"><button type="button" class="' + (all ? 'on' : '') + '" onclick="ssDrWlMode(true)">All workloads</button><button type="button" class="' + (all ? '' : 'on') + '" onclick="ssDrWlMode(false)">Specific workloads</button></span>'
+        + (all ? '<div class="ss-note">Includes workloads added later.</div>' : '<div id="ssWp"></div>') + '</div>' : '');
+  }
+  window.ssWlToggle = function(){
+    if (!dr) return;
+    if (dr.wlOpen){ slide(document.getElementById('ssWlIn'), false, function(){ dr.wlOpen = false; pgMain(); }); }
+    else { dr.wlOpen = true; pgMain(); slide(document.getElementById('ssWlIn'), true); }
+  };
   function secLevel(c){
     if (!c.levels) return '';
     var g = AS_GRANTS[c.id] || {}, lim = g.limits || c.note, n = c.levels.length;
@@ -4583,18 +4577,9 @@ function hydrateDefaultPolicyForm(wl) {
       + '<div class="ss-scs" role="radiogroup" aria-label="Level" style="grid-template-columns:repeat(' + n + ', minmax(0, 1fr))">' + cards + '</div>' + mx
       + (lim ? '<div class="ss-note">' + esc(lim) + '</div>' : '') + (c.note && lim !== c.note ? '<div class="ss-note">' + esc(c.note) + '</div>' : '') + '</section>';
   }
-  function secWl(c){
-    var ok = wlApplies(c.id), fixed = ok.length < WLS.length, all = dr.wl === 'all';
-    var head = '<section class="ss-pg-sec" id="ssSec_wl">' + (dr.inline ? '' : '<h3 class="ss-pg-h">Workloads</h3>');
-    if (fixed) return head + '<p class="ss-pg-d">Only available on ' + esc(ok.map(wlName).join(', ')) + '.</p></section>';
-    return head + '<p class="ss-pg-d">' + (c.baseline ? 'Which workloads the agent can read.' : 'Where the agent may use this skill.') + '</p>'
-      + '<span class="ss-seg" role="group" aria-label="Workload scope"><button type="button" class="' + (all ? 'on' : '') + '" onclick="ssDrWlMode(true)">All workloads</button><button type="button" class="' + (all ? '' : 'on') + '" onclick="ssDrWlMode(false)">Specific workloads</button></span>'
-      + (all ? '<div class="ss-note">Includes workloads added later.</div>' : '<div id="ssWp"></div>') + '</section>';
-  }
   function pgMain(){
-    if (dr && dr.inline){ var ih = document.getElementById('ssReadInline'); if (ih) ih.innerHTML = secWl(pgC()); pgWp(); return; }   // Read access edits inside the availability card, not the full-page editor
     var m = document.getElementById('ssPgMain'), top = m.scrollTop, c = pgC();
-    m.style.scrollBehavior = 'auto'; m.innerHTML = '<div class="ss-md-col">' + secOverview(c) + secLevel(c) + secWl(c) + '</div>'; m.scrollTop = top; m.style.scrollBehavior = '';
+    m.style.scrollBehavior = 'auto'; m.innerHTML = '<div class="ss-md-col">' + secOverview(c) + secLevel(c) + '</div>'; m.scrollTop = top; m.style.scrollBehavior = '';
     pgWp();
   }
   function wlMatches(w){ var q = (dr.wlq || '').trim().toLowerCase(); return !q || w.name.toLowerCase().indexOf(q) >= 0; }
@@ -4624,12 +4609,6 @@ function hydrateDefaultPolicyForm(wl) {
   window.ssWlFoldAll = function(close){ dr.closed = {}; if (close) WL_CATS.forEach(function(c, i){ dr.closed[i] = true; }); dr.wlq = ''; pgWp(); };
   window.ssWlGrp = function(i, on){ WLS.filter(function(w){ return w.cat === WL_CATS[i]; }).forEach(function(w){ var k = dr.wl.indexOf(w.id); if (on && k < 0) dr.wl.push(w.id); if (!on && k >= 0) dr.wl.splice(k, 1); }); pgWp(); pgSync(); };
   function pgSync(){
-    if (dr && dr.inline){
-      var rsv = document.getElementById('ssReadSave'), rh = document.getElementById('ssReadHint'); if (!rsv) return;
-      var same0 = JSON.stringify(wlKey(dr.wl)) === JSON.stringify(wlKey(state[dr.id].wl)), none0 = dr.wl !== 'all' && !dr.wl.length;
-      rsv.disabled = same0 || none0; if (rh) rh.textContent = none0 ? 'Choose at least one workload to save.' : '';
-      return;
-    }
     var sv = document.getElementById('ssDrSave'); if (!sv) return;
     var cc = pgC(), dlv = lvlOf(cc, dr.level), raise = dr.on && dlv && dlv.confirm && !(state[dr.id].on && state[dr.id].level === dr.level);
     var cw = state[dr.id].wl, same = JSON.stringify(wlKey(dr.wl)) === JSON.stringify(wlKey(cw)), noneChosen = dr.wl !== 'all' && !dr.wl.length;
@@ -4639,7 +4618,7 @@ function hydrateDefaultPolicyForm(wl) {
   }
   function wlKey(w){ return w === 'all' ? w : w.slice().sort(); }
   function pgAll(){ pgHead(); pgMain(); pgSync(); }
-  window.ssDrOn = function(){ dr.on = !dr.on; pgAll(); };
+  window.ssDrOn = function(){ dr.on = !dr.on; if (!dr.on) dr.wlOpen = false; pgAll(); };
   window.ssDrLevel = function(id){ dr.level = id; pgMain(); pgSync(); };
   window.ssDrWlMode = function(all){ dr.wl = all ? 'all' : []; dr.wlq = ''; dr.wlCat = 0; dr.closed = {}; pgMain(); pgSync(); };
   window.ssDrWl = function(id){ var i = dr.wl.indexOf(id); if (i >= 0) dr.wl.splice(i, 1); else dr.wl.push(id); pgWp(); pgSync(); };
@@ -4647,7 +4626,7 @@ function hydrateDefaultPolicyForm(wl) {
   window.ssWlCat = function(i){ dr.wlCat = i; dr.wlq = ''; pgWp(); };
   window.ssWlAll = function(){ var q = (dr.wlq || '').trim(); (q ? WLS.filter(wlMatches) : WLS.filter(function(w){ return w.cat === WL_CATS[dr.wlCat]; })).forEach(function(w){ if (dr.wl.indexOf(w.id) < 0) dr.wl.push(w.id); }); pgWp(); pgSync(); };
   window.ssWlNone = function(){ dr.wl = []; pgWp(); pgSync(); };
-  window.ssDrClose = function(){ if (dr && dr.inline){ ssReadCancel(); return; } dr = null; document.getElementById('ssPg').classList.remove('open'); document.getElementById('ssPgScrim').classList.remove('open'); };
+  window.ssDrClose = function(){ dr = null; document.getElementById('ssPg').classList.remove('open'); document.getElementById('ssPgScrim').classList.remove('open'); };
   function commitDr(){
     state[dr.id] = { on:dr.on, level:dr.level, tier:tierOf(capById(dr.id), dr.level), wl:(dr.wl === 'all' || dr.wl.length === WLS.length) && wlApplies(dr.id).length === WLS.length ? 'all' : dr.wl }; persist(); var n = capById(dr.id).name; ssDrClose(); ssRenderCaps(); renderAvail(); toast(n + ' updated');
   }
