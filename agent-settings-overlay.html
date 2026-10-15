@@ -4437,7 +4437,7 @@ function hydrateDefaultPolicyForm(wl) {
     document.querySelector('.plv-title').textContent = VIEWS[view][0];
     var help = '<button class="plv-btn plv-btn-secondary" type="button" aria-label="Help" style="width:36px;padding:0;justify-content:center">' + ic('help-circle-outlined', 20) + '</button>';
     var kebab = '<button class="plv-btn plv-btn-secondary" type="button" aria-label="More" style="width:36px;padding:0;justify-content:center">' + KEBAB + '</button>';
-    var acts = '<button class="plv-btn plv-btn-secondary" type="button" id="ssResetBtn" onclick="ssResetAll()">Reset skills to defaults</button><button class="plv-btn plv-btn-primary ss-save" type="button" id="ssSaveBtn" onclick="ssSave()">Save</button>' + help;
+    var acts = '<button class="plv-btn plv-btn-secondary" type="button" id="ssResetBtn" onclick="ssResetAll()">Reset skills to defaults</button>' + help;
     document.getElementById('ssActs').innerHTML = acts;
     
     syncSave();
@@ -4467,7 +4467,13 @@ function hydrateDefaultPolicyForm(wl) {
   }
   function syncSave(){ var b = document.getElementById('ssSaveBtn'); if (b) b.disabled = draftAvail === savedAvail; }
   window.ssAvail = function(v){ draftAvail = v; renderAvail(); };
-  window.ssAvailToggle = function(){ draftAvail = draftAvail === 'active' ? 'inactive' : 'active'; renderAvail(); };
+  // Availability applies the moment it is toggled (no page-level Save): persisted at once, confirmed with a toast. The skills below dim / return immediately.
+  window.ssAvailToggle = function(){
+    draftAvail = draftAvail === 'active' ? 'inactive' : 'active'; savedAvail = draftAvail;
+    try { localStorage.setItem(KEYA, draftAvail); } catch(e){}
+    renderAvail();
+    toast(draftAvail === 'active' ? 'Agent is now active' : 'Agent is now inactive');
+  };
   // slide(): expand / collapse a block in place (used by the skill page's workload picker)
   function slide(el, open, done){
     if (!el || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)){ if (done) done(); return; }
@@ -4476,7 +4482,7 @@ function hydrateDefaultPolicyForm(wl) {
     a.onfinish = function(){ el.style.overflow = ''; if (done) done(); };
   }
   window.ssSave = function(){ try { localStorage.setItem(KEYA, draftAvail); } catch(e){} savedAvail = draftAvail; syncSave(); toast(draftAvail === 'active' ? 'Agent settings saved' : 'Agent is now inactive'); };
-  window.addEventListener('beforeunload', function(e){ if (draftAvail !== savedAvail){ e.preventDefault(); e.returnValue = ''; } });
+  // (beforeunload guard removed 2026-10-16 — availability no longer has unsaved state)
 
   // ── shared list helpers ──
   function statCell(l, v){ return '<div class="ss-stat"><div class="ss-stat-l">' + l + '</div><div class="ss-stat-v">' + v + '</div></div>'; }
