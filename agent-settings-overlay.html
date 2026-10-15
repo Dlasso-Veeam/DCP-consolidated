@@ -3854,7 +3854,7 @@ var VN_ITEMS = [
   { id: 'inventory',    label: 'Inventory', disabled: true },
   { id: 'helpcenter',   label: 'Help Center', disabled: true },
   { id: 'integrations', label: 'Integrations', href: 'index.html', rail: true },
-  { id: 'settings',     label: 'Settings', disabled: true },   // disabled 2026-07-15 (was rail:true w/ subs Appliances/Email Notification Templates)
+  { id: 'settings',     label: 'Settings', href: 'agent-settings-overlay.html', rail: true, subs: [{ label: 'Agent Settings', href: 'agent-settings-overlay.html' }] },   // wired 2026-10-15 — the only way into Settings. was: disabled: true (2026-07-15; earlier rail:true w/ subs Appliances/Email Notification Templates)
   { id: 'workflows',    label: 'Workflows', disabled: true }
   // [parked 2026-07-15] { id: 'notifications', label: 'Notifications', disabled: true },
   // [parked 2026-07-15] { id: 'reporting',     label: 'Reporting', disabled: true },

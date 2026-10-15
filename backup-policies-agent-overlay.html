@@ -9785,7 +9785,7 @@ var VN_ITEMS = [
   // 2026-07-14 leadership IA are parked below, not deleted.
   { id: 'dashboards',   label: 'Dashboard', disabled: true },
   { id: 'findings',     label: 'Findings', disabled: true },
-  { id: 'policies',     label: 'Policies', href: 'backup-policies.html', rail: true },   // wired 2026-08-13 (VIRO rail port — THIS page; was: disabled: true in activity-agent-overlay.html)
+  { id: 'policies',     label: 'Policies', href: 'backup-policies-agent-overlay.html', rail: true },   // was backup-policies.html (the original page, no agent panel)   // wired 2026-08-13 (VIRO rail port — THIS page; was: disabled: true in activity-agent-overlay.html)
   { id: 'protected',    label: 'Protected Data', href: 'inventory-V1-agent-overlay.html', rail: true },
   // [parked 2026-09-09, user: no nav link until broader agreement on the approach]
   // was: { id: 'agentstudio',  label: 'Agentic Studio', href: 'agent-studio-agent-overlay.html' },
@@ -9794,7 +9794,7 @@ var VN_ITEMS = [
   { id: 'inventory',    label: 'Inventory', disabled: true },
   { id: 'helpcenter',   label: 'Help Center', disabled: true },
   { id: 'integrations', label: 'Integrations', href: 'index.html', rail: true },
-  { id: 'settings',     label: 'Settings', disabled: true },   // disabled 2026-07-15 (was rail:true w/ subs Appliances/Email Notification Templates)
+  { id: 'settings',     label: 'Settings', href: 'agent-settings-overlay.html', rail: true, subs: [{ label: 'Agent Settings', href: 'agent-settings-overlay.html' }] },   // wired 2026-10-15 — the only way into Settings. was: disabled: true (2026-07-15; earlier rail:true w/ subs Appliances/Email Notification Templates)
   { id: 'workflows',    label: 'Workflows', disabled: true }
   // [parked 2026-07-15] { id: 'notifications', label: 'Notifications', disabled: true },
   // [parked 2026-07-15] { id: 'reporting',     label: 'Reporting', disabled: true },
