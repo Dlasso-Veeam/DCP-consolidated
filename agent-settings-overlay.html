@@ -2301,6 +2301,7 @@ button.ov-rs-row:hover .ov-rs-lbl { text-decoration: underline; text-decoration-
 .ss-readedit > .ss-seg { align-self: flex-start; width: auto; }   /* the All / Specific control hugs its two buttons instead of stretching the card's width */
 .ss-readft { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border-light); }
 .ss-readft .ss-md-hint { margin-right: auto; }
+.ss-readft .ss-md-hint.is-warn { color: var(--orange); }
 .ss-skills { transition: opacity 0.2s ease; }
 .ss-skills.is-off #ssViewCaps { opacity: 0.5; user-select: none; }   /* saved state stays visible, just unavailable */
 .ss-md-h1 { margin: 0 0 8px; font-size: 24px; line-height: 32px; font-weight: 500; letter-spacing: -0.01em; }
@@ -2824,7 +2825,7 @@ td.as-td-actions { position: relative; }
 <div class="ss-md" id="ssPg" role="dialog" aria-modal="true" aria-label="Configure skill">
   <div class="ss-md-hd" id="ssPgHd"></div>
   <div class="ss-md-body" id="ssPgMain"></div>
-  <div class="ss-md-ft"><div class="ss-md-col"><span class="ss-md-hint" id="ssPgHint"></span><button type="button" class="plv-btn plv-btn-secondary" onclick="ssDrClose()">Cancel</button><button type="button" class="plv-btn plv-btn-primary" id="ssDrSave" onclick="ssDrSave()">Save</button></div></div>
+  <div class="ss-md-ft"><div class="ss-md-col"><span class="ss-md-hint" id="ssPgHint"></span><button type="button" class="plv-btn plv-btn-secondary" id="ssDrCancel" onclick="ssDrClose()">Cancel</button><button type="button" class="plv-btn plv-btn-primary" id="ssDrSave" onclick="ssDrSave()">Save</button></div></div>
 </div>
 <div id="ssToast" class="ss-toast" aria-live="polite"></div>
 
@@ -4549,15 +4550,26 @@ function hydrateDefaultPolicyForm(wl) {
     var ok = wlApplies(c.id), fixed = ok.length < WLS.length;
     if (fixed) return '<div class="ss-readrow"><span><strong>Workloads</strong> \u00b7 Only available on ' + esc(ok.map(wlName).join(', ')) + '</span></div>';
     var open = !!dr.wlOpen && dr.on, all = dr.wl === 'all';
-    return '<div class="ss-readrow' + (open ? ' is-editing' : '') + '"><span><strong>Workloads</strong>' + (open ? '' : ' \u00b7 ' + esc(wlSummary(dr.wl, c.id))) + '</span><button type="button" class="plv-btn plv-btn-secondary" onclick="ssWlToggle()"' + (dr.on ? '' : ' disabled') + '>' + (open ? 'Done' : 'Edit') + '</button></div>'
+    return '<div class="ss-readrow' + (open ? ' is-editing' : '') + '"><span><strong>Workloads</strong>' + (open ? '' : ' \u00b7 ' + esc(wlSummary(dr.wl, c.id))) + '</span>' + (open ? '' : '<button type="button" class="plv-btn plv-btn-secondary" onclick="ssWlToggle()"' + (dr.on ? '' : ' disabled') + '>Edit</button>') + '</div>'
       + (open ? '<div class="ss-readedit" id="ssWlIn"><p class="ss-pg-d" style="margin:0">Where the agent may use this skill.</p>'
         + '<span class="ss-seg" role="group" aria-label="Workload scope"><button type="button" class="' + (all ? 'on' : '') + '" onclick="ssDrWlMode(true)">All workloads</button><button type="button" class="' + (all ? '' : 'on') + '" onclick="ssDrWlMode(false)">Specific workloads</button></span>'
-        + (all ? '<div class="ss-note">Includes workloads added later.</div>' : '<div id="ssWp"></div>') + '</div>' : '');
+        + (all ? '<div class="ss-note">Includes workloads added later.</div>' : '<div id="ssWp"></div>')
+        + '</div>' : '');
   }
-  window.ssWlToggle = function(){
+  function wlClone(w){ return w === 'all' ? 'all' : w.slice(); }
+  window.ssWlToggle = function(){   // Edit
+    if (!dr || dr.wlOpen) return;
+    dr.wlBackup = wlClone(dr.wl); dr.wlOpen = true; pgMain(); pgSync(); slide(document.getElementById('ssWlIn'), true);
+  };
+  window.ssWlCancel = function(){   // drop the edits made since Edit
     if (!dr) return;
-    if (dr.wlOpen){ slide(document.getElementById('ssWlIn'), false, function(){ dr.wlOpen = false; pgMain(); }); }
-    else { dr.wlOpen = true; pgMain(); slide(document.getElementById('ssWlIn'), true); }
+    slide(document.getElementById('ssWlIn'), false, function(){ dr.wl = wlClone(dr.wlBackup); dr.wlOpen = false; dr.wlq = ''; pgMain(); pgSync(); });
+  };
+  window.ssWlSave = function(){     // Save workloads: commits just the scope, then collapses. At least one workload is required.
+    if (!dr || dr.wl !== 'all' && !dr.wl.length) return;
+    var wl = (dr.wl === 'all' || dr.wl.length === WLS.length) && wlApplies(dr.id).length === WLS.length ? 'all' : dr.wl.slice();
+    state[dr.id].wl = wl; persist(); dr.wl = wlClone(wl);
+    slide(document.getElementById('ssWlIn'), false, function(){ dr.wlOpen = false; dr.wlq = ''; ssRenderCaps(); pgMain(); pgSync(); toast('Workloads updated'); });
   };
   function secLevel(c){
     if (!c.levels) return '';
@@ -4615,10 +4627,20 @@ function hydrateDefaultPolicyForm(wl) {
     var changed = (dr.on !== state[dr.id].on || dr.level !== state[dr.id].level || !same) && !noneChosen;
     sv.disabled = !changed; sv.textContent = raise ? 'Review and save' : 'Save';
     var hint = document.getElementById('ssPgHint'); if (hint) hint.textContent = noneChosen ? 'Choose at least one workload to save.' : '';
+    // While the workloads editor is open the PINNED footer carries its actions (so Save is never scrolled out of sight): Cancel drops the edits, Save workloads commits them.
+    var fc = document.getElementById('ssDrCancel');
+    if (dr.wlOpen){
+      sv.textContent = 'Save workloads'; sv.disabled = noneChosen; sv.setAttribute('onclick', 'ssWlSave()');
+      if (fc){ fc.setAttribute('onclick', 'ssWlCancel()'); }
+      if (hint){ hint.textContent = noneChosen ? 'Choose at least one workload to save.' : 'Editing workloads'; hint.style.color = noneChosen ? '' : 'var(--black-60)'; }   // orange is reserved for the validation message
+    } else {
+      if (hint) hint.style.color = '';
+      sv.setAttribute('onclick', 'ssDrSave()'); if (fc) fc.setAttribute('onclick', 'ssDrClose()');
+    }
   }
   function wlKey(w){ return w === 'all' ? w : w.slice().sort(); }
   function pgAll(){ pgHead(); pgMain(); pgSync(); }
-  window.ssDrOn = function(){ dr.on = !dr.on; if (!dr.on) dr.wlOpen = false; pgAll(); };
+  window.ssDrOn = function(){ dr.on = !dr.on; if (!dr.on && dr.wlOpen){ dr.wl = wlClone(dr.wlBackup); dr.wlOpen = false; } pgAll(); };
   window.ssDrLevel = function(id){ dr.level = id; pgMain(); pgSync(); };
   window.ssDrWlMode = function(all){ dr.wl = all ? 'all' : []; dr.wlq = ''; dr.wlCat = 0; dr.closed = {}; pgMain(); pgSync(); };
   window.ssDrWl = function(id){ var i = dr.wl.indexOf(id); if (i >= 0) dr.wl.splice(i, 1); else dr.wl.push(id); pgWp(); pgSync(); };
