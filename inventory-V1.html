@@ -6752,43 +6752,41 @@ body.pol-drawer-open { overflow: hidden; }
 .rw-rp-picker-btn-hdr[aria-disabled="true"]:hover { background: transparent !important; border-color: transparent !important; box-shadow: none !important; cursor: default !important; }
 .rw-rp-picker-btn-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; text-align: left; }
 .rw-rp-menu-right { left: auto; right: 0; }
-/* ── Restore-point list + jump-to-date flyout (user 2026-09-18) ─────────
-   Ported from restore-point-dropdown-jump.html's Variant 3 — the full
-   history in one scrollable list, grouped by day, with the calendar
-   demoted to a "Jump to date" flyout the user pulls in rather than a
-   permanent pane. Chosen over view-swap (loses your place in the list)
-   and inline-expand (a full month grid ate too much of the dropdown's
-   height) specifically because nothing here moves or disappears — the
-   list stays put, just dimmed, while the flyout is up. Production match:
-   reuses the AI panel's own "browse history" scrim+card mechanics
-   (.ai-hx-scrim / .ai-hx-card, itself a documented DS-gap exception —
-   no Figma modal component exists, searched live 2026-09-01) — a scrim
-   CONTAINED to this dropdown, not the whole page. Icons are DS-store
-   (calendar-today-outlined / close-outlined via _dsStoreIconSvg). */
-.rd-rpsel-hdr { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid var(--border-light); }
-.rd-rpsel-hdr-title { font-size: 13px; font-weight: 500; color: var(--black-60); }
-.rd-rpsel-jump-link { display: inline-flex; align-items: center; gap: 5px; font-family: inherit; font-size: 13px; font-weight: 500; color: var(--em-green); background: none; border: none; cursor: pointer; padding: 2px; }
-.rd-rpsel-jump-link:hover { color: var(--em-green-accent); }
-.rd-rpsel-jump-link .ic-x, .rd-rpsel-jump-link .lbl-cal { display: none; }
-.rw-rp-menu-cal.rd-rpsel-flyout-open .rd-rpsel-jump-link .ic-cal { display: none; }
-.rw-rp-menu-cal.rd-rpsel-flyout-open .rd-rpsel-jump-link .ic-x { display: inline-flex; }
-.rw-rp-menu-cal.rd-rpsel-flyout-open .rd-rpsel-jump-link .lbl-list { display: none; }
-.rw-rp-menu-cal.rd-rpsel-flyout-open .rd-rpsel-jump-link .lbl-cal { display: inline; }
-.rd-rpsel-body { position: relative; width: 300px; }
+/* ── Restore-point picker: calendar + anchored history list in ONE overlay ──
+   The calendar sits on the left; the right column is the full history, grouped by day, scrolling. Picking a day on the
+   calendar scrolls that day's group to the top of the list and marks it (green header, tinted rows); picking a time
+   selects the restore point. */
+.rd-rpsel-hdr { padding: 0 0 8px; }
+.rd-rpsel-hdr-title { font-size: 14px; font-weight: 500; color: var(--black-80, #4c4e54); }
+/* One overlay, two models: the calendar stays on the left; the right column is the FULL scrolling history. Picking a day
+   on the calendar anchors that day's group to the top of the list and marks it (green header + tinted rows). */
+.rd-rpsel-hero { border-radius: 8px 8px 0 0; }
+.rd-rpsel-body.rd-rpsel-combo { display: flex; align-items: stretch; width: 541px; }   /* 290 calendar + 1 rule + 250 list */
+.rd-rpsel-combo .cal-left { flex: 0 0 290px; border-right: 1px solid var(--border-light); }
+.rd-rpsel-listcol { flex: 0 0 250px; position: relative; overflow: hidden; background: var(--white); }   /* its height comes from the calendar beside it: the list is positioned inside, so the overlay is only as tall as the calendar */
+.rd-rpsel-colin { position: absolute; inset: 12px; display: flex; flex-direction: column; min-height: 0; }
+.rd-rpsel-colin .rd-rpsel-hdr { flex: 0 0 auto; padding: 0 0 8px; }
+.rd-rpsel-row.rd-rpsel-latest { height: auto; min-height: 44px; padding: 6px 10px; }   /* two lines: Latest backup / its date and time */
+.rd-rpsel-colin .rd-rpsel-list { flex: 1 1 0; min-height: 0; max-height: none; position: relative; }
+.rw-rp-menu-cal .cal-grid { row-gap: 10px; min-height: 254px; align-content: start; }   /* air between the date rows; always six rows tall so the overlay doesn't change height from month to month */
+@keyframes rdRpselPulse { 0% { background: var(--green-s20, #c6eddd); } 100% { background: var(--em-green-tint); } }
+.rw-rp-menu-cal .cal-day.in-month.has-rp.inview { background: var(--em-green-tint); color: var(--em-green); font-weight: 500; }   /* identical fill + text to the list's current-day header */
+.rd-rpsel-daygroup.is-anchored { animation: rdRpselPulse 0.9s ease-out; }
+@media (prefers-reduced-motion: reduce) { .rd-rpsel-daygroup.is-anchored { animation: none; } }
+.rd-rpsel-daygroup.is-anchored { background: var(--em-green-tint); color: var(--em-green); font-weight: 500; }
 /* No top padding — a sticky child clamps to the CONTENT-box edge (this
    list's padding-top would become a permanent gap above it that scrolling
    rows show through, confirmed empirically 2026-09-18). Breathing room
    above the first row comes from .rd-rpsel-daygroup/.rd-rpsel-row's own
    padding instead. */
-.rd-rpsel-list { max-height: 420px; overflow-y: auto; padding: 0 12px 12px; }
-.rw-rp-menu-cal.rd-rpsel-flyout-open .rd-rpsel-list { overflow-y: hidden; }
+.rd-rpsel-list { max-height: 420px; overflow-y: auto; overflow-x: hidden; padding: 0; }
 /* Flat siblings, each individually sticky — see the comment above
    rdBuildSidePicker's listHtml loop for why (a per-day wrapper and a
    JS-driven single floating header were both tried and broke worse). Fully
    opaque background is load-bearing: every already-passed header clamps to
    the same top:0 spot, and relies on painting over (not replacing) the
    ones behind it. */
-.rd-rpsel-daygroup { position: sticky; top: 0; z-index: 1; background: var(--black-3); font-size: 13px; font-weight: 450; color: var(--black-50); padding: 6px 12px; margin: 0 0 4px; }
+.rd-rpsel-daygroup { position: sticky; top: 0; z-index: 1; background: var(--white); font-size: 12px; font-weight: 500; color: var(--black-60); padding: 6px 0 6px 8px; margin: 0 0 4px; border-radius: 4px; }
 /* RP rows use the DS List Item selection grammar (tint fill + inset accent
    bar, Figma 9286-65490 — same recipe as .tnwl-item's .is-active) instead
    of the older bordered/filled .cal-time-chip button — the validated
@@ -6796,20 +6794,15 @@ body.pol-drawer-open { overflow: hidden; }
    grammar (.rp-row/.selected there) and production should match what was
    actually validated, not the single-day calendar picker's chip styling
    .cal-time-chip is shared with (corrected 2026-09-18). */
-.rd-rpsel-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 32px; padding: 6px 12px; margin-bottom: 4px; border-radius: 4px; background: transparent; border: none; font-family: inherit; font-size: 14px; color: var(--black-100); cursor: pointer; text-align: left; }
-.rd-rpsel-row:hover { background: var(--em-green-tint); }
-.rd-rpsel-row.current { background: var(--em-green-tint); box-shadow: inset 2px 0 0 var(--em-green); color: var(--em-green); font-weight: 500; border-radius: 0; }
+.rd-rpsel-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; height: 32px; padding: 0 10px; margin-bottom: 6px; border: 1px solid var(--border); background: var(--white); border-radius: 4px; font-family: inherit; font-size: 14px; color: var(--black-100); cursor: pointer; text-align: left; }
+.rd-rpsel-row:hover { border-color: var(--em-green); color: var(--em-green); background: var(--em-green-tint); }
+.rd-rpsel-row.current { border-color: var(--em-green); background: var(--em-green); color: var(--white); font-weight: 500; }
 .rd-rpsel-row-type { font-size: 14px; color: var(--black-60); }
-.rd-rpsel-row.current .rd-rpsel-row-type { color: var(--em-green); }
-.rd-rpsel-row.is-disabled, .rd-rpsel-row.is-disabled:hover { background: var(--black-3); color: var(--black-60); cursor: not-allowed; opacity: 0.55; font-weight: 450; box-shadow: none; }
+.rd-rpsel-row.current .rd-rpsel-row-type { color: rgba(255,255,255,0.85); }
+.rd-rpsel-row.is-disabled, .rd-rpsel-row.is-disabled:hover { background: var(--black-3); color: var(--black-60); border-color: var(--border-light); cursor: not-allowed; opacity: 0.55; font-weight: 450; }
 .rd-rpsel-row.is-disabled .rd-rpsel-row-type { color: var(--black-30); }
 .rd-rpsel-row-sub { display: block; font-size: 12px; font-weight: 450; color: var(--black-60); margin-top: 1px; }
-.rd-rpsel-row.current .rd-rpsel-row-sub { color: var(--em-green); }
-.rd-rpsel-flyout-scrim { position: absolute; inset: 0; background: rgba(31,34,41,0.32); z-index: 2; opacity: 0; pointer-events: none; transition: opacity .14s ease; }
-.rw-rp-menu-cal.rd-rpsel-flyout-open .rd-rpsel-flyout-scrim { opacity: 1; pointer-events: auto; }
-.rd-rpsel-flyout { position: absolute; top: 8px; left: 8px; right: 8px; background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; box-shadow: 0 12px 32px rgba(31,34,41,0.18); z-index: 3; opacity: 0; transform: translateY(-6px); pointer-events: none; transition: opacity .14s ease, transform .14s ease; overflow: hidden; }
-.rw-rp-menu-cal.rd-rpsel-flyout-open .rd-rpsel-flyout { opacity: 1; transform: translateY(0); pointer-events: auto; }
-.rd-rpsel-flyout .cal-left { flex: none; width: auto; }
+.rd-rpsel-row.current .rd-rpsel-row-sub { color: rgba(255,255,255,0.85); }
 /* ── Calendar+time-strip variant of the side picker ────────────────
    Replaces the flat dropdown list. Layout:
      [ Production (now) quick-pick ]
@@ -37311,11 +37304,8 @@ function _buildChildSelectAllOverflowMsg() {
     }
     if (state.recSelectAllAcrossPages) return null;
     var recAllPageSelected = recVisibleInPlan === recVisibleRows.length;
-    if (recAllPageSelected) {
-      var rnP = recVisibleRows.length === 1 ? '1 record' : recVisibleRows.length + ' records';
-      var rnT = recTotal === 1 ? '1 record' : recTotal + ' records';
-      return '<strong>' + rnP + '</strong> selected. ';
-    }
+    // A fully selected page says nothing the green "N items selected" chip on the right of the bar doesn't already say,
+    // so the left zone stays quiet (the across-every-page confirmation above still speaks — the chip can't carry that).
     return null;
   }
   // Replicate childRender's leaves filter (the function is closure-
@@ -52595,15 +52585,8 @@ var rdState = {
   resourceId: null, title: null, workload: null, meta: null,
   leftSel: 'prod', rightSel: null,
   leftDropOpen: false, rightDropOpen: false,
-  // Calendar picker state per side (user 2026-09-18: ported the winning
-  // pattern from restore-point-dropdown-jump.html — a full-history list,
-  // grouped by day, with the calendar demoted to a "jump to date" flyout
-  // rather than a permanent side-by-side pane). Year/month track the
-  // flyout's visible month; pickerDay now only highlights a day WITHIN the
-  // flyout (no longer filters a chip list — the list shows every day at
-  // once). Initialized from the currently selected RP's date when the
-  // popover opens (rdToggleSideDrop). *CalFlyoutOpen is the flyout's own
-  // open state, independent of and nested inside the picker's open state.
+  // Calendar picker state per side: year/month = the calendar's visible month; pickerDay = the day anchored at the top of
+  // the history list (marked in the list). Seeded from the currently selected RP when the popover opens (rdToggleSideDrop).
   leftPickerYear: null, leftPickerMonth: null, leftPickerDay: null,
   rightPickerYear: null, rightPickerMonth: null, rightPickerDay: null,
   leftCalFlyoutOpen: false, rightCalFlyoutOpen: false,
@@ -53050,6 +53033,7 @@ function _rdPositionOpenPicker(_isFollowup) {
   var trigger = picker.querySelector('.rw-rp-picker-btn-hdr');
   var menu = picker.querySelector('.rw-rp-menu-cal.open');
   if (!trigger || !menu) return;
+  _rdWireRpListSpy(openSide);
   var tr = trigger.getBoundingClientRect();
   // Match the panel's width to whichever trigger opened it (2026-09-22,
   // user report) — .rd-rpsel-body carried a flat 300px that looked fine
@@ -53057,7 +53041,8 @@ function _rdPositionOpenPicker(_isFollowup) {
   // wide compare-mode trigger, so the popup no longer lined up with the
   // affordance under it. Never shrink below the original 300px baseline.
   var body = menu.querySelector('.rd-rpsel-body');
-  if (body) body.style.width = Math.max(300, Math.round(tr.width)) + 'px';
+  // (The combined calendar + list overlay keeps its own fixed width.)
+  if (body && !body.classList.contains('rd-rpsel-combo')) body.style.width = Math.max(300, Math.round(tr.width)) + 'px';
   // rdAddComparison mounts the wide two-column layout in the SAME tick
   // that opens this dropdown, and that mount is width-transitioned — a
   // measurement taken synchronously right after the class/DOM change
@@ -53108,10 +53093,6 @@ function rdToggleSideDrop(side, e) {
   var willOpen = !rdState[openKey];
   rdState.leftDropOpen = false;
   rdState.rightDropOpen = false;
-  // The jump-to-date flyout always starts closed on a fresh open — it's a
-  // momentary navigation aid, not state that should persist across opens.
-  rdState.leftCalFlyoutOpen = false;
-  rdState.rightCalFlyoutOpen = false;
   if (willOpen) {
     rdState[openKey] = true;
     if (typeof rdSeedSidePickerView === 'function') rdSeedSidePickerView(side);
@@ -53168,8 +53149,13 @@ function rdSidePickerNav(side, dir, e) {
   if (y > now.getFullYear() || (y === now.getFullYear() && m > now.getMonth())) return;
   if (side === 'left') { rdState.leftPickerYear = y; rdState.leftPickerMonth = m; }
   else { rdState.rightPickerYear = y; rdState.rightPickerMonth = m; }
+  var _nl0 = document.querySelector('#recordDrawer .rw-rp-picker[data-side="' + side + '"] .rd-rpsel-list');
+  var _keepTop = _nl0 ? _nl0.scrollTop : 0;
   renderRdBody();
   _rdPositionOpenPicker();
+  // The re-render rebuilt the list at the top — put it back where it was (the arrows only change the calendar).
+  var _nl1 = document.querySelector('#recordDrawer .rw-rp-picker[data-side="' + side + '"] .rd-rpsel-list');
+  if (_nl1) _nl1.scrollTop = _keepTop;
 }
 // Jump to a day from the calendar flyout — the flyout is a navigation
 // aid over the list, not its own picker, so a day click closes it and
@@ -53177,11 +53163,77 @@ function rdSidePickerNav(side, dir, e) {
 // filtering anything.
 function rdSidePickerSelectDay(side, dateStr, e) {
   if (e) e.stopPropagation();
-  if (side === 'left') { rdState.leftPickerDay = dateStr; rdState.leftCalFlyoutOpen = false; }
-  else { rdState.rightPickerDay = dateStr; rdState.rightCalFlyoutOpen = false; }
+  var _oldList = document.querySelector('#recordDrawer .rw-rp-picker[data-side="' + side + '"] .rd-rpsel-list');
+  var _fromTop = _oldList ? _oldList.scrollTop : 0;
+  var _pp = dateStr.split('-');
+  // The calendar snaps to the picked day's month and the in-view marker moves to it at once; the pick then owns the sync
+  // until the list's glide settles (otherwise days passing the top on the way would flip the month back and forth).
+  _rdRpSpyLock(side, dateStr);
+  if (side === 'left') { rdState.leftPickerDay = dateStr; rdState.leftPickerYear = +_pp[0]; rdState.leftPickerMonth = +_pp[1] - 1; }
+  else { rdState.rightPickerDay = dateStr; rdState.rightPickerYear = +_pp[0]; rdState.rightPickerMonth = +_pp[1] - 1; }
   renderRdBody();
   _rdPositionOpenPicker();
-  _rdScrollRpListToDay(side, dateStr, true);
+  _rdScrollRpListToDay(side, dateStr, true, _fromTop);
+}
+// ── Scroll-spy for the restore-point list: the calendar's in-view day follows the day at the top of the list ──
+var _rdSpyLock = null, _rdSpyLockTimer = null;
+function _rdRpSpyLock(side, dateStr) {
+  _rdSpyLock = { side: side, key: dateStr };
+  clearTimeout(_rdSpyLockTimer);
+  _rdSpyLockTimer = setTimeout(function(){ _rdRpSpyRelease(side); }, 1200);   // safety release if the list never scrolls
+}
+// Release a calendar pick's hold on the sync. If the list could not scroll far enough to put the picked day at the top (the
+// oldest days sit at the very end of the history), the pick stays marked until the user scrolls — otherwise the marker would
+// walk off to whichever day did land at the top.
+function _rdRpSpyRelease(side) {
+  var lk = _rdSpyLock; _rdSpyLock = null;
+  var picker = document.querySelector('#recordDrawer .rw-rp-picker[data-side="' + side + '"]');
+  var list = picker && picker.querySelector('.rd-rpsel-list');
+  if (lk && list && list.scrollTop >= list.scrollHeight - list.clientHeight - 2) { list._pinKey = lk.key; list._pinTop = list.scrollTop; }
+  _rdRpSpy(side);
+}
+function _rdWireRpListSpy(side) {
+  var picker = document.querySelector('#recordDrawer .rw-rp-picker[data-side="' + side + '"]');
+  var list = picker && picker.querySelector('.rd-rpsel-list');
+  if (!list || list._spyWired) return;
+  list._spyWired = true;
+  // Sticky day headers report shifted offsets once the list is scrolled, so measure them while it is still at the top.
+  list._goff = [].map.call(list.querySelectorAll('.rd-rpsel-daygroup'), function(g){ return { k: g.getAttribute('data-daykey'), y: g.offsetTop }; });
+  list.addEventListener('scroll', function(){ _rdRpSpy(side); }, { passive: true });
+}
+function _rdRpSpy(side) {
+  var picker = document.querySelector('#recordDrawer .rw-rp-picker[data-side="' + side + '"]');
+  var list = picker && picker.querySelector('.rd-rpsel-list');
+  if (!list || !list._goff || !list._goff.length) return;
+  var top = list.scrollTop + 4, topKey = null, G = list._goff;
+  for (var i = 0; i < G.length; i++) { if (G[i].y <= top) topKey = G[i].k; }
+  if (!topKey) topKey = G[0].k;
+  if (_rdSpyLock && _rdSpyLock.side === side) {
+    clearTimeout(_rdSpyLockTimer);
+    _rdSpyLockTimer = setTimeout(function(){ _rdRpSpyRelease(side); }, 160);   // released once the scroll goes quiet
+    topKey = _rdSpyLock.key;
+  }
+  if (list._pinKey) { if (Math.abs(list.scrollTop - list._pinTop) <= 2) topKey = list._pinKey; else list._pinKey = null; }
+  var cur = side === 'left' ? rdState.leftPickerDay : rdState.rightPickerDay;
+  if (topKey === cur) return;
+  var p = topKey.split('-'), y = +p[0], m = +p[1] - 1;
+  var curY = side === 'left' ? rdState.leftPickerYear : rdState.rightPickerYear, curM = side === 'left' ? rdState.leftPickerMonth : rdState.rightPickerMonth;
+  if (side === 'left') rdState.leftPickerDay = topKey; else rdState.rightPickerDay = topKey;
+  if (y !== curY || m !== curM) {
+    // The list crossed a month boundary: flip the calendar, keeping the list exactly where it is.
+    if (side === 'left') { rdState.leftPickerYear = y; rdState.leftPickerMonth = m; } else { rdState.rightPickerYear = y; rdState.rightPickerMonth = m; }
+    var keep = list.scrollTop;
+    renderRdBody(); _rdPositionOpenPicker();
+    var nl = document.querySelector('#recordDrawer .rw-rp-picker[data-side="' + side + '"] .rd-rpsel-list');
+    if (nl) nl.scrollTop = keep;
+    return;
+  }
+  // Same month: move the markers in place (no re-render while scrolling).
+  picker.querySelectorAll('.cal-day.has-rp').forEach(function(d){
+    var n = d.querySelector('.cal-day-num'), key = p[0] + '-' + p[1] + '-' + String(n ? n.textContent : '').padStart(2, '0');
+    d.classList.toggle('inview', key === topKey && !d.classList.contains('selected'));
+  });
+  picker.querySelectorAll('.rd-rpsel-daygroup').forEach(function(g){ g.classList.toggle('is-anchored', g.getAttribute('data-daykey') === topKey); });
 }
 function rdClosePickerOutside(e) {
   var pickers = document.querySelectorAll('#recordDrawer .rw-rp-picker');
@@ -53199,22 +53251,25 @@ function rdClosePickerOutside(e) {
 // explicit calendar-flyout jump from a passive reseed (plain dropdown open,
 // or the loading-beat resync) — only a real jump animates; reseeding to the
 // current selection should land silently, instantly.
-function _rdScrollRpListToDay(side, dateStr, isJump) {
+function _rdScrollRpListToDay(side, dateStr, isJump, fromTop) {
   var picker = document.querySelector('#recordDrawer .rw-rp-picker[data-side="' + side + '"]');
   if (!picker) return;
   var list = picker.querySelector('.rd-rpsel-list');
   var hdr = list && list.querySelector('.rd-rpsel-daygroup[data-daykey="' + dateStr + '"]');
+  if (list && !hdr) { list.scrollTop = 0; return; }   // the day holds only the pinned latest backup — show the top
   if (!list || !hdr) return;
-  if (isJump) list.scrollTo({ top: hdr.offsetTop, behavior: 'smooth' });
-  else list.scrollTop = hdr.offsetTop;
-}
-// Toggle the calendar jump-to-date flyout over the RP list.
-function rdToggleCalFlyout(side, e) {
-  if (e) e.stopPropagation();
-  var key = side === 'left' ? 'leftCalFlyoutOpen' : 'rightCalFlyoutOpen';
-  rdState[key] = !rdState[key];
-  renderRdBody();
-  _rdPositionOpenPicker();
+  // The headers are sticky, so once the list is scrolled their offsetTop reports where they are STUCK, not where they sit in
+  // the history. Use the natural offsets measured while the list was at the top (see _rdWireRpListSpy).
+  var G = list._goff, hit = G && G.filter(function(x){ return x.k === dateStr; })[0];
+  var y = hit ? hit.y : hdr.offsetTop;
+  if (!isJump) { list.scrollTop = y; return; }
+  // Jump from the calendar: the re-render rebuilt the list at the top, so put it back where the user was (no visible
+  // snap), then glide to the day on the next frame — a smooth scroll started in the same task as the DOM swap is dropped.
+  if (typeof fromTop === 'number') list.scrollTop = fromTop;
+  requestAnimationFrame(function(){
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    list.scrollTo({ top: y, behavior: reduce ? 'auto' : 'smooth' });
+  });
 }
 // Build the drawer's base fields for a record-level entry (rec-{schema}-{idx}).
 // The diff flags here are derived from the same genRecDiff source the table
@@ -53856,6 +53911,7 @@ function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
   var todayStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
   var canStepFwd = !(year === now.getFullYear() && month === now.getMonth());
   var dowsHtml = DOWS.map(function(d){ return '<span>' + d + '</span>'; }).join('');
+  var _chosenDay = (info && info.rp) ? (function(t){ var q = new Date(t); return q.getFullYear() + '-' + String(q.getMonth()+1).padStart(2,'0') + '-' + String(q.getDate()).padStart(2,'0'); })(info.rp.ts) : null;
   var cellsHtml = '';
   for (var i = 0; i < firstDow; i++) cellsHtml += '<div class="cal-day"></div>';
   var anyMatchInMonth = false, anyDiffInMonth = false;
@@ -53868,8 +53924,9 @@ function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
     if (hasMatch) anyMatchInMonth = true;
     if (hasDiff) anyDiffInMonth = true;
     var isToday = dateStr === todayStr;
-    var isFocused = dateStr === pickerDay;
-    var cellCls = 'cal-day in-month' + (hasRp ? ' has-rp' : '') + (hasMatch ? ' has-match' : '') + (hasDiff ? ' has-diff' : '') + (isToday ? ' today' : '') + (isFocused ? ' selected' : '');
+    var isFocused = dateStr === pickerDay;           // the day at the top of the list (in view)
+    var isChosen = dateStr === _chosenDay;           // the day of the restore point actually chosen on this side
+    var cellCls = 'cal-day in-month' + (hasRp ? ' has-rp' : '') + (hasMatch ? ' has-match' : '') + (hasDiff ? ' has-diff' : '') + (isToday ? ' today' : '') + (isChosen ? ' selected' : '') + (isFocused && !isChosen ? ' inview' : '');
     var click = hasRp ? ' onclick="rdSidePickerSelectDay(\'' + side + '\', \'' + dateStr + '\', event)"' : '';
     var dayLabel = new Date(year, month, day).toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
     var ariaParts = [dayLabel];
@@ -53877,7 +53934,7 @@ function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
     ariaParts.push(hasRp ? 'restore point available' : 'no restore point');
     if (hasMatch) ariaParts.push('matches your search');
     if (hasDiff) ariaParts.push('changed data');
-    if (isFocused) ariaParts.push('selected');
+    if (isChosen) ariaParts.push('selected'); else if (isFocused) ariaParts.push('in view');
     var ariaLabel = ariaParts.join(', ');
     var roleAttr = hasRp ? ' role="button" tabindex="0"' : ' role="gridcell"';
     // Dots render as a centered row of real child elements BELOW the date
@@ -53922,11 +53979,12 @@ function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
   var _latestRpObj = (typeof _v1LatestRp === 'function') ? _v1LatestRp() : (allRps[0] || null);
   var _latestId = _latestRpObj ? _latestRpObj.id : null;
   var latestChip = '';
-  if (_latestId && sel && sel !== 'prod' && sel !== 'snap' && sel !== _latestId) {
-    var latestCurrent  = (sel === _latestId);
+  // The latest backup lives ONLY here, pinned above the list (it carries the priority) — the list below omits it.
+  if (_latestId) {
+    var latestCurrent  = (_rdNormSel(resource && resource.id, sel) === _latestId);
     var latestDisabled = (otherSel === _latestId);
     var latestSub = (typeof _v1FormatRpId === 'function') ? (_v1FormatRpId(_latestId) || '') : '';
-    latestChip = '<button class="rd-rpsel-row' + (latestCurrent ? ' current' : '') + (latestDisabled ? ' is-disabled' : '') + '"' +
+    latestChip = '<button class="rd-rpsel-row rd-rpsel-latest' + (latestCurrent ? ' current' : '') + (latestDisabled ? ' is-disabled' : '') + '"' +
       (latestDisabled
         ? ' type="button" disabled aria-disabled="true" title="The latest backup is already selected on the other side — choose a different point to compare"'
         : ' onclick="rdSelectSide(\'' + side + '\', \'' + _latestId + '\')"') + '>' +
@@ -53967,10 +54025,14 @@ function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
   allRps.forEach(function(rp){
     var d = new Date(rp.ts);
     var dayKey = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    var _anchored = (dayKey === pickerDay);   // the day picked on the calendar — its group is marked in the list
     if (dayKey !== _lastDayKey) {
-      listHtml += '<div class="rd-rpsel-daygroup" data-daykey="' + dayKey + '">' + _rdDayGroupLabel(d) + '</div>';
+      listHtml += '<div class="rd-rpsel-daygroup' + (_anchored ? ' is-anchored' : '') + '" data-daykey="' + dayKey + '">' + _rdDayGroupLabel(d) + '</div>';
       _lastDayKey = dayKey;
     }
+    // The latest backup is the first row of the newest day, in the list like every other point (a calendar click on that day
+    // therefore always has a group to land on); it keeps its two-line style so it still stands apart from the time chips.
+    if (rp.id === _latestId && latestChip) { listHtml += latestChip; return; }
     var t = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
     var isCurrent = rp.id === sel;
     var isMatch = !!matchedRpIdSet[rp.id];
@@ -53991,24 +54053,41 @@ function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
   // built — only its container changed (a contained overlay instead of a
   // permanent side-by-side pane). Its day-cell click now jumps + closes
   // rather than filtering a chip list (see rdSidePickerSelectDay).
-  var flyoutOpen = side === 'left' ? rdState.leftCalFlyoutOpen : rdState.rightCalFlyoutOpen;
   var rpListHtml =
-    '<div class="rd-rpsel-hdr"><span class="rd-rpsel-hdr-title">Restore points</span>' +
-      '<button type="button" class="rd-rpsel-jump-link" onclick="rdToggleCalFlyout(\'' + side + '\', event)">' +
-        '<span class="ic-cal">' + _dsStoreIconSvg('calendar-today-outlined', 13) + '</span>' +
-        '<span class="ic-x">' + _dsStoreIconSvg('close-outlined', 13) + '</span>' +
-        '<span class="lbl-list">Jump to date</span><span class="lbl-cal">Cancel</span>' +
-      '</button>' +
-    '</div>' +
-    '<div class="rd-rpsel-body">' +
-      '<div class="rd-rpsel-list">' +
-        (prodChip || latestChip ? '<div class="cal-prod-slot">' + prodChip + latestChip + '</div>' : '') +
-        listHtml +
-      '</div>' +
-      (flyoutOpen ? '<div class="rd-rpsel-flyout-scrim" onclick="rdToggleCalFlyout(\'' + side + '\', event)"></div><div class="rd-rpsel-flyout">' + leftPane + '</div>' : '') +
+    '<div class="rd-rpsel-body rd-rpsel-combo">' +
+      leftPane +
+      '<div class="rd-rpsel-listcol"><div class="rd-rpsel-colin">' +
+        '<div class="rd-rpsel-hdr"><span class="rd-rpsel-hdr-title">Restore points</span></div>' +
+        '<div class="rd-rpsel-list">' + listHtml + '</div>' +
+      '</div></div>' +
     '</div>';
+  // Hero band — same DS Date Picker hero as the global picker: the selected date small, the selected point large.
+  var heroHtml;
+  (function(){
+    var rpSel = info && info.rp;
+    if (rpSel) {
+      var hd = new Date(rpSel.ts);
+      // The two lines never repeat each other: the big line is the value, the small line is context.
+      //   latest backup → small: its date and time · big: "Latest backup"   (same as the global picker)
+      //   any other point → small: how far it sits from the latest backup · big: the full date and time
+      var _hTime = hd.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      var hSmall, hBig;
+      if (_latestId && rpSel.id === _latestId) {
+        hSmall = hd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' \u00b7 ' + _hTime;
+        hBig = 'Latest backup';
+      } else {
+        var _lRp = allRps.filter(function(r){ return r.id === _latestId; })[0];
+        var _hd = _lRp ? Math.round((_lRp.ts - rpSel.ts) / 86400000) : 0;
+        hSmall = _hd < 1 ? 'Earlier than the latest backup' : _hd + (_hd === 1 ? ' day' : ' days') + ' before the latest backup';
+        hBig = hd.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) + ' \u00b7 ' + _hTime;
+      }
+      heroHtml = '<div class="cal-hero rd-rpsel-hero"><div class="cal-hero-year">' + hSmall + '</div><div class="cal-hero-date">' + hBig + '</div></div>';
+    } else {
+      heroHtml = '<div class="cal-hero rd-rpsel-hero"><div class="cal-hero-year">Restore point</div><div class="cal-hero-date">Select a restore point</div></div>';
+    }
+  })();
   var menuAlign = side === 'right' ? ' rw-rp-menu-right' : '';
-  var flyoutCls = flyoutOpen ? ' rd-rpsel-flyout-open' : '';
+  var flyoutCls = '';
   // Item-compare model: the side picker is a live dropdown whose popover is
   // the full-history list + jump-to-date flyout described above. Both
   // columns are independently repickable — the only comparison surface now
@@ -54051,6 +54130,7 @@ function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
       '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' +
     '</button>' +
     '<div class="rw-rp-menu rw-rp-menu-cal' + menuAlign + flyoutCls + (isOpen ? ' open' : '') + '" onclick="event.stopPropagation()">' +
+      heroHtml +
       _cartAlertHtml +
       rpListHtml +
     '</div>' +

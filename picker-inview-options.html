@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Picker In-View Options</title>
+<style>
+@font-face { font-family: 'Circular Pro'; src: url('./fonts/CircularPro-Book.otf')   format('opentype'); font-weight: 450; font-display: swap; }
+@font-face { font-family: 'Circular Pro'; src: url('./fonts/CircularPro-Medium.otf') format('opentype'); font-weight: 500; font-display: swap; }
+@font-face { font-family: 'Circular Pro'; src: url('./fonts/CircularPro-Bold.otf')   format('opentype'); font-weight: 700; font-display: swap; }
+:root {
+  --black-100: #1f2229; --black-80: #4c4e54; --black-60: #626469; --black-30: #bcbdbf; --black-10: #e9e9ea; --black-5: #f8f8f9; --border: #d2d3d4; --border-light: #e9e9ea;
+  --white: #fff; --page-bg: #edf0f0; --em-green: #01804a; --em-green-tint: #f6fbf9; --green-s10: #e4f6ee; --green-s20: #c6eddd; --green-s30: #9cd8be;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page-bg); color: var(--black-100); font-family: 'Circular Pro', system-ui, sans-serif; font-size: 16px; font-weight: 450; line-height: 22px; }
+button { font-family: inherit; }
+.pg { max-width: 1100px; margin: 0 auto; padding: 24px 16px 48px; display: flex; flex-direction: column; gap: 24px; }
+h1 { margin: 0; font-size: 24px; line-height: 32px; font-weight: 500; }
+.sub { margin: 4px 0 0; color: var(--black-60); max-width: 80ch; }
+.ctl { background: var(--white); border-radius: 8px; padding: 16px; display: grid; grid-template-columns: 1.6fr 1fr; gap: 24px; }
+.ctl legend { padding: 0; font-size: 14px; font-weight: 500; color: var(--black-60); margin-bottom: 8px; }
+.ctl fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.opt { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; }
+.opt input { margin: 4px 0 0; accent-color: var(--em-green); }
+.opt b { display: block; font-weight: 500; } .opt span { display: block; font-size: 14px; line-height: 20px; color: var(--black-60); }
+.stage { background: var(--black-10); border-radius: 8px; padding: 32px; display: flex; justify-content: center; }
+.note { background: var(--white); border-radius: 8px; padding: 12px 16px; font-size: 14px; line-height: 20px; color: var(--black-60); }
+.note b { color: var(--black-100); font-weight: 500; }
+
+/* ── The picker overlay (mirrors the drawer's: hero, calendar, pinned latest, scrolling day-grouped list) ── */
+.pk { width: 541px; background: var(--white); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); overflow: hidden; }
+.hero { background: var(--em-green); color: var(--white); padding: 14px 16px; }
+.hero-s { font-size: 14px; opacity: .85; line-height: 17px; }
+.hero-b { font-size: 22px; font-weight: 500; line-height: 26px; letter-spacing: -0.02em; margin-top: 2px; }
+.body { display: flex; align-items: stretch; }
+.cal { flex: 0 0 290px; border-right: 1px solid var(--border-light); padding: 12px 16px 12px; display: flex; flex-direction: column; }
+.nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.nav button { width: 28px; height: 28px; border: 0; background: none; border-radius: 4px; font-size: 18px; color: var(--black-60); cursor: pointer; } .nav button:hover { background: var(--black-5); } .nav button:disabled { opacity: .3; cursor: default; }
+.mlbl { font-size: 14px; font-weight: 500; }
+.dow, .grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+.dow span { text-align: center; font-size: 12px; color: var(--black-60); padding: 4px 0; }
+.grid { row-gap: 10px; min-height: 254px; align-content: start; }
+.day { position: relative; width: 34px; height: 34px; margin: 0 auto; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--black-30); user-select: none; }
+.day.has { color: var(--black-100); cursor: pointer; } .day.has:hover { background: var(--black-5); }
+.day .n { position: relative; z-index: 1; }
+/* selected = the day of the restore point you chose — solid, never moves with scroll */
+.day.sel { background: var(--em-green); color: var(--white); font-weight: 500; }
+.day.sel:hover { background: var(--em-green); }
+/* in-view = the day at the top of the list — option-specific, always lighter than selected */
+.o-ring .day.top:not(.sel) { box-shadow: inset 0 0 0 2px var(--em-green); color: var(--em-green); font-weight: 500; }
+.o-fill .day.top:not(.sel) { background: var(--em-green-tint); color: var(--em-green); font-weight: 500; }   /* identical fill + text to the list's day header (.grp.top) */
+.o-bar .day.top:not(.sel) { color: var(--em-green); font-weight: 500; }
+.o-bar .day.top::after { content: ''; position: absolute; left: 50%; bottom: 3px; width: 14px; height: 3px; margin-left: -7px; border-radius: 2px; background: var(--em-green); }
+.o-bar .day.sel.top::after { background: var(--white); }
+.o-span .day.vis:not(.sel):not(.top) { background: var(--green-s10); color: var(--em-green); }
+.o-span .day.top:not(.sel) { background: var(--green-s10); box-shadow: inset 0 0 0 2px var(--em-green); color: var(--em-green); font-weight: 500; }
+.cap { margin-top: auto; padding-top: 8px; font-size: 12px; color: var(--black-60); text-align: center; min-height: 28px; }
+.cap b { color: var(--em-green); font-weight: 500; }
+
+.col { flex: 0 0 250px; position: relative; overflow: hidden; background: var(--white); }
+.colin { position: absolute; inset: 12px; display: flex; flex-direction: column; min-height: 0; }
+.col-h { font-size: 14px; font-weight: 500; color: var(--black-80); padding-bottom: 8px; }
+.slot { padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid var(--border-light); }
+.chip { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; height: 32px; padding: 0 10px; margin-bottom: 6px; border: 1px solid var(--border); background: var(--white); border-radius: 4px; font-size: 14px; color: var(--black-100); cursor: pointer; text-align: left; }
+.chip:hover { border-color: var(--em-green); color: var(--em-green); background: var(--em-green-tint); }
+.chip.cur { border-color: var(--em-green); background: var(--em-green); color: var(--white); font-weight: 500; }
+.chip .t { font-size: 14px; color: var(--black-60); } .chip.cur .t { color: rgba(255,255,255,.85); }
+.chip.latest { height: auto; min-height: 44px; padding: 6px 10px; margin-bottom: 0; }
+.chip.latest .sub { display: block; font-size: 12px; font-weight: 450; color: var(--black-60); } .chip.cur .sub { color: rgba(255,255,255,.85); }
+.list { flex: 1 1 0; min-height: 0; overflow-y: auto; overflow-x: hidden; position: relative; }
+.grp { position: sticky; top: 0; z-index: 1; background: var(--white); font-size: 12px; font-weight: 500; color: var(--black-60); padding: 6px 0 6px 8px; margin: 0 0 4px; border-radius: 4px; }
+/* the day at the top of the list: tinted header (same in every option) */
+.grp.top { background: var(--em-green-tint); color: var(--em-green); }
+.o-span .grp.vis { color: var(--em-green); }
+</style>
+</head>
+<body>
+<div class="pg">
+  <header>
+    <h1>Picker — marking the day in view</h1>
+    <p class="sub">As the restore-point list scrolls, the calendar marks the day at the top of it. The solid green day is always the restore point you have <em>chosen</em> and never moves with scroll; the options below only differ in how the <em>in-view</em> day reads. Scroll the list, click a date, click a time. The tinted day header in the list is the same in every option.</p>
+  </header>
+
+  <section class="ctl">
+    <fieldset>
+      <legend>In-view marker on the calendar</legend>
+      <label class="opt"><input type="radio" name="o" value="ring" checked><div><b>A · Ring</b><span>A green outline circle, no fill. Clearly secondary to the solid selected day; reads as "focus here".</span></div></label>
+      <label class="opt"><input type="radio" name="o" value="fill"><div><b>B · Soft fill</b><span>The same fill and text as the list's day header (Green/S5 fill, green medium text) on the date's circle, so the pair reads as one thing. Very pale on a white calendar.</span></div></label>
+      <label class="opt"><input type="radio" name="o" value="bar"><div><b>C · Underline bar</b><span>A short green bar under the number. Leaves the day's circle untouched, so it never competes with the selected fill.</span></div></label>
+      <label class="opt"><input type="radio" name="o" value="span"><div><b>D · Window</b><span>Every day currently visible in the list gets a pale fill; the top one also gets the ring. Shows how much of the history is on screen, not just one date.</span></div></label>
+    </fieldset>
+    <fieldset>
+      <legend>Extras</legend>
+      <label class="opt"><input type="checkbox" id="capOn"><div><b>Caption under the calendar</b><span>States the in-view day in words ("Showing Thu, Oct 8").</span></div></label>
+      <label class="opt"><input type="checkbox" id="followOn" checked><div><b>Calendar month follows the list</b><span>When scrolling crosses into another month, the calendar flips with it.</span></div></label>
+    </fieldset>
+  </section>
+
+  <div class="stage"><div id="mount"></div></div>
+  <div class="note" id="note"></div>
+</div>
+
+<script>
+/* ── Seed: restore points, newest first (some days have none, some have two) ── */
+var RPS = []; (function(){
+  var today = new Date(2026, 9, 16);
+  for (var d = 0; d < 32; d++) {
+    var day = new Date(today.getFullYear(), today.getMonth(), today.getDate() - d);
+    var skip = (d > 0 && (d % 7 === 3 || d === 11 || d === 19));
+    if (skip) continue;
+    var two = d % 2 === 0 || d === 0;
+    if (two) RPS.push({ ts: +new Date(day.getFullYear(), day.getMonth(), day.getDate(), 15, 45), type: 'Full' });
+    RPS.push({ ts: +new Date(day.getFullYear(), day.getMonth(), day.getDate(), 3, 15), type: d % 5 === 0 ? 'Incremental' : 'Full' });
+  }
+  RPS.forEach(function(r, i){ r.id = 'rp' + i; });
+})();
+var LATEST = RPS[0];
+function dkey(ts) { var d = new Date(ts); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function fmtDay(key) { var p = key.split('-'); return new Date(+p[0], +p[1]-1, +p[2]).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); }
+function fmtTime(ts) { return new Date(ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }); }
+var HAS = {}; RPS.forEach(function(r){ HAS[dkey(r.ts)] = true; });
+
+/* ── State ── */
+var GOFF = [], LOCK = null, LOCKTIMER = null;
+var S = { opt: 'ring', sel: RPS[9].id, topDay: dkey(RPS[9].ts), vis: {}, y: 2026, m: 9, cap: false, follow: true };
+S.y = new Date(RPS[9].ts).getFullYear(); S.m = new Date(RPS[9].ts).getMonth();
+var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function render() {
+  var selRp = RPS.filter(function(r){ return r.id === S.sel; })[0], selDay = dkey(selRp.ts);
+  var hero = '<div class="hero"><div class="hero-s">' + new Date(selRp.ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + '</div><div class="hero-b">' + (selRp.id === LATEST.id ? 'Latest backup' : fmtDay(selDay) + ' · ' + fmtTime(selRp.ts)) + '</div></div>';
+  var first = new Date(S.y, S.m, 1).getDay(), dim = new Date(S.y, S.m + 1, 0).getDate(), cells = '';
+  for (var i = 0; i < first; i++) cells += '<div></div>';
+  for (var d = 1; d <= dim; d++) {
+    var key = S.y + '-' + String(S.m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    var has = !!HAS[key] && new Date(S.y, S.m, d) <= new Date(2026, 9, 16);
+    cells += '<div class="day' + (has ? ' has' : '') + (key === selDay ? ' sel' : '') + (key === S.topDay ? ' top' : '') + (S.vis[key] ? ' vis' : '') + '"' + (has ? ' data-day="' + key + '" role="button" tabindex="0"' : '') + '><span class="n">' + d + '</span></div>';
+  }
+  var cal = '<div class="cal"><div class="nav"><button data-nav="-1" aria-label="Previous month">‹</button><span class="mlbl">' + MONTHS[S.m] + ' ' + S.y + '</span><button data-nav="1" aria-label="Next month"' + (S.y === 2026 && S.m === 9 ? ' disabled' : '') + '>›</button></div>'
+    + '<div class="dow"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div><div class="grid">' + cells + '</div>'
+    + (S.cap ? '<div class="cap">Showing <b id="capDay">' + fmtDay(S.topDay) + '</b></div>' : '') + '</div>';
+  var list = '', last = null;
+  RPS.forEach(function(r){
+    if (r.id === LATEST.id) return;
+    var k = dkey(r.ts);
+    if (k !== last) { list += '<div class="grp' + (k === S.topDay ? ' top' : '') + (S.vis[k] ? ' vis' : '') + '" data-grp="' + k + '">' + fmtDay(k) + '</div>'; last = k; }
+    list += '<button class="chip' + (r.id === S.sel ? ' cur' : '') + '" data-rp="' + r.id + '"><span>' + fmtTime(r.ts) + '</span><span class="t">' + r.type + '</span></button>';
+  });
+  var latest = '<div class="slot"><button class="chip latest' + (LATEST.id === S.sel ? ' cur' : '') + '" data-rp="' + LATEST.id + '"><span>Latest backup<span class="sub">' + new Date(LATEST.ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' · ' + fmtTime(LATEST.ts) + '</span></span></button></div>';
+  var keepScroll = (document.getElementById('lst') || {}).scrollTop || 0;
+  document.getElementById('mount').innerHTML = '<div class="pk o-' + S.opt + '">' + hero + '<div class="body">' + cal + '<div class="col"><div class="colin"><div class="col-h">Restore points</div>' + latest + '<div class="list" id="lst">' + list + '</div></div></div></div></div>';
+  var l = document.getElementById('lst'); GOFF = [];
+  l.querySelectorAll('.grp').forEach(function(g){ GOFF.push({ k: g.getAttribute('data-grp'), y: g.offsetTop }); });   // measured at scrollTop 0: sticky headers report shifted offsets once scrolled
+  l.scrollTop = keepScroll; l.addEventListener('scroll', spy, { passive: true });
+  note();
+}
+/* scroll-spy: the day whose header is at (or has just passed) the top of the list; and every day with a header inside the viewport */
+function spy() {
+  var l = document.getElementById('lst'), top = l.scrollTop + 4, vis = {}, topKey = null;
+  for (var i = 0; i < GOFF.length; i++) {
+    var y = GOFF[i].y, nextY = i + 1 < GOFF.length ? GOFF[i + 1].y : Infinity;
+    if (y <= top) topKey = GOFF[i].k;
+    if (nextY > l.scrollTop && y < l.scrollTop + l.clientHeight) vis[GOFF[i].k] = true;
+  }
+  if (!topKey) topKey = GOFF[0].k;
+  // A calendar pick is in flight: the list is gliding there, so the marker and the month belong to the pick, not to whatever
+  // day happens to pass the top on the way (otherwise the calendar flips back and forth across the month boundary).
+  if (LOCK) {
+    clearTimeout(LOCKTIMER); LOCKTIMER = setTimeout(function(){ LOCK = null; spy(); }, 160);   // released once the scroll goes quiet
+    topKey = LOCK; vis = {}; vis[LOCK] = true;
+  }
+  if (topKey === S.topDay && JSON.stringify(vis) === JSON.stringify(S.vis)) return;
+  var p = topKey.split('-'), monthChanged = (+p[0] !== S.y || +p[1] - 1 !== S.m);
+  S.topDay = topKey; S.vis = vis;
+  if (monthChanged && S.follow) { S.y = +p[0]; S.m = +p[1] - 1; render(); return; }   // render keeps the list's scroll position
+  paint();
+}
+function paint() {   // update markers in place (no re-render while scrolling)
+  document.querySelectorAll('.day').forEach(function(d){ var k = d.getAttribute('data-day'); d.classList.toggle('top', k === S.topDay); d.classList.toggle('vis', !!S.vis[k]); });
+  document.querySelectorAll('.grp').forEach(function(g){ var k = g.getAttribute('data-grp'); g.classList.toggle('top', k === S.topDay); g.classList.toggle('vis', !!S.vis[k]); });
+  var c = document.getElementById('capDay'); if (c) c.textContent = fmtDay(S.topDay);
+}
+function note() {
+  var N = {
+    ring: '<b>A · Ring.</b> Two states, two weights: solid = chosen, outline = in view. The risk: a ring is a common focus indicator, so on a keyboard-focused day it could be confused with focus.',
+    fill: '<b>B · Soft fill.</b> Same visual language as the existing calendar hover, which makes it instantly familiar, and also means hovering another day looks nearly identical to the in-view day.',
+    bar: '<b>C · Underline bar.</b> The most separate from the selected state, since the circle is never touched. Easy to miss at a glance on a small bar, but it can sit under the selected day too (white on green) without any clash.',
+    span: '<b>D · Window.</b> Answers "how much am I looking at" as well as "where am I": the pale days are all on screen, the ringed one is at the top. Busier, and the pale fills can read as available days if you don\'t know what they mean.'
+  };
+  document.getElementById('note').innerHTML = N[S.opt] + ' The pale green tint on the list\'s day header is the same everywhere; with "Calendar month follows" on, crossing a month boundary flips the calendar.';
+}
+document.addEventListener('change', function(e){
+  var t = e.target;
+  if (t.name === 'o') { S.opt = t.value; render(); }
+  else if (t.id === 'capOn') { S.cap = t.checked; render(); }
+  else if (t.id === 'followOn') { S.follow = t.checked; }
+});
+document.addEventListener('click', function(e){
+  var chip = e.target.closest('[data-rp]');
+  if (chip) {
+    S.sel = chip.getAttribute('data-rp');
+    // Choosing a time puts everything on that day: the calendar snaps to its month, the in-view marker moves to it, and the
+    // list glides so that day's group is at the top (the pick owns the sync until the scroll settles, as with a calendar click).
+    var picked = RPS.filter(function(r){ return r.id === S.sel; })[0], pk = dkey(picked.ts), pp = pk.split('-'), l0 = document.getElementById('lst');
+    var keep = l0.scrollTop, target = GOFF.filter(function(x){ return x.k === pk; })[0];
+    LOCK = pk; clearTimeout(LOCKTIMER);
+    S.y = +pp[0]; S.m = +pp[1] - 1; S.topDay = pk; S.vis = {}; S.vis[pk] = true;
+    render(); var l1 = document.getElementById('lst'); l1.scrollTop = keep;
+    l1.scrollTo({ top: target ? target.y : 0, behavior: 'smooth' });
+    LOCKTIMER = setTimeout(function(){ LOCK = null; spy(); }, 1200);
+    return;
+  }
+  var nav = e.target.closest('[data-nav]'); if (nav) { S.m += +nav.getAttribute('data-nav'); if (S.m < 0) { S.m = 11; S.y--; } if (S.m > 11) { S.m = 0; S.y++; } render(); return; }
+  var day = e.target.closest('[data-day]');
+  if (day) {
+    var key = day.getAttribute('data-day'), l = document.getElementById('lst'), g = GOFF.filter(function(x){ return x.k === key; })[0];
+    LOCK = key; clearTimeout(LOCKTIMER);
+    var pp = key.split('-'); S.y = +pp[0]; S.m = +pp[1] - 1; S.topDay = key; S.vis = {}; S.vis[key] = true;   // calendar and marker are in sync immediately
+    var keepTop = l.scrollTop; render(); l = document.getElementById('lst'); l.scrollTop = keepTop;
+    l.scrollTo({ top: g ? g.y : 0, behavior: 'smooth' });
+    LOCKTIMER = setTimeout(function(){ LOCK = null; spy(); }, 1200);   // safety release if the list was already there and never scrolls
+  }
+});
+render();
+requestAnimationFrame(function(){ requestAnimationFrame(function(){ var l = document.getElementById('lst'), g = GOFF.filter(function(x){ return x.k === S.topDay; })[0]; if (g) l.scrollTop = g.y; spy(); }); });
+</script>
+</body>
+</html>
