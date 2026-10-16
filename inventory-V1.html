@@ -5934,6 +5934,11 @@ td.cb-col input:disabled, th.cb-col input:disabled { pointer-events: none; }
 .rd-hc.is-added { background: var(--em-green-tint); box-shadow: inset 0 3px 0 var(--em-green); }
 .rd-hc-pick { min-width: 0; display: flex; align-items: center; gap: 8px; } .rd-hc-pick > .rw-rp-picker { flex: 1; min-width: 0; }
 .rd-hc-clear { flex: 0 0 auto; width: 28px; height: 28px; }
+/* Date picker + "stop comparing" joined as one segmented control: no gap, shared edge, squared inner corners. */
+.rd-hc-pick.has-clear { gap: 0; align-items: stretch; }
+.rd-hc-pick.has-clear .rw-rp-picker-hdr .rw-rp-picker-btn-hdr { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.rd-hc-pick.has-clear .rd-hc-clear { align-self: stretch; width: 40px; height: auto; margin-left: -1px; border-radius: 0 4px 4px 0; position: relative; }
+.rd-hc-pick.has-clear .rw-rp-picker-btn-hdr:hover, .rd-hc-pick.has-clear .rw-rp-picker-btn-hdr:focus-visible, .rd-hc-pick.has-clear .rd-hc-clear:hover, .rd-hc-pick.has-clear .rd-hc-clear:focus-visible { position: relative; z-index: 1; }   /* the hovered half's border sits above the shared edge */
 /* Comparison slot while viewing one point: holds the Compare button. */
 .rd-hc.rd-hc-ghost { background: var(--white); justify-content: center; align-items: center; }
 .rd-hc-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 28px; }
@@ -19255,11 +19260,9 @@ function childRenderFolderRow(folder, count, pLayerSet, selState, existenceCount
   // Workload-lock tooltip on the row so hover explains why the
   // folder's affordances are disabled when the cart is pinned to a
   // different workload.
-  var folderLockTitle = workloadLockedFolder
-    ? ' title="Restore job is limited to ' + activeWlFolder + ' resources. Clear the job to add other workloads."'
-    : '';
+  var folderLockTitle = '';   // the lock is explained by the styled bubble on the checkbox + Restore button (see below), never a native title
   // Category lock: styled bubble on the checkbox cell (never native title=).
-  var catLockTipFolder = categoryLockedFolder ? _categoryLockMsg() : null;
+  var catLockTipFolder = categoryLockedFolder ? _categoryLockMsg() : (workloadLockedFolder ? _workloadLockMsg(activeWlFolder) : null);
   var catLockFolderCbAttr = catLockTipFolder
     ? ' data-tooltip="' + catLockTipFolder.replace(/"/g, '&quot;') + '"'
     : '';
@@ -19627,12 +19630,10 @@ function childRenderLeafRow(r, showFolder, folderLabel, diffStatus, matchCount) 
   // Export-through-cart: export-eligible rows (Okta System Log) keep a LIVE
   // checkbox — the cart is the only way to start an export job (no express).
   var rowDisabled = !canRestore || isCovered || (leafAvailability !== 'add' && !_exportCartEligible(r)) || workloadLockedLeaf || categoryLockedLeaf;
-  var lockTitleLeaf = workloadLockedLeaf
-    ? ' title="Restore job is limited to ' + activeWlLeaf + ' resources. Clear the job to add other workloads."'
-    : '';
+  var lockTitleLeaf = '';   // explained by the styled bubble (checkbox + Restore button), never a native title
   // Category lock uses the styled bubble (user rule: never native title=)
   // on the checkbox cell — the seg-btn carries its own copy via lockTip.
-  var catLockTipLeaf = categoryLockedLeaf ? _categoryLockMsg() : null;
+  var catLockTipLeaf = categoryLockedLeaf ? _categoryLockMsg() : (workloadLockedLeaf ? _workloadLockMsg(activeWlLeaf) : null);
   var catLockCbAttr = catLockTipLeaf
     ? ' data-tooltip="' + catLockTipLeaf.replace(/"/g, '&quot;') + '"'
     : '';
@@ -24818,7 +24819,7 @@ function _childRenderFields() {
       '</div></td>';
     // Comparing: the row carries the same status dot as the records table (changed / unchanged).
     if (_fieldsCompareDate && typeof D365X !== 'undefined' && D365X.on()) {
-      var _stCls = 'rec-diff-row-' + (_isChanged ? 'modified' : 'unchanged');
+      var _stCls = 'rec-diff-row-' + (resolved.record && resolved.record._gone ? 'removed' : (_isChanged ? 'modified' : 'unchanged'));   // every field of a deleted record is gone with it
       rowSelectedCls = rowSelectedCls ? rowSelectedCls.replace('class="', 'class="' + _stCls + ' ') : ' class="' + _stCls + '"';
     }
     return '<tr data-id="' + fid + '"' + rowSelectedCls + '>' + cb + nameCell + typeCell + valueCell + modifiedCell + actions + '</tr>';
@@ -36365,7 +36366,7 @@ function renderSearchResults(query) {
     // bubble-up superset), so this is the surface most likely to hit it.
     var categoryLockedSearch = !workloadLockedSearch
       && (typeof _categoryLockBlocks === 'function') && _categoryLockBlocks(r);
-    var catLockTipSearch = categoryLockedSearch ? _categoryLockMsg() : null;
+    var catLockTipSearch = categoryLockedSearch ? _categoryLockMsg() : (workloadLockedSearch ? _workloadLockMsg(activeWlSearch) : null);
     var canSelectSearch = (r.status !== 'excluded' || _excludedActionable(r)) && !workloadLockedSearch && !categoryLockedSearch;
     // Conflict-avoidance — same covered-by-ancestor check used in the
     // snapshot-mode row. Locks add-to-plan affordances when a parent
@@ -36373,9 +36374,7 @@ function renderSearchResults(query) {
     var coveredAncestorSearch = _resourceCoveredByPlan(r);
     var isCoveredSearch = !!coveredAncestorSearch;
     var coveredTitleSearch = isCoveredSearch ? ' title="Included by ' + (coveredAncestorSearch.name || '') + ' — restoring the parent covers this item."' : '';
-    var lockTitleSearch = workloadLockedSearch
-      ? ' title="Restore job is limited to ' + activeWlSearch + ' resources. Clear the job to add other workloads."'
-      : coveredTitleSearch;
+    var lockTitleSearch = coveredTitleSearch;   // the workload lock is explained by the styled bubble, never a native title
     var rowSelectedClsSearch = (inCart || isCoveredSearch) ? ' class="row-selected"' : '';
     var cbCheckedSearch = (inCart || isCoveredSearch) ? ' checked' : '';
     // §17.7 row archetype gates the checkbox too (otherwise the
@@ -36455,7 +36454,7 @@ function renderSearchResults(query) {
         ((function(){
           var avail = _restoreAvailability(r);
           if (avail !== 'add') return renderUnavailableSegBtn(avail, r);
-          return renderSearchSegBtn(r.id, matchCount, 'openMatchesDrawer(\'' + safeId + '\')', 'addToRestoreRow(\'' + safeId + '\')', !canSelectSearch || isCoveredSearch, isCoveredSearch);
+          return renderSearchSegBtn(r.id, matchCount, 'openMatchesDrawer(\'' + safeId + '\')', 'addToRestoreRow(\'' + safeId + '\')', !canSelectSearch || isCoveredSearch, isCoveredSearch, catLockTipSearch);
         })()) +
         renderPreviewIconBtn(r.id, canRestoreSearch) +
         // GitLab action-state matrix: per-row Download on 'add'/'parent'
@@ -36616,7 +36615,7 @@ function renderTable() {
     // Single-category lock (Okta/GitHub) — one level below the workload pin.
     var categoryLocked = !workloadLocked
       && (typeof _categoryLockBlocks === 'function') && _categoryLockBlocks(r);
-    var catLockTipInv = categoryLocked ? _categoryLockMsg() : null;
+    var catLockTipInv = categoryLocked ? _categoryLockMsg() : (workloadLocked ? _workloadLockMsg(activeWl) : null);
     var canSelect = (r.status !== 'excluded' || _excludedActionable(r)) && !workloadLocked && !categoryLocked;
     // Conflict-avoidance: when an ancestor of `r` is already in the
     // plan, this row is implicitly included (restoring the ancestor
@@ -36626,9 +36625,7 @@ function renderTable() {
     var coveredAncestor = _resourceCoveredByPlan(r);
     var isCoveredByPlan = !!coveredAncestor;
     var coveredTitle = isCoveredByPlan ? ' title="Included by ' + (coveredAncestor.name || '') + ' — restoring the parent covers this item."' : '';
-    var lockTitle = workloadLocked
-      ? ' title="Restore job is limited to ' + activeWl + ' resources. Clear the job to add other workloads."'
-      : coveredTitle;
+    var lockTitle = coveredTitle;   // the workload lock is explained by the styled bubble, never a native title
     // Last Backup is an UNCONDITIONAL property of the resource —
     // the actual last successful backup, full stop. It does NOT
     // shift with the temporal picker, because that misled admins
@@ -38409,8 +38406,8 @@ function exportResource(resourceId) {
 //   matchCount + openDrawerAction are retained for call-site API
 //   stability; openDrawerAction is forwarded as renderSegBtn's
 //   browseAction (unused there) and matchCount is ignored.
-function renderSearchSegBtn(resourceId, matchCount, openDrawerAction, addToPlanAction, disabled, coveredByAncestor) {
-  return renderSegBtn(resourceId, addToPlanAction, openDrawerAction, '', disabled, coveredByAncestor);
+function renderSearchSegBtn(resourceId, matchCount, openDrawerAction, addToPlanAction, disabled, coveredByAncestor, lockTip) {
+  return renderSegBtn(resourceId, addToPlanAction, openDrawerAction, '', disabled, coveredByAncestor, lockTip);
 }
 // Updates the seg-btn inside a table row to match inPlan state.
 // Used by checkbox path so button and checkbox always agree.
@@ -40362,6 +40359,11 @@ function _categoryLockBlocks(keyOrResource) {
   if (active === null) return false;
   var cat = _restoreCategoryOf(keyOrResource);
   return cat !== null && cat !== active;
+}
+// Copy for the WORKLOAD lock (the job already holds items from another workload) — shown in the styled bubble on a locked row's
+// checkbox and Restore button; never as a native title, which would stack a second tooltip on top.
+function _workloadLockMsg(activeWl) {
+  return 'Restore job is limited to ' + activeWl + ' resources. Clear the job to add other workloads.';
 }
 // One copy string for every category-lock surface (tooltips + toasts).
 function _categoryLockMsg() {
@@ -52858,7 +52860,7 @@ function openRecordDrawer(id, nameOverride, subOverride, asOfDate, ctxOverride) 
     }
     if (!_src) _src = _inCart ? (state.selectedRpOverrides[id] || _cartRp || _latest) : (_cartRp || _latest);
     // Validate against this resource's RP list; fall back to latest.
-    if (_src !== 'prod' && !rps.find(function(p){ return p.id === _src; })) _src = _latest;
+    if (!rps.find(function(p){ return p.id === _src; })) _src = _latest;   // 'prod' is not a valid source either: the drawer compares backups only
     rdState.leftSel  = _src;
     // With a global date anchor active, default the comparison to the adjacent
     // backup (anchor=today → previous; anchor=earlier → today). With NO filter
@@ -57983,6 +57985,12 @@ function rdToggleRelSec(btn) {
 }
 function renderRdBody() {
   if (typeof _rdSyncCartBtn === 'function') _rdSyncCartBtn();
+  // Production (now) is never a comparison point — the drawer compares backups only. Whichever path opened it, a column left
+  // on 'prod' means "the latest backup", and a comparison side is never pre-filled with production.
+  if (rdState.mode !== 'matches' && rdState.resourceId) {
+    if (rdState.leftSel === 'prod' || !rdState.leftSel) rdState.leftSel = _rdNormSel(rdState.resourceId, 'prod');
+    if (rdState.rightSel === 'prod') rdState.rightSel = 'none';
+  }
   // Empty-comparison top gap: default OFF each render; the compare branch
   // re-enables it when the comparison side is empty (see .rd-none-gap CSS).
   (function(){ var _b = document.getElementById('rdBody'); if (_b) { _b.classList.remove('rd-none-gap'); _b.classList.remove('rd-tight-top'); } })();
@@ -59018,7 +59026,7 @@ function renderRdBody() {
     }
     function _hcCell(side, picker, action, info, note, added, clearBtn) {
       return '<div class="rd-hc' + (added ? ' is-added' : '') + '" data-side="' + side + '">'
-        + '<div class="rd-hc-pick">' + picker + (clearBtn || '') + '</div>'
+        + '<div class="rd-hc-pick' + (clearBtn ? ' has-clear' : '') + '">' + picker + (clearBtn || '') + '</div>'
         + '<div class="rd-hc-meta"><span class="rd-hc-cap">' + _hcCap(info) + '</span>' + (action || '') + '</div>'
         + (note ? '<div class="rd-ctrl-note">' + note + '</div>' : '')
         + '</div>';
@@ -71892,7 +71900,7 @@ window.D365X.recChip = function (key, item) {
     if (hd.querySelector('.dx-lg') || !hd.firstElementChild) return;
     var lg = document.createElement('span'); lg.className = 'dx-lg'; lg.style.display = 'none';
     lg.setAttribute('aria-label', 'Row marker key');
-    lg.innerHTML = '<span><i class="dx-ld m"></i>Modified</span><span><i class="dx-ld d"></i>Deleted since</span><span><i class="dx-ld a"></i>Created since</span><span><i class="dx-ld u"></i>Unchanged</span>';
+    lg.innerHTML = '<span><i class="dx-ld m"></i>Changed</span><span><i class="dx-ld d"></i>Deleted since</span><span><i class="dx-ld u"></i>Unchanged</span>';
     hd.insertBefore(lg, hd.firstElementChild.nextSibling);
   });
   /* the key sits at the right while the title leaves room for it; once it wraps beneath, it lines up left */
@@ -71921,7 +71929,9 @@ window.D365X.recChip = function (key, item) {
     '.dx-lg { display: inline-flex; align-items: center; gap: 4px 16px; flex-wrap: wrap; justify-content: flex-end; flex: 0 1 auto; font-size: 14px; line-height: 20px; color: var(--black-70); }',
     '.inv-header { flex-wrap: wrap; } .inv-header > div:first-child { flex: 1 1 max-content !important; } .inv-header > .dx-lg { flex: 0 1 auto; margin-left: auto; } .inv-header > .dx-lg.is-wrapped { margin-left: 0; justify-content: flex-start; flex-basis: 100%; }',
     '.dx-lg span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }',
-    '.dx-ld { display: inline-block; width: 8px; height: 8px; border-radius: 50%; } .dx-ld.m { background: var(--yellow); } .dx-ld.d { background: var(--red); } .dx-ld.a { background: var(--green); } .dx-ld.u { background: var(--black-30); }'
+    '.dx-ld { display: inline-block; width: 8px; height: 8px; border-radius: 50%; } .dx-ld.m { background: var(--yellow); } .dx-ld.d { background: var(--red); } .dx-ld.a { background: var(--green); } .dx-ld.u { background: var(--black-30); }',
+    /* a record created after the compared point has nothing to restore to, so it reads as a plain change, not its own state */
+    'body:has(#wlChromeRow.dx-on) tbody tr.rec-diff-row-added .diff-dot { background: var(--yellow); }'
   ].join('\n'); document.head.appendChild(css);
   X.syncChrome();
 })();
@@ -72102,44 +72112,72 @@ window.D365X.recChip = function (key, item) {
   var X = window.D365X;
   var CHECKLIST = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.28342 13.7754C2.93048 13.7754 2.62834 13.6497 2.37701 13.3984C2.12567 13.1471 2 12.8449 2 12.492V3.50802C2 3.15508 2.12567 2.85294 2.37701 2.6016C2.62834 2.35027 2.93048 2.2246 3.28342 2.2246H11.2888C11.4706 2.2246 11.623 2.2861 11.746 2.40909C11.869 2.53209 11.9305 2.68449 11.9305 2.86631C11.9305 3.04813 11.869 3.20053 11.746 3.32353C11.623 3.44652 11.4706 3.50802 11.2888 3.50802H3.28342V12.492H12.2674V8.32086C12.2674 8.13904 12.3289 7.98663 12.4519 7.86364C12.5749 7.74064 12.7273 7.67914 12.9091 7.67914C13.0909 7.67914 13.2433 7.74064 13.3663 7.86364C13.4893 7.98663 13.5508 8.13904 13.5508 8.32086V12.492C13.5508 12.8449 13.4251 13.1471 13.1738 13.3984C12.9225 13.6497 12.6203 13.7754 12.2674 13.7754H3.28342ZM7.47059 9.41176L12.9251 3.95722C13.0428 3.83957 13.1872 3.78075 13.3583 3.78075C13.5294 3.78075 13.6791 3.83957 13.8075 3.95722C13.9358 4.07487 14 4.2246 14 4.40642C14 4.58824 13.9358 4.74332 13.8075 4.87166L7.91979 10.7594C7.79144 10.8877 7.64171 10.9519 7.47059 10.9519C7.29947 10.9519 7.14973 10.8877 7.02139 10.7594L4.29412 8.03209C4.17647 7.91444 4.11765 7.76471 4.11765 7.58289C4.11765 7.40107 4.17647 7.25134 4.29412 7.13369C4.41176 7.01604 4.5615 6.95722 4.74332 6.95722C4.92513 6.95722 5.07487 7.01604 5.19251 7.13369L7.47059 9.41176Z" fill="currentColor"/></svg>';
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+  /* Per-column "select what changed" control: a gold tile (changed-cell tint + corner mark, same as .rec-diff-cell-changed) holding a tri-state
+     checkbox and the count. Empty / partial / all reflect how many of that column's changed records are already in the cart. */
+  var CB_OFF = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3.5 1h9A2.5 2.5 0 0 1 15 3.5v9a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5v-9A2.5 2.5 0 0 1 3.5 1Zm0 1.5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1h-9Z"/></svg>',
+      CB_ON = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3.5 1h9A2.5 2.5 0 0 1 15 3.5v9a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5v-9A2.5 2.5 0 0 1 3.5 1Zm7.9 4.4L7 9.8 4.6 7.4 3.5 8.5 7 12l5.5-5.5-1.1-1.1Z"/></svg>',
+      CB_MID = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3.5 1h9A2.5 2.5 0 0 1 15 3.5v9a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5v-9A2.5 2.5 0 0 1 3.5 1ZM4 7.25v1.5h8v-1.5H4Z"/></svg>';
+  function selTile(n, nSel, tip, attrs, lockMsg) {
+    var all = n > 0 && nSel >= n, some = nSel > 0 && nSel < n, b = document.createElement('button');
+    b.type = 'button'; b.className = 'dx-col-sel' + (all ? ' on' : some ? ' mid' : ''); b.setAttribute('aria-pressed', all ? 'true' : some ? 'mixed' : 'false');
+    b.setAttribute('aria-label', tip); b.setAttribute('data-tooltip', tip);
+    b.innerHTML = '<span class="dx-cs-cb">' + (all ? CB_ON : some ? CB_MID : CB_OFF) + '</span><span class="dx-cs-n">' + n + '</span>';
+    Object.keys(attrs || {}).forEach(function (k) { b.setAttribute(k, attrs[k]); });
+    if (lockMsg) { b.classList.add('dx-locked'); b.setAttribute('aria-disabled', 'true'); b.setAttribute('aria-label', lockMsg); b.setAttribute('data-tooltip', lockMsg); b.onclick = function (e) { e.preventDefault(); e.stopPropagation(); }; }
+    return b;
+  }
+  function lead(th, b) { th.classList.add('dx-has-sel'); th.insertBefore(b, th.firstChild); }
   X.injectColSelect = function () {
     var tbl = document.getElementById('childTable'); if (!tbl) return;
     [].slice.call(tbl.querySelectorAll('thead .dx-col-sel')).forEach(function (b) { b.remove(); });
     if (X.on() && X.bulkLevel() === 'fields') {
-      var fr = _resolveD365Record(childState.parentId), fd = fr && X.diffNow(fr.schemaKey), fe = fd && fd.modifiedByIdx[fr.idx], fc = { changed: ((fe && fe.changedCols) || []).length }, vth = tbl.querySelectorAll('thead th')[3]; if (!fc.changed || !vth) return;
-      var fon = !!state.fieldsDiffActive, fnoun = fc.changed + ' field' + (fc.changed === 1 ? '' : 's');
-      var ftip = fon ? fnoun + ' that changed are selected. Click to deselect them.' : 'Select the ' + fnoun + ' that changed between the two ranges';
-      var fb = document.createElement('button'); fb.type = 'button'; fb.className = 'dx-col-sel' + (fon ? ' on' : ''); fb.setAttribute('aria-pressed', fon ? 'true' : 'false');
-      fb.setAttribute('aria-label', ftip); fb.setAttribute('data-tooltip', ftip); fb.innerHTML = CHECKLIST;
-      fb.onclick = function (e) { e.stopPropagation(); toggleSelectChangedFields(); };
-      vth.classList.add('dx-has-sel-inline'); vth.appendChild(fb); return;   // the Value column is far wider than the viewport, so the button follows its label
+      var fr = _resolveD365Record(childState.parentId), fd = fr && X.diffNow(fr.schemaKey), fe = fd && fd.modifiedByIdx[fr.idx], fcols = (fe && fe.changedCols) || [], vth = tbl.querySelectorAll('thead th')[3]; if (!fcols.length || !vth) return;
+      var fnSel = fcols.filter(function (f) { return isInPlan('field-' + _fieldRowId(fr.schemaKey, fr.idx, f)); }).length;
+      if (!fnSel && state.fieldsDiffActive) fnSel = 0;
+      var fnoun = fcols.length + ' field' + (fcols.length === 1 ? '' : 's'), fon = fnSel >= fcols.length;
+      var ftip = fon ? fnoun + ' that changed ' + (fcols.length === 1 ? 'is' : 'are') + ' selected. Click to deselect ' + (fcols.length === 1 ? 'it' : 'them') + '.' : 'Select the ' + fnoun + ' that changed between the two ranges';
+      var fLock = !fnSel && typeof _d365Locked === 'function' && fcols.some(function (f) { return _d365Locked('field-' + _fieldRowId(fr.schemaKey, fr.idx, f)); }) ? _categoryLockMsg() : null;
+      var fb = selTile(fcols.length, fnSel, ftip, null, fLock); if (!fLock) fb.onclick = function (e) { e.stopPropagation(); toggleSelectChangedFields(); };
+      lead(vth, fb); return;
     }
     if (!X.on() || X.bulkLevel() !== 'records') return;
-    var p = RESOURCES.find(function (r) { return r.id === childState.parentId; }), d = p && X.diffNow(d365SchemaFor(p)); if (!d) return;
+    var p = RESOURCES.find(function (r) { return r.id === childState.parentId; }), sk = p && d365SchemaFor(p), d = p && X.diffNow(sk); if (!d) return;
     /* data-col-key is the CSS-safe key (_colResizeCssKey: "Contract value" -> "Contract-value"), but the diff counts are keyed by the REAL column
        name. Map back through the changed columns, or every multi-word column (Contract value, Payment terms) never got its button. */
     var rawByKey = {}; Object.keys(d.fieldCounts).forEach(function (c) { rawByKey[_colResizeCssKey(c)] = c; });
     [].slice.call(tbl.querySelectorAll('thead th[data-col-key]')).forEach(function (th) {
       var col = rawByKey[th.getAttribute('data-col-key')] || th.getAttribute('data-col-key'), n = d.fieldCounts[col] || 0; if (!n) return;
-      var on = (state.recDiffActiveCols || []).indexOf(col) >= 0, noun = n + ' record' + (n === 1 ? '' : 's');
-      var tip = on ? noun + ' where ' + col + ' changed are selected. Click to deselect them.' : 'Select the ' + noun + ' where ' + col + ' changed between the two ranges';
-      var b = document.createElement('button'); b.type = 'button'; b.className = 'dx-col-sel' + (on ? ' on' : ''); b.setAttribute('aria-pressed', on ? 'true' : 'false');
-      b.setAttribute('aria-label', tip); b.setAttribute('data-tooltip', tip); b.innerHTML = CHECKLIST;
-      b.setAttribute('data-col', col); b.onclick = function (e) { e.stopPropagation(); toggleSelectByDiffCol(col); };
-      if (tbl.querySelector('#childSelectAll[data-dx-locked]')) { b.disabled = true; b.style.opacity = '.4'; b.style.cursor = 'default'; }
-      th.classList.add('dx-has-sel'); th.appendChild(b);
+      var nSel = 0;
+      if (d.modifiedByIdx) Object.keys(d.modifiedByIdx).forEach(function (ix) { var e = d.modifiedByIdx[ix]; if (e && e.changedCols && e.changedCols.indexOf(col) >= 0 && isInPlan('rec-' + sk + '-' + ix)) nSel++; });
+      else if ((state.recDiffActiveCols || []).indexOf(col) >= 0) nSel = n;
+      var all = nSel >= n, noun = n + ' record' + (n === 1 ? '' : 's');
+      var tip = all ? noun + ' where ' + col + ' changed ' + (n === 1 ? 'is' : 'are') + ' selected. Click to deselect ' + (n === 1 ? 'it' : 'them') + '.' : 'Select the ' + noun + ' where ' + col + ' changed between the two ranges';
+      var rLock = !nSel && ((tbl.querySelector('#childSelectAll[data-dx-locked]') && true) || (typeof _d365Locked === 'function' && d.modifiedByIdx && Object.keys(d.modifiedByIdx).some(function (ix) { var e = d.modifiedByIdx[ix]; return e && e.changedCols && e.changedCols.indexOf(col) >= 0 && _d365Locked('rec-' + sk + '-' + ix); }))) ? _categoryLockMsg() : null;
+      var b = selTile(n, nSel, tip, { 'data-col': col }, rLock); if (!rLock) b.onclick = function (e) { e.stopPropagation(); toggleSelectByDiffCol(col); };
+      lead(th, b);
     });
   };
   document.addEventListener('click', function (e) {
-    var b = e.target.closest && e.target.closest('.dx-col-sel'); if (!b) return; e.stopPropagation(); var col = b.getAttribute('data-col'); if (col) toggleSelectByDiffCol(col);
+    var b = e.target.closest && e.target.closest('.dx-col-sel'); if (!b) return; e.stopPropagation(); if (b.classList.contains('dx-locked')) return; var col = b.getAttribute('data-col'); if (col) toggleSelectByDiffCol(col);
   });
+  function dxPreview(on, tile) {
+    var tbl = document.getElementById('childTable'); if (!tbl) return;
+    [].slice.call(tbl.querySelectorAll('tbody td.dx-pv')).forEach(function (c) { c.classList.remove('dx-pv'); });
+    var th = on && tile && tile.closest('th'); if (!th || tile.disabled) return;
+    var ix = th.cellIndex; [].slice.call(tbl.querySelectorAll('tbody tr')).forEach(function (r) { var c = r.cells[ix]; if (c && c.classList.contains('rec-diff-cell-changed')) c.classList.add('dx-pv'); });
+  }
+  document.addEventListener('mouseover', function (e) { var t = e.target.closest && e.target.closest('.dx-col-sel'); if (t) dxPreview(true, t); });
+  document.addEventListener('mouseout', function (e) { var t = e.target.closest && e.target.closest('.dx-col-sel'); if (t && !(e.relatedTarget && t.contains(e.relatedTarget))) dxPreview(false); });
   var origInj = X.injectBulk;
   X.injectBulk = function () { origInj.apply(this, arguments); X.injectColSelect(); };
   var css = document.createElement('style'); css.textContent = [
-    '.dx-col-sel { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; width: 28px; height: 28px; padding: 4px; margin: 0; border: 1px solid var(--yellow); border-radius: 4px; background: var(--yellow-10); color: var(--yellow-dark); cursor: pointer; }',
-    '.dx-col-sel:hover { border-color: var(--yellow-dark); } .dx-col-sel.on { background: var(--yellow); color: var(--black-100); border-color: var(--yellow); }',
-    '#childTable thead th.dx-has-sel-inline .dx-col-sel, .floating-thead thead th.dx-has-sel-inline .dx-col-sel { position: relative; right: auto; top: auto; transform: none; margin-left: 8px; vertical-align: middle; }',
-    '.dx-col-sel svg { width: 16px; height: 16px; display: block; } #childTable thead th.dx-has-sel, .floating-thead thead th.dx-has-sel { position: relative; padding-right: 44px; }'
+    '.dx-col-sel { position: relative; display: inline-flex; align-items: center; vertical-align: middle; box-sizing: border-box; height: 24px; margin: 0 8px 0 0; padding: 0 8px 0 2px; border: 0; border-radius: 2px; background: var(--yellow-10); color: var(--yellow-dark); font: inherit; font-size: 12px; font-weight: 500; line-height: 16px; cursor: pointer; }',
+    '.dx-col-sel::after { content: ""; position: absolute; top: 0; right: 0; border: 5px solid transparent; border-top-color: var(--yellow); border-right-color: var(--yellow); }',
+    '.dx-col-sel:hover { box-shadow: inset 0 0 0 1px var(--yellow); } .dx-col-sel:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--yellow-dark); }',
+    '.dx-col-sel .dx-cs-cb { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; pointer-events: none; } .dx-col-sel .dx-cs-cb svg { width: 16px; height: 16px; display: block; } .dx-col-sel .dx-cs-n { pointer-events: none; }',
+    '.dx-col-sel.dx-locked { opacity: .4; cursor: default; } .dx-col-sel.dx-locked:hover { box-shadow: none; }',
+    /* hovering the tile outlines the changed cells it will select */
+    '#childTable tbody td.dx-pv { box-shadow: inset 0 0 0 2px var(--yellow); }'
   ].join('\n'); document.head.appendChild(css);
 })();
 
@@ -72247,7 +72285,19 @@ window.D365X.recChip = function (key, item) {
   function day(ts) { return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
   function chipText(sel) { var e = document.querySelector(sel); return e ? e.textContent.trim() : ''; }
   var NAME = { compare: 'Compare to', anchor: 'Restore Point' };
+  /* a deleted record or field exists only at the older Compare to point, so a job holding one can only restore from there */
+  X.jobHasDeleted = function () {
+    var hit = false;
+    state.restorePlan.forEach(function (_, key) {
+      if (hit || typeof key !== 'string') return;
+      var m = key.match(/^rec-([a-z0-9]+)-(\d+)$/) || key.match(/^field-([a-z0-9]+)~(\d+)~/); if (!m) return;
+      var sc = D365_SCHEMAS[m[1]], i = +m[2], row = sc && (i < sc.rows.length ? sc.rows[i] : (sc.goneRows || [])[i - sc.rows.length]);
+      if (row && row._gone) hit = true;
+    });
+    return hit;
+  };
   X.setTarget = function (t) {
+    if (t === 'anchor' && X.jobHasDeleted()) return;
     if (t === X.target) return; X.target = t;
     state.restorePlan.forEach(function (item, key) {
       var r = RESOURCES.find(function (x) { return x.id === key; }) || (/^(rec|field)-/.test(key) ? X.table : null);
@@ -72262,6 +72312,7 @@ window.D365X.recChip = function (key, item) {
       var old = bar.querySelector('.dx-rs'); if (old) old.remove();
       if (!X.on() || !state.restorePlan.size) return;
       var btn = bar.querySelector('.tab-right-primary'); if (!btn || btn.closest('.dx-rs') || btn.disabled || !/^\s*Restore\s*$/.test(btn.textContent)) return;
+      if (X.target === 'anchor' && X.jobHasDeleted()) { X.setTarget('compare'); return; }
       var res = jobRes(), rp = res && X.targetRp(res), when = rp ? day(rp.ts) : '', full = rp ? X.short(rp.ts) : '';
       var icon = (btn.querySelector('svg') || {}).outerHTML || '';
       var chev = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('keyboard-arrow-down-outlined', 20)) || '▾';
@@ -72282,7 +72333,9 @@ window.D365X.recChip = function (key, item) {
   function openRs(btn) {
     if (rsMenu) { closeRs(); return; }
     var check = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
+    var delJob = X.jobHasDeleted();
     var row = function (t, label) {
+      if (t === 'anchor' && delJob) return '<button type="button" class="dx-mi dx-rs-opt dx-rs-dis" role="menuitemradio" aria-checked="false" aria-disabled="true" data-tooltip="This job includes deleted items, which only exist at the Compare to point. Remove them to restore from this point."><span class="dx-rs-ck"></span><span class="dx-rs-tx"><span class="dx-rs-cap">' + NAME[t] + '</span><span>' + esc(label) + '</span></span></button>';
       return '<button type="button" class="dx-mi dx-rs-opt" role="menuitemradio" aria-checked="' + (X.target === t) + '" onclick="D365X.setTarget(\'' + t + '\')"><span class="dx-rs-ck">' + (X.target === t ? check : '') + '</span><span class="dx-rs-tx"><span class="dx-rs-cap">' + NAME[t] + '</span><span>' + esc(label) + '</span></span></button>';
     };
     var m = document.createElement('div'); m.className = 'dx-bm'; m.setAttribute('role', 'menu');
@@ -72304,6 +72357,7 @@ window.D365X.recChip = function (key, item) {
     '.dx-rs .dx-rs-chev svg { width: 20px; height: 20px; }',
     '.dx-rs-opt { justify-content: flex-start !important; gap: 8px !important; min-width: 220px; }',
     '.dx-rs-ck { width: 16px; height: 16px; flex: none; color: var(--em-green); display: inline-flex; } .dx-rs-ck svg { width: 16px; height: 16px; }',
+    '.dx-rs-opt.dx-rs-dis { color: var(--black-30); cursor: default; } .dx-rs-opt.dx-rs-dis:hover { background: transparent; } .dx-rs-opt.dx-rs-dis .dx-rs-cap { color: var(--black-30); }',
     '.dx-rs-tx { display: flex; flex-direction: column; text-align: left; line-height: 20px; } .dx-rs-cap { font-size: 14px; color: var(--black-60); }'
   ].join('\n');
   document.head.appendChild(st);
