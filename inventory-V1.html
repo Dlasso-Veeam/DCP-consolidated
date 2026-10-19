@@ -71744,7 +71744,7 @@ window.D365X.recChip = function (key, item) {
   window.openRecordDrawer = function (id, nm, sub, asOf, ctx) {
     var res = origOpen.apply(this, arguments);
     try {
-      if (X.on() && !(ctx && (ctx.rpId || ctx.fieldScope)) && typeof id === 'string') {
+      if (X.on() && !(ctx && ctx.rpId) && typeof id === 'string') {   // a single-field preview opens comparing too
         var target = id.indexOf('rec-') === 0 ? X.table : RESOURCES.find(function (x) { return x.id === id; });
         var a = target && X.anchorRp(target), b = target && X.compareRp(target);
         if (a && b && a.id !== b.id && !(target.wl && target.wl !== 'Dynamics 365')) {
