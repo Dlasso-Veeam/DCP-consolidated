@@ -1519,6 +1519,8 @@ tbody tr.rec-diff-row-unchanged .diff-dot { background: var(--black-30); }
 
 /* Cell tints for modified cells (yellow corner triangle as a scan affordance) */
 .rec-diff-cell-changed { background: var(--yellow-10) !important; position: relative; }
+.rec-diff-cell-removed { background: var(--red-10) !important; position: relative; }
+.rec-diff-cell-removed::after { content: ''; position: absolute; top: 0; right: 0; border: 6px solid transparent; border-top-color: var(--red); border-right-color: var(--red); }
 .rec-diff-cell-changed::after { content: ''; position: absolute; top: 0; right: 0; border: 6px solid transparent; border-top-color: var(--yellow); border-right-color: var(--yellow); }
 /* D365 records compare: in-cell before/after stack (changed cells only).
    Sits inside the existing .rec-diff-cell-changed tint — before = older
@@ -24676,6 +24678,7 @@ function _childRenderFields() {
     }
   });
 
+  state._fieldsAllNames = allFieldRows.map(function (f) { return f.name; });
   // Comparing: changed fields come first, so they are on page one rather than buried in the list.
   if (typeof D365X !== 'undefined' && D365X.on()) {
     var _cmpD = D365X.diffNow(resolved.schemaKey), _cmpE = _cmpD && _cmpD.modifiedByIdx[resolved.idx], _cmpCols = (_cmpE && _cmpE.changedCols) || [];
@@ -24797,8 +24800,16 @@ function _childRenderFields() {
     // deterministic _recBeforeVal for this (record, field), so it matches what
     // the table showed for the same cell. Non-changed cells render plainly.
     var valueCell;
+    var _fGone = !!(resolved.record && resolved.record._gone && _fieldsCompareDate && typeof D365X !== 'undefined' && D365X.on());
     var _fldBef = _isChanged ? _recBeforeVal(resolved.schemaKey, resolved.idx, f.name, f.value) : null;
-    if (_isChanged && _fldBef != null) {
+    if (_fGone) {
+      /* a deleted record's fields read like changed ones: today's slot says Deleted, the compared point keeps the value */
+      valueCell = '<td class="rec-diff-cell-removed rec-ba">'
+        + '<span class="rec-ba-top">Deleted</span>'
+        + '<span class="rec-ba-date">' + _baAfterDate + '</span>'
+        + '<span class="rec-ba-bottom">' + _fVal + '</span>'
+        + '<span class="rec-ba-date">' + _baBeforeDate + '</span></td>';
+    } else if (_isChanged && _fldBef != null) {
       var _fBefHl = q ? _hlText(String(_fldBef), q) : wsEscape(String(_fldBef));
       valueCell = '<td class="rec-diff-cell-changed rec-ba">'
         + '<span class="rec-ba-top">' + _fVal + '</span>'
@@ -52329,8 +52340,12 @@ function toggleSelectChangedFields() {
   var compareDate = state.recCompareDate || state.invCompareDate || null;
   if (!compareDate || typeof genRecDiff !== 'function') return;
   var diff = genRecDiff(resolved.schemaKey, compareDate);
-  if (!diff || !diff.modifiedByIdx || !diff.modifiedByIdx[resolved.idx]) return;
-  var changedCols = diff.modifiedByIdx[resolved.idx].changedCols || [];
+  var changedCols;
+  if (resolved.record && resolved.record._gone) changedCols = (state._fieldsAllNames || []).slice();   // a deleted record: every field is part of the change
+  else {
+    if (!diff || !diff.modifiedByIdx || !diff.modifiedByIdx[resolved.idx]) return;
+    changedCols = diff.modifiedByIdx[resolved.idx].changedCols || [];
+  }
   if (!changedCols.length) return;
   var activating = !state.fieldsDiffActive;
   state.fieldsDiffActive = activating;
@@ -72131,20 +72146,22 @@ window.D365X.recChip = function (key, item) {
     var tbl = document.getElementById('childTable'); if (!tbl) return;
     [].slice.call(tbl.querySelectorAll('thead .dx-col-sel')).forEach(function (b) { b.remove(); });
     if (X.on() && X.bulkLevel() === 'fields') {
-      var fr = _resolveD365Record(childState.parentId), fd = fr && X.diffNow(fr.schemaKey), fe = fd && fd.modifiedByIdx[fr.idx], fcols = (fe && fe.changedCols) || [], vth = tbl.querySelectorAll('thead th')[3]; if (!fcols.length || !vth) return;
+      var fr = _resolveD365Record(childState.parentId), fd = fr && X.diffNow(fr.schemaKey), fe = fd && fd.modifiedByIdx[fr.idx], fcols = (fe && fe.changedCols) || [], fGone = !!(fr && fr.record && fr.record._gone), vth = tbl.querySelectorAll('thead th')[3]; if ((!fcols.length && !fGone) || !vth) return;
+      if (fGone) fcols = (state._fieldsAllNames || []).slice();
+      if (!fcols.length || !vth) return;
       var fnSel = fcols.filter(function (f) { return isInPlan('field-' + _fieldRowId(fr.schemaKey, fr.idx, f)); }).length;
       if (!fnSel && state.fieldsDiffActive) fnSel = 0;
       var fnoun = fcols.length + ' field' + (fcols.length === 1 ? '' : 's'), fon = fnSel >= fcols.length;
-      var ftip = fon ? fnoun + ' that changed ' + (fcols.length === 1 ? 'is' : 'are') + ' selected. Click to deselect ' + (fcols.length === 1 ? 'it' : 'them') + '.' : 'Select the ' + fnoun + ' that changed between the two ranges';
+      var ftip = fGone ? (fon ? 'All ' + fnoun + ' of this deleted record are selected. Click to deselect them.' : 'Select all ' + fnoun + ' of this deleted record') : fon ? fnoun + ' that changed ' + (fcols.length === 1 ? 'is' : 'are') + ' selected. Click to deselect ' + (fcols.length === 1 ? 'it' : 'them') + '.' : 'Select the ' + fnoun + ' that changed between the two ranges';
       var fLock = !fnSel && typeof _d365Locked === 'function' && fcols.some(function (f) { return _d365Locked('field-' + _fieldRowId(fr.schemaKey, fr.idx, f)); }) ? _categoryLockMsg() : null;
-      var fb = selTile(fcols.length, fnSel, ftip, null, fLock); if (!fLock) fb.onclick = function (e) { e.stopPropagation(); toggleSelectChangedFields(); };
+      var fb = selTile(fcols.length, fnSel, ftip, fGone ? { 'data-del': '1' } : null, fLock); if (!fLock) fb.onclick = function (e) { e.stopPropagation(); toggleSelectChangedFields(); };
       lead(vth, fb); return;
     }
     if (!X.on() || X.bulkLevel() !== 'records') return;
     var p = RESOURCES.find(function (r) { return r.id === childState.parentId; }), sk = p && d365SchemaFor(p), d = p && X.diffNow(sk); if (!d) return;
     /* data-col-key is the CSS-safe key (_colResizeCssKey: "Contract value" -> "Contract-value"), but the diff counts are keyed by the REAL column
        name. Map back through the changed columns, or every multi-word column (Contract value, Payment terms) never got its button. */
-    var rawByKey = {}; Object.keys(d.fieldCounts).forEach(function (c) { rawByKey[_colResizeCssKey(c)] = c; });
+    var rawByKey = {}, sch = D365_SCHEMAS[sk] || {}; Object.keys(d.fieldCounts).concat(sch.cols || [], sch.extendedCols || []).forEach(function (c) { rawByKey[_colResizeCssKey(c)] = c; });
     [].slice.call(tbl.querySelectorAll('thead th[data-col-key]')).forEach(function (th) {
       var col = rawByKey[th.getAttribute('data-col-key')] || th.getAttribute('data-col-key'), n = d.fieldCounts[col] || 0; if (!n) return;
       var nSel = 0;
@@ -72164,7 +72181,7 @@ window.D365X.recChip = function (key, item) {
     var tbl = document.getElementById('childTable'); if (!tbl) return;
     [].slice.call(tbl.querySelectorAll('tbody td.dx-pv')).forEach(function (c) { c.classList.remove('dx-pv'); });
     var th = on && tile && tile.closest('th'); if (!th || tile.disabled) return;
-    var ix = th.cellIndex; [].slice.call(tbl.querySelectorAll('tbody tr')).forEach(function (r) { var c = r.cells[ix]; if (c && c.classList.contains('rec-diff-cell-changed')) c.classList.add('dx-pv'); });
+    var ix = th.cellIndex; [].slice.call(tbl.querySelectorAll('tbody tr')).forEach(function (r) { var c = r.cells[ix]; if (c && (c.classList.contains('rec-diff-cell-changed') || c.classList.contains('rec-diff-cell-removed'))) c.classList.add('dx-pv'); });
   }
   document.addEventListener('mouseover', function (e) { var t = e.target.closest && e.target.closest('.dx-col-sel'); if (t) dxPreview(true, t); });
   document.addEventListener('mouseout', function (e) { var t = e.target.closest && e.target.closest('.dx-col-sel'); if (t && !(e.relatedTarget && t.contains(e.relatedTarget))) dxPreview(false); });
@@ -72175,9 +72192,10 @@ window.D365X.recChip = function (key, item) {
     '.dx-col-sel::after { content: ""; position: absolute; top: 0; right: 0; border: 5px solid transparent; border-top-color: var(--yellow); border-right-color: var(--yellow); }',
     '.dx-col-sel:hover { box-shadow: inset 0 0 0 1px var(--yellow); } .dx-col-sel:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--yellow-dark); }',
     '.dx-col-sel .dx-cs-cb { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; pointer-events: none; } .dx-col-sel .dx-cs-cb svg { width: 16px; height: 16px; display: block; } .dx-col-sel .dx-cs-n { pointer-events: none; }',
+    '.dx-col-sel[data-del] { background: var(--red-10); color: var(--red-60); } .dx-col-sel[data-del]::after { border-top-color: var(--red); border-right-color: var(--red); } .dx-col-sel[data-del]:hover { box-shadow: inset 0 0 0 1px var(--red); }',
     '.dx-col-sel.dx-locked { opacity: .4; cursor: default; } .dx-col-sel.dx-locked:hover { box-shadow: none; }',
     /* hovering the tile outlines the changed cells it will select */
-    '#childTable tbody td.dx-pv { box-shadow: inset 0 0 0 2px var(--yellow); }'
+    '#childTable tbody td.dx-pv { box-shadow: inset 0 0 0 2px var(--yellow); } #childTable tbody td.rec-diff-cell-removed.dx-pv { box-shadow: inset 0 0 0 2px var(--red); }'
   ].join('\n'); document.head.appendChild(css);
 })();
 
