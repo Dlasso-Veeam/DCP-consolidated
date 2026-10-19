@@ -2764,9 +2764,15 @@ body.okov-mode .floating-thead { display: none !important; }
    Black/S5 tile w/ 1px Black/S20 border + 24px restore-point glyph; title =
    Single Line/Title (ITC Avant Garde Medium 24/32); trailing 36px Action
    Buttons (help + close). was: breadcrumbs row + page-title + Add more/Cancel. */
-.ws-hd { display: flex; align-items: center; gap: 8px; padding: 12px; }
-.ws-hd-tile { width: 32px; height: 32px; border-radius: 4px; background: var(--black-5); border: 1px solid var(--border); color: var(--black-100); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; box-sizing: border-box; }
-.ws-hd-title { flex: 1; min-width: 0; font-family: 'Circular Pro', sans-serif; font-size: 24px; font-weight: 500; line-height: 32px; color: var(--black-100); margin-left: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#wsTopbar.topbar { padding: 0; }   /* the header owns its edges: 12px on every side of the 32px tile, the same inset the findings header and the sidebar rows use; the tile is 40px like the findings tile and the chip is the Mini Chip (20px), so the two lines sit 10px from the top and bottom */
+.ws-hd { display: flex; align-items: center; gap: 16px; padding: 0 12px; height: 64px; }
+.ws-hd-tile { width: 40px; height: 40px; border-radius: 4px; background: var(--black-5); border: 1px solid var(--border); color: var(--black-100); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; box-sizing: border-box; }
+/* same two-line header as the findings modal: a 14/16 muted label row (job type + workload Chip) over the job's own name (18/22 medium), 2px apart */
+.ws-hd-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ws-hd-kick { display: flex; align-items: center; gap: 8px; height: 20px; font-size: 14px; line-height: 20px; color: var(--black-60); white-space: nowrap; min-width: 0; }
+.ws-hd-title { min-width: 0; font-family: 'Circular Pro', sans-serif; font-size: 18px; font-weight: 500; line-height: 22px; color: var(--black-100); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ws-hd-chip { display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 4px; border-radius: 2px; background: var(--black-5); color: var(--black-100); font-size: 14px; line-height: 20px; letter-spacing: .005em; white-space: nowrap; flex: none; }
+.ws-hd-chip svg { width: 16px; height: 16px; display: block; flex: none; }
 .ws-hd-act { width: 36px; height: 36px; border-radius: 4px; border: 1px solid var(--border); background: var(--white); color: var(--black-100); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; padding: 0; box-sizing: border-box; }
 .ws-hd-act:hover { background: var(--black-5); }
 .ws-topbar-icon { width: 32px; height: 32px; border-radius: 4px; background: var(--blue-light); color: var(--blue); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -41759,6 +41765,41 @@ function wsTitleForStep() {
 // breadcrumbs row (home > section > current), then a topbar-row with
 // the page-title on the left (icon + name + workload badge) and
 // topbar-actions on the right (Add more, Cancel).
+// Brand logo for the workload chip in the wizard header, from the shared picker registry (color logo, mono glyph when there is none).
+function _wsWlLogo(name, size) {
+  try {
+    var D = window.WorkloadPickerDS; if (!D) return '';
+    var nm = name === 'Okta WIC' ? 'Okta' : name, hit = null;
+    D.WORKLOADS.forEach(function (w) { if (!hit && w.name === nm) hit = w; });
+    if (!hit) return '';
+    return (hit.colorKey && D.colorLogo(hit.colorKey, size)) || D.monoLogo(hit.monoKey || null, size) || '';
+  } catch (e) { return ''; }
+}
+// The job's own name for the wizard header: the item's name when there is one, otherwise a short scope (what and where).
+function _wsJobTitle(fallback) {
+  try {
+    var keys = []; state.restorePlan.forEach(function (_, k) { keys.push(k); });
+    if (!keys.length) return fallback;
+    var nameOf = function (k) {
+      if (typeof k !== 'string') return null;
+      if (k.indexOf('rec-') === 0) { var r = _resolveD365Record(k); return r && r.name; }
+      if (k.indexOf('field-') === 0) { var f = _parseFieldId(k.slice(6)); return f && f.fieldName; }
+      var res = _resById(k.indexOf(':') > 0 ? k.split(':')[0] : k); return res && res.name;
+    };
+    if (keys.length === 1) return nameOf(keys[0]) || fallback;
+    var n = keys.length;
+    var recs = keys.filter(function (k) { return typeof k === 'string' && k.indexOf('rec-') === 0; });
+    if (recs.length === n) {
+      var r0 = _resolveD365Record(recs[0]), tbl = r0 && RESOURCES.find(function (x) { return x.drillTarget === 'records' && d365SchemaFor(x) === r0.schemaKey; });
+      return n + ' records' + (tbl ? ' from ' + tbl.name : '');
+    }
+    var flds = keys.filter(function (k) { return typeof k === 'string' && k.indexOf('field-') === 0; });
+    if (flds.length === n) { var p0 = _parseFieldId(flds[0].slice(6)), rr = p0 && _resolveD365Record('rec-' + p0.schemaKey + '-' + p0.idx); return n + ' fields' + (rr ? ' on ' + rr.name : ''); }
+    var parents = {}; keys.forEach(function (k) { var res = typeof k === 'string' ? _resById(k.indexOf(':') > 0 ? k.split(':')[0] : k) : null; if (res) parents[res.parentId || res.id] = true; });
+    var pk = Object.keys(parents), par = pk.length === 1 ? _resById(pk[0]) : null;
+    return n + ' items' + (par ? ' in ' + par.name : '');
+  } catch (e) { return fallback; }
+}
 function wsRenderTopbar() {
   // OVERLAY HEADER (Figma 9303:90358, 2026-09-04): restore-point tile +
   // "Restore N items • <Workload>" (Single Line/Title, Avant Garde 24/32,
@@ -41776,7 +41817,9 @@ function wsRenderTopbar() {
   el.innerHTML =
     '<div class="ws-hd">'
       + '<span class="ws-hd-tile">' + _ic('restore-point', 24) + '</span>'
-      + '<div class="ws-hd-title">' + (_tbExp ? 'Export ' : 'Restore ') + noun + (wl ? ' \u2022 ' + wsEscape(wl) : '') + '</div>'
+      + '<div class="ws-hd-main"><div class="ws-hd-kick">' + (_tbExp ? 'Export job' : 'Restore job')
+      + (wl ? '<span class="ws-hd-chip">' + _wsWlLogo(wl, 16) + wsEscape(wl === 'Okta WIC' ? 'Okta' : wl) + '</span>' : '') + '</div>'
+      + '<div class="ws-hd-title">' + wsEscape(_wsJobTitle(noun)) + '</div></div>'
       + '<button class="ws-hd-act" type="button" data-tooltip="Restore guide" aria-label="Restore guide" onclick="wsToggleHelpDrawer()">' + _ic('help-circle-outlined', 20) + '</button>'
       + (ws.restoreInitiated
           ? '<button class="ws-hd-act" type="button" data-tooltip="Close" aria-label="Close" onclick="closeWorkspace()">' + _ic('close-outlined', 20) + '</button>'
