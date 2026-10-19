@@ -56651,9 +56651,15 @@ function rdRefreshActiveTable() {
   else if (s === 'screen-drive' && typeof childRender === 'function') childRender();
   else if (typeof renderTable === 'function') renderTable();
 }
+// The cart key the drawer acts on. A single-field preview adds THAT field, not the record that contains it (adding the record would put every field in the job).
+function _rdPlanId() {
+  var fs = rdState.fieldScope;
+  if (fs && typeof _fieldRowId === 'function') return 'field-' + _fieldRowId(fs.schemaKey, fs.idx, fs.fieldName);
+  return rdState.resourceId;
+}
 function rdAddToRestore(side) {
   _rwStampAddLatch();
-  var id = rdState.resourceId;
+  var id = _rdPlanId();
   if (!id) return;
   var sel = side === 'left' ? rdState.leftSel : rdState.rightSel;
   if (!sel || sel === 'prod') return;
@@ -56735,10 +56741,10 @@ function rdAddToRestore(side) {
 // "Restore points don't match" dialog asks first, verbatim grammar.
 function rdAddFromPoint(side) {
   _rwStampAddLatch();
-  var id = rdState.resourceId;
+  var rid = rdState.resourceId, id = _rdPlanId();   // restore points belong to the record; the cart key is the field when one is previewed
   if (!id) return;
   var sel = (side === 'right') ? rdState.rightSel : rdState.leftSel;
-  var itemRps = (typeof generateRps === 'function') ? generateRps(id) : [];
+  var itemRps = (typeof generateRps === 'function') ? generateRps(rid) : [];
   if (!itemRps || !itemRps.length) return;
   // 'snap' / unset = the item's latest backup.
   var chosen = (!sel || sel === 'snap' || sel === 'prod') ? itemRps[0] : (itemRps.find(function(p){ return p.id === sel; }) || itemRps[0]);
@@ -56879,7 +56885,7 @@ function rdAddFromPoint(side) {
   }
 }
 function rdRemoveFromRestore() {
-  var id = rdState.resourceId;
+  var id = _rdPlanId();
   if (!id) return;
   delete state.selectedRpOverrides[id];
   removeFromPlan(id);
@@ -56984,12 +56990,12 @@ function rdBuildSideAction(side, sel, resource) {
     var _afIsRec = !!(rdState.resourceId && String(rdState.resourceId).indexOf('rec-') === 0);
     if (!_afIsRec && (!resource || typeof _restoreAvailability !== 'function' || _restoreAvailability(resource) !== 'add')) return '';
     var _afLabels = rdCtaLabels();
-    var _afInPlan = !!(rdState.resourceId && state.restorePlan && state.restorePlan.has(rdState.resourceId));
+    var _afInPlan = !!(_rdPlanId() && state.restorePlan && state.restorePlan.has(_rdPlanId()));
     if (_afInPlan) {
       // Badge ONLY on the column showing the point the item restores from —
       // in compare mode the other column stays action-free (repointing is a
       // cart/wizard concern, not a browse concern).
-      var _afEntry = state.restorePlan.get(rdState.resourceId);
+      var _afEntry = state.restorePlan.get(_rdPlanId());
       var _afPinned = (_afEntry && _afEntry.manualRpId)
         || (typeof _cartPinnedRpId === 'function' ? _cartPinnedRpId() : null)
         || (typeof _v1LatestRpId === 'function' ? _v1LatestRpId() : null);
@@ -57003,7 +57009,8 @@ function rdBuildSideAction(side, sel, resource) {
       return _rwAddedToggleHtml('rdRemoveFromRestore()', _afLabels.addedCompact);
     }
     var _afBtnInner = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add to restore';
-    if (resource && typeof _categoryLockBlocks === 'function' && _categoryLockBlocks(resource)) {
+    var _afLockArg = rdState.fieldScope ? _rdPlanId() : resource;   // a field is checked as a field, not as the record that holds it
+    if (_afLockArg && typeof _categoryLockBlocks === 'function' && _categoryLockBlocks(_afLockArg)) {
       return '<span class="icon-dtip" data-tooltip="' + _categoryLockMsg().replace(/"/g, '&quot;') + '">' +
         '<button class="rw-use-side-btn" disabled aria-disabled="true" style="pointer-events:none;opacity:.5">' + _afBtnInner + '</button></span>';
     }
