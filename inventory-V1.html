@@ -1496,6 +1496,7 @@ tbody tr.rec-diff-row-unchanged .diff-dot { background: var(--black-30); }
 /* Sticky-left pair on the floating thead — matches the body's
    cb-col + name-col so the column headers stay anchored on both
    edges during horizontal scroll of the cloned floater. */
+.floating-thead thead th.col-toggle-th { text-align: right; padding-right: 12px; }
 .floating-thead thead th.cb-col {
   position: sticky;
   left: 0;
@@ -2396,6 +2397,26 @@ body.okov-mode .floating-thead { display: none !important; }
 .search-token-x:hover { background: var(--blue-30); }
 .inv-search-inner { position: relative; }
 .search-suggest { position: absolute; top: calc(100% + 4px); left: 0; min-width: 340px; background: var(--white, #fff); border: 1px solid var(--black-10); border-radius: 8px; box-shadow: 0 4px 16px rgba(31,34,41,.12); padding: 8px; z-index: 60; }
+/* D365 "Match" picker (2026-10-20): the in: chips + auto-popover are replaced by ONE button in the bar that opens a
+   checklist on click — Everything first, grouped, with counts. Independent of the depth toggle (scope line). */
+.search-match { flex: none; margin-left: 8px; display: inline-flex; }
+.search-match:empty { display: none; }
+.sm-btn { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); color: var(--black-100); font-family: inherit; font-size: 14px; line-height: 20px; cursor: pointer; white-space: nowrap; }
+.sm-btn b { font-weight: 500; }
+.sm-btn:hover { background: var(--black-5); }
+.sm-btn.set, .sm-btn.open { border-color: var(--em-green); color: var(--em-green); background: var(--em-green-tint); }
+.search-suggest.sm-pop { left: auto; right: 0; min-width: 300px; }
+.sm-hd { font-size: 14px; line-height: 20px; color: var(--black-60); padding: 4px 8px 8px; }
+.sm-grp { font-size: 14px; line-height: 20px; font-weight: 500; color: var(--black-100); padding: 8px 8px 0; }
+.sm-chk { display: flex; align-items: center; gap: 12px; width: 100%; padding: 8px; border: none; background: none; border-radius: 4px; font-family: inherit; font-size: 16px; line-height: 22px; color: var(--black-100); text-align: left; cursor: pointer; }
+.sm-chk:hover { background: var(--em-green-tint); }
+.sm-chk[disabled] { opacity: .45; cursor: not-allowed; } .sm-chk[disabled]:hover { background: none; }
+.sm-cb { width: 16px; height: 16px; border: 1px solid var(--border); border-radius: 2px; background: var(--white); display: inline-flex; align-items: center; justify-content: center; color: var(--white); flex-shrink: 0; }
+.sm-chk.on .sm-cb { background: var(--em-green); border-color: var(--em-green); }
+.sm-cb svg { width: 12px; height: 12px; opacity: 0; margin: 0; color: var(--white); } .sm-chk.on .sm-cb svg { opacity: 1; }
+.sm-n { margin-left: auto; font-size: 14px; color: var(--black-60); font-variant-numeric: tabular-nums; }
+.sm-sep { height: 1px; background: var(--black-10); margin: 4px 0; }
+.sm-ft { display: flex; justify-content: flex-end; padding: 8px 8px 0; border-top: 1px solid var(--black-10); margin-top: 8px; font-size: 14px; }
 .search-suggest-hd { font-size: 12px; color: var(--black-60); padding: 4px 8px 8px; }
 .search-suggest-opt { display: flex; width: 100%; border: none; background: none; padding: 6px 8px; border-radius: 4px; cursor: pointer; text-align: left; }
 .search-suggest-opt:hover { background: var(--black-3); }
@@ -3276,7 +3297,7 @@ body.ai-full #aiWorkingGlow { display: none; }
    .is-in stripped border-color/background/padding to transparent, reading as
    the toolbar breaking free of its button-shaped chrome; now it stays inside
    it at every width. */
-.ai-showctl { display: inline-flex; align-items: center; height: 36px; box-sizing: border-box; overflow: hidden; border-radius: 4px; border: 1px solid var(--border); background: var(--white); padding: 0 8px; flex-shrink: 0; transition: width 0.32s cubic-bezier(.2,.7,.3,1); }
+.ai-showctl { display: inline-flex; align-items: center; height: 36px; box-sizing: border-box; overflow: hidden; border-radius: 4px; border: 1px solid var(--border); background: var(--white); padding: 0 8px; flex-shrink: 0; position: relative; }
 /* SETTLED (2026-09-24): applied only AFTER the width transition finishes —
    flex:1 lets the bar stay responsive to panel resizes from then on. Doing
    this from the first frame instead (flex-grow computing the used width)
@@ -3290,6 +3311,36 @@ body.ai-full #aiWorkingGlow { display: none; }
    it was clipping the speed/playlist popovers, which render as descendants
    of this box (user: "the popups... appear to be cut off"). */
 .ai-showctl.is-settled { flex: 1 1 auto; width: auto !important; min-width: 160px; overflow: visible; }
+/* WATCH → SCRUBBER MORPH, v3 (2026-10-20, user: "this transition is still just a
+   little bit jagged … smooth like butter"). Measured causes of the jag, fixed here:
+   1) ~100ms synchronous workspace rewind ran inside the click, BEFORE the first
+      frame of the morph (button looked dead, then lurched), and its debounced
+      second renderTable landed ~120ms later MID-morph (84ms frozen frame) →
+      the rewind now waits until the morph has settled (see aiShowStart).
+   2) The Approve button collapsed to icon-only INSTANTLY (115px → 36px) while
+      the scrubber was still at 92px, and the scrubber started 15px narrower
+      than the Watch button it replaced → two hard jumps in frame 1. Both now
+      start from their real pre-click geometry and animate in lockstep.
+   3) The old width transition lived on one DOM node; any aiRender() mid-flight
+      replaced it and the new node snapped. The morph is now a pure function of
+      elapsed time: every render re-emits the animation with a NEGATIVE delay
+      equal to the time already spent, so a rebuilt node resumes on the exact
+      same frame (compositor-continuous) instead of restarting or snapping.
+   4) The "Watch" label vanished in one frame — it now stays as a ghost and
+      fades out while the transport controls fade in behind the growing edge.
+   5) Easing swapped to an ease-out-quint-style curve with a longer tail. */
+@keyframes aiMorphW { from { width: var(--w0); padding-left: var(--pl0, 12px); } to { width: var(--w1); padding-left: 8px; } }
+@keyframes aiMorphA { from { width: var(--a0); padding-left: 16px; padding-right: 16px; } to { width: var(--a1); padding-left: 10px; padding-right: 10px; } }
+@keyframes aiFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes aiFadeOut { from { opacity: 1; } to { opacity: 0; } }
+.ai-showctl.is-morph { animation: aiMorphW var(--dur) var(--ease) calc(0ms - var(--el)) both; will-change: width; }
+.ai-showctl.is-morph .ai-scrub { min-width: 200px; }
+.ai-showctl.is-morph .ai-scrub > :not(.ai-scrub-play) { animation: aiFadeIn 240ms linear calc(150ms - var(--el)) both; }
+.ai-showctl-ghost { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; font-size: 16px; font-weight: 450; line-height: 22px; color: var(--black-100); white-space: nowrap; pointer-events: none; animation: aiFadeOut 150ms linear calc(0ms - var(--el)) both; }
+.ai-gate-btns.has-scrub { flex-wrap: nowrap; }
+.ai-gate-btns.has-scrub.is-morph .ai-gate-btn.primary { overflow: hidden; white-space: nowrap; flex-shrink: 0; animation: aiMorphA var(--dur) var(--ease) calc(0ms - var(--el)) both; }
+.ai-gate-btns.has-scrub.is-morph .ai-gate-btn.primary .ai-gate-btn-label { display: inline; animation: aiFadeOut 130ms linear calc(0ms - var(--el)) both; }
+@media (prefers-reduced-motion: reduce) { .ai-showctl.is-morph, .ai-gate-btns.has-scrub.is-morph .ai-gate-btn.primary, .ai-showctl-ghost, .ai-showctl.is-morph .ai-scrub > :not(.ai-scrub-play) { animation: none !important; } }
 /* .ai-scrub* inner controls — same Figma fcV4iUjRZz7k8dIYm7ScG0 (node
    15937:78214) reference cited above; icons verbatim per securiti-icons-data.js. */
 .ai-scrub { display: flex; align-items: center; gap: 8px; width: 100%; }
@@ -3348,6 +3399,29 @@ body.ai-full #aiWorkingGlow { display: none; }
 .ai-scrub-pop-badge.is-done { background: var(--em-green); border-color: var(--em-green); color: var(--white); }
 .ai-scrub-pop-badge.is-current { background: var(--em-green); border-color: var(--em-green); color: var(--white); }
 .ai-scrub-pop-speed.active { color: var(--em-green); font-weight: 500; }
+/* PLAYLIST STEPS MENU — aligned to Figma fcV4iUjRZz7k8dIYm7ScG0 node 19665:176714 (2026-10-20).
+   340px card (white, 1px Black/S30, r4, 0 8 24 shadow) = 44px search bar on top (same recipe as the
+   workload picker's .wlp-search: bare field, 16px, bottom hairline) → "Playlist steps" subsection
+   title (14px, Black/S60) → 8px-padded list, 4px gap, rows min 36px. Step badges are 28px ROUNDED
+   SQUARES (r4) — three states: completed = green fill + white check; active = green fill + white
+   number; incomplete = Black/S3 fill + Grey/S100 number. Row text stays Black/S100 in every state. */
+.ai-scrub-pop-wide { width: 340px; min-width: 0; max-width: calc(100vw - 32px); max-height: 352px; padding: 0; display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--black-30); border-radius: 4px; box-shadow: 0 8px 24px rgba(31,34,41,.16); }
+.ai-scrub-pop-wide .ai-scrub-pop-search { flex: none; height: 44px; box-sizing: border-box; margin: 0; padding: 4px 12px; gap: 8px; border: none; border-bottom: 1px solid var(--border-light); border-radius: 0; background: var(--white); }
+.ai-scrub-pop-wide .ai-scrub-pop-search:focus-within { border-color: var(--border-light); }
+.ai-scrub-pop-wide .ai-scrub-pop-search svg { width: 20px; height: 20px; color: var(--black-100); }
+.ai-scrub-pop-wide .ai-scrub-pop-search input { height: 100%; font-size: 16px; line-height: 22px; }
+.ai-scrub-pop-wide .ai-scrub-pop-search input::placeholder { color: var(--black-60); }
+.ai-scrub-pop-hd { flex: none; padding: 4px 16px; font-size: 14px; line-height: 16px; color: var(--black-60); }
+.ai-scrub-pop-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 0 8px 8px; display: flex; flex-direction: column; gap: 4px; }
+.ai-scrub-pop-wide .ai-scrub-pop-empty { padding: 12px; font-size: 14px; color: var(--black-60); }
+.ai-scrub-pop-wide .ai-scrub-pop-item { min-height: 36px; padding: 4px 12px; gap: 8px; font-size: 16px; font-weight: 450; line-height: 22px; color: var(--black-100); }
+.ai-scrub-pop-wide .ai-scrub-pop-item:hover { background: var(--em-green-tint, var(--green-10)); }
+.ai-scrub-pop-wide .ai-scrub-pop-item.is-current { color: var(--black-100); font-weight: 450; }
+.ai-scrub-pop-wide .ai-scrub-pop-item:disabled { color: var(--black-100); cursor: default; }
+.ai-scrub-pop-wide .ai-scrub-pop-item:disabled:hover { background: none; }
+.ai-scrub-pop-wide .ai-scrub-pop-badge { width: 28px; height: 28px; border: none; border-radius: 4px; background: var(--black-3); color: var(--grey-100); font-size: 16px; font-weight: 450; line-height: 22px; }
+.ai-scrub-pop-wide .ai-scrub-pop-badge.is-done, .ai-scrub-pop-wide .ai-scrub-pop-badge.is-current { background: var(--em-green); color: var(--white); }
+.ai-scrub-pop-wide .ai-scrub-pop-badge svg { width: 16px; height: 16px; }
 /* CHAT HISTORY — searchable history overlay, PORTED byte-faithful from the
    picked pattern in ai-history-patterns.html (user 2026-09-01; A/B/C bake-off,
    adaptations rejected). Anatomy: history affordance (or ⌘K) opens a scrim
@@ -3442,7 +3516,7 @@ body.ai-hx-transcript .ai-foot { display: none; }
 .ai-tr2-state { flex-shrink: 0; width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; }
 .ai-tr2-state .tick { color: var(--em-green); }
 .ai-tr2-state .disc-spinner { width: 12px; height: 12px; }
-.ai-tr2-detail { display: none; margin: 0 0 6px; border: 1px solid var(--border-light); border-radius: 4px; background: var(--white); padding: 8px 10px; font-size: 12px; }
+.ai-tr2-detail { display: none; margin: 6px 0; border: 1px solid var(--border-light); border-radius: 4px; background: var(--white); padding: 8px 10px; font-size: 12px; }
 .ai-tr2-step.open .ai-tr2-detail { display: block; }
 .ai-tr2-kv { display: flex; gap: 8px; padding: 2px 0; line-height: 1.5; }
 .ai-tr2-kv .k { width: 76px; flex-shrink: 0; color: var(--black-50); }
@@ -3509,7 +3583,7 @@ body.ai-hx-transcript .ai-foot { display: none; }
 .ai-reason.module .ai-tr2-chip { background: none; padding: 0; height: auto; font-size: 12px; font-weight: 450; color: var(--black-50); }
 .ai-reason.module .ai-tr2-chip.n { background: none; color: var(--black-50); }
 .ai-reason.module .ai-tr2-dur { font-size: 12px; color: var(--black-50); }
-.ai-reason.module .ai-tr2-detail { margin: 0 0 8px 22px; }
+.ai-reason.module .ai-tr2-detail { margin: 6px 0 8px 22px; }
 .ai-reason.module .ai-reason-step { font-size: 13px; color: var(--black-60); padding: 8px 0; border-top: 1px solid var(--border-light); }
 .ai-reason.quiet .ai-tr2-label b { font-size: 11.5px; color: var(--black-60); }
 .ai-reason.quiet .ai-tr2-chip { background: none; color: var(--black-40); font-weight: 450; height: auto; padding: 0 0 0 4px; }
@@ -3563,16 +3637,22 @@ body.ai-hx-transcript .ai-foot { display: none; }
    (recorded in memory): the vis follows the SHAPE OF THE CLAIM —
    composition→strip · per-category comparison→rows · limit-proximity→
    capacity row · trend→sparkline · uniform verdict→NO chart. */
-.aiac-strip { display: flex; height: 6px; border-radius: 2px; overflow: hidden; margin-top: 10px; }
-.aiac-strip span { height: 100%; }
+/* BOLD, HIGH-CONTRAST SERIES + HAIRLINE GAPS (2026-10-20, user: "bolder high contrast colors in the data
+   vis with hairline spaces between bars"). The scenarios still tag segments with the Chart/Soft series
+   vars; re-pointing those vars inside the vis containers swaps in the solid status colours for every
+   existing card (strip, legend markers, per-category rows) without touching any scenario data.
+   green = healthy/protected · gold→orange = warning/stale · red = failed/critical · blue = info. */
+.aiac-strip, .aiac-legend, .aiac-vrows, .aiac-act-vis { --chart-soft-green: var(--em-green); --chart-soft-gold: var(--orange); --chart-soft-red: var(--red); --chart-soft-blue: var(--blue); }
+.aiac-strip { display: flex; gap: 2px; height: 8px; margin-top: 10px; }
+.aiac-strip span { height: 100%; border-radius: 2px; }
 .aiac-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; font-size: 12px; color: var(--black-60); }
 .aiac-legend .li { display: inline-flex; align-items: center; gap: 5px; }
 .aiac-legend .dot { width: 10px; height: 3px; border-radius: 1.5px; flex-shrink: 0; }   /* line marker, not a disc — dashboard legend convention */
 .aiac-vrows { display: flex; flex-direction: column; gap: 7px; margin-top: 10px; }
 .aiac-vrow { display: grid; grid-template-columns: 128px 1fr 74px; gap: 10px; align-items: center; font-size: 12px; color: var(--black-80); }
 .aiac-vrow .lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.aiac-vrow .track { height: 4px; border-radius: 2px; background: var(--black-5); overflow: hidden; display: flex; }
-.aiac-vrow .track span { height: 100%; }
+.aiac-vrow .track { height: 8px; border-radius: 2px; background: var(--black-5); overflow: hidden; display: flex; gap: 2px; }
+.aiac-vrow .track span { height: 100%; border-radius: 2px; }
 .aiac-vrow .val { text-align: right; color: var(--black-60); font-variant-numeric: tabular-nums; white-space: nowrap; }
 /* Trend v2 (2026-09-02): full card width, dated axis, hover readout —
    readout bubble clones the .app-tooltip recipe (DS Tooltip WHITE theme,
@@ -5974,7 +6054,9 @@ td.cb-col input:disabled, th.cb-col input:disabled { pointer-events: none; }
    full-width card. 3fr/2fr ≈ the old table's (attr+value)/(comparison)
    split. The panel stretches the stack's height; its content sticks near
    the viewport top so it stays visible while scrolling long stacks. */
-.rd-none-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: stretch; }
+/* Columns mirror the control bar above (.rd-hbar: 180px attribute column + two equal comparison slots): the values stack = attr + left slot,
+   the guidance panel = the right slot — so the panel is exactly as wide as the "Pick another restore point…" header over it. */
+.rd-none-grid { display: grid; grid-template-columns: minmax(0, calc(180px + (100% - 180px) / 2)) minmax(0, calc((100% - 180px) / 2)); gap: 0; align-items: stretch; }
 .rd-none-stack { min-width: 0; }
 .rd-none-side { margin-top: 16px; align-self: stretch; }
 .rd-none-side .inv-empty-state { position: sticky; top: 40px; padding: 24px 12px; }
@@ -7625,6 +7707,22 @@ input[type="checkbox"] { accent-color: var(--em-green); }
    invisible when the bar went white. Scoped to .top-action-bar because some
    classes (tab-right-clear) are also used inside the blue covered-bar banner,
    where white is still correct. ── */
+/* Out-of-range search chip + peek (user 2026-10-20, search-range-notice-options.html variant D): one verb-less "+N outside range" chip
+   after the search summary; clicking opens a bounded list of the matches the range hides, with Search all time as the way out. */
+.oow-wrap { position: relative; display: inline-flex; align-items: center; flex-shrink: 0; }
+.oow-chip { display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 8px; border: 1px solid var(--green-s30); border-radius: 12px; background: var(--em-green-tint); color: var(--em-green); font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+.oow-chip:hover, .oow-chip[aria-expanded="true"] { background: var(--green-s10); }
+.oow-pop { position: absolute; top: calc(100% + 8px); left: 0; z-index: 40; width: 400px; background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; box-shadow: 0 8px 24px rgba(31,34,41,0.13); padding: 12px 16px 16px; color: var(--black-100); white-space: normal; }
+.oow-pop h4 { margin: 0 0 8px; font-size: 14px; line-height: 20px; font-weight: 500; }
+.oow-list { border-bottom: 1px solid var(--border-light); }
+.oow-list.scroll { max-height: 220px; overflow-y: auto; scrollbar-gutter: stable; padding-right: 8px; }
+.oow-it { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-top: 1px solid var(--border-light); font-size: 14px; line-height: 20px; }
+.oow-it .oow-nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.oow-it .oow-when { margin-left: auto; padding-left: 12px; color: var(--black-60); font-size: 12px; line-height: 16px; white-space: nowrap; }
+.oow-it .oow-when.del { color: var(--red); }
+.oow-foot { margin-top: 8px; font-size: 12px; line-height: 16px; color: var(--black-60); }
+.oow-go { margin-top: 12px; height: 36px; width: 100%; border-radius: 4px; border: 1px solid var(--em-green); background: var(--em-green); color: var(--white); font: inherit; font-size: 16px; font-weight: 500; cursor: pointer; }
+.oow-go:hover { background: var(--em-green-accent); border-color: var(--em-green-accent); }
 .top-action-bar .tab-left-link { color: var(--em-green); }
 .top-action-bar .tab-right-clear { border-color: var(--border); color: var(--black-100); }
 .top-action-bar .tab-right-clear:hover { background: var(--black-3); border-color: var(--border); }
@@ -8589,6 +8687,7 @@ input[type="checkbox"] { accent-color: var(--em-green); }
                     <button type="button" class="search-clear-btn" onclick="clearSearchInput('invSearch')" aria-label="Clear search">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
                     </button>
+                    <span class="search-match" id="invSearchMatch"></span>
                     <!-- Lab-port v8: in: token suggestions — opens on focus
                          (D365 only). Absolutely positioned against the input
                          wrapper so it drops immediately below the field,
@@ -8843,6 +8942,7 @@ input[type="checkbox"] { accent-color: var(--em-green); }
                     <button type="button" class="search-clear-btn" onclick="clearSearchInput('childSearch')" aria-label="Clear search">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
                     </button>
+                    <span class="search-match" id="childSearchMatch"></span>
                     <!-- v9.3: same in: token suggestions as the inventory
                          search — anchored to the drill input. -->
                     <div class="search-suggest" id="childSearchSuggest" style="display:none"></div>
@@ -17350,12 +17450,8 @@ function openChildrenDrill(parentId) {
       }
     }
   }
-  // Active Directory: a forest whose only child is its root domain is a degenerate level (same name, one row) —
-  // drilling the forest lands directly on the domain's contents.
-  if (_okOrg && _okOrg.wl === 'Active Directory' && _okOrg.type === 'Forest') {
-    var _adForestKids = RESOURCES.filter(function(x){ return x.parentId === parentId; });
-    if (_adForestKids.length === 1 && _adForestKids[0].type === 'Domain') { openChildrenDrill(_adForestKids[0].id); return; }
-  }
+  // Active Directory (2026-10-20): a forest can hold several domains (child domains, extra domain trees), so the Domain
+  // level is ALWAYS shown — even when there is one — and no longer skipped. Forest and Domain get distinct icons/types.
   // R6: the event grid reads newest-first by default (Published desc).
   if (parentId === 'okta-sl-log' || parentId === 'okta-sb-log') {
     state.childSort = { key: 'od:evPub', dir: 'desc' };
@@ -23702,6 +23798,7 @@ function childRender() {
         state._oowInfo = {
           total: _dpOut.length,
           deleted: _dpOut.filter(function(r){ return r.existence === 'deleted-in-live'; }).length,
+          items: _v1OowItems(_dpOut),
           verb: 'Search all time'
         };
       }
@@ -27162,14 +27259,60 @@ function _v1RangeEmptyRow(colspan) {
 // (hoisted 2026-09-08 — cloning it tripped the hand-drawn-svg ratchet, and
 // two copies of the same glyph is exactly what the ratchet exists to stop).
 var _V1_INFO_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>';
+// Out-of-range peek rows (user 2026-10-20). Deleted items are placed by DELETION time, live items by their newest backup —
+// the same two facts _v1InRangeVisible tests — so the date label says which one it is. Nearest the range first, capped.
+function _v1OowItems(list) {
+  var rg = _v1InvRange();
+  var startTs = rg.start ? new Date(rg.start + 'T00:00:00').getTime() : null;
+  var endTs = rg.end ? new Date(rg.end + 'T23:59:59').getTime() : Date.now();
+  return (list || []).map(function(r){
+    var del = r.existence === 'deleted-in-live', ts = null;
+    if (del) ts = (typeof _invDeletedAtRaw === 'function') ? _invDeletedAtRaw(r) : null;
+    else { var rps = (typeof generateRps === 'function') ? generateRps(r.id) : null; ts = (rps && rps.length) ? rps[0].ts : null; }
+    var dist = ts == null ? Infinity : (startTs != null && ts < startTs ? startTs - ts : (ts > endTs ? ts - endTs : 0));
+    return { id: r.id, name: r.name || r.id, deleted: del, ts: ts, dist: dist };
+  }).sort(function(a, b){ return a.dist - b.dist; }).slice(0, 100);
+}
+function toggleOowPop(e) {
+  if (e) e.stopPropagation();
+  state._oowPop = !state._oowPop;
+  if (typeof renderTopActionBar === 'function') renderTopActionBar();
+}
+function oowSearchAllTime() {
+  state._oowPop = false;
+  setInvRange('all');
+}
+document.addEventListener('click', function(e){
+  if (!state._oowPop || e.target.closest('.oow-wrap')) return;
+  state._oowPop = false;
+  if (typeof renderTopActionBar === 'function') renderTopActionBar();
+});
 function _v1OowBarHtml(info, terse) {
   if (!info || !info.total) return '';
   var _n = info.total, _d = info.deleted || 0;
   var verb = info.verb || 'Show all time';
   var btn = '<button class="tab-left-link" type="button" onclick="setInvRange(\'all\')">' + verb + '</button>';
   if (terse) {
-    return '<span class="tab-left-text">+' + _n + ' before this range' + (_d > 0 ? ' (' + _d + ' deleted)' : '') + '</span>' + btn;
+    var _items = info.items || [], _open = !!state._oowPop;
+    var _chev = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('chevron-down', 12)) || '';
+    var _fmtD = function(ts){ return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); };
+    var _pop = '';
+    if (_open) {
+      _pop = '<div class="oow-pop" role="dialog" aria-label="Matches outside this range"><h4>' + _n + ' more ' + (_n === 1 ? 'match' : 'matches') + ' outside this range</h4>'
+        + '<div class="oow-list' + (_items.length > 8 ? ' scroll' : '') + '">'
+        + _items.map(function(it){
+            return '<div class="oow-it"><span class="oow-nm">' + wsEscape(it.name) + '</span>'
+              + (it.ts != null ? '<span class="oow-when' + (it.deleted ? ' del' : '') + '">' + (it.deleted ? 'Deleted ' : 'Last backup ') + _fmtD(it.ts) + '</span>' : '') + '</div>';
+          }).join('')
+        + '</div>'
+        + (_n > _items.length ? '<div class="oow-foot">Showing ' + _items.length + ' of ' + _n + ' · nearest the range first</div>' : '')
+        + '<button type="button" class="oow-go" onclick="oowSearchAllTime()">' + (info.verb || 'Search all time') + '</button></div>';
+    }
+    // was: "+N before this range (D deleted)" text + a bare link — read as a continuation of the result sentence, and
+    // "before" was wrong for matches that sit AFTER the window.
+    return '<span class="oow-wrap"><button type="button" class="oow-chip" aria-expanded="' + _open + '" onclick="toggleOowPop(event)" title="See the matches outside this range">+' + _n + ' outside range' + _chev + '</button>' + _pop + '</span>';
   }
+
   // Copy grammar (user 2026-09-08): say what the PAGE is doing ("isn't shown"),
   // date the fact ("before this range" — deletion/last backup happened earlier),
   // parenthetical deleted count for width (the "including" clause was too
@@ -28964,6 +29107,10 @@ var _MS365_MAILFOLDER_ICON = {
   'Junk Email': 'ms365-junk', 'Archive': 'ms365-archive'
 };
 function _treeIconSvgFor(r) {
+  if (r && r.wl === 'Active Directory' && (r.type === 'Forest' || r.type === 'Domain')) {
+    var _adI = _dsStoreIconSvg(r.type === 'Forest' ? 'regions-outlined' : 'organization-outlined', 14);
+    if (_adI) return _adI;
+  }
   // Microsoft 365 first — its verbatim glyph set is workload-scoped so the
   // shared type map ('tenant', 'team', 'folder', …) can't hijack it.
   if (r && r.wl === 'Microsoft 365') {
@@ -33584,7 +33731,9 @@ function _tokenSearchOn() {
   // Jira + Confluence (2026-07-17). Jira's legacy always-descend + gear
   // facet model is superseded by this pattern.
   return w === 'd365' || w === 'github' || w === 'azure-devops' || w === 'okta-wic'
-      || w === 'jira' || w === 'confluence' || w === 'powerplatform';
+      || w === 'jira' || w === 'confluence' || w === 'powerplatform'
+      // Rollout 2026-10-20 (Match picker): the remaining workloads join the same reach model
+      || w === 'ms365' || w === 'gitlab' || w === 'gws' || w === 'entra-id' || w === 'active-directory' || w === 'ping' || w === 'hybrid-vms';
 }
 var SEARCH_TOKEN_KINDS_D365 = [
   { key: 'resource',  label: 'Table names' },
@@ -33638,7 +33787,23 @@ var SEARCH_TOKEN_KINDS_PP = [
   { key: 'item',      label: 'Item names' },
   { key: 'details',   label: 'Details' }
 ];
+// Remaining workloads (2026-10-20): same three-tier reach, each workload's own nouns. Flat workloads
+// (Ping, Virtual Machines) have no container tier, so they offer object names + details only.
+var SEARCH_TOKEN_KINDS_MS365 = [ { key: 'container', label: 'Mailbox, site & team names' }, { key: 'item', label: 'Item names' }, { key: 'details', label: 'Details' } ];
+var SEARCH_TOKEN_KINDS_GITLAB = [ { key: 'container', label: 'Group names' }, { key: 'item', label: 'Item names' }, { key: 'details', label: 'Details' } ];
+var SEARCH_TOKEN_KINDS_GWS = [ { key: 'container', label: 'User & drive names' }, { key: 'item', label: 'Item names' }, { key: 'details', label: 'Details' } ];
+var SEARCH_TOKEN_KINDS_ENTRA = [ { key: 'container', label: 'Folder names' }, { key: 'item', label: 'Object names' }, { key: 'details', label: 'Details' } ];
+var SEARCH_TOKEN_KINDS_AD = [ { key: 'container', label: 'OU & folder names' }, { key: 'item', label: 'Object names' }, { key: 'details', label: 'Details' } ];
+var SEARCH_TOKEN_KINDS_FLAT = [ { key: 'item', label: 'Object names' }, { key: 'details', label: 'Details' } ];
+var SEARCH_TOKEN_KINDS_VMS = [ { key: 'item', label: 'VM names' }, { key: 'details', label: 'Details' } ];
 function _searchTokenKindsFor(wl) {
+  if (wl === 'ms365') return SEARCH_TOKEN_KINDS_MS365;
+  if (wl === 'gitlab') return SEARCH_TOKEN_KINDS_GITLAB;
+  if (wl === 'gws') return SEARCH_TOKEN_KINDS_GWS;
+  if (wl === 'entra-id') return SEARCH_TOKEN_KINDS_ENTRA;
+  if (wl === 'active-directory') return SEARCH_TOKEN_KINDS_AD;
+  if (wl === 'ping') return SEARCH_TOKEN_KINDS_FLAT;
+  if (wl === 'hybrid-vms') return SEARCH_TOKEN_KINDS_VMS;
   if (wl === 'd365') return SEARCH_TOKEN_KINDS_D365;
   if (wl === 'azure-devops') return SEARCH_TOKEN_KINDS_ADO;
   if (wl === 'okta-wic') return SEARCH_TOKEN_KINDS_OKTA;
@@ -33732,6 +33897,8 @@ function _treeIsContainer(r) {
   if (r && r.wl === 'Jira') return r.type === 'Jira Site' || r.type === 'Jira Project';
   if (r && r.wl === 'Confluence') return r.type === 'Confluence Site' || r.type === 'Space';
   if (r && r.wl === 'Power Platform') return r.type === 'Tenant' || r.type === 'Environment' || r.type === 'Workspace';
+  if (r && r.wl === 'Entra ID') return r.type === 'Tenant' || r.type === 'Folder';
+  if (r && (r.wl === 'Ping' || r.wl === 'Virtual Machines')) return false;   // flat workloads — no container tier
   return !!_TREE_CONTAINER_TYPES[(r || {}).type];
 }
 // Back-compat alias — the AI agent + legacy refs expect the D365 vocab name.
@@ -33778,7 +33945,8 @@ function renderSearchTokensFor(surface) {
     var wlNow = (state.wl === 'all') ? state.catWlScope : state.wl;
     if (input) input.placeholder = on ? ('Search everything in ' + (WL_MAP[wlNow] || 'this workload')) : 'Search your inventory';
   }
-  if (!on) { wrap.innerHTML = ''; return; }
+  if (!on) { wrap.innerHTML = ''; renderMatchButton(surface); return; }
+  wrap.innerHTML = ''; renderMatchButton(surface); return;   // every tokenized workload: the Match button replaces the chips
   wrap.innerHTML = _activeSearchKinds().map(function(k){
     return '<span class="search-token"><span class="search-token-in">in:</span>' + _searchTokenLabel(k)
       + '<button type="button" class="search-token-x" onclick="removeSearchToken(\'' + k + '\',\'' + surface + '\')" aria-label="Remove ' + _searchTokenLabel(k) + ' token">✕</button></span>';
@@ -33801,6 +33969,8 @@ function removeSearchToken(kind, surface) {
 function renderSearchSuggestFor(surface) {
   var panel = document.getElementById(_tokenSurfaceIds(surface).panel);
   if (!panel) return;
+  if (_tokenSearchOn()) { renderMatchPicker(surface); return; }
+  panel.classList.remove('sm-pop');
   var kinds = _activeSearchKinds();
   var _wlNow = (state.wl === 'all') ? state.catWlScope : state.wl;
   var remaining = _searchTokenKindsFor(_wlNow).filter(function(k){ return kinds.indexOf(k.key) < 0; });
@@ -33844,6 +34014,112 @@ function searchSuggestCloseAll() {
   state._suggestOpenSurface = null;
   document.removeEventListener('click', _searchSuggestOutside, true);
 }
+// ── D365 "Match" picker ─────────────────────────────────────────────────
+// WHICH CATEGORY the term must match (reach). Independent of depth — the
+// scope line's "Search all contents" toggle is untouched. Levels: the
+// inventory list and a table-level drill offer all four categories; a
+// records drill offers record names + field values (its rows ARE records);
+// the fields drill is highlight-only (the whole record is shown), so no
+// category control there.
+var _MATCH_KIND_LABEL = { resource: 'Table names', record: 'Record names', fieldName: 'Field names', field: 'Field values' };
+function _matchLabelFor(k) { return _MATCH_KIND_LABEL[k] || _searchTokenLabel(k); }
+function _matchPickerLevel(surface) {
+  if (!(typeof _tokenSearchOn === 'function' && _tokenSearchOn())) return null;
+  if (!_d365SupersetOn()) {
+    // Tree workloads (GitHub, Azure DevOps, Okta, Jira, Confluence, Power Platform): one reach model at every level
+    if (surface === 'inv') return (state.invMode === 'list') ? 'tree' : null;
+    return (state.invMode === 'drill') ? 'tree' : null;
+  }
+  if (surface === 'inv') return (state.invMode === 'list') ? 'inv' : null;
+  if (state.invMode !== 'drill') return null;
+  var dt = (typeof _drillType === 'function') ? _drillType() : 'standard';
+  return dt === 'fields' ? null : (dt === 'records' ? 'records' : 'tables');
+}
+function _matchKindsForLevel(level) {
+  if (level === 'tree') { var w = (state.wl === 'all') ? state.catWlScope : state.wl; return _searchTokenKindsFor(w).map(function (k) { return k.key; }); }
+  return level === 'records' ? ['record', 'field'] : ['resource', 'record', 'fieldName', 'field'];
+}
+function _matchQuery(surface) { return ((document.getElementById(_tokenSurfaceIds(surface).input) || {}).value || '').trim(); }
+// Match counts per category for the current query at this level — computed with the reach lifted
+// (so unselected categories still report), and deep rows included regardless of the depth toggle.
+function _matchKindCounts(surface) {
+  var c = { resource: 0, record: 0, fieldName: 0, field: 0, container: 0, item: 0, details: 0 }, q = _matchQuery(surface);
+  if (!q) return c;
+  var level = _matchPickerLevel(surface);
+  if (level === 'records') { var rc = state._recSearchFacetCounts || {}; c.record = rc.record || 0; c.field = rc.field || 0; return c; }
+  if (level === 'tree') {
+    var tc = { container: 0, item: 0, details: 0 }, f0 = state.searchFacets, m0 = f0.mode, k0 = f0.kinds, i0 = state.searchIncludeSubfolders, a0 = state.searchFacetsAnchorId;
+    try {
+      f0.mode = 'all'; f0.kinds = []; state.searchIncludeSubfolders = true;
+      state.searchFacetsAnchorId = (surface === 'child') ? 'childSearchFacetsBtn' : 'invSearchFacetsBtn';   // _itemReasons reads the query from the anchored surface
+      var trows = (surface === 'inv') ? buildSearchGroups(q).map(function (g) { return g.resource || g; }) : (_buildDrillSearchResults(q, true) || []);
+      trows.forEach(function (r) { var re = _itemReasons(r); if (re.container) tc.container++; if (re.item) tc.item++; if (re.details) tc.details++; });
+    } finally { f0.mode = m0; f0.kinds = k0; state.searchIncludeSubfolders = i0; state.searchFacetsAnchorId = a0; }
+    return tc;
+  }
+  var f = state.searchFacets, sm = f.mode, sk = f.kinds, si = state.searchIncludeSubfolders;
+  try {
+    f.mode = 'all'; f.kinds = [];
+    var rows;
+    state.searchIncludeSubfolders = true;   // deep rows exist regardless of the depth toggle; counts must too
+    if (surface === 'inv') rows = _buildSearchGroupsTypeLifted(q).map(function (g) { return g.resource || g; });
+    else rows = _buildDrillSearchResults(q, true) || [];
+    // Count each matching OBJECT once: a record row that merely rolls up its field-value hits is not a second hit.
+    rows.forEach(function (r) {
+      if (!r) return;
+      if (r.type === 'Record' && r._hitKind === 'record') c.record++;
+      else if (r.type === 'Field' && r._hitKind === 'field') c.field++;
+      else if (r.type === 'Field' && r._hitKind === 'fieldName') c.fieldName++;
+      else if (r.type === 'Table' && !r._hitKind && _qMatch(r.name || '', q)) c.resource++;
+    });
+  } finally { f.mode = sm; f.kinds = sk; state.searchIncludeSubfolders = si; }
+  return c;
+}
+function _matchSelected(surface) { var lv = _matchKindsForLevel(_matchPickerLevel(surface)); return _activeSearchKinds().filter(function (k) { return lv.indexOf(k) >= 0; }); }
+function _matchLabel(surface) {
+  var lv = _matchKindsForLevel(_matchPickerLevel(surface)), act = _activeSearchKinds(), sel = _matchSelected(surface);
+  if (!act.length) return 'Everything';
+  if (!sel.length) return 'Other categories';
+  return sel.length === 1 ? _matchLabelFor(sel[0]) : sel.length + ' of ' + lv.length;
+}
+function renderMatchButton(surface) {
+  var host = document.getElementById(surface === 'child' ? 'childSearchMatch' : 'invSearchMatch');
+  if (!host) return;
+  var level = _matchPickerLevel(surface), q = _matchQuery(surface);
+  if (!level || (!q && !_activeSearchKinds().length)) { host.innerHTML = ''; if (state._suggestOpenSurface === surface && level === null) searchSuggestCloseAll(); return; }
+  var open = state._suggestOpenSurface === surface, set = _activeSearchKinds().length > 0;
+  host.innerHTML = '<button type="button" class="sm-btn' + (set ? ' set' : '') + (open ? ' open' : '') + '" onclick="toggleMatchPicker(\'' + surface + '\');event.stopPropagation()" aria-haspopup="true" aria-expanded="' + open + '">Match: <b>' + wsEscape(_matchLabel(surface)) + '</b>'
+    + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0"><polyline points="6 9 12 15 18 9"/></svg></button>';
+}
+function toggleMatchPicker(surface) {
+  if (state._suggestOpenSurface === surface) searchSuggestCloseAll(); else searchSuggestOpenFor(surface);
+  renderMatchButton(surface);
+}
+function renderMatchPicker(surface) {
+  var panel = document.getElementById(_tokenSurfaceIds(surface).panel);
+  if (!panel) return;
+  var level = _matchPickerLevel(surface); if (!level) { panel.style.display = 'none'; return; }
+  var kinds = _matchKindsForLevel(level), c = _matchKindCounts(surface), act = _activeSearchKinds(), q = _matchQuery(surface);
+  var tot = kinds.reduce(function (a, k) { return a + (c[k] || 0); }, 0);
+  var CK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  function row(k) { var on = act.indexOf(k) >= 0; return '<button type="button" class="sm-chk' + (on ? ' on' : '') + '"' + (c[k] ? '' : ' disabled') + ' onclick="toggleMatchKind(\'' + k + '\',\'' + surface + '\')"><span class="sm-cb">' + CK + '</span>' + _matchLabelFor(k) + '<span class="sm-n">' + c[k] + '</span></button>'; }
+  var names = kinds.filter(function (k) { return k !== 'field' && k !== 'details'; }), conts = kinds.filter(function (k) { return k === 'field' || k === 'details'; });
+  panel.classList.add('sm-pop');
+  panel.innerHTML = '<div class="sm-hd">Match “' + wsEscape(q) + '” against…</div>'
+    + '<button type="button" class="sm-chk' + (!act.length ? ' on' : '') + '" onclick="resetMatchKinds(\'' + surface + '\')"><span class="sm-cb">' + CK + '</span><b style="font-weight:500">Everything</b><span class="sm-n">' + tot + '</span></button><div class="sm-sep"></div>'
+    + '<div class="sm-grp">Names</div>' + names.map(row).join('')
+    + (conts.length ? '<div class="sm-grp">Contents</div>' + conts.map(row).join('') : '')
+    + '<div class="sm-ft"><button type="button" class="search-scope-link" onclick="toggleMatchPicker(\'' + surface + '\')">Done</button></div>';
+}
+function toggleMatchKind(kind, surface) { toggleSearchFacetKind(kind); renderMatchButton(surface); renderMatchPicker(surface); }
+function resetMatchKinds(surface) { resetSearchScope(); renderMatchButton(surface); if (state._suggestOpenSurface) renderMatchPicker(state._suggestOpenSurface); }
+// One-line prompt on the scope line when narrowing hides matches that exist in other categories.
+function _matchHiddenHint(surface) {
+  var level = _matchPickerLevel(surface); if (!level || !_activeSearchKinds().length || !_matchQuery(surface)) return '';
+  var c = _matchKindCounts(surface), sel = _matchSelected(surface), hidden = 0;
+  _matchKindsForLevel(level).forEach(function (k) { if (sel.indexOf(k) < 0) hidden += (c[k] || 0); });
+  return hidden > 0 ? ' · ' + hidden + ' more match' + (hidden === 1 ? '' : 'es') + ' in other categories <button type="button" class="search-scope-link" onclick="resetMatchKinds(\'' + surface + '\')">Include</button>' : '';
+}
 // Back-compat wrappers — agent + inv markup call the inv-named forms.
 function invSearchSuggestClose() { searchSuggestCloseAll(); }
 // The panel only appears once the user has TYPED something — on a bare
@@ -33852,6 +34128,7 @@ function invSearchSuggestClose() { searchSuggestCloseAll(); }
 // the field is refocused or emptied.
 function searchSuggestSync(surface) {
   if (!_tokenSearchOn()) return;
+  if (_tokenSearchOn()) return;   // the Match picker opens on click only — never over the results while typing
   var input = document.getElementById(_tokenSurfaceIds(surface).input);
   var hasText = !!(input && input.value && input.value.trim());
   if (!hasText) {
@@ -33862,12 +34139,14 @@ function searchSuggestSync(surface) {
   if (state._suggestOpenSurface !== surface && !state._suggestSquelch) searchSuggestOpenFor(surface);
 }
 function searchSuggestFocus(surface) {
+  if (_tokenSearchOn()) return;
   state._suggestSquelch = false;
   var input = document.getElementById(_tokenSurfaceIds(surface).input);
   if (input && input.value && input.value.trim()) searchSuggestOpenFor(surface);
 }
 function searchTokenKeydown(surface, e) {
   if (!_tokenSearchOn()) return;
+  if (_tokenSearchOn()) { if (e.key === 'Escape') searchSuggestCloseAll(); return; }
   var input = document.getElementById(_tokenSurfaceIds(surface).input);
   // Backspace on an empty input removes the last token — standard
   // recipient-chip behavior.
@@ -34135,6 +34414,7 @@ function syncSearchScopeLines() {
       line.innerHTML = all
         ? 'Searching all contents for “' + wsEscape(q) + '” · <button type="button" class="search-scope-link" onclick="toggleSearchScopeAll(\'inv\')">' + cap(noun) + ' only</button>'
         : 'Searching ' + noun + ' for “' + wsEscape(q) + '” · <button type="button" class="search-scope-link" onclick="toggleSearchScopeAll(\'inv\')">Search all contents</button>';
+      line.innerHTML += _matchHiddenHint('inv');
       line.style.display = '';
     }
   }
@@ -34151,7 +34431,7 @@ function syncSearchScopeLines() {
       if (dType === 'records') {
         // Records drill: field values already classify into the record
         // rows, so there's no deeper tier to pivot to — descriptive only.
-        cline.innerHTML = 'Searching records in <strong>' + wsEscape(pn) + '</strong> for “' + wsEscape(cq) + '” — field-value matches included.';
+        cline.innerHTML = 'Searching records in <strong>' + wsEscape(pn) + '</strong> for “' + wsEscape(cq) + '” — field-value matches included' + (_matchHiddenHint('child') || '.');
       } else if (dType === 'fields') {
         // Fields drill: the parent is a SYNTHETIC record (rec-<schema>-<idx>)
         // that doesn't live in RESOURCES — resolve its name from the schema.
@@ -34172,9 +34452,11 @@ function syncSearchScopeLines() {
           ? 'Searching all contents of <strong>' + wsEscape(pn) + '</strong> for “' + wsEscape(cq) + '” · <button type="button" class="search-scope-link" onclick="toggleSearchScopeAll(\'child\')">' + _lvlCap + ' only</button>'
           : 'Searching ' + _lvlNoun + ' in <strong>' + wsEscape(pn) + '</strong> for “' + wsEscape(cq) + '” · <button type="button" class="search-scope-link" onclick="toggleSearchScopeAll(\'child\')">Search all contents</button>';
       }
+      if (dType !== 'records' && dType !== 'fields') cline.innerHTML += _matchHiddenHint('child');
       cline.style.display = '';
     }
   }
+  if (typeof renderMatchButton === 'function') { renderMatchButton('inv'); renderMatchButton('child'); if (state._suggestOpenSurface && _tokenSearchOn()) renderMatchPicker(state._suggestOpenSurface); }
 }
 function cap(str) { return str ? str.charAt(0).toUpperCase() + str.slice(1) : str; }
 // Unified facet-popover toggle. Called from both gear buttons
@@ -36320,6 +36602,7 @@ function renderSearchResults(query) {
       state._oowInfo = {
         total: _sOut.length,
         deleted: _sOut.filter(function(g){ var _r = (g && g.resource) ? g.resource : g; return _r && _r.existence === 'deleted-in-live'; }).length,
+        items: _v1OowItems(_sOut.map(function(g){ return (g && g.resource) ? g.resource : g; })),
         verb: 'Search all time'
       };
     }
@@ -40859,8 +41142,10 @@ function renderTopActionBar() {
       leftEl.style.display = subjectHtml ? '' : 'none';
       // Empty context slot on an active bar → the out-of-range disclosure
       // (lowest-priority context; any lock/search/select-all above outranks it).
-      var _oowCtxHtml = (!leftHtml && state._oowInfo && state._oowInfo.total && typeof _v1OowBarHtml === 'function')
-        ? _v1OowBarHtml(state._oowInfo, false) : '';
+      // was: the standing "N items before this range aren't shown" line filled this slot when it was empty.
+      // Out-of-range disclosure is search-scoped now (user 2026-10-20): the terse suffix on the search-count
+      // line above is its only home in the bar.
+      var _oowCtxHtml = '';
       if (centerEl) centerEl.innerHTML = leftHtml || _oowCtxHtml;
       rightEl.innerHTML = rightHtml;
       rightEl.style.display = rightHtml ? '' : 'none';
@@ -40957,9 +41242,7 @@ function renderTopActionBar() {
         // nothing is hidden. Export sections keep their specific line.
         _rtMsg = _rtExpSection
           ? 'These items can\u2019t be restored \u2014 select them to add them to an export job.'
-          : ((state._oowInfo && state._oowInfo.total && typeof _v1OowBarHtml === 'function')
-              ? _v1OowBarHtml(state._oowInfo, false)
-              : 'Select items to add them to a restore job.');
+          : 'Select items to add them to a restore job.';   // was: oow disclosure took this slot — search-scoped now
       }
       leftEl.innerHTML = ''; leftEl.style.display = 'none';
       if (centerEl) centerEl.innerHTML = '<span class="tab-resting">' + _rtMsg + '</span>';
@@ -47204,7 +47487,7 @@ function wsBeginRestoreAnimation() {
       // the Jobs record stays ONE table, initiator is a fact on the row
       // (realignment 2026-09-10). Fictional operator otherwise (2026-07-13
       // — no real coworkers in demo data).
-      owner: ((typeof aiAgent !== 'undefined' && aiAgent._pendingAgentJob && (Date.now() - aiAgent._pendingAgentJob) < 30000) ? 'Backup Admin Agent \u2014 approved by you' : 'j.rivera@acme.com'),
+      owner: ((typeof aiAgent !== 'undefined' && aiAgent._pendingAgentJob && (Date.now() - aiAgent._pendingAgentJob) < 30000) ? 'Veeam Intelligence \u2014 approved by you' : 'j.rivera@acme.com'),
       itemCount: keys.length,
       artifact: isExp ? { file: slug + '-' + new Date().toISOString().slice(0, 10) + '.zip', format: 'ZIP of JSON', size: (keys.length * 6) + ' MB' } : null,
       origin: 'inventory'
@@ -52764,6 +53047,23 @@ function _activeDrawerSearchQuery() {
   });
   return q.toLowerCase();
 }
+// The empty-comparison panel must be exactly as wide as the right comparison slot of the control bar above it.
+// The bar spans the full drawer; the body sits beside a scrollbar, so percentages drift — measure the real slot.
+function _rdAlignNoneGrid() {
+  var g = document.querySelector('.rd-none-grid'), slots = document.querySelectorAll('.rd-hcs > *');
+  if (!g) return;
+  // The drawer animates its width open — keep re-measuring until it settles (and on any later resize).
+  if (window.ResizeObserver) {
+    if (!window._rdAlignRO) window._rdAlignRO = new ResizeObserver(function () { _rdAlignNoneGrid(); });
+    window._rdAlignRO.disconnect();
+    var _rb = document.getElementById('rdBody'); if (_rb) window._rdAlignRO.observe(_rb);
+  }
+  if (slots.length < 2) return;
+  var gr = g.getBoundingClientRect(), s2 = slots[1].getBoundingClientRect();
+  var left = Math.round(s2.left - gr.left), right = Math.round(gr.right - s2.left);
+  if (left > 120 && right > 120) g.style.gridTemplateColumns = left + 'px ' + right + 'px';
+}
+window.addEventListener('resize', function () { if (typeof _rdAlignNoneGrid === 'function') _rdAlignNoneGrid(); });
 function openRecordDrawer(id, nameOverride, subOverride, asOfDate, ctxOverride) {
   var ctx = ctxOverride || {};
   var r = RESOURCES.find(function(x){return x.id === id;}) || {
@@ -59226,6 +59526,7 @@ function renderRdBody() {
   body.innerHTML = _noneSideHtml
     ? '<div class="rd-none-grid"><div class="rd-none-stack">' + _stackHtml + '</div>' + _noneSideHtml + '</div>'
     : _stackHtml;
+  if (_noneSideHtml) { requestAnimationFrame(function () { requestAnimationFrame(_rdAlignNoneGrid); }); setTimeout(_rdAlignNoneGrid, 300); }
   // Re-show the summary block (matches mode hides it; restore it for
   // compare mode) — but ONLY when the mask banner isn't occupying the
   // banner slot, and never in the empty-comparison state (the overlay
@@ -63656,6 +63957,17 @@ function refreshAllTableScrollShadows() {
       return isNaN(n) ? 163 : n;
     }
 
+    // Cloning via innerHTML copies attributes, not live DOM properties, so the
+    // select-all's indeterminate/checked state is mirrored here by index.
+    function syncCloneState() {
+      var o = table.querySelectorAll('thead input'), c = cloneTable.querySelectorAll('thead input');
+      o.forEach(function(el, i) {
+        if (!c[i]) return;
+        c[i].checked = el.checked; c[i].indeterminate = el.indeterminate; c[i].disabled = el.disabled;
+      });
+    }
+    setInterval(function() { if (floater.style.display !== 'none') syncCloneState(); }, 200);
+
     function update() {
       var origThead = table.querySelector('thead');
       if (!origThead || !table.offsetParent) {
@@ -63697,6 +64009,7 @@ function refreshAllTableScrollShadows() {
           cloneCells[i].style.maxWidth = w + 'px';
         }
       });
+      syncCloneState();
       // Position the floater above the wrapper, clipped to wrapper
       // bounds so it doesn't bleed sideways into the tree-nav or
       // beyond the right viewport edge.
@@ -64931,6 +65244,11 @@ function aiFinishReasoning(m){
   if (m._autoOpen && !m._userToggled) m.open = false;
   aiRender();
 }
+// One agent per request: Veeam Intelligence spawns a single task agent for the whole turn, so a trace that
+// already spawned one does not spawn another (the scenario step and the wizard step would each add one).
+function _aiSecondAgent(reason, en){
+  return !!(en && en.kind === 'agent' && en.spawn && (reason.steps || []).some(function(s){ return s && s.kind === 'agent' && s.spawn; }));
+}
 function aiToggleReason(i){
   var m = aiAgent.msgs[i]; if(!m || m.role !== 'reasoning') return;
   m.open = !m.open; m._userToggled = true;
@@ -65746,7 +66064,7 @@ function aiRender(){
         var running = !m.done && si === m.steps.length - 1;
         var isDone = m.done || si < m.steps.length - 1;
         var open = !!(m.stepOpen && m.stepOpen[si]);
-        var hasDetail = !!(st.detail || st.result);
+        var hasDetail = !!(st.detail || st.result || st.spawn);
         // tool signature: the part before ' — ' gets the quiet mono <b>
         var lbl = _aiEsc(st.label);
         if (st.kind === 'tool' && lbl.indexOf(' — ') > 0) lbl = '<b>' + lbl.split(' — ')[0] + '</b> — ' + lbl.split(' — ').slice(1).join(' — ');
@@ -65760,8 +66078,10 @@ function aiRender(){
           + '</button>'
           + (hasDetail
              ? '<div class="ai-tr2-detail">'
+               + (st.spawn ? [['task', st.spawn.task], ['granted', st.spawn.granted], ['not granted', st.spawn.denied], ['lifetime', 'Retired when the task completes']].map(function(kv){ return '<div class="ai-tr2-kv"><span class="k">' + _aiEsc(kv[0]) + '</span><span class="v">' + _aiEsc(kv[1]) + '</span></div>'; }).join('') : '')
                + (st.detail || []).map(function(kv){ return '<div class="ai-tr2-kv"><span class="k">' + _aiEsc(kv[0]) + '</span><span class="v">' + _aiEsc(kv[1]) + '</span></div>'; }).join('')
                + (st.result ? '<div class="ai-tr2-kv res"><span class="k">result</span><span class="v">' + _aiEsc(st.result) + '</span></div>' : '')
+               + (st.spawn ? '<div class="ai-tr2-kv"><span class="k"></span><button type="button" style="border:none;background:none;padding:0;font-family:inherit;font-size:12px;color:var(--em-green);cursor:pointer" onclick="event.stopPropagation();aiacGo(\'nav\', \'activity.html#agents\')">View in Agent activity</button></div>' : '')
                + '</div>'
              : '')
           + '</div>';
@@ -65841,7 +66161,7 @@ function aiRender(){
         // rule below can hide just the text and leave the checkmark + a
         // hover tooltip carrying the word. Scoped to the PRIMARY button only
         // (Deny/secondary choices keep their label at any width).
-        '<div class="ai-gate-btns' + (apEmbedded ? ' has-scrub' : '') + '">'+m.gate.buttons.map(function(b,i){ return '<button type="button" class="ai-gate-btn'+(b.primary?' primary':'')+'" onclick="aiGateClick('+i+')"'+(b.primary?' data-tooltip="'+_aiEsc(b.label)+'"':'')+'>'+(b.primary?apApproveIc:'')+'<span class="ai-gate-btn-label">'+_aiEsc(b.label)+'</span></button>'; }).join('')+apShowMe+'</div>';
+        '<div class="ai-gate-btns' + (apEmbedded ? ' has-scrub' : '') + (apEmbedded && _aiMorphState(aiAgent._live) ? ' is-morph"' + _aiMorphVars(_aiMorphState(aiAgent._live)) : '"') + '>'+m.gate.buttons.map(function(b,i){ return '<button type="button" class="ai-gate-btn'+(b.primary?' primary':'')+'" onclick="aiGateClick('+i+')"'+(b.primary?' data-tooltip="'+_aiEsc(b.label)+'"':'')+'>'+(b.primary?apApproveIc:'')+'<span class="ai-gate-btn-label">'+_aiEsc(b.label)+'</span></button>'; }).join('')+apShowMe+'</div>';
       var apRows = [['Action', ap.action], ['Scope', ap.scope], ['Evidence', ap.evidence], ['Reversal', ap.reversal]]
         .filter(function(r){ return r[1]; })
         .map(function(r){ return '<div class="ai-approval-row"><span class="ai-approval-k">'+r[0]+'</span><span class="ai-approval-v">'+r[1]+'</span></div>'; }).join('');
@@ -66494,7 +66814,7 @@ var AI_HELD_GATES = {
         type: 'Backup', job: 'backup-sharepoint-sites-rerun',
         resource: 'SharePoint Sites — Retail Division', wl: 'Microsoft 365', tenant: 'contoso-corp',
         status: 'running', startedTs: Date.now(), runForMs: 45 * 60 * 1000,
-        dest: 'Veeam Data Cloud repository', owner: 'Backup Admin Agent — approved by you', origin: 'inventory'
+        dest: 'Veeam Data Cloud repository', owner: 'Veeam Intelligence — approved by you', origin: 'inventory'
       });
       _aiTaskOverride('at3', 'done');
       aiPushAgent('Backup session started — <strong>SharePoint Sites · Retail Division</strong> is re-running now. The session is live in <strong>Activity</strong>; I’ll flag it if the permission-drift signature comes back.' + aiAction('Re-run approved · session dispatched'));
@@ -66703,6 +67023,15 @@ function _aiRecQueueNext(){
   // continues; walked away means the rest run backgrounded (user 2026-09-10)
   aiPickScenario(next, { preapproved: true, follow: aiAgent.showing !== false });
 }
+// Minimal conversational form of an accepted recommendation: authored per action (`say`) so the
+// target is named exactly as the tile names it; the fallback is just the button's own verb phrase
+// plus the tile's target text.
+function _aiacSay(a){
+  if (!a) return 'Go ahead.';
+  if (a.say) return a.say;
+  var v = String(a.btn || 'proceed').replace(/^./, function(c){ return c.toLowerCase(); });
+  return 'Go ahead and ' + v + (a.txt ? ': ' + a.txt : '') + '.';
+}
 function aiacGo(kind, arg){
   if (kind === 'nav'){
     // CONVERSATION-LED HANDOFF (user 2026-09-11): a click-through FROM the
@@ -66748,6 +67077,12 @@ function aiacGo(kind, arg){
     // _sayBlock is cleared after it so the run's first reply starts its OWN
     // block — merged, the ack would slide BELOW the thinking module, which is
     // the one place it must not be.
+    // ACCEPTING IS A USER TURN (user 2026-10-20: the click is the user telling the agent a
+    // recommendation was accepted and is being worked on — context the agent and the transcript
+    // both need). The text is the tile's own button + target put into a sentence, nothing more
+    // (see _aiacSay) — the 2026-09-17 ruling stands: never post the scenario's authored prompt
+    // or any reasoning the user didn't give. Sits right after the cards, before the agent's ack.
+    aiAgent.msgs.push({ role:'user', html: _aiEsc(_aiacSay(act)) });
     aiPushAgent(act && act.ack ? act.ack : 'On it. Nothing gets written until you approve the plan.');
     aiAgent._sayBlock = null;
     if (!(aiAgent._board && aiAgent._board.length)) aiAgent._boardOpen = false;
@@ -67618,13 +67953,13 @@ function aiDashFlow(){
   var tr = [
     { kind:'route', label:'Interpreting request — estate-wide volume summary', ms:400, chip:'estate-wide',
       detail:[['scope','all repositories · every workload']], result:'A tenant-level aggregate is the right scope here' },
-    { kind:'agent', label:'Delegating to Backup Admin Agent', ms:300 },
+    { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Total and per-repository consumption, trailing 30 days', granted:'Read access', denied:'Restore · Export · Manage policies' } },
     { kind:'tool',  label:'repos.query — capacity and used space', ms:800, chip:'6 repositories',
       detail:[['metric','used vs provisioned per repository']], result:'427 TB used of 760 TB provisioned (56%)' },
     { kind:'tool',  label:'growth.aggregate — trailing 30 days', ms:700, chip:'+9.0%',
       detail:[['window','trailing 30 days']], result:'Fastest-growing: Primary repository' }
   ];
-  tr.forEach(function(en, ti){ setTimeout(function(){ reason.steps.push(en); aiRender(); }, 350 + ti * 700); });
+  tr.forEach(function(en, ti){ setTimeout(function(){ if (!_aiSecondAgent(reason, en)) reason.steps.push(en); aiRender(); }, 350 + ti * 700); });
   setTimeout(function(){
     aiFinishReasoning(reason);
     aiPushCard({
@@ -67700,6 +68035,8 @@ function aiSendFromInput(){
 // Working… -> Resolved) is the record of the acceptance, so no turn is needed.
 // Home-screen cards KEEP their turn: there the authored prompt IS what the
 // user chose, so posting it is truthful.
+// UPDATE 2026-10-20: accepting a recommendation now DOES post a turn — but a minimal one built from
+// the tile's own button + target (_aiacSay), not the authored scenario prompt this note is about.
 function aiSend(text, scenarioId, opts){
   aiAgent._traceBlock = null; aiAgent._sayBlock = null;   // user interaction — next thinking is a new turn-block
   if(aiAgent.busy) return;
@@ -67951,7 +68288,7 @@ function aiNext(){
     step.trace.forEach(function(en, ti){
       var _lbl = (typeof en === 'string') ? en : (en && en.label);
       if (aiAgent.showing === false && _aiIsActivity(_lbl)) return;   // activity, not thought
-      setTimeout(function(){ if ((aiAgent._epoch || 0) !== _ep) return; reason.steps.push(en); aiRender(); }, 350 + ti * 700);
+      setTimeout(function(){ if ((aiAgent._epoch || 0) !== _ep) return; if (!_aiSecondAgent(reason, en)) reason.steps.push(en); aiRender(); }, 350 + ti * 700);
     });
   }
   var _settle = function(){
@@ -68294,7 +68631,11 @@ function aiShowStart(embedHost, embedFlow){
     // hands off to the live run at the frontier. Clicking Watch before
     // anything is recorded is the same path with a frontier of 0.
     aiAgent._replay = null;                  // the live list supersedes the replay
-    _aiReplayRewind();                       // start from the pre-run frame
+    // EMBEDDED (Watch morph): the rewind is ~100ms of synchronous workspace re-render plus a
+    // debounced second table render ~120ms later — it used to run inside the click, ahead of
+    // the first morph frame, and its second half froze the morph mid-flight. For the embedded
+    // path it is held until the morph has settled (see the embedHost block below).
+    if (!embedHost) _aiReplayRewind();       // start from the pre-run frame
     // ONE list block per run: re-watching REUSES the existing message rather
     // than pushing a second one. Pushing left the finished list on screen with
     // its own "caught up" controls beside the new one — ten rows and two sets
@@ -68318,6 +68659,7 @@ function aiShowStart(embedHost, embedFlow){
     // are untouched) — the approval-gate embed doesn't need this since a
     // gate message has exactly one Show-me slot, so it stays null there.
     aiAgent._live = { all: _all, i: 0, playing: false, msg: _msg, anchored: 0, rowStart: {}, timer: null, embedHost: embedHost || null, embedFlow: embedFlow || null, scrubMounted: false, speedMul: 1 };
+    if (embedHost) aiAgent._live.morph = _aiMorphMeasure(embedHost);   // measured before the first morph render
     aiAgent._replayHold = true;              // the catch-up loop owns progression
     _aiLivePaint();
     // PAUSE FOR A SECOND, THEN PLAY (2026-09-24, user: "when the button
@@ -68335,7 +68677,11 @@ function aiShowStart(embedHost, embedFlow){
       L.rowStart[L.i] = Date.now();
       _aiLiveTickStart();
       _aiLivePaint();
-      _aiLiveCatchUp();
+      // Let the pause→play glyph PAINT before the first recorded action runs: that action is
+      // ~0.5s of synchronous workspace work, and it used to block the very frame that flips the
+      // button, so "play" appeared half a second late. rAF → timeout = after the next paint.
+      var _L0 = L;
+      requestAnimationFrame(function(){ setTimeout(function(){ if (aiAgent._live === _L0 && _L0.playing) _aiLiveCatchUp(); }, 0); });
     }, 1000);
     // MORPH (2026-09-24, user: "i literally want the button to transform" —
     // not a new block appearing beside/below it). The first paint (above)
@@ -68350,66 +68696,21 @@ function aiShowStart(embedHost, embedFlow){
     // no inline width into the string directly (CSS flex:1 takes over) —
     // the entrance never replays on subsequent aiRender() calls.
     if (embedHost){
-      // FRAME-ACCURATE TRIGGER (2026-09-24, user: "the transition to the
-      // scrubber still looks a little stuttery — i want it smooth like
-      // butter"). was: a blind setTimeout(fn, 30) — an arbitrary guess at
-      // "one frame," at the mercy of whatever else is on the event loop at
-      // that moment, so the transition's start point jittered from run to
-      // run. Double-rAF is the correct primitive for "after the browser has
-      // actually committed the current frame, before the next one" — it's
-      // built for exactly this. The original concern (rAF throttled hard on
-      // a backgrounded tab, measured 600ms+ delay) still gets a safety net:
-      // a 120ms fallback fires the same trigger if rAF hasn't by then, so a
-      // backgrounded tab still starts the morph, just later, instead of
-      // silently stalling — same guarantee as before, smoother in the
-      // (overwhelmingly common) foreground case.
-      var _morphDone = false;
-      var _morphTrigger = function(){
-        if (_morphDone) return; _morphDone = true;
-        var el = document.querySelector('.ai-showctl');
-        if (el){
-          var row = el.parentElement, target = 220;
-          if (row){
-            var used = 0;
-            Array.prototype.forEach.call(row.children, function(c){ if (c !== el) used += c.offsetWidth + 8; });
-            target = Math.max(140, row.clientWidth - used);
-          }
-          // FORCE THE FLUSH: reading a layout property synchronously commits
-          // the CURRENT (92px, bordered) box as an actual rendered frame
-          // before the next line changes it — without this, the browser is
-          // free to coalesce both states into one paint and the transition
-          // has nothing to animate FROM (measured live).
-          void el.offsetWidth;
-          el.classList.add('is-in');
-          el.style.width = target + 'px';
-          if (aiAgent._live) aiAgent._live.scrubMounted = true;
-          // SETTLE ON TRANSITIONEND, not a guessed duration (2026-09-24):
-          // was setTimeout(fn, 340), a hand-tuned guess at "just after the
-          // 0.32s CSS transition ends" — any drift between that number and
-          // the real transition (browser rounding, a future CSS tweak)
-          // either clipped the animation's last frames or left a visible gap
-          // before flex took over. Listening for the actual 'transitionend'
-          // on width can never drift out of sync with the transition it's
-          // settling. A fallback timeout (400ms, comfortably past the 320ms
-          // transition) still fires it if the event is ever missed —
-          // reduced-motion, a mid-flight interrupt — so settling can't hang.
-          var _settleDone = false;
-          var _settle = function(){
-            if (_settleDone) return; _settleDone = true;
-            el.classList.add('is-settled');
-            el.style.width = '';
-            if (aiAgent._live) aiAgent._live.scrubSettled = true;
-          };
-          el.addEventListener('transitionend', function _te(e){
-            if (e.target !== el || e.propertyName !== 'width') return;
-            el.removeEventListener('transitionend', _te);
-            _settle();
-          });
-          setTimeout(_settle, 400);
+      // The morph itself is driven by CSS from the first render (L.morph — see _aiMorphState),
+      // so nothing here needs a frame-accurate trigger any more. This just settles the classes
+      // in place once it finishes (no DOM replacement → no flash), then does the heavy rewind.
+      var _live0 = aiAgent._live, _M0 = _live0.morph;
+      setTimeout(function(){
+        if (aiAgent._live !== _live0) return;
+        var row = document.querySelector('.ai-gate-btns.is-morph');
+        if (row){
+          row.classList.remove('is-morph');
+          var sc = row.querySelector('.ai-showctl');
+          if (sc){ sc.classList.remove('is-morph'); sc.classList.add('is-settled'); var g = sc.querySelector('.ai-showctl-ghost'); if (g) g.remove(); }
         }
-      };
-      requestAnimationFrame(function(){ requestAnimationFrame(_morphTrigger); });
-      setTimeout(_morphTrigger, 120);
+        _live0.scrubSettled = true;
+        _aiReplayRewind();
+      }, _M0 ? _M0.dur + 30 : 0);
     }
   } else if (aiAgent._stageShow){
     aiAgent._driving = true;
@@ -68594,6 +68895,37 @@ function _aiScrubFrac(L){
   var f = (Math.min(L.i, n) - 1 + (cur ? _aiLiveFrac(cur) : 0)) / n;
   return Math.max(0, Math.min(1, f));
 }
+// Morph clock (see the WATCH → SCRUBBER MORPH comment in the CSS): the animation is
+// a function of elapsed time, so any re-render mid-flight resumes on the same frame.
+function _aiMorphState(L){
+  var M = L && L.morph; if (!M) return null;
+  var el = performance.now() - M.t0;
+  return el < M.dur ? { M: M, el: Math.max(0, Math.round(el)) } : null;
+}
+function _aiMorphVars(S){
+  var M = S.M;
+  return ' style="--w0:' + M.w0 + 'px;--w1:' + M.w1 + 'px;--pl0:' + M.pl0 + 'px;--a0:' + M.a0 + 'px;--a1:' + M.a1 + 'px;--gx:' + M.gx + 'px;--dur:' + M.dur + 'ms;--ease:' + M.ease + ';--el:' + S.el + 'ms"';
+}
+// Real pre-click geometry of the Watch button + Approve button + the row, measured
+// BEFORE anything re-renders, so both ends of the morph are pixel-exact.
+function _aiMorphMeasure(host){
+  try {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
+    var idx = aiAgent.msgs.indexOf(host); if (idx < 0) return null;
+    var btn = document.querySelector('.ai-gate-btn[onclick^="aiShowStart(aiAgent.msgs[' + idx + ']"]'); if (!btn) return null;
+    var row = btn.parentElement, gap = parseFloat(getComputedStyle(row).columnGap) || 8;
+    var kids = Array.prototype.slice.call(row.children);
+    var prim = row.querySelector('.ai-gate-btn.primary');
+    var a0 = prim ? prim.offsetWidth : 0;
+    var a1 = prim ? ((prim.querySelector('svg') ? prim.querySelector('svg').getBoundingClientRect().width : 14) + 22) : 0;
+    var others = 0; kids.forEach(function(c){ if (c !== btn) others += (c === prim ? a1 : c.offsetWidth); });
+    var w1 = Math.max(160, row.clientWidth - others - gap * (kids.length - 1));
+    var ic = btn.querySelector('svg'), icR = ic.getBoundingClientRect(), bR = btn.getBoundingClientRect();
+    var bGap = parseFloat(getComputedStyle(btn).columnGap) || 6;
+    return { t0: performance.now(), dur: 440, ease: 'cubic-bezier(.32,.72,0,1)', w0: btn.offsetWidth, w1: Math.round(w1 * 10) / 10, a0: a0, a1: a1,
+             gx: Math.round((icR.right - bR.left + bGap - 1) * 10) / 10, pl0: Math.round((icR.left - bR.left - 1 - 4) * 10) / 10 };
+  } catch(e){ return null; }
+}
 function _aiScrubHtml(L){
   var n = L.all.length;
   // PLAY/PAUSE SWAP (2026-09-24, reversing the earlier static-glyph
@@ -68635,7 +68967,7 @@ function _aiScrubHtml(L){
   // filled + check, active = filled) — reused here as .ai-scrub-pop-badge
   // rather than the old plain number span.
   var listQ = (L.listSearch || '').toLowerCase();
-  var checkIc = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  var checkIc = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
   var listRows = L.all.map(function(a, i){
       if (listQ && a.cap.toLowerCase().indexOf(listQ) === -1) return '';
       var done = allDone || i < L.i - 1, cur = (!allDone && i === L.i - 1);
@@ -68647,9 +68979,10 @@ function _aiScrubHtml(L){
     }).join('');
   var listPop = L.listOpen
     ? '<div class="ai-scrub-pop ai-scrub-pop-wide">'
-      + '<div class="ai-scrub-pop-search">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('search-outlined', 14)) || '')
-      + '<input type="text" placeholder="Search steps" value="' + _aiEsc(L.listSearch || '') + '" onclick="event.stopPropagation()" oninput="aiScrubPlaylistSearch(this.value)"></div>'
-      + (listRows || '<div class="ai-scrub-pop-empty">No steps match &ldquo;' + _aiEsc(L.listSearch || '') + '&rdquo;</div>')
+      + '<div class="ai-scrub-pop-search">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('search-outlined', 20)) || '')
+      + '<input type="text" placeholder="Search" value="' + _aiEsc(L.listSearch || '') + '" onclick="event.stopPropagation()" oninput="aiScrubPlaylistSearch(this.value)"></div>'
+      + '<div class="ai-scrub-pop-hd">Playlist steps</div>'
+      + '<div class="ai-scrub-pop-list">' + (listRows || '<div class="ai-scrub-pop-empty">No steps match &ldquo;' + _aiEsc(L.listSearch || '') + '&rdquo;</div>') + '</div>'
       + '</div>' : '';
   // Unmounted (very first frame): explicit inline width matching a resting
   // "Show me" .ai-gate-btn (padding 0 16px + ~"Show me" text + border ≈
@@ -68657,9 +68990,10 @@ function _aiScrubHtml(L){
   // has a real pixel value to animate FROM. Settled (animation long since
   // finished): no inline width — .is-settled's flex:1 takes over and every
   // later re-render is already in its final, responsive state.
-  var outerCls = 'ai-showctl' + (L.scrubMounted ? ' is-in' : '') + (L.scrubSettled ? ' is-settled' : '');
-  var outerStyle = L.scrubMounted ? '' : ' style="width:92px"';
-  return '<div class="' + outerCls + '"' + outerStyle + '>'
+  var _ms = _aiMorphState(L);
+  var outerCls = 'ai-showctl ' + (_ms ? 'is-morph' : 'is-settled');
+  return '<div class="' + outerCls + '">'
+    + (_ms ? '<span class="ai-showctl-ghost" style="left:var(--gx)">Watch</span>' : '')
     + '<div class="ai-scrub">'
     + '<button type="button" class="ai-scrub-play" onclick="aiScrubToggle()" aria-label="' + (L.playing ? 'Pause' : 'Play') + '">' + playPauseIc + '</button>'
     + '<span class="ai-scrub-track' + (L.playing ? ' is-playing' : '') + '" onclick="aiScrubSeekClick(event)">'
@@ -69118,14 +69452,12 @@ function aiStepsManufacturing(){
     { trace: [
         { kind:'route', label:'Interpreting request — spans backup inventory and record contents', ms:400, chip:'2 clues',
           detail:[['topic','“Manufacturing”'],['tier','records + field values']], result:'Query reaches into record contents — a field-value search, not a name search' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Dynamics 365)', ms:300,
-          detail:[['workload','Dynamics 365'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns Dataverse recovery' },
+        { kind:'agent', label:'Spawning a recovery agent', ms:300, spawn:{ task:'Restore the manufacturing records you select', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
         { kind:'tool',  label:'catalog.lookup — field-value index for “Manufacturing”', ms:700, chip:'index hit',
           detail:[['index','backed-up field values'],['term','“Manufacturing”']], result:'Term present in the index — a scoped search will land' }
       ],
       say: function(){ return "<p>Got it — find the Dynamics 365 <strong>records that mention “Manufacturing”</strong> and set them up to restore. I'll search the backed-up field values, see where the term actually lands, and walk you through it.</p><p>Here's how I'll work, right here in your console:</p><p>1 · search &amp; filter → 2 · select the matches → 3 · review &amp; lock the restore point → 4 · configure → 5 · you review the summary and approve.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Backup Admin Agent — searching the backed-up estate', ms:300 },
         { kind:'tool',  label:'inventory.search — “Manufacturing” · in: Field values · all contents', ms:900, chip: m.n + ' records',
           detail:[['query','“Manufacturing”'],['token','in: Field values'],['scope','all contents']], result: m.n + ' records carry matching field values — every match lands on the Industry field' },
         { kind:'tool',  label:'filters.apply — Type: Records', ms:300, chip:'Type: Records',
@@ -69225,12 +69557,10 @@ function aiStepsOwnerFields(){
     { trace: [
         { kind:'route', label:'Interpreting request — field-level rollback to a fixed date', ms:400, chip:'2 clues',
           detail:[['field','Owner'],['target date', DATE_LBL]], result:'Only the Owner value reverts — every other field stays as it is today' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Dynamics 365)', ms:300,
-          detail:[['workload','Dynamics 365'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns Dataverse recovery' }
+        { kind:'agent', label:'Spawning a recovery agent', ms:300, spawn:{ task:'Roll the Owner fields back to the fixed date', granted:'Restore data · asks first', denied:'Export · Manage policies' } }
       ],
       say: function(){ return "<p>Got it — roll the <strong>Owner</strong> field on <strong>every record</strong> back to its <strong>"+DATE_LBL+"</strong> value, leaving every other field exactly as it is today. The usual fix after a bad bulk reassignment.</p><p>Here's how I'll work, right here in your console:</p><p>1 · search the backup for the <strong>Owner field</strong> → 2 · narrow the table to just those fields → 3 · select them → 4 · set the restore point to "+DATE_LBL+" and configure → 5 · you review the summary and approve.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Backup Admin Agent — searching the backed-up estate', ms:300 },
         { kind:'tool',  label:'inventory.search — “Owner” · in: Field names · all contents', ms:900, chip: m.n + ' fields',
           detail:[['query','“Owner”'],['token','in: Field names — matches the COLUMN, not values'],['scope','all contents']], result: m.n + ' Owner fields across Accounts, Cases and Opportunities' },
         { kind:'tool',  label:'filters.apply — Type: Field', ms:300, chip:'Type: Field',
@@ -69352,12 +69682,10 @@ function aiStepsDeletedRecovery(){
     { trace: [
         { kind:'route', label:'Interpreting request — recover recently deleted objects', ms:400, chip:'1 lens',
           detail:[['state','deleted in live · intact in backup'],['scope','all of Dynamics 365']], result:'An existence-filter job — the inventory has a lens for exactly this' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Dynamics 365)', ms:300,
-          detail:[['workload','Dynamics 365'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns Dataverse recovery' }
+        { kind:'agent', label:'Spawning a recovery agent', ms:300, spawn:{ task:'Recover the recently deleted objects', granted:'Restore data · asks first', denied:'Export · Manage policies' } }
       ],
       say: function(){ return "<p>Got it — find everything <strong>recently deleted</strong> from Dynamics 365 and bring it back. Deleted objects are gone from your live org but still intact in backup.</p><p>Here's how I'll work: 1 · filter the inventory to deleted objects → 2 · select them → 3 · review the restore point → 4 · configure → 5 · you review the summary and approve.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Backup Admin Agent — filtering the inventory', ms:300 },
         { kind:'tool',  label:'filters.apply — Existence: Deleted', ms:600, chip: m.n + ' objects',
           detail:[['filter','Existence = Deleted in live'],['meaning','in backup · gone from production']], result: m.n + ' recoverable objects — each row carries its dated Deleted badge' }
       ],
@@ -69453,14 +69781,12 @@ function aiStepsMs365DeletedMail(){
     { trace: [
         { kind:'route', label:'Interpreting request — owner: John Voight · topic: “contract renewal” · state: deleted', ms:400, chip:'3 clues',
           detail:[['owner','John Voight'],['topic','“contract renewal”'],['state','deleted']], result:'Scope derivable from the request — no tenant-wide sweep needed' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Microsoft 365)', ms:300,
-          detail:[['workload','Microsoft 365'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns mailbox recovery' },
+        { kind:'agent', label:'Spawning a recovery agent', ms:300, spawn:{ task:'Recover the deleted email you select', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
         { kind:'tool',  label:'scope.set — John Voight’s mailbox (named in the request)', ms:200, chip:'scoped',
           detail:[['container','All Mailboxes › John Voight'],['reason','owner named in the request']], result:'Search will sweep 1 mailbox instead of 12' }
       ],
       say: function(){ return "<p>Got it — find the <strong>contract renewal</strong> email <strong>John Voight</strong> deleted and set it up to restore. The request names the owner, so I'll scope to <strong>his mailbox</strong> rather than searching the whole tenant.</p><p>1 · open his mailbox → 2 · search it → 3 · lock the restore point → 4 · configure → 5 · you review the summary and approve.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Backup Admin Agent — searching inside the scoped mailbox', ms:300 },
         { kind:'tool',  label:'inventory.open — All Mailboxes · John Voight', ms:600, chip:'5 folders',
           detail:[['path','contoso.onmicrosoft.com › All Mailboxes › John Voight']], result:'5 mail folders listed · the breadcrumb confirms the scope' },
         { kind:'tool',  label:'drill.search — “contract renewal” · all contents of this mailbox', ms:900, chip:'1 match',
@@ -69522,8 +69848,7 @@ function aiStepsMs365Offboard(){
     { trace: [
         { kind:'route', label:'Interpreting request — departed user, cross-service recovery', ms:400, chip:'2 services',
           detail:[['user','Mark Aldridge'],['goal','handoff to his manager'],['services','Mailbox · OneDrive']], result:'Departed-user recovery — check what backup still holds' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Microsoft 365)', ms:300,
-          detail:[['workload','Microsoft 365'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns mailbox recovery' },
+        { kind:'agent', label:'Spawning a recovery agent', ms:300, spawn:{ task:'Recover the departed user across services', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
         { kind:'tool',  label:'directory.lookup — Mark Aldridge · account state', ms:600, chip:'deprovisioned',
           detail:[['account','mark.aldridge@contoso.onmicrosoft.com'],['state','deprovisioned Apr 17']], result:'Account gone from the live tenant' },
         { kind:'tool',  label:'backup.coverage — Mailbox · OneDrive', ms:500, chip:'mailbox only',
@@ -69531,7 +69856,6 @@ function aiStepsMs365Offboard(){
       ],
       say: function(){ return "<p>Got it — recover <strong>Mark Aldridge's</strong> data so his manager can take it over. Checking what the backup still holds for him:</p><p>His <strong>mailbox</strong> was deprovisioned with his account on <strong>Apr 17</strong> — it's gone from the live tenant but <strong>fully restorable from backup</strong>.</p><p>His <strong>OneDrive</strong> isn't in the protected estate — it was never enrolled in backup — so there's nothing to recover there.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Backup Admin Agent — searching the backed-up estate', ms:300 },
         { kind:'tool',  label:'inventory.search — “Mark Aldridge” · all contents', ms:800, chip:'0 hits',
           detail:[['query','“Mark Aldridge”'],['scope','all contents'],['range','Last 30 days']], result:'No mailbox surfaced inside the current window' },
         { kind:'tool',  label:'range.check — no hits inside Last 30 days', ms:300, chip:'out of window',
@@ -69677,14 +70001,12 @@ function aiStepsMs365SiteRollback(){
     { trace: [
         { kind:'route', label:'Interpreting request — point-in-time rollback of one SharePoint folder', ms:400, chip:'3 clues',
           detail:[['site','Retail Division'],['folder','Taxes'],['point','before yesterday’s bulk edit']], result:'Whole-folder rollback to the last clean point' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Microsoft 365)', ms:300,
-          detail:[['workload','Microsoft 365'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns SharePoint recovery' },
+        { kind:'agent', label:'Spawning a recovery agent', ms:300, spawn:{ task:'Roll the folder back to the chosen point in time', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
         { kind:'tool',  label:'sharepoint.locate — Retail Division · Taxes', ms:500, chip:'located',
           detail:[['path','All SharePoint › Retail Division › Taxes']], result:'Folder present in backup at the pre-edit point' }
       ],
       say: function(){ return "<p>Got it — the <strong>Taxes</strong> folder on the <strong>Retail Division</strong> site was damaged by yesterday's bulk edit. I'll roll the whole folder back to the last clean point <strong>before</strong> the edit (" + DATE_LBL + "), replacing today's contents.</p><p>1 · open the folder → 2 · confirm the scope → 3 · lock the pre-edit restore point → 4 · configure → 5 · you review the summary and approve.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Backup Admin Agent — searching the backed-up estate', ms:300 },
         { kind:'tool',  label:'inventory.search — “Taxes” · all contents · Type: Folder', ms:800, chip:'3 folders',
           detail:[['query','“Taxes”'],['filter','Type: Folder'],['scope','all contents']], result:'3 folders share the name — the path under each row tells them apart' }
       ],
@@ -69768,8 +70090,7 @@ function aiStepsMs365MassDelete(){
     { trace: [
         { kind:'route', label:'Interpreting request — anomaly investigation across OneDrive accounts', ms:400, chip:'estate-wide',
           detail:[['signal','unusual deletion activity'],['service','OneDrive'],['window','this morning']], result:'Genuinely estate-wide — a tenant-level scan is the right scope here' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Microsoft 365)', ms:300,
-          detail:[['workload','Microsoft 365'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns OneDrive recovery' },
+        { kind:'agent', label:'Spawning a recovery agent', ms:300, spawn:{ task:'Rank OneDrive accounts by unusual deletion activity, then open and restore the affected accounts', granted:'Read access · Restore data · asks first', denied:'Export · Manage policies' } },
         { kind:'tool',  label:'activity.scan — deletion events · OneDrive · last 12h', ms:900, chip:'412 events',
           detail:[['window','last 12 hours'],['service','OneDrive · 12 accounts']], result:'Deletion volume concentrated in a 20-minute window' },
         { kind:'tool',  label:'anomaly.rank — per-account deletion volume vs 30-day baseline', ms:700, chip:'3 accounts',
@@ -69777,7 +70098,6 @@ function aiStepsMs365MassDelete(){
       ],
       say: function(){ return "<p>On it — scanning this morning's <strong>deletion events across every OneDrive account</strong> and ranking them against each account's 30-day baseline.</p><p>Three accounts stand well outside their baseline: <strong>" + names.map(_aiEsc).join('</strong>, <strong>') + "</strong> — together they account for the bulk of this morning's deletions, concentrated in a 20-minute window. That pattern is consistent with a scripted or bulk action, not everyday cleanup.</p>"; } },
     { trace: [
-        { kind:'agent', label:'Backup Admin Agent — opening the affected accounts', ms:300 },
         { kind:'tool',  label:'tree.open — All OneDrive', ms:400, chip:'13 drives',
           detail:[['path','contoso.onmicrosoft.com › All OneDrive']], result:'Every account in one table — the three affected are selectable here' }
       ],
@@ -69837,8 +70157,7 @@ function aiStepsMs365Overnight(){
     { trace: [
         { kind:'route', label:'Interpreting request — daily composite, exception-first', ms:400, chip:'composite',
           detail:[['scope','whole tenant · trailing 24h'],['mode','exception-first']], result:'Composite of coverage, sessions, threat, license and lifecycle signals' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Microsoft 365)', ms:300,
-          detail:[['workload','Microsoft 365'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns estate reporting' },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Compose the overnight picture, exceptions first', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'sessions.scan — trailing 24h · all policies', ms:900, chip:'42 sessions',
           detail:[['window','trailing 24h'],['policies','4 active']], result:'40 succeeded · 1 failed · 1 warning' },
         { kind:'tool',  label:'graph.query — policy staleness vs RPO', ms:600, chip:'1 stale',
@@ -69851,7 +70170,7 @@ function aiStepsMs365Overnight(){
         headsub: '42 sessions overnight · no threat, license, or lifecycle signals',
         strip: [ ['Succeeded', 40, 'var(--chart-soft-green)'], ['Failed', 1, 'var(--chart-soft-red)'], ['Stale', 1, 'var(--chart-soft-gold)'] ],
         actions: [
-          { tone:'bad', chip:'Critical', txt:'SharePoint Sites — Retail Division failed', sub:'Permission-drift signature · 3 same-named folders — SharePoint one selected', btn:'Recover the site', flow:'ms365SiteRollback', ack:'On it \u2014 recovering the Retail Division site. Nothing gets written until you approve the plan.' },   // was: btn 'Review session — Activity', nav activity.html (insight→action bridge 2026-09-02); tightened 2026-09-21
+          { tone:'bad', chip:'Critical', txt:'SharePoint Sites — Retail Division failed', sub:'Permission-drift signature · 3 same-named folders — SharePoint one selected', btn:'Recover the site', flow:'ms365SiteRollback', say:'Go ahead and recover the Retail Division site.', ack:'On it \u2014 recovering the Retail Division site. Nothing gets written until you approve the plan.' },   // was: btn 'Review session — Activity', nav activity.html (insight→action bridge 2026-09-02); tightened 2026-09-21
           { tone:'warn', chip:'Warning', txt:'Executive Mailboxes — 11h behind RPO', sub:'Schedule throttled — restore the 10-minute cadence', btn:'Fix the schedule', factId:'exec-mail-rpo', nav:'backup-policies.html#edit/pol_gws_exec_mail', look:true, grant:'Configure policies' }
         ],
         table: { label: 'Exceptions', cols: ['Exception', 'Detail', 'Status'], rows: [
@@ -69866,8 +70185,7 @@ function aiStepsMs365Coverage(){
     { trace: [
         { kind:'route', label:'Interpreting request — coverage, policy mapping, staleness vs RPO', ms:400, chip:'3 questions',
           detail:[['clauses','backed up? · which policies cover what? · behind schedule?']], result:'All three clauses answered in the headline' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Microsoft 365)', ms:300,
-          detail:[['workload','Microsoft 365'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns estate reporting' },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Check coverage, policy mapping and staleness against RPO', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'graph.query — VDC_BACKUP policies · scope by object type', ms:800, chip:'4 policies',
           detail:[['policies','Default · Executive Mailboxes · SharePoint Sites · Teams Files']], result:'Every service has a covering policy (Default is the catch-all)' },
         { kind:'tool',  label:'sessions.scan — last session age per policy', ms:700, chip:'1 stale',
@@ -69889,7 +70207,7 @@ function aiStepsMs365Coverage(){
             { label: 'Teams Files', frac: 6/24, color: 'var(--chart-soft-green)', val: '6h / 24h' } ] },
         actions: [
           { tone:'warn', chip:'Warning', txt:'Executive Mailboxes — 11h behind RPO', sub:'Schedule throttled — restore the 10-minute cadence', btn:'Fix the schedule', factId:'exec-mail-rpo', nav:'backup-policies.html#edit/pol_gws_exec_mail', look:true, grant:'Configure policies' },
-          { tone:'bad', chip:'Critical', txt:'SharePoint Sites — Retail Division failed', sub:'Permission-drift signature · 3 same-named folders — SharePoint one selected', btn:'Recover the site', flow:'ms365SiteRollback', ack:'On it \u2014 recovering the Retail Division site. Nothing gets written until you approve the plan.' },   // was: btn 'Review session — Activity', nav activity.html (insight→action bridge 2026-09-02)
+          { tone:'bad', chip:'Critical', txt:'SharePoint Sites — Retail Division failed', sub:'Permission-drift signature · 3 same-named folders — SharePoint one selected', btn:'Recover the site', flow:'ms365SiteRollback', say:'Go ahead and recover the Retail Division site.', ack:'On it \u2014 recovering the Retail Division site. Nothing gets written until you approve the plan.' },   // was: btn 'Review session — Activity', nav activity.html (insight→action bridge 2026-09-02)
           // the "any gaps?" clause — seeded gap facts, same tiles as the
           // estate health check's roll-up (2026-09-02 overflow staging)
           { tone:'warn', chip:'Warning', txt:'2 mailbox types unsupported on Express', sub:'Draft a Flex policy — eDiscovery + Boardroom A/V', btn:'Draft the Flex policy', nav:'backup-policies.html#new', look:true, grant:'Configure policies' },
@@ -69909,8 +70227,7 @@ function aiStepsMs365MailboxCov(){
     { trace: [
         { kind:'route', label:'Interpreting request — protected %, exclusions, license flags', ms:400, chip:'3 questions',
           detail:[['clauses','how many protected? · types excluded? · near a license limit?']], result:'All three clauses answered in the headline' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Microsoft 365)', ms:300,
-          detail:[['workload','Microsoft 365'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns estate reporting' },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Count protected mailboxes, exclusions and license flags', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'graph.query — BACKUPED_MAILBOX · restore point in trailing 30d', ms:800, chip:'23 / 25',
           detail:[['rule','protected = restore point inside the trailing 30 days']], result:'23 of 25 mailboxes protected (92%)' },
         { kind:'tool',  label:'mailboxes.classify — type support on Express-Outlook', ms:600, chip:'2 excluded',
@@ -69953,8 +70270,7 @@ function aiStepsMs365Health(){
     { trace: [
         { kind:'route', label:'Interpreting request — full estate sweep, ranked by severity', ms:400, chip:'open-ended',
           detail:[['scope','sessions · policies · coverage · licenses · platform gaps']], result:'Broad prompt → aggregate every open issue, ranked by impact' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Microsoft 365)', ms:300,
-          detail:[['workload','Microsoft 365'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns estate reporting' },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Sweep the estate and rank findings by severity', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'sessions.review — trailing 24h across all policies', ms:700, chip:'1 failed · 1 stale',
           detail:[['failed','SharePoint Sites — Retail Division site'],['stale','Executive Mailboxes — 11h vs a 10-minute RPO']], result:'Two session-level issues need action now' },
         { kind:'tool',  label:'mailboxes.classify — type support on Express-Outlook', ms:500, chip:'2 excluded',
@@ -69972,7 +70288,7 @@ function aiStepsMs365Health(){
         strip: [ ['Critical', 2, 'var(--chart-soft-red)'], ['Warning', 3, 'var(--chart-soft-gold)'], ['Info', 1, 'var(--chart-soft-blue)'] ],
         insight: 'Ranked by blast radius: the <strong>failed SharePoint session</strong> and the <strong>stale Express policy</strong> are live data-loss exposure; everything below them costs money or coverage, not data. Each of these also appears in its focused report — this view is the roll-up. <strong>Also worth noting:</strong> finance-shared is at 94% of the 50GB seat threshold — 2.8GB of headroom before it consumes a license seat. Multi-geo teams may need a region review — Known 502 signature on multi-geo backups.',
         actions: [
-          { tone:'bad',  chip:'Critical', txt:'SharePoint Sites — Retail Division failed', sub:'Permission-drift signature · 3 same-named folders — SharePoint one selected', btn:'Recover the site', flow:'ms365SiteRollback', ack:'On it \u2014 recovering the Retail Division site. Nothing gets written until you approve the plan.' },   // was: btn 'Review session — Activity', nav activity.html (insight→action bridge 2026-09-02); tightened 2026-09-21
+          { tone:'bad',  chip:'Critical', txt:'SharePoint Sites — Retail Division failed', sub:'Permission-drift signature · 3 same-named folders — SharePoint one selected', btn:'Recover the site', flow:'ms365SiteRollback', say:'Go ahead and recover the Retail Division site.', ack:'On it \u2014 recovering the Retail Division site. Nothing gets written until you approve the plan.' },   // was: btn 'Review session — Activity', nav activity.html (insight→action bridge 2026-09-02); tightened 2026-09-21
           { tone:'bad',  chip:'Critical', txt:'Executive Mailboxes — 11h behind RPO', sub:'Schedule throttled — restore the 10-minute cadence', btn:'Fix the schedule', factId:'exec-mail-rpo', nav:'backup-policies.html#edit/pol_gws_exec_mail', look:true, grant:'Configure policies' },
           { tone:'warn', chip:'Warning', txt:'2 mailbox types unsupported on Express', sub:'Draft a Flex policy — eDiscovery + Boardroom A/V', btn:'Draft the Flex policy', nav:'backup-policies.html#new', look:true, grant:'Configure policies' },
           { tone:'warn', chip:'Warning', txt:'Team Posts backup — off by default', sub:'One policy toggle closes the only coverage gap', btn:'Enable Team Posts backup', nav:'backup-policies.html', look:true, grant:'Configure policies' }
@@ -69985,8 +70301,7 @@ function aiStepsMs365TeamsGaps(){
     { trace: [
         { kind:'route', label:'Interpreting request — scope check + inherent platform gaps', ms:400, chip:'2 questions',
           detail:[['clauses','protected end-to-end? · what’s never backed up?']], result:'Both clauses answered in the headline' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Microsoft 365)', ms:300,
-          detail:[['workload','Microsoft 365'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns estate reporting' },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Check Teams scope and inherent platform gaps', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'graph.query — BACKUPED_TEAM · policy scope', ms:700, chip:'6 teams',
           detail:[['policy','Teams Files (Flex) — Teams is Flex-only']], result:'All 6 teams covered' },
         { kind:'tool',  label:'docs.match — considerations & limitations (Teams)', ms:500, chip:'4 gaps',
@@ -70023,8 +70338,7 @@ function aiStepsGhGrowth(){
     { trace: [
         { kind:'route', label:'Interpreting request — growth rate + what’s driving it', ms:400, chip:'2 questions',
           detail:[['clauses','how fast is it growing? · what’s driving it?']], result:'Both clauses answered in the headline' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (GitHub)', ms:300,
-          detail:[['workload','GitHub'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns estate reporting' },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Measure growth and attribute it to its drivers', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'footprint.series — protected data size, trailing 30 days', ms:800, chip:'+12%',
           detail:[['scope','acme-corp · 16 repositories']], result:'75 → 84 GB over the trailing 30 days' },
         { kind:'tool',  label:'repos.classify — growth attribution by repository', ms:600, chip:'top: data-pipeline',
@@ -70069,8 +70383,7 @@ function aiStepsAdoRpo(){
     { trace: [
         { kind:'route', label:'Interpreting request — every project vs its own backup window', ms:400, chip:'6 projects',
           detail:[['clauses','are all six inside their policy windows?']], result:'Answered per project in the headline + rows' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Azure DevOps)', ms:300,
-          detail:[['workload','Azure DevOps'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns estate reporting' },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Compare each project with its own backup window', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'graph.query — latest restore point per project', ms:800, chip:'6 checked',
           detail:[['scope','contoso-org · 6 projects']], result:'Ages range 3h to 13h' },
         { kind:'tool',  label:'policies.match — window per project', ms:500, chip:'1 behind',
@@ -70110,8 +70423,7 @@ function aiStepsPpCapacity(){
     { trace: [
         { kind:'route', label:'Interpreting request — capacity headroom per environment', ms:400, chip:'3 environments',
           detail:[['clauses','is any environment close to its Dataverse limit?']], result:'Answered with the nearest limit up front' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Power Platform)', ms:300,
-          detail:[['workload','Power Platform'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns estate reporting' },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Check Dataverse capacity per environment', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'capacity.check — Dataverse usage vs entitlement', ms:800, chip:'1 near limit',
           detail:[['rule','flag environments past 85% of entitled capacity']], result:'Contoso Production at 91% · EU Production 38% · Sandbox 22%' },
         { kind:'tool',  label:'growth.attribute — what’s consuming Production', ms:600, chip:'top: attachments',
@@ -70146,8 +70458,7 @@ function aiStepsInfraFailedJobs(){
     { trace: [
         { kind:'route', label:'Interpreting request — failures + affected VMs, trailing 24h', ms:400, chip:'62 sessions',
           detail:[['window','trailing 24h'],['mode','failure + retry clustering, resolved to protected VMs']], result:'7 failed of 62 sessions across 5 jobs' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Backup Infrastructure)', ms:300,
-          detail:[['scope','all jobs · all repositories'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns job & session reporting' },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Cluster the last 24 hours of failures and resolve each failed job to the VMs behind it', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'sessions.scan — trailing 24h · every job', ms:900, chip:'7 failed',
           detail:[['window','trailing 24h'],['jobs','7 total']], result:'49 succeeded · 5 warning · 7 failed · 1 running' },
         { kind:'tool',  label:'failures.cluster — group by failure message per job', ms:600, chip:'2 repeats',
@@ -70178,8 +70489,8 @@ function aiStepsInfraFailedJobs(){
         // after the table).
         actions: [
           { tone:'bad', chip:'Critical', txt:'Production Sites — repository full', sub:'3 VMs affected · veeam-repo-01: 312 GB free, needs 1.4 TB', btn:'Review repository capacity', nav:'backup-policies.html', look:true, grant:'Configure repositories' },
-          { tone:'bad', chip:'Critical', txt:'Finance VMs — network timeout to dr-esx-01', sub:'2 VMs affected · dr-esx-01 reachable again — safe to retry', btn:'Retry the session', flow:'infraRetryFinanceVms', ack:'On it — retrying Weekly Replication for Finance VMs now that dr-esx-01 is reachable again.', watchJob:'Weekly Replication — Finance VMs' },
-          { tone:'warn', chip:'Warning', txt:'Edge Sites — agent unreachable', sub:'2 VMs affected · edge-proxy-01 back online — safe to retry', btn:'Retry the session', flow:'infraRetryEdgeSites', ack:'On it — retrying Daily Backup for Edge Sites now that edge-proxy-01 is back online.', watchJob:'Daily Backup — Edge Sites' }
+          { tone:'bad', chip:'Critical', txt:'Finance VMs — network timeout to dr-esx-01', sub:'2 VMs affected · dr-esx-01 reachable again — safe to retry', btn:'Retry the session', flow:'infraRetryFinanceVms', say:'Go ahead and retry the session for Finance VMs.', ack:'On it — retrying Weekly Replication for Finance VMs now that dr-esx-01 is reachable again.', watchJob:'Weekly Replication — Finance VMs' },
+          { tone:'warn', chip:'Warning', txt:'Edge Sites — agent unreachable', sub:'2 VMs affected · edge-proxy-01 back online — safe to retry', btn:'Retry the session', flow:'infraRetryEdgeSites', say:'Go ahead and retry the session for Edge Sites.', ack:'On it — retrying Daily Backup for Edge Sites now that edge-proxy-01 is back online.', watchJob:'Daily Backup — Edge Sites' }
         ],
         table: { label: 'Failed jobs — last 24 hours', cols: ['Job', 'Failure', 'VMs affected', 'Result'], rows: [
           ['Daily Backup — Production Sites', 'Repository veeam-repo-01 has insufficient free space', 'US-VMs-DB003, US-VMs-WEB01, US-VMs-APP02', ['bad','Failed']],
@@ -70247,8 +70558,7 @@ function aiStepsInfraRetryFinanceVms(){
     { trace: [
         { kind:'route', label:'Retrying Weekly Replication — Finance VMs', ms:300, chip:'2 VMs',
           detail:[['cause','network timeout to dr-esx-01, both prior attempts']], result:'Safe to automate — a transient network fault, not a config error' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Backup Infrastructure)', ms:250,
-          detail:[['autonomy','Automated retries on transient network faults — pre-approved']], result:'Backup Admin Agent runs this class of retry without a gate' },
+        { kind:'agent', label:'Spawning a retry agent', ms:250, spawn:{ task:'Restart the failed session after a transient network fault', granted:'Retry sessions · pre-approved for transient faults', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'network.check — dr-esx-01 reachability', ms:500, chip:'reachable',
           detail:[['target','dr-esx-01']], result:'Target responds now — the timeout has cleared' },
         { kind:'tool',  label:'sessions.retry — Weekly Replication, Finance VMs', ms:600, chip:'queued',
@@ -70284,8 +70594,7 @@ function aiStepsInfraRetryEdgeSites(){
     { trace: [
         { kind:'route', label:'Retrying Daily Backup — Edge Sites', ms:300, chip:'2 VMs',
           detail:[['cause','edge proxy agent unreachable']], result:'Safe to automate — a one-off agent drop, not a config error' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Backup Infrastructure)', ms:250,
-          detail:[['autonomy','Automated retries on an unreachable-agent fault — pre-approved']], result:'Backup Admin Agent runs this class of retry without a gate' },
+        { kind:'agent', label:'Spawning a retry agent', ms:250, spawn:{ task:'Restart the failed session after an unreachable-agent fault', granted:'Retry sessions · pre-approved for transient faults', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'agent.ping — edge proxy', ms:500, chip:'online',
           detail:[['proxy','edge-proxy-01']], result:'Agent responds now — it was offline only during the last run' },
         { kind:'tool',  label:'sessions.retry — Daily Backup, Edge Sites', ms:600, chip:'queued',
@@ -70316,8 +70625,7 @@ function aiStepsInfraLiveSessions(){
     { trace: [
         { kind:'route', label:'Interpreting request — live job states + why anything is queued', ms:400, chip:'7 jobs',
           detail:[['clauses','what’s running? · what’s queued? · what already finished?']], result:'All three answered from a live poll' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Backup Infrastructure)', ms:300,
-          detail:[['scope','all jobs · live poll'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns job & session reporting' },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Poll live job states and where sessions are waiting', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'jobs.poll — live status across all jobs', ms:700, chip:'3 running',
           detail:[['states','running · queued · finished · disabled']], result:'3 running · 2 queued · 1 finished with a warning · 1 disabled' },
         { kind:'tool',  label:'proxy.assignment — task slots per live session', ms:600, chip:'5 of 8 slots',
@@ -70366,8 +70674,7 @@ function aiStepsInfraRepoCapacity(){
     { trace: [
         { kind:'route', label:'Interpreting request — capacity headroom + an actionable plan', ms:400, chip:'3 repositories',
           detail:[['clauses','which repository is at risk? · what closes the gap?']], result:'One repository at risk, one clear move to fix it' },
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Backup Infrastructure)', ms:300,
-          detail:[['scope','all repositories'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns repository reporting' },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Project repository headroom and draft a plan', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'repository.capacity — free space & growth per repository', ms:800, chip:'1 at risk',
           detail:[['repositories','veeam-repo-01 · nas-archive-01 · object-s3-vault']], result:'veeam-repo-01 is 87% full and growing 176 GB/day — full in about 18 days' },
         { kind:'tool',  label:'immutability.check — lock status per repository', ms:500, chip:'2 disabled',
@@ -70436,8 +70743,7 @@ function aiStepsInfraCapacityCharts(){
       say: function(){ return 'You asked for this in charts — here are three: veeam-repo-01’s growth trend, a capacity comparison across all three repositories, and their immutability posture.'; },
       noFb: true },
     { trace: [
-        { kind:'agent', label:'Delegating to Backup Admin Agent (Backup Infrastructure)', ms:300,
-          detail:[['scope','all repositories'],['autonomy','Always ask — approval gates stay with you']], result:'Backup Admin Agent owns repository reporting' },
+        { kind:'agent', label:'Spawning an analysis agent', ms:300, spawn:{ task:'Chart repository capacity, growth and immutability', granted:'Read access', denied:'Restore · Export · Manage policies' } },
         { kind:'tool',  label:'repository.history — trailing 14-day usage, veeam-repo-01', ms:600, chip:'+2.3 TB',
           detail:[['window','trailing 14 days']], result:'18.6 TB → 20.9 TB over the window' }
       ],
@@ -70574,7 +70880,7 @@ function aiWizardTailSteps(noun, opts){
       ];
       return {
         trace: [
-          { kind:'agent', label:'Backup Admin Agent — resolving restore points for the selection', ms:300 },
+          { kind:'agent', label:'Spawning a recovery agent', ms:300, spawn:{ task:'Resolve restore points for the selection', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
           { kind:'tool',  label:'wizard.open — Select step', ms:500,
             detail:[['step','Select — review restore items']], result:'Cart items staged in the wizard' },
           { kind:'tool',  label:'restorepoint.set — ' + rpLabel, ms:400, chip:'locked',
@@ -72328,7 +72634,7 @@ window.D365X.recChip = function (key, item) {
   var origMsg = window._categoryLockMsg;
   window._categoryLockMsg = function () {
     if (window.planActiveWorkload() === 'Dynamics 365' && !(typeof planIsExportOnly === 'function' && planIsExportOnly())) {
-      var n = window.planActiveCategoryNode(); if (n) return 'This job holds ' + n.name.replace(/^(\w)/, function (m) { return m.toLowerCase(); }) + '. Clear the job to select anything else.';
+      var n = window.planActiveCategoryNode(); if (n) return 'This job holds ' + n.name.replace(/^(\w)/, function (m) { return m.toLowerCase(); }).replace(/\.+$/, '') + '. Clear the job to select anything else.';
     }
     return origMsg.apply(this, arguments);
   };

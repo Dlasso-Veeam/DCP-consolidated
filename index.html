@@ -794,6 +794,57 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
 .success-modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; cursor: pointer; color: var(--black-60); padding: 4px; }
 .success-modal-close:hover { color: var(--black-100); }
 
+/* Okta success fork modal (Figma 19457:154403) */
+#success-overlay.okf-on { background: rgba(255,255,255,0.7); backdrop-filter: none; }
+#success-overlay.okf-on .success-modal:not(.okf) { display: none; }
+.success-modal.okf { display: none; max-width: 780px; padding: 0; overflow: hidden; border-radius: 8px; }
+#success-overlay.okf-on .success-modal.okf { display: block; }
+.okf-top { position: relative; background: linear-gradient(180deg, var(--green-10), #e9f7ef); padding: 32px; min-height: 240px; box-sizing: border-box; overflow: hidden; }
+.okf-top h2 { font-family: 'Circular Pro', sans-serif; font-size: 40px; font-weight: 500; line-height: 52px; letter-spacing: -0.02em; color: var(--black-100); margin: 0 0 24px; max-width: 420px; position: relative; z-index: 1; }
+.okf-art { position: absolute; right: 24px; top: 0; width: 296px; height: 118px; opacity: .55; filter: blur(6px); }
+.okf-inst { display: flex; align-items: center; gap: 12px; position: relative; z-index: 1; }
+.okf-inst .tile { width: 48px; height: 48px; border: 1px solid var(--border-light); border-radius: 4px; background: var(--white); display: flex; align-items: center; justify-content: center; color: var(--black-100); }
+.okf-inst .nm { font-size: 16px; font-weight: 500; color: var(--black-100); display: flex; align-items: center; gap: 8px; }
+.okf-inst .sub { font-size: 14px; color: var(--black-60); margin-top: 2px; }
+.okf-chip { font-size: 14px; font-weight: 500; color: var(--green); background: var(--green-10); padding: 2px 8px; border-radius: 2px; }
+.okf-body { padding: 24px 32px 32px; }
+.okf-body p { font-size: 14px; line-height: 20px; color: var(--black-100); margin: 0 0 24px; }
+.okf-btns { display: flex; gap: 8px; }
+.okf-btns .btn { height: 44px; padding: 0 16px; justify-content: center; }
+.okf-x { position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--black-100); z-index: 2; }
+
+/* Okta Overview (Figma 19457:154997) */
+.ovk { width: 100%; max-width: 1095px; display: flex; flex-direction: column; gap: 16px; }
+.ovk-card { background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; overflow: hidden; }
+.ovk-hd { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; min-height: 48px; box-sizing: border-box; }
+.ovk-hd h3 { margin: 0; font-size: 16px; font-weight: 500; color: var(--black-100); line-height: 24px; }
+.ovk-acts { display: flex; gap: 8px; }
+.ovk-btn { height: 36px; padding: 0 12px; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; }
+.ovk-btn.ovk-danger { color: var(--red); border-color: var(--red); }
+.ovk-grid { display: grid; }
+.ovk-g2 { grid-template-columns: 1fr 200px; }
+.ovk-g5 { grid-template-columns: repeat(5, 1fr); }
+.ovk-g11 { grid-template-columns: 1fr 1fr; }
+.ovk-chip { white-space: nowrap; }
+.ovk-th { font-size: 14px; color: var(--black-60); padding: 6px 12px; border-top: 1px solid var(--border-light); background: var(--white); display: flex; align-items: center; gap: 6px; }
+.ovk-td { padding: 12px; border-top: 1px solid var(--border-light); display: flex; align-items: center; gap: 12px; min-height: 64px; box-sizing: border-box; font-size: 14px; }
+.ovk-td .t { font-size: 14px; font-weight: 500; color: var(--black-100); }
+.ovk-td .s { font-size: 14px; color: var(--black-60); }
+.ovk-st { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--black-100); }
+.ovk-chip { font-size: 14px; font-weight: 500; color: var(--green); background: var(--green-soft); padding: 2px 8px; border-radius: 2px; }
+.ovk-logo { width: 20px; height: 20px; display: inline-flex; color: var(--black-100); flex-shrink: 0; }
+.ovk-logo svg { width: 20px; height: 20px; }
+.ovk-i { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border: 1px solid var(--black-30); border-radius: 50%; font-size: 9px; font-style: normal; color: var(--black-60); cursor: default; }
+.ovk-av { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; margin-right: -4px; border: 2px solid var(--white); box-sizing: content-box; }
+.ovk-next .ovk-hd { padding: 16px 12px; border-bottom: 1px solid var(--border-light); }
+.ovk-next .ovk-hd h3 { font-size: 14px; font-weight: 400; color: var(--black-60); }
+.ovk-step { display: flex; align-items: center; gap: 12px; padding: 14px 12px; border-bottom: 1px solid var(--border-light); cursor: pointer; }
+.ovk-step:last-child { border-bottom: none; }
+.ovk-step:hover { background: var(--black-3); }
+.ovk-step .tile { width: 24px; height: 24px; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ovk-step .tt { font-size: 14px; font-weight: 500; color: var(--black-100); }
+.ovk-step .dd { font-size: 14px; color: var(--black-60); margin-top: 2px; }
+
 /* Utility */
 .hidden { display: none !important; }
 .mt-8 { margin-top: 8px; }
@@ -1093,6 +1144,129 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
   }
 </style>
 
+<style id="okta-redesign-css">
+/* ═══ Okta onboarding redesign (Figma DCP Consolidated 19459:160269 "WIP updates to template") — Okta only ═══ */
+.okw-wrap { flex: 1; min-height: 0; display: flex; padding: 16px 24px; overflow: hidden; background: var(--white); }
+.okw-card { flex: 1; min-height: 0; min-width: 0; display: flex; gap: 24px; overflow: hidden; border: 1px solid var(--border-light); border-radius: 8px; padding: 24px; background: var(--white); }
+.okw-visual { position: relative; flex: 0 1 44%; min-width: 0; border-radius: 12px; overflow: hidden; background: linear-gradient(160deg, #e6f9ef 0%, #f3fcf7 55%, #fbfefc 100%); }
+.okw-visual svg.okw-art { position: absolute; inset: 0; width: 100%; height: 100%; }
+.okw-tag { position: absolute; top: 24px; left: 24px; z-index: 2; padding: 4px 12px; border-radius: 8px; background: rgba(255,255,255,.85); color: var(--em-green, #01804a); font-size: 16px; line-height: 22px; font-weight: 500; }
+.okw-play { position: absolute; left: 50%; top: 52%; transform: translate(-50%, -50%); z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 12px; cursor: pointer; border: 0; background: none; padding: 0; font-family: inherit; }
+.okw-play .ring { width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.55) 0%, rgba(255,255,255,.2) 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 1px rgba(1,128,74,.08); }
+.okw-play .btn-c { width: 122px; height: 122px; border-radius: 50%; background: linear-gradient(160deg, #35b67f 0%, #0b8a55 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 28px rgba(1,128,74,.28); }
+.okw-play .pill { padding: 8px 18px; border-radius: 999px; background: #fff; box-shadow: 0 4px 16px rgba(31,34,41,.1); font-size: 18px; line-height: 24px; font-weight: 450; color: var(--black-100); margin-top: -34px; position: relative; }
+.okw-body { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; padding: 0 8px 0 24px; }
+.okw-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-right: 8px; margin-right: -8px; }
+.okw-top { flex: none; display: flex; align-items: center; justify-content: space-between; margin-bottom: clamp(16px, 4vh, 40px); }
+.okw-icbtn { width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--black-100); }
+.okw-icbtn:hover { background: var(--black-5); }
+.okw-h1 { margin: 0 0 clamp(12px, 2.5vh, 24px); font-size: clamp(32px, 4.2vw, 56px); line-height: 1.14; font-weight: 500; letter-spacing: -0.04em; color: var(--black-100); }
+.okw-lede { margin: 0 0 clamp(16px, 4vh, 40px); font-size: 18px; line-height: 26px; color: var(--black-60); }
+.okw-lede strong { font-weight: 500; color: var(--black-100); }
+.okw-feats { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding-bottom: 16px; }
+.okw-feat { display: flex; gap: 12px; align-items: flex-start; }
+.okw-feat .t { flex: none; width: 40px; height: 40px; border: 1px solid var(--border-light); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; background: var(--white); }
+.okw-feat .t svg { width: 24px; height: 24px; }
+.okw-feat b { display: block; font-size: 18px; line-height: 24px; font-weight: 500; color: var(--black-100); }
+.okw-feat span { display: block; font-size: 16px; line-height: 24px; color: var(--black-60); }
+.okw-ctas { flex: none; display: flex; flex-direction: column; gap: 12px; padding-top: 16px; background: var(--white); }
+@media (max-width: 1180px) { .okw-feats { grid-template-columns: 1fr; } .okw-visual { flex-basis: 34%; } }
+@media (max-width: 900px) { .okw-visual { display: none; } .okw-body { padding-left: 0; } }
+@media (max-height: 760px) { .okw-lede { font-size: 16px; line-height: 24px; } .okw-feat b { font-size: 16px; line-height: 22px; } .okw-feat span { font-size: 14px; line-height: 20px; } .okw-ctas .btn { height: 44px; } }
+.okw-ctas .btn { height: 48px; justify-content: center; gap: 8px; font-size: 16px; }
+
+.okc-wrap { position: relative; flex: 1; overflow: hidden; background: #f6f7f8; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.okc-bg { position: absolute; inset: 0; padding: 24px 32px; opacity: .42; filter: blur(1.5px); pointer-events: none; }
+.okc-bg h2 { margin: 0; font-size: 28px; line-height: 32px; font-weight: 500; }
+.okc-bg p { margin: 4px 0 24px; color: var(--black-60); }
+.okc-bg .row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+.okc-bg .c { height: 150px; border-radius: 8px; border: 1px solid var(--border-light); background: var(--white); padding: 16px; font-weight: 500; }
+.okc-bg .c i { display: block; margin-top: 44px; text-align: center; font-style: normal; font-weight: 450; color: var(--black-60); }
+.okc-scrim { position: absolute; inset: 0; background: rgba(246,247,248,.55); }
+.okc-modal { position: relative; z-index: 2; width: min(1020px, 100%); background: var(--white); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 12px 40px rgba(31,34,41,.16); overflow: hidden; }
+.okc-head { position: relative; padding: 36px 32px 28px; background: linear-gradient(135deg, #e9faf1 0%, #f4fcf8 70%, #f8fdfb 100%); overflow: hidden; min-height: 154px; }
+.okc-head h2 { margin: 0 0 24px; font-size: 40px; line-height: 44px; font-weight: 500; letter-spacing: -1.2px; position: relative; z-index: 1; }
+.okc-head p { margin: 0; font-size: 16px; line-height: 22px; position: relative; z-index: 1; }
+.okc-head .deco { position: absolute; width: 130px; height: 130px; background: linear-gradient(135deg, rgba(120,226,172,.55), rgba(120,226,172,0)); transform: rotate(45deg); filter: blur(1.5px); }
+.okc-body { padding: 16px 32px 24px; }
+.okc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+.okc-card { display: flex; gap: 12px; padding: 12px 16px; border: 1px solid var(--border-light); border-radius: 4px; }
+.okc-card svg { flex: none; width: 24px; height: 24px; margin-top: 0; }
+.okc-card b { display: block; font-size: 16px; line-height: 22px; font-weight: 500; }
+.okc-card span { display: block; font-size: 14px; line-height: 20px; color: var(--black-60); }
+.okc-req { background: var(--black-3); border-radius: 4px; margin-bottom: 24px; }
+.okc-req > button { width: 100%; display: flex; align-items: center; gap: 8px; padding: 14px 24px; border: 0; background: none; font: 500 16px/22px inherit; font-family: inherit; cursor: pointer; text-align: left; color: var(--black-100); }
+.okc-req > button .chev { margin-left: auto; transition: transform .15s ease; }
+.okc-req.open > button .chev { transform: rotate(180deg); }
+.okc-req ul { display: none; list-style: none; margin: 0; padding: 0 24px 16px; }
+.okc-req.open ul { display: block; }
+.okc-req li { position: relative; padding: 4px 0 4px 26px; font-size: 16px; line-height: 22px; color: var(--black-100); }
+.okc-req li::before { content: "\2014"; position: absolute; left: 0; color: var(--black-30); }
+.okc-cta { width: 100%; height: 44px; justify-content: center; font-size: 16px; }
+.okc-note { margin: 12px 0 0; text-align: center; font-size: 12px; line-height: 18px; color: var(--black-60); }
+
+/* Okta page shell (Figma 19436:139734): logo in a 32px bordered tile beside the connector name */
+.wl-page-icon.okta-logo-tile { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); box-sizing: border-box; }
+.wl-page-icon.okta-logo-tile svg { width: 22px; height: 22px; }
+.bi-co-head { display: flex; align-items: center; gap: 12px; padding-top: 16px; margin-top: 8px; border-top: 1px solid var(--border-light); margin-bottom: 16px; }
+.bi-co-chev { width: 24px; height: 24px; border: 0; border-radius: 4px; background: var(--green-soft, #e4f6ee); color: var(--em-green, #01804a); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; transition: transform .15s ease; }
+.bi-co-title { font-size: 18px; line-height: 22px; font-weight: 500; color: var(--black-100); display: flex; align-items: center; gap: 12px; }
+.bi-co-opt { font-size: 14px; line-height: 20px; font-weight: 450; padding: 2px 8px; background: var(--black-5); border-radius: 2px; }
+.bi-co-count { font-size: 14px; line-height: 20px; color: var(--black-60); }
+
+.oka-h1 { font-size: 20px; line-height: 24px; font-weight: 500; color: var(--black-100); padding-bottom: 16px; }
+.oka-rule { height: 1px; background: var(--border-light); margin-bottom: 24px; }
+.oka-h2 { font-size: 18px; line-height: 24px; font-weight: 500; color: var(--black-100); margin-bottom: 4px; }
+.oka-p { font-size: 16px; line-height: 22px; color: var(--black-60); margin-bottom: 16px; }
+.oka-help { font-size: 14px; line-height: 20px; color: var(--black-60); margin-top: 8px; }
+.oka-alg { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 12px 16px; border: 1px solid var(--border-light); border-radius: 4px; cursor: pointer; background: var(--white); text-align: center; }
+.oka-alg.is-sel { border-color: var(--em-green, #01804a); background: var(--em-green-tint, #f6fbf9); }
+.oka-alg-t { font-size: 16px; line-height: 22px; font-weight: 500; color: var(--black-100); } .oka-alg.is-sel .oka-alg-t { color: var(--em-green, #01804a); }
+.oka-alg-s { font-size: 14px; line-height: 20px; color: var(--black-60); }
+.oka-jwk { position: relative; border: 1px solid var(--border-light); border-radius: 4px; background: var(--black-3); max-height: 232px; overflow: auto; }
+.oka-jwk-act { position: sticky; top: 0; z-index: 1; display: flex; justify-content: flex-end; gap: 4px; height: 0; padding: 8px 8px 0 0; }
+.oka-ib { width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); color: var(--black-100); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+.oka-ib:hover { background: var(--black-5); }
+.oka-code { padding: 8px 0; font-family: 'SF Mono', Menlo, Consolas, monospace; font-size: 12px; line-height: 20px; color: var(--em-green, #01804a); }
+.oka-code .ln { display: flex; } .oka-code .n { flex: 0 0 40px; text-align: right; padding-right: 12px; color: var(--black-30); user-select: none; } .oka-code .c { white-space: pre-wrap; word-break: break-all; padding-right: 64px; }
+
+/* Okta "Verifying access" (Figma 19440:142225 family): joined connectivity + feature-permission card, pinned/inline actions */
+#screen-test-conn.okv #tc-col { padding-top: 0 !important; margin: auto 0; }
+#screen-test-conn.okv.okv-p2 #tc-col { margin: 0 auto; padding-top: 24px !important; padding-bottom: 104px; gap: 0 !important; }
+#screen-test-conn.okv .main-scroll { align-items: stretch; }
+#screen-test-conn.okv #tc-col > * { flex-shrink: 0; }
+#screen-test-conn.okv #tc-col { align-self: flex-start; flex-shrink: 0; }
+#screen-test-conn.okv-running .wizard-footer { display: none; }
+#screen-test-conn.okv .wizard-footer { border-top: none; }
+.okv-head { display: none; margin-bottom: 16px; }
+.okv-head h2 { font-size: 16px; font-weight: 500; color: var(--black-100); margin: 0; line-height: 22px; }
+.okv-head p { font-size: 14px; color: var(--black-60); margin: 8px 0 0; line-height: 20px; }
+#screen-test-conn.okv.okv-p2 .okv-head { display: block; }
+#screen-test-conn.okv.okv-p2 #tc-conn-card { border-radius: 8px 8px 0 0 !important; border-bottom: 1px solid var(--border-light) !important; }
+#screen-test-conn.okv.okv-p2 #tc-perm-card { border-top: none !important; border-radius: 0 0 8px 8px !important; }
+#screen-test-conn.okv #tc-conn-icon { width: 56px; height: 56px; border: 1px solid var(--border-light); border-radius: 4px; color: var(--black-100); }
+#screen-test-conn.okv #tc-perm-pending { padding: 16px; }
+#screen-test-conn.okv #tc-perm-pending p { font-size: 14px; }
+#screen-test-conn.okv .perm-row { position: relative; }
+#screen-test-conn.okv .perm-row-icon { border: 1px solid var(--border-light); border-radius: 4px; color: var(--black-100); }
+#screen-test-conn.okv .perm-row-icon svg { width: 24px; height: 24px; }
+#screen-test-conn.okv .tc-perm-ind { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
+#screen-test-conn.okv .tc-perm-chev { position: absolute; right: 76px; top: 50%; margin-top: -7px; }
+#screen-test-conn.okv .perm-row.failed h4 { color: var(--red); }
+#screen-test-conn.okv #tc-okv-cancel { display: none; height: 44px; }
+#screen-test-conn.okv.okv-running #tc-okv-cancel { display: flex; margin-top: 16px; }
+#screen-test-conn.okv.okv-running:not(.okv-p2) #tc-okv-cancel { margin-top: 0; }
+.okv-chip { display: none; align-items: center; gap: 8px; height: 28px; padding: 0 8px; border-radius: 4px; background: var(--green-10); color: var(--green); font-size: 14px; font-weight: 500; }
+#screen-test-conn.okv.okv-checking .okv-chip { display: inline-flex; }
+#screen-test-conn.okv.okv-checking #tc-perm-counter-wrap, #screen-test-conn.okv.okv-checking #tc-perm-barwrap { display: none; }
+/* Landing visual (Figma 18476:38408): supplied artwork (1032×1350 ≈ the 688×900 panel) as the panel background; 50/50 split, 64px headline */
+.okw-card.lnd .okw-visual { flex: 1 1 50%; border-radius: 8px; }
+.okw-card.lnd .okw-body { flex: 1 1 50%; }
+.okw-visual.lnd-visual { background: url('landing-visual.webp') center / cover no-repeat, linear-gradient(160deg, #e6f9ef 0%, #f3fcf7 55%, #fbfefc 100%); }
+.okw-card.lnd .okw-h1 { font-size: clamp(32px, 3.9vw, 56px); line-height: 1.125; letter-spacing: -0.0625em; }
+.okw-card.lnd .okw-feat .t svg { width: 32px; height: 32px; }
+.okw-card.lnd .okw-feats { column-gap: 12px; row-gap: 12px; }
+</style>
 </head>
 <body>
 
@@ -1202,85 +1376,70 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
 
       <!-- ========== SCREEN 0: WELCOME ========== -->
       <div class="screen active" id="screen-welcome">
-        <div style="flex:1;display:flex;padding:32px;overflow:hidden">
-
-          <!-- Main container with border — fills available space -->
-          <div style="display:flex;flex:1;border:1px solid var(--border-light);border-radius:8px;overflow:hidden;background:var(--white);position:relative">
-
-            <!-- Left: Dashboard background image with video CTA -->
-            <!-- was: background:url('Content.png') top left/cover no-repeat — the
-                 top-left anchor let the PNG's baked-in white fade dominate at
-                 wide/short sizes and read as an uncovered container (user
-                 2026-08-14). Center-anchored cover + a tinted base layer under
-                 the image so no aspect ratio ever shows stark white. -->
-            <!-- Content.png carried a ~160px fully-TRANSPARENT tail (rows 898–1057)
-                 — cover scaled it faithfully, so the "white gap" was the container
-                 showing through dead pixels, and no CSS could fix it (user catches
-                 #2 + #3, 2026-08-14). Content-cropped.png = same image with the
-                 transparent tail cropped (688×898, generated via PIL from
-                 Content.png — original untouched); center/cover now scales REAL
-                 content across the full height at any window shape. was: on-top
-                 tint gradient masking the tail. -->
-            <div style="width:48%;position:relative;overflow:hidden;background:url('Content-cropped.png') center/cover no-repeat, linear-gradient(135deg, color-mix(in srgb, var(--green-soft-160) 70%, var(--white)) 0%, var(--white) 100%);background-color:var(--green-soft-160)">
-              <!-- See What's New button centered -->
-              <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1">
-                <div style="background:var(--green);border-radius:8px;padding:24px 36px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 8px 32px color-mix(in srgb, var(--green) 35%, transparent)"><!-- was: var(--blue) + rgba(28,168,221,.35) shadow (user 2026-08-14: green) -->
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
-                  <span style="font-size: 16px;font-weight:500;color:white">See What's New</span>
-                </div>
-              </div>
+      <!-- Landing (Figma 18476:38408): same split as the Okta welcome — visual left (supplied artwork), copy + six capabilities right, CTAs pinned. -->
+        <div class="okw-wrap"><div class="okw-card lnd">
+          <div class="okw-visual lnd-visual">
+            <span class="okw-tag">New in Intelligent ResOps</span>
+            <button class="okw-play" type="button" aria-label="See what’s new"><span class="ring"><span class="btn-c"><svg width="54" height="54" viewBox="0 0 24 24" fill="#fff"><path d="M8 5.5v13l11-6.5z"/></svg></span></span><span class="pill">See what’s new</span></button>
+          </div>
+          <div class="okw-body">
+            <div class="okw-scroll"><h1 class="okw-h1">Welcome to Veeam Intelligent ResOps.</h1>
+            <p class="okw-lede">iResOps for Microsoft 365 is the context layer for your Veeam Data Cloud tenant. See what’s in your estate, which users and AI agents can access it, and what needs protection. Take action: quarantine or label files, or undo changes.</p>
+            <div class="okw-feats"><div class="okw-feat"><span class="t"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M5.20709 25.6436C4.8774 25.6436 4.60103 25.5321 4.378 25.3091C4.15497 25.0861 4.04346 24.8097 4.04346 24.48V17.4982C4.04346 17.1685 4.15497 16.8921 4.378 16.6691C4.60103 16.4461 4.8774 16.3345 5.20709 16.3345H12.1889C12.5186 16.3345 12.795 16.4461 13.018 16.6691C13.241 16.8921 13.3525 17.1685 13.3525 17.4982V24.48C13.3525 24.8097 13.241 25.0861 13.018 25.3091C12.795 25.5321 12.5186 25.6436 12.1889 25.6436H5.20709ZM6.37073 23.3164H11.0253V18.6618H6.37073V23.3164ZM18.8507 13.4255H10.1816C9.73558 13.4255 9.40103 13.2267 9.178 12.8291C8.95497 12.4315 8.95982 12.0388 9.19255 11.6509L13.5271 4.58182C13.7598 4.19394 14.0895 4 14.5162 4C14.9429 4 15.2725 4.19394 15.5053 4.58182L19.8398 11.6509C20.0725 12.0388 20.0774 12.4315 19.8544 12.8291C19.6313 13.2267 19.2968 13.4255 18.8507 13.4255ZM12.2471 11.0982H16.7853L14.5162 7.43273L12.2471 11.0982ZM26.0071 27.68L23.738 25.4109C23.3307 25.6824 22.8895 25.8861 22.4144 26.0218C21.9392 26.1576 21.4398 26.2255 20.9162 26.2255C19.4616 26.2255 18.2253 25.7164 17.2071 24.6982C16.1889 23.68 15.6798 22.4436 15.6798 20.9891C15.6798 19.5345 16.1889 18.2982 17.2071 17.28C18.2253 16.2618 19.4616 15.7527 20.9162 15.7527C22.3707 15.7527 23.6071 16.2618 24.6253 17.28C25.6435 18.2982 26.1525 19.5345 26.1525 20.9891C26.1525 21.4933 26.0847 21.983 25.9489 22.4582C25.8132 22.9333 25.6192 23.3745 25.3671 23.7818L27.6362 26.0509C27.8495 26.2642 27.9562 26.5358 27.9562 26.8655C27.9562 27.1952 27.8495 27.4667 27.6362 27.68C27.4229 27.8933 27.1513 28 26.8216 28C26.4919 28 26.2204 27.8933 26.0071 27.68ZM20.9162 23.8982C21.7307 23.8982 22.4192 23.617 22.9816 23.0545C23.5441 22.4921 23.8253 21.8036 23.8253 20.9891C23.8253 20.1745 23.5441 19.4861 22.9816 18.9236C22.4192 18.3612 21.7307 18.08 20.9162 18.08C20.1016 18.08 19.4132 18.3612 18.8507 18.9236C18.2883 19.4861 18.0071 20.1745 18.0071 20.9891C18.0071 21.8036 18.2883 22.4921 18.8507 23.0545C19.4132 23.617 20.1016 23.8982 20.9162 23.8982Z" fill="#1CA8DD"/></svg></span><div><b>File Discovery</b><span>Every site, drive, mailbox, team and file as metadata, within hours.</span></div></div><div class="okw-feat"><span class="t"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M15.0532 29.3327H11.9998C11.2665 29.3327 10.6665 28.7327 10.6665 27.9993V26.0793C10.6665 25.1327 10.6665 24.5593 10.9198 23.9327C11.1732 23.3193 11.5732 22.906 12.2532 22.2393L16.4798 18.0127C16.2132 16.026 16.8798 13.9993 18.3065 12.5593C20.8265 10.0393 24.9198 10.0393 27.4398 12.5593C29.9598 15.0793 29.9598 19.1727 27.4398 21.6927C25.9998 23.1327 23.9732 23.7993 21.9865 23.5193L21.1598 24.346C20.6132 24.8927 20.2932 25.2127 19.7998 25.466C19.3065 25.706 18.8532 25.7727 18.0932 25.8793L17.8932 25.906L17.7332 26.9993C17.7065 27.186 17.6932 27.266 17.6665 27.346C17.5732 27.6927 17.4265 27.986 17.2132 28.2527C17.1465 28.3327 17.0798 28.3993 16.9598 28.5327C16.7865 28.706 16.7065 28.786 16.6132 28.8527C16.2932 29.0927 15.9065 29.2527 15.5065 29.306C15.3998 29.3193 15.2798 29.3327 15.0532 29.3327ZM13.3332 26.666H15.0932L15.3865 24.546C15.4665 23.9593 15.9332 23.4927 16.5198 23.4127L17.7065 23.2393C18.1465 23.1727 18.4932 23.1327 18.5998 23.0793C18.7065 23.026 18.9598 22.7727 19.2665 22.466L20.5998 21.1327C20.9332 20.7993 21.4265 20.666 21.8798 20.786C23.1865 21.1327 24.5865 20.7593 25.5465 19.7993C27.0265 18.3193 27.0265 15.9193 25.5465 14.4393C24.0665 12.9593 21.6665 12.9593 20.1865 14.4393C19.2265 15.3993 18.8532 16.7993 19.1998 18.106C19.3198 18.5727 19.1998 19.0527 18.8532 19.3993L14.1332 24.1193C13.7465 24.5193 13.4265 24.826 13.3732 24.946C13.3198 25.0793 13.3198 25.5193 13.3198 26.0793V26.666H13.3332ZM7.33317 25.3327C4.75984 25.3327 2.6665 23.2393 2.6665 20.666V7.33268C2.6665 4.75935 4.75984 2.66602 7.33317 2.66602H20.6665C23.2398 2.66602 25.3332 4.75935 25.3332 7.33268C25.3332 8.06602 24.7332 8.66602 23.9998 8.66602C23.2665 8.66602 22.6665 8.06602 22.6665 7.33268C22.6665 6.22602 21.7732 5.33268 20.6665 5.33268H16.2398V7.07935L18.1998 9.03935C18.7198 9.55935 18.7198 10.3993 18.1998 10.9193C17.6798 11.4393 16.8398 11.4393 16.3198 10.9193L13.9732 8.57268C13.7198 8.31935 13.5865 7.98602 13.5865 7.62602V5.31935H10.7998V9.79935L14.5598 13.5593C15.0798 14.0793 15.0798 14.9193 14.5598 15.4393C14.0398 15.9593 13.1998 15.9593 12.6798 15.4393L10.8132 13.5727V15.6793C11.8798 16.186 12.6265 17.2793 12.6265 18.5327C12.6265 20.266 11.2132 21.6793 9.47984 21.6793C7.7465 21.6793 6.33317 20.266 6.33317 18.5327C6.33317 17.266 7.07984 16.186 8.1465 15.6793V5.33268H7.35984C6.25317 5.33268 5.35984 6.22602 5.35984 7.33268V20.666C5.35984 21.7727 6.25317 22.666 7.35984 22.666C8.09317 22.666 8.69317 23.266 8.69317 23.9993C8.69317 24.7327 8.09317 25.3327 7.35984 25.3327H7.33317ZM9.45317 18.066C9.1865 18.066 8.97317 18.2793 8.97317 18.546C8.97317 18.8127 9.1865 19.026 9.45317 19.026C9.71984 19.026 9.93317 18.8127 9.93317 18.546C9.93317 18.2793 9.71984 18.066 9.45317 18.066ZM22.8798 18.466C22.5332 18.466 22.1998 18.3327 21.9332 18.0793C21.4132 17.5593 21.4132 16.706 21.9332 16.186C22.4532 15.666 23.2932 15.666 23.8132 16.186C24.3332 16.7193 24.3332 17.5593 23.8132 18.0793C23.5465 18.346 23.2132 18.466 22.8665 18.466H22.8798Z" fill="#3BBCCE"/></svg></span><div><b>Access &amp; AI Agent Intelligence</b><span>Who and which agents can reach what, and what they did.</span></div></div><div class="okw-feat"><span class="t"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M22.1332 29.3327C19.3465 29.3327 16.7732 27.6927 15.5998 25.1593C15.2932 24.4927 15.5865 23.6927 16.2532 23.386C16.9198 23.0793 17.7198 23.3727 18.0265 24.0393C18.7598 25.6393 20.3865 26.666 22.1332 26.666C24.6398 26.666 26.6665 24.626 26.6665 22.1327C26.6665 19.6393 24.6265 17.5993 22.1332 17.5993C21.3998 17.5993 20.7998 16.9993 20.7998 16.266C20.7998 15.5327 21.3998 14.9327 22.1332 14.9327C26.1065 14.9327 29.3332 18.1593 29.3332 22.1327C29.3332 26.106 26.1065 29.3327 22.1332 29.3327ZM13.3332 29.3327H6.6665C4.4665 29.3327 2.6665 27.5327 2.6665 25.3327V6.66602C2.6665 4.46602 4.4665 2.66602 6.6665 2.66602H25.3332C27.5332 2.66602 29.3332 4.46602 29.3332 6.66602V11.9993C29.3332 12.7327 28.7332 13.3327 27.9998 13.3327C27.4265 13.3327 26.9465 12.9727 26.7598 12.4793H5.33317V25.3327C5.33317 26.066 5.93317 26.666 6.6665 26.666H13.3332C14.0665 26.666 14.6665 27.266 14.6665 27.9993C14.6665 28.7327 14.0665 29.3327 13.3332 29.3327ZM5.33317 9.81268H26.6665V6.66602C26.6665 5.93268 26.0665 5.33268 25.3332 5.33268H6.6665C5.93317 5.33268 5.33317 5.93268 5.33317 6.66602V9.81268ZM22.1332 25.8127C21.3998 25.8127 20.7998 25.2127 20.7998 24.4793C20.7998 23.746 21.3998 23.146 22.1332 23.146C22.6932 23.146 23.1465 22.6927 23.1465 22.1327C23.1465 21.5727 22.6932 21.1193 22.1332 21.1193C21.3998 21.1193 20.7998 20.5193 20.7998 19.786C20.7998 19.0527 21.3998 18.4527 22.1332 18.4527C24.1598 18.4527 25.8132 20.106 25.8132 22.1327C25.8132 24.1593 24.1598 25.8127 22.1332 25.8127ZM13.4132 21.3327H9.33317C8.59984 21.3327 7.99984 20.7327 7.99984 19.9993C7.99984 19.266 8.59984 18.666 9.33317 18.666H13.4132C14.1465 18.666 14.7465 19.266 14.7465 19.9993C14.7465 20.7327 14.1465 21.3327 13.4132 21.3327ZM9.33317 17.346C8.59984 17.346 7.99984 16.746 7.99984 16.0127C7.99984 15.2793 8.59984 14.6793 9.33317 14.6793H15.9998C16.7865 14.626 17.3332 15.266 17.3332 15.9993C17.3332 16.7327 16.7332 17.3327 15.9998 17.3327H9.33317V17.346ZM15.9998 8.98601C15.2665 8.98601 14.6665 8.38602 14.6665 7.65268C14.6665 6.91935 15.2532 6.31935 15.9998 6.31935C16.7332 6.31935 17.3332 6.91935 17.3332 7.65268C17.3332 8.38602 16.7332 8.98601 15.9998 8.98601ZM11.9998 8.98601C11.2665 8.98601 10.6665 8.38602 10.6665 7.65268C10.6665 6.91935 11.2532 6.31935 11.9998 6.31935C12.7332 6.31935 13.3332 6.91935 13.3332 7.65268C13.3332 8.38602 12.7332 8.98601 11.9998 8.98601ZM8.01317 8.98601C7.27984 8.98601 6.67984 8.38602 6.67984 7.65268C6.67984 6.91935 7.2665 6.31935 8.01317 6.31935C8.7465 6.31935 9.3465 6.91935 9.3465 7.65268C9.3465 8.38602 8.7465 8.98601 8.01317 8.98601Z" fill="#98269B"/></svg></span><div><b>Data Lifecycle</b><span>Obsolete and duplicate data, with storage cost estimates.</span></div></div><div class="okw-feat"><span class="t"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M24 2.66602H8C5.8 2.66602 4 4.43846 4 6.62404V14.5001C4 25.388 15.48 29.2261 15.5867 29.266C15.72 29.306 15.8533 29.3327 16 29.3327C16.1467 29.3327 16.28 29.306 16.4133 29.266C16.5333 29.2261 28 25.388 28 14.5001V6.62404C28 4.43846 26.2 2.66602 24 2.66602ZM25.3333 14.5001C25.3333 22.4694 17.88 25.8544 16 26.5741C14.12 25.8544 6.66667 22.4694 6.66667 14.5001V6.62404C6.66667 5.91772 7.26667 5.33135 8 5.33135H24C24.7333 5.33135 25.3333 5.9044 25.3333 6.62404V14.5001ZM16 19.9907C15.56 19.9907 15.16 19.7242 15 19.311L14.28 17.4453C14.16 17.1255 14.0667 16.8989 14.0133 16.8189C13.96 16.7523 13.9067 16.6857 13.84 16.6457C13.76 16.5924 13.5333 16.4991 13.2267 16.3792L11.36 15.6595C10.9467 15.4996 10.68 15.0998 10.68 14.66C10.68 14.2202 10.9467 13.8204 11.36 13.6605L13.2267 12.9409C13.56 12.8076 13.7733 12.7277 13.8533 12.6743C13.92 12.621 13.9867 12.5677 14.04 12.4878C14.0933 12.4078 14.1867 12.1813 14.3067 11.8614L15.0267 9.99568C15.1867 9.58256 15.5867 9.31602 16.0267 9.31602C16.4667 9.31602 16.8667 9.58256 17.0267 9.99568L17.7467 11.8614C17.88 12.1946 17.96 12.4078 18.0133 12.4878C18.0667 12.5544 18.12 12.621 18.2 12.6743C18.28 12.7277 18.4933 12.8076 18.8267 12.9409L20.6933 13.6605C21.1067 13.8204 21.3733 14.2202 21.3733 14.66C21.3733 15.0998 21.1067 15.4996 20.6933 15.6595L18.8267 16.3792C18.4933 16.4991 18.28 16.5924 18.2 16.6457C18.1333 16.699 18.0667 16.7523 18.0267 16.8323C17.9733 16.9122 17.88 17.1255 17.7733 17.4453L17.0533 19.3244C16.8933 19.7375 16.4933 20.004 16.0533 20.004L16 19.9907Z" fill="#00A744"/></svg></span><div><b>Backup Intelligence</b><span>What VDC isn’t protecting, and what to protect first.</span></div></div><div class="okw-feat"><span class="t"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M21.3372 29.3327C20.7908 29.3327 20.2844 28.9994 20.0978 28.4795L18.9783 25.5598C18.7518 24.9866 18.6319 24.6666 18.5252 24.5199C18.4186 24.3733 18.2987 24.2533 18.1654 24.16C18.0055 24.0533 17.6857 23.92 17.1126 23.7067L14.1941 22.5869C13.6743 22.3869 13.3412 21.8936 13.3412 21.347C13.3412 20.8004 13.6743 20.2938 14.1941 20.1072L17.1126 18.9873C17.6857 18.7607 18.0055 18.6407 18.1521 18.534C18.2854 18.4407 18.4053 18.3207 18.5119 18.1741C18.6185 18.0141 18.7518 17.6941 18.965 17.1209L20.0845 14.2012C20.2844 13.6813 20.7774 13.348 21.3238 13.348C21.8702 13.348 22.3766 13.6813 22.5632 14.2012L23.6827 17.1209C23.9092 17.6941 24.0292 18.0141 24.1358 18.1741C24.2291 18.3074 24.349 18.4274 24.4956 18.534C24.6555 18.6407 24.962 18.7607 25.5351 18.9873L28.4669 20.1072C28.9867 20.3071 29.3198 20.8004 29.3198 21.347C29.3198 21.8936 28.9867 22.4002 28.4669 22.5869L25.5484 23.7067C24.9753 23.9334 24.6555 24.0533 24.5089 24.16C24.3623 24.2666 24.2424 24.3866 24.1491 24.5199C24.0425 24.6799 23.9225 24.9866 23.696 25.5598L22.5765 28.4795C22.3766 28.9994 21.8836 29.3327 21.3372 29.3327ZM18.392 21.3337C18.9783 21.5603 19.3382 21.7203 19.7113 21.9869C20.0978 22.2536 20.4176 22.5869 20.6975 22.9735C20.964 23.3334 21.1239 23.72 21.3505 24.2933C21.577 23.7067 21.737 23.3468 22.0035 22.9735C22.27 22.5869 22.6032 22.2536 22.9897 21.9869C23.3495 21.7203 23.736 21.5603 24.309 21.3337C23.736 21.107 23.3495 20.9471 22.9897 20.6804C22.6165 20.4138 22.2834 20.0805 22.0035 19.6939C21.737 19.3206 21.5904 18.9606 21.3505 18.3741C21.1239 18.9473 20.964 19.3206 20.6975 19.6939C20.431 20.0805 20.0978 20.4138 19.7113 20.6804C19.3382 20.9471 18.9783 21.107 18.392 21.3337ZM10.4626 24H6.67783C5.94486 24 5.34516 23.4001 5.34516 22.6668C5.34516 21.9336 5.94486 21.3337 6.67783 21.3337H10.4626C11.1956 21.3337 11.7953 21.9336 11.7953 22.6668C11.7953 23.4001 11.1956 24 10.4626 24ZM28.0005 17.3342C27.2675 17.3342 26.6678 16.7343 26.6678 16.001C26.6678 13.0547 24.2824 10.6683 21.3372 10.6683H7.22423L10.276 13.7213C10.7958 14.2412 10.7958 15.0811 10.276 15.6011C9.75629 16.121 8.91671 16.121 8.39697 15.6011L3.0663 10.2817C2.93304 10.1484 2.83975 10.0018 2.77312 9.84178C2.70648 9.68181 2.6665 9.52182 2.6665 9.33518C2.6665 9.14854 2.70648 8.97523 2.77312 8.82858C2.83975 8.6686 2.93304 8.52195 3.0663 8.38863L8.39697 3.05597C8.91671 2.53603 9.75629 2.53603 10.276 3.05597C10.7958 3.5759 10.7958 4.4158 10.276 4.93573L7.22423 7.98868H21.3372C25.7483 7.98868 29.3332 11.5749 29.3332 15.9877C29.3332 16.7209 28.7335 17.3208 28.0005 17.3208V17.3342Z" fill="#5F50AE"/></svg></span><div><b>Undo AI</b><span>Roll back an agent’s file changes from your restore points.</span></div></div><div class="okw-feat"><span class="t"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M16.0067 29.326C15.1662 29.326 14.3257 29.0993 13.5653 28.6594L6.36131 24.4193C4.90717 23.5527 4 21.9793 4 20.286V11.6993C4 10.006 4.90717 8.41935 6.36131 7.56602L13.5653 3.32602C15.0728 2.44602 16.9405 2.44602 18.4347 3.32602L25.6387 7.56602C27.0928 8.41935 28 10.006 28 11.6993V20.286C28 21.9793 27.0928 23.566 25.6387 24.4193L18.4347 28.6594C17.6876 29.0993 16.8471 29.326 15.9933 29.326H16.0067ZM16.0067 5.32602C15.6331 5.32602 15.2596 5.41935 14.9261 5.61935L7.72207 9.85935C7.06837 10.246 6.66815 10.9393 6.66815 11.6993V20.286C6.66815 21.0327 7.06837 21.7393 7.72207 22.126L14.9261 26.366C15.5931 26.766 16.4202 26.766 17.0873 26.366L24.2913 22.126C24.945 21.7393 25.3452 21.046 25.3452 20.286V11.6993C25.3452 10.9527 24.945 10.246 24.2913 9.85935L17.0873 5.61935C16.7538 5.41935 16.3802 5.32602 16.0067 5.32602ZM15.0728 10.0727L14.5392 12.3927C14.2991 13.4593 13.4586 14.2993 12.3913 14.5393L10.07 15.0727C9.62979 15.166 9.32296 15.5527 9.32296 16.006C9.32296 16.4593 9.62979 16.8327 10.07 16.9393L12.3913 17.4727C13.4586 17.7127 14.2991 18.5527 14.5392 19.6194L15.0728 21.9394C15.1662 22.3793 15.5531 22.686 16.0067 22.686C16.4603 22.686 16.8338 22.3793 16.9405 21.9394L17.4742 19.6194C17.7143 18.5527 18.5548 17.7127 19.622 17.4727L21.9433 16.9393C22.3835 16.846 22.6904 16.4593 22.6904 16.006C22.6904 15.5527 22.3835 15.1793 21.9433 15.0727L19.622 14.5393C18.5548 14.2993 17.7143 13.4593 17.4742 12.3927L16.9405 10.0727C16.8471 9.63268 16.4603 9.32602 16.0067 9.32602C15.5531 9.32602 15.1795 9.63268 15.0728 10.0727Z" fill="#F6772C"/></svg></span><div><b>Sensitive Data Intelligence</b><span>Classify content with evidence, label with Purview, quarantine.</span></div></div></div></div>
+            <div class="okw-ctas">
+              <button class="btn btn-outline btn-full" type="button"><svg width="20" height="20" viewBox="0 0 18 18" fill="currentColor" aria-hidden="true"><path d="M7.785 12.375 L12.1725 9.5625 C12.3825 9.4275 12.4875 9.24 12.4875 9 C12.4875 8.76 12.3825 8.5725 12.1725 8.4375 L7.785 5.625 C7.56 5.475 7.33125 5.46375 7.09875 5.59125 C6.86625 5.71875 6.75 5.9175 6.75 6.1875 L6.75 11.8125 C6.75 12.0825 6.86625 12.2813 7.09875 12.4088 C7.33125 12.5363 7.56 12.525 7.785 12.375 Z M9 18 C7.755 18 6.585 17.7638 5.49 17.2913 C4.395 16.8188 3.4425 16.1775 2.6325 15.3675 C1.8225 14.5575 1.18125 13.605 0.70875 12.51 C0.23625 11.415 0 10.245 0 9 C0 7.755 0.23625 6.585 0.70875 5.49 C1.18125 4.395 1.8225 3.4425 2.6325 2.6325 C3.4425 1.8225 4.395 1.18125 5.49 0.70875 C6.585 0.23625 7.755 0 9 0 C10.245 0 11.415 0.23625 12.51 0.70875 C13.605 1.18125 14.5575 1.8225 15.3675 2.6325 C16.1775 3.4425 16.8188 4.395 17.2913 5.49 C17.7638 6.585 18 7.755 18 9 C18 10.245 17.7638 11.415 17.2913 12.51 C16.8188 13.605 16.1775 14.5575 15.3675 15.3675 C14.5575 16.1775 13.605 16.8188 12.51 17.2913 C11.415 17.7638 10.245 18 9 18 Z M9 16.2 C11.01 16.2 12.7125 15.5025 14.1075 14.1075 C15.5025 12.7125 16.2 11.01 16.2 9 C16.2 6.99 15.5025 5.2875 14.1075 3.8925 C12.7125 2.4975 11.01 1.8 9 1.8 C6.99 1.8 5.2875 2.4975 3.8925 3.8925 C2.4975 5.2875 1.8 6.99 1.8 9 C1.8 11.01 2.4975 12.7125 3.8925 14.1075 C5.2875 15.5025 6.99 16.2 9 16.2 Z"/></svg>See What’s New</button>
+              <button class="btn btn-blue btn-full" type="button" onclick="goTo('catalog')">Skip video<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
             </div>
+          </div>
+        </div></div>
+      </div>
 
-            <!-- Right: Welcome content -->
-            <div style="flex:1;display:flex;flex-direction:column;padding:0;overflow-y:auto">
-              <!-- Skip button top-right inside container -->
-              <div style="display:flex;justify-content:flex-end;padding:20px 24px 0">
-                <button class="btn btn-outline" onclick="goTo('connections')">Skip</button>
-              </div>
-              <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 48px 48px">
 
-            <!-- Headline matches the workload splash popups (approved off-spec
-                 Circular Pro Medium 56/64, -2.24px — Figma 7266:29536) instead
-                 of the old Avant Garde 40 (user 2026-07-28). -->
-            <h1 style="font-size:56px;font-weight:500;color:var(--black-100);line-height:64px;letter-spacing:-2.24px;margin-bottom:20px">Welcome to AI &<br>Intelligent Resilience.</h1>
-
-            <p style="font-size: 16px;color:var(--black-60);line-height:24px;margin-bottom:32px">Welcome to a smarter, faster platform that turns data into action, instantly. With Global Search, AI-driven intelligence, precision resilience, and fully custom dashboards, the latest version doesn't just keep up with risk, it stays ahead of it.</p>
-
-            <!-- Feature grid.
-                 Each row pairs a neutral white tile (thin grey border, no
-                 tinted background) with a brand-colored icon. Icons are
-                 the actual Securiti DS glyphs hardcoded inline — pulled
-                 directly from securiti-icons-data.js for the matching
-                 names (discovery-scan-outlined, policy-outlined, etc.).
-                 Inlining means there's no flash of generic glyph while
-                 the runtime swap fires, and the markup is now
-                 self-documenting (the path data IS the icon). The
-                 runtime swap remains a safety net if anything else on
-                 the page needs the same icons. -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:32px">
-              <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:450;color:var(--black-100)"><div style="width:32px;height:32px;border-radius:8px;background:var(--white);border:1px solid var(--border-light);color:#F6772C;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 19.999 19.998" fill="currentColor" aria-hidden="true"><path fill-rule="nonzero" d="M 9.999 19.998 C 9.449 19.998 8.999 19.548 8.999 18.998 L 8.999 11.728 C 8.399 11.378 7.999 10.738 7.999 9.998 C 7.999 8.898 8.899 7.998 9.999 7.998 C 10.739 7.998 11.389 8.398 11.729 8.998 L 18.999 8.998 C 19.549 8.998 19.999 9.448 19.999 9.998 C 19.999 15.518 15.509 19.998 9.999 19.998 Z M 10.999 10.998 L 10.999 17.938 C 14.609 17.488 17.489 14.608 17.939 10.998 L 10.999 10.998 Z M 6.999 19.498 C 6.889 19.498 6.779 19.478 6.669 19.438 C 3.809 18.428 1.589 16.208 0.579 13.358 C -1.271 8.158 1.459 2.428 6.659 0.578 C 9.169 -0.312 11.889 -0.172 14.299 0.978 C 16.709 2.128 18.529 4.148 19.429 6.668 C 19.609 7.188 19.339 7.758 18.819 7.948 C 18.299 8.128 17.729 7.858 17.539 7.338 C 16.829 5.318 15.369 3.708 13.439 2.788 C 11.509 1.868 9.339 1.758 7.329 2.468 C 3.169 3.938 0.989 8.528 2.459 12.688 C 3.269 14.978 5.049 16.748 7.329 17.558 C 7.849 17.738 8.119 18.308 7.939 18.838 C 7.799 19.248 7.409 19.508 6.999 19.508 L 6.999 19.498 Z M 6.999 14.998 C 6.789 14.998 6.579 14.928 6.399 14.798 C 5.939 14.458 5.539 14.048 5.199 13.598 C 3.219 10.948 3.749 7.178 6.399 5.198 C 7.679 4.238 9.259 3.828 10.849 4.058 C 12.439 4.288 13.839 5.118 14.799 6.398 C 15.129 6.838 15.039 7.468 14.599 7.798 C 14.159 8.128 13.529 8.038 13.199 7.598 C 12.559 6.738 11.619 6.188 10.569 6.038 C 9.509 5.888 8.459 6.158 7.599 6.798 C 5.829 8.118 5.479 10.638 6.799 12.398 C 7.029 12.698 7.299 12.968 7.599 13.198 C 8.039 13.528 8.129 14.158 7.799 14.598 C 7.599 14.858 7.299 14.998 6.999 14.998 Z"/></svg></div>Global Search</div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:450;color:var(--black-100)"><div style="width:32px;height:32px;border-radius:8px;background:var(--white);border:1px solid var(--border-light);color:#F6772C;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="nonzero" d="M 7 12.994 C 7 13.543 6.55 13.993 6 13.993 L 5 13.993 C 4.45 13.993 4 13.543 4 12.994 C 4 12.444 4.45 11.994 5 11.994 L 6 11.994 C 6.55 11.994 7 12.444 7 12.994 Z M 4.94 3.998 C 4.39 3.998 3.94 4.448 3.94 4.998 C 3.94 5.547 4.39 5.997 4.94 5.997 L 10.69 5.997 C 11.24 5.997 11.69 5.547 11.69 4.998 C 11.69 4.448 11.24 3.998 10.69 3.998 L 4.94 3.998 Z M 6 17.991 L 2.88 17.991 C 2.4 17.991 2 17.601 2 17.111 L 2 2.879 C 2 2.399 2.39 1.999 2.88 1.999 L 13.12 1.999 C 13.6 1.999 14 2.389 14 2.879 L 14 4.998 C 14 5.547 14.45 5.997 15 5.997 C 15.55 5.997 16 5.547 16 4.998 L 16 2.879 C 16 1.289 14.71 0 13.12 0 L 2.88 0 C 1.29 0 0 1.289 0 2.879 L 0 17.121 C 0 18.701 1.29 20 2.88 20 L 6 20 C 6.55 20 7 19.55 7 19 C 7 18.451 6.55 18.001 6 18.001 L 6 17.991 Z M 7.6 7.996 L 4.94 7.996 C 4.39 7.996 3.94 8.446 3.94 8.996 C 3.94 9.545 4.39 9.995 4.94 9.995 L 7.6 9.995 C 8.15 9.995 8.6 9.545 8.6 8.996 C 8.6 8.446 8.15 7.996 7.6 7.996 Z M 20 10.365 L 20 12.974 C 20 17.971 16.04 19.63 15.25 19.91 C 15.11 19.96 14.96 19.99 14.8 19.99 C 14.64 19.99 14.48 19.96 14.33 19.91 C 13.55 19.63 9.6 17.971 9.6 12.974 L 9.6 10.365 C 9.6 9.365 10.39 8.546 11.36 8.546 L 18.23 8.546 C 19.2 8.546 19.99 9.365 19.99 10.365 L 20 10.365 Z M 18 10.545 L 11.6 10.545 L 11.6 12.974 C 11.6 16.282 13.93 17.571 14.8 17.941 C 15.69 17.561 18 16.262 18 12.974 L 18 10.545 Z M 13.82 15.562 C 14.18 15.862 14.72 15.812 15.02 15.442 L 17.15 12.874 C 17.72 12.184 16.73 11.274 16.09 11.904 L 14.45 13.523 L 13.96 12.894 C 13.72 12.594 13.29 12.504 12.96 12.704 C 12.59 12.924 12.47 13.393 12.69 13.763 C 12.8 13.923 13.67 15.502 13.82 15.572 L 13.82 15.562 Z"/></svg></div>Intelligent Policies</div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:450;color:var(--black-100)"><div style="width:32px;height:32px;border-radius:8px;background:var(--white);border:1px solid var(--border-light);color:#7C3AED;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="nonzero" d="M 1.741 20 C 1.241 20 0.75 19.79 0.41 19.379 C 0.14 19.059 0 18.659 0 18.248 L 0 3.984 C -0.01 2.322 1.341 0.981 2.992 0.981 L 6.994 0.981 C 7.544 0.981 7.994 1.431 7.994 1.982 C 7.994 2.533 7.544 2.983 6.994 2.983 L 2.992 2.983 C 2.441 2.983 1.991 3.433 1.991 3.984 L 1.991 17.698 L 4.582 15.425 C 4.912 15.145 5.313 15.005 5.723 15.005 L 16.999 15.005 C 17.549 15.005 17.999 14.555 17.999 14.004 L 17.999 10.991 C 17.999 10.44 18.449 9.99 19 9.99 C 19.55 9.99 20 10.44 20 10.991 L 20 14.004 C 20 15.656 18.649 17.007 16.999 17.007 L 5.823 17.007 L 2.881 19.58 C 2.541 19.86 2.141 20 1.741 20 Z M 13.997 11.992 C 13.587 11.992 13.207 11.742 13.067 11.351 L 12.226 9.159 C 12.056 8.729 11.966 8.488 11.886 8.378 C 11.806 8.268 11.716 8.178 11.616 8.108 C 11.496 8.028 11.266 7.928 10.835 7.768 L 8.644 6.927 C 8.254 6.777 8.004 6.406 8.004 5.996 C 8.004 5.586 8.254 5.215 8.644 5.065 L 10.835 4.224 C 11.266 4.054 11.506 3.964 11.616 3.884 C 11.726 3.804 11.816 3.714 11.886 3.614 C 11.966 3.493 12.056 3.263 12.226 2.833 L 13.067 0.641 C 13.217 0.25 13.587 0 13.997 0 C 14.407 0 14.787 0.25 14.927 0.641 L 15.768 2.833 C 15.938 3.283 16.028 3.504 16.108 3.624 C 16.178 3.724 16.268 3.814 16.378 3.894 C 16.498 3.974 16.728 4.074 17.159 4.234 L 19.35 5.075 C 19.74 5.225 19.99 5.596 19.99 6.006 C 19.99 6.416 19.74 6.787 19.35 6.937 L 17.159 7.778 C 16.728 7.948 16.488 8.038 16.378 8.118 C 16.268 8.198 16.178 8.288 16.108 8.388 C 16.028 8.498 15.938 8.729 15.768 9.179 L 14.927 11.371 C 14.777 11.762 14.407 12.012 13.997 12.012 L 13.997 11.992 Z M 11.786 5.986 C 12.226 6.156 12.496 6.276 12.776 6.476 C 13.067 6.677 13.317 6.927 13.517 7.217 C 13.717 7.497 13.827 7.768 14.007 8.208 C 14.177 7.778 14.297 7.497 14.497 7.217 C 14.697 6.927 14.947 6.677 15.238 6.476 C 15.518 6.276 15.788 6.166 16.228 5.986 C 15.788 5.816 15.518 5.696 15.238 5.495 C 14.947 5.295 14.697 5.045 14.497 4.755 C 14.297 4.474 14.177 4.194 14.007 3.764 C 13.837 4.204 13.717 4.474 13.517 4.755 C 13.317 5.035 13.067 5.285 12.776 5.495 C 12.496 5.696 12.226 5.806 11.786 5.986 Z"/></svg></div>Contextual Intelligence</div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:450;color:var(--black-100)"><div style="width:32px;height:32px;border-radius:8px;background:var(--white);border:1px solid var(--border-light);color:#FFBB42;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="nonzero" d="M 18.4 20 L 7.6 20 C 6.72 20 6 19.28 6 18.4 L 6 15.6 C 6 14.72 6.72 14 7.6 14 L 10 14 L 10 11.6 C 10 10.72 10.72 10 11.6 10 L 14 10 L 14 7.6 C 14 6.72 14.72 6 15.6 6 L 18.4 6 C 19.28 6 20 6.72 20 7.6 L 20 18.4 C 20 19.28 19.28 20 18.4 20 Z M 8 18 L 18 18 L 18 8 L 16 8 L 16 10.4 C 16 11.28 15.28 12 14.4 12 L 12 12 L 12 14.4 C 12 15.28 11.28 16 10.4 16 L 8 16 L 8 18 Z M 4.4 14 L 1.6 14 C 0.72 14 0 13.28 0 12.4 L 0 9.6 C 0 8.72 0.72 8 1.6 8 L 4.4 8 C 5.28 8 6 8.72 6 9.6 L 6 12.4 C 6 13.28 5.28 14 4.4 14 Z M 2 12 L 4 12 L 4 10 L 2 10 L 2 12 Z M 11.4 7 L 7.6 7 C 6.72 7 6 6.28 6 5.4 L 6 1.6 C 6 0.72 6.72 0 7.6 0 L 11.4 0 C 12.28 0 13 0.72 13 1.6 L 13 5.4 C 13 6.28 12.28 7 11.4 7 Z M 8 5 L 11 5 L 11 2 L 8 2 L 8 5 Z"/></svg></div>Primary Data Intelligence</div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:450;color:var(--black-100)"><div style="width:32px;height:32px;border-radius:8px;background:var(--white);border:1px solid var(--border-light);color:#7C3AED;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="nonzero" d="M 17 20 L 3 20 C 1.35 20 0 18.65 0 17 L 0 3 C 0 1.35 1.35 0 3 0 L 17 0 C 18.65 0 20 1.35 20 3 L 20 17 C 20 18.65 18.65 20 17 20 Z M 2 7 L 2 17 C 2 17.55 2.45 18 3 18 L 17 18 C 17.55 18 18 17.55 18 17 L 18 7 L 2 7 Z M 8 5 L 18 5 L 18 3 C 18 2.45 17.55 2 17 2 L 8 2 L 8 5 Z M 2 5 L 6 5 L 6 2 L 3 2 C 2.45 2 2 2.45 2 3 L 2 5 Z M 15.6 15.8 C 15.05 15.8 14.6 15.35 14.6 14.8 L 14.6 11.75 C 14.6 11.2 15.05 10.75 15.6 10.75 C 16.15 10.75 16.6 11.2 16.6 11.75 L 16.6 14.8 C 16.6 15.35 16.15 15.8 15.6 15.8 Z M 6.9 15.8 C 4.97 15.8 3.4 14.23 3.4 12.3 C 3.4 11.75 3.85 11.3 4.4 11.3 C 4.95 11.3 5.4 11.75 5.4 12.3 C 5.4 13.13 6.07 13.8 6.9 13.8 C 7.73 13.8 8.4 13.13 8.4 12.3 C 8.4 11.47 7.73 10.8 6.9 10.8 C 6.35 10.8 5.9 10.35 5.9 9.8 C 5.9 9.25 6.35 8.8 6.9 8.8 C 8.83 8.8 10.4 10.37 10.4 12.3 C 10.4 14.23 8.83 15.8 6.9 15.8 Z M 12.61 15.8 C 12.06 15.8 11.61 15.35 11.61 14.8 L 11.61 9.8 C 11.61 9.25 12.05 8.8 12.6 8.8 C 13.15 8.8 13.6 9.25 13.6 9.8 L 13.6 14.8 C 13.6 15.35 13.16 15.8 12.61 15.8 Z"/></svg></div>Custom Dashboards</div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:450;color:var(--black-100)"><div style="width:32px;height:32px;border-radius:8px;background:var(--white);border:1px solid var(--border-light);color:var(--green);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 18 20" fill="currentColor" aria-hidden="true"><path fill-rule="nonzero" d="M 15 0 L 3 0 C 1.35 0 0 1.329 0 2.969 L 0 8.876 C 0 17.041 8.61 19.92 8.69 19.95 C 8.79 19.98 8.89 20 9 20 C 9.11 20 9.21 19.98 9.31 19.95 C 9.4 19.92 18 17.041 18 8.876 L 18 2.969 C 18 1.329 16.65 0 15 0 Z M 16 8.876 C 16 14.853 10.41 17.391 9 17.931 C 7.59 17.391 2 14.853 2 8.876 L 2 2.969 C 2 2.439 2.45 1.999 3 1.999 L 15 1.999 C 15.55 1.999 16 2.429 16 2.969 L 16 8.876 Z M 9 12.994 C 8.67 12.994 8.37 12.794 8.25 12.484 L 7.71 11.084 C 7.62 10.845 7.55 10.675 7.51 10.615 C 7.47 10.565 7.43 10.515 7.38 10.485 C 7.32 10.445 7.15 10.375 6.92 10.285 L 5.52 9.745 C 5.21 9.625 5.01 9.325 5.01 8.996 C 5.01 8.666 5.21 8.366 5.52 8.246 L 6.92 7.706 C 7.17 7.606 7.33 7.546 7.39 7.506 C 7.44 7.466 7.49 7.426 7.53 7.366 C 7.57 7.306 7.64 7.136 7.73 6.897 L 8.27 5.497 C 8.39 5.187 8.69 4.988 9.02 4.988 C 9.35 4.988 9.65 5.187 9.77 5.497 L 10.31 6.897 C 10.41 7.146 10.47 7.306 10.51 7.366 C 10.55 7.416 10.59 7.466 10.65 7.506 C 10.71 7.546 10.87 7.606 11.12 7.706 L 12.52 8.246 C 12.83 8.366 13.03 8.666 13.03 8.996 C 13.03 9.325 12.83 9.625 12.52 9.745 L 11.12 10.285 C 10.87 10.375 10.71 10.445 10.65 10.485 C 10.6 10.525 10.55 10.565 10.52 10.625 C 10.48 10.685 10.41 10.845 10.33 11.084 L 9.79 12.494 C 9.67 12.804 9.37 13.003 9.04 13.003 L 9 12.994 Z"/></svg></div>Precision Resilience</div>
-              <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:450;color:var(--black-100)"><div style="width:32px;height:32px;border-radius:8px;background:var(--white);border:1px solid var(--border-light);color:#2A9D93;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 20 18" fill="currentColor" aria-hidden="true"><path fill-rule="nonzero" d="M 13.69 9 C 13.69 9.29 13.51 9.56 13.23 9.66 L 11.92 10.16 C 11.69 10.25 11.54 10.31 11.48 10.35 C 11.43 10.39 11.38 10.43 11.35 10.48 C 11.31 10.54 11.25 10.69 11.16 10.92 L 10.66 12.23 C 10.55 12.5 10.29 12.69 10 12.69 C 9.71 12.69 9.44 12.51 9.34 12.23 L 8.84 10.92 C 8.75 10.69 8.69 10.54 8.65 10.48 C 8.61 10.43 8.57 10.38 8.52 10.35 C 8.46 10.31 8.31 10.25 8.08 10.16 L 6.77 9.66 C 6.5 9.55 6.31 9.29 6.31 9 C 6.31 8.71 6.49 8.44 6.77 8.34 L 8.08 7.84 C 8.32 7.75 8.47 7.69 8.52 7.65 C 8.57 7.61 8.62 7.57 8.65 7.52 C 8.69 7.46 8.75 7.31 8.84 7.08 L 9.34 5.77 C 9.45 5.5 9.71 5.31 10 5.31 C 10.29 5.31 10.56 5.49 10.66 5.77 L 11.16 7.08 C 11.25 7.31 11.31 7.46 11.35 7.52 C 11.39 7.57 11.43 7.62 11.48 7.65 C 11.54 7.69 11.68 7.75 11.9 7.83 L 13.22 8.34 C 13.49 8.45 13.68 8.71 13.68 9 L 13.69 9 Z M 20 15.8 C 20 17.02 19.02 18 17.8 18 C 17.03 18 16.35 17.6 15.96 17 L 4.04 17 C 3.65 17.6 2.97 18 2.2 18 C 0.98 18 0 17.02 0 15.8 C 0 15.03 0.4 14.35 1 13.96 L 1 4.04 C 0.4 3.65 0 2.97 0 2.2 C 0 0.98 0.98 0 2.2 0 C 2.97 0 3.65 0.4 4.04 1 L 15.96 1 C 16.35 0.4 17.03 0 17.8 0 C 19.02 0 20 0.98 20 2.2 C 20 2.97 19.6 3.65 19 4.04 L 19 13.96 C 19.6 14.35 20 15.03 20 15.8 Z M 4.24 15 L 15.75 15 C 15.97 14.43 16.42 13.98 16.99 13.76 L 16.99 4.24 C 16.42 4.02 15.97 3.57 15.75 3 L 4.24 3 C 4.02 3.57 3.57 4.02 3 4.24 L 3 13.75 C 3.57 13.97 4.02 14.42 4.24 14.99 L 4.24 15 Z"/></svg></div>Backup AI Agents</div>
+      <!-- ========== SCREEN: OKTA WELCOME (Figma 19433:137242) ========== -->
+      <div class="screen" id="screen-okta-welcome">
+        <div class="okw-wrap"><div class="okw-card">
+          <div class="okw-visual"><svg class="okw-art" viewBox="0 0 700 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+<defs><pattern id="okw-grid" width="44" height="44" patternUnits="userSpaceOnUse"><path d="M44 0H0V44" fill="none" stroke="#01804a" stroke-opacity=".05"/></pattern>
+<radialGradient id="okw-node" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#f2fffa"/><stop offset="1" stop-color="#bfeed6"/></radialGradient></defs>
+<rect width="700" height="900" fill="url(#okw-grid)"/>
+<path d="M0 640 L330 940 L700 560 L700 900 L0 900Z" fill="#e4f7ec" opacity=".75"/>
+<g fill="none" stroke="#8fe3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".95">
+<path d="M112 128 V320"/><path d="M178 190 H340 Q372 190 372 222 V300 H520 Q556 300 556 336 V610 H640"/>
+<path d="M112 320 H318 Q350 320 350 352 V420 H570 Q604 420 604 454 V700"/><path d="M112 320 V470 Q112 500 82 500 H60"/>
+<path d="M610 330 V230 Q610 196 576 196 H470"/><path d="M370 700 V780 Q370 806 396 806 H468"/></g>
+<g stroke="#fff" stroke-width="3"><circle cx="112" cy="128" r="17" fill="url(#okw-node)"/><circle cx="178" cy="190" r="15" fill="url(#okw-node)"/>
+<circle cx="112" cy="320" r="17" fill="#e8eefc"/><circle cx="604" cy="330" r="17" fill="#f3efd6"/><circle cx="640" cy="610" r="21" fill="url(#okw-node)"/>
+<circle cx="60" cy="500" r="14" fill="#f3efd6"/><circle cx="468" cy="806" r="8" fill="url(#okw-node)"/><circle cx="520" cy="470" r="11" fill="url(#okw-node)"/></g></svg>
+            <span class="okw-tag">New in Identity protection</span>
+            <button class="okw-play" type="button" aria-label="See what’s new"><span class="ring"><span class="btn-c"><svg width="54" height="54" viewBox="0 0 24 24" fill="#fff"><path d="M8 5.5v13l11-6.5z"/></svg></span></span><span class="pill">See what’s new</span></button>
+          </div>
+          <div class="okw-body">
+            <div class="okw-top"><button class="btn btn-outline" style="height:36px;gap:8px" onclick="goTo('catalog')"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z"/></svg>Back to catalog</button><button class="okw-icbtn" type="button" aria-label="Close" onclick="goTo('catalog')"><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 11.4195L5.03169 16.3878C4.8458 16.5737 4.60921 16.6667 4.32193 16.6667C4.03464 16.6667 3.79806 16.5737 3.61217 16.3878C3.42628 16.2019 3.33333 15.9654 3.33333 15.6781C3.33333 15.3908 3.42628 15.1542 3.61217 14.9683L8.58048 10L3.61217 5.03169C3.42628 4.8458 3.33333 4.60921 3.33333 4.32193C3.33333 4.03464 3.42628 3.79806 3.61217 3.61217C3.79806 3.42628 4.03464 3.33333 4.32193 3.33333C4.60921 3.33333 4.8458 3.42628 5.03169 3.61217L10 8.58048L14.9683 3.61217C15.1542 3.42628 15.3908 3.33333 15.6781 3.33333C15.9654 3.33333 16.2019 3.42628 16.3878 3.61217C16.5737 3.79806 16.6667 4.03464 16.6667 4.32193C16.6667 4.60921 16.5737 4.8458 16.3878 5.03169L11.4195 10L16.3878 14.9683C16.5737 15.1542 16.6667 15.3908 16.6667 15.6781C16.6667 15.9654 16.5737 16.2019 16.3878 16.3878C16.2019 16.5737 15.9654 16.6667 15.6781 16.6667C15.3908 16.6667 15.1542 16.5737 14.9683 16.3878L10 11.4195Z"/></svg></button></div>
+            <div class="okw-scroll"><h1 class="okw-h1">Welcome to Veeam Intelligent ResOps for Okta</h1>
+            <p class="okw-lede"><strong>iResOps for Okta</strong> is the context layer for your identity tenant. See every user, group, app and policy, which users and AI agents can change them, and what’s gone stale. Take action: restore a single rule, or undo an agent’s changes.</p>
+            <div class="okw-feats"><div class="okw-feat"><span class="t"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M5.20758 25.6436C4.87788 25.6436 4.60152 25.5321 4.37849 25.3091C4.15546 25.0861 4.04395 24.8097 4.04395 24.48V17.4982C4.04395 17.1685 4.15546 16.8921 4.37849 16.6691C4.60152 16.4461 4.87788 16.3345 5.20758 16.3345H12.1894C12.5191 16.3345 12.7955 16.4461 13.0185 16.6691C13.2415 16.8921 13.353 17.1685 13.353 17.4982V24.48C13.353 24.8097 13.2415 25.0861 13.0185 25.3091C12.7955 25.5321 12.5191 25.6436 12.1894 25.6436H5.20758ZM6.37122 23.3164H11.0258V18.6618H6.37122V23.3164ZM18.8512 13.4255H10.1821C9.73607 13.4255 9.40152 13.2267 9.17849 12.8291C8.95546 12.4315 8.96031 12.0388 9.19304 11.6509L13.5276 4.58182C13.7603 4.19394 14.09 4 14.5167 4C14.9433 4 15.273 4.19394 15.5058 4.58182L19.8403 11.6509C20.073 12.0388 20.0779 12.4315 19.8549 12.8291C19.6318 13.2267 19.2973 13.4255 18.8512 13.4255ZM12.2476 11.0982H16.7858L14.5167 7.43273L12.2476 11.0982ZM26.0076 27.68L23.7385 25.4109C23.3312 25.6824 22.89 25.8861 22.4149 26.0218C21.9397 26.1576 21.4403 26.2255 20.9167 26.2255C19.4621 26.2255 18.2258 25.7164 17.2076 24.6982C16.1894 23.68 15.6803 22.4436 15.6803 20.9891C15.6803 19.5345 16.1894 18.2982 17.2076 17.28C18.2258 16.2618 19.4621 15.7527 20.9167 15.7527C22.3712 15.7527 23.6076 16.2618 24.6258 17.28C25.6439 18.2982 26.153 19.5345 26.153 20.9891C26.153 21.4933 26.0852 21.983 25.9494 22.4582C25.8136 22.9333 25.6197 23.3745 25.3676 23.7818L27.6367 26.0509C27.85 26.2642 27.9567 26.5358 27.9567 26.8655C27.9567 27.1952 27.85 27.4667 27.6367 27.68C27.4233 27.8933 27.1518 28 26.8221 28C26.4924 28 26.2209 27.8933 26.0076 27.68ZM20.9167 23.8982C21.7312 23.8982 22.4197 23.617 22.9821 23.0545C23.5446 22.4921 23.8258 21.8036 23.8258 20.9891C23.8258 20.1745 23.5446 19.4861 22.9821 18.9236C22.4197 18.3612 21.7312 18.08 20.9167 18.08C20.1021 18.08 19.4136 18.3612 18.8512 18.9236C18.2888 19.4861 18.0076 20.1745 18.0076 20.9891C18.0076 21.8036 18.2888 22.4921 18.8512 23.0545C19.4136 23.617 20.1021 23.8982 20.9167 23.8982Z" fill="#1CA8DD"/></svg></span><div><b>Identity Discovery</b><span>Every user, group, app, policy and federation cataloged, within hours.</span></div></div><div class="okw-feat"><span class="t"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M15.0537 29.3337H12.0003C11.267 29.3337 10.667 28.7337 10.667 28.0003V26.0803C10.667 25.1337 10.667 24.5603 10.9203 23.9337C11.1737 23.3203 11.5737 22.907 12.2537 22.2403L16.4803 18.0137C16.2137 16.027 16.8803 14.0003 18.307 12.5603C20.827 10.0403 24.9203 10.0403 27.4403 12.5603C29.9603 15.0803 29.9603 19.1737 27.4403 21.6937C26.0003 23.1337 23.9737 23.8003 21.987 23.5203L21.1603 24.347C20.6137 24.8937 20.2937 25.2137 19.8003 25.467C19.307 25.707 18.8537 25.7737 18.0937 25.8803L17.8937 25.907L17.7337 27.0003C17.707 27.187 17.6937 27.267 17.667 27.347C17.5737 27.6937 17.427 27.987 17.2137 28.2537C17.147 28.3337 17.0803 28.4003 16.9603 28.5337C16.787 28.707 16.707 28.787 16.6137 28.8537C16.2937 29.0937 15.907 29.2537 15.507 29.307C15.4003 29.3203 15.2803 29.3337 15.0537 29.3337ZM13.3337 26.667H15.0937L15.387 24.547C15.467 23.9603 15.9337 23.4937 16.5203 23.4137L17.707 23.2403C18.147 23.1737 18.4937 23.1337 18.6003 23.0803C18.707 23.027 18.9603 22.7737 19.267 22.467L20.6003 21.1337C20.9337 20.8003 21.427 20.667 21.8803 20.787C23.187 21.1337 24.587 20.7603 25.547 19.8003C27.027 18.3203 27.027 15.9203 25.547 14.4403C24.067 12.9603 21.667 12.9603 20.187 14.4403C19.227 15.4003 18.8537 16.8003 19.2003 18.107C19.3203 18.5737 19.2003 19.0537 18.8537 19.4003L14.1337 24.1203C13.747 24.5203 13.427 24.827 13.3737 24.947C13.3203 25.0803 13.3203 25.5203 13.3203 26.0803V26.667H13.3337ZM7.33366 25.3337C4.76033 25.3337 2.66699 23.2403 2.66699 20.667V7.33366C2.66699 4.76033 4.76033 2.66699 7.33366 2.66699H20.667C23.2403 2.66699 25.3337 4.76033 25.3337 7.33366C25.3337 8.06699 24.7337 8.66699 24.0003 8.66699C23.267 8.66699 22.667 8.06699 22.667 7.33366C22.667 6.22699 21.7737 5.33366 20.667 5.33366H16.2403V7.08033L18.2003 9.04033C18.7203 9.56033 18.7203 10.4003 18.2003 10.9203C17.6803 11.4403 16.8403 11.4403 16.3203 10.9203L13.9737 8.57366C13.7203 8.32032 13.587 7.98699 13.587 7.62699V5.32033H10.8003V9.80032L14.5603 13.5603C15.0803 14.0803 15.0803 14.9203 14.5603 15.4403C14.0403 15.9603 13.2003 15.9603 12.6803 15.4403L10.8137 13.5737V15.6803C11.8803 16.187 12.627 17.2803 12.627 18.5337C12.627 20.267 11.2137 21.6803 9.48033 21.6803C7.74699 21.6803 6.33366 20.267 6.33366 18.5337C6.33366 17.267 7.08033 16.187 8.14699 15.6803V5.33366H7.36033C6.25366 5.33366 5.36033 6.22699 5.36033 7.33366V20.667C5.36033 21.7737 6.25366 22.667 7.36033 22.667C8.09366 22.667 8.69366 23.267 8.69366 24.0003C8.69366 24.7337 8.09366 25.3337 7.36033 25.3337H7.33366ZM9.45366 18.067C9.18699 18.067 8.97366 18.2803 8.97366 18.547C8.97366 18.8137 9.18699 19.027 9.45366 19.027C9.72033 19.027 9.93366 18.8137 9.93366 18.547C9.93366 18.2803 9.72033 18.067 9.45366 18.067ZM22.8803 18.467C22.5337 18.467 22.2003 18.3337 21.9337 18.0803C21.4137 17.5603 21.4137 16.707 21.9337 16.187C22.4537 15.667 23.2937 15.667 23.8137 16.187C24.3337 16.7203 24.3337 17.5603 23.8137 18.0803C23.547 18.347 23.2137 18.467 22.867 18.467H22.8803Z" fill="#3BBCCE"/></svg></span><div><b>Access &amp; AI Agent Intelligence</b><span>Track every user and AI agent’s access, and every change they make.</span></div></div><div class="okw-feat"><span class="t"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M22.1337 29.3337C19.347 29.3337 16.7737 27.6937 15.6003 25.1603C15.2937 24.4937 15.587 23.6937 16.2537 23.387C16.9203 23.0803 17.7203 23.3737 18.027 24.0403C18.7603 25.6403 20.387 26.667 22.1337 26.667C24.6403 26.667 26.667 24.627 26.667 22.1337C26.667 19.6403 24.627 17.6003 22.1337 17.6003C21.4003 17.6003 20.8003 17.0003 20.8003 16.267C20.8003 15.5337 21.4003 14.9337 22.1337 14.9337C26.107 14.9337 29.3337 18.1603 29.3337 22.1337C29.3337 26.107 26.107 29.3337 22.1337 29.3337ZM13.3337 29.3337H6.66699C4.46699 29.3337 2.66699 27.5337 2.66699 25.3337V6.66699C2.66699 4.46699 4.46699 2.66699 6.66699 2.66699H25.3337C27.5337 2.66699 29.3337 4.46699 29.3337 6.66699V12.0003C29.3337 12.7337 28.7337 13.3337 28.0003 13.3337C27.427 13.3337 26.947 12.9737 26.7603 12.4803H5.33366V25.3337C5.33366 26.067 5.93366 26.667 6.66699 26.667H13.3337C14.067 26.667 14.667 27.267 14.667 28.0003C14.667 28.7337 14.067 29.3337 13.3337 29.3337ZM5.33366 9.81366H26.667V6.66699C26.667 5.93366 26.067 5.33366 25.3337 5.33366H6.66699C5.93366 5.33366 5.33366 5.93366 5.33366 6.66699V9.81366ZM22.1337 25.8137C21.4003 25.8137 20.8003 25.2137 20.8003 24.4803C20.8003 23.747 21.4003 23.147 22.1337 23.147C22.6937 23.147 23.147 22.6937 23.147 22.1337C23.147 21.5737 22.6937 21.1203 22.1337 21.1203C21.4003 21.1203 20.8003 20.5203 20.8003 19.787C20.8003 19.0537 21.4003 18.4537 22.1337 18.4537C24.1603 18.4537 25.8137 20.107 25.8137 22.1337C25.8137 24.1603 24.1603 25.8137 22.1337 25.8137ZM13.4137 21.3337H9.33366C8.60033 21.3337 8.00033 20.7337 8.00033 20.0003C8.00033 19.267 8.60033 18.667 9.33366 18.667H13.4137C14.147 18.667 14.747 19.267 14.747 20.0003C14.747 20.7337 14.147 21.3337 13.4137 21.3337ZM9.33366 17.347C8.60033 17.347 8.00033 16.747 8.00033 16.0137C8.00033 15.2803 8.60033 14.6803 9.33366 14.6803H16.0003C16.787 14.627 17.3337 15.267 17.3337 16.0003C17.3337 16.7337 16.7337 17.3337 16.0003 17.3337H9.33366V17.347ZM16.0003 8.98699C15.267 8.98699 14.667 8.38699 14.667 7.65366C14.667 6.92033 15.2537 6.32033 16.0003 6.32033C16.7337 6.32033 17.3337 6.92033 17.3337 7.65366C17.3337 8.38699 16.7337 8.98699 16.0003 8.98699ZM12.0003 8.98699C11.267 8.98699 10.667 8.38699 10.667 7.65366C10.667 6.92033 11.2537 6.32033 12.0003 6.32033C12.7337 6.32033 13.3337 6.92033 13.3337 7.65366C13.3337 8.38699 12.7337 8.98699 12.0003 8.98699ZM8.01366 8.98699C7.28033 8.98699 6.68033 8.38699 6.68033 7.65366C6.68033 6.92033 7.26699 6.32033 8.01366 6.32033C8.74699 6.32033 9.34699 6.92033 9.34699 7.65366C9.34699 8.38699 8.74699 8.98699 8.01366 8.98699Z" fill="#98269B"/></svg></span><div><b>Identity Lifecycle</b><span>Inactive users, empty groups and unused apps cluttering your tenant.</span></div></div><div class="okw-feat"><span class="t"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M12.61 20.8001H5.2C4.86 20.8001 4.575 20.6851 4.345 20.4551C4.115 20.2251 4 19.9401 4 19.6001C4 19.2601 4.115 18.9751 4.345 18.7451C4.575 18.5151 4.86 18.4001 5.2 18.4001H12.61L10.36 16.1501C10.14 15.9301 10.03 15.6551 10.03 15.3251C10.03 14.9951 10.14 14.7101 10.36 14.4701C10.6 14.2301 10.885 14.1101 11.215 14.1101C11.545 14.1101 11.83 14.2301 12.07 14.4701L16.36 18.7601C16.48 18.8801 16.565 19.0101 16.615 19.1501C16.665 19.2901 16.69 19.4401 16.69 19.6001C16.69 19.7601 16.665 19.9101 16.615 20.0501C16.565 20.1901 16.48 20.3201 16.36 20.4401L12.04 24.7601C11.8 25.0001 11.52 25.1151 11.2 25.1051C10.88 25.0951 10.6 24.9701 10.36 24.7301C10.14 24.4901 10.025 24.2101 10.015 23.8901C10.005 23.5701 10.12 23.2901 10.36 23.0501L12.61 20.8001ZM19.39 13.6001L21.64 15.8501C21.86 16.0701 21.97 16.3451 21.97 16.6751C21.97 17.0051 21.86 17.2901 21.64 17.5301C21.4 17.7701 21.115 17.8901 20.785 17.8901C20.455 17.8901 20.17 17.7701 19.93 17.5301L15.64 13.2401C15.52 13.1201 15.435 12.9901 15.385 12.8501C15.335 12.7101 15.31 12.5601 15.31 12.4001C15.31 12.2401 15.335 12.0901 15.385 11.9501C15.435 11.8101 15.52 11.6801 15.64 11.5601L19.96 7.24013C20.2 7.00013 20.48 6.88513 20.8 6.89513C21.12 6.90513 21.4 7.03013 21.64 7.27013C21.86 7.51013 21.975 7.79013 21.985 8.11013C21.995 8.43013 21.88 8.71013 21.64 8.95013L19.39 11.2001H26.8C27.14 11.2001 27.425 11.3151 27.655 11.5451C27.885 11.7751 28 12.0601 28 12.4001C28 12.7401 27.885 13.0251 27.655 13.2551C27.425 13.4851 27.14 13.6001 26.8 13.6001H19.39Z" fill="#1CA8DD"/></svg></span><div><b>Rule-Level Diff &amp; Restore</b><span>See exactly what changed in a policy or rule, and restore just that.</span></div></div><div class="okw-feat"><span class="t"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M21.3377 29.3337C20.7913 29.3337 20.2848 29.0004 20.0983 28.4804L18.9788 25.5608C18.7523 24.9875 18.6323 24.6676 18.5257 24.5209C18.4191 24.3743 18.2992 24.2543 18.1659 24.161C18.006 24.0543 17.6861 23.921 17.1131 23.7077L14.1946 22.5878C13.6748 22.3879 13.3417 21.8946 13.3417 21.348C13.3417 20.8014 13.6748 20.2948 14.1946 20.1081L17.1131 18.9883C17.6861 18.7616 18.006 18.6417 18.1526 18.535C18.2858 18.4417 18.4058 18.3217 18.5124 18.1751C18.619 18.0151 18.7523 17.6951 18.9655 17.1219L20.085 14.2022C20.2849 13.6823 20.7779 13.349 21.3243 13.349C21.8707 13.349 22.3771 13.6823 22.5637 14.2022L23.6832 17.1219C23.9097 17.6951 24.0296 18.0151 24.1363 18.1751C24.2295 18.3084 24.3495 18.4284 24.4961 18.535C24.656 18.6417 24.9625 18.7616 25.5356 18.9883L28.4674 20.1081C28.9872 20.3081 29.3203 20.8014 29.3203 21.348C29.3203 21.8946 28.9872 22.4012 28.4674 22.5878L25.5489 23.7077C24.9758 23.9343 24.656 24.0543 24.5094 24.161C24.3628 24.2676 24.2429 24.3876 24.1496 24.5209C24.043 24.6809 23.923 24.9875 23.6965 25.5608L22.577 28.4804C22.3771 29.0004 21.8841 29.3337 21.3377 29.3337ZM18.3925 21.3347C18.9788 21.5613 19.3387 21.7213 19.7118 21.9879C20.0983 22.2545 20.4181 22.5878 20.698 22.9745C20.9645 23.3344 21.1244 23.721 21.351 24.2943C21.5775 23.7077 21.7375 23.3477 22.004 22.9745C22.2705 22.5878 22.6037 22.2545 22.9902 21.9879C23.35 21.7213 23.7365 21.5613 24.3095 21.3347C23.7365 21.108 23.35 20.948 22.9902 20.6814C22.617 20.4148 22.2838 20.0815 22.004 19.6949C21.7375 19.3216 21.5909 18.9616 21.351 18.375C21.1244 18.9483 20.9645 19.3216 20.698 19.6949C20.4314 20.0815 20.0983 20.4148 19.7118 20.6814C19.3387 20.948 18.9788 21.108 18.3925 21.3347ZM10.4631 24.001H6.67832C5.94535 24.001 5.34565 23.4011 5.34565 22.6678C5.34565 21.9346 5.94535 21.3347 6.67832 21.3347H10.4631C11.1961 21.3347 11.7958 21.9346 11.7958 22.6678C11.7958 23.4011 11.1961 24.001 10.4631 24.001ZM28.001 17.3352C27.268 17.3352 26.6683 16.7352 26.6683 16.002C26.6683 13.0557 24.2829 10.6693 21.3377 10.6693H7.22471L10.2765 13.7223C10.7963 14.2422 10.7963 15.0821 10.2765 15.602C9.75678 16.122 8.9172 16.122 8.39746 15.602L3.06679 10.2827C2.93353 10.1494 2.84024 10.0027 2.77361 9.84276C2.70697 9.68278 2.66699 9.5228 2.66699 9.33616C2.66699 9.14951 2.70697 8.9762 2.77361 8.82955C2.84024 8.66957 2.93353 8.52293 3.06679 8.38961L8.39746 3.05694C8.9172 2.53701 9.75678 2.53701 10.2765 3.05694C10.7963 3.57688 10.7963 4.41677 10.2765 4.93671L7.22471 7.98966H21.3377C25.7488 7.98966 29.3337 11.5759 29.3337 15.9887C29.3337 16.7219 28.734 17.3218 28.001 17.3218V17.3352Z" fill="#5F50AE"/></svg></span><div><b>Undo AI</b><span>Roll back an agent’s changes to users, groups and policies.</span></div></div><div class="okw-feat"><span class="t"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M8.2 28C7.04 28 6.05 27.59 5.23 26.77C4.41 25.95 4 24.96 4 23.8C4 22.64 4.41 21.65 5.23 20.83C6.05 20.01 7.04 19.6 8.2 19.6C8.56 19.6 8.91 19.645 9.25 19.735C9.59 19.825 9.91 19.95 10.21 20.11L14.8 15.52V12.22C13.92 11.96 13.2 11.465 12.64 10.735C12.08 10.005 11.8 9.16 11.8 8.2C11.8 7.04 12.21 6.05 13.03 5.23C13.85 4.41 14.84 4 16 4C17.16 4 18.15 4.41 18.97 5.23C19.79 6.05 20.2 7.04 20.2 8.2C20.2 9.16 19.92 10.005 19.36 10.735C18.8 11.465 18.08 11.96 17.2 12.22V15.52L21.82 20.11C22.12 19.95 22.435 19.825 22.765 19.735C23.095 19.645 23.44 19.6 23.8 19.6C24.96 19.6 25.95 20.01 26.77 20.83C27.59 21.65 28 22.64 28 23.8C28 24.96 27.59 25.95 26.77 26.77C25.95 27.59 24.96 28 23.8 28C22.64 28 21.65 27.59 20.83 26.77C20.01 25.95 19.6 24.96 19.6 23.8C19.6 23.44 19.645 23.09 19.735 22.75C19.825 22.41 19.95 22.09 20.11 21.79L16 17.68L11.89 21.79C12.05 22.09 12.175 22.41 12.265 22.75C12.355 23.09 12.4 23.44 12.4 23.8C12.4 24.96 11.99 25.95 11.17 26.77C10.35 27.59 9.36 28 8.2 28ZM23.8 25.6C24.3 25.6 24.725 25.425 25.075 25.075C25.425 24.725 25.6 24.3 25.6 23.8C25.6 23.3 25.425 22.875 25.075 22.525C24.725 22.175 24.3 22 23.8 22C23.3 22 22.875 22.175 22.525 22.525C22.175 22.875 22 23.3 22 23.8C22 24.3 22.175 24.725 22.525 25.075C22.875 25.425 23.3 25.6 23.8 25.6ZM16 10C16.5 10 16.925 9.825 17.275 9.475C17.625 9.125 17.8 8.7 17.8 8.2C17.8 7.7 17.625 7.275 17.275 6.925C16.925 6.575 16.5 6.4 16 6.4C15.5 6.4 15.075 6.575 14.725 6.925C14.375 7.275 14.2 7.7 14.2 8.2C14.2 8.7 14.375 9.125 14.725 9.475C15.075 9.825 15.5 10 16 10ZM8.2 25.6C8.7 25.6 9.125 25.425 9.475 25.075C9.825 24.725 10 24.3 10 23.8C10 23.3 9.825 22.875 9.475 22.525C9.125 22.175 8.7 22 8.2 22C7.7 22 7.275 22.175 6.925 22.525C6.575 22.875 6.4 23.3 6.4 23.8C6.4 24.3 6.575 24.725 6.925 25.075C7.275 25.425 7.7 25.6 8.2 25.6Z" fill="#F6772C"/></svg></span><div><b>Dependency-Aware Recovery</b><span>Restore users, groups, apps and policies in order, links intact.</span></div></div></div></div>
+            <div class="okw-ctas">
+              <button class="btn btn-outline btn-full" type="button"><svg width="20" height="20" viewBox="0 0 18 18" fill="currentColor" aria-hidden="true"><path d="M7.785 12.375 L12.1725 9.5625 C12.3825 9.4275 12.4875 9.24 12.4875 9 C12.4875 8.76 12.3825 8.5725 12.1725 8.4375 L7.785 5.625 C7.56 5.475 7.33125 5.46375 7.09875 5.59125 C6.86625 5.71875 6.75 5.9175 6.75 6.1875 L6.75 11.8125 C6.75 12.0825 6.86625 12.2813 7.09875 12.4088 C7.33125 12.5363 7.56 12.525 7.785 12.375 Z M9 18 C7.755 18 6.585 17.7638 5.49 17.2913 C4.395 16.8188 3.4425 16.1775 2.6325 15.3675 C1.8225 14.5575 1.18125 13.605 0.70875 12.51 C0.23625 11.415 0 10.245 0 9 C0 7.755 0.23625 6.585 0.70875 5.49 C1.18125 4.395 1.8225 3.4425 2.6325 2.6325 C3.4425 1.8225 4.395 1.18125 5.49 0.70875 C6.585 0.23625 7.755 0 9 0 C10.245 0 11.415 0.23625 12.51 0.70875 C13.605 1.18125 14.5575 1.8225 15.3675 2.6325 C16.1775 3.4425 16.8188 4.395 17.2913 5.49 C17.7638 6.585 18 7.755 18 9 C18 10.245 17.7638 11.415 17.2913 12.51 C16.8188 13.605 16.1775 14.5575 15.3675 15.3675 C14.5575 16.1775 13.605 16.8188 12.51 17.2913 C11.415 17.7638 10.245 18 9 18 Z M9 16.2 C11.01 16.2 12.7125 15.5025 14.1075 14.1075 C15.5025 12.7125 16.2 11.01 16.2 9 C16.2 6.99 15.5025 5.2875 14.1075 3.8925 C12.7125 2.4975 11.01 1.8 9 1.8 C6.99 1.8 5.2875 2.4975 3.8925 3.8925 C2.4975 5.2875 1.8 6.99 1.8 9 C1.8 11.01 2.4975 12.7125 3.8925 14.1075 C5.2875 15.5025 6.99 16.2 9 16.2 Z"/></svg>See What’s New</button>
+              <button class="btn btn-blue btn-full" type="button" onclick="goTo('okta-configure')">Skip video<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
             </div>
+          </div>
+        </div></div>
+      </div>
 
-            <!-- CTAs -->
-            <div style="display:flex;flex-direction:column;gap:8px">
-              <button class="btn btn-outline btn-full" style="height:44px;gap:8px;justify-content:center">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-                See What's New
-              </button>
-              <button class="btn btn-blue btn-full" onclick="goTo('catalog')" style="height:44px;gap:6px;justify-content:center">
-                Connect Now
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </button>
+      <!-- ========== SCREEN: CONFIGURE OKTA — first-time dashboard with the connect dialog (Figma 19433:137914 / 19436:139394) ========== -->
+      <div class="screen" id="screen-okta-configure">
+        <div class="okc-wrap">
+          <div class="okc-bg"><h2>Intelligent Resilience Ops - Overview</h2><p>What is in your deployment, what it costs you, and what to do about it next.</p><div class="row"><div class="c">Users<i>No Data<br>Configure a workload to populate</i></div><div class="c">Groups<i>No Data<br>Configure a workload to populate</i></div><div class="c">Mailboxes<i>No Data<br>Configure a workload to populate</i></div><div class="c">Onedrives<i>No Data<br>Configure a workload to populate</i></div></div><div class="row"><div class="c">Users<i>No Data<br>Configure a workload to populate</i></div><div class="c">Groups<i>No Data<br>Configure a workload to populate</i></div><div class="c">Mailboxes<i>No Data<br>Configure a workload to populate</i></div><div class="c">Onedrives<i>No Data<br>Configure a workload to populate</i></div></div></div>
+          <div class="okc-scrim"></div>
+          <div class="okc-modal" role="dialog" aria-label="Configure Okta">
+            <div class="okc-head"><span class="deco" style="right:150px;top:30px"></span><span class="deco" style="right:-10px;top:10px"></span><h2>Configure Okta</h2><p>Connect Okta to enable these features:</p></div>
+            <div class="okc-body">
+              <div class="okc-grid"><div class="okc-card"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.93 20H4.91C4.64 20 4.38 19.8805 4.2 19.6814L2.27 17.6204C1.89 17.2222 1.92 16.5849 2.32 16.2166C2.72 15.8382 3.36 15.8681 3.73 16.2663L4.95 17.5706L8.29 14.2452C8.68 13.8569 9.31 13.8569 9.7 14.2452C10.09 14.6335 10.09 15.2607 9.7 15.649L5.63 19.7013C5.44 19.8905 5.19 19.99 4.92 19.99L4.93 20ZM21 17.939H13C12.45 17.939 12 17.491 12 16.9434C12 16.3958 12.45 15.9477 13 15.9477H21C21.55 15.9477 22 16.3958 22 16.9434C22 17.491 21.55 17.939 21 17.939ZM21 12.9608H13C12.45 12.9608 12 12.5128 12 11.9652C12 11.4175 12.45 10.9695 13 10.9695H21C21.55 10.9695 22 11.4175 22 11.9652C22 12.5128 21.55 12.9608 21 12.9608ZM8 11.9652H4C2.9 11.9652 2 11.0691 2 9.97386V5.99129C2 4.89608 2.9 4 4 4H8C9.1 4 10 4.89608 10 5.99129V9.97386C10 11.0691 9.1 11.9652 8 11.9652ZM4 5.99129V9.97386H8V5.99129H4ZM21 7.98258H13C12.45 7.98258 12 7.53454 12 6.98693C12 6.43933 12.45 5.99129 13 5.99129H21C21.55 5.99129 22 6.43933 22 6.98693C22 7.53454 21.55 7.98258 21 7.98258Z" fill="#01804A"/></svg><div><b>Full inventory</b><span>Users, groups, policies, apps and federations in your organization</span></div></div><div class="okc-card"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 21.99H14C12.9 21.99 12 21.0905 12 19.991V11.995C12 10.8956 12.9 9.996 14 9.996H18C18.52 9.996 19.01 10.1959 19.39 10.5557L21.39 12.4848C21.78 12.8546 22 13.3843 22 13.924V20.001C22 21.1004 21.1 22 20 22V21.99ZM14 11.995V19.991H20V13.914L18 11.995H14ZM9.13 21.99H5C3.35 21.99 2 20.6407 2 18.9915V15.4933C2 13.8441 3.35 12.4948 5 12.4948H9C9.55 12.4948 10 12.9445 10 13.4943C10 14.044 9.55 14.4938 9 14.4938H5C4.45 14.4938 4 14.9435 4 15.4933V18.9915C4 19.5412 4.45 19.991 5 19.991H9.13C9.68 19.991 10.13 20.4408 10.13 20.9905C10.13 21.5402 9.68 21.99 9.13 21.99ZM9.5 19.2414C8.95 19.2414 8.5 18.7916 8.5 18.2419V16.2429C8.5 15.6932 8.95 15.2434 9.5 15.2434C10.05 15.2434 10.5 15.6932 10.5 16.2429V18.2419C10.5 18.7916 10.05 19.2414 9.5 19.2414ZM6.5 19.2414C5.95 19.2414 5.5 18.7916 5.5 18.2419V16.2429C5.5 15.6932 5.95 15.2434 6.5 15.2434C7.05 15.2434 7.5 15.6932 7.5 16.2429V18.2419C7.5 18.7916 7.05 19.2414 6.5 19.2414ZM18 16.9925H16C15.45 16.9925 15 16.5427 15 15.993C15 15.4433 15.45 14.9935 16 14.9935H18C18.55 14.9935 19 15.4433 19 15.993C19 16.5427 18.55 16.9925 18 16.9925ZM9.13 11.4953H5C3.35 11.4953 2 10.1459 2 8.49675V4.9985C2 3.33933 3.35 2 5 2H19C20.65 2 22 3.34933 22 4.9985V7.49725C22 8.04698 21.55 8.49675 21 8.49675C20.45 8.49675 20 8.04698 20 7.49725V4.9985C20 4.44878 19.55 3.999 19 3.999H5C4.45 3.999 4 4.44878 4 4.9985V8.49675C4 9.04648 4.45 9.49625 5 9.49625H9.13C9.68 9.49625 10.13 9.94603 10.13 10.4958C10.13 11.0455 9.68 11.4953 9.13 11.4953ZM9.5 8.74663C8.95 8.74663 8.5 8.29685 8.5 7.74713V5.74813C8.5 5.1984 8.95 4.74863 9.5 4.74863C10.05 4.74863 10.5 5.1984 10.5 5.74813V7.74713C10.5 8.29685 10.05 8.74663 9.5 8.74663ZM6.5 8.74663C5.95 8.74663 5.5 8.29685 5.5 7.74713V5.74813C5.5 5.1984 5.95 4.74863 6.5 4.74863C7.05 4.74863 7.5 5.1984 7.5 5.74813V7.74713C7.5 8.29685 7.05 8.74663 6.5 8.74663ZM17 7.74713H13C12.45 7.74713 12 7.29735 12 6.74763C12 6.1979 12.45 5.74813 13 5.74813H17C17.55 5.74813 18 6.1979 18 6.74763C18 7.29735 17.55 7.74713 17 7.74713Z" fill="#01804A"/></svg><div><b>ROT analysis</b><span>Inactive users, empty groups and unused apps cluttering your tenant</span></div></div><div class="okc-card"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21.591 7.48105L21.182 7.606C20.222 7.89754 18.8948 8.30571 18.7195 8.44731C18.5442 8.65556 18.1436 9.97168 17.8514 10.9296L17.7262 11.3294C17.6594 11.5877 17.4341 11.7543 17.1669 11.7543C16.8998 11.7543 16.6661 11.5793 16.6077 11.3378L16.5075 11.0129C16.2237 10.08 15.7896 8.66389 15.581 8.45564C15.389 8.27239 13.7529 7.78925 12.7763 7.49771L12.7012 7.47272C12.4424 7.40608 12.2755 7.18117 12.2755 6.91462C12.2755 6.64806 12.4508 6.41483 12.6928 6.35652L12.7763 6.33153C13.7529 6.03998 15.389 5.55685 15.581 5.37359C15.798 5.15702 16.1486 3.95752 16.3573 3.24115C16.4574 2.8913 16.5492 2.58309 16.6077 2.41649C16.6578 2.18326 16.8664 2.01666 17.1085 2C17.3673 2 17.6177 2.14994 17.7179 2.41649C17.7513 2.52478 17.793 2.68305 17.8431 2.87464C18.0267 3.54935 18.4441 5.13203 18.6861 5.37359C18.8948 5.54852 20.2137 5.94835 21.1736 6.2399L21.5743 6.36485C21.8331 6.43149 22 6.65639 22 6.92295C22 7.1895 21.8247 7.42274 21.5826 7.48105H21.591ZM18.9699 6.92295C18.4357 6.75635 18.0768 6.59808 17.7846 6.30654C17.4925 6.01499 17.3172 5.66514 17.1586 5.14869C16.9917 5.66514 16.8247 6.02332 16.4992 6.30654C16.207 6.59808 15.8815 6.74802 15.3556 6.91462C15.8731 7.08122 16.2154 7.23948 16.4992 7.5227C16.8247 7.81424 16.9917 8.17243 17.1586 8.68888C17.3172 8.17243 17.5008 7.82257 17.7846 7.53103C18.0684 7.23948 18.4441 7.08122 18.9699 6.91462V6.92295ZM2.58431 14.1116L2.69282 14.0783C4.11185 13.6618 6.48247 12.9538 6.75793 12.6872C7.09182 12.354 7.6177 10.5381 7.92654 9.45523C8.05175 9.01374 8.16027 8.6389 8.24374 8.40566C8.33556 8.04748 8.61937 7.80591 8.98664 7.78925C9.37062 7.76426 9.7212 8.00583 9.87145 8.40566C10.7229 11.5793 11.1235 12.4956 11.2738 12.6789C11.5743 12.9288 13.4858 13.5119 14.8881 13.9367L15.4641 14.1116C15.8314 14.2032 16.0818 14.5281 16.0818 14.9279C16.0818 15.3278 15.8314 15.6443 15.4808 15.7359L15.0301 15.8776C13.6694 16.294 11.6077 16.9188 11.3072 17.227C11.0401 17.5019 10.3306 19.8759 9.91319 21.3003L9.88815 21.3836C9.79633 21.7501 9.47078 22 9.07846 22C8.68614 22 8.35225 21.7501 8.26878 21.3919L8.23539 21.292C7.84307 19.9675 7.10851 17.5019 6.75793 17.202C6.49082 16.8855 4.00334 16.1524 2.6177 15.7359C2.25042 15.6443 2 15.3195 2 14.9196C2 14.5198 2.25042 14.2032 2.60935 14.1116H2.58431ZM6.44073 14.9196C7.20033 15.1695 7.69282 15.3944 8.17696 15.8276C8.59432 16.294 8.81135 16.7772 9.06177 17.5435C9.31219 16.7855 9.52921 16.294 9.95492 15.8192C10.3806 15.3944 10.9065 15.1695 11.6745 14.9279C10.9065 14.6864 10.3806 14.4531 9.95492 14.0367C9.53756 13.6118 9.30384 13.087 9.06177 12.3207C8.81135 13.087 8.58598 13.6118 8.16861 14.0367H8.15192C7.68447 14.4615 7.19199 14.6864 6.43239 14.9279L6.44073 14.9196Z" fill="#01804A"/></svg><div><b>AI agent discovery</b><span>Every agent with Okta access, its owner and what it changes</span></div></div><div class="okc-card"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14.2504 17.4C13.6204 17.4 13.0879 17.1825 12.6529 16.7475C12.2179 16.3125 12.0004 15.78 12.0004 15.15C12.0004 14.52 12.2179 13.9875 12.6529 13.5525C13.0879 13.1175 13.6204 12.9 14.2504 12.9C14.8804 12.9 15.4129 13.1175 15.8479 13.5525C16.2829 13.9875 16.5004 14.52 16.5004 15.15C16.5004 15.78 16.2829 16.3125 15.8479 16.7475C15.4129 17.1825 14.8804 17.4 14.2504 17.4ZM5.70039 21C5.20539 21 4.78164 20.8238 4.42914 20.4713C4.07664 20.1188 3.90039 19.695 3.90039 19.2V6.6C3.90039 6.105 4.07664 5.68125 4.42914 5.32875C4.78164 4.97625 5.20539 4.8 5.70039 4.8H6.60039V3.9C6.60039 3.645 6.68664 3.43125 6.85914 3.25875C7.03164 3.08625 7.24539 3 7.50039 3C7.75539 3 7.96914 3.08625 8.14164 3.25875C8.31414 3.43125 8.40039 3.645 8.40039 3.9V4.8H15.6004V3.9C15.6004 3.645 15.6866 3.43125 15.8591 3.25875C16.0316 3.08625 16.2454 3 16.5004 3C16.7554 3 16.9691 3.08625 17.1416 3.25875C17.3141 3.43125 17.4004 3.645 17.4004 3.9V4.8H18.3004C18.7954 4.8 19.2191 4.97625 19.5716 5.32875C19.9241 5.68125 20.1004 6.105 20.1004 6.6V19.2C20.1004 19.695 19.9241 20.1188 19.5716 20.4713C19.2191 20.8238 18.7954 21 18.3004 21H5.70039ZM5.70039 19.2H18.3004V10.2H5.70039V19.2ZM5.70039 8.4H18.3004V6.6H5.70039V8.4Z" fill="#01804A"/></svg><div><b>Point-in-time restore</b><span>Restore points that go back further than Okta’s native retention</span></div></div><div class="okc-card"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M17 22H6C3.79 22 2 20.2127 2 18.006V7.02247C2 4.81578 3.79 3.02846 6 3.02846H13C13.55 3.02846 14 3.47778 14 4.02696C14 4.57614 13.55 5.02546 13 5.02546H6C4.9 5.02546 4 5.92411 4 7.02247V18.006C4 19.1043 4.9 20.003 6 20.003H17C18.1 20.003 19 19.1043 19 18.006V11.0165C19 10.4673 19.45 10.018 20 10.018C20.55 10.018 21 10.4673 21 11.0165V18.006C21 20.2127 19.21 22 17 22ZM7.2 15.7394C6.99 15.7394 6.77 15.6695 6.59 15.5297C6.15 15.1902 6.07 14.5711 6.41 14.1318L8.73 11.1163C9.03 10.7369 9.45 10.4873 9.93 10.4274C10.41 10.3674 10.89 10.4973 11.26 10.7968L13.04 12.1947L15.18 9.43884C15.52 8.9995 16.15 8.91962 16.58 9.25911C17.02 9.5986 17.1 10.2277 16.76 10.657L14.5 13.5726C14.2 13.9521 13.78 14.1917 13.3 14.2516C12.82 14.3215 12.35 14.1817 11.97 13.8822L10.19 12.4843L7.99 15.34C7.79 15.5996 7.5 15.7294 7.2 15.7294V15.7394ZM19.19 7.61158C17.64 7.61158 16.38 6.35347 16.38 4.80579C16.38 3.25811 17.64 2 19.19 2C20.74 2 22 3.25811 22 4.80579C22 6.35347 20.74 7.61158 19.19 7.61158ZM19.19 3.997C18.74 3.997 18.38 4.35647 18.38 4.80579C18.38 5.25512 18.74 5.61458 19.19 5.61458C19.64 5.61458 20 5.25512 20 4.80579C20 4.35647 19.64 3.997 19.19 3.997Z" fill="#01804A"/></svg><div><b>Activity analysis</b><span>7-day backfill to surface sign-in and admin behaviour from day one</span></div></div><div class="okc-card"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.9974 22C20.7376 22 20.4777 21.9 20.2879 21.7L18.599 19.99L16.9101 21.7C16.5204 22.09 15.8908 22.1 15.501 21.7C15.1113 21.31 15.1013 20.68 15.501 20.29L17.2099 18.56L15.501 16.83C15.1113 16.44 15.1213 15.8 15.501 15.42C15.8908 15.03 16.5304 15.04 16.9101 15.42L18.599 17.13L20.2879 15.42C20.6776 15.03 21.3072 15.02 21.6969 15.42C22.0867 15.81 22.0967 16.44 21.6969 16.83L19.9881 18.56L21.6969 20.29C22.0867 20.68 22.0767 21.32 21.6969 21.7C21.5071 21.89 21.2472 21.99 20.9974 21.99V22ZM10.0047 18.74C9.82481 18.74 9.64493 18.71 9.47504 18.65C8.23586 18.24 2 15.78 2 8.35V3.64C2.00999 2.74 2.73951 2 3.64891 2H16.3705C17.2699 2 18.0094 2.74 18.0094 3.64V7.35C18.0094 7.9 17.5597 8.35 17.01 8.35C16.4604 8.35 16.0107 7.9 16.0107 7.35V6.77L10.5643 10.4C10.2245 10.62 9.79483 10.62 9.45505 10.4L4.00867 6.77V8.36C4.00867 14.2 8.75552 16.28 10.0047 16.72C10.5044 16.54 11.5037 16.13 12.553 15.34C12.9927 15.01 13.6223 15.1 13.9521 15.55C14.2819 15.99 14.1919 16.62 13.7422 16.95C12.3531 17.99 11.014 18.49 10.5144 18.66C10.3545 18.72 10.1846 18.74 10.0047 18.74ZM4.00867 4.36L10.0047 8.36L16.0007 4.36V4H4.00867V4.36ZM16.8701 14.18C16.8701 14.18 16.8002 14.18 16.7702 14.18C16.4904 14.15 16.2306 14 16.0607 13.77L14.7016 11.88C14.3818 11.43 14.4817 10.81 14.9314 10.48C15.3811 10.16 16.0007 10.26 16.3305 10.71L17.03 11.69L20.3278 8.67C20.7376 8.3 21.3671 8.33 21.7369 8.73C22.1067 9.14 22.0867 9.77 21.6769 10.14L17.5497 13.92C17.3698 14.09 17.12 14.18 16.8801 14.18H16.8701Z" fill="#01804A"/></svg><div><b>Permission coverage</b><span>All required API scopes to unlock Entitlements and Posture scanning</span></div></div></div>
+              <div class="okc-req" id="okc-req"><button type="button" onclick="document.getElementById('okc-req').classList.toggle('open')" aria-expanded="false"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01" stroke-linecap="round"/></svg>Minimum requirements<svg width="24" height="24" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="chev"><path d="M10 12.9372C9.88042 12.9372 9.76831 12.9185 9.66368 12.8812C9.55904 12.8438 9.46188 12.7803 9.3722 12.6906L5.24664 8.56502C5.08221 8.4006 5 8.19133 5 7.93722C5 7.68311 5.08221 7.47384 5.24664 7.30942C5.41106 7.14499 5.62033 7.06278 5.87444 7.06278C6.12855 7.06278 6.33782 7.14499 6.50224 7.30942L10 10.8072L13.4978 7.30942C13.6622 7.14499 13.8714 7.06278 14.1256 7.06278C14.3797 7.06278 14.5889 7.14499 14.7534 7.30942C14.9178 7.47384 15 7.68311 15 7.93722C15 8.19133 14.9178 8.4006 14.7534 8.56502L10.6278 12.6906C10.5381 12.7803 10.441 12.8438 10.3363 12.8812C10.2317 12.9185 10.1196 12.9372 10 12.9372Z"/></svg></button><ul><li>Okta Super Admin to authorise Veeam — Express (OAuth admin consent on Veeam’s app) or Manual (create a customer-owned OAuth 2.0 service app and upload Veeam’s public key)</li><li>If admin sign-in or app auth is restricted by IP zone, allowlist Veeam’s egress IPs</li><li>For tenants above ~250,000 users, request an Okta Support rate-limit increase (15-day lead) to stay within the 24h backup SLO</li></ul></div>
+              <button class="btn btn-blue okc-cta" type="button" onclick="advanceFromSplash()">Connect Okta</button>
+              <p class="okc-note">An Okta Super Admin completes setup once. Users then go directly to the dashboard.</p>
             </div>
-            </div><!-- /inner padding -->
-          </div><!-- /right panel -->
-          </div><!-- /container -->
+          </div>
         </div>
       </div>
 
@@ -1890,9 +2049,9 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
               <!-- Basic Information (combined with ownership) -->
               <div class="form-card">
                 <div class="form-title">Basic Information</div>
-                <div class="form-subtitle">Enter a name and assign owners for this connection. You can update these details at any time.</div>
+                <div class="form-subtitle" id="bi-subtitle">Enter a name and assign owners for this connection. You can update these details at any time.</div>
                 <div class="form-field">
-                  <label class="form-label">Connection name<span class="req">*</span></label>
+                  <label class="form-label"><span id="bi-name-label">Connection name</span><span class="req">*</span></label>
                   <input class="form-input focused" id="instance-name-input" value="Github-connection-1" />
                 </div>
                 <div class="form-field">
@@ -1902,15 +2061,17 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
                 <div class="form-field">
                   <label class="form-label">Owner<span class="req">*</span></label>
                   <div class="form-select-wrap">
-                    <select style="padding-left:40px"><option>Alex Morgan</option></select>
-                    <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%)"><span class="mini-avatar" style="width:24px;height:24px;font-size: 8px;background:var(--orange)">AM</span></span>
+                    <select style="padding-left:40px"><option id="bi-owner-opt">Alex Morgan</option></select>
+                    <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%)"><span class="mini-avatar" id="bi-owner-av" style="width:24px;height:24px;font-size: 8px;background:var(--orange)">AM</span></span>
                   </div>
                 </div>
                 <!-- Co-owner(s) re-added 2026-09-22 per explicit request,
                      reversing the round-2 removal noted above. Applies to
                      every workload since screen-basic-info is one shared
                      screen. -->
-                <div class="form-field">
+                <div class="form-field" id="bi-coowner-field">
+                  <div class="bi-co-head" id="bi-coowner-head" style="display:none"><button type="button" class="bi-co-chev" onclick="toggleCoownerSection()" aria-expanded="true" aria-label="Toggle co-owners"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button><div><div class="bi-co-title">Co-owners <span class="bi-co-opt">Optional</span></div><div class="bi-co-count" id="bi-co-count">2 co-owners</div></div></div>
+                  <div id="bi-coowner-body">
                   <label class="form-label">Co-owner(s)<span class="req">*</span></label>
                   <div style="position:relative">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--black-60)" stroke-width="2" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -1918,6 +2079,7 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
                     <datalist id="coowner-datalist"></datalist>
                   </div>
                   <div class="chips-row" id="coowner-chips-row"></div>
+                  </div>
                 </div>
               </div>
 
@@ -2622,6 +2784,26 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
           <div class="main-scroll">
             <div class="form-area">
               <div class="form-card" style="padding:0;gap:0;overflow:hidden">
+                <!-- Okta (Figma 19436:140791): Authentication now opens with Region & Data Processing — the separate Region & Storage step is gone. -->
+                <div id="okta-auth-head" style="display:none;padding:24px 24px 0">
+                  <div class="oka-h1">Authentication</div><div class="oka-rule"></div>
+                  <div class="oka-h2">Region &amp; Data Processing</div>
+                  <div class="oka-p">Where we process your data, and where evidence and quarantined files are kept.</div>
+                  <label class="form-label">Select Processing Region<span class="req">*</span></label>
+                  <div style="position:relative" id="okta-region-wrap">
+                    <div class="form-input" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="toggleOktaRegionDropdown()">
+                      <span id="okta-region-selected" style="color:var(--black-30)">Select a storage region...</span>
+                      <svg width="10" height="6" viewBox="0 0 10 6" fill="var(--black-60)"><path d="M0 0l5 6 5-6z"/></svg>
+                    </div>
+                    <div id="okta-region-dropdown" style="display:none;position:absolute;top:48px;left:0;right:0;background:var(--white);border:1px solid var(--border);border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,0.1);z-index:50;max-height:280px;overflow:hidden">
+                      <div style="padding:8px;border-bottom:1px solid var(--border-light)">
+                        <input class="form-input" placeholder="Search regions..." style="height:36px;font-size:14px" oninput="renderOktaRegionOptions(this.value)" />
+                      </div>
+                      <div id="okta-region-options" style="max-height:220px;overflow-y:auto"></div>
+                    </div>
+                  </div>
+                  <div class="oka-help">Inventory, activity and discovery scans run here. Content read for scanning is encrypted in transit and at rest and purged after each scan. Pick the region closest to your tenant or the one your policy requires.</div>
+                </div>
                 <div style="padding:24px 24px 16px">
                   <div class="form-title" id="auth-title">Connect to GitHub</div>
                   <div class="form-subtitle" id="auth-subtitle">Choose how Veeam authenticates with your GitHub organization. Both methods are secure — Express is recommended for most teams.</div>
@@ -3050,14 +3232,8 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
                       <div class="form-field" style="margin-bottom:16px">
                         <label class="form-label">Key algorithm<span class="req">*</span></label>
                         <div style="display:flex;gap:8px">
-                          <label id="okta-keyalg-rsa-label" style="flex:1;display:flex;align-items:center;gap:8px;border:1px solid var(--blue);background:var(--blue-light);border-radius:4px;padding:10px 12px;cursor:pointer;font-size:14px;color:var(--black-100)">
-                            <input type="radio" name="okta-key-alg" value="RSA 2048" checked onchange="onOktaKeyAlgChange()" style="accent-color:var(--blue)">
-                            <span>RSA 2048 <span style="color:var(--black-60)">· widely compatible</span></span>
-                          </label>
-                          <label id="okta-keyalg-ec-label" style="flex:1;display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:4px;padding:10px 12px;cursor:pointer;font-size:14px;color:var(--black-100)">
-                            <input type="radio" name="okta-key-alg" value="ECDSA P-256" onchange="onOktaKeyAlgChange()" style="accent-color:var(--blue)">
-                            <span>ECDSA P-256 <span style="color:var(--black-60)">· smaller, faster</span></span>
-                          </label>
+                          <label id="okta-keyalg-rsa-label" class="oka-alg is-sel"><input type="radio" name="okta-key-alg" value="RSA 2048" checked onchange="onOktaKeyAlgChange()" style="position:absolute;opacity:0;pointer-events:none"><span class="oka-alg-t">RSA 2048</span><span class="oka-alg-s">widely compatible</span></label>
+                          <label id="okta-keyalg-ec-label" class="oka-alg"><input type="radio" name="okta-key-alg" value="ECDSA P-256" onchange="onOktaKeyAlgChange()" style="position:absolute;opacity:0;pointer-events:none"><span class="oka-alg-t">ECDSA P-256</span><span class="oka-alg-s">smaller, faster</span></label>
                         </div>
                         <span style="font-size:14px;color:var(--black-60);margin-top:6px;display:block">Veeam generates the keypair and keeps the private key encrypted — it is shown only once.</span>
                       </div>
@@ -3182,11 +3358,12 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
             <div class="sb-item"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg></div>Activity Log</div>
           </div>
           <div class="main-scroll" style="display:flex;justify-content:center;">
-            <div style="max-width:780px;width:100%;padding-top:32px;display:flex;flex-direction:column;gap:16px">
+            <div id="tc-col" style="max-width:780px;width:100%;padding-top:32px;display:flex;flex-direction:column;gap:16px">
+              <div class="okv-head" id="tc-okv-head"><h2>Verifying access</h2><p>We&rsquo;re checking that the Veeam service account has every scope and IAM grant it needs.</p></div>
 
               <!-- Connection Test Card -->
               <div id="tc-conn-card" style="background:var(--white);border:1px solid var(--border-light);border-radius:8px;padding:16px;display:flex;align-items:center;gap:16px">
-                <div style="width:40px;height:40px;border-radius:8px;background:var(--black-3);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--black-60)">
+                <div id="tc-conn-icon" style="width:40px;height:40px;border-radius:8px;background:var(--black-3);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--black-60)">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
                 </div>
                 <div style="flex:1">
@@ -3205,24 +3382,25 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
 
               <!-- Permission Status Card (hidden in stage 1) -->
               <div id="tc-perm-pending" style="background:var(--black-3);border:1px solid var(--border-light);border-radius:8px;padding:24px;text-align:center">
-                <p style="font-size: 16px;color:var(--black-60)">Connection checks will run once connectivity is established.</p>
+                <p id="tc-perm-pending-text" style="font-size: 16px;color:var(--black-60)">Connection checks will run once connectivity is established.</p>
               </div>
 
               <div id="tc-perm-card" style="display:none;background:var(--white);border:1px solid var(--border-light);border-radius:8px;overflow:hidden">
                 <div style="padding:16px;border-bottom:1px solid var(--border-light)">
                   <div style="display:flex;justify-content:space-between;align-items:flex-start">
                     <div>
-                      <div style="font-size:16px;font-weight:500;color:var(--black-100)">Connection checks</div>
-                      <div style="font-size:14px;color:var(--black-60);margin-top:2px">Verify the connection has the access it needs</div>
+                      <div id="tc-perm-title" style="font-size:16px;font-weight:500;color:var(--black-100)">Connection checks</div>
+                      <div id="tc-perm-sub" style="font-size:14px;color:var(--black-60);margin-top:2px">Verify the connection has the access it needs</div>
                     </div>
-                    <div style="text-align:right">
+                    <div id="tc-perm-counter-wrap" style="text-align:right">
                       <div id="tc-perm-counter" class="perm-count" style="font-family:'Circular Pro',sans-serif;font-size:24px;font-weight:500;color:var(--black-100);letter-spacing:-0.02em">0/4</div>
-                      <div style="font-size:14px;color:var(--black-60)">Checks passed</div>
+                      <div id="tc-perm-countlbl" style="font-size:14px;color:var(--black-60)">Checks passed</div>
                     </div>
+                    <span class="okv-chip" id="tc-okv-chip"><svg width="16" height="16" viewBox="0 0 40 40" class="spinner-ring" style="flex-shrink:0"><circle cx="20" cy="20" r="16" fill="none" stroke="var(--green-30)" stroke-width="4"/><circle cx="20" cy="20" r="16" fill="none" stroke="currentColor" stroke-width="4" stroke-dasharray="33 67" stroke-linecap="round"/></svg>Checking permissions</span>
                   </div>
-                  <div style="margin-top:12px">
+                  <div id="tc-perm-barwrap" style="margin-top:12px">
                     <div style="display:flex;justify-content:space-between;font-size:14px;color:var(--black-60);margin-bottom:4px">
-                      <span>Checks passed</span>
+                      <span id="tc-perm-barlbl">Checks passed</span>
                       <span id="tc-perm-pct">0%</span>
                     </div>
                     <!-- Two-segment bar: green for passed, non-green
@@ -3316,6 +3494,7 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
                      a failed env. -->
                 <div id="tc-env-expanded" style="display:none;background:var(--black-3);border-top:1px solid var(--border-light);padding:10px 16px"></div>
               </div>
+              <button id="tc-okv-cancel" class="btn btn-outline btn-full" onclick="goTo('auth')">Cancel</button>
 
             </div>
           </div>
@@ -3518,7 +3697,7 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
       <div class="screen" id="screen-overview">
         <div class="topbar">
           <div class="page-title-area">
-            <div class="breadcrumbs">
+            <div class="breadcrumbs" id="ov-bc">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
               <span class="bc-sep">&rsaquo;</span><span>Connections</span><span class="bc-sep">&rsaquo;</span>
             </div>
@@ -3527,7 +3706,7 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
                 <span class="wl-page-icon"></span>
                 <span class="wl-instance-name">DevOps demo</span>
               </div>
-              <div class="topbar-actions">
+              <div class="topbar-actions" id="ov-actions">
                 <button class="btn btn-outline">View Graph</button>
                 <button class="btn-icon" style="width:36px;height:36px;border-radius:4px;border:1px solid var(--border)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><text x="12" y="17" text-anchor="middle" font-size="13" font-weight="600" font-family="Arial,sans-serif" fill="currentColor" stroke="none">?</text></svg></button>
               </div>
@@ -3537,7 +3716,40 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
         <div class="body-split">
           <div class="left-sidebar"></div>
           <div class="main-scroll">
-            <div style="max-width:780px;width:100%">
+            <!-- Okta Overview (Figma 19457:154997) — populated by paintOktaOverview() -->
+            <div id="ov-okta" class="ovk" style="display:none">
+              <section class="ovk-card">
+                <div class="ovk-hd"><h3>Connection Details</h3>
+                  <div class="ovk-acts">
+                    <button class="btn btn-outline ovk-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 12l3-3M8 15h8"/></svg>Statistics</button>
+                    <button class="btn btn-outline ovk-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h10M4 11h7M4 16h5"/><circle cx="17" cy="16" r="4"/><path d="M17 14v2l1 1"/></svg>Activity Log</button>
+                    <button class="btn btn-outline ovk-btn ovk-danger"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/></svg>Deactivate</button>
+                  </div>
+                </div>
+                <div class="ovk-grid ovk-g2"><div class="ovk-th">Region</div><div class="ovk-th">Owners</div>
+                  <div class="ovk-td"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--black-60)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-5.7-6.5-11a6.5 6.5 0 0 1 13 0c0 5.3-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg><div><div class="t" id="ovk-region">—</div><div class="s">Veeam-Hosted</div></div></div>
+                  <div class="ovk-td" id="ovk-owners"></div></div>
+              </section>
+              <section class="ovk-card">
+                <div class="ovk-hd"><h3>Entities Overview</h3></div>
+                <div class="ovk-grid ovk-g11"><div class="ovk-th">App</div><div class="ovk-th">Breakdown</div>
+                  <div class="ovk-td"><span class="ovk-logo" id="ovk-logo1"></span><div><div class="t">Okta</div><div class="s">94 entities</div></div></div>
+                  <div class="ovk-td"><span class="ovk-chip">90 Users</span><span class="ovk-chip">3 User groups</span><span class="ovk-chip">1 Application</span></div></div>
+              </section>
+              <section class="ovk-card">
+                <div class="ovk-hd" style="flex-direction:column;align-items:flex-start;gap:0"><h3>Scans by Application</h3><div class="s" style="font-size:14px;color:var(--black-60)">Updated 2 mins ago</div></div>
+                <div class="ovk-grid ovk-g5">
+                  <div class="ovk-th">Application</div><div class="ovk-th">Scoping Inventory <i class="ovk-i" data-tooltip="Finds the identity objects that are in scope for this connection.">i</i></div><div class="ovk-th">Data Inventory <i class="ovk-i" data-tooltip="Indexes the in-scope objects so they can be browsed and protected.">i</i></div><div class="ovk-th">Activity Analysis <i class="ovk-i" data-tooltip="Analyzes recent changes made by people and AI agents.">i</i></div><div class="ovk-th">Discovery Scans <i class="ovk-i" data-tooltip="Scans objects for sensitive data.">i</i></div>
+                  <div class="ovk-td"><span class="ovk-logo ovk-logo-s" id="ovk-logo2"></span><span class="t">Okta</span></div>
+                  <div class="ovk-td"><span class="ovk-st"><svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="var(--green)"/><polyline points="7.5 12.5 10.5 15.5 16.5 9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Completed</span></div>
+                  <div class="ovk-td"><span class="ovk-st"><svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="var(--green)"/><polyline points="7.5 12.5 10.5 15.5 16.5 9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Completed</span></div>
+                  <div class="ovk-td"><span class="ovk-st"><svg width="20" height="20" viewBox="0 0 40 40" class="spinner-ring"><circle cx="20" cy="20" r="16" fill="none" stroke="var(--green-30)" stroke-width="3"/><circle cx="20" cy="20" r="16" fill="none" stroke="var(--green)" stroke-width="3" stroke-dasharray="25 75" stroke-linecap="round"/></svg>Running</span></div>
+                  <div class="ovk-td"><span class="ovk-st"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--black-60)" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 15.5l7-7"/></svg>No Scans</span></div>
+                </div>
+              </section>
+              <section class="ovk-card ovk-next" id="ovk-next-host"></section>
+            </div>
+            <div id="ov-legacy" style="max-width:780px;width:100%">
 
               <!-- Integration header card -->
               <div style="background:var(--white);border:1px solid var(--border-light);border-radius:8px;padding:20px;display:flex;align-items:center;gap:16px;margin-bottom:24px">
@@ -4131,6 +4343,22 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
       </button>
     </div>
   </div>
+  <!-- Okta variant (Figma 19457:154403) -->
+  <div class="success-modal okf" id="success-okta">
+    <button class="okf-x" onclick="closeSuccessModal()" aria-label="Close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <div class="okf-top">
+      <svg class="okf-art" viewBox="0 0 296 118" aria-hidden="true"><defs><linearGradient id="okfg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#91f8b2"/><stop offset="1" stop-color="#01804a" stop-opacity=".5"/></linearGradient></defs><path d="M10 30 L110 110 L286 6" fill="none" stroke="url(#okfg)" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <h2>Okta has been successfully set up.</h2>
+      <div class="okf-inst"><div class="tile" id="okf-logo"></div><div><div class="nm">Okta Workforce Identity Cloud <span class="okf-chip">Active</span></div><div class="sub" id="okf-inst-name">okta-prod-1</div></div></div>
+    </div>
+    <div class="okf-body">
+      <p>Inventory sync has started for four apps. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust each app&rsquo;s configuration.</p>
+      <div class="okf-btns">
+        <button class="btn btn-blue" onclick="closeSuccessModal()">Connector Overview</button>
+        <button class="btn btn-outline" onclick="closeSuccessModal();goTo('catalog')">Go to Dashboard <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:6px"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Keyframes for the Apply CTA spinner and the post-apply chip pulse on the
@@ -4634,6 +4862,7 @@ function getConnectSubSteps() {
   // front now.
   var subs = [];
   if (w.requiresApplicationStep) subs.push(apps);
+  if (currentWorkload === 'okta') return [];   // Okta: Region sits on the Authentication page; no sub-steps in the rail
   subs.push(infra, auth);
   if (effectiveRequiresEnvList()) subs.push(envs);
   if (effectiveRequiresWorkspaceList()) subs.push(workspaces);
@@ -4726,8 +4955,12 @@ function sidebarHTML(activeStep, subStep) {
   var progSvg = '<span class="sb-badge prog"><svg class="spinner-ring" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="var(--green-30)" stroke-width="2.5"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" stroke-dasharray="20 40" stroke-linecap="round"/></svg></span>';
   var errorSvg = '<span class="sb-badge error">' + _dsStoreIconSvg('status-error-outlined', 14) + '</span>';
 
+  var isOkta = (currentWorkload === 'okta');
   var h = '<div class="sb-header">Overview</div>';
   h += '<div class="sb-item'+(activeStep==='summary'?' active':'')+'"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01" stroke-linecap="round"/></svg></div>Overview</div>';
+  if (isOkta && activeStep === 'summary') {
+    h += '<div class="sb-sub" style="padding-left:48px"><div class="ic" style="border-radius:50%;background:var(--green-10);color:var(--green)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:12px;height:12px"><circle cx="12" cy="12" r="9"/><path d="M12 12l3-3M8 15h8"/></svg></div>Statistics</div>';
+  }
   h += '<div class="sb-header">Settings</div>';
 
   steps.forEach(function(s,i){
@@ -4737,7 +4970,7 @@ function sidebarHTML(activeStep, subStep) {
     // there's no sub-step underneath carrying that highlight instead —
     // Connect's own row stays neutral while one of its sub-steps (or
     // the transient Test Connection state) is what's actually current.
-    var cls = (act && !subStep) ? ' active' : (done ? ' completed' : '');
+    var cls = (act && (!subStep || (isOkta && subStep !== 'test'))) ? ' active' : (done ? ' completed' : '');
     var svgAttr = s.filled ? 'viewBox="0 0 20 20" fill="currentColor"' : 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"';
     var itemClick = done ? ' onclick="goToStep(\''+s.id+'\')"' : '';
 
@@ -4754,11 +4987,16 @@ function sidebarHTML(activeStep, subStep) {
     // row carries the test's live status instead of nothing: a
     // spinner while it runs, a check once every row passes, or the
     // error hexagon if anything failed.
-    var pastVisibleSubsteps = !!subStep && activeSubIdx === -1;
+    var pastVisibleSubsteps = !!subStep && activeSubIdx === -1 && !(isOkta && subStep !== 'test');
     var connectTestBadge = _tcStatus === 'failed' ? errorSvg : (_tcStatus === 'success' ? checkSvg : progSvg);
     var badge = done ? checkSvg : ((s.id === 'connect' && act && pastVisibleSubsteps) ? connectTestBadge : '');
 
-    h += '<div class="sb-item'+cls+'"'+itemClick+'><div class="ic"><svg '+svgAttr+'>'+s.icon+'</svg></div>'+s.label+badge+'</div>';
+    var rowLabel = (isOkta && s.id === 'connect') ? 'Authentication' : s.label;
+    h += '<div class="sb-item'+cls+'"'+itemClick+'><div class="ic"><svg '+svgAttr+'>'+s.icon+'</svg></div>'+rowLabel+((isOkta && s.id === 'connect' && act && subStep === 'test') ? progSvg : badge)+'</div>';
+    // Okta: a "Connection Test" row appears under Authentication only while the test runs
+    if (isOkta && s.id === 'connect' && act && subStep === 'test') {
+      h += '<div class="sb-sub active"><div class="ic"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M5.5 6.5h8.1l-1.8-1.8.9-.9 3.2 3.2-3.2 3.2-.9-.9 1.8-1.8H5.5v-1zm9 7H6.4l1.8 1.8-.9.9-3.2-3.2 3.2-3.2.9.9-1.8 1.8h8.1v1z"/></svg></div>Connection Test'+(_tcStatus === 'failed' ? '<span class="sb-badge error"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3.5L2.5 20h19L12 3.5z"/><path d="M12 10v4M12 17h.01" stroke-linecap="round"/></svg></span>' : connectTestBadge)+'</div>';
+    }
 
     if (subSteps && subSteps.length) {
       subSteps.forEach(function(sub, si){
@@ -4771,6 +5009,13 @@ function sidebarHTML(activeStep, subStep) {
       });
     }
   });
+  if (isOkta) {
+    var dim = ' style="opacity:.5;cursor:default;pointer-events:none"';
+    h += '<div class="sb-header">Statistics</div>';
+    h += '<div class="sb-item"'+dim+'><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 12l4-3M7 15h10" stroke-linecap="round"/></svg></div>Statistics</div>';
+    h += '<div class="sb-header">Monitoring</div>';
+    h += '<div class="sb-item"'+dim+'><div class="ic" style="background:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h10M4 11h7M4 16h5"/><circle cx="17" cy="16" r="4"/><path d="M17 14v2l1 1"/></svg></div>Audit Log</div>';
+  }
   return h;
 }
 
@@ -4840,6 +5085,10 @@ function goToStep(id) {
 }
 
 function goTo(screen) {
+  // Coming back to Authorize after an Express authorization (Reconfigure, the error footers, the sidebar): the page was left in its
+  // post-authorize state — Express CTA hidden, Manual card dimmed and unclickable — so nothing on it could be changed. Reset it to the
+  // pristine two-card choice. (A completed Manual connection resets itself via its own Reconfigure, resetManualAuth.)
+  if (screen === 'auth' && typeof currentAuthMethod !== 'undefined' && currentAuthMethod === 'express' && typeof resetOAuthFlow === 'function') resetOAuthFlow();
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   var el = document.getElementById('screen-' + screen);
   if (el) el.classList.add('active');
@@ -4895,6 +5144,7 @@ function goTo(screen) {
     });
   }
 
+  if (screen === 'overview') { if (currentWorkload === 'okta') { paintOktaOverview(true); renderOktaNextSteps(); } else paintOktaOverview(false); }
   // Two-stage test connection animation
   if (screen === 'test-conn') {
     runTestConnectionSequence();
@@ -7060,6 +7310,36 @@ var d365PendingEnvs = [];
 // re-validate" — so a retry should resolve cleanly. Initial runs (no
 // arg) still simulate the seeded failure so the failure UX is
 // demonstrable on first land.
+// Okta "Verifying access" chrome toggle: restyles the shared test-conn screen (no-op / restore for every other workload).
+function _tcOkvChrome(on, w) {
+  var scr = document.getElementById('screen-test-conn'); if (!scr) return;
+  scr.classList.toggle('okv', on); scr.classList.remove('okv-p2'); scr.classList.toggle('okv-running', on); scr.classList.toggle('okv-checking', on);
+  var $ = function (id) { return document.getElementById(id); };
+  var icon = $('tc-conn-icon'), sp = $('tc-conn-spinner'), ck = $('tc-conn-check');
+  if (icon && !icon.hasAttribute('data-d')) { icon.setAttribute('data-d', icon.innerHTML); sp.setAttribute('data-d', sp.innerHTML); }
+  if (on) {
+    icon.innerHTML = uniquifySvgIds(w.icon.replace(/width="28"/g,'width="40"').replace(/height="28"/g,'height="40"').replace(/fill="white"/g,'fill="currentColor"'));
+    sp.innerHTML = '<svg width="44" height="44" viewBox="0 0 40 40" class="spinner-ring"><circle cx="20" cy="20" r="17" fill="none" stroke="var(--black-5)" stroke-width="2"/><circle cx="20" cy="20" r="17" fill="none" stroke="var(--green)" stroke-width="2" stroke-dasharray="80 27" stroke-linecap="round"/></svg>';
+    ck.style.width = ck.style.height = '44px';
+    $('tc-conn-title').textContent = 'Testing Okta connectivity';
+    $('tc-perm-pending-text').textContent = 'Permission status for all features will be available once connection is established';
+    $('tc-perm-title').textContent = 'Feature Permission Status';
+    $('tc-perm-sub').textContent = 'Verify permissions for platform features and modules';
+    $('tc-perm-countlbl').textContent = 'Features available';
+    $('tc-perm-barlbl').textContent = 'Permission coverage';
+    var pc = $('tc-perm-pct'); if (pc) pc.style.color = '';
+  } else {
+    if (icon.hasAttribute('data-d')) { icon.innerHTML = icon.getAttribute('data-d'); sp.innerHTML = sp.getAttribute('data-d'); }
+    ck.style.width = ck.style.height = '40px';
+    $('tc-conn-title').textContent = 'Connection test';
+    $('tc-perm-pending-text').textContent = 'Connection checks will run once connectivity is established.';
+    $('tc-perm-title').textContent = 'Connection checks';
+    $('tc-perm-sub').textContent = 'Verify the connection has the access it needs';
+    $('tc-perm-countlbl').textContent = 'Checks passed';
+    $('tc-perm-barlbl').textContent = 'Checks passed';
+    var ff = $('tc-perm-bar-fail'); if (ff) ff.style.background = 'var(--orange)';
+  }
+}
 function runTestConnectionSequence(isRetry) {
   _tcStatus = 'running';
   if (typeof refreshSidebar === 'function') refreshSidebar();
@@ -7069,6 +7349,14 @@ function runTestConnectionSequence(isRetry) {
   var spinnerSvg = '<svg width="36" height="36" viewBox="0 0 40 40" class="spinner-ring"><circle cx="20" cy="20" r="16" fill="none" stroke="#e9e9ea" stroke-width="2"/><circle cx="20" cy="20" r="16" fill="none" stroke="#1ca8dd" stroke-width="2" stroke-dasharray="33 67" stroke-linecap="round"/></svg>';
 
   var w = WORKLOADS[currentWorkload];
+  // Okta "Verifying access" (Figma 19440:142225): green 44px indicators, joined card, inline Cancel while running.
+  var isOkv = (currentWorkload === 'okta');
+  if (isOkv) {
+    checkHtml = '<div style="width:44px;height:44px;border-radius:50%;background:var(--green-10);border:1.5px solid var(--green);display:flex;align-items:center;justify-content:center;color:var(--green)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>';
+    failHtml = '<div style="width:44px;height:44px;border-radius:50%;background:var(--red-10);border:1.5px solid var(--red);display:flex;align-items:center;justify-content:center;color:var(--red)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>';
+    spinnerSvg = '<svg width="44" height="44" viewBox="0 0 40 40" class="spinner-ring"><circle cx="20" cy="20" r="17" fill="none" stroke="var(--black-5)" stroke-width="2"/><circle cx="20" cy="20" r="17" fill="none" stroke="var(--green)" stroke-width="2" stroke-dasharray="80 27" stroke-linecap="round"/></svg>';
+  }
+  _tcOkvChrome(isOkv, w);
   // Connected-domain context for the top "Connection test" card (user
   // 2026-09-30: "couldn't we add the context of which domain is currently
   // connected to the card at the top of the testing step" — the card
@@ -7103,7 +7391,7 @@ function runTestConnectionSequence(isRetry) {
   // with the customer's uploaded public key (private_key_jwt); Express
   // uses OAuth consent, so there's no customer key to verify there.
   document.getElementById('tc-conn-subtitle').textContent =
-    (currentWorkload === 'okta' && currentAuthMethod === 'manual')
+    (currentWorkload === 'okta' && currentAuthMethod === 'manual' && !isOkv)
       ? 'Verifying your service app and signing key.'
       : 'Testing connectivity. This may take a few moments.';
   document.getElementById('tc-perm-pending').style.display = 'block';
@@ -7251,6 +7539,10 @@ function runTestConnectionSequence(isRetry) {
         ? ('Service app and signing key verified' + (tcConnDomainHtml ? ' for ' + tcConnDomainHtml : '') + '.')
         : ('Connection successfully established' + (tcConnDomainHtml ? ' to ' + tcConnDomainHtml : '') + '.');
 
+    if (isOkv) {
+      document.getElementById('tc-conn-subtitle').textContent = 'Connection successfully established.';
+      document.getElementById('screen-test-conn').classList.add('okv-p2');
+    }
     // Show permission card, hide pending
     document.getElementById('tc-perm-pending').style.display = 'none';
     document.getElementById('tc-perm-card').style.display = 'block';
@@ -7273,6 +7565,15 @@ function runTestConnectionSequence(isRetry) {
     // ── Parallel-launch test durations for all other workloads ──
     var CAP_DURATIONS_FULL = [1200, 2200, 3500, 4400, 5200, 6000];
     var CAP_DURATIONS = CAP_DURATIONS_FULL.slice(0, capRowCount);
+    // Okta: "Checking permissions" runs to completion first; THEN the count + coverage bar appear and fill as each feature check resolves.
+    if (isOkv) {
+      var okvCheckMs = 2600;
+      CAP_DURATIONS = [0, 1, 2, 3].slice(0, capRowCount).map(function (i) { return okvCheckMs + 700 + i * 900; });
+      setTimeout(function () {
+        var sc = document.getElementById('screen-test-conn');
+        if (sc && sc.classList.contains('active')) sc.classList.remove('okv-checking');
+      }, okvCheckMs);
+    }
     var ENV_ROW_DURATION = 6500;
     var PROP_ROW_DURATION = 9000;
 
@@ -7323,6 +7624,7 @@ function runTestConnectionSequence(isRetry) {
         // first run fails so the failure UX is demonstrable, Retry resolves.
         // Override in the console: window.gwsSkipCapFail = true skips it.
         var capFailIdx = (w && typeof w.failCapRowIdx === 'number' && !(typeof window !== 'undefined' && window.gwsSkipCapFail)) ? w.failCapRowIdx : -1;
+        if (isOkv && window.oktaSeedFail) capFailIdx = 2;
         var simulateCapFailure = (typeof idx === 'number') && !isRetry && idx === capFailIdx;
 
         if (simulateCapFailure) {
@@ -7437,6 +7739,19 @@ function runTestConnectionSequence(isRetry) {
     // failed"). The top card now stays exactly as stage 1 left it in BOTH
     // branches — only the footer (whose action genuinely does depend on
     // whether everything passed) still differs.
+    if (isOkv) {
+      var scrEl = document.getElementById('screen-test-conn');
+      scrEl.classList.remove('okv-running');
+      var failFill = document.getElementById('tc-perm-bar-fail'); if (failFill) failFill.style.background = 'var(--red)';
+      var pctEl = document.getElementById('tc-perm-pct'); if (pctEl && anyFailed) pctEl.style.color = 'var(--red)';
+      var reIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>';
+      footer.innerHTML = '<div style="display:flex;gap:8px;width:100%"><button class="btn btn-outline" onclick="goTo(\'auth\')" style="flex:1;justify-content:center;height:44px">' + reIcon + ' Reconfigure</button>'
+        + (anyFailed
+          ? '<button class="btn" onclick="runTestConnectionSequence(true)" style="flex:1;justify-content:center;height:44px;font-weight:500;background:var(--green-10);color:var(--green);border:1px solid var(--green-30)">Retry</button>'
+          : '<button class="btn btn-blue" onclick="goTo(\'protect\')" style="flex:1;justify-content:center;height:44px;font-weight:500">Continue</button>')
+        + '</div>';
+      return;
+    }
     if (anyFailed) {
       // Footer offers Reconfigure (back to env selection) + Retry; the
       // failure itself is already fully visible in the checks card below
@@ -8258,7 +8573,15 @@ function advanceFromProtect() {
 
 function createConnection() {
   goTo('overview');
-  document.getElementById('success-overlay').classList.add('open');
+  var _ov = document.getElementById('success-overlay');
+  var _isOkta = (currentWorkload === 'okta');
+  _ov.classList.toggle('okf-on', _isOkta);
+  if (_isOkta) {
+    var _w = WORKLOADS.okta, _in = document.getElementById('instance-name-input');
+    var _lg = document.getElementById('okf-logo'); if (_lg) _lg.innerHTML = uniquifySvgIds(_w.icon.replace(/width="28"/g,'width="32"').replace(/height="28"/g,'height="32"').replace(/fill="white"/g,'fill="currentColor"'));
+    var _nm = document.getElementById('okf-inst-name'); if (_nm && _in && _in.value) _nm.textContent = _in.value;
+  }
+  _ov.classList.add('open');
   // Sync the summary's Data Backup card to whatever protection choice
   // the user made on the protect step (chip pulses if they applied the
   // standard policy). Then paint the dynamic "Recommended Next Steps"
@@ -8894,7 +9217,27 @@ var NEXT_STEPS_ORDERING = {
     recommend: 2
   }
 };
+// Okta Overview (Figma 19457:154997): show the Okta layout, hide the shared one, and fill the dynamic bits.
+function paintOktaOverview(on) {
+  var k = document.getElementById('ov-okta'), l = document.getElementById('ov-legacy'); if (!k || !l) return;
+  k.style.display = on ? 'flex' : 'none'; l.style.display = on ? 'none' : '';
+  var bc = document.getElementById('ov-bc'), ac = document.getElementById('ov-actions');
+  if (bc && !bc.hasAttribute('data-d')) { bc.setAttribute('data-d', bc.innerHTML); ac.setAttribute('data-d', ac.innerHTML); }
+  if (!on) { if (bc && bc.hasAttribute('data-d')) { bc.innerHTML = bc.getAttribute('data-d'); ac.innerHTML = ac.getAttribute('data-d'); } return; }
+  bc.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg><span class="bc-sep">&rsaquo;</span><span>Data Backup</span><span class="bc-sep">&rsaquo;</span><span>Integrations</span>';
+  ac.innerHTML = '<button class="btn btn-outline" style="height:36px;padding:0 12px;font-size:14px;display:inline-flex;align-items:center;gap:8px" onclick="goTo(\'catalog\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 14h2M12 14h4"/></svg>Go to Dashboard</button><button class="btn-icon" style="width:36px;height:36px;border-radius:4px;border:1px solid var(--border)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><text x="12" y="17" text-anchor="middle" font-size="13" font-weight="600" font-family="Arial,sans-serif" fill="currentColor" stroke="none">?</text></svg></button>';
+  var rg = document.getElementById('okta-region-selected'), rt = document.getElementById('ovk-region');
+  if (rt) rt.textContent = (rg && rg.getAttribute('data-sel')) ? rg.textContent : (document.getElementById('summary-storage-region') || {}).textContent || '—';
+  var tints = [['var(--green-soft)', 'var(--green)'], ['var(--blue-light)', 'var(--blue)'], ['var(--orange-10)', 'var(--orange)']];
+  var names = ['Jonathan Cash'].concat(coOwners || []).slice(0, 3);
+  var ow = document.getElementById('ovk-owners');
+  if (ow) ow.innerHTML = names.map(function (n, i) { var _p = n.split(/\s+/), ini = (_p[0][0] + (_p.length > 1 ? _p[_p.length - 1][0] : '')).toUpperCase(); return '<span class="ovk-av" style="background:' + tints[i % 3][0] + ';color:' + tints[i % 3][1] + '" data-tooltip="' + escapeHtml(n) + '">' + ini + '</span>'; }).join('');
+  var lg = uniquifySvgIds(WORKLOADS.okta.icon.replace(/width="28"/g, 'width="20"').replace(/height="28"/g, 'height="20"').replace(/fill="white"/g, 'fill="currentColor"'));
+  ['ovk-logo1', 'ovk-logo2'].forEach(function (id) { var e = document.getElementById(id); if (e) e.innerHTML = lg; });
+}
 function renderRecommendedNextSteps() {
+  if (currentWorkload === 'okta') { paintOktaOverview(true); renderOktaNextSteps(); return; }
+  paintOktaOverview(false);
   var list = document.getElementById('recommended-next-steps-list');
   var sub  = document.getElementById('recommended-next-steps-subtitle');
   if (!list) return;
@@ -8936,6 +9279,15 @@ function renderRecommendedNextSteps() {
       '</div>';
   });
   list.innerHTML = html;
+}
+function renderOktaNextSteps() {
+  var host = document.getElementById('ovk-next-host'); if (!host) return;
+  var ids = (policyApplied ? NEXT_STEPS_ORDERING.protected : NEXT_STEPS_ORDERING.unprotected).ids.filter(function (id) { return id !== 'protected-data' && id !== 'customize-policy'; });
+  var T = { 'create-policy': 'Create a backup policy', 'notifications': 'Set up notifications', 'inventory': 'View Inventory', 'dashboard': 'Go to the Overview dashboard', 'sla': 'Review backup SLA' };
+  host.innerHTML = '<div class="ovk-hd"><h3>Recommended next steps</h3></div>' + ids.map(function (id) {
+    var st = NEXT_STEPS[id], o = OKTA_NEXT_STEP_COPY[id] || {}; if (!st) return '';
+    return '<div class="ovk-step"' + (st.onClick ? ' onclick="' + st.onClick + '"' : '') + '><div class="tile" style="background:' + st.iconBg + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="' + st.iconColor + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + st.icon + '</svg></div><div><div class="tt">' + (T[id] || o.title || st.title) + '</div><div class="dd">' + (o.desc || st.desc) + '</div></div></div>';
+  }).join('');
 }
 // Kebab menu on summary header card
 function toggleConnKebab(e) {
@@ -9021,6 +9373,8 @@ function advanceFromBasicInfo() {
   if (w && w.requiresApplicationStep && w.applicationOptions && w.applicationOptions.length) {
     initApplicationsSel(currentWorkload);
     goTo('applications');
+  } else if (currentWorkload === 'okta') {
+    goTo('auth');   // Region & Data Processing now lives at the top of Authentication (Figma 19436:140791)
   } else {
     goTo('infra-storage');
   }
@@ -9044,15 +9398,41 @@ var coOwners = [];
 function enterBasicInfoScreen() {
   // Re-entering (e.g. via back button) keeps whatever was already
   // selected — seed a couple of defaults only the first time.
+  var _isOkta = (typeof currentWorkload !== 'undefined' && currentWorkload === 'okta');
   if (!coOwners.length) {
-    coOwners = ['Hussain Ali Z.', 'Rehan Jalil', 'Priya Nair', 'Diego Fuentes', 'Aisha Khan', 'Tom Baker', 'Lena Ortiz'];
+    coOwners = _isOkta ? ['Hussain Ali Z.', 'Rehan Jalil'] : ['Hussain Ali Z.', 'Rehan Jalil', 'Priya Nair', 'Diego Fuentes', 'Aisha Khan', 'Tom Baker', 'Lena Ortiz'];
   }
+  applyOktaBasicInfo(_isOkta);
+  if (_isOkta && !window._biCoInit) { window._biCoInit = true; setCoownerOpen(false); }   // Okta: Co-owners start collapsed
   renderCoownerChips();
   var input = document.getElementById('coowner-search-input');
   if (input) input.value = '';
   refreshCoownerDatalist();
 }
 
+// Okta (Figma 19436:139734): "Instance Name", Co-owners becomes an optional, collapsible section, owner shown as the signed-in admin.
+function applyOktaBasicInfo(on) {
+  var set = function (id, txt) { var e = document.getElementById(id); if (e) e.textContent = txt; };
+  set('bi-subtitle', on ? 'Create an instance, and then continue to set up the integration.' : 'Enter a name and assign owners for this connection. You can update these details at any time.');
+  set('bi-name-label', on ? 'Instance Name' : 'Connection name');
+  set('bi-owner-opt', on ? 'Jonathan Cash' : 'Alex Morgan');
+  var av = document.getElementById('bi-owner-av'); if (av) av.textContent = on ? 'JC' : 'AM';
+  var head = document.getElementById('bi-coowner-head'); if (head) head.style.display = on ? 'flex' : 'none';
+  var lbl = document.querySelector('#bi-coowner-body > .form-label'); if (lbl) lbl.innerHTML = on ? 'Co-owner(s)<span class="req">*</span>' : 'Co-owner(s)<span class="req">*</span>';
+  var body = document.getElementById('bi-coowner-body'); if (body && !on) body.style.display = '';
+  var inp = document.getElementById('instance-name-input'); if (inp && on && /^okta-prod-1$/i.test(inp.value)) inp.value = 'Okta-connection-1';
+  if (on) updateCoownerCount();
+}
+function updateCoownerCount() { var e = document.getElementById('bi-co-count'); if (e) e.textContent = coOwners.length + ' co-owner' + (coOwners.length === 1 ? '' : 's'); }
+function toggleCoownerSection() {
+  var body = document.getElementById('bi-coowner-body'); if (!body) return;
+  setCoownerOpen(body.style.display === 'none');
+}
+function setCoownerOpen(open) {
+  var body = document.getElementById('bi-coowner-body'), btn = document.querySelector('#bi-coowner-head .bi-co-chev'); if (!body) return;
+  body.style.display = open ? '' : 'none';
+  if (btn) { btn.setAttribute('aria-expanded', open ? 'true' : 'false'); btn.style.transform = open ? '' : 'rotate(-90deg)'; }
+}
 function refreshCoownerDatalist() {
   var list = document.getElementById('coowner-datalist');
   if (!list) return;
@@ -9096,6 +9476,7 @@ function renderCoownerChips() {
       + '<span class="chip-close" onclick="removeCoowner(\'' + name.replace(/'/g, "\\'") + '\')">' + closeSvg + '</span>'
       + '</span>';
   }).join('') + (overflow > 0 ? '<span class="chip-more">+' + overflow + ' more</span>' : '');
+  if (typeof updateCoownerCount === 'function') updateCoownerCount();
 }
 
 // Builds the 2-up card grid for the Applications screen and updates
@@ -10139,32 +10520,21 @@ var WORKLOADS = {
     // the System Log is export-only (no restore), matching the GitHub audit
     // row. (Spec prose says "27 scopes" but enumerates 26 — flagged to PM;
     // we list the 26 it actually names rather than invent a 27th.)
+    // Figma 19440:142225 — four feature-level checks (Connector Activation / Backup / Restore / Discovery Scan) over the 26 granular Okta scopes.
+    // iconSvg = exact Figma export (currentColor); a seeded Restore failure is opt-in via window.oktaSeedFail = true (see runTestConnectionSequence).
     permissionCheckRows: [
-      { id: 0, title: 'Identity & Directory',
-        icon: 'users-outlined', subtitle: 'Users, groups + memberships + rules, devices, user schema, user types',
-        detail: 'Verifies scopes okta.users.manage, okta.groups.manage, okta.schemas.manage, okta.userTypes.manage, okta.devices.read. GET /api/v1/users?limit=1 and GET /api/v1/groups?limit=1 → 200 OK.',
-        fix: 'On the Okta consent screen (Express) or your OAuth service app’s Okta API Scopes tab (Manual), grant the okta.users.* and okta.groups.* scopes. Without them, user and group streams cannot be backed up or restored.' },
-      { id: 1, title: 'Authentication Policies',
-        icon: 'policy-outlined', subtitle: 'Sign-on, MFA, access, and enrollment policies with rules; authenticators; network zones; ThreatInsight; behavior detection; trusted origins',
-        detail: 'Verifies scopes okta.policies.manage, okta.authenticators.manage, okta.networkZones.manage, okta.threatInsights.manage, okta.behaviors.manage, okta.trustedOrigins.manage. GET /api/v1/policies?type=OKTA_SIGN_ON → 200 OK.',
-        fix: 'Grant the okta.policies.* scope (plus the authenticator, network-zone, ThreatInsight, and behavior scopes) so authentication policies and their rules can be captured for rule-level diff and restore.' },
-      { id: 2, title: 'Applications & Authorization',
-        icon: 'integration-widget-outlined', subtitle: 'SAML, OIDC, SWA, and Bookmark apps with OAuth2 grants, signing keys, and assignments; authorization servers',
-        detail: 'Verifies scopes okta.apps.manage, okta.appGrants.manage, okta.authorizationServers.manage. GET /api/v1/apps?limit=1 → 200 OK.',
-        fix: 'Grant okta.apps.manage, okta.appGrants.manage, and okta.authorizationServers.manage so application configurations, OAuth grants, user/group assignments, and authorization servers can be backed up and restored.' },
-      { id: 3, title: 'Federated Identity',
-        icon: 'iam-identity-provider-outlined', subtitle: 'OIDC, SAML2, and social IdPs with signing keys; Active Directory, LDAP, and HR directory connectors with agent pools',
-        detail: 'Verifies scopes okta.idps.manage, okta.agentPools.manage. GET /api/v1/idps?limit=1 → 200 OK.',
-        fix: 'Grant okta.idps.manage and okta.agentPools.manage so identity providers and directory connectors are captured with their federation relationships intact.' },
-      { id: 4, title: 'Administration & Governance',
-        icon: 'management-outlined', subtitle: 'Custom IAM roles, resource sets, role bindings and assignments; API tokens; event and inline hooks; MFA factors',
-        detail: 'Verifies scopes okta.roles.manage, okta.apiTokens.manage, okta.eventHooks.manage, okta.inlineHooks.manage, okta.factors.manage. GET /api/v1/iam/roles → 200 OK.',
-        fix: 'Grant okta.roles.manage, okta.apiTokens.manage, okta.eventHooks.manage, okta.inlineHooks.manage, and okta.factors.manage so custom roles, governance bindings, hooks, and MFA factors can be backed up and restored.' },
-      { id: 5, title: 'Branding & Configuration',
-        icon: 'settings-outlined', subtitle: 'Brands, themes, email domains; org configuration, contacts; OAuth client registry — System Log: export only, no restore',
-        softWarn: true,
-        detail: 'Verifies scopes okta.brands.manage, okta.emailDomains.manage, okta.orgs.manage, okta.logs.read (export-only), okta.clients.read. GET /api/v1/brands and GET /api/v1/logs?limit=1 → 200 OK. The System Log is export-only — captured for compliance evidence, not restorable.',
-        fix: 'Grant okta.brands.manage, okta.emailDomains.manage, okta.orgs.manage, and okta.clients.read for branding and org-config restore, plus okta.logs.read to retain the System Log for compliance. No action needed if you don’t require System Log retention — this row never blocks setup.' }
+      { id: 0, title: 'Connector Activation',
+        iconSvg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.74 13.62L8.805 11.685C8.64 11.52 8.43 11.4375 8.175 11.4375C7.92 11.4375 7.71 11.52 7.545 11.685C7.38 11.85 7.2975 12.06 7.2975 12.315C7.2975 12.57 7.38 12.78 7.545 12.945L10.11 15.51C10.29 15.69 10.5 15.78 10.74 15.78C10.98 15.78 11.19 15.69 11.37 15.51L16.455 10.425C16.62 10.26 16.7025 10.05 16.7025 9.795C16.7025 9.54 16.62 9.33 16.455 9.165C16.29 9 16.08 8.9175 15.825 8.9175C15.57 8.9175 15.36 9 15.195 9.165L10.74 13.62ZM12 21C10.755 21 9.585 20.7638 8.49 20.2913C7.395 19.8188 6.4425 19.1775 5.6325 18.3675C4.8225 17.5575 4.18125 16.605 3.70875 15.51C3.23625 14.415 3 13.245 3 12C3 10.755 3.23625 9.585 3.70875 8.49C4.18125 7.395 4.8225 6.4425 5.6325 5.6325C6.4425 4.8225 7.395 4.18125 8.49 3.70875C9.585 3.23625 10.755 3 12 3C13.245 3 14.415 3.23625 15.51 3.70875C16.605 4.18125 17.5575 4.8225 18.3675 5.6325C19.1775 6.4425 19.8188 7.395 20.2913 8.49C20.7638 9.585 21 10.755 21 12C21 13.245 20.7638 14.415 20.2913 15.51C19.8188 16.605 19.1775 17.5575 18.3675 18.3675C17.5575 19.1775 16.605 19.8188 15.51 20.2913C14.415 20.7638 13.245 21 12 21ZM12 19.2C14.01 19.2 15.7125 18.5025 17.1075 17.1075C18.5025 15.7125 19.2 14.01 19.2 12C19.2 9.99 18.5025 8.2875 17.1075 6.8925C15.7125 5.4975 14.01 4.8 12 4.8C9.99 4.8 8.2875 5.4975 6.8925 6.8925C5.4975 8.2875 4.8 9.99 4.8 12C4.8 14.01 5.4975 15.7125 6.8925 17.1075C8.2875 18.5025 9.99 19.2 12 19.2Z"/></svg>', subtitle: 'Ability to activate and connect to data source',
+        fix: 'Re-authorize Veeam on the Okta consent screen (Express) or confirm your service app’s Client ID, Okta domain, and public key are registered and active (Manual). Without an active connection, no stream can run.' },
+      { id: 1, title: 'Backup',
+        iconSvg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.1818 12.695L10.4455 13.4109C10.2955 13.5609 10.108 13.6359 9.88295 13.6359C9.65795 13.6359 9.46364 13.5541 9.3 13.3905C9.15 13.2405 9.075 13.0496 9.075 12.8177C9.075 12.5859 9.15 12.395 9.3 12.245L11.4273 10.1177C11.5909 9.9541 11.7818 9.87228 12 9.87228C12.2182 9.87228 12.4091 9.9541 12.5727 10.1177L14.7 12.245C14.85 12.395 14.9284 12.5825 14.9352 12.8075C14.942 13.0325 14.8636 13.2268 14.7 13.3905C14.55 13.5405 14.3625 13.6189 14.1375 13.6257C13.9125 13.6325 13.7182 13.5609 13.5545 13.4109L12.8182 12.695V16.9086H17.3182C17.8909 16.9086 18.375 16.7109 18.7705 16.3155C19.1659 15.92 19.3636 15.4359 19.3636 14.8632C19.3636 14.2905 19.1659 13.8064 18.7705 13.4109C18.375 13.0155 17.8909 12.8177 17.3182 12.8177H16.0909V11.1814C16.0909 10.0496 15.692 9.08478 14.8943 8.28706C14.0966 7.48933 13.1318 7.09047 12 7.09047C10.8682 7.09047 9.90341 7.48933 9.10568 8.28706C8.30795 9.08478 7.90909 10.0496 7.90909 11.1814H7.5C6.70909 11.1814 6.03409 11.4609 5.475 12.02C4.91591 12.5791 4.63636 13.2541 4.63636 14.045C4.63636 14.8359 4.91591 15.5109 5.475 16.07C6.03409 16.6291 6.70909 16.9086 7.5 16.9086H8.72727C8.95909 16.9086 9.15341 16.9871 9.31023 17.1439C9.46705 17.3007 9.54545 17.495 9.54545 17.7268C9.54545 17.9586 9.46705 18.153 9.31023 18.3098C9.15341 18.4666 8.95909 18.545 8.72727 18.545H7.5C6.25909 18.545 5.19886 18.1155 4.31932 17.2564C3.43977 16.3973 3 15.3473 3 14.1064C3 13.0427 3.32045 12.095 3.96136 11.2632C4.60227 10.4314 5.44091 9.89956 6.47727 9.66774C6.81818 8.41319 7.5 7.39728 8.52273 6.62001C9.54545 5.84274 10.7045 5.4541 12 5.4541C13.5955 5.4541 14.9489 6.00978 16.0602 7.12115C17.1716 8.23251 17.7273 9.58592 17.7273 11.1814C18.6682 11.2905 19.4489 11.6961 20.0693 12.3984C20.6898 13.1007 21 13.9223 21 14.8632C21 15.8859 20.642 16.7552 19.9261 17.4711C19.2102 18.1871 18.3409 18.545 17.3182 18.545H12.8182C12.3682 18.545 11.983 18.3848 11.6625 18.0643C11.342 17.7439 11.1818 17.3586 11.1818 16.9086V12.695Z"/></svg>', subtitle: 'Read access to the directory, groups, and IAM policies that back up on schedule',
+        fix: 'Grant the okta.users.*, okta.groups.*, okta.policies.*, okta.apps.*, okta.idps.* and okta.roles.* scopes so users, groups, policies, applications, identity providers and admin roles can be read on schedule.' },
+      { id: 2, title: 'Restore',
+        iconSvg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.11 21.9402C12.73 21.9802 12.35 22.0002 11.98 22.0002C9.72 22.0002 7.55 21.2402 5.76 19.8102C3.68 18.1502 2.36 15.7702 2.07 13.1102C2.01 12.5602 2.4 12.0702 2.95 12.0002C3.5 11.9502 3.99 12.3302 4.06 12.8802C4.3 15.0002 5.35 16.9102 7.02 18.2402C8.69 19.5702 10.77 20.1802 12.9 19.9402C17.28 19.4502 20.45 15.4802 19.96 11.1002C19.72 8.98023 18.67 7.07023 17 5.74023C15.33 4.41023 13.24 3.80023 11.12 4.04023C8.55 4.33023 6.35 5.81023 5.1 7.99023H8.01C8.56 7.99023 9.01 8.44023 9.01 8.99023C9.01 9.54023 8.56 9.99023 8.01 9.99023H3C2.45 9.99023 2 9.54023 2 8.99023V4.00023C2 3.45023 2.45 3.00023 3 3.00023C3.55 3.00023 4 3.45023 4 4.00023V6.00023C5.62 3.83023 8.08 2.38023 10.89 2.06023C13.54 1.76023 16.15 2.52023 18.24 4.18023C20.33 5.85023 21.64 8.23023 21.94 10.8802C22.55 16.3602 18.59 21.3202 13.12 21.9302L13.11 21.9402ZM12 14.0002C10.9 14.0002 10 13.1002 10 12.0002C10 10.9002 10.9 10.0002 12 10.0002C13.1 10.0002 14 10.9002 14 12.0002C14 13.1002 13.1 14.0002 12 14.0002Z"/></svg>', subtitle: 'Write access to restore identities, groups, and IAM policies from a backup',
+        fix: 'Grant the okta.*.manage scopes (users, groups, policies, apps, idps, roles) on the Okta consent screen (Express) or your service app’s Okta API Scopes tab (Manual). Read-only scopes allow backup but not restore.' },
+      { id: 3, title: 'Discovery Scan',
+        iconSvg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.65718 16.3144C7.79659 16.3144 6.22191 15.67 4.93314 14.3812C3.64438 13.0925 3 11.5178 3 9.65718C3 7.79659 3.64438 6.22191 4.93314 4.93314C6.22191 3.64438 7.79659 3 9.65718 3C11.5178 3 13.0925 3.64438 14.3812 4.93314C15.67 6.22191 16.3144 7.79659 16.3144 9.65718C16.3144 10.4083 16.1949 11.1166 15.9559 11.7824C15.7169 12.4481 15.3926 13.037 14.9829 13.5491L20.7183 19.2845C20.9061 19.4723 21 19.7112 21 20.0014C21 20.2916 20.9061 20.5306 20.7183 20.7183C20.5306 20.9061 20.2916 21 20.0014 21C19.7112 21 19.4723 20.9061 19.2845 20.7183L13.5491 14.9829C13.037 15.3926 12.4481 15.7169 11.7824 15.9559C11.1166 16.1949 10.4083 16.3144 9.65718 16.3144ZM9.65718 14.266C10.9374 14.266 12.0256 13.8179 12.9218 12.9218C13.8179 12.0256 14.266 10.9374 14.266 9.65718C14.266 8.37696 13.8179 7.28876 12.9218 6.3926C12.0256 5.49644 10.9374 5.04836 9.65718 5.04836C8.37696 5.04836 7.28876 5.49644 6.3926 6.3926C5.49644 7.28876 5.04836 8.37696 5.04836 9.65718C5.04836 10.9374 5.49644 12.0256 6.3926 12.9218C7.28876 13.8179 8.37696 14.266 9.65718 14.266Z"/></svg>', subtitle: 'Advanced data discovery and scanning capabilities',
+        fix: 'Grant okta.logs.read, okta.schemas.manage, okta.userTypes.manage and okta.clients.read so identity relationships, schemas and the System Log can be discovered and scanned.' }
     ],
     expressLabel: 'Authorize with Okta',
     expressIcon: '<svg width="18" height="18" viewBox="0 0 150 150" fill="white"><path fill-rule="evenodd" d="M81.58,8.72l-2.78,34.26c-1.31-.15-2.63-.23-3.98-.23-1.69,0-3.34,.11-4.96,.38l-1.58-16.6c-.04-.53,.38-.98,.9-.98h2.82l-1.35-16.79c-.04-.53,.38-.98,.86-.98h9.2c.53,0,.94,.45,.86,.98h0v-.04Zm-23.22,1.69c-.15-.49-.68-.79-1.16-.6l-8.64,3.16c-.49,.19-.71,.75-.49,1.2l7.03,15.33-2.67,.98c-.49,.19-.71,.75-.49,1.2l7.18,15.06c2.59-1.43,5.41-2.52,8.38-3.19L58.4,10.41h-.04Zm-21.19,9.54l19.87,28.02c-2.52,1.65-4.81,3.61-6.76,5.86l-11.91-11.72c-.38-.38-.34-.98,.04-1.31l2.18-1.8-11.83-11.98c-.38-.38-.34-.98,.08-1.31l7.03-5.9c.41-.34,.98-.26,1.28,.15h.04Zm-16.68,16.23c-.41-.3-1.01-.15-1.28,.3l-4.58,7.96c-.26,.45-.08,1.01,.38,1.24l15.25,7.21-1.43,2.44c-.26,.45-.08,1.05,.41,1.24l15.18,6.95c1.09-2.82,2.55-5.45,4.36-7.81l-28.29-19.53Zm-11.23,21.64c.08-.53,.6-.83,1.09-.71l33.25,8.68c-.86,2.82-1.35,5.79-1.43,8.87l-16.64-1.35c-.53-.04-.9-.53-.79-1.05l.49-2.78-16.79-1.58c-.53-.04-.86-.53-.79-1.05l1.58-9.05h0l.04,.04Zm-1.24,22.47c-.53,.04-.86,.53-.79,1.05l1.62,9.05c.08,.53,.6,.83,1.09,.71l16.3-4.25,.49,2.78c.08,.53,.6,.83,1.09,.71l16.08-4.43c-.94-2.78-1.54-5.75-1.69-8.79l-34.22,3.16h.04Zm5.33,23.82c-.26-.45-.08-1.01,.38-1.24l31.03-14.73c1.16,2.78,2.74,5.37,4.62,7.7l-13.6,9.69c-.41,.3-1.01,.19-1.28-.26l-1.43-2.48-13.86,9.58c-.41,.3-1.01,.15-1.28-.3l-4.62-7.96h.04Zm37.6-6.46l-24.16,24.46c-.38,.38-.34,.98,.08,1.31l7.06,5.9c.41,.34,.98,.26,1.28-.15l9.77-13.75,2.18,1.84c.41,.34,1.01,.26,1.31-.19l9.47-13.75c-2.55-1.58-4.92-3.49-6.95-5.67h-.04Zm-4.77,39.26c-.49-.19-.71-.75-.49-1.2l14.31-31.26c2.63,1.35,5.48,2.37,8.45,2.93l-4.21,16.15c-.11,.49-.68,.79-1.16,.6l-2.67-.98-4.47,16.27c-.15,.49-.68,.79-1.16,.6l-8.64-3.16h0l.04,.04Zm24.64-29.11l-2.78,34.26c-.04,.53,.38,.98,.86,.98h9.2c.53,0,.94-.45,.86-.98l-1.35-16.79h2.82c.53,0,.94-.45,.9-.98l-1.58-16.6c-1.62,.26-3.27,.38-4.96,.38-1.35,0-2.67-.08-3.98-.26h0ZM103.97,15.03c.23-.49,0-1.01-.49-1.2l-8.64-3.16c-.49-.19-1.01,.11-1.16,.6l-4.47,16.27-2.67-.98c-.49-.19-1.01,.11-1.16,.6l-4.21,16.15c3.01,.6,5.82,1.62,8.45,2.93l14.35-31.22h0Zm18.86,13.64l-24.16,24.46c-2.03-2.18-4.36-4.09-6.95-5.67l9.47-13.75c.3-.41,.9-.53,1.31-.19l2.18,1.84,9.77-13.75c.3-.41,.9-.49,1.28-.15l7.06,5.9c.41,.34,.41,.94,.08,1.31h-.04Zm13.07,19.23c.49-.23,.64-.79,.38-1.24l-4.62-7.96c-.26-.45-.86-.56-1.28-.3l-13.86,9.58-1.43-2.44c-.26-.45-.86-.6-1.28-.26l-13.6,9.69c1.88,2.33,3.42,4.92,4.62,7.7l31.03-14.73,.04-.04Zm4.88,12.47l1.58,9.05c.08,.53-.26,.98-.79,1.05l-34.22,3.19c-.15-3.08-.75-6.01-1.69-8.79l16.08-4.43c.49-.15,1.01,.19,1.09,.71l.49,2.78,16.3-4.25c.49-.11,1.01,.19,1.09,.71h0l.08-.04Zm-1.54,33.25c.49,.11,1.01-.19,1.09-.71l1.58-9.05c.08-.53-.26-.98-.79-1.05l-16.79-1.58,.49-2.78c.08-.53-.26-.98-.79-1.05l-16.64-1.35c-.08,3.08-.56,6.05-1.43,8.87l33.25,8.68h0l.04,.04Zm-8.87,20.66c-.26,.45-.86,.56-1.28,.3l-28.29-19.53c1.8-2.37,3.27-5,4.36-7.81l15.18,6.95c.49,.23,.68,.79,.41,1.24l-1.43,2.44,15.25,7.21c.45,.23,.64,.79,.38,1.24l-4.58,7.96h0Zm-37.83-11.53l19.87,28.02c.3,.41,.9,.49,1.28,.15l7.03-5.9c.41-.34,.41-.94,.08-1.31l-11.83-11.98,2.18-1.8c.41-.34,.41-.94,.04-1.31l-11.91-11.72c-1.99,2.25-4.25,4.25-6.76,5.86h.04Zm-.19,38.17c-.49,.19-1.01-.11-1.16-.6l-9.09-33.13c2.97-.68,5.79-1.77,8.38-3.19l7.18,15.06c.23,.49,0,1.05-.49,1.2l-2.67,.98,7.03,15.33c.23,.49,0,1.01-.49,1.2l-8.64,3.16h-.04Z"/></svg>',
@@ -11494,7 +11864,12 @@ function selectWorkload(wl, skipNav) {
 
   // Update all instance name and workload name references across the prototype
   var instanceName = w.defaultInstanceName;
-  document.querySelectorAll('.wl-instance-name').forEach(function(el){ el.textContent = instanceName; });
+  document.querySelectorAll('.wl-instance-name').forEach(function(el){ el.textContent = (wl === 'okta') ? 'Okta' : instanceName; });   // Okta: page title is the connector name (Figma 19436:139734)
+  document.querySelectorAll('.wl-page-icon').forEach(function(el){
+    var on = (wl === 'okta');
+    el.classList.toggle('okta-logo-tile', on);
+    if (on) el.innerHTML = uniquifySvgIds(w.icon.replace(/width="28"/g,'width="24"').replace(/height="28"/g,'height="24"').replace(/fill="white"/g,'fill="#1f2229"'));
+  });
   document.querySelectorAll('.wl-name-display').forEach(function(el){ el.textContent = w.name; });
   document.querySelectorAll('.wl-modal-title').forEach(function(el){ el.textContent = 'Add ' + w.name + ' Application'; });
   document.querySelectorAll('.wl-manual-alert').forEach(function(el){ el.textContent = 'You are adding the ' + w.name + ' application manually. For security purposes, the details cannot be modified later. To update them, you must remove the application and add it again.'; });
@@ -11776,7 +12151,13 @@ function selectWorkload(wl, skipNav) {
         // here as the real DS glyph so the row icon matches what it describes
         // AND uses the design-system icon set. Falls back to the static HTML
         // default when a row supplies no `icon` or the name isn't found.
-        if (override.icon) {
+        if (override.iconSvg) {
+          var iconElS = row.querySelector('.perm-row-icon');
+          if (iconElS) {
+            if (!iconElS.hasAttribute('data-default-icon')) iconElS.setAttribute('data-default-icon', iconElS.innerHTML);
+            iconElS.innerHTML = override.iconSvg;
+          }
+        } else if (override.icon) {
           var iconEl = row.querySelector('.perm-row-icon');
           var dsEntry = window.__SECURITI_ICONS && window.__SECURITI_ICONS[override.icon];
           if (iconEl && dsEntry) {
@@ -12401,7 +12782,9 @@ function selectWorkload(wl, skipNav) {
     if (summaryRegion) summaryRegion.textContent = w.defaultRegion;
   }
 
-  if (!skipNav) goTo('splash');
+  var _sov = document.getElementById('success-overlay'); if (_sov && wl !== 'okta') _sov.classList.remove('okf-on');
+  if (wl === 'okta') applyOktaAuthPage(); else { var _oh = document.getElementById('okta-auth-head'); if (_oh) _oh.style.display = 'none'; }
+  if (!skipNav) goTo(wl === 'okta' ? 'okta-welcome' : 'splash');   // Okta: new Welcome → Configure Okta dialog (Figma 19459:160269)
 }
 
 function toggleHelpDrawer() {
@@ -12436,6 +12819,72 @@ function buildOktaPublicJwk(alg) {
     n: _oktaFakeB64(342)
   }, null, 2);
 }
+function renderOktaRegionOptions(filter) {
+  var el = document.getElementById('okta-region-options'); if (!el) return;
+  var f = (filter || '').toLowerCase();
+  el.innerHTML = storageRegions.filter(function (r) { return !f || r.toLowerCase().indexOf(f) !== -1; }).map(function (r, i) {
+    return '<div style="padding:8px 12px;font-size:14px;cursor:pointer;color:var(--black-100)" onmouseover="this.style.background=\'var(--black-3)\'" onmouseout="this.style.background=\'\'" data-r="' + escapeHtml(r) + '" onclick="selectOktaRegion(this.getAttribute(\'data-r\'))">' + escapeHtml(r) + '</div>';
+  }).join('');
+}
+function toggleOktaRegionDropdown() {
+  var dd = document.getElementById('okta-region-dropdown'); if (!dd) return;
+  if (dd.style.display === 'none') { dd.style.display = 'block'; renderOktaRegionOptions(''); } else dd.style.display = 'none';
+}
+function _oktaRegionChosen() { var s = document.getElementById('okta-region-selected'); return !!(s && s.getAttribute('data-sel')); }
+// Okta: the processing region is an intentional choice — the auth CTA stays disabled until one is picked.
+function _oktaRegionGate() {
+  if (currentWorkload !== 'okta' || _oktaRegionChosen()) return;
+  ['test-conn-btn', 'manual-save-btn'].forEach(function (id) {
+    var b = document.getElementById(id);
+    if (b) { b.disabled = true; b.style.cursor = 'not-allowed'; b.style.background = 'var(--green-30)'; }
+  });
+}
+function selectOktaRegion(v) {
+  var s = document.getElementById('okta-region-selected'); if (s) { s.textContent = v; s.setAttribute('data-sel', '1'); s.style.color = 'var(--black-100)'; }
+  if (typeof refreshAuthAdvanceBtnLabel === 'function') refreshAuthAdvanceBtnLabel();
+  if (typeof checkManualFields === 'function') checkManualFields();
+  var dd = document.getElementById('okta-region-dropdown'); if (dd) dd.style.display = 'none';
+  onOktaRegionChange(v);
+}
+function onOktaRegionChange(v) {
+  var a = document.getElementById('storage-selected-2'); if (a) { a.textContent = v; a.style.color = 'var(--black-100)'; }
+  var b = document.getElementById('summary-storage-region'); if (b) b.textContent = v;
+}
+// Read-only code view of the generated public key (line numbers + copy / download), driven by the hidden #okta-public-jwk value.
+function renderOktaJwkView() {
+  var ta = document.getElementById('okta-public-jwk'), box = document.getElementById('okta-jwk-view'); if (!ta || !box) return;
+  var lines = String(ta.value || '').split('\n');
+  box.querySelector('.oka-code').innerHTML = lines.map(function (l, i) { return '<div class="ln"><span class="n">' + (i + 1) + '</span><span class="c">' + escapeHtml(l).replace(/ /g, '&nbsp;') + '</span></div>'; }).join('');
+}
+// Okta Authentication page (Figma 19436:140791 / 19436:141487): Region block on top, Manual form in the new order and copy, key view with line numbers.
+function applyOktaAuthPage() {
+  var head = document.getElementById('okta-auth-head'); if (head) head.style.display = 'block';
+  var rs = document.getElementById('okta-region-selected');
+  if (rs) { rs.removeAttribute('data-sel'); rs.textContent = 'Select a storage region...'; rs.style.color = 'var(--black-30)'; }
+  var sr = document.getElementById('summary-storage-region'); if (sr) sr.textContent = '';
+  _oktaRegionGate();
+  var note = document.getElementById('manual-perenv-note'); if (note) note.style.display = 'none';
+  var md = document.getElementById('manual-desc'); if (md) md.textContent = 'Provide an Okta API token, Client ID, and Okta domain';
+  var cid = document.getElementById('cred-client-id-section'), org = document.getElementById('org-url-field');
+  if (cid && org && org.nextElementSibling !== cid && cid.parentNode) cid.parentNode.insertBefore(org, cid);   // Okta domain leads
+  if (org) {
+    var oi = org.querySelector('input'); if (oi) { oi.placeholder = 'Domain.Okta.com'; oi.value = ''; }
+    var oh = [].slice.call(org.querySelectorAll('span')).filter(function (x) { return !x.closest('label'); }).pop(); if (oh) oh.textContent = 'Provide your Okta org domain';
+  }
+  if (cid) {
+    var ci = cid.querySelector('input'); if (ci) { ci.placeholder = '00000000000000000000'; ci.value = ''; }
+    var ch = [].slice.call(cid.querySelectorAll('span')).filter(function (x) { return !x.closest('label'); }).pop(); if (ch) ch.textContent = 'Client ID of your Okta org\u2019s API service app.';
+  }
+  var ta = document.getElementById('okta-public-jwk');
+  if (ta && !document.getElementById('okta-jwk-view')) {
+    ta.style.display = 'none';
+    var btnRow = ta.nextElementSibling; if (btnRow && btnRow.querySelector && btnRow.querySelector('button')) btnRow.style.display = 'none';
+    var v = document.createElement('div'); v.id = 'okta-jwk-view'; v.className = 'oka-jwk';
+    v.innerHTML = '<div class="oka-jwk-act"><button type="button" class="oka-ib" aria-label="Copy key" data-tooltip="Copy" onclick="event.stopPropagation();copyOktaJwk(null)">' + _dsStoreIconSvg('content-copy-outlined', 16) + '</button><button type="button" class="oka-ib" aria-label="Download key" data-tooltip="Download" onclick="event.stopPropagation();downloadOktaJwk()"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg></button></div><div class="oka-code"></div>';
+    ta.parentNode.insertBefore(v, ta);
+  }
+  onOktaKeyAlgChange();
+}
 // Regenerate the displayed JWK whenever the algorithm changes (and on
 // entry). Also repaints the radio-card selected styling.
 function onOktaKeyAlgChange() {
@@ -12444,10 +12893,9 @@ function onOktaKeyAlgChange() {
   if (ta) ta.value = buildOktaPublicJwk(alg);
   var rsaLabel = document.getElementById('okta-keyalg-rsa-label');
   var ecLabel = document.getElementById('okta-keyalg-ec-label');
-  var sel = 'border:1px solid var(--green);background:var(--green-10);border-radius:4px;padding:10px 12px;cursor:pointer;font-size:14px;color:var(--black-100);flex:1;display:flex;align-items:center;gap:8px'; // was blue/blue-light — Vision selection (user 2026-08-14)
-  var unsel = 'border:1px solid var(--border);border-radius:4px;padding:10px 12px;cursor:pointer;font-size:14px;color:var(--black-100);flex:1;display:flex;align-items:center;gap:8px';
-  if (rsaLabel) rsaLabel.setAttribute('style', alg === 'RSA 2048' ? sel : unsel);
-  if (ecLabel)  ecLabel.setAttribute('style', alg === 'ECDSA P-256' ? sel : unsel);
+  if (rsaLabel) rsaLabel.classList.toggle('is-sel', alg === 'RSA 2048');
+  if (ecLabel)  ecLabel.classList.toggle('is-sel', alg === 'ECDSA P-256');
+  renderOktaJwkView();
 }
 function copyOktaJwk(btn) {
   var ta = document.getElementById('okta-public-jwk');
@@ -13233,6 +13681,7 @@ function refreshAuthAdvanceBtnLabel() {
 // Once either path has succeeded, the click advances the wizard via
 // advanceFromAuth(), same as always.
 function handleAuthAdvanceClick() {
+  if (currentWorkload === 'okta' && !_oktaRegionChosen()) return;
   var manualFormEl = document.getElementById('manual-form-inline');
   var manualCardOpen = !!manualFormEl && manualFormEl.style.display !== 'none';
   if (manualCardOpen && !_manualConnectDone) {
@@ -14573,6 +15022,12 @@ function refreshAllTableScrollShadows() {
   }
   window._connSyncFloatingThead = update;
   update();
+})();
+
+// Okta region gate wrappers (re-apply after the generic enable/label logic runs)
+(function () {
+  var _r = refreshAuthAdvanceBtnLabel; refreshAuthAdvanceBtnLabel = function () { _r.apply(this, arguments); _oktaRegionGate(); };
+  var _c = checkManualFields; checkManualFields = function () { var o = _c.apply(this, arguments); _oktaRegionGate(); return o; };
 })();
 </script>
 </body>
