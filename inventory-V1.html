@@ -42189,6 +42189,12 @@ function wsSyncClipTips(root) {
     if (t.scrollWidth > t.clientWidth + 1) el.setAttribute('data-tooltip', el.getAttribute('data-tip-clip')); else el.removeAttribute('data-tooltip');
   });
 }
+// The same check at hover time, wherever the marked text lives (the wizard, the preview drawer, rows loaded later): a tooltip appears only if the text is cut off right now.
+document.addEventListener('mouseover', function(e){
+  var el = e.target && e.target.closest ? e.target.closest('[data-tip-clip]') : null; if (!el) return;
+  var t = el.querySelector('.fr-sel-v') || el;
+  if (t.scrollWidth > t.clientWidth + 1) el.setAttribute('data-tooltip', el.getAttribute('data-tip-clip')); else el.removeAttribute('data-tooltip');
+}, true);
 (function(){ var _t; window.addEventListener('resize', function(){ clearTimeout(_t); _t = setTimeout(function(){ if (typeof ws !== 'undefined' && ws.isOpen) wsSyncClipTips(document.getElementById('wsBody')); }, 120); }); })();
 function wsRenderAll() {
   if (!ws.isOpen) return;
@@ -58757,7 +58763,7 @@ function _rdRelgRowHtml(row, ledger) {
     return rdState.payloadQ ? _hlText(v, rdState.payloadQ) : esc(String(v == null ? '' : v));
   }
   if (!ledger.cmp) {
-    return '<tr class="rd-relg-tr"><td class="rd-relg-name">' + _rhl(row.it.name) + '</td><td class="rd-relg-payload">' + _rhl(String(row.lPay || row.it.payload || '')) + '</td></tr>';
+    return '<tr class="rd-relg-tr"><td class="rd-relg-name" data-tip-clip="' + esc(String(row.it.name)) + '">' + _rhl(row.it.name) + '</td><td class="rd-relg-payload" data-tip-clip="' + esc(String(row.lPay || row.it.payload || '')) + '">' + _rhl(String(row.lPay || row.it.payload || '')) + '</td></tr>';
   }
   function _icon20(name) {
     var e = window.__SECURITI_ICONS && window.__SECURITI_ICONS[name];
@@ -58783,7 +58789,7 @@ function _rdRelgRowHtml(row, ledger) {
     if (isLater && row.kind === 'add') {
       pre = '<span class="rd-relg-preicon pre-add" data-tooltip="Added between the compared points" aria-label="Added">' + _icon20('diff-plus-outlined') + '</span>';
     }
-    return '<span class="rd-relg-valwrap">' + pre + '<span class="rd-relg-valtxt">' + _rhl(String(pay || 'Member')) + '</span></span>';
+    return '<span class="rd-relg-valwrap">' + pre + '<span class="rd-relg-valtxt" data-tip-clip="' + esc(String(pay || 'Member')) + '">' + _rhl(String(pay || 'Member')) + '</span></span>';
   }
   return '<tr class="rd-relg-tr' + (row.changed ? ' row-diff' : '') + '">'
     + '<td class="rd-relg-name" data-tooltip="' + esc(row.it.name) + '">' + _rhl(row.it.name) + '</td>'
@@ -60151,8 +60157,9 @@ function renderRdBody() {
     // column, then one cell per restore point. The date picker (the existing picker + popover, unchanged) names the
     // column; a grey caption says how old the point is; the add action sits on its own row. The green accent appears
     // only on the column whose point has been added to the restore job.
-    var _addedL = /rw-added-toggle/.test(leftAction || '');
-    var _addedR = !rdState.singleSnap && /rw-added-toggle/.test(rightAction || '');
+    // The column holding the job's restore point wears the same green as an item added to the cart: in the wizard that column carries the Selected tag instead of the Added toggle.
+    var _addedL = /rw-added-toggle|rw-restore-target-tag/.test(leftAction || '');
+    var _addedR = !rdState.singleSnap && /rw-added-toggle|rw-restore-target-tag/.test(rightAction || '');
     function _hcCap(info) {
       if (!info) return '';
       if (info.isProd) return 'Live now';
