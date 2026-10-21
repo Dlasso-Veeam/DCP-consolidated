@@ -23467,6 +23467,7 @@ function renderChildThead() {
 }
 
 function childRender() {
+  if (window._wsBehindQuiet) return;
   if (!state.childSelectedIds) state.childSelectedIds = new Set();
   state._oowInfo = null;   // out-of-range disclosure: recomputed below per render
   // v9: the search-scope line must track the drill level the instant the
@@ -28161,6 +28162,7 @@ function _changedSinceHit(r, f) {
 }
 
 function renderCatRail() {
+  if (window._wsBehindQuiet) return;
   // INLINE-DRILL: single rail now — the drill no longer has its own
   // copy. Cat-rail is shared chrome on the inventory screen and
   // stays visible across list/drill mode toggles.
@@ -36945,6 +36947,7 @@ function _topLevelActionsHtml(r) {
     + '<button class="btn-icon btn-icon-sm row-preview-btn" disabled aria-disabled="true" data-tooltip="' + pTip + '">' + eye + '</button>';
 }
 function renderTable() {
+  if (window._wsBehindQuiet) return;   // behind the wizard during a re-anchor: repainted on close
   state._oowInfo = null;   // out-of-range disclosure: recomputed below per render
   updateInvWorkloadLockBanner();
   // Keep the search-facets gear button visibility in sync with the
@@ -40894,6 +40897,7 @@ function planHasChildLevel() {
 // (piggybacks on updatePlanDock + renderTable, which are already
 // called at every state-mutation site).
 function renderTopActionBar() {
+  if (window._wsBehindQuiet) return;
   // Three zones (see CSS .tab-left / .tab-center / .tab-right):
   //   LEFT   — persistent cart SUBJECT (composition + workload).
   //   CENTER — transient view CONTEXT (search / select-all / lock /
@@ -41987,6 +41991,14 @@ function closeWorkspace() {
     if (_wsApp && _wsApp.getAttribute('data-inv-mode') === 'drill' && typeof childRender === 'function') childRender();
     if (typeof renderTreeNav === 'function') renderTreeNav();
   }
+  // A re-anchor inside the wizard skipped the repaints behind it (see rdReanchorCart); do them now, once.
+  if (ws._behindDirty) {
+    ws._behindDirty = false;
+    if (typeof renderCatRail === 'function') renderCatRail();
+    if (typeof renderTopActionBar === 'function') renderTopActionBar();
+    if (typeof updatePlanDock === 'function') updatePlanDock();
+    if (typeof updateBulkBar === 'function') updateBulkBar();
+  }
   // EXPRESS restore teardown: put the user's real cart + selection back exactly
   // as it was before the express job (whether they completed or cancelled it).
   if (ws._expressMode && typeof _v1ExpressTeardown === 'function') _v1ExpressTeardown();
@@ -42997,7 +43009,7 @@ function wsRenderSelectTableRow(key, q) {
     switch (c.key) {
       case 'target':
         // Restore point chip (Vision Chip Green Light, Default): opens this item's metadata at the job's restore point, single point, no comparison.
-        _midCells += '<td class="ws-td ws-col-target"><button type="button" class="ws-rp-chip" onclick="wsPreviewBasketItem(\'' + wsEscape(key) + '\')" aria-haspopup="dialog" data-tooltip="View restore point metadata" aria-label="View restore point metadata for ' + wsEscape(name) + ', ' + wsEscape(_wsRpChipLabel(wsItemTargetTs(key))) + '">' + wsEscape(_wsRpChipLabel(wsItemTargetTs(key))) + '</button></td>'; break;
+        _midCells += '<td class="ws-td ws-col-target"><button type="button" class="ws-rp-chip" onclick="wsPreviewBasketItem(\'' + wsEscape(key) + '\')" aria-haspopup="dialog" data-tooltip="' + (state.restorePlan.size === 1 ? 'View or change the restore point' : 'View restore point metadata') + '" aria-label="' + (state.restorePlan.size === 1 ? 'View or change the restore point for ' : 'View restore point metadata for ') + wsEscape(name) + ', ' + wsEscape(_wsRpChipLabel(wsItemTargetTs(key))) + '">' + wsEscape(_wsRpChipLabel(wsItemTargetTs(key))) + '</button></td>'; break;
       case 'type':
         _midCells += '<td class="ws-td ws-col-type"><span class="res-type" data-tip-clip="' + wsEscape(typeLabel) + '">' + wsEscape(typeLabel) + '</span></td>'; break;
       case 'oktaStatus':
@@ -43323,7 +43335,9 @@ function wsPreviewBasketItem(key) {
     // basket item is a whole-resource restore (no mask), we pass only
     // rpId so the drawer renders without any mask chrome — preserving
     // the existing non-masked preview behavior.
-    var _previewCtx = { rpId: rpId, noCompare: true };   // Select step: the one point this item restores from, nothing to compare
+    // Select step: the job's one point is shared by every item, so with several items the drawer only shows it. With ONE item there is no sharing to protect:
+    // the full browse and compare view is offered, and Set as restore point moves the job (which is just that item).
+    var _previewCtx = { rpId: rpId, noCompare: state.restorePlan.size > 1 };
     if (item && item.fieldMask && item.fieldMask.length) {
       _previewCtx.restoreMask = item.fieldMask;
       _previewCtx.restoreMaskType = 'fields';
@@ -53676,6 +53690,7 @@ function _activeDrawerSearchQuery() {
 }
 // The empty-comparison panel must be exactly as wide as the right comparison slot of the control bar above it.
 // The bar spans the full drawer; the body sits beside a scrollbar, so percentages drift — measure the real slot.
+function _rdIsAdForest(r) { return !!r && r.wl === 'Active Directory' && r.type === 'Forest'; }
 function _rdAlignNoneGrid() {
   var g = document.querySelector('.rd-none-grid'), slots = document.querySelectorAll('.rd-hcs > *');
   if (!g) return;
@@ -53688,7 +53703,11 @@ function _rdAlignNoneGrid() {
   if (slots.length < 2) return;
   var gr = g.getBoundingClientRect(), s2 = slots[1].getBoundingClientRect();
   var left = Math.round(s2.left - gr.left), right = Math.round(gr.right - s2.left);
-  if (left > 120 && right > 120) g.style.gridTemplateColumns = left + 'px ' + right + 'px';
+  if (left > 120 && right > 120) {
+    // Re-applying a width that is within a pixel of the current one only re-triggers the observer (a ResizeObserver loop that repainted every frame).
+    var _cur = (g.style.gridTemplateColumns || '').match(/^(\d+)px (\d+)px$/);
+    if (!(_cur && Math.abs(+_cur[1] - left) <= 1 && Math.abs(+_cur[2] - right) <= 1)) g.style.gridTemplateColumns = left + 'px ' + right + 'px';
+  }
 }
 window.addEventListener('resize', function () { if (typeof _rdAlignNoneGrid === 'function') _rdAlignNoneGrid(); });
 function openRecordDrawer(id, nameOverride, subOverride, asOfDate, ctxOverride) {
@@ -54064,6 +54083,11 @@ function _rdPositionOpenPicker(_isFollowup) {
   }
   menu.style.top = Math.round(top) + 'px';
 }
+// In the wizard's preview the left column is the job's restore point. With several items it is locked (one shared point, changed only through Set as restore point
+// on a compared column); with ONE item there is nothing shared to protect, so it is an ordinary dropdown again.
+function _rdWizLeftLocked() {
+  return typeof ws !== 'undefined' && ws.isOpen && typeof _v1BrowseAnchorActive === 'function' && _v1BrowseAnchorActive() && !(state.restorePlan && state.restorePlan.size === 1);
+}
 function rdToggleSideDrop(side, e) {
   if (e) e.stopPropagation();
   // As-of-date lens active → only the LEFT side is locked (it's the restore
@@ -54071,7 +54095,7 @@ function rdToggleSideDrop(side, e) {
   // dropdown open; block only the left.
   // Left side is only locked in the wizard/cart preview; in the inventory preview
   // both sides open freely (pure comparison — see rdBuildSidePicker).
-  if (typeof ws !== 'undefined' && ws.isOpen && typeof _v1BrowseAnchorActive === 'function' && _v1BrowseAnchorActive() && side === 'left') return;
+  if (_rdWizLeftLocked() && side === 'left') return;
   // Item-compare model: the preview drawer IS the comparison surface, so
   // each side's restore-point dropdown is fully interactive again. Open one
   // picker at a time, seed its calendar on the current selection, and wire
@@ -54810,6 +54834,24 @@ function _rdBuildStateForSelCore(resource, sel, baseFields) {
 // vs prod so the user can spot low- vs high-churn snapshots at a glance.
 function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
   var info = rdResolveSel(resource, sel);
+  // The calendar, the diff dots and the restore point list cost about 30ms per picker and are invisible while it is closed, so build them only when it opens
+  // (opening re-renders the drawer, which comes back through here with isOpen).
+  if (_rdWizLeftLocked() && side === 'left') {
+    return '<div class="rw-rp-picker rw-rp-picker-hdr" data-side="' + side + '">' +
+      '<button type="button" class="rw-rp-picker-btn rw-rp-picker-btn-hdr" aria-disabled="true" data-tooltip="Your restore point — every item restores from here. Compare it against any point using the right side.">' +
+        '<span class="rw-rp-picker-btn-label">' + info.label + '</span>' +
+      '</button>' +
+    '</div>';
+  }
+  if (!isOpen) {
+    return '<div class="rw-rp-picker rw-rp-picker-hdr" data-side="' + side + '">' +
+      '<button type="button" class="rw-rp-picker-btn rw-rp-picker-btn-hdr" aria-haspopup="true" aria-expanded="false" onclick="rdToggleSideDrop(\'' + side + '\', event)">' +
+        '<span class="rw-rp-picker-btn-label">' + info.label + '</span>' +
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>' +
+      '</button>' +
+      '<div class="rw-rp-menu rw-rp-menu-cal" onclick="event.stopPropagation()"></div>' +
+    '</div>';
+  }
   // Count diffs per rp vs prod — drives the time-chip diff badge.
   function countDiffsForRp(rpId) {
     var left  = rdBuildStateForSel(resource, 'prod', baseFields).state;
@@ -55091,7 +55133,7 @@ function rdBuildSidePicker(side, sel, resource, allRps, isOpen, baseFields) {
   // BOTH sides browse freely: it's a pure comparison surface and restore-point
   // selection is deferred to the cart, so there's no anchor to protect here.
   var _inWiz = (typeof ws !== 'undefined' && ws.isOpen);
-  var _asofLocked = _inWiz && (typeof _v1BrowseAnchorActive === 'function') && _v1BrowseAnchorActive();
+  var _asofLocked = _rdWizLeftLocked();
   if (_asofLocked && side === 'left') {
     return '<div class="rw-rp-picker rw-rp-picker-hdr" data-side="' + side + '">' +
       '<button type="button" class="rw-rp-picker-btn rw-rp-picker-btn-hdr" aria-disabled="true" data-tooltip="Your restore point — every item restores from here. Compare it against any point using the right side.">' +
@@ -57945,10 +57987,16 @@ function rdReanchorCart(side) {
   if (n === 0) return;
   var curAnchor = (typeof _v1ResolveSideRpId === 'function') ? _v1ResolveSideRpId('anchor') : null;
   if (sel === curAnchor) return;   // already the cart's point — nothing to move
-  if (typeof _setInvAsOfRpImpl === 'function') _setInvAsOfRpImpl(sel);
-  renderRdBody();
-  if (typeof ws !== 'undefined' && ws.isOpen && typeof wsRenderAll === 'function') wsRenderAll();
-  if (typeof renderTopActionBar === 'function') renderTopActionBar();
+  // The inventory behind the wizard is repainted for the new point when the wizard closes (closeWorkspace), so while it is open skip those repaints:
+  // they re-render 20,000 rows nobody can see and made Select take about a second and a half.
+  var _quiet = (typeof ws !== 'undefined' && ws.isOpen);
+  if (_quiet) { window._wsBehindQuiet = true; ws._behindDirty = true; }
+  try {
+    if (typeof _setInvAsOfRpImpl === 'function') _setInvAsOfRpImpl(sel);
+    renderRdBody();
+    if (typeof ws !== 'undefined' && ws.isOpen && typeof wsRenderAll === 'function') wsRenderAll();
+    if (typeof renderTopActionBar === 'function') renderTopActionBar();
+  } finally { window._wsBehindQuiet = false; }
   if (typeof showToast === 'function') {
     var lbl = (typeof _v1FormatRpId === 'function') ? _v1FormatRpId(sel) : 'the selected point';
     showToast('All ' + n + ' item' + (n === 1 ? '' : 's') + ' will restore from ' + lbl);
@@ -58031,7 +58079,7 @@ function rdBuildSideAction(side, sel, resource) {
       return '<span class="rw-restore-target-tag is-static" title="This is the cart’s restore point — every item restores from here.">' +
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Selected</span>';
     }
-    return '<button class="rw-use-side-btn" onclick="rdReanchorCart(\'' + side + '\')" data-tooltip="For now, every item in the cart shares one restore point — selecting this date moves all ' + _cartCount + ', not just this one.">Select</button>';
+    return '<button class="rw-use-side-btn" onclick="rdReanchorCart(\'' + side + '\')">Select</button>';   // the point is shared by the whole job; the Select button needs no explanation
   }
   // [reactivated 2026-07-14] SINGLE-RP: as-of-date lens active but NOT
   // re-anchorable (e.g. empty cart): the RIGHT side stays a comparison
@@ -59583,8 +59631,8 @@ function renderRdBody() {
       // carries the guidance; a second banner saying the same thing was noise.
       summary.style.display = 'none';
       summary.innerHTML = '';
-    } else if (_inWiz && _rdHasKids && typeof _rdContentsDifferBetween === 'function'
-        && _rdContentsDifferBetween(resource, rdState.leftSel, rdState.rightSel)) {
+    } else if (_inWiz && _rdHasKids && !_rdIsAdForest(resource) && typeof _rdContentsDifferBetween === 'function'
+        && _rdContentsDifferBetween(resource, rdState.leftSel, rdState.rightSel)) {   // a forest keeps the standard summary line
       summary.className = 'rd-summary has-diff';
       summary.innerHTML = '<strong>This ' + _rdTypeWord + '’s own settings match between these points,</strong> but its contents differ — restoring it reverts every item it contains to the selected restore point.';
     } else if (!_inWiz && typeof _v1DiffReason === 'function' && resource
@@ -59633,8 +59681,9 @@ function renderRdBody() {
     var _sideMovesCart = function(sel){ return sel && sel !== 'prod' && sel !== 'snap' && sel !== 'none' && sel !== _anchorRpN; };
     var _noteWarn = '<svg viewBox="0 0 24 24" fill="none" stroke="var(--orange-dark)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
     var _noteHtml = '<span class="rw-reanchor-note" data-tooltip="For now, every item in the cart shares one restore point — selecting this date moves all ' + _cN + ', not just this one.">' + _noteWarn + 'Updates all ' + _cN + ' cart item' + (_cN === 1 ? '' : 's') + '</span>';
-    if (_sideMovesCart(rdState.leftSel))  _leftNote  = _noteHtml;
-    if (_sideMovesCart(rdState.rightSel)) _rightNote = _noteHtml;
+    // With one item in the cart "updates all 1 item" says nothing, so the heads-up only appears when the point is shared by several.
+    if (_cN > 1 && _sideMovesCart(rdState.leftSel))  _leftNote  = _noteHtml;
+    if (_cN > 1 && _sideMovesCart(rdState.rightSel)) _rightNote = _noteHtml;
   }
   var leftHdr, rightHdr;
   // Always render the two-picker UI — record-level (rec-*) entries
