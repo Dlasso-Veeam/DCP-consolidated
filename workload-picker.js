@@ -381,7 +381,7 @@
     try { localStorage.setItem('vdc-default-wl:' + _pageKey(), id); } catch (e) {}
   }
 
-  window.WorkloadPickerDS = { renderPanel: renderPanel, colorLogo: colorLogo, monoLogo: monoLogo,
+  window.WorkloadPickerDS = { ensureCss: ensureCss, renderPanel: renderPanel, colorLogo: colorLogo, monoLogo: monoLogo,
                               monoMark: monoMark, WORKLOADS: WORKLOADS, canonicalEntries: canonicalEntries,
                               getDefaultWl: getDefaultWl, setDefaultWl: setDefaultWl };
 })();

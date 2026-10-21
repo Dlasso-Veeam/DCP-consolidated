@@ -34099,7 +34099,10 @@ function renderMatchButton(surface) {
   var host = document.getElementById(surface === 'child' ? 'childSearchMatch' : 'invSearchMatch');
   if (!host) return;
   var level = _matchPickerLevel(surface), q = _matchQuery(surface);
-  if (!level || (!q && !_activeSearchKinds().length)) { host.innerHTML = ''; if (state._suggestOpenSurface === surface && level === null) searchSuggestCloseAll(); return; }
+  // Clearing the search removes the control (user 2026-10-20) — and drops any narrowing with it, so the next
+  // search starts at Everything instead of silently inheriting a scope the user can no longer see.
+  if (level && !q && _activeSearchKinds().length) resetSearchScope();
+  if (!level || !q) { host.innerHTML = ''; if (state._suggestOpenSurface === surface && (level === null || !q)) searchSuggestCloseAll(); return; }
   var open = state._suggestOpenSurface === surface, set = _activeSearchKinds().length > 0;
   host.innerHTML = '<button type="button" class="sm-btn' + (set ? ' set' : '') + (open ? ' open' : '') + '" onclick="toggleMatchPicker(\'' + surface + '\');event.stopPropagation()" aria-haspopup="true" aria-expanded="' + open + '">Match: <b>' + wsEscape(_matchLabel(surface)) + '</b>'
     + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0"><polyline points="6 9 12 15 18 9"/></svg></button>';
@@ -34126,13 +34129,7 @@ function renderMatchPicker(surface) {
 }
 function toggleMatchKind(kind, surface) { toggleSearchFacetKind(kind); renderMatchButton(surface); renderMatchPicker(surface); }
 function resetMatchKinds(surface) { resetSearchScope(); renderMatchButton(surface); if (state._suggestOpenSurface) renderMatchPicker(state._suggestOpenSurface); }
-// One-line prompt on the scope line when narrowing hides matches that exist in other categories.
-function _matchHiddenHint(surface) {
-  var level = _matchPickerLevel(surface); if (!level || !_activeSearchKinds().length || !_matchQuery(surface)) return '';
-  var c = _matchKindCounts(surface), sel = _matchSelected(surface), hidden = 0;
-  _matchKindsForLevel(level).forEach(function (k) { if (sel.indexOf(k) < 0) hidden += (c[k] || 0); });
-  return hidden > 0 ? ' · ' + hidden + ' more match' + (hidden === 1 ? '' : 'es') + ' in other categories <button type="button" class="search-scope-link" onclick="resetMatchKinds(\'' + surface + '\')">Include</button>' : '';
-}
+// (removed 2026-10-20: the scope line no longer prompts "N more matches in other categories · Include" — the Match picker carries the kinds.)
 // Back-compat wrappers — agent + inv markup call the inv-named forms.
 function invSearchSuggestClose() { searchSuggestCloseAll(); }
 // The panel only appears once the user has TYPED something — on a bare
@@ -34427,7 +34424,6 @@ function syncSearchScopeLines() {
       line.innerHTML = all
         ? 'Searching all contents for “' + wsEscape(q) + '” · <button type="button" class="search-scope-link" onclick="toggleSearchScopeAll(\'inv\')">' + cap(noun) + ' only</button>'
         : 'Searching ' + noun + ' for “' + wsEscape(q) + '” · <button type="button" class="search-scope-link" onclick="toggleSearchScopeAll(\'inv\')">Search all contents</button>';
-      line.innerHTML += _matchHiddenHint('inv');
       line.style.display = '';
     }
   }
@@ -34444,7 +34440,7 @@ function syncSearchScopeLines() {
       if (dType === 'records') {
         // Records drill: field values already classify into the record
         // rows, so there's no deeper tier to pivot to — descriptive only.
-        cline.innerHTML = 'Searching records in <strong>' + wsEscape(pn) + '</strong> for “' + wsEscape(cq) + '” — field-value matches included' + (_matchHiddenHint('child') || '.');
+        cline.innerHTML = 'Searching records in <strong>' + wsEscape(pn) + '</strong> for “' + wsEscape(cq) + '” — field-value matches included' + '.';
       } else if (dType === 'fields') {
         // Fields drill: the parent is a SYNTHETIC record (rec-<schema>-<idx>)
         // that doesn't live in RESOURCES — resolve its name from the schema.
@@ -34465,7 +34461,6 @@ function syncSearchScopeLines() {
           ? 'Searching all contents of <strong>' + wsEscape(pn) + '</strong> for “' + wsEscape(cq) + '” · <button type="button" class="search-scope-link" onclick="toggleSearchScopeAll(\'child\')">' + _lvlCap + ' only</button>'
           : 'Searching ' + _lvlNoun + ' in <strong>' + wsEscape(pn) + '</strong> for “' + wsEscape(cq) + '” · <button type="button" class="search-scope-link" onclick="toggleSearchScopeAll(\'child\')">Search all contents</button>';
       }
-      if (dType !== 'records' && dType !== 'fields') cline.innerHTML += _matchHiddenHint('child');
       cline.style.display = '';
     }
   }
