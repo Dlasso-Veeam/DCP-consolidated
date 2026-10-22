@@ -4411,6 +4411,10 @@ body.ai-hx-transcript .ai-foot { display: none; }
 .ws-target-card-body, .ws-cfg-choice-body { font-size: 14px; color: var(--black-60); line-height: 20px; }
 .ws-target-card-consequence { margin-top: 4px; font-size: 14px; color: var(--black-60); line-height: 20px; }
 .ws-cfg-choice-badge { display: inline-flex; padding: 1px 8px; border-radius: 2px; /* Vision chip radius 2; was 100px pill */ background: var(--green-10); color: var(--green);  font-size: 14px; font-weight: 500; }
+.ws-cfg-choice-chip { display: inline-flex; align-items: center; height: 28px; padding: 0 8px; border-radius: 2px; background: var(--soft-green-bg); color: var(--btn-success); font-size: 16px; font-weight: 500; line-height: 22px; white-space: nowrap; }   /* Vision Chip, Type Green / Mode Light / Size Default (read live 2026-10-22): Green/S5 #f6fbf9 fill, Green/S80 #01804a text, 28px, radius 2, Body/B2/Semi Bold 16/22 = weight 500, no border. It leads the card description on a white ground, so the Light variant is enough (Outline was used while it sat in the tinted header). This file's --green is #86b62c, not Vision green */
+.ws-cfg-choice-chiprow { display: flex; margin-bottom: 4px; }   /* the Current chip leads the description, so a long title never pushes it onto a second header line */
+.ws-cfg-choices.fr-targets { grid-template-rows: auto 1fr; row-gap: 0; }
+.ws-cfg-choices.fr-targets > .ws-cfg-choice { display: grid; grid-row: span 2; grid-template-rows: subgrid; }   /* three destination cards on one row: the header band is as tall as the tallest title (the chip wraps in the narrow VMware card), so the descriptions start level */
 /* Toggle rows (Wiki / Release assets / Git LFS) */
 .ws-cfg-toggles { display: flex; flex-direction: column; }
 .ws-cfg-toggle { display: flex; align-items: center; gap: 16px; padding: 12px 20px; border: none; background: var(--white); cursor: pointer; font-family: inherit; text-align: left; border-bottom: 1px solid var(--border-light); }
@@ -4504,9 +4508,10 @@ body.ai-hx-transcript .ai-foot { display: none; }
 .fr-sel.is-changed .fr-sel-v { color: var(--em-green); font-weight: 500; }
 .fr-sel-v { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .fr-sel svg { flex: 0 0 16px; color: var(--black-60); }
 .fr-pop { position: fixed; z-index: 60; width: 380px; max-width: calc(100vw - 32px); background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; box-shadow: 0 8px 24px rgba(31,34,41,0.13); overflow: hidden; }
-.fr-pop-ip { width: 300px; padding: 12px 16px 16px; overflow: visible; } .fr-pop-hd { font-size: 14px; font-weight: 500; margin-bottom: 8px; }
+.fr-pop-ip { width: 400px; padding: 12px 16px 16px; overflow: visible; } .fr-pop-hd { font-size: 14px; font-weight: 500; margin-bottom: 8px; }
 .fr-ip-err { min-height: 0; margin-top: 4px; font-size: 12px; line-height: 16px; color: var(--red); } .fr-ip-err:empty { display: none; }
 .fr-ip-act { display: flex; gap: 8px; margin-top: 8px; }
+.fr-ipg { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px 12px; } .fr-ipg .full { grid-column: 1 / -1; } .fr-ipf { min-width: 0; } .fr-cov { margin-top: 8px; }
 .fr-li-list { max-height: 260px; overflow-y: auto; padding: 8px; }
 .fr-li { text-align: left; } .fr-li[hidden] { display: none; }
 .fr-li-txt { display: flex; flex-direction: column; min-width: 0; flex: 1; } .fr-li-meta { font-size: 14px; line-height: 20px; font-weight: 450; color: var(--black-60); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -4535,6 +4540,7 @@ body.ai-hx-transcript .ai-foot { display: none; }
 .fr-ro { display: block; font-size: 14px; color: var(--black-60); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fr-mrow { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 8px; } .fr-mrow .fr-bt { flex: 0 0 auto; margin-bottom: 0; } .fr-mrow .btn { white-space: nowrap; flex-shrink: 0; }
 .fr-dtr-hint { font-size: 14px; line-height: 20px; color: var(--black-60); }
+.fr-tfields { display: flex; flex-direction: column; gap: 16px; max-width: 520px; }
 .fr-bt { display: inline-flex; width: fit-content; max-width: 100%; padding: 2px; gap: 2px; margin-bottom: 8px; border-radius: 4px; background: var(--black-3); }   /* DS Button Tabs: the container hugs its tabs; each tab hugs its label (pad 8/12, h36) */
 .fr-bt button { flex: 0 0 auto; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; white-space: nowrap; height: 36px; padding: 8px 12px; border: 1px solid transparent; border-radius: 4px; background: transparent; font: inherit; font-size: 16px; color: var(--black-60); cursor: pointer; } .fr-bt button:hover { background: var(--black-5); }
 .fr-bt button::before { content: attr(data-t); font-weight: 500; height: 0; overflow: hidden; visibility: hidden; }   /* reserves the semi-bold width so choosing a tab never moves its neighbour */
@@ -4569,7 +4575,7 @@ body.ai-hx-transcript .ai-foot { display: none; }
 .fr-envsel .fr-sel-v { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fr-envsel.is-src .fr-sel-v { color: var(--black-60); }
 .fr-envsel.is-changed .fr-sel-v { color: var(--em-green); font-weight: 500; }
-.fr-rec .fr-ro { font-size: 16px; line-height: 22px; white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
+.fr-rec .fr-ro { color: var(--black-100); font-weight: 500; font-size: 16px; line-height: 22px; white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
 /* Apply as the Vision Combo Button, Primary / Default (library node 283:21275): halves are Primary buttons (Green/S80, 36px, label pad 8+8, Body/B2 Semi Bold white) on a Green/S30 container, 1px gap, radius 4; the chevron half is 36px square. */
 .fr-pop-opts { overflow: visible; }
 .fr-combo-wrap { position: relative; display: inline-flex; }
@@ -12677,7 +12683,7 @@ var RESOURCES = (function(){
     function AF(id, name, parent, meta){ list.push(R(id, name, 'Folder', AW, AT, AC, {parentId:parent, drillable:true, drillTarget:'children', meta:meta})); }
     function AI(id, name, type, parent, meta, opts){ opts = opts || {}; opts.parentId = parent; opts.meta = meta; list.push(R(id, name, type, AW, AT, AC, opts)); }
     // Hierarchy mirrors the console tree of the reference product (no Deleted Objects container, by decision):
-    //   Forest → Domain → Users and Computers (default containers + OUs + Domain Controllers) · Group Policy Objects · Integrated DNS · Configuration Partition
+    //   Forest → Domain → Domain Controllers · Users and Computers (default containers + OUs) · Group Policy Objects · Integrated DNS · Configuration Partition
     // Enterprise-scale seed: generated deterministically (fixed seed), container meta counts are derived from what is actually seeded.
     var DN = 'DC=corp,DC=meridian,DC=local', SIDP = 'S-1-5-21-3623811015-3361044348-30300820-';
     var _adSeed = 20261014;
@@ -12696,13 +12702,13 @@ var RESOURCES = (function(){
         ['Distinguished name', dnOf(disp, ouPath, extra.cont)], ['SID', SIDP + rid], ['Password last set', extra.pwd || 'Sep 12, 2026'], ['Last logon', extra.last || 'Oct 5, 2026'], ['Account expires', 'Never']];
     }
     list.push(R(AR, 'corp.meridian.local', 'Forest', AW, AT, AC, {drillable:true, drillTarget:'children', meta:'1 domain · 6 domain controllers'}));
-    list.push(R('ad-domain', 'corp.meridian.local', 'Domain', AW, AT, AC, {parentId:AR, drillable:true, drillTarget:'children', meta:'4 sections · NetBIOS MERIDIAN'}));
+    list.push(R('ad-domain', 'corp.meridian.local', 'Domain', AW, AT, AC, {parentId:AR, drillable:true, drillTarget:'children', meta:'5 sections · NetBIOS MERIDIAN'}));
+    AF('ad-sec-dc',  'Domain Controllers',   'ad-domain', '');   // a folder of its own at the domain, as the Domain Controllers OU is at the root of a real domain (user 2026-10-22); was under Users and Computers
     AF('ad-sec-uc',  'Users and Computers',  'ad-domain', '');
     AF('ad-sec-gpo', 'Group Policy Objects', 'ad-domain', '');
     AF('ad-sec-dns', 'Integrated DNS',       'ad-domain', '');
     AF('ad-sec-cfg', 'Configuration Partition','ad-domain', '');
     AF('ad-cont-computers', 'Computers',                 'ad-sec-uc', '');
-    AF('ad-sec-dc',         'Domain Controllers',        'ad-sec-uc', '');
     AF('ad-cont-fsp',       'ForeignSecurityPrincipals', 'ad-sec-uc', '');
     AF('ad-cont-keys',      'Keys',                      'ad-sec-uc', '');
     AF('ad-cont-msa',       'Managed Service Accounts',  'ad-sec-uc', '');
@@ -13042,9 +13048,8 @@ var RESOURCES = (function(){
         list.push(R(fid, F.name, 'Forest', AW, AT, AC, {drillable:true, drillTarget:'children', meta:F.domains.length + ' domain' + (F.domains.length > 1 ? 's' : '') + ' · ' + dcTotal + ' domain controllers'}));
         F.domains.forEach(function(D, di){
           var k = F.slug + '-' + di, did = 'ad-domain-' + k, uc = 'ad-sec-uc-' + k, gp = 'ad-sec-gpo-' + k, dnsF = 'ad-sec-dns-' + k, cf = 'ad-sec-cfg-' + k, dcF = 'ad-sec-dc-' + k;
-          list.push(R(did, D.name, 'Domain', AW, AT, AC, {parentId:fid, drillable:true, drillTarget:'children', meta:'4 sections · NetBIOS ' + D.nb}));
-          AF(uc, 'Users and Computers', did, ''); AF(gp, 'Group Policy Objects', did, ''); AF(dnsF, 'Integrated DNS', did, ''); AF(cf, 'Configuration Partition', did, '');
-          AF(dcF, 'Domain Controllers', uc, '');
+          list.push(R(did, D.name, 'Domain', AW, AT, AC, {parentId:fid, drillable:true, drillTarget:'children', meta:'5 sections · NetBIOS ' + D.nb}));
+          AF(dcF, 'Domain Controllers', did, ''); AF(uc, 'Users and Computers', did, ''); AF(gp, 'Group Policy Objects', did, ''); AF(dnsF, 'Integrated DNS', did, ''); AF(cf, 'Configuration Partition', did, '');
           D.dcs.forEach(function(d, i){
             AI('ad-dc-' + k + '-' + i, d[0], 'Domain Controller', dcF, d[0].replace(/\d+$/, '') && /^PDC/.test(d[4]) ? 'PDC emulator · ' + d[2].replace(' Standard', '') : d[2].replace(' Standard', ''),
               {adAttrs:[['Name', d[0]],['DNS hostname', d[0].toLowerCase() + '.' + D.name],['Site', d[1]],['Operating system', d[2]],['Global catalog', d[3]],['FSMO roles', d[4]]]});
@@ -42217,8 +42222,6 @@ function wsGetSteps() {
   if (typeof planIsExportOnly === 'function' && planIsExportOnly()) {
     steps = steps.filter(function(s){ return s.id !== 2; });
   }
-  // A forest restore has nothing to decide on Restore options: Configure opens on the original environment and Edit environment changes it there.
-  if (typeof wsIsForest === 'function' && wsIsForest()) steps = steps.filter(function(s){ return s.id !== 2; });
   return steps;
 }
 var WS_STEPS = wsGetSteps();
@@ -42270,7 +42273,7 @@ function wsRenderAll() {
   wsRenderTopbar();
   wsRenderSidebar();
   if (wsIsForest()) {   // forest recovery job — its own bodies (see "Active Directory forest recovery")
-    body.innerHTML = ws.step === 1 ? wsRenderConfigure() : ws.step === 3 ? wsRenderForestConfig() : wsRenderProgress();   // Summary is the standard step; the forest fills its slots
+    body.innerHTML = ws.step === 1 ? wsRenderConfigure() : ws.step === 2 ? wsRenderForestDest() : ws.step === 3 ? wsRenderForestConfig() : wsRenderProgress();   // Summary is the standard step; the forest fills its slots
   }
   else if (ws.step === 1) body.innerHTML = wsRenderConfigure();
   else if (ws.step === 2) body.innerHTML = wsRenderReview('dest');     // Destination
@@ -42418,7 +42421,7 @@ function wsGotoStep(n) {
   // Export-only carts have no Destination step — reroute any landing on 2:
   // moving forward (from Select) skips ahead to Configure; moving back
   // (from Configure/Summary) returns to Select.
-  if (n === 2 && ((typeof planIsExportOnly === 'function' && planIsExportOnly()) || wsIsForest())) {
+  if (n === 2 && (typeof planIsExportOnly === 'function' && planIsExportOnly())) {
     n = ws.step >= 3 ? 1 : 3;
   }
   ws.step = n;
@@ -42446,7 +42449,7 @@ function wsRenderFooterV2() {
   var footer = document.getElementById('wsFooter');
   var inner  = document.getElementById('wsFooterInner');
   if (!footer || !inner) return;
-  if (wsIsForest() && ws.step === 3) { footer.style.display = ''; wsFrFooter(inner); return; }   // step 1 keeps the standard Select footer
+  if (wsIsForest() && (ws.step === 2 || ws.step === 3)) { footer.style.display = ''; wsFrFooter(inner); return; }   // step 1 keeps the standard Select footer
   var n = state.restorePlan.size;
   var noun = n === 1 ? '1 item' : (n + ' items');
   // Whole-repo carts: the CTA commits repositories (matches the action bar).
@@ -44434,19 +44437,111 @@ var FR_INV = {
              { n: 'DR-Dallas', t: 'Datacenter', c: [ { n: 'DSwitch-DR', t: 'Distributed switch', c: [ { n: 'VLAN-DR-Test', t: 'Port group', sel: 1 } ] } ] } ],
   datastore: [ { n: 'DS-Prod-SSD', m: '2.1 TB free of 12 TB' }, { n: 'DS-Recovery-SSD', m: '4.2 TB free of 8 TB' }, { n: 'DS-DR-Standard', m: '11.8 TB free of 20 TB' }, { n: 'DS-Archive', m: '18 TB free of 40 TB' } ]
 };
-var FR_KEYS = ['host', 'datastore', 'folder', 'network'];
-var FR_LBL = { host: 'Host or cluster', datastore: 'Datastore', folder: 'Folder', network: 'Network' };
+var FR_KEYS = ['server', 'host', 'pool', 'datastore', 'folder', 'network', 'network2', 'clres'];
+var FR_LBL = { server: 'Server', host: 'Host or cluster', pool: 'Resource pool', datastore: 'Datastore', folder: 'Folder', network: 'Network', network2: 'Network', clres: 'Cluster resource' };
+var FR_NONE = '@disconnected';   // an adapter that is not connected to any network
+var FR_POOLS = { 'Prod-Cluster': ['Resources', 'Identity', 'Infrastructure'], 'Recovery-Cluster': ['Resources', 'Domain controllers', 'Test'], 'DR-Cluster': ['Resources', 'Identity'] };   // the resource pools of each cluster
+// Where the forest is recovered to. VMware keeps the per-domain-controller environment (host, datastore, folder, network) that starts at each one's original; Hyper-V and a clean
+// Windows Server have no "same as source" (a different platform), so their values start empty and Configure won't continue until they are chosen.
+var FR_TARGETS = [
+  ['vmware', 'VMware', 'Restore the domain controllers as virtual machines on a vCenter Server or an ESXi host.'],
+  ['hyperv', 'Microsoft Hyper-V', 'Restore the domain controllers as virtual machines on a Hyper-V host or cluster.'],
+  ['windows', 'New Windows Server', 'Restore each domain controller onto a clean Windows Server machine that you provide.']
+];
+var FR_INV_HV = {
+  host: [{ n: 'hv-cluster-01.meridian.local', t: 'Cluster', sel: 1 }, { n: 'hv-prod-01.meridian.local', t: 'Host', sel: 1 }, { n: 'hv-prod-02.meridian.local', t: 'Host', sel: 1 }],
+  datastore: [{ n: 'D:\\Hyper-V\\VMs', m: '1.8 TB free of 4 TB' }, { n: 'E:\\Recovery', m: '3.2 TB free of 8 TB' }, { n: 'C:\\ClusterStorage\\Volume1', m: '6.4 TB free of 12 TB' }],
+  network: [{ n: 'External-Prod', t: 'External virtual switch', sel: 1 }, { n: 'Internal-Mgmt', t: 'Internal virtual switch', sel: 1 }, { n: 'Private-Recovery', t: 'Private virtual switch', sel: 1 }]
+};
+FR_INV_HV.clres = [{ n: 'Register as a cluster resource', t: 'Assigns a cluster role to the restored domain controller', sel: 1 }, { n: 'Do not register as a cluster resource', t: 'Does not assign a cluster role to the restored domain controller', sel: 1 }];
+var FR_HV_SERVERS = {   // what each server or cluster offers once connected: a standalone host has one of everything, a cluster has choices
+  'hv-cluster-01.meridian.local': FR_INV_HV,
+  'hv-dr-01.meridian.local': { host: [{ n: 'hv-dr-01.meridian.local', t: 'Host', sel: 1 }], datastore: [{ n: 'E:\\Recovery', m: '3.2 TB free of 8 TB' }], network: [{ n: 'Private-Recovery', t: 'Private virtual switch', sel: 1 }], clres: FR_INV_HV.clres }
+};
+var FR_CONNECTED = {   // the servers onboarding supplied, by platform: the backup servers connected there bring in the vCenter and Hyper-V servers they manage
+  vmware: [['vcenter.meridian.local', 'vCenter Server'], ['vcenter-dr.meridian.local', 'vCenter Server'], ['esx-recovery-01.meridian.local', 'ESXi host']],
+  hyperv: [['hv-cluster-01.meridian.local', 'Hyper-V cluster'], ['hv-dr-01.meridian.local', 'Hyper-V host']]
+};
+var FR_FOREST_SRC = { 'ad-forest-fabrikam': { platform: 'hyperv', server: 'hv-cluster-01.meridian.local' } };   // where each forest's domain controllers were backed up from; the rest came from VMware
+var FR_SRC_DEFAULT_PLAT = { platform: 'vmware', server: 'vcenter.meridian.local' };
+
+function _frConnInit(t, src) { return { sel: src.platform === t ? src.server : '' }; }
+var FR_HV_SRC_DEFAULT = { host: 'hv-prod-01.meridian.local', datastore: 'D:\\Hyper-V\\VMs', network: 'External-Prod', network2: 'Internal-Mgmt' };   // where a Hyper-V-sourced domain controller was backed up from
+var FR_HV_SRC_BY = { 'FB-DC01': { host: 'hv-prod-02.meridian.local', datastore: 'D:\\Hyper-V\\VMs', network: 'External-Prod', network2: 'Internal-Mgmt' } };
+function _frTLabel(k, d) {
+  var t = ws.forest && ws.forest.target, two = d && _frNics(d) > 1;
+  if (k === 'clres') return 'Cluster resource';
+  if (k === 'server') return t === 'hyperv' ? 'Hyper-V server or cluster' : 'vCenter Server or ESXi host';
+  if (k === 'datastore' && t === 'hyperv') return 'Path';
+  if (k === 'network' || k === 'network2') return (t === 'hyperv' ? 'Virtual switch' : 'Network') + (two ? ' (adapter ' + (k === 'network2' ? 2 : 1) + ')' : '');
+  return FR_LBL[k];
+}
+function _frKeysFor(d) {   // the settings each domain controller shows, in order; a second adapter, a cluster resource and a resource pool appear only where they apply
+  var t = ws.forest && ws.forest.target; if (t === 'windows') return [];
+  var two = d && _frNics(d) > 1, e = d ? (ws.forest.envRows[d.res.id] || {}) : {};
+  if (t === 'hyperv') return ['server', 'host'].concat(d && _frHvIsCluster(_frShown(d, 'host', e.host)) ? ['clres'] : [], ['network'], two ? ['network2'] : [], ['datastore']);
+  return ['server', 'host', 'pool', 'network'].concat(two ? ['network2'] : [], ['folder', 'datastore']);
+}
+function _frAdapter2On(d) { return _frNics(d) > 1 && (ws.forest.envRows[d.res.id] || {}).network2 !== FR_NONE; }   // a disconnected adapter has no network, so no address
+function _frGridKeys(d) { var ks = _frKeysFor(d); if (ws.forest.target !== 'windows' && _frNics(d) > 1) { if (_frAdapter2On(d)) ks.splice(ks.indexOf('network2') + 1, 0, 'ip2'); ks.splice(ks.indexOf('network') + 1, 0, 'ip'); } return ks; }   // with two adapters each address follows its own network   // each adapter's IP address follows its network
+
+function _frG(show, html) { return show ? html : ''; }
+function _frIsVmware() { return !ws.forest || ws.forest.target === 'vmware'; }
 // Where each domain controller was backed up from. They differ: a forest's domain controllers sit on different hosts, datastores, folders and networks.
 var FR_S = '@source';   // marker: "Same as source", resolved per domain controller
-var FR_SRC_DEFAULT = { host: 'esx-prod-01.meridian.local', datastore: 'DS-Prod-SSD', folder: 'HQ-Boston/Production/Identity', network: 'VLAN-Prod-Identity' };
+var FR_SRC_DEFAULT = { host: 'esx-prod-01.meridian.local', pool: 'Identity', datastore: 'DS-Prod-SSD', folder: 'HQ-Boston/Production/Identity', network: 'VLAN-Prod-Identity' };
 var FR_SRC_BY = {
-  'DC-01': { host: 'esx-prod-01.meridian.local', datastore: 'DS-Prod-SSD', folder: 'HQ-Boston/Production/Identity', network: 'VLAN-Prod-Identity' },
-  'CT-DC01': { host: 'esx-prod-02.meridian.local', datastore: 'DS-Prod-SSD', folder: 'HQ-Boston/Production/Identity', network: 'VLAN-Prod-Identity' },
-  'EM-DC01': { host: 'esx-dr-01.meridian.local', datastore: 'DS-DR-Standard', folder: 'DR-Dallas/Identity', network: 'VLAN-DR-Test' },
-  'FB-DC01': { host: 'esx-prod-01.meridian.local', datastore: 'DS-Archive', folder: 'HQ-Boston/Production/Infrastructure', network: 'VLAN-Mgmt' }
+  'DC-01': { host: 'esx-prod-01.meridian.local', pool: 'Identity', datastore: 'DS-Prod-SSD', folder: 'HQ-Boston/Production/Identity', network: 'VLAN-Prod-Identity', network2: 'VLAN-Mgmt' },
+  'CT-DC01': { host: 'esx-prod-02.meridian.local', pool: 'Identity', datastore: 'DS-Prod-SSD', folder: 'HQ-Boston/Production/Identity', network: 'VLAN-Prod-Identity' },
+  'EM-DC01': { host: 'esx-dr-01.meridian.local', pool: 'Identity', datastore: 'DS-DR-Standard', folder: 'DR-Dallas/Identity', network: 'VLAN-DR-Test' },
+  'FB-DC01': { host: 'esx-prod-01.meridian.local', pool: 'Infrastructure', datastore: 'DS-Archive', folder: 'HQ-Boston/Production/Infrastructure', network: 'VLAN-Mgmt' }
 };
-function _frSrcOf(d) { return (d && d.auth && FR_SRC_BY[d.auth.name]) || FR_SRC_DEFAULT; }
-function _frShown(d, k, v) { return v === FR_S ? _frSrcOf(d)[k] : v; }   // the value that will actually be used for a domain controller
+function _frSrcVm(d) { return (d && d.auth && FR_SRC_BY[d.auth.name]) || FR_SRC_DEFAULT; }   // where the domain controller sat on VMware: also tells how many adapters it has
+function _frSrcOf(d) { return (ws.forest && ws.forest.srcPlatform === 'hyperv') ? ((d && d.auth && FR_HV_SRC_BY[d.auth.name]) || FR_HV_SRC_DEFAULT) : _frSrcVm(d); }   // where it was backed up from, on the platform it was backed up from
+function _frHasOrig() { var f = ws.forest; return !!f && f.target !== 'windows' && f.target === f.srcPlatform; }   // restoring to the platform the backups came from: every setting has an original to start at
+function _frShown(d, k, v) {   // the value that will actually be used for a domain controller
+  if (v === FR_NONE) return 'Disconnected';
+  if (v !== FR_S) return v;
+  if (k === 'server') return _frHasOrig() ? ws.forest.srcServer : 'Choose\u2026';
+  if (k === 'clres') return 'Choose\u2026';
+  if (!_frDcHasOrig(d)) return k === 'pool' ? 'Resources' : 'Choose\u2026';
+  return k === 'pool' ? _frPoolDefault(d) : _frSrcOf(d)[k];
+}
+function _frNics(d) { return _frSrcVm(d).network2 ? 2 : 1; }   // network adapters the domain controller was backed up with; each is mapped to a network and re-addressed on its own
+function _frClusterOf(host) {   // the cluster a host (or the cluster itself) belongs to
+  var hit = null;
+  (function walk(nodes, cl){ nodes.forEach(function(n){ var c = n.t === 'Cluster' ? n.n : cl; if (n.n === host) hit = c; if (n.c) walk(n.c, c); }); })(FR_INV.host, null);
+  return hit;
+}
+function _frConnList(t) { return FR_CONNECTED[t]; }   // the servers onboarding supplied for this platform
+function _frDcServer(d) { var e = ws.forest.envRows[d.res.id] || {}; return (e.server && e.server !== FR_S) ? e.server : (_frHasOrig() ? ws.forest.srcServer : null); }   // its own server; until one is chosen, the source server while restoring to the source platform
+function _frDcHasOrig(d) { return _frHasOrig() && _frDcServer(d) === ws.forest.srcServer; }   // the original host, path and switch belong to the source server, not to another one
+function _frInvFor(d) { return ws.forest.target === 'hyperv' ? (FR_HV_SERVERS[d ? _frDcServer(d) : null] || FR_INV_HV) : FR_INV; }   // what a domain controller's server offers
+function _frSrvRows(dom, cur, q) {   // the servers onboarding supplied for this platform; the source server leads (as "Same as source") while restoring to the source platform
+  var f = ws.forest, t = f.target, src = f.srcPlatform === t ? f.srcServer : null;
+  return _frConnList(t).filter(function(x){ return !(x[0] === src && _frHasOrig()) && (!q || x[0].toLowerCase().indexOf(q) >= 0); }).map(function(x){
+    return '<button type="button" class="fr-li2' + (cur === x[0] ? ' on' : '') + '" onclick="wsFrPick(\'' + dom + '\',\'server\',\'' + _frJs(x[0]) + '\')"><span class="fr-li2-n">' + wsEscape(x[0]) + '</span><span class="fr-li2-m">' + wsEscape(x[0] === src ? 'Where these backups were taken from' : x[1]) + '</span></button>'; }).join('') || (q ? '<div class="fr-li-empty">No matches</div>' : '');
+}
+function _frHvAutoSelect() {   // a server that offers only one host, path or switch needs no choice on Configure
+  var f = ws.forest; if (f.target !== 'hyperv') return;
+  _frModel().domains.forEach(function(d){
+    var name = _frDcServer(d); if (!name || _frDcHasOrig(d)) return; var inv = FR_HV_SERVERS[name] || FR_INV_HV;
+    var e = f.envRows[d.res.id] = f.envRows[d.res.id] || _frRowSeed();
+    [['host', 'host'], ['datastore', 'datastore'], ['network', 'network'], ['network', 'network2']].forEach(function(p){ var l = inv[p[0]] || []; if (l.length === 1 && (!e[p[1]] || e[p[1]] === FR_S)) e[p[1]] = l[0].n; });
+  });
+}
+
+
+
+
+
+function _frHvIsCluster(name) { return FR_INV_HV.host.some(function(h){ return h.n === name && h.t === 'Cluster'; }); }
+function _frHostOf(d) { var e = ws.forest.envRows[d.res.id] || {}, src = _frSrcOf(d); return (e.host === undefined || e.host === FR_S) ? src.host : e.host; }
+function _frPoolsFor(d) { return FR_POOLS[_frClusterOf(_frHostOf(d))] || ['Resources']; }
+function _frPoolDefault(d) { if (!_frDcHasOrig(d)) return 'Resources'; var src = _frSrcOf(d); return _frClusterOf(_frHostOf(d)) === _frClusterOf(src.host) ? src.pool : 'Resources'; }   // a pool belongs to a cluster: the source's own while the domain controller stays in that cluster, otherwise the cluster's default pool
+function _frPoolInv(d) { return [{ n: _frClusterOf(_frHostOf(d)) || '', t: 'Cluster', c: _frPoolsFor(d).map(function(p){ return { n: p, t: 'Resource pool', sel: 1 }; }) }]; }
+function _frRowSeed() { return { server: FR_S, host: FR_S, pool: FR_S, datastore: FR_S, folder: FR_S, network: FR_S, network2: FR_S, clres: FR_S }; }
+function _frClearIp(st) { st.ip = ''; st.ip2 = ''; st.rule = null; st.rule2 = null; st.draft = null; st.errs = null; st.ipDraft = ''; st.ipErr = ''; }
 var FR_DISK = [['same', 'Same as source'], ['thin', 'Thin'], ['lazy', 'Thick lazy zeroed'], ['eager', 'Thick eager zeroed']];   // VBR full VM restore, Disk Type Settings
 function wsIsForest() { return !!(typeof ws !== 'undefined' && ws.isOpen && ws.forest && state.restorePlan && state.restorePlan.has && state.restorePlan.has(ws.forest.id)); }
 function _isAdForest(keyOrResource) {
@@ -44454,7 +44549,8 @@ function _isAdForest(keyOrResource) {
   return !!r && r.wl === 'Active Directory' && r.type === 'Forest';
 }
 function _frInit(id) {
-  ws.forest = { id: id, dest: 'original', dom: {}, envRows: {}, sel: {}, pend: undefined, msg: '', menu: false, q: '', exp: {}, nameMode: 'same', prefix: '', suffix: '', name: '', uuid: 'preserve', disk: 'same', collide: 'replace', collideSuffix: '-recovered', pop: null,
+  var src = FR_FOREST_SRC[id] || FR_SRC_DEFAULT_PLAT;
+  ws.forest = { id: id, dest: 'original', target: src.platform, srcPlatform: src.platform, srcServer: src.server, tInfo: { vmware: _frConnInit('vmware', src), hyperv: _frConnInit('hyperv', src), windows: { user: '', pass: '' } }, win: {}, dom: {}, envRows: {}, sel: {}, pend: undefined, msg: '', menu: false, q: '', exp: {}, nameMode: 'same', prefix: '', suffix: '', name: '', uuid: 'preserve', disk: 'same', collide: 'replace', collideSuffix: '-recovered', pop: null,
     ownCreds: false, tags: true, confirm: false, t0: null };
   ws.frAdvOpen = false;
   _frSeedRows();
@@ -44519,14 +44615,14 @@ function _frPage(title, desc, inner) {
 // One settings row per domain controller, every setting starting at the "Same as source" marker. The rows hold the Different environment's edits; they persist when the destination is switched back and forth, and Original never reads them.
 function _frSeedRows() {
   var f = ws.forest; f.envRows = {}; f.sel = {}; f.pend = undefined;
-  var seed = function(d){ f.envRows[d.res.id] = { host: FR_S, datastore: FR_S, folder: FR_S, network: FR_S }; };
+  var seed = function(d){ f.envRows[d.res.id] = _frRowSeed(); };
   var rs = RESOURCES.filter(function(r){ return r.wl === 'Active Directory' && r.type === 'Domain' && r.parentId === f.id; });
   rs.forEach(function(r){ seed({ res: r }); });
 }
 function wsFrSetDest(v) { var f = ws.forest; f.dest = v; f.pop = null; f.pend = undefined; f.msg = ''; wsRenderAll(); }
 function _frChangeCount() {   // how many settings differ from what each domain controller was backed up with (environment values and IP addresses)
   var f = ws.forest, n = 0;
-  _frModel().domains.forEach(function(d){ var e = f.envRows[d.res.id] || {}; FR_KEYS.forEach(function(k){ if (e[k] !== FR_S && e[k] !== _frSrcOf(d)[k]) n++; }); if ((f.dom[d.res.id] || {}).ip) n++; });
+  _frModel().domains.forEach(function(d){ var e = f.envRows[d.res.id] || {}; FR_KEYS.forEach(function(k){ if (e[k] !== FR_S && e[k] !== _frSrcOf(d)[k]) n++; }); var s0 = f.dom[d.res.id] || {}; if (s0.ip) n++; if (s0.ip2) n++; });
   return n;
 }
 function wsFrExit() {   // leave edit mode: nothing changed returns at once; otherwise confirm in the wizard's standard dialog
@@ -44537,14 +44633,15 @@ function wsFrExit() {   // leave edit mode: nothing changed returns at once; oth
 }
 function wsFrCloseDiscard() { document.getElementById('frDiscardBackdrop').style.display = 'none'; document.getElementById('frDiscardModal').style.display = 'none'; }
 function wsFrReset() {
-  var f = ws.forest; wsFrCloseDiscard(); _frSeedRows(); Object.keys(f.dom).forEach(function(k){ var st = f.dom[k]; st.ip = ''; st.ipDraft = ''; st.ipErr = ''; });
+  var f = ws.forest; wsFrCloseDiscard(); _frSeedRows(); Object.keys(f.dom).forEach(function(k){ _frClearIp(f.dom[k]); });
   f.pop = null; f.view = 'place'; f.dest = 'original'; wsRenderAll();
 }
-function _frWarnNames() {   // domain controllers still on the network they were backed up on
+function _frWarnNames() {   // domain controllers with an adapter still on the network it was backed up on
   var f = ws.forest;
-  return _frModel().domains.filter(function(d){ var e = f.dest === 'original' ? FR_S : (f.envRows[d.res.id] || {}).network; return e === FR_S || e === _frSrcOf(d).network; }).map(function(d){ return d.auth ? d.auth.name : d.res.name; });
+  return _frModel().domains.filter(function(d){ var e = f.dest === 'original' ? {} : (f.envRows[d.res.id] || {}); return ['network', 'network2'].slice(0, _frNics(d)).some(function(k){ var v = e[k]; return v === undefined || v === FR_S || v === _frSrcOf(d)[k]; }); }).map(function(d){ return d.auth ? d.auth.name : d.res.name; });
 }
-function _frProdWarning() {   // follows the network, not a choice: shown while any domain controller is still on its original network
+function _frProdWarning() {
+  if (!_frHasOrig()) return '';   // follows the network, not a choice: shown while any domain controller is still on its original network
   var l = _frWarnNames(), all = _frModel().domains.length; if (!l.length) return '';
   var who = l.length === all && all > 1 ? 'Every domain controller is still on its' : (l.length === 1 ? l[0] + ' is still on its' : l.slice(0, -1).join(', ') + ' and ' + l[l.length - 1] + ' are still on their');
   return '<div style="margin-top:16px">' + _frNote('warn', 'Keep the recovered forest away from production', who + ' original network. Production and recovered domain controllers on the same network cause replication, FSMO and Kerberos conflicts. If production is still running, the recovered domain controllers must not be able to reach it.') + '</div>';
@@ -44554,10 +44651,10 @@ function _frProdWarning() {   // follows the network, not a choice: shown while 
 // Per-domain recovery row: the domain controller restored (auto-picked, changeable), its IP handling, and — for the isolated destination — where it lands.
 // One row per domain collapses VBR steps 3 and 5–9 (authoritative DC, hosts, datastores, folder, network, re-IP) into the Configure step.
 // Picklists reuse the workload picker's List Item recipe (wlp-* classes from workload-picker.js: search row, rows with a 28px tile, selected = Green/S5 + inset bar + Medium name).
-function _frIpOf(c) {   // mock: the DC's original address — a stable per-name subnet so two forests don't share addresses
+function _frIpOf(c, second) {   // mock: the DC's original address (and, for a second adapter, its management address) — a stable per-name subnet so two forests don't share addresses
   var nm = c ? String(c.name) : 'DC-01', n = parseInt(nm.replace(/\D/g, ''), 10) || 1, h = 0;
   for (var i = 0; i < nm.length; i++) h = (h * 31 + nm.charCodeAt(i)) % 211;
-  return '10.' + (20 + h % 40) + '.' + n + '.10';
+  return second ? '172.16.' + n + '.10' : '10.' + (20 + h % 40) + '.' + n + '.10';
 }
 function _frEnvOf(dom) { var f = ws.forest; return (f.envRows || {})[dom] || {}; }
 function _frSelIds() { var f = ws.forest; return Object.keys(f.sel || {}).filter(function(k){ return f.sel[k]; }); }
@@ -44576,6 +44673,7 @@ function _frTree(nodes, kind, cur, dom, path, srcVal) {   // srcVal: the value t
   }).join('');
 }
 // search + tree (or list) for one environment field — the same content wherever it opens
+function _frJs(v) { return String(v).replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }   // a value inside an inline handler's quotes: Hyper-V paths carry backslashes
 function _frOpts(dom, k) {
   var f = ws.forest, bulk = dom === '_sel', q = (f.q || '').trim().toLowerCase(), body = '';
   var cur = bulk ? f.pend : (f.pop && f.pop.pend !== undefined ? f.pop.pend : _frEnvOf(dom)[k]);   // a single-domain-controller pick is staged until Apply
@@ -44583,12 +44681,17 @@ function _frOpts(dom, k) {
   var ds = _frModel().domains, one = bulk ? (_frSelIds().length === 1 ? ds.filter(function(x){ return x.res.id === _frSelIds()[0]; })[0] : null) : ds.filter(function(x){ return x.res.id === dom; })[0];
   // the real value leads; "Same as source" is the caption
   // Only folders are browsed as a tree (the value is the path and the nesting is how people find it). Datastores, networks and hosts are flat lists whose rows carry their datacenter and parent underneath.
-  var flat = (k !== 'folder'), srcVal = (one && (flat || !q)) ? _frSrcOf(one)[k] : null;   // the top row offers this value, so the list below leaves it out
-  var src = '<button type="button" class="fr-li2 src' + (cur === FR_S ? ' on' : '') + '" onclick="wsFrPick(\'' + dom + '\',\'' + k + '\',\'' + FR_S + '\')"><span class="fr-li2-n">' + wsEscape(one ? _frSrcOf(one)[k] : 'Each domain controller\u2019s original') + '</span><span class="fr-li2-m">Same as source</span></button>';
-  if (k === 'datastore') body = FR_INV.datastore.filter(function(d){ return (!q || d.n.toLowerCase().indexOf(q) >= 0) && d.n !== srcVal; }).map(function(d){ return '<button type="button" class="fr-li2' + (cur === d.n ? ' on' : '') + '" onclick="wsFrPick(\'' + dom + '\',\'datastore\',\'' + d.n + '\')"><span class="fr-li2-n">' + d.n + '</span><span class="fr-li2-m">' + d.m + '</span></button>'; }).join('') || '<div class="fr-li-empty">No matches</div>';
-  else if (q || flat) body = _frFlat(FR_INV[k], q, [], []).filter(function(h){ return !(srcVal && h.n === srcVal && flat); }).map(function(h){ var hv = k === 'folder' ? h.v : h.n; return '<button type="button" class="fr-li2' + (cur === hv ? ' on' : '') + '" onclick="wsFrPick(\'' + dom + '\',\'' + k + '\',\'' + hv.replace(/'/g, "\\'") + '\')"><span class="fr-li2-n">' + wsEscape(h.n) + '</span><span class="fr-li2-m">' + h.t + ' in ' + wsEscape(k === 'host' ? h.path.replace(/^[^\u203a]*\u203a\s*/, '') : h.path) + '</span></button>'; }).join('') || '<div class="fr-li-empty">No matches</div>';
-  else body = _frTree(FR_INV[k], k, cur, dom, '', srcVal);
-  return '<div class="fr-srch">' + mag + '<input id="fr-q" type="text" placeholder="Search" value="' + wsEscape(f.q || '') + '" oninput="wsFrQ(this.value)" autocomplete="off" aria-label="Search ' + FR_LBL[k].toLowerCase() + '"></div><div class="fr-pk">' + (flat || !q ? src : '') + body + '</div>';
+  var ik = k === 'network2' ? 'network' : k, inv = k === 'pool' ? (one ? _frPoolInv(one) : []) : _frInvFor(one)[ik];   // a second adapter picks from the same networks; a resource pool from the cluster the domain controller lands in
+  var hasSrc = one ? (k === 'server' ? _frHasOrig() : _frDcHasOrig(one)) : _frHasOrig();   // the top row offers the source's own value
+  var flat = (k !== 'folder'), srcVal = (one && hasSrc && (flat || !q)) ? (k === 'server' ? ws.forest.srcServer : k === 'pool' ? _frPoolDefault(one) : _frSrcOf(one)[k]) : null;   // the top row offers this value, so the list below leaves it out
+  var srcName = one ? (k === 'server' ? ws.forest.srcServer : k === 'pool' ? _frPoolDefault(one) : _frSrcOf(one)[k]) : 'Each domain controller\u2019s original', srcCap = (k === 'pool' && one && _frPoolDefault(one) !== _frSrcOf(one).pool) ? 'Default for this cluster' : 'Same as source';
+  var src = '<button type="button" class="fr-li2 src' + (cur === FR_S ? ' on' : '') + '" onclick="wsFrPick(\'' + dom + '\',\'' + k + '\',\'' + FR_S + '\')"><span class="fr-li2-n">' + wsEscape(srcName) + '</span><span class="fr-li2-m">' + srcCap + '</span></button>';
+  var disc = (k === 'network2' && !q) ? '<button type="button" class="fr-li2' + (cur === FR_NONE ? ' on' : '') + '" onclick="wsFrPick(\'' + dom + '\',\'network2\',\'' + FR_NONE + '\')"><span class="fr-li2-n">Disconnected</span><span class="fr-li2-m">The adapter is not connected to a network</span></button>' : '';
+  if (k === 'server') body = _frSrvRows(dom, cur, q);
+  else if (k === 'datastore') body = _frInvFor(one).datastore.filter(function(d){ return (!q || d.n.toLowerCase().indexOf(q) >= 0) && d.n !== srcVal; }).map(function(d){ return '<button type="button" class="fr-li2' + (cur === d.n ? ' on' : '') + '" onclick="wsFrPick(\'' + dom + '\',\'datastore\',\'' + _frJs(d.n) + '\')"><span class="fr-li2-n">' + d.n + '</span><span class="fr-li2-m">' + d.m + '</span></button>'; }).join('') || '<div class="fr-li-empty">No matches</div>';
+  else if (q || flat) body = _frFlat(inv, q, [], []).filter(function(h){ return !(srcVal && h.n === srcVal && flat); }).map(function(h){ var hv = k === 'folder' ? h.v : h.n; return '<button type="button" class="fr-li2' + (cur === hv ? ' on' : '') + '" onclick="wsFrPick(\'' + dom + '\',\'' + k + '\',\'' + _frJs(hv) + '\')"><span class="fr-li2-n">' + wsEscape(h.n) + '</span><span class="fr-li2-m">' + h.t + (h.path ? ' in ' + wsEscape(k === 'host' ? h.path.replace(/^[^\u203a]*\u203a\s*/, '') : h.path) : '') + '</span></button>'; }).join('') || '<div class="fr-li-empty">No matches</div>';
+  else body = _frTree(inv, k, cur, dom, '', srcVal);
+  return '<div class="fr-srch">' + mag + '<input id="fr-q" type="text" placeholder="Search" value="' + wsEscape(f.q || '') + '" oninput="wsFrQ(this.value)" autocomplete="off" aria-label="Search ' + _frTLabel(k, one).toLowerCase() + '"></div><div class="fr-pk">' + (hasSrc && (flat || !q) ? src : '') + disc + body + '</div>';
 }
 function wsFrQ(v) {   // the list re-renders as you type; the new popover is hidden until it is placed, and a hidden input can't take focus, so place it first
   var i = document.getElementById('fr-q'), pos = i ? i.selectionStart : v.length; ws.forest.q = v; wsRenderAll(); _frPlacePop(); i = document.getElementById('fr-q'); if (i) { i.focus(); i.setSelectionRange(pos, pos); }
@@ -44611,13 +44714,22 @@ function _frComboFoot(d) {   // Cancel, then the Combo Button: the face applies 
 function wsFrChev() { var f = ws.forest; if (!f.pop || f.pop.pend === undefined) return; f.pop.menu = !f.pop.menu; wsRenderAll(); }
 function wsFrApply(all) {   // commit the staged value to this domain controller, or to every domain controller in the forest
   var f = ws.forest, p = f.pop; if (!p || p.pend === undefined) return;
-  _frModel().domains.forEach(function(d){ if (all || d.res.id === p.dom) f.envRows[d.res.id][p.key] = (p.pend === FR_S || p.pend === _frSrcOf(d)[p.key]) ? FR_S : p.pend; });
+  _frModel().domains.forEach(function(d){
+    if (!all && d.res.id !== p.dom) return;
+    var e = f.envRows[d.res.id];
+    if (p.key === 'pool' && p.pend !== FR_S && _frPoolsFor(d).indexOf(p.pend) < 0) return;   // that pool is in a different cluster
+    var same = p.key === 'pool' ? p.pend === _frPoolDefault(d) : p.key === 'server' ? (_frHasOrig() && p.pend === f.srcServer) : p.pend === _frSrcOf(d)[p.key];
+    e[p.key] = (p.pend === FR_S || same) ? FR_S : p.pend;
+    if (p.key === 'host' && e.pool !== FR_S && _frPoolsFor(d).indexOf(e.pool) < 0) e.pool = FR_S;   // a different cluster has its own pools
+    if (p.key === 'server') ['host', 'datastore', 'network', 'network2', 'clres'].forEach(function(k){ e[k] = FR_S; });   // another server, another inventory
+  });
+  if (f.target === 'hyperv') _frHvAutoSelect();
   f.pop = null; wsRenderAll();
 }
 function wsFrApplyBulk() {   // a bulk pick is staged in the picker; Apply commits it to every selected domain controller
   var f = ws.forest, k = f.pop && f.pop.key, ids = _frSelIds(); if (!k || f.pend === undefined) return;
   ids.forEach(function(id){ f.envRows[id][k] = f.pend; });
-  f.msg = FR_LBL[k] + ' updated for ' + ids.length + ' domain controller' + (ids.length === 1 ? '' : 's'); f.pop = null; f.pend = undefined; wsRenderAll();
+  f.msg = _frTLabel(k) + ' updated for ' + ids.length + ' domain controller' + (ids.length === 1 ? '' : 's'); f.pop = null; f.pend = undefined; wsRenderAll();
   setTimeout(function(){ if (ws.forest && ws.forest.msg) { ws.forest.msg = ''; if (wsIsForest() && ws.step === 3) wsRenderAll(); } }, 4000);
 }
 function wsFrSet(k, v) { ws.forest[k] = v; wsRenderAll(); }
@@ -44628,7 +44740,7 @@ function _frRadios(k, opts, cur) {   // DS Radio: 16px control in the brand gree
 function _frPopRows(d, key) {
   if (key !== 'dc') {
     var bulk = d.res.id === '_sel', n = bulk ? _frSelIds().length : 0;
-    return '<div class="fr-pop fr-pop-opts" role="listbox" style="visibility:hidden" onclick="event.stopPropagation()">' + (bulk ? '<div class="fr-pop-hd">' + FR_LBL[key] + ' for ' + n + ' selected domain controller' + (n === 1 ? '' : 's') + '</div>' : '<div class="fr-pop-hd">' + FR_LBL[key] + ' for ' + wsEscape(d.auth ? d.auth.name : d.res.name) + '</div>') + _frOpts(d.res.id, key)
+    return '<div class="fr-pop fr-pop-opts" role="listbox" style="visibility:hidden" onclick="event.stopPropagation()">' + (bulk ? '<div class="fr-pop-hd">' + _frTLabel(key) + ' for ' + n + ' selected domain controller' + (n === 1 ? '' : 's') + '</div>' : '<div class="fr-pop-hd">' + _frTLabel(key, d) + ' for ' + wsEscape(d.auth ? d.auth.name : d.res.name) + '</div>') + _frOpts(d.res.id, key)
       + (bulk ? '<div class="fr-pop-ft"><button type="button" class="btn btn-outline" onclick="wsFrCancelBulk()">Cancel</button><button type="button" class="btn btn-blue"' + (ws.forest.pend === undefined ? ' disabled aria-disabled="true"' : '') + ' onclick="wsFrApplyBulk()">Apply to ' + n + '</button></div>' : _frComboFoot(d)) + '</div>';
   }
   try { WorkloadPickerDS.ensureCss(); } catch (e) {}   // the wlp-* List Item styles are self-injected by the picker; make sure they exist before this list renders
@@ -44655,12 +44767,13 @@ function wsFrFilter(inp) {
 function _frCell(d, key, value, changed, muted, cls) {
   var open = ws.forest.pop && ws.forest.pop.dom === d.res.id && ws.forest.pop.key === key;
   var chev = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('keyboard-arrow-down-outlined', 16)) || '';
-  return '<button type="button" class="' + (cls || 'fr-sel') + (changed ? ' is-changed' : '') + (muted ? ' is-src' : '') + '" id="fr-c-' + d.res.id + '-' + key + '" data-tip-clip="' + wsEscape(value) + '" aria-haspopup="listbox" aria-expanded="' + !!open + '" onclick="' + (key === 'ip' ? 'wsFrIpEdit' : 'wsFrPop') + '(\'' + d.res.id + '\'' + (key === 'ip' ? '' : ',\'' + key + '\'') + ')"><span class="fr-sel-v">' + wsEscape(value) + '</span>' + chev + '</button>';
+  return '<button type="button" class="' + (cls || 'fr-sel') + (changed ? ' is-changed' : '') + (muted ? ' is-src' : '') + '" id="fr-c-' + d.res.id + '-' + key + '" data-tip-clip="' + wsEscape(value) + '" aria-haspopup="listbox" aria-expanded="' + !!open + '" onclick="' + ((key === 'ip' || key === 'ip2') ? 'wsFrIpEdit' : 'wsFrPop') + '(\'' + d.res.id + '\',\'' + key + '\')"><span class="fr-sel-v">' + wsEscape(value) + '</span>' + chev + '</button>';
 }
 function _frPlacePop() {
   var f = ws.forest; if (!f) return;
-  var place = function(el, a, right){
+  var place = function(el, a, right, fit){
     if (!el || !a) return;
+    if (fit) el.style.width = a.offsetWidth + 'px';   // a field on Restore options: the list is as wide as the field it opens from
     var r = a.getBoundingClientRect(), w = el.offsetWidth, h = el.offsetHeight;
     var left = Math.max(16, Math.min(right ? r.right - w : r.left, window.innerWidth - w - 16)), top = r.bottom + 4;
     if (top + h > window.innerHeight - 16) top = Math.max(16, r.top - h - 4);
@@ -44668,7 +44781,7 @@ function _frPlacePop() {
   };
   var p = document.querySelector('.fr-pop'); if (!p || !f.pop) return;
   var bulk = f.pop.dom === '_sel';
-  place(p, document.getElementById(bulk ? 'fr-c-_sel-' + f.pop.key : 'fr-c-' + f.pop.dom + '-' + f.pop.key), bulk);
+  place(p, document.getElementById(bulk ? 'fr-c-_sel-' + f.pop.key : 'fr-c-' + f.pop.dom + '-' + f.pop.key), bulk, f.pop.dom === '_conn');
 }
 (function(){   // close an open picker on outside click or when the wizard body scrolls (it is fixed-positioned)
   document.addEventListener('click', function(e){ if (ws && ws.forest && (ws.forest.pop || ws.forest.menu) && !e.target.closest('.fr-pop, .fr-sel, .fr-envsel, .fr-abtn, #fr-menu')) { ws.forest.pop = null; ws.forest.menu = false; wsRenderAll(); } });
@@ -44680,27 +44793,28 @@ function wsRenderForestConfig() {
   var multi = m.domains.length > 1, nSel = _frSelIds().length, allSel = multi && nSel === m.domains.length;
   // Domain controllers: one card each, every setting in view (user 2026-10-22). Was: one table with a segmented control that swapped the columns ("Host, network and IP" | "Datastore and folder") and a bulk bar.
   // Values are the real ones: grey while the source's own, green once changed. A value is set per domain controller; the picker's Apply chevron applies it to all of them.
-  var ro = f.dest === 'original';
-  var lblOf = function(k){ return k === 'ip' ? 'IP address' : FR_LBL[k]; };
+  var vm = _frHasOrig(), ro = vm && f.dest === 'original';
+  var lblOf = function(k, d){ return (k === 'ip' || k === 'ip2') ? 'IP address' + (_frNics(d) > 1 ? ' (adapter ' + (k === 'ip2' ? 2 : 1) + ')' : '') : _frTLabel(k, d); };
   var cards = m.domains.map(function(d){
-    var st = f.dom[d.res.id] || (f.dom[d.res.id] = {}), e = f.envRows[d.res.id] || (f.envRows[d.res.id] = { host: FR_S, datastore: FR_S, folder: FR_S, network: FR_S });
-    if (f.pop && f.pop.dom === d.res.id) popHtml = f.pop.key === 'ip' ? _frIpPop(d, st) : _frPopRows(d, f.pop.key);
+    var st = f.dom[d.res.id] || (f.dom[d.res.id] = {}), e = f.envRows[d.res.id] || (f.envRows[d.res.id] = _frRowSeed());
+    if (f.pop && f.pop.dom === d.res.id) popHtml = (f.pop.key === 'ip' || f.pop.key === 'ip2') ? _frIpPop(d, st) : _frPopRows(d, f.pop.key);
     var field = function(k){
       var inner;
-      if (ro) inner = '<span class="fr-ro">' + wsEscape(k === 'ip' ? _frIpOf(d.auth) : _frSrcOf(d)[k]) + '</span>';   // Original infrastructure: what will be used, read only
-      else if (k === 'ip') inner = _frCell(d, 'ip', st.ip || _frIpOf(d.auth), !!st.ip, !st.ip, 'fr-envsel');
-      else { var changed = e[k] !== FR_S && e[k] !== _frSrcOf(d)[k]; inner = _frCell(d, k, _frShown(d, k, e[k]), changed, !changed, 'fr-envsel'); }
-      return '<div class="fr-rec-f"><div class="fr-dtr-l">' + lblOf(k) + '</div>' + inner + '</div>';
+      if (ro) inner = '<span class="fr-ro">' + wsEscape((k === 'ip' || k === 'ip2') ? _frIpOf(d.auth, k === 'ip2') : k === 'server' ? f.srcServer : _frSrcOf(d)[k]) + '</span>';   // Original infrastructure: what will be used, read only
+      else if (k === 'ip' || k === 'ip2') inner = _frCell(d, k, st[k] || _frIpOf(d.auth, k === 'ip2'), !!st[k], !st[k], 'fr-envsel');
+      else { var changed = e[k] !== FR_S && (k === 'pool' || k === 'server' || e[k] !== _frSrcOf(d)[k]); inner = _frCell(d, k, _frShown(d, k, e[k]), changed, !changed, 'fr-envsel'); }
+      return '<div class="fr-rec-f"><div class="fr-dtr-l">' + lblOf(k, d) + '</div>' + inner + '</div>';
     };
+    var winField = function(){ var v = (f.win || {})[d.res.id] || ''; return '<div class="fr-rec-f" style="grid-column:1/-1"><div class="fr-dtr-l">Target server</div><input id="fr-win-' + d.res.id + '" class="ws-field-input' + (_frWinMsg(d.res.id).err ? ' has-error' : '') + '" value="' + wsEscape(v) + '" placeholder="Host name or IP address of a clean Windows Server machine" oninput="wsFrWin(\'' + d.res.id + '\', this.value)" aria-label="Target Windows Server for ' + wsEscape(d.auth ? d.auth.name : d.res.name) + '"><div id="fr-wchk-' + d.res.id + '" class="' + _frWinMsg(d.res.id).cls + '" role="alert">' + wsEscape(_frWinMsg(d.res.id).text) + '</div></div>'; };
     var nm = d.auth ? d.auth.name : '\u2014';
-    return '<div class="fr-rec" role="group" aria-label="' + wsEscape(nm) + '"><div class="fr-rec-h"><div class="fr-rec-id"><span class="fr-rec-n">' + wsEscape(nm) + '</span><span class="fr-rec-d">' + wsEscape(d.res.name) + '</span></div><div class="fr-rec-ip">' + field('ip') + '</div></div>'
-      + '<div class="fr-rec-g">' + ['host', 'network', 'folder', 'datastore'].map(field).join('') + '</div></div>';
+    return '<div class="fr-rec" role="group" aria-label="' + wsEscape(nm) + '"><div class="fr-rec-h"><div class="fr-rec-id"><span class="fr-rec-n">' + wsEscape(nm) + '</span><span class="fr-rec-d">' + wsEscape(d.res.name) + '</span></div><div class="fr-rec-ip">' + ((f.target === 'windows' || _frNics(d) > 1) ? '' : field('ip')) + '</div></div>'
+      + '<div class="fr-rec-g">' + (f.target === 'windows' ? winField() : _frGridKeys(d).map(field).join('')) + '</div>' + _frCoverage(d) + '</div>';
   }).join('');
-  var table = '<div class="fr-mrow end">' + (ro ? '<button type="button" class="btn btn-outline" onclick="wsFrSetDest(\'different\')">Edit environment</button>' : '<button type="button" class="btn btn-outline" id="fr-exit" onclick="wsFrExit()">Use original environment</button>') + '</div>'
+  var table = (!vm ? '' : '<div class="fr-mrow end">' + (ro ? '<button type="button" class="btn btn-outline" onclick="wsFrSetDest(\'different\')">Edit environment</button>' : '<button type="button" class="btn btn-outline" id="fr-exit" onclick="wsFrExit()">Use original environment</button>') + '</div>')
     + '<div class="fr-rec-list">' + cards + '</div>'
-    + (ro ? '' : '<div class="fr-dtr-hint" style="margin-top:8px"><span style="color:var(--black-60)">Grey</span> is the value the domain controller was backed up with; <span style="color:var(--em-green);font-weight:500">green</span> has been changed.</div>');
+    + (ro || !vm ? '' : '<div class="fr-dtr-hint" style="margin-top:8px"><span style="color:var(--black-60)">Grey</span> is the value the domain controller was backed up with; <span style="color:var(--em-green);font-weight:500">green</span> has been changed.</div>');
   var sections = [];
-  sections.push(_frSection('Domain controllers', 'One domain controller per domain is restored, and it takes over all FSMO roles. Domains recover root first, then children. Each is restored to the environment shown.', table + popHtml + _frProdWarning()));
+  sections.push(_frSection('Domain controllers', _frSubFor(), table + popHtml + _frProdWarning()));
   sections.push(wsReasonTicketSections(cfg));
   // Advanced settings — collapsed by default (user 2026-10-20). Same chrome as wsAdvancedSectionHtml, with room for per-DC detail.
   var open = !!ws.frAdvOpen;
@@ -44710,21 +44824,21 @@ function wsRenderForestConfig() {
   if (open) {
     var affix = '<div class="fr-advf"><div class="fr-dtr-l">Prefix</div><input class="form-input" value="' + wsEscape(f.prefix) + '" oninput="ws.forest.prefix=this.value" aria-label="VM name prefix"></div><div class="fr-advf"><div class="fr-dtr-l">Suffix</div><input class="form-input" value="' + wsEscape(f.suffix) + '" oninput="ws.forest.suffix=this.value" aria-label="VM name suffix"></div>';
     var nameOpts = [['same', 'Same as source'], ['affix', 'Add a prefix or suffix', affix]].concat(m.domains.length === 1 ? [['set', 'Set a name', '<input class="form-input" style="grid-column:1/-1" value="' + wsEscape(f.name) + '" oninput="ws.forest.name=this.value" aria-label="VM name">']] : []);
+    // Retired 2026-10-22 (user: remove it from Advanced settings): the per-domain "Restore each domain from" choice. The authoritative domain controller is the PDC emulator, else the first candidate (see _frModel); dcRows, wsFrFixDc and the 'dc' picker are left in place, unused.
     var dcRows = m.domains.map(function(d){
       var many = d.cand.length > 1, nm = d.auth ? d.auth.name : '\u2014', pdc = d.auth && /PDC/i.test(_frAttr(d.auth, 'FSMO roles')), open2 = f.pop && f.pop.dom === d.res.id && f.pop.key === 'dc';
       var ctl = many ? '<button type="button" class="fr-envsel" id="fr-c-' + d.res.id + '-dc" aria-haspopup="listbox" aria-expanded="' + !!open2 + '" onclick="wsFrPop(\'' + d.res.id + '\',\'dc\')"><span class="fr-sel-v">' + wsEscape(nm) + '</span>' + chev + '</button>' : '<span class="fr-dcn" style="padding:0 12px">' + wsEscape(nm) + '</span>';
       return '<div class="fr-dcrow"><div class="fr-dcrow-l"><span class="fr-dcn">' + wsEscape(d.res.name) + '</span><span class="fr-dd">' + d.cand.length + (d.cand.length === 1 ? ' domain controller' : ' domain controllers') + ' backed up</span></div><div class="fr-dcrow-c"><div class="fr-dcrow-s">' + ctl + '</div><span class="fr-tag' + (pdc ? ' ok' : '') + '">' + (pdc ? 'PDC emulator' : 'Not the PDC emulator') + '</span></div></div>';
     }).join('');
     adv += '<div class="ws-adv-desc">Defaults are right for most recoveries.</div><div class="fr-advgrp">'
-      + '<div class="fr-advf" id="fr-adv-dc"><div class="fr-dtr-l">Restore each domain from</div><div class="fr-dtr-hint" style="margin:0 0 8px">One domain controller per domain is restored from backup and takes over all FSMO roles. The domain\u2019s other controllers are not restored; they are rebuilt afterwards. The default is right for most recoveries. Change it only if that controller\u2019s backup is unsuitable, for example if it is missing at the restore point or was taken after the problem began. The settings on Configure then follow the controller you choose.</div>' + dcRows + '</div>'
-      + '<div class="fr-advf"><div class="fr-dtr-l">VM name</div>' + _frRadios('nameMode', nameOpts, f.nameMode) + '</div>'
-      + '<div class="fr-advf"><div class="fr-dtr-l">If a virtual machine with the same name already exists</div>' + _frRadios('collide', [['replace', 'Delete it, then restore'], ['suffix', 'Keep it and add a suffix to the recovered virtual machine', '<div class="fr-advf" style="grid-column:1/-1"><div class="fr-dtr-l">Suffix</div><input class="form-input" value="' + wsEscape(f.collideSuffix) + '" oninput="ws.forest.collideSuffix=this.value" aria-label="Suffix for the recovered virtual machine"></div>']], f.collide) + '</div>'
-      + '<div class="fr-advf"><div class="fr-dtr-l">BIOS UUID</div>' + _frRadios('uuid', [['preserve', 'Preserve the source UUID'], ['new', 'Generate a new UUID']], f.uuid) + '</div>'
-      + '<div class="fr-advf"><div class="fr-dtr-l">Disk type</div>' + _frRadios('disk', FR_DISK, f.disk) + '<div class="fr-dtr-hint">Applies to every virtual disk of each recovered virtual machine.</div></div>'
+      + _frG(f.target !== 'windows', '<div class="fr-advf"><div class="fr-dtr-l">VM name</div>' + _frRadios('nameMode', nameOpts, f.nameMode) + '</div>')
+      + _frG(f.target !== 'windows', '<div class="fr-advf"><div class="fr-dtr-l">If a virtual machine with the same name already exists</div>' + _frRadios('collide', [['replace', 'Delete it, then restore'], ['suffix', 'Keep it and add a suffix to the recovered virtual machine', '<div class="fr-advf" style="grid-column:1/-1"><div class="fr-dtr-l">Suffix</div><input class="form-input" value="' + wsEscape(f.collideSuffix) + '" oninput="ws.forest.collideSuffix=this.value" aria-label="Suffix for the recovered virtual machine"></div>']], f.collide) + '</div>')
+      + _frG(f.target === 'vmware' || f.target === 'hyperv', '<div class="fr-advf"><div class="fr-dtr-l">BIOS UUID</div>' + _frRadios('uuid', [['preserve', 'Preserve the source UUID'], ['new', 'Generate a new UUID']], f.uuid) + '</div>')
+      + _frG(f.target !== 'windows', '<div class="fr-advf"><div class="fr-dtr-l">Disk type</div>' + _frRadios('disk', FR_DISK, f.disk) + '<div class="fr-dtr-hint">Applies to every virtual disk of each recovered virtual machine.</div></div>')
       + '</div><div class="ws-adv-list">'
       + tog(!f.ownCreds, 'Use the connection’s credentials', 'Recovery signs in to each domain controller with the credentials from the Active Directory connection. Turn off to enter a Domain Admin account per domain controller.', "wsFrTog('ownCreds')")
       + (f.ownCreds ? '<div class="fr-sub">' + allDcs.map(function(c){ return '<div class="fr-cred"><span>' + wsEscape(c.name) + '</span><input class="form-input" placeholder="Domain\\username" aria-label="Username for ' + wsEscape(c.name) + '"><input class="form-input" type="password" placeholder="Password" aria-label="Password for ' + wsEscape(c.name) + '"></div>'; }).join('') + '<div class="fr-dtr-hint">Domain Admin is required. Only a username and password are supported.</div></div>' : '')
-      + tog(f.tags, 'Restore VM tags', 'Reassign the original virtual machine tags to the recovered virtual machines.', "wsFrTog('tags')")
+      + _frG(_frIsVmware(), tog(f.tags, 'Restore VM tags', 'Reassign the original virtual machine tags to the recovered virtual machines.', "wsFrTog('tags')"))
       + '</div>';
   }
   sections.push(adv + '</div>');
@@ -44735,54 +44849,168 @@ function wsFrPop(dom, key) { var p = ws.forest.pop; ws.forest.pop = (p && p.dom 
 function wsFrPick(dom, key, val) {
   var f = ws.forest;
   if (FR_KEYS.indexOf(key) >= 0) { if (dom === '_sel') { f.pend = val; wsRenderAll(); setTimeout(function(){ _frPlacePop(); var i = document.getElementById('fr-q'); if (i) i.focus(); }, 0); return; } f.pop.pend = val; f.pop.menu = false; wsRenderAll(); setTimeout(function(){ _frPlacePop(); var i = document.getElementById('fr-q'); if (i) i.focus(); }, 0); return; }   // staged: Apply commits it to this domain controller, the chevron to all of them
-  var st = f.dom[dom] = f.dom[dom] || {}; if (key === 'dc') { st.dcId = val; st.ip = ''; st.ipEditing = false; } else st[key] = val; f.pop = null; wsRenderAll();
+  var st = f.dom[dom] = f.dom[dom] || {}; if (key === 'dc') { st.dcId = val; _frClearIp(st); st.ipEditing = false; } else st[key] = val; f.pop = null; wsRenderAll();
 }
 // IP address cell: shows the address that will be used (the original, or the new one once saved). Change opens an editable field pre-filled with it, with Save / Cancel and validation.
-function _frIpCheck(dom, v) {
-  v = String(v || '').trim();
-  if (!v) return 'Enter an IP address.';
-  var p = v.split('.');
-  if (p.length !== 4 || !p.every(function(o){ return /^(0|[1-9]\d{0,2})$/.test(o) && +o <= 255; })) return 'Enter a valid IPv4 address, like 10.99.3.10.';
-  var n = p.map(Number);
-  if (n[0] === 0 || n[0] === 127 || n[0] >= 224) return 'That address can\u2019t be used for a domain controller.';
-  if (n[3] === 0 || n[3] === 255) return 'Use a host address \u2014 not a network or broadcast address.';
-  var clash = Object.keys(ws.forest.dom).some(function(k){ return k !== dom && (ws.forest.dom[k] || {}).ip === v; });
-  return clash ? 'Another domain controller in this recovery already uses this address.' : '';
+// Re-IP rule for one adapter, as in the Veeam wizard: the new IP address, subnet mask (or IPv6 prefix length) and default gateway are required; DNS and WINS servers are optional.
+var FR_RULE = [['ip', 'IP address'], ['mask', 'Subnet mask or prefix length'], ['gw', 'Default gateway'], ['dns1', 'Preferred DNS server'], ['dns2', 'Alternate DNS server'], ['wins1', 'Preferred WINS server'], ['wins2', 'Alternate WINS server']];
+function _frV4(v) { var p = String(v).split('.'); return p.length === 4 && p.every(function(o){ return /^(0|[1-9]\d{0,2})$/.test(o) && +o <= 255; }); }
+function _frV6(v) {
+  if (!/^[0-9a-fA-F:]+$/.test(v) || v.indexOf(':::') >= 0 || (v.match(/::/g) || []).length > 1) return false;
+  var g = v.split(':'); if (g.length > 8 || (g.length < 8 && v.indexOf('::') < 0)) return false;
+  return g.every(function(x){ return x.length <= 4; });
 }
-function _frIpPop(d, st) {   // popover editor for a row's IP address: editable field pre-filled with the current value, Save / Cancel, validation
-  var orig = _frIpOf(d.auth), id = d.res.id, err = st.ipErr || '';
-  return '<div class="fr-pop fr-pop-ip" style="visibility:hidden" role="dialog" aria-label="IP address for ' + wsEscape(d.auth ? d.auth.name : d.res.name) + '" onclick="event.stopPropagation()">'
-    + '<div class="fr-pop-hd">IP address for ' + wsEscape(d.auth ? d.auth.name : d.res.name) + '</div>'
-    + '<input class="ws-field-input fr-ip' + (err ? ' has-error' : '') + '" id="fr-ip-' + id + '" value="' + wsEscape(st.ipDraft) + '" inputmode="decimal" autocomplete="off" aria-invalid="' + !!err + '" aria-describedby="fr-ip-err-' + id + '" oninput="wsFrIpDraft(\'' + id + '\',this.value)" onkeydown="wsFrIpKey(event,\'' + id + '\')">'
-    + '<div class="fr-ip-err" id="fr-ip-err-' + id + '" role="alert">' + wsEscape(err) + '</div>'
-    + '<div class="fr-dtr-hint">Original: ' + orig + (st.ip ? ' \u00b7 <button type="button" class="fr-edit" onclick="wsFrIpReset(\'' + id + '\')">Reset to original</button>' : '') + '</div>'
-    + '<div class="fr-ip-act"><button type="button" class="btn btn-blue btn-sm" id="fr-ip-save-' + id + '"' + (err ? ' disabled aria-disabled="true"' : '') + ' onclick="wsFrIpSave(\'' + id + '\')">Save</button>'
-    + '<button type="button" class="btn btn-outline btn-sm" onclick="wsFrIpCancel(\'' + id + '\')">Cancel</button></div></div>';
+function _frInt4(v) { return v.split('.').reduce(function(a, o){ return a * 256 + +o; }, 0); }
+function _frMaskInt(m) {   // a dotted mask, or a prefix length like /24, as a number; null when it is not a usable mask
+  m = String(m).trim().replace(/^\//, '');
+  if (/^\d{1,2}$/.test(m)) { var b = +m; return (b < 1 || b > 30) ? null : (0xFFFFFFFF << (32 - b)) >>> 0; }
+  if (!_frV4(m)) return null;
+  var n = _frInt4(m), inv = (~n) >>> 0; return (n !== 0 && (inv & (inv + 1)) === 0 && inv >= 3) ? n : null;
 }
-function wsFrIpEdit(dom) {
-  var st = ws.forest.dom[dom] = ws.forest.dom[dom] || {}, d = _frModel().domains.filter(function(x){ return x.res.id === dom; })[0];
-  ws.forest.pop = { dom: dom, key: 'ip' }; st.ipDraft = st.ip || _frIpOf(d && d.auth); st.ipErr = '';
-  wsRenderAll(); setTimeout(function(){ _frPlacePop(); var i = document.getElementById('fr-ip-' + dom); if (i) { i.focus(); i.select(); } }, 0);
+function _frRuleErrs(dom, key, dr) {   // field → message for what has been typed; an empty field is not an error (Save stays off until the required ones are filled)
+  var errs = {}, t = function(x){ return String(x || '').trim(); }, ip = t(dr.ip), mk = t(dr.mask), gw = t(dr.gw), v6 = ip.indexOf(':') >= 0, self = dom + ':' + key;
+  if (ip) {
+    if (v6) { if (!_frV6(ip) || /^(::|::1)$/.test(ip)) errs.ip = 'Enter a valid IPv6 address.'; }
+    else if (!_frV4(ip)) errs.ip = 'Enter a valid IPv4 address, like 10.99.3.10.';
+    else { var n = ip.split('.').map(Number); if (n[0] === 0 || n[0] === 127 || n[0] >= 224) errs.ip = 'That address can’t be used for a domain controller.'; else if (n[3] === 0 || n[3] === 255) errs.ip = 'Use a host address, not a network or broadcast address.'; }
+    if (!errs.ip && Object.keys(ws.forest.dom).some(function(k){ var s = ws.forest.dom[k] || {}; return (k + ':ip' !== self && s.ip === ip) || (k + ':ip2' !== self && s.ip2 === ip); })) errs.ip = 'Another adapter in this recovery already uses this address.';
+  }
+  if (mk) { if (v6) { if (!/^\/?\d{1,3}$/.test(mk) || +mk.replace('/', '') < 1 || +mk.replace('/', '') > 128) errs.mask = 'Enter a prefix length from 1 to 128.'; } else if (_frMaskInt(mk) === null) errs.mask = 'Enter a valid subnet mask, like 255.255.255.0, or a prefix length, like /24.'; }
+  if (gw) {
+    if (v6 ? !_frV6(gw) : !_frV4(gw)) errs.gw = 'Enter a valid ' + (v6 ? 'IPv6' : 'IPv4') + ' address.';
+    else if (gw === ip) errs.gw = 'The gateway can’t be the domain controller’s own address.';
+    else if (!v6 && !errs.ip && ip && mk && _frMaskInt(mk) !== null && ((_frInt4(ip) & _frMaskInt(mk)) >>> 0) !== ((_frInt4(gw) & _frMaskInt(mk)) >>> 0)) errs.gw = 'The gateway must be in the same subnet as the IP address.';
+  }
+  ['dns1', 'dns2'].forEach(function(f){ var x = t(dr[f]); if (x && !(_frV4(x) || _frV6(x))) errs[f] = 'Enter a valid IP address.'; });
+  ['wins1', 'wins2'].forEach(function(f){ var x = t(dr[f]); if (x && !_frV4(x)) errs[f] = 'Enter a valid IPv4 address.'; });
+  return errs;
 }
-function wsFrIpDraft(dom, v) {   // validate as they type, without re-rendering (keeps focus and caret)
-  var st = ws.forest.dom[dom]; st.ipDraft = v; st.ipErr = (v.trim() === '') ? '' : _frIpCheck(dom, v);
-  var e = document.getElementById('fr-ip-err-' + dom), i = document.getElementById('fr-ip-' + dom), b = document.getElementById('fr-ip-save-' + dom);
-  if (e) e.textContent = st.ipErr; if (i) { i.classList.toggle('has-error', !!st.ipErr); i.setAttribute('aria-invalid', !!st.ipErr); } if (b) { b.disabled = !!st.ipErr || v.trim() === ''; }
+function _frRuleOk(dr, errs) { return ['ip', 'mask', 'gw'].every(function(f){ return String(dr[f] || '').trim() !== ''; }) && Object.keys(errs || {}).every(function(k){ return !errs[k]; }); }
+function _frIpPop(d, st) {   // popover editor for one adapter's re-IP rule: required address, mask and gateway, optional DNS and WINS servers, Save / Cancel
+  var id = d.res.id, key = ws.forest.pop.key, ad = key === 'ip2' ? 2 : 1, dr = st.draft || {}, errs = st.errs || {}, nm = d.auth ? d.auth.name : d.res.name, orig = _frIpOf(d.auth, ad === 2);
+  var inp = function(f, label, cls, ph){
+    return '<div class="fr-ipf' + (cls ? ' ' + cls : '') + '"><div class="fr-dtr-l">' + label + '</div><input class="ws-field-input fr-ip' + (errs[f] ? ' has-error' : '') + '" id="fr-ip-' + id + '-' + f + '" value="' + wsEscape(dr[f] || '') + '" placeholder="' + (ph || '') + '" autocomplete="off" aria-invalid="' + !!errs[f] + '" oninput="wsFrIpDraft(\'' + id + '\',\'' + f + '\',this.value)" onkeydown="wsFrIpKey(event,\'' + id + '\')">'
+      + '<div class="fr-ip-err" id="fr-ip-err-' + id + '-' + f + '" role="alert">' + wsEscape(errs[f] || '') + '</div></div>';
+  };
+  var title = 'IP address for ' + wsEscape(nm) + (_frNics(d) > 1 ? ' (adapter ' + ad + ')' : '');
+  return '<div class="fr-pop fr-pop-ip" style="visibility:hidden" role="dialog" aria-label="' + title + '" onclick="event.stopPropagation()">'
+    + '<div class="fr-pop-hd">' + title + '</div>'
+    + '<div class="fr-ipg">' + inp('ip', 'IP address', 'full') + inp('mask', 'Subnet mask or prefix length', '', '255.255.255.0') + inp('gw', 'Default gateway') + inp('dns1', 'Preferred DNS server (optional)') + inp('dns2', 'Alternate DNS server (optional)') + inp('wins1', 'Preferred WINS server (optional)') + inp('wins2', 'Alternate WINS server (optional)') + '</div>'
+    + '<div class="fr-dtr-hint">Original: ' + orig + '</div>'
+    + '<div class="fr-ip-act"><button type="button" class="btn btn-blue btn-sm" id="fr-ip-save-' + id + '"' + (_frRuleOk(dr, errs) ? '' : ' disabled aria-disabled="true"') + ' onclick="wsFrIpSave(\'' + id + '\')">Save</button>'
+    + '<button type="button" class="btn btn-outline btn-sm" onclick="wsFrIpCancel(\'' + id + '\')">Cancel</button>'
+    + (st[key] ? '<button type="button" class="btn btn-outline btn-sm" onclick="wsFrIpReset(\'' + id + '\',\'' + key + '\')">Reset to original</button>' : '') + '</div></div>';
+}
+function wsFrIpEdit(dom, key) {
+  key = key || 'ip'; var f = ws.forest, st = f.dom[dom] = f.dom[dom] || {}, d = _frModel().domains.filter(function(x){ return x.res.id === dom; })[0], r = (key === 'ip2' ? st.rule2 : st.rule) || {};
+  f.pop = { dom: dom, key: key }; st.errs = {};
+  st.draft = { ip: st[key] || _frIpOf(d && d.auth, key === 'ip2'), mask: r.mask || '', gw: r.gw || '', dns1: r.dns1 || '', dns2: r.dns2 || '', wins1: r.wins1 || '', wins2: r.wins2 || '' };
+  wsRenderAll(); setTimeout(function(){ _frPlacePop(); var i = document.getElementById('fr-ip-' + dom + '-ip'); if (i) { i.focus(); i.select(); } }, 0);
+}
+function wsFrIpDraft(dom, field, v) {   // validate as they type, without re-rendering (keeps focus and caret)
+  var st = ws.forest.dom[dom], key = ws.forest.pop && ws.forest.pop.key; if (!st || !st.draft) return;
+  st.draft[field] = v; st.errs = _frRuleErrs(dom, key, st.draft);
+  FR_RULE.forEach(function(r){ var m = st.errs[r[0]] || '', e = document.getElementById('fr-ip-err-' + dom + '-' + r[0]), i = document.getElementById('fr-ip-' + dom + '-' + r[0]); if (e) e.textContent = m; if (i) { i.classList.toggle('has-error', !!m); i.setAttribute('aria-invalid', !!m); } });
+  var b = document.getElementById('fr-ip-save-' + dom); if (b) b.disabled = !_frRuleOk(st.draft, st.errs);
 }
 function wsFrIpKey(ev, dom) { if (ev.key === 'Enter') { ev.preventDefault(); wsFrIpSave(dom); } else if (ev.key === 'Escape') { ev.preventDefault(); wsFrIpCancel(dom); } }
 function wsFrIpSave(dom) {
-  var st = ws.forest.dom[dom], v = String(st.ipDraft || '').trim(), err = _frIpCheck(dom, v);
-  if (err) { st.ipErr = err; wsFrIpDraft(dom, st.ipDraft); return; }
-  var d = _frModel().domains.filter(function(x){ return x.res.id === dom; })[0];
-  st.ip = (d && v === _frIpOf(d.auth)) ? '' : v;   // saving the original address is the same as keeping it
-  st.ipErr = ''; ws.forest.pop = null; wsRenderAll();
+  var f = ws.forest, st = f.dom[dom], key = (f.pop && f.pop.key) || 'ip', t = function(x){ return String(x || '').trim(); };
+  st.errs = _frRuleErrs(dom, key, st.draft);
+  if (!_frRuleOk(st.draft, st.errs)) { wsFrIpDraft(dom, 'ip', st.draft.ip); return; }
+  var dr = st.draft; st[key] = t(dr.ip); st[key === 'ip2' ? 'rule2' : 'rule'] = { mask: t(dr.mask), gw: t(dr.gw), dns1: t(dr.dns1), dns2: t(dr.dns2), wins1: t(dr.wins1), wins2: t(dr.wins2) };
+  st.errs = {}; f.pop = null; wsRenderAll();
 }
-function wsFrIpCancel(dom) { var st = ws.forest.dom[dom]; st.ipErr = ''; ws.forest.pop = null; wsRenderAll(); }
-function wsFrIpReset(dom) { var st = ws.forest.dom[dom]; st.ip = ''; st.ipErr = ''; ws.forest.pop = null; wsRenderAll(); }
+function wsFrIpCancel(dom) { var st = ws.forest.dom[dom]; st.errs = {}; ws.forest.pop = null; wsRenderAll(); }
+function wsFrIpReset(dom, key) { var st = ws.forest.dom[dom]; key = key || 'ip'; st[key] = ''; st[key === 'ip2' ? 'rule2' : 'rule'] = null; st.errs = {}; ws.forest.pop = null; wsRenderAll(); }
+function _frRuleLines(d, st) {   // one labelled line per setting of each re-addressed adapter
+  var out = [], two = _frNics(d) > 1;
+  [['ip', 'rule', 1], ['ip2', 'rule2', 2]].forEach(function(a){
+    if (!st[a[0]] || (a[2] === 2 && !_frAdapter2On(d))) return; var r = st[a[1]] || {}, suf = two ? ' (adapter ' + a[2] + ')' : '', dns = [r.dns1, r.dns2].filter(Boolean).join(', '), wins = [r.wins1, r.wins2].filter(Boolean).join(', ');
+    out.push('IP address' + suf + ': ' + _frIpOf(d.auth, a[2] === 2) + ' to ' + st[a[0]]); out.push('Subnet mask' + suf + ': ' + r.mask); out.push('Default gateway' + suf + ': ' + r.gw);
+    if (dns) out.push('DNS servers' + suf + ': ' + dns); if (wins) out.push('WINS servers' + suf + ': ' + wins);
+  });
+  return out;
+}
+function _frCoverageMsg(d) {   // the Veeam rule: if one adapter of a domain controller gets a re-IP rule, every adapter must
+  var f = ws.forest; if (!_frAdapter2On(d) || f.target === 'windows' || (_frHasOrig() && f.dest === 'original')) return '';
+  var st = f.dom[d.res.id] || {}; if (!!st.ip === !!st.ip2) return '';
+  return 'Set a new IP address for adapter ' + (st.ip ? 2 : 1) + ' too. When one adapter gets a new address, every adapter of the domain controller must.';
+}
+function _frCoverage(d) { var m = _frCoverageMsg(d); return m ? '<div class="fr-ip-err fr-cov" role="alert">' + wsEscape(m) + '</div>' : ''; }
 function wsFrFixDc() {   // from a failed domain controller check: back to Configure with Advanced settings open on the per-domain choice
   ws.preExecutionPhase = 'idle'; ws.preExecutionFailure = null; ws.frAdvOpen = true; wsGotoStep(3);
   setTimeout(function(){ var e = document.getElementById('fr-adv-dc'); if (e) e.scrollIntoView({ block: 'center' }); }, 50);
 }
+function _frSubFor() {
+  var t = ws.forest.target, m = _frModel(), kept = m.domains.filter(function(d){ return d.auth; }).length, total = m.domains.reduce(function(n, d){ return n + d.dcs.length; }, 0);
+  var lead = (total > kept ? 'Restoring ' + kept + ' of ' + total + ' backed-up domain controllers: one per domain, and it takes over all FSMO roles. The others are rebuilt after recovery. ' : 'One domain controller per domain is restored, and it takes over all FSMO roles. ') + 'Domains recover root first, then children. ';
+  return lead + (_frHasOrig() ? 'Each is restored to the environment shown.' : t === 'windows' ? 'Each one is restored onto the clean Windows Server machine you name.' : 'Choose where each one lands on ' + (t === 'hyperv' ? 'Hyper-V' : 'VMware') + '.');
+}
+function _frChoice(sel, fn, title, body, badge) {
+  return '<button class="ws-cfg-choice' + (sel ? ' is-selected' : '') + '" type="button" onclick="' + fn + '"><span class="ws-cfg-radio"></span><span class="ws-cfg-choice-text"><span class="ws-cfg-choice-title">' + title + '</span>' + (badge ? '<span class="ws-cfg-choice-chiprow"><span class="ws-cfg-choice-chip">Current</span></span>' : '') + '<span class="ws-cfg-choice-body">' + body + '</span></span></button>';
+}
+function _frField(label, hint, tgt, key, type, ph) {   // the wizard's standard field: label above, 36px input
+  var v = ws.forest.tInfo[tgt][key] || '', id = 'fr-ti-' + tgt + '-' + key;
+  return '<div class="ws-field"><label class="ws-field-label" for="' + id + '">' + label + '</label><input id="' + id + '" class="ws-field-input" type="' + (type || 'text') + '" value="' + wsEscape(v) + '" placeholder="' + wsEscape(ph || '') + '" oninput="wsFrInfo(\'' + tgt + '\',\'' + key + '\',this.value)" autocomplete="off">' + (hint ? '<div class="ws-field-hint">' + hint + '</div>' : '') + '</div>';
+}
+// A choice from a list on the Restore options step (the connected vCenter, or a Hyper-V host, path or switch): the same dropdown the Configure cards use.
+
+function _frTargetSection() {   // what the chosen destination needs before Configure: a second section of the same card, titled like the Reason section below Configure
+  var f = ws.forest, t = f.target, title, sub, fields;
+  if (t !== 'windows') return '';   // VMware and Hyper-V: the server is chosen on Configure
+  { title = 'Clean Windows Server machines'; sub = 'Each domain controller is restored onto its own machine, which you name on the next step. The machines must run Windows Server 2016 or later and must not already be domain controllers.';
+    fields = _frField('Administrator user name', 'Recovery signs in to every machine with this account to install Active Directory Domain Services and restore the domain controller.', 'windows', 'user', 'text', 'Administrator') + _frField('Password', '', 'windows', 'pass', 'password', ''); }
+  return '<div class="ws-cfg-section"><div class="ws-cfg-section-hdr"><div class="ws-cfg-section-title">' + title + '</div><div class="ws-cfg-section-sub">' + sub + '</div></div><div class="ws-cfg-section-body"><div class="fr-tfields">' + fields + '</div></div></div>';
+}
+function wsRenderForestDest() {
+  var f = ws.forest, pop = '';
+  var cards = '<div class="ws-cfg-choices ws-cfg-choices-3 fr-targets">' + FR_TARGETS.map(function(t){ return _frChoice(f.target === t[0], "wsFrSetTarget('" + t[0] + "')", t[1], t[2], t[0] === f.srcPlatform); }).join('') + '</div>';
+
+  setTimeout(_frPlacePop, 0);
+  return '<div class="ws-step-pad"><div class="ws-step-header"><div class="ws-step-title">Restore Options</div><div class="ws-step-description">Choose where the domain controllers are restored.</div></div>'
+    + '<div class="ws-cfg-card"><div class="ws-cfg-sections"><div class="ws-cfg-section"><div class="ws-cfg-section-body">' + cards + '</div></div>' + _frTargetSection() + '</div></div></div>' + pop;
+}
+function wsFrSetTarget(t) {
+  var f = ws.forest; if (f.target === t) return;
+  f.target = t; f.dest = 'original'; f.win = {}; f.winChk = {}; f.pop = null; f.pend = undefined; f.msg = ''; _frSeedRows();
+  Object.keys(f.dom).forEach(function(k){ _frClearIp(f.dom[k]); });
+  if (t === 'hyperv') _frHvAutoSelect();
+  wsRenderAll();
+}
+function wsFrInfo(t, k, v) { ws.forest.tInfo[t][k] = v; wsRenderFooterV2(); }   // the clean Windows Server account
+function _frWinMsg(id) { var c = (ws.forest.winChk || {})[id]; return c === 'checking' ? { cls: 'ws-field-hint', text: 'Checking\u2026', err: false } : (c && c !== 'ok') ? { cls: 'fr-ip-err', text: c, err: true } : { cls: 'fr-ip-err', text: '', err: false }; }
+function _frWinCheck(v) {   // mock: the machine must answer, run Windows Server 2016 or later, and not already be a domain controller; the names "offline", "old2012" and "existing-dc" show each failure
+  var n = String(v).trim(); if (/offline/i.test(n)) return 'Can\u2019t reach ' + n + '. Check the name and that the machine is turned on.';
+  if (/old2012/i.test(n)) return n + ' runs a Windows Server version older than 2016.';
+  if (/existing-dc/i.test(n)) return n + ' is already a domain controller.';
+  return '';
+}
+function wsFrWin(id, v) {
+  var f = ws.forest; f.win[id] = v; f.winChk = f.winChk || {}; f.winT = f.winT || {}; clearTimeout(f.winT[id]); delete f.winChk[id];
+  var paint = function(){ var m = _frWinMsg(id), e = document.getElementById('fr-wchk-' + id), i = document.getElementById('fr-win-' + id); if (e) { e.className = m.cls; e.textContent = m.text; } if (i) { i.classList.toggle('has-error', m.err); i.setAttribute('aria-invalid', m.err); } wsRenderFooterV2(); };
+  paint();
+  if (!String(v).trim()) return;
+  f.winT[id] = setTimeout(function(){ if (ws.forest !== f) return; f.winChk[id] = 'checking'; paint(); f.winT[id] = setTimeout(function(){ if (ws.forest !== f) return; f.winChk[id] = _frWinCheck(v) || 'ok'; paint(); }, 700); }, 500);
+}
+function _frTargetReady() {   // Restore options only needs the platform, and the administrator account for a clean Windows Server; servers are chosen on Configure
+  var f = ws.forest, ok = function(x){ return String(x || '').trim() !== ''; };
+  return f.target === 'windows' ? (ok(f.tInfo.windows.user) && ok(f.tInfo.windows.pass)) : true;
+}
+function _frConfigReady() {   // a clean Windows Server needs a machine for every domain controller; every other domain controller needs a server and, off its original infrastructure, every setting chosen (a resource pool defaults); a re-addressed domain controller needs every adapter re-addressed
+  var f = ws.forest, m = _frModel();
+  return m.domains.every(function(d){
+    if (_frCoverageMsg(d)) return false;
+    if (f.target === 'windows') return String((f.win || {})[d.res.id] || '').trim() !== '' && (f.winChk || {})[d.res.id] === 'ok';
+    if (!_frDcServer(d)) return false;
+    var e = f.envRows[d.res.id] || {};
+    if (_frHasOrig() && f.dest === 'original') return true;
+    var ho = _frDcHasOrig(d);
+    return _frKeysFor(d).every(function(k){ return k === 'server' || (ho && k !== 'clres' && e[k] === FR_S) || k === 'pool' || (e[k] !== undefined && e[k] !== FR_S); });
+  });
+}
+
+
 function wsFrToggleAdv() { ws.frAdvOpen = !ws.frAdvOpen; wsRenderAll(); }
 function wsFrTog(k) { ws.forest[k] = !ws.forest[k]; wsRenderAll(); }
 
@@ -44796,28 +45024,36 @@ function wsFrPrepRun() {
   var bad = _frChecks(_frModel()).filter(function(c){ return !c.ok; })[0];
   ws.preExecutionForceFail = bad ? bad.id : null; ws.preExecutionForceFailMessage = bad ? bad.detail : null;
 }
-function _frChangedLines(d) {   // what differs from this domain controller's backup, one labelled line each: environment values, then the IP address
-  var f = ws.forest, e = f.dest === 'different' ? (f.envRows[d.res.id] || {}) : {}, st = f.dest === 'different' ? (f.dom[d.res.id] || {}) : {}, out = [];
-  FR_KEYS.forEach(function(k){ if (e[k] !== undefined && e[k] !== FR_S && e[k] !== _frSrcOf(d)[k]) out.push(FR_LBL[k] + ': ' + e[k]); });
-  if (st.ip) out.push('IP address: ' + _frIpOf(d.auth) + ' to ' + st.ip);
-  return out;
+function _frTargetName() { var t = ws.forest.target; return t === 'hyperv' ? 'Microsoft Hyper-V' : t === 'windows' ? 'New Windows Server' : 'VMware'; }
+function _frChangedLines(d) {
+  var f = ws.forest, st = f.dom[d.res.id] || {}, out = [];
+  if (!_frHasOrig()) {   // no original to compare with: list what was chosen
+    if (f.target === 'windows') { var w = (f.win || {})[d.res.id]; if (w) out.push('Target server: ' + w); return out; }
+    var e2 = f.envRows[d.res.id] || {}; _frKeysFor(d).forEach(function(k){ if (e2[k] && e2[k] !== FR_S) out.push(_frTLabel(k, d) + ': ' + _frShown(d, k, e2[k])); });
+    return out.concat(_frRuleLines(d, st));
+  }   // what differs from this domain controller's backup, one labelled line each: environment values, then each re-addressed adapter
+  var e = f.dest === 'different' ? (f.envRows[d.res.id] || {}) : {}, st2 = f.dest === 'different' ? st : {};
+  _frKeysFor(d).forEach(function(k){ if (e[k] !== undefined && e[k] !== FR_S && (k === 'pool' || e[k] !== _frSrcOf(d)[k])) out.push(_frTLabel(k, d) + ': ' + _frShown(d, k, e[k])); });
+  return out.concat(_frRuleLines(d, st2));
 }
 function wsFrConfigRows() {
   // Only what the user decided: defaults are not repeated. Per-domain-controller detail lives in the collapsible items list below.
   var f = ws.forest, m = _frModel(), cfg = ws.config || {}, rows = [];
-  rows.push({ label: 'Destination', value: f.dest === 'different' ? 'Different environment' : 'Original infrastructure' });
-  if (f.dest === 'different') {
+  var used = []; m.domains.forEach(function(d){ var v = _frDcServer(d); if (v && used.indexOf(v) < 0) used.push(v); });
+  if (!_frHasOrig()) rows.push({ label: 'Destination', value: _frTargetName() + (f.target === 'windows' || !used.length ? '' : ', ' + used.join(', ')) });
+  else rows.push({ label: 'Destination', value: _frTargetName() + ', ' + (used.some(function(v){ return v !== f.srcServer; }) ? used.join(', ') : f.dest === 'different' ? 'a different environment' : 'original infrastructure') });
+  if (f.dest === 'different' && _frHasOrig()) {
     var moved = m.domains.filter(function(d){ return _frChangedLines(d).length; }).length;
     rows.push({ label: 'Recovery environment', value: moved ? 'Changed for ' + moved + ' of ' + m.domains.length + (m.domains.length === 1 ? ' domain' : ' domains') + '. Expand the list below to see where each one lands.' : 'No changes from the original environment' });
   }
   var nameTxt = f.nameMode === 'affix' ? ((f.prefix ? 'prefix ' + f.prefix : '') + (f.prefix && f.suffix ? ' and ' : '') + (f.suffix ? 'suffix ' + f.suffix : '')) : (f.nameMode === 'set' && f.name ? f.name : '');
   var vm = [];
-  if (nameTxt) vm.push('VM name: ' + nameTxt.replace(/^./, function(c){ return c.toUpperCase(); }));
-  if (f.uuid === 'new') vm.push('BIOS UUID: Generate a new UUID');
-  if (f.disk !== 'same') vm.push('Disk type: ' + FR_DISK.filter(function(o){ return o[0] === f.disk; })[0][1]);
-  if (!f.tags) vm.push('VM tags: Not restored');
+  if (nameTxt && f.target !== 'windows') vm.push('VM name: ' + nameTxt.replace(/^./, function(c){ return c.toUpperCase(); }));
+  if (f.uuid === 'new' && f.target !== 'windows') vm.push('BIOS UUID: Generate a new UUID');
+  if (f.disk !== 'same' && f.target !== 'windows') vm.push('Disk type: ' + FR_DISK.filter(function(o){ return o[0] === f.disk; })[0][1]);
+  if (!f.tags && _frIsVmware()) vm.push('VM tags: Not restored');
   if (vm.length) rows.push({ label: 'Virtual machines', value: vm.join('\n') });
-  rows.push({ label: 'Existing virtual machines', value: f.collide === 'suffix' ? 'Kept; the recovered virtual machines get the suffix ' + (f.collideSuffix || '(none)') : 'Deleted before recovery starts' });
+  if (f.target !== 'windows') rows.push({ label: 'Existing virtual machines', value: f.collide === 'suffix' ? 'Kept; the recovered virtual machines get the suffix ' + (f.collideSuffix || '(none)') : 'Deleted before recovery starts' });
   if (f.ownCreds) rows.push({ label: 'Credentials', value: 'Entered per domain controller' });
   if ((cfg.restoreReason || '').trim()) rows.push({ label: 'Restore reason', value: cfg.restoreReason.trim() });
   if ((cfg.ticketNumber || '').trim()) rows.push({ label: 'Ticket number', value: cfg.ticketNumber.trim() });
@@ -44842,12 +45078,14 @@ function wsFrChecklist() {
 }
 function wsFrWarningsHtml() {
   var f = ws.forest, m = _frModel(), names = m.domains.map(function(d){ return d.auth ? d.auth.name : ''; }).filter(Boolean).join(', ');
-  return '<ul class="fr-warn">' + (f.collide === 'replace' ? '<li>Existing virtual machines named ' + wsEscape(names) + ' at the destination are deleted before recovery starts. You can change this in Advanced settings.</li>' : '')
+  var kept = m.domains.filter(function(d){ return d.auth; }).length, total = m.domains.reduce(function(n, d){ return n + d.dcs.length; }, 0), rest = total - kept, ro = m.domains.some(function(d){ return d.dcs.some(function(c){ return /RODC/i.test(c.name); }); });
+  return '<ul class="fr-warn">' + (rest > 0 ? '<li>Only one domain controller per domain is restored: ' + wsEscape(names) + '. ' + (rest === 1 ? 'The other backed-up domain controller is' : 'The other ' + rest + ' backed-up domain controllers are') + ' not restored; you rebuild ' + (rest === 1 ? 'it' : 'them') + ' after recovery' + (ro ? ', and a read-only domain controller can\u2019t be restored at all' : '') + '.</li>' : '') + (f.collide === 'replace' ? '<li>Existing virtual machines named ' + wsEscape(names) + ' at the destination are deleted before recovery starts. You can change this in Advanced settings.</li>' : '')
     + '<li>A failed recovery can\u2019t be retried or resumed. You restart from the beginning, and any restored virtual machines and agent files stay behind until you remove them.</li></ul>';
 }
 function wsFrFooter(inner) {
   var f = ws.forest, back = ws.step > 1 ? '<button class="ws-cta ws-cta-secondary" type="button" onclick="wsGotoStep(' + (ws.step - 1) + ')">Back</button>' : '';
-  if (ws.step === 3) inner.innerHTML = back + '<button class="ws-cta ws-cta-primary" type="button" onclick="wsGotoStep(4)">Review →</button>';
+  if (ws.step === 2) inner.innerHTML = back + '<button class="ws-cta ws-cta-primary" type="button" onclick="wsGotoStep(3)"' + (_frTargetReady() ? '' : ' disabled aria-disabled="true"') + '>Continue</button>';
+  else if (ws.step === 3) inner.innerHTML = back + '<button class="ws-cta ws-cta-primary" type="button" onclick="wsGotoStep(4)"' + (_frConfigReady() ? '' : ' disabled aria-disabled="true"') + '>Review →</button>';
 }
 // ── Active Directory restore bodies ────────────────────────────────────
 // Restore options (step 2): Original location | Export — the Okta pattern (AD restores always land in the
@@ -48368,7 +48606,7 @@ function wsRenderProgress() {
   // Forest recovery context in the standard slots: what the job does to existing virtual machines (a DS alert, like the wizard's other warnings),
   // and a failed pre-flight check, which the standard summary only surfaced in its retired status card.
   if (wsIsForest()) {
-    if (ws.preExecutionPhase === 'failed') html += '<div style="margin-bottom:16px">' + _frNote('err', 'Pre-flight check failed', wsEscape((ws.preExecutionFailure && ws.preExecutionFailure.message) || 'A check failed, so nothing was restored.') + ' Nothing was restored. Go back and fix it, then start again.' + (ws.preExecutionFailure && ws.preExecutionFailure.check && ws.preExecutionFailure.check.id === 'fr-dc' ? ' <button type="button" class="fr-edit" onclick="wsFrFixDc()">Restore each domain from</button>' : '')) + '</div>';
+    if (ws.preExecutionPhase === 'failed') html += '<div style="margin-bottom:16px">' + _frNote('err', 'Pre-flight check failed', wsEscape((ws.preExecutionFailure && ws.preExecutionFailure.message) || 'A check failed, so nothing was restored.') + ' Nothing was restored. Go back and fix it, then start again.') + '</div>';
     else if (jobState === 'ready') html += '<div style="margin-bottom:16px">' + _frNote('warn', 'Before you start', wsFrWarningsHtml()) + '</div>';
   }
   // Top-level summary card — single row (clickable to expand). Mirrors
