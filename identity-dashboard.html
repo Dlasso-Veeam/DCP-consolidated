@@ -1073,6 +1073,12 @@ table.idd-tbl.pgt { table-layout: auto; min-width: 0; width: 100%; border-top: 1
 .toast-content { flex: 1; min-width: 0; } .toast-title { font-size: 16px; font-weight: 500; color: var(--black-100); line-height: 1.4; } .toast-body { font-size: 14px; font-weight: 450; color: var(--black-100); line-height: 1.5; margin-top: 4px; }
 .toast-close { background: none; border: none; padding: 0; cursor: pointer; flex-shrink: 0; align-self: flex-start; margin-top: 2px; } .toast-close svg { width: 16px; height: 16px; display: block; stroke-width: 2.5; }
 .toast.toast-success .toast-close { color: var(--green); } .toast.toast-error .toast-close { color: var(--red); } .toast.toast-warning .toast-close { color: var(--orange); }
+/* SLA Status widget */
+.sla-tier { width: 28px; height: 28px; border-radius: 4px; flex: none; display: inline-flex; align-items: center; justify-content: center; background: var(--black-5); } .sla-tier svg { width: 20px; height: 20px; }
+.sla-tier.gold { color: var(--gold-40); background: var(--gold-soft); } .sla-tier.silver { color: var(--black-50); } .sla-tier.blue { color: var(--blue); background: var(--blue-light); }
+.sla-ssf { padding: 0 12px 8px; display: flex; gap: 8px; }
+.sla-fc { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px 0 12px; border: 1px solid var(--black-20); border-radius: 4px; background: var(--white); font-size: 16px; } .sla-fc b { font-weight: 500; } .sla-fc button { border: none; background: none; padding: 0; display: inline-flex; color: var(--black-70); cursor: pointer; } .sla-fc svg { width: 16px; height: 16px; }
+a.idd-ibtn { text-decoration: none; } .idd-ibtn.is-disabled { opacity: .4; cursor: default; }
 </style>
 </head>
 <body>
@@ -1243,6 +1249,13 @@ table.idd-tbl.pgt { table-layout: auto; min-width: 0; width: 100%; border-top: 1
             <div data-wh="cov"></div>
             <div class="idd-wb flush" id="iddCov"></div>
           </div>
+        </div>
+
+        <!-- SLA Status: policies (default) or SLA domains that are breaching; the title chevron switches the view -->
+        <div class="idd-widget" id="iddSlaW">
+          <div data-wh="sla"></div>
+          <div class="idd-wb flush"><div class="idd-tbl-wrap" id="iddSla"></div></div>
+          <div class="idd-tfoot" id="iddSlaFoot"></div>
         </div>
 
         <!-- ACT: findings (security-threat and resilience types in ONE list; the full filtered list lives in Threat Center › Findings) -->
@@ -1736,7 +1749,8 @@ var REASON = {
 var WIDGETS = {
   'kpi-cov':    { title: 'Coverage',                   go: INV },
   'kpi-succ':   { title: 'Backup success',             go: ACT },
-  'kpi-rpo':    { title: 'Policies within RPO',        go: POL },
+  'kpi-sla':    { title: 'Breaching SLA',               go: POL },   // was: 'kpi-rpo', Policies within RPO
+  'sla':        { title: 'Breaching policies',          go: POL, pick: true },
   'kpi-issues': { title: 'Open findings',               go: TC },
   'top':        { title: 'Top findings',                go: TC, pick: true },
   'sessions':   { title: 'Recent sessions',            go: ACT },
@@ -1917,12 +1931,9 @@ function renderKpis() {
   h += kpiCard('kpi-succ', rate === null ? '' : rate >= 95 ? 'ok' : rate >= 80 ? 'warn' : 'err', rate === null ? '—' : pct1(rate),
     [rate === null ? 'No backups ran. No policy applies.' : fmt(total) + ' runs in ' + daysTxt(n) + ' · ' + warn + ' with warnings · ' + err + ' failed',
      rate !== null && prev !== null ? pts(rate - prev) + ' vs previous ' + daysTxt(n) : ''], goAttrs(ACT));
-  var pairs = rpoPairs(list), okP = pairs.filter(rpoOk).length, bad = pairs.filter(function(p){ return !rpoOk(p); }).sort(function(a, b){ return (b.paused - a.paused) || (b.age / b.rpoH - a.age / a.rpoH); });
-  var noPol = list.filter(function(w){ return !pairs.some(function(p){ return p.w === w; }); });
-  var grp = {}; bad.forEach(function(p){ var g = grp[p.w.id] = grp[p.w.id] || { w: p.w, late: 0, paused: 0 }; if (p.paused) g.paused++; else g.late++; });
-  var why = Object.keys(grp).map(function(id){ var g = grp[id]; return g.w.name + ': ' + [g.late ? g.late + ' late' : '', g.paused ? g.paused + ' paused' : ''].filter(Boolean).join(', '); }).join(' · ');
-  h += kpiCard('kpi-rpo', !pairs.length ? '' : okP === pairs.length ? 'ok' : okP >= pairs.length * 0.9 ? 'warn' : 'err', pairs.length ? okP + ' of ' + pairs.length : '—',
-    pairs.length === 0 ? ['No backup policy applies'] : okP === pairs.length ? ['Policies on connections within RPO'] : [bad.length + ' policies on connections outside RPO', why], goAttrs(POL));
+  /* Breaching SLA: breach status belongs to the SLA domain, so this counts every policy that uses a breaching domain. (was: Policies within RPO from rpoPairs; the helpers stay for the checks below) */
+  var slaB = slaBreaching(), slaN = slaAll().length;
+  h += kpiCard('kpi-sla', !slaN ? '' : slaB.length ? 'err' : 'ok', slaN ? String(slaB.length) : '—', [slaB.length + ' policies use a breaching SLA domain'], goAttrs(POL));
   var openF = openUnified(), critF = openF.filter(function(f){ return f.lvl === 5; }).length, nRes = openF.filter(function(f){ return f.type === 'Resilience'; }).length;
   h += kpiCard('kpi-issues', openF.length === 0 ? 'ok' : critF ? 'err' : 'warn', String(openF.length),
     [openF.length === 0 ? 'No open findings' : critF + ' critical · ' + (openF.length - critF) + ' other', openF.length ? nRes + ' resilience · ' + (openF.length - nRes) + ' security threat' : ''], ' data-go="" data-dest="Threat Center" data-hint="' + esc(TC_HINT) + '"');
@@ -2533,6 +2544,61 @@ function iRow(v) {
   return '<tr tabindex="0" data-incident="' + v.id + '" data-hint="Open incident details" data-dest="Incident details"><td>' + v.id + '</td><td>' + tDots(v.lvl) + '</td><td><span class="idd-ell" style="display:block">' + esc(v.name) + '</span></td><td>' + chip(STATUS_CHIP[v.status], v.status) + '</td><td><span class="idd-ell" style="display:block">' + esc(v.srcs.join(', ')) + '</span></td><td>' + v.mem.length + '</td>'
     + '<td>' + fDate(v.c, true) + '</td><td>' + fDate(v.u, true) + '</td><td>' + assigneeCell(v.assignee) + '</td><td class="idd-act"><button type="button" class="idd-ibtn rowdetail" data-incident="' + v.id + '" data-tooltip="View incident details" aria-label="View incident details: ' + esc(v.name) + '">' + opn + '</button></td></tr>';
 }
+/* ═══ SLA Status ═══
+   An SLA domain sets the SLA and a policy uses one SLA domain. Breach status belongs to the domain: when a domain is breaching, every policy that uses it is breaching.
+   The table shows only what the product reports (Policy, Organization, SLA Domain, Last successful backup, Status); no breach reason is shown because the product does not state one.
+   Mock: the Okta-Standard domain is breaching (consistent with the failed and stalled Okta backups elsewhere on this page). */
+var SLA_DOM = {
+  'Silver-Identity':    { tier: 'silver', type: 'SaaS',       breach: false, h: 6 },
+  'Directory-Critical': { tier: 'blue',   type: 'Datacenter', breach: false, h: 24 },
+  'Okta-Standard':      { tier: 'blue',   type: 'SaaS',       breach: true,  h: 12 }
+};
+var SLA_DOMAIN_OF = { entra: 'Silver-Identity', ad: 'Directory-Critical', okta: 'Okta-Standard' };
+var SLA_VIEW = 'policies', SLA_DOMF = null, SLA_PAGE = 1, SLA_PER = 5, SLA_CACHE = null;
+function slaAll() {
+  if (SLA_CACHE) return SLA_CACHE;
+  var out = [], r = rng(hash('sla-policies'));
+  WL.forEach(function(w){
+    var dom = SLA_DOMAIN_OF[w.id]; if (!dom) return;
+    connsOf(w).forEach(function(c){
+      var age = w.id === 'okta' ? (c === 'meridian.okta.com' ? 974 : c === 'meridian-eu.okta.com' ? 1694 : 780 + Math.floor(r() * 700)) : Math.round(SLA_DOM[dom].h * 60 * (0.2 + 0.4 * r()));
+      out.push({ wl: w.id, org: c, name: w.policy + ' - ' + c, dom: dom, age: age });
+    });
+  });
+  out.push({ wl: 'okta', org: 'meridian.okta.com', name: 'System Log capture - meridian.okta.com', dom: 'Okta-Standard', age: 5514 });   // the paused policy
+  return (SLA_CACHE = out);
+}
+function slaBreaching() { return slaAll().filter(function(p){ return SLA_DOM[p.dom].breach; }).sort(function(a, b){ return b.age - a.age; }); }
+function slaWhen(min) { var d = new Date(BASE.getFullYear(), BASE.getMonth(), BASE.getDate(), 0, NOW_MIN - min), h = d.getHours(); return MON[d.getMonth()] + ' ' + d.getDate() + ' ' + d.getFullYear() + ', ' + ((h % 12) || 12) + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes() + ' ' + (h < 12 ? 'am' : 'pm'); }
+function slaDomains() {
+  var by = {}; slaBreaching().forEach(function(p){ var d = by[p.dom] = by[p.dom] || { dom: p.dom, worst: 0 }; d.worst = Math.max(d.worst, p.age); });
+  return Object.keys(by).map(function(k){ return by[k]; });
+}
+function renderSla() {
+  var host = document.getElementById('iddSla'); if (!host) return;
+  pickTitle('sla');
+  var chev = _dsStoreIconSvg('keyboard-arrow-down-outlined', 16) || '', list, rows, head, filt = '';
+  if (SLA_VIEW === 'domains') {
+    list = slaDomains();
+    rows = list.slice((SLA_PAGE - 1) * SLA_PER, SLA_PAGE * SLA_PER).map(function(d){
+      var x = SLA_DOM[d.dom];
+      return '<tr class="is-click" data-sla-dom="' + esc(d.dom) + '" data-hint="Show the policies using ' + esc(d.dom) + '"><td><div class="idd-wl-cell"><span class="sla-tier ' + x.tier + '">' + (_dsStoreIconSvg('shield-plain-outlined', 20) || '') + '</span><span class="idd-cell-1">' + esc(d.dom) + '</span></div></td><td>' + x.type + '</td><td>' + slaWhen(d.worst) + '</td><td>' + chip('err', 'Breaching SLA') + '</td>'
+        + '<td class="idd-act"><span class="idd-ibtn rowdetail is-disabled" aria-disabled="true" data-tooltip="' + esc(notBuilt('Backup SLA Domains')) + '">' + (_dsStoreIconSvg('shield-plain-outlined', 16) || '') + '</span></td></tr>';
+    }).join('');
+    head = '<colgroup><col style="width:30%"><col style="width:18%"><col style="width:24%"><col style="width:14%"><col style="width:3%"></colgroup><thead><tr><th>SLA Domain</th><th>Workload Type</th><th>Last successful backup</th><th>Status</th><th></th></tr></thead>';
+  } else {
+    list = slaBreaching().filter(function(p){ return !SLA_DOMF || p.dom === SLA_DOMF; });
+    rows = list.slice((SLA_PAGE - 1) * SLA_PER, SLA_PAGE * SLA_PER).map(function(p){
+      return '<tr class="is-click" tabindex="0" data-go="' + POL.href + '" data-dest="Policies"><td><span class="idd-ell" style="display:block">' + esc(p.name) + '</span></td><td>' + esc(p.org) + '</td><td>' + p.dom + ' - ' + SLA_DOM[p.dom].type + '</td><td>' + slaWhen(p.age) + '</td><td>' + chip('err', 'Breaching SLA') + '</td>'
+        + '<td class="idd-act"><a class="idd-ibtn rowdetail" href="' + POL.href + '" data-tooltip="Open in Policies" aria-label="Open ' + esc(p.name) + ' in Policies">' + (_dsStoreIconSvg('policy-outlined', 16) || '') + '</a></td></tr>';
+    }).join('');
+    head = '<colgroup><col style="width:28%"><col style="width:20%"><col style="width:20%"><col style="width:17%"><col style="width:12%"><col style="width:3%"></colgroup><thead><tr><th>Policy</th><th>Organization</th><th>SLA Domain</th><th>Last successful backup</th><th>Status</th><th></th></tr></thead>';
+    if (SLA_DOMF) filt = '<div class="sla-ssf"><span class="sla-fc">SLA Domain is <b>' + esc(SLA_DOMF) + '</b><button type="button" data-sla-rm aria-label="Remove filter">' + (_dsStoreIconSvg('close-outlined', 16) || '') + '</button></span></div>';
+  }
+  var pages = Math.max(1, Math.ceil(list.length / SLA_PER)); if (SLA_PAGE > pages) { SLA_PAGE = pages; return renderSla(); }
+  host.innerHTML = filt + (list.length ? '<table class="idd-tbl dense">' + head + '<tbody>' + rows + '</tbody></table>' : '<div class="idd-empty">No SLA domain is breaching.</div>');
+  document.getElementById('iddSlaFoot').innerHTML = '<button type="button" class="idd-pg prev" data-sla-page="-1"' + (SLA_PAGE <= 1 ? ' disabled' : '') + ' aria-label="Previous page">' + chev + '</button><button type="button" class="idd-pg next" data-sla-page="1"' + (SLA_PAGE >= pages ? ' disabled' : '') + ' aria-label="Next page">' + chev + '</button><span class="idd-sp"></span><span class="cnt">' + (list.length ? ((SLA_PAGE - 1) * SLA_PER + 1) + ' - ' + Math.min(SLA_PAGE * SLA_PER, list.length) + ' of ' + list.length : '0 of 0') + '</span>';
+}
 var TOPMODE = 'findings';
 /* card-title view pickers (Threat Center pattern): [value, card title, menu label, one-line description] */
 var PICKS = {
@@ -2540,6 +2606,7 @@ var PICKS = {
   t1:  { opts: [['backup', 'Backup sessions', 'Backup sessions', 'Success, warning, failed and running backups per day'], ['restore', 'Restore sessions', 'Restore sessions', 'Success, warning, failed and running restores per day'], ['export', 'Export sessions', 'Export sessions', 'Success, warning, failed and running exports per day']], get: function(){ return SESSMODE; }, set: function(v){ SESSMODE = v; renderTrends(); } }
 };
 function pickTitle(k) { var P = PICKS[k], cur = P.get(), el = document.getElementById('iddPick-' + k); if (el) el.textContent = P.opts.filter(function(o){ return o[0] === cur; })[0][1]; }
+PICKS.sla = { opts: [['policies', 'Breaching policies', 'Breaching policies', 'Every policy that uses a breaching SLA domain'], ['domains', 'Breaching SLA domains', 'Breaching SLA domains', 'SLA domains that are breaching']], get: function(){ return SLA_VIEW; }, set: function(v){ SLA_VIEW = v; SLA_DOMF = null; SLA_PAGE = 1; renderSla(); } };
 function renderTop() {
   pickTitle('top');
   if (TOPMODE === 'incidents') {
@@ -3357,7 +3424,7 @@ window.iddWlToggle = function(e) {
   if (open) { WorkloadPickerDS.renderPanel(document.getElementById('iddWlPanel'), iddWlCfg()); var inp = document.querySelector('#iddWlPanel .wlp-search input'); if (inp) setTimeout(function(){ inp.focus(); }, 0); setTimeout(function(){ document.addEventListener('click', iddWlOutside); }, 0); }
   else document.removeEventListener('click', iddWlOutside);
 };
-function renderAll() { renderFilters(); renderKpis(); renderTop(); renderThreats(); renderSessions(); renderCoverage(); renderTrends(); }   // renderFindingsView() PARKED 2026-10-05   // renderConns() PARKED 2026-10-05: connection problems are findings (RES-105)
+function renderAll() { renderFilters(); renderKpis(); renderSla(); renderTop(); renderThreats(); renderSessions(); renderCoverage(); renderTrends(); }   // renderFindingsView() PARKED 2026-10-05   // renderConns() PARKED 2026-10-05: connection problems are findings (RES-105)
 Array.prototype.forEach.call(document.querySelectorAll('[data-wh]'), function(el){ el.outerHTML = wh(el.getAttribute('data-wh')); });
 
 // [parked 2026-10-05] old Issues-view search wiring (the Findings view has its own: #fndSearch)
@@ -3473,6 +3540,9 @@ document.addEventListener('click', function(e){
   var ss = t.closest('[data-setstatus]'); if (ss) { closeMenu(); var st = ss.getAttribute('data-setstatus'); if (MENUCTX === 'bulk') applyStatus(selIds(), st); else askStatus(st); return; }
   if (t.closest('#iddTStatus')) { e.stopPropagation(); closeMenu(); MENUCTX = 'overlay'; openStatusMenu(t.closest('#iddTStatus')); return; }
   if (t.closest('#iddTKebab')) { e.stopPropagation(); closeMenu(); openCustomMenu(t.closest('#iddTKebab'), [{ label: 'Share', icon: 'share-general-outlined', act: 'share' }, { label: 'Open in Threat Center', icon: 'open-in-new-outlined', disabled: true, tip: NOT_BUILT }]); return; }
+  var slp = t.closest('[data-sla-page]'); if (slp) { SLA_PAGE = Math.max(1, SLA_PAGE + (+slp.getAttribute('data-sla-page'))); renderSla(); return; }
+  if (t.closest('[data-sla-rm]')) { SLA_DOMF = null; SLA_PAGE = 1; renderSla(); return; }
+  var sld = t.closest('[data-sla-dom]'); if (sld && !t.closest('.rowdetail')) { SLA_DOMF = sld.getAttribute('data-sla-dom'); SLA_VIEW = 'policies'; SLA_PAGE = 1; renderSla(); return; }
   var rf = t.closest('[data-refresh]'); if (rf) { stampAge(rf.getAttribute('data-refresh')); return; }
   var kb = t.closest('[data-kebab]'); if (kb) { var was = menuEl && menuEl.getAttribute('data-for') === kb.getAttribute('data-kebab'); closeMenu(); if (!was) { openMenu(kb); menuEl.setAttribute('data-for', kb.getAttribute('data-kebab')); } e.stopPropagation(); return; }
   if (t.closest('[data-scroll]')) { closeMenu(); document.getElementById('iddAttention').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
