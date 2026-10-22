@@ -4551,6 +4551,35 @@ body.ai-hx-transcript .ai-foot { display: none; }
 .fr-envfields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .fr-advgrp { display: flex; flex-direction: column; gap: 24px; padding: 8px 0 24px 0; }
 .fr-advf { display: flex; flex-direction: column; gap: 8px; } .fr-advf > .fr-dtr-l { font-size: 14px; line-height: 20px; margin: 0; }
+/* Domain controller cards (user 2026-10-22; chosen from forest-env-view-options.html, option 1). One card per domain controller, every setting in view.
+   Card = the wizard's card recipe (White, 1px Black/S10, radius 8). Fields = Vision Text Input Size=Medium (36): Form BG fill, 1px Black/S20, radius 4, pad 12, gap 8, label above in Body/B3 Black/S70 with gap 4, value Body/B2 16/22; open = Green/S5 fill + Green/S80 border. */
+.fr-mrow.end { justify-content: flex-end; }
+.fr-rec-list { display: flex; flex-direction: column; gap: 8px; }
+.fr-rec { border: 1px solid var(--border-light); border-radius: 8px; padding: 12px 16px 16px; background: var(--white); }
+.fr-rec-h { display: flex; align-items: flex-start; gap: 12px; }
+.fr-rec-id { flex: 1; min-width: 0; }
+.fr-rec-n { display: block; font-size: 16px; line-height: 22px; font-weight: 500; color: var(--black-100); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fr-rec-d { display: block; font-size: 14px; line-height: 20px; color: var(--black-60); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fr-rec-ip { flex: 0 0 auto; }
+.fr-rec-ip .fr-envsel { width: 160px; }
+.fr-rec-g { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 12px 16px; margin-top: 12px; }
+.fr-rec-f { min-width: 0; }
+.fr-rec .fr-dtr-l { font-size: 14px; line-height: 20px; margin-bottom: 4px; }
+.fr-rec .fr-envsel { font-size: 16px; line-height: 22px; }
+.fr-envsel .fr-sel-v { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fr-envsel.is-src .fr-sel-v { color: var(--black-60); }
+.fr-envsel.is-changed .fr-sel-v { color: var(--em-green); font-weight: 500; }
+.fr-rec .fr-ro { font-size: 16px; line-height: 22px; white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
+/* Apply as the Vision Combo Button, Primary / Default (library node 283:21275): halves are Primary buttons (Green/S80, 36px, label pad 8+8, Body/B2 Semi Bold white) on a Green/S30 container, 1px gap, radius 4; the chevron half is 36px square. */
+.fr-pop-opts { overflow: visible; }
+.fr-combo-wrap { position: relative; display: inline-flex; }
+.fr-combo { display: inline-flex; gap: 1px; background: var(--green-s30); border-radius: 4px; overflow: hidden; }
+.fr-combo-main, .fr-combo-chev { height: 36px; border: 0; background: var(--em-green); color: var(--white); font: inherit; font-size: 16px; line-height: 22px; font-weight: 500; cursor: pointer; }
+.fr-combo-main { padding: 0 16px; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fr-combo-chev { width: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+.fr-combo-main:hover:not(:disabled), .fr-combo-chev:hover:not(:disabled), .fr-combo-chev[aria-expanded="true"] { background: var(--em-green-accent); }
+.fr-combo-main:disabled, .fr-combo-chev:disabled { opacity: 0.4; cursor: not-allowed; }
+.fr-combo-menu { position: absolute; right: 0; bottom: calc(100% + 4px); min-width: 280px; background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; box-shadow: 0 8px 24px rgba(31,34,41,0.13); padding: 8px; z-index: 3; }
 .fr-rads { display: flex; flex-direction: column; gap: 12px; } .fr-rad { display: flex; align-items: center; gap: 8px; min-height: 24px; font-size: 16px; line-height: 22px; color: var(--black-100); cursor: pointer; }
 .fr-rad input { width: 16px; height: 16px; margin: 0; accent-color: var(--em-green); cursor: pointer; } .fr-rad input:focus-visible { outline: 2px solid var(--em-green); outline-offset: 2px; } .fr-rad-x { margin: 12px 0 4px 24px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .fr-kvh { font-weight: 500; font-size: 14px; margin: 8px 0 0; }
@@ -5096,6 +5125,40 @@ body.ai-hx-transcript .ai-foot { display: none; }
 .ws-sum-type-items { max-height: 200px; overflow-y: auto; overscroll-behavior: contain; background: transparent; }
 .ws-sum-type-items .ws-progress-row { padding: 8px 12px 8px 34px; border-bottom: 1px solid var(--border-light); }
 .ws-sum-type-items .ws-progress-row:last-child { border-bottom: none; }
+/* Summary items as one table (user 2026-10-22; chosen from sum-list-options.html option 6): search, sortable columns, a row with children expands in place, fixed 10 per page with the app's pager.
+   Columns that no item uses are left out. A container item is one row with a Contents count; it is never expanded into its descendants. */
+.ws-sum-expanded { container-type: inline-size; }
+.ws-sit-search { padding: 12px 0 8px; }
+.ws-sit { width: 100%; min-width: 0; border-collapse: collapse; table-layout: fixed; }   /* min-width: a global table rule would otherwise force 900px */
+.ws-sit th { text-align: left; padding: 8px; font-size: 14px; line-height: 20px; font-weight: 450; color: var(--black-60); border-bottom: 1px solid var(--border-light); }
+.ws-sit td { padding: 10px 8px; vertical-align: top; font-size: 14px; line-height: 20px; border-bottom: 1px solid var(--border-light); overflow: hidden; }
+.ws-sit tbody tr:last-child td { border-bottom: 0; }
+.ws-sit tbody tr:hover td { background: var(--black-3); }
+.ws-sit tr.has-open td { border-bottom: 0; }
+.ws-sit tr.kid td { background: var(--black-3); border-bottom: 0; padding-top: 8px; padding-bottom: 8px; }
+.ws-sit tr.kid:last-of-type td { border-bottom: 1px solid var(--border-light); }
+.ws-sit-th { display: inline-flex; align-items: center; gap: 4px; padding: 0; border: 0; background: none; font: inherit; color: var(--black-60); cursor: pointer; }
+.ws-sit-th:hover { color: var(--black-100); }
+.ws-sit-arr { display: inline-flex; color: var(--black-100); } .ws-sit-arr.desc { transform: rotate(180deg); }
+.ws-sit-nm { display: flex; align-items: flex-start; gap: 8px; min-width: 0; }
+.ws-sit-nm > div { min-width: 0; }
+.ws-sit-name { color: var(--black-100); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ws-sit-sub { display: none; color: var(--black-60); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ws-sit-mut { color: var(--black-60); }
+.ws-sit td.ws-sit-mut-w { white-space: normal; }
+.ws-sit .c-loc { white-space: nowrap; text-overflow: ellipsis; }
+.ws-sit-chev { flex: none; width: 20px; height: 20px; padding: 0; border: 0; background: none; color: var(--black-60); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.15s ease; }
+.ws-sit-chev.is-open { transform: rotate(90deg); }
+.ws-sit .kid .ws-sit-nm { padding-left: 28px; }
+.ws-sit-pg { padding: 8px; border-radius: 0; }
+@container (max-width: 560px) { .ws-sit .c-loc { display: none; } .ws-sit-sub { display: block; } }
+/* Forest recovery items: the domain controllers sit inside their forest — an indented group on a tree line, so they read as its children, not as sibling rows. */
+.ws-sum-type-items .ws-progress-row:has(+ .fr-sum-kids) { border-bottom: none; }
+.fr-sum-kids { position: relative; margin: 0 0 0 22px; padding: 0 0 8px; border-bottom: 1px solid var(--border-light); }
+.fr-sum-kids:last-child { border-bottom: none; }
+.fr-sum-kids::before { content: ''; position: absolute; left: 0; top: 0; bottom: 20px; border-left: 1px solid var(--border); }
+.ws-sum-type-items .fr-sum-kids .ws-progress-row.fr-sum-kid { position: relative; padding: 6px 12px 6px 24px; border-bottom: none; }
+.fr-sum-kid::before { content: ''; position: absolute; left: 0; top: 18px; width: 12px; border-top: 1px solid var(--border); }
 
 /* ─── Legacy progress summary (kept for any callers still using it) — */
 .ws-progress-summary { background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; padding: 20px 20px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px; }
@@ -41691,6 +41754,7 @@ var ws = {
     d365RelatedRecords: { enabled: false, parentLevels: 1, childLevels: 1 }
   },
   summaryExpanded: false,     // (legacy) Step 3 Summary single-card expand — superseded by always-visible config + summaryItemsExpanded
+  sumQ: '', sumPage: 1, sumSort: null, sumX: {},   // Summary items table: search text, page, sort, expanded rows
   summaryItemsExpanded: false, // Step 3 Summary — Items list is its own collapsible block, collapsed by default; config recap is always visible
   restoreInitiated: false,    // Step 3 — flips true when the user clicks "Restore N items" on the summary page; before that, step 3 is a preview, not an in-flight job
   helpDrawerOpen: false,      // Step 2 Configure — right-side "Restore guide" drawer with AI summary + paragraph behavior notes
@@ -41930,6 +41994,7 @@ function showWorkspace() {
   ws.summaryExpanded = false;
   ws.summaryItemsExpanded = false;
   ws.summaryTypeExpanded = {};
+  ws.sumQ = ''; ws.sumPage = 1; ws.sumSort = null; ws.sumX = {};
   // Reset pre-execution check ticker so a re-opened wizard runs from
   // a clean state — checks fire afresh every time Execute is clicked.
   ws.preExecutionPhase = 'idle';
@@ -44513,7 +44578,7 @@ function _frTree(nodes, kind, cur, dom, path, srcVal) {   // srcVal: the value t
 // search + tree (or list) for one environment field — the same content wherever it opens
 function _frOpts(dom, k) {
   var f = ws.forest, bulk = dom === '_sel', q = (f.q || '').trim().toLowerCase(), body = '';
-  var cur = bulk ? f.pend : _frEnvOf(dom)[k];
+  var cur = bulk ? f.pend : (f.pop && f.pop.pend !== undefined ? f.pop.pend : _frEnvOf(dom)[k]);   // a single-domain-controller pick is staged until Apply
   var mag = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('search-outlined', 14)) || '';
   var ds = _frModel().domains, one = bulk ? (_frSelIds().length === 1 ? ds.filter(function(x){ return x.res.id === _frSelIds()[0]; })[0] : null) : ds.filter(function(x){ return x.res.id === dom; })[0];
   // the real value leads; "Same as source" is the caption
@@ -44536,6 +44601,19 @@ function wsFrToggleSel(id) { var f = ws.forest; f.sel[id] = !f.sel[id]; f.msg = 
 function wsFrToggleAll(on) { var f = ws.forest; _frModel().domains.forEach(function(d){ f.sel[d.res.id] = on; }); f.msg = ''; wsRenderAll(); }
 function wsFrClearSel() { var f = ws.forest; f.sel = {}; f.pop = null; f.pend = undefined; wsRenderAll(); }
 function wsFrCancelBulk() { var f = ws.forest; f.pop = null; f.pend = undefined; wsRenderAll(); }
+function _frComboFoot(d) {   // Cancel, then the Combo Button: the face applies to this domain controller, the chevron offers every one of them
+  var f = ws.forest, p = f.pop, n = _frModel().domains.length, off = p.pend === undefined ? ' disabled aria-disabled="true"' : '', nm = d.auth ? d.auth.name : d.res.name;
+  var label = n > 1 ? 'Apply to ' + wsEscape(nm) : 'Apply';
+  return '<div class="fr-pop-ft"><button type="button" class="btn btn-outline" onclick="wsFrCancelBulk()">Cancel</button><div class="fr-combo-wrap"><div class="fr-combo"><button type="button" class="fr-combo-main"' + off + ' title="' + label + '" onclick="wsFrApply(false)">' + label + '</button>'
+    + (n > 1 ? '<button type="button" class="fr-combo-chev" aria-haspopup="menu" aria-expanded="' + !!p.menu + '" aria-label="More apply options"' + off + ' onclick="wsFrChev()">' + _frIcon('keyboard-arrow-down-outlined', 20) + '</button>' : '') + '</div>'
+    + (n > 1 && p.menu ? '<div class="fr-combo-menu" role="menu"><button type="button" class="fr-li2" role="menuitem" onclick="wsFrApply(true)"><span class="fr-li2-n">Apply to all ' + n + ' domain controllers</span></button></div>' : '') + '</div></div>';
+}
+function wsFrChev() { var f = ws.forest; if (!f.pop || f.pop.pend === undefined) return; f.pop.menu = !f.pop.menu; wsRenderAll(); }
+function wsFrApply(all) {   // commit the staged value to this domain controller, or to every domain controller in the forest
+  var f = ws.forest, p = f.pop; if (!p || p.pend === undefined) return;
+  _frModel().domains.forEach(function(d){ if (all || d.res.id === p.dom) f.envRows[d.res.id][p.key] = (p.pend === FR_S || p.pend === _frSrcOf(d)[p.key]) ? FR_S : p.pend; });
+  f.pop = null; wsRenderAll();
+}
 function wsFrApplyBulk() {   // a bulk pick is staged in the picker; Apply commits it to every selected domain controller
   var f = ws.forest, k = f.pop && f.pop.key, ids = _frSelIds(); if (!k || f.pend === undefined) return;
   ids.forEach(function(id){ f.envRows[id][k] = f.pend; });
@@ -44550,8 +44628,8 @@ function _frRadios(k, opts, cur) {   // DS Radio: 16px control in the brand gree
 function _frPopRows(d, key) {
   if (key !== 'dc') {
     var bulk = d.res.id === '_sel', n = bulk ? _frSelIds().length : 0;
-    return '<div class="fr-pop fr-pop-opts" role="listbox" style="visibility:hidden" onclick="event.stopPropagation()">' + (bulk ? '<div class="fr-pop-hd">' + FR_LBL[key] + ' for ' + n + ' selected domain controller' + (n === 1 ? '' : 's') + '</div>' : '') + _frOpts(d.res.id, key)
-      + (bulk ? '<div class="fr-pop-ft"><button type="button" class="btn btn-outline" onclick="wsFrCancelBulk()">Cancel</button><button type="button" class="btn btn-blue"' + (ws.forest.pend === undefined ? ' disabled aria-disabled="true"' : '') + ' onclick="wsFrApplyBulk()">Apply to ' + n + '</button></div>' : '') + '</div>';
+    return '<div class="fr-pop fr-pop-opts" role="listbox" style="visibility:hidden" onclick="event.stopPropagation()">' + (bulk ? '<div class="fr-pop-hd">' + FR_LBL[key] + ' for ' + n + ' selected domain controller' + (n === 1 ? '' : 's') + '</div>' : '<div class="fr-pop-hd">' + FR_LBL[key] + ' for ' + wsEscape(d.auth ? d.auth.name : d.res.name) + '</div>') + _frOpts(d.res.id, key)
+      + (bulk ? '<div class="fr-pop-ft"><button type="button" class="btn btn-outline" onclick="wsFrCancelBulk()">Cancel</button><button type="button" class="btn btn-blue"' + (ws.forest.pend === undefined ? ' disabled aria-disabled="true"' : '') + ' onclick="wsFrApplyBulk()">Apply to ' + n + '</button></div>' : _frComboFoot(d)) + '</div>';
   }
   try { WorkloadPickerDS.ensureCss(); } catch (e) {}   // the wlp-* List Item styles are self-injected by the picker; make sure they exist before this list renders
   var rows = key === 'dc'
@@ -44574,10 +44652,10 @@ function wsFrFilter(inp) {
   var e = pop.querySelector('.fr-li-empty'); if (e) e.hidden = any;
 }
 // A table cell that opens a picker: the value (single line, ellipsized, full text on hover) + a chevron. Pickers are placed with fixed positioning so the table never clips them.
-function _frCell(d, key, value, changed, muted) {
+function _frCell(d, key, value, changed, muted, cls) {
   var open = ws.forest.pop && ws.forest.pop.dom === d.res.id && ws.forest.pop.key === key;
   var chev = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('keyboard-arrow-down-outlined', 16)) || '';
-  return '<button type="button" class="fr-sel' + (changed ? ' is-changed' : '') + (muted ? ' is-src' : '') + '" id="fr-c-' + d.res.id + '-' + key + '" data-tip-clip="' + wsEscape(value) + '" aria-haspopup="listbox" aria-expanded="' + !!open + '" onclick="' + (key === 'ip' ? 'wsFrIpEdit' : 'wsFrPop') + '(\'' + d.res.id + '\'' + (key === 'ip' ? '' : ',\'' + key + '\'') + ')"><span class="fr-sel-v">' + wsEscape(value) + '</span>' + chev + '</button>';
+  return '<button type="button" class="' + (cls || 'fr-sel') + (changed ? ' is-changed' : '') + (muted ? ' is-src' : '') + '" id="fr-c-' + d.res.id + '-' + key + '" data-tip-clip="' + wsEscape(value) + '" aria-haspopup="listbox" aria-expanded="' + !!open + '" onclick="' + (key === 'ip' ? 'wsFrIpEdit' : 'wsFrPop') + '(\'' + d.res.id + '\'' + (key === 'ip' ? '' : ',\'' + key + '\'') + ')"><span class="fr-sel-v">' + wsEscape(value) + '</span>' + chev + '</button>';
 }
 function _frPlacePop() {
   var f = ws.forest; if (!f) return;
@@ -44600,38 +44678,27 @@ function wsRenderForestConfig() {
   var m = _frModel(), f = ws.forest, cfg = ws.config || (ws.config = {});
   var popHtml = '', chev = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('keyboard-arrow-down-outlined', 16)) || '';
   var multi = m.domains.length > 1, nSel = _frSelIds().length, allSel = multi && nSel === m.domains.length;
-  // Domain controllers and where each one lands, in one table. A segmented control switches which settings the columns show: Host and folder, or Datastore, network and IP.
-  // The rows, the checkboxes and the selection stay the same across views. Values are the real ones: grey while the source's own, green once changed.
-  var place = (f.view || 'place') === 'place', ro = f.dest === 'original', withCb = multi && !ro;
-  var vcols = place ? [['Host or cluster', 'host', 34], ['Network', 'network', 26], ['IP address', 'ip', 16]] : [['Datastore', 'datastore', 30], ['Folder', 'folder', 46]];   // default view: where it runs and how it connects; second view: storage and organization
-  var cols = (withCb ? [['', 6]] : []).concat([['Domain controller', withCb ? 18 : 24]], vcols.map(function(c){ return [c[0], c[2]]; }));
-  var envCell = function(d, e, k){ var changed = e[k] !== FR_S && e[k] !== _frSrcOf(d)[k]; return _frCell(d, k, _frShown(d, k, e[k]), changed, !changed); };
-  var rows = m.domains.map(function(d){
+  // Domain controllers: one card each, every setting in view (user 2026-10-22). Was: one table with a segmented control that swapped the columns ("Host, network and IP" | "Datastore and folder") and a bulk bar.
+  // Values are the real ones: grey while the source's own, green once changed. A value is set per domain controller; the picker's Apply chevron applies it to all of them.
+  var ro = f.dest === 'original';
+  var lblOf = function(k){ return k === 'ip' ? 'IP address' : FR_LBL[k]; };
+  var cards = m.domains.map(function(d){
     var st = f.dom[d.res.id] || (f.dom[d.res.id] = {}), e = f.envRows[d.res.id] || (f.envRows[d.res.id] = { host: FR_S, datastore: FR_S, folder: FR_S, network: FR_S });
     if (f.pop && f.pop.dom === d.res.id) popHtml = f.pop.key === 'ip' ? _frIpPop(d, st) : _frPopRows(d, f.pop.key);
-    var td = function(inner){ return '<td class="ws-td fr-td">' + inner + '</td>'; };
-    return '<tr class="ws-tr">' + (withCb ? td('<input type="checkbox" class="fr-cb" aria-label="Select ' + wsEscape(d.auth ? d.auth.name : d.res.name) + '"' + (f.sel[d.res.id] ? ' checked' : '') + ' onchange="wsFrToggleSel(\'' + d.res.id + '\')">') : '')
-      + td('<span class="fr-dcn">' + wsEscape(d.auth ? d.auth.name : '\u2014') + '</span><span class="fr-dd">' + wsEscape(d.res.name) + '</span>')
-      + vcols.map(function(c){
-        if (ro) return td('<span class="fr-ro">' + wsEscape(c[1] === 'ip' ? _frIpOf(d.auth) : _frSrcOf(d)[c[1]]) + '</span>');   // Original infrastructure: what will be used, read only
-        return td(c[1] === 'ip' ? _frCell(d, 'ip', st.ip || _frIpOf(d.auth), !!st.ip, !st.ip) : envCell(d, e, c[1]));
-      }).join('') + '</tr>';
+    var field = function(k){
+      var inner;
+      if (ro) inner = '<span class="fr-ro">' + wsEscape(k === 'ip' ? _frIpOf(d.auth) : _frSrcOf(d)[k]) + '</span>';   // Original infrastructure: what will be used, read only
+      else if (k === 'ip') inner = _frCell(d, 'ip', st.ip || _frIpOf(d.auth), !!st.ip, !st.ip, 'fr-envsel');
+      else { var changed = e[k] !== FR_S && e[k] !== _frSrcOf(d)[k]; inner = _frCell(d, k, _frShown(d, k, e[k]), changed, !changed, 'fr-envsel'); }
+      return '<div class="fr-rec-f"><div class="fr-dtr-l">' + lblOf(k) + '</div>' + inner + '</div>';
+    };
+    var nm = d.auth ? d.auth.name : '\u2014';
+    return '<div class="fr-rec" role="group" aria-label="' + wsEscape(nm) + '"><div class="fr-rec-h"><div class="fr-rec-id"><span class="fr-rec-n">' + wsEscape(nm) + '</span><span class="fr-rec-d">' + wsEscape(d.res.name) + '</span></div><div class="fr-rec-ip">' + field('ip') + '</div></div>'
+      + '<div class="fr-rec-g">' + ['host', 'network', 'folder', 'datastore'].map(field).join('') + '</div></div>';
   }).join('');
-  if (f.pop && f.pop.dom === '_sel' && !ro) popHtml = _frPopRows({ res: { id: '_sel' } }, f.pop.key);
-  var tabs = '<div class="fr-mrow"><div class="fr-bt" role="tablist" aria-label="Settings to show"><button type="button" role="tab" aria-selected="' + place + '" class="' + (place ? 'on' : '') + '" data-t="Host, network and IP" onclick="wsFrView(\'place\')">Host, network and IP</button><button type="button" role="tab" aria-selected="' + !place + '" class="' + (place ? '' : 'on') + '" data-t="Datastore and folder" onclick="wsFrView(\'store\')">Datastore and folder</button></div>'
-    + (ro ? '<button type="button" class="btn btn-outline" onclick="wsFrSetDest(\'different\')">Edit environment</button>' : '<button type="button" class="btn btn-outline" id="fr-exit" onclick="wsFrExit()">Use original environment</button>') + '</div>';
-  var table = tabs + '__BAR__<div class="ws-table-wrap"><table class="ws-table fr-tbl"><colgroup>' + cols.map(function(c){ return '<col style="width:' + c[1] + '%">'; }).join('') + '</colgroup>'
-    + '<thead><tr>' + cols.map(function(c, i){ return '<th class="ws-th" style="white-space:normal">' + (withCb && i === 0 ? '<input type="checkbox" class="fr-cb" aria-label="Select all"' + (allSel ? ' checked' : '') + ' onchange="wsFrToggleAll(this.checked)">' : c[0]) + '</th>'; }).join('') + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
+  var table = '<div class="fr-mrow end">' + (ro ? '<button type="button" class="btn btn-outline" onclick="wsFrSetDest(\'different\')">Edit environment</button>' : '<button type="button" class="btn btn-outline" id="fr-exit" onclick="wsFrExit()">Use original environment</button>') + '</div>'
+    + '<div class="fr-rec-list">' + cards + '</div>'
     + (ro ? '' : '<div class="fr-dtr-hint" style="margin-top:8px"><span style="color:var(--black-60)">Grey</span> is the value the domain controller was backed up with; <span style="color:var(--em-green);font-weight:500">green</span> has been changed.</div>');
-  // The app's action bar: helper text on the left; on the right, the selection chip and the settings for this view (Different environment) or Edit environment (Original, read only). Always present.
-  var xIcon = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('close-outlined', 12)) || '';
-  var barKeys = place ? ['host', 'network'] : ['datastore', 'folder'];
-  var bar = ro ? ''
-    : multi ? '<div class="fr-abar" role="toolbar" aria-label="Actions for the selected domain controllers">'
-    + (f.msg ? '<span class="fr-ahelp ok">' + wsEscape(f.msg) + '</span>' : '<span class="fr-ahelp">' + (nSel ? 'Edit the selected domain controllers together.' : 'Select domain controllers to edit together.') + '</span>')
-    + '<div class="fr-aright">' + (nSel ? '<span class="tab-sel-chip">' + nSel + ' selected<button type="button" class="tsc-x" onclick="wsFrClearSel()" aria-label="Clear selection">' + xIcon + '</button></span>' : '<span class="tab-none-chip">None selected</span>')
-    + barKeys.map(function(k){ return '<button type="button" class="fr-abtn" id="fr-c-_sel-' + k + '"' + (nSel ? '' : ' disabled aria-disabled="true"') + ' aria-haspopup="listbox" aria-expanded="' + !!(f.pop && f.pop.dom === '_sel' && f.pop.key === k) + '" onclick="wsFrPop(\'_sel\',\'' + k + '\')">' + FR_LBL[k] + chev + '</button>'; }).join('') + '</div></div>' : '';
-  table = table.replace('__BAR__', bar);
   var sections = [];
   sections.push(_frSection('Domain controllers', 'One domain controller per domain is restored, and it takes over all FSMO roles. Domains recover root first, then children. Each is restored to the environment shown.', table + popHtml + _frProdWarning()));
   sections.push(wsReasonTicketSections(cfg));
@@ -44653,21 +44720,21 @@ function wsRenderForestConfig() {
       + '<div class="fr-advf"><div class="fr-dtr-l">VM name</div>' + _frRadios('nameMode', nameOpts, f.nameMode) + '</div>'
       + '<div class="fr-advf"><div class="fr-dtr-l">If a virtual machine with the same name already exists</div>' + _frRadios('collide', [['replace', 'Delete it, then restore'], ['suffix', 'Keep it and add a suffix to the recovered virtual machine', '<div class="fr-advf" style="grid-column:1/-1"><div class="fr-dtr-l">Suffix</div><input class="form-input" value="' + wsEscape(f.collideSuffix) + '" oninput="ws.forest.collideSuffix=this.value" aria-label="Suffix for the recovered virtual machine"></div>']], f.collide) + '</div>'
       + '<div class="fr-advf"><div class="fr-dtr-l">BIOS UUID</div>' + _frRadios('uuid', [['preserve', 'Preserve the source UUID'], ['new', 'Generate a new UUID']], f.uuid) + '</div>'
-      + '<div class="fr-advf"><div class="fr-dtr-l">Disk type</div>' + _frRadios('disk', FR_DISK, f.disk) + '<div class="fr-dtr-hint">Applies to every virtual disk of the domain controller.</div></div>'
+      + '<div class="fr-advf"><div class="fr-dtr-l">Disk type</div>' + _frRadios('disk', FR_DISK, f.disk) + '<div class="fr-dtr-hint">Applies to every virtual disk of each recovered virtual machine.</div></div>'
       + '</div><div class="ws-adv-list">'
       + tog(!f.ownCreds, 'Use the connection’s credentials', 'Recovery signs in to each domain controller with the credentials from the Active Directory connection. Turn off to enter a Domain Admin account per domain controller.', "wsFrTog('ownCreds')")
       + (f.ownCreds ? '<div class="fr-sub">' + allDcs.map(function(c){ return '<div class="fr-cred"><span>' + wsEscape(c.name) + '</span><input class="form-input" placeholder="Domain\\username" aria-label="Username for ' + wsEscape(c.name) + '"><input class="form-input" type="password" placeholder="Password" aria-label="Password for ' + wsEscape(c.name) + '"></div>'; }).join('') + '<div class="fr-dtr-hint">Domain Admin is required. Only a username and password are supported.</div></div>' : '')
-      + tog(f.tags, 'Restore VM tags', 'Reassign the original virtual machine tags to the recovered domain controllers.', "wsFrTog('tags')")
+      + tog(f.tags, 'Restore VM tags', 'Reassign the original virtual machine tags to the recovered virtual machines.', "wsFrTog('tags')")
       + '</div>';
   }
   sections.push(adv + '</div>');
   setTimeout(_frPlacePop, 0);
-  return _frPage('Configure restore options', 'Check the domain controllers to restore, then record why you’re running it.', '<div class="ws-cfg-card"><div class="ws-cfg-sections">' + sections.join('') + '</div></div>');
+  return _frPage('Configure restore options', 'Review where each domain controller will be recovered, then record why you’re running it.', '<div class="ws-cfg-card"><div class="ws-cfg-sections">' + sections.join('') + '</div></div>');
 }
 function wsFrPop(dom, key) { var p = ws.forest.pop; ws.forest.pop = (p && p.dom === dom && p.key === key) ? null : { dom: dom, key: key }; ws.forest.q = ''; ws.forest.pend = undefined; ws.forest.msg = ''; wsRenderAll(); setTimeout(function(){ _frPlacePop(); var i = document.querySelector('.fr-pop .wlp-search input, .fr-pop #fr-q'); if (i) i.focus(); }, 0); }
 function wsFrPick(dom, key, val) {
   var f = ws.forest;
-  if (FR_KEYS.indexOf(key) >= 0) { if (dom === '_sel') { f.pend = val; wsRenderAll(); setTimeout(function(){ _frPlacePop(); var i = document.getElementById('fr-q'); if (i) i.focus(); }, 0); return; } var _pd = _frModel().domains.filter(function(x){ return x.res.id === dom; })[0]; f.envRows[dom][key] = (_pd && val === _frSrcOf(_pd)[key]) ? FR_S : val; f.pop = null; wsRenderAll(); return; }   // choosing the source value by name is the same as "Same as source"
+  if (FR_KEYS.indexOf(key) >= 0) { if (dom === '_sel') { f.pend = val; wsRenderAll(); setTimeout(function(){ _frPlacePop(); var i = document.getElementById('fr-q'); if (i) i.focus(); }, 0); return; } f.pop.pend = val; f.pop.menu = false; wsRenderAll(); setTimeout(function(){ _frPlacePop(); var i = document.getElementById('fr-q'); if (i) i.focus(); }, 0); return; }   // staged: Apply commits it to this domain controller, the chevron to all of them
   var st = f.dom[dom] = f.dom[dom] || {}; if (key === 'dc') { st.dcId = val; st.ip = ''; st.ipEditing = false; } else st[key] = val; f.pop = null; wsRenderAll();
 }
 // IP address cell: shows the address that will be used (the original, or the new one once saved). Change opens an editable field pre-filled with it, with Save / Cancel and validation.
@@ -44758,11 +44825,11 @@ function wsFrConfigRows() {
 }
 function wsFrItemRows() {
   var m = _frModel();
-  return m.domains.map(function(d){
+  return '<div class="fr-sum-kids">' + m.domains.map(function(d){
     var extra = _frChangedLines(d).map(function(l){ return '<span class="ws-progress-row-sub">' + wsEscape(l) + '</span>'; }).join('');
-    return '<div class="ws-progress-row" style="display:flex;align-items:center;gap:10px"><div class="ws-progress-row-id"><span class="ws-progress-row-name">' + wsEscape(d.auth ? d.auth.name : d.res.name) + '</span>'
+    return '<div class="ws-progress-row fr-sum-kid" style="display:flex;align-items:center;gap:10px"><div class="ws-progress-row-id"><span class="ws-progress-row-name">' + wsEscape(d.auth ? d.auth.name : d.res.name) + '</span>'
       + '<span class="ws-progress-row-sub">' + (d.root ? 'Root domain ' + wsEscape(d.res.name) + ', restored first' : 'Child domain ' + wsEscape(d.res.name) + ', restored after ' + wsEscape(m.domains[0].res.name)) + '</span>' + extra + '</div></div>';
-  }).join('');
+  }).join('') + '</div>';
 }
 function wsFrChecklist() {
   var m = _frModel(), left = [];
@@ -48579,41 +48646,7 @@ function wsRenderProgress() {
       + '</button>';
     if (_itemsOpen) {
     html += '<div class="ws-sum-expanded">';
-    typeNames.forEach(function(t){
-      var arr = byType[t];
-      // Single-type cart: no per-type header, items list flat. Multi-type:
-      // expanded by default, header still toggles it.
-      var open = _singleType ? true : ((t in ws.summaryTypeExpanded) ? ws.summaryTypeExpanded[t] : autoExpand);
-      var tArg = t.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-      html += '<div class="ws-sum-typegroup">';
-      if (!_singleType) {
-        html += '<button class="ws-sum-type-row" type="button" onclick="wsToggleSummaryType(\'' + tArg + '\')" aria-expanded="' + (open ? 'true' : 'false') + '">'
-          + '<span class="ws-sum-type-chev' + (open ? ' is-open' : '') + '"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>'
-          + '<span class="ws-sum-type-name">' + wsEscape(t) + '</span>'
-          + '<span class="ws-sum-type-count">' + arr.length.toLocaleString('en-US') + '</span>'
-        + '</button>';
-      }
-      if (open) {
-        html += '<div class="ws-sum-type-items">';
-        arr.forEach(function(r){
-          var _d = _dispMap[r.id];
-          var _pill = _d ? '<span class="ws-dr-pill ' + _d + '" style="margin-left:auto;flex-shrink:0" title="' + wsEscape(_WS_DR_META[_d].desc) + '">' + _WS_DR_META[_d].label + '</span>' : '';
-          // Sub-line: the item's LOCATION (where it lives) — varies per item and
-          // helps confirm what you're restoring. Falls back to its type for
-          // top-level items with no parent path. (Workload is the same for the
-          // whole job, so repeating it per row added nothing.)
-          var _loc = (typeof _invParentBreadcrumb === 'function') ? _invParentBreadcrumb(r) : '';
-          if (_loc && typeof _truncatePathMiddle === 'function') _loc = _truncatePathMiddle(_loc);
-          var _sub = _loc || r.type || '';
-          html += '<div class="ws-progress-row" style="display:flex;align-items:center;gap:10px"><div class="ws-progress-row-id">'
-            + '<span class="ws-progress-row-name">' + wsEscape(r.name || r.id) + '</span>'
-            + '<span class="ws-progress-row-sub">' + wsEscape(_sub) + '</span>'
-          + '</div>' + _pill + '</div>' + (wsIsForest() && r.type === 'Forest' ? wsFrItemRows() : '');
-        });
-        html += '</div>';
-      }
-      html += '</div>';
-    });
+    html += _wsSumItemsTable(typeNames.reduce(function(acc, t){ return acc.concat(byType[t]); }, []), _dispMap);
     html += '</div>';   // /.ws-sum-expanded
     }   // /if (_itemsOpen)
     html += '</div>';   // /.ws-sum-card (Items)
@@ -48836,6 +48869,71 @@ function wsRunDryRun() {
     ws.dryRunPhase = 'done';
     wsRenderAll();
   }, 850);
+}
+// ── Summary items table ──────────────────────────────────────────────────────
+var WS_SUM_PAGE = 10;   // fixed: nobody pages through this list at this point in the restore
+function _wsSumKids(r) {   // children shown inside an item's own row. Forest recovery: the domain controllers it restores.
+  if (!(wsIsForest() && r.type === 'Forest')) return [];
+  var m = _frModel();
+  return m.domains.map(function(d){
+    var lines = [['Restore order', d.root ? 'First' : 'After ' + m.domains[0].res.name]];
+    _frChangedLines(d).forEach(function(l){ var k = l.indexOf(': '); lines.push([l.slice(0, k), l.slice(k + 2)]); });
+    return { name: d.auth ? d.auth.name : d.res.name, loc: d.res.name, lines: lines };
+  });
+}
+function wsSumQ(v) { ws.sumQ = v; ws.sumPage = 1; var i = document.getElementById('wsSumQ'), pos = i ? i.selectionStart : v.length; wsRenderAll(); i = document.getElementById('wsSumQ'); if (i) { i.focus(); i.setSelectionRange(pos, pos); } }
+function wsSumSort(c) { var so = ws.sumSort || { col: 'n', dir: 'asc' }; ws.sumSort = so.col === c ? { col: c, dir: so.dir === 'asc' ? 'desc' : 'asc' } : { col: c, dir: 'asc' }; ws.sumPage = 1; wsRenderAll(); }
+function wsSumPage(p) { ws.sumPage = p; wsRenderAll(); }
+function wsSumX(id) { ws.sumX[id] = !ws.sumX[id]; wsRenderAll(); }
+function _wsSumPager(total) {
+  var pages = Math.max(1, Math.ceil(total / WS_SUM_PAGE)); if (ws.sumPage > pages) ws.sumPage = pages;
+  var c = ws.sumPage, from = total ? (c - 1) * WS_SUM_PAGE + 1 : 0, to = Math.min(total, c * WS_SUM_PAGE);
+  var info = '<span class="pgds-info">' + from + ' - ' + to + ' of ' + total.toLocaleString('en-US') + '</span>';
+  if (pages < 2) return '<div class="pg-bar ws-sit-pg" style="justify-content:flex-end"><div class="pgds-right">' + info + '</div></div>';
+  var arrow = function(dir, dis){ return '<button class="pgds-arrow" type="button"' + (dis ? ' disabled' : '') + ' onclick="wsSumPage(' + (c + (dir === 'prev' ? -1 : 1)) + ')" aria-label="' + (dir === 'prev' ? 'Previous' : 'Next') + ' page"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="' + (dir === 'prev' ? '15 18 9 12 15 6' : '9 18 15 12 9 6') + '"/></svg></button>'; };
+  var nums = [], chips = '', i; for (i = 1; i <= pages; i++) if (pages <= 7 || i === 1 || i === pages || Math.abs(i - c) <= 1) nums.push(i);
+  nums.forEach(function(n, k){ if (k && n - nums[k - 1] > 1) chips += '<span class="pgds-gap">…</span>'; chips += '<button type="button" class="pgds-chip' + (n === c ? ' current' : '') + '" onclick="wsSumPage(' + n + ')">' + n + '</button>'; });
+  var gos = '<option value="">Go to Page</option>'; for (i = 1; i <= pages; i++) gos += '<option value="' + i + '">' + i + '</option>';
+  return '<div class="pg-bar ws-sit-pg"><div class="pgds-pages">' + arrow('prev', c <= 1) + '<span class="pgds-chips">' + chips + '</span>' + arrow('next', c >= pages) + '</div><div class="pgds-right"><select class="pgds-select pgds-goto" aria-label="Go to page" onchange="if(this.value)wsSumPage(+this.value)">' + gos + '</select>' + info + '</div></div>';
+}
+function _wsSumItemsTable(res, dispMap) {
+  var q = (ws.sumQ || '').trim().toLowerCase(), so = ws.sumSort || { col: 'n', dir: 'asc' };
+  var items = res.map(function(r){
+    var kids = _wsSumKids(r), loc = (typeof _invParentBreadcrumb === 'function') ? _invParentBreadcrumb(r) : '', full = loc;
+    if (loc && typeof _truncatePathMiddle === 'function') loc = _truncatePathMiddle(loc);
+    var con = kids.length ? kids.length + ' domain controller' + (kids.length === 1 ? '' : 's') : ((typeof _invContentsRollup === 'function') ? _invContentsRollup(r) : '');
+    if (con === '—') con = '';
+    return { r: r, name: r.name || r.id, loc: loc, full: full, con: con, d: dispMap[r.id] || '', kids: kids };
+  });
+  var hasLoc = items.some(function(i){ return i.loc; }), hasCon = items.some(function(i){ return i.con; }), hasD = items.some(function(i){ return i.d; });
+  var shown = items.filter(function(i){ return !q || (i.name + ' ' + i.full + ' ' + i.kids.map(function(k){ return k.name; }).join(' ')).toLowerCase().indexOf(q) >= 0; });
+  var key = function(i){ return so.col === 'loc' ? i.full : so.col === 'con' ? i.con : so.col === 'd' ? (i.d ? _WS_DR_META[i.d].label : '') : i.name; };
+  shown.sort(function(a, b){ return String(key(a)).localeCompare(String(key(b)), undefined, { numeric: true }) * (so.dir === 'asc' ? 1 : -1); });
+  var total = shown.length, pager = _wsSumPager(total);
+  shown = shown.slice((ws.sumPage - 1) * WS_SUM_PAGE, ws.sumPage * WS_SUM_PAGE);
+  var arrowIc = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('arrow-upward-outlined', 14)) || '';
+  var th = function(c, l, cls, right){ var on = so.col === c; return '<th' + (cls ? ' class="' + cls + '"' : '') + (right ? ' style="text-align:right"' : '') + '><button type="button" class="ws-sit-th" onclick="wsSumSort(\'' + c + '\')">' + l + (on ? '<span class="ws-sit-arr' + (so.dir === 'asc' ? '' : ' desc') + '">' + arrowIc + '</span>' : '') + '</button></th>'; };
+  var chevSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>';
+  var ncols = 1 + (hasLoc ? 1 : 0) + (hasCon ? 1 : 0) + (hasD ? 1 : 0), body = '';
+  shown.forEach(function(i){
+    var open = i.kids.length && !!ws.sumX[i.r.id], idq = String(i.r.id).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    body += '<tr' + (open ? ' class="has-open"' : '') + '><td><div class="ws-sit-nm">' + (i.kids.length ? '<button type="button" class="ws-sit-chev' + (open ? ' is-open' : '') + '" onclick="wsSumX(\'' + idq + '\')" aria-expanded="' + !!open + '" aria-label="' + (open ? 'Collapse ' : 'Expand ') + wsEscape(i.name) + '">' + chevSvg + '</button>' : '')
+      + '<div><div class="ws-sit-name" title="' + wsEscape(i.name) + '">' + wsEscape(i.name) + '</div>' + (i.loc ? '<div class="ws-sit-sub">' + wsEscape(i.loc) + '</div>' : '') + '</div></div></td>'
+      + (hasLoc ? '<td class="ws-sit-mut c-loc" title="' + wsEscape(i.full) + '">' + wsEscape(i.loc) + '</td>' : '')
+      + (hasCon ? '<td class="ws-sit-mut ws-sit-mut-w">' + wsEscape(i.con) + '</td>' : '')
+      + (hasD ? '<td style="text-align:right">' + (i.d ? '<span class="ws-dr-pill ' + i.d + '" title="' + wsEscape(_WS_DR_META[i.d].desc) + '">' + _WS_DR_META[i.d].label + '</span>' : '') + '</td>' : '') + '</tr>';
+    if (open) i.kids.forEach(function(k){
+      body += '<tr class="kid"><td><div class="ws-sit-nm"><div><div class="ws-sit-name">' + wsEscape(k.name) + '</div><div class="ws-sit-sub">' + wsEscape(k.loc) + '</div></div></div></td>'
+        + (hasLoc ? '<td class="ws-sit-mut c-loc">' + wsEscape(k.loc) + '</td>' : '')
+        + (hasCon ? '<td class="ws-sit-mut ws-sit-mut-w">' + k.lines.map(function(l){ return '<div>' + wsEscape(l[0] + ': ' + l[1]) + '</div>'; }).join('') + '</td>' : '')
+        + (hasD ? '<td></td>' : '') + '</tr>';
+    });
+  });
+  var w = hasLoc && hasCon ? ['30%', '28%', '42%'] : hasLoc ? ['40%', '60%'] : hasCon ? ['40%', '60%'] : ['100%'];
+  var cols = hasD ? (hasLoc && hasCon ? ['28%', '22%', '34%', '16%'] : hasLoc || hasCon ? ['40%', '40%', '20%'] : ['80%', '20%']) : w;
+  return '<div class="ws-sit-search"><input id="wsSumQ" class="ws-field-input" type="text" placeholder="Search" value="' + wsEscape(ws.sumQ || '') + '" oninput="wsSumQ(this.value)" autocomplete="off" aria-label="Search items"></div>'
+    + '<table class="ws-sit"><colgroup>' + cols.map(function(x, n){ return '<col' + (hasLoc && n === 1 ? ' class="c-loc"' : '') + ' style="width:' + x + '">'; }).join('') + '</colgroup><thead><tr>' + th('n', 'Name') + (hasLoc ? th('loc', 'Location', 'c-loc') : '') + (hasCon ? th('con', 'Contents') : '') + (hasD ? th('d', 'Status', '', true) : '') + '</tr></thead><tbody>'
+    + (body || '<tr><td colspan="' + ncols + '" class="ws-sit-mut">No matches</td></tr>') + '</tbody></table>' + pager;
 }
 function wsToggleSummaryType(t) {
   if (!ws.summaryTypeExpanded) ws.summaryTypeExpanded = {};
