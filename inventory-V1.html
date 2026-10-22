@@ -4541,7 +4541,7 @@ body.ai-hx-transcript .ai-foot { display: none; }
 .fr-mrow { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 8px; } .fr-mrow .fr-bt { flex: 0 0 auto; margin-bottom: 0; } .fr-mrow .btn { white-space: nowrap; flex-shrink: 0; }
 .fr-dtr-hint { font-size: 14px; line-height: 20px; color: var(--black-60); }
 .fr-tfields { display: flex; flex-direction: column; gap: 16px; max-width: 520px; }
-.fr-bt { display: inline-flex; width: fit-content; max-width: 100%; padding: 2px; gap: 2px; margin-bottom: 8px; border-radius: 4px; background: var(--black-3); }   /* DS Button Tabs: the container hugs its tabs; each tab hugs its label (pad 8/12, h36) */
+.fr-bt { display: inline-flex; width: fit-content; max-width: 100%; padding: 2px; gap: 2px; margin-bottom: 12px; border-radius: 4px; background: var(--black-3); }   /* DS Button Tabs: the container hugs its tabs; each tab hugs its label (pad 8/12, h36) */
 .fr-bt button { flex: 0 0 auto; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; white-space: nowrap; height: 36px; padding: 8px 12px; border: 1px solid transparent; border-radius: 4px; background: transparent; font: inherit; font-size: 16px; color: var(--black-60); cursor: pointer; } .fr-bt button:hover { background: var(--black-5); }
 .fr-bt button::before { content: attr(data-t); font-weight: 500; height: 0; overflow: hidden; visibility: hidden; }   /* reserves the semi-bold width so choosing a tab never moves its neighbour */
 .fr-bt button.on { background: var(--white); border-color: var(--border); color: var(--black-100); font-weight: 500; }
@@ -4560,6 +4560,7 @@ body.ai-hx-transcript .ai-foot { display: none; }
 /* Domain controller cards (user 2026-10-22; chosen from forest-env-view-options.html, option 1). One card per domain controller, every setting in view.
    Card = the wizard's card recipe (White, 1px Black/S10, radius 8). Fields = Vision Text Input Size=Medium (36): Form BG fill, 1px Black/S20, radius 4, pad 12, gap 8, label above in Body/B3 Black/S70 with gap 4, value Body/B2 16/22; open = Green/S5 fill + Green/S80 border. */
 .fr-mrow.end { justify-content: flex-end; }
+.fr-mrow.lead { justify-content: flex-start; margin-bottom: 12px; } .fr-mrow.lead .fr-dtr-hint { flex: 1 1 auto; min-width: 0; }   /* the button leads; a line of state sits to its right */
 .fr-rec-list { display: flex; flex-direction: column; gap: 8px; }
 .fr-rec { border: 1px solid var(--border-light); border-radius: 8px; padding: 12px 16px 16px; background: var(--white); }
 .fr-rec-h { display: flex; align-items: flex-start; gap: 12px; }
@@ -44810,9 +44811,12 @@ function wsRenderForestConfig() {
     return '<div class="fr-rec" role="group" aria-label="' + wsEscape(nm) + '"><div class="fr-rec-h"><div class="fr-rec-id"><span class="fr-rec-n">' + wsEscape(nm) + '</span><span class="fr-rec-d">' + wsEscape(d.res.name) + '</span></div><div class="fr-rec-ip">' + ((f.target === 'windows' || _frNics(d) > 1) ? '' : field('ip')) + '</div></div>'
       + '<div class="fr-rec-g">' + (f.target === 'windows' ? winField() : _frGridKeys(d).map(field).join('')) + '</div>' + _frCoverage(d) + '</div>';
   }).join('');
-  var table = (!vm ? '' : '<div class="fr-mrow end">' + (ro ? '<button type="button" class="btn btn-outline" onclick="wsFrSetDest(\'different\')">Edit environment</button>' : '<button type="button" class="btn btn-outline" id="fr-exit" onclick="wsFrExit()">Use original environment</button>') + '</div>')
+  var table = (!vm ? '' : '<div class="fr-bt" role="group" aria-label="Environment">'
+      + '<button type="button" data-t="Original environment" class="' + (ro ? 'on' : '') + '" aria-pressed="' + ro + '"' + (ro ? '' : ' id="fr-exit" onclick="wsFrExit()"') + '>Original environment</button>'
+      + '<button type="button" data-t="Different environment" class="' + (ro ? '' : 'on') + '" aria-pressed="' + !ro + '"' + (ro ? ' onclick="wsFrSetDest(\'different\')"' : '') + '>Different environment</button></div>')
     + '<div class="fr-rec-list">' + cards + '</div>'
     + (ro || !vm ? '' : '<div class="fr-dtr-hint" style="margin-top:8px"><span style="color:var(--black-60)">Grey</span> is the value the domain controller was backed up with; <span style="color:var(--em-green);font-weight:500">green</span> has been changed.</div>');
+
   var sections = [];
   sections.push(_frSection('Domain controllers', _frSubFor(), table + popHtml + _frProdWarning()));
   sections.push(wsReasonTicketSections(cfg));
@@ -44945,7 +44949,7 @@ function wsFrFixDc() {   // from a failed domain controller check: back to Confi
 function _frSubFor() {
   var t = ws.forest.target, m = _frModel(), kept = m.domains.filter(function(d){ return d.auth; }).length, total = m.domains.reduce(function(n, d){ return n + d.dcs.length; }, 0);
   var lead = (total > kept ? 'Restoring ' + kept + ' of ' + total + ' backed-up domain controllers: one per domain, and it takes over all FSMO roles. The others are rebuilt after recovery. ' : 'One domain controller per domain is restored, and it takes over all FSMO roles. ') + 'Domains recover root first, then children. ';
-  return lead + (_frHasOrig() ? 'Each is restored to the environment shown.' : t === 'windows' ? 'Each one is restored onto the clean Windows Server machine you name.' : 'Choose where each one lands on ' + (t === 'hyperv' ? 'Hyper-V' : 'VMware') + '.');
+  return lead + (_frHasOrig() ? '' : t === 'windows' ? 'Each one is restored onto the clean Windows Server machine you name.' : 'Choose where each one lands on ' + (t === 'hyperv' ? 'Hyper-V' : 'VMware') + '.');
 }
 function _frChoice(sel, fn, title, body, badge) {
   return '<button class="ws-cfg-choice' + (sel ? ' is-selected' : '') + '" type="button" onclick="' + fn + '"><span class="ws-cfg-radio"></span><span class="ws-cfg-choice-text"><span class="ws-cfg-choice-title">' + title + '</span>' + (badge ? '<span class="ws-cfg-choice-chiprow"><span class="ws-cfg-choice-chip">Current</span></span>' : '') + '<span class="ws-cfg-choice-body">' + body + '</span></span></button>';
