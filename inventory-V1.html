@@ -4415,6 +4415,8 @@ body.ai-hx-transcript .ai-foot { display: none; }
 .ws-cfg-choice-chip { display: inline-flex; align-items: center; height: 28px; padding: 0 8px; border-radius: 2px; background: var(--soft-green-bg); color: var(--btn-success); font-size: 16px; font-weight: 500; line-height: 22px; white-space: nowrap; }   /* Vision Chip, Type Green / Mode Light / Size Default (read live 2026-10-22): Green/S5 #f6fbf9 fill, Green/S80 #01804a text, 28px, radius 2, Body/B2/Semi Bold 16/22 = weight 500, no border. It leads the card description on a white ground, so the Light variant is enough (Outline was used while it sat in the tinted header). This file's --green is #86b62c, not Vision green */
 .ws-cfg-choice-chiprow { display: flex; margin-bottom: 4px; }   /* the Current chip leads the description, so a long title never pushes it onto a second header line */
 .ws-cfg-choices.fr-targets { grid-template-rows: auto 1fr; row-gap: 0; }
+.ws-target-card-meta.fr-clip { display: block; min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }   /* a long server name stays on one line; the full name shows in a tooltip while it is cut off */
+.ws-cross-org-popover.fr-platpop { max-height: none; overflow: visible; padding: 4px; }
 .ws-cfg-choices.fr-targets > .ws-cfg-choice { display: grid; grid-row: span 2; grid-template-rows: subgrid; }   /* three destination cards on one row: the header band is as tall as the tallest title (the chip wraps in the narrow VMware card), so the descriptions start level */
 /* Toggle rows (Wiki / Release assets / Git LFS) */
 .ws-cfg-toggles { display: flex; flex-direction: column; }
@@ -9666,6 +9668,19 @@ input[type="checkbox"] { accent-color: var(--em-green); }
       <div class="v1-cmp-warn-modal-actions-right">
         <button type="button" class="btn btn-outline" onclick="wsFrCloseDiscard()">Keep editing</button>
         <button type="button" class="btn btn-danger" onclick="wsFrReset()">Discard changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="v1-cmp-warn-backdrop" id="frRunBackdrop" style="display:none;z-index:9002" onclick="wsFrCloseRun()"></div>
+<div class="v1-cmp-warn-modal" id="frRunModal" style="display:none;z-index:9003" role="dialog" aria-modal="true" aria-labelledby="frRunTitle">
+  <div class="v1-cmp-warn-modal-body">
+    <div class="v1-cmp-warn-modal-title" id="frRunTitle"></div>
+    <div class="v1-cmp-warn-modal-text" id="frRunText"></div>
+    <div class="v1-cmp-warn-modal-actions">
+      <div class="v1-cmp-warn-modal-actions-right">
+        <button type="button" class="btn btn-outline" onclick="wsFrCloseRun()">Cancel</button>
+        <button type="button" class="btn btn-danger" id="frRunOk" onclick="wsFrConfirmRun()"></button>
       </div>
     </div>
   </div>
@@ -15248,6 +15263,12 @@ var RESOURCES = (function(){
   list.push(R('vm-edge-kiosk01', 'EDGE-VMs-KIOSK01', 'VM', 'Virtual Machines', 'acme-corp', 'vm-all', {p:null, vm:{ jobName:'Daily Backup — Edge Sites', backupServer:'vbr1.n.local', platform:'Hyper-V Backup' }}));
   list.push(R('vm-dev-build01', 'DEV-VMs-BUILD01', 'VM', 'Virtual Machines', 'acme-corp', 'vm-all', {p:null, vm:{ jobName:'Daily Backup — Edge Sites', backupServer:'vbr3.n.local', platform:'Hyper-V Backup' }}));
   list.push(R('vm-us-dc001', 'US-VMs-DC001', 'VM', 'Virtual Machines', 'acme-corp', 'vm-all', {p:null, vm:{ jobName:'Configuration Database Resynchronize', backupServer:'vbr1.n.local', platform:'VMware Backup' }}));
+  // Domain controllers are also virtual machines: these rows are the SAME machines as the AD domain controllers named in dcId, so the cart treats the pair as one item (_planKey).
+  window.VM_DC_ALIAS = window.VM_DC_ALIAS || {};
+  [['vm-dc-01', 'DC-01', 'ad-dc-01', 'corp.meridian.local'], ['vm-dc-02', 'DC-02', 'ad-dc-02', 'corp.meridian.local'], ['vm-em-dc01', 'EM-DC01', 'ad-dc-contoso-1-0', 'emea.contoso.local']].forEach(function(d){
+    window.VM_DC_ALIAS[d[0]] = d[2];
+    list.push(R(d[0], d[1], 'VM', 'Virtual Machines', 'acme-corp', 'vm-all', {p:null, vm:{ jobName:'Identity Servers — ' + d[3], backupServer:'vbr1.n.local', platform:'VMware Backup', dcId:d[2] }}));
+  });
 
   return list;
 })();
@@ -19242,14 +19263,10 @@ function addFolderGroupToPlan(compositeId) {
     var activeWlFold = planActiveWorkload();
     var parentResLock = parentId ? RESOURCES.find(function(x){ return x.id === parentId; }) : null;
     if (activeWlFold !== null && parentResLock && parentResLock.wl !== activeWlFold) {
-      if (typeof showToast === 'function') {
-        showToast('Restore job is limited to ' + activeWlFold + ' resources. Clear the job to add other workloads.');
-      }
-      return;
+      return;   // no toast: the control is disabled and its tooltip gives the reason
     }
     // Single-category lock — same defensive block, one level down.
     if (parentResLock && typeof _categoryLockBlocks === 'function' && _categoryLockBlocks(parentResLock)) {
-      if (typeof showToast === 'function') showToast(_categoryLockMsg());
       return;
     }
   }
@@ -19965,7 +19982,7 @@ function childRenderLeafRow(r, showFolder, folderLabel, diffStatus, matchCount) 
   // Without this, drilling deep enough lets the user mix workloads in
   // the cart and the wizard handoff breaks.
   var activeWlLeaf = (typeof planActiveWorkload === 'function') ? planActiveWorkload() : null;
-  var workloadLockedLeaf = activeWlLeaf !== null && r.wl !== activeWlLeaf;
+  var workloadLockedLeaf = activeWlLeaf !== null && _wlMismatch(r, activeWlLeaf);
   // Single-category lock (Okta/GitHub): same-workload rows outside the
   // cart's category are blocked the same way cross-workload rows are.
   var categoryLockedLeaf = !workloadLockedLeaf
@@ -20516,7 +20533,6 @@ function ghSectionExport(parentId, sectionId){
   var eligible = units.filter(function(u){ return typeof _exportCartEligible === 'function' && _exportCartEligible(u); });
   if (!eligible.length) return;
   if (typeof _categoryLockBlocks === 'function' && _categoryLockBlocks(eligible[0])) {
-    if (typeof showToast === 'function') showToast(_categoryLockMsg());
     return;
   }
   var added = 0;
@@ -31931,6 +31947,7 @@ var INV_COLUMNS_GITLAB_GROUPS = [
 // column's meaning, and Policy/Type add nothing a flat VM list needs).
 var INV_COLUMNS_VM = [
   { key: 'name',           label: 'Name'                 },
+  { key: 'vmType',         label: 'Type'                 },
   { key: 'vmJobName',      label: 'Job Name'              },
   { key: 'vmBackupServer', label: 'Backup Server'         },
   { key: 'vmPlatform',     label: 'Platform'              },
@@ -32881,6 +32898,7 @@ function renderInvCell(r, key, ctx) {
   // as the design's Platform cell). VMware has a verified DS-store logo
   // (brand-vmware); Hyper-V doesn't, so it renders label-only rather
   // than drawing one.
+  if (key === 'vmType')         return '<td><span class="res-type">' + ((r.vm && r.vm.dcId) ? 'Domain Controller' : 'Virtual Machine') + '</span></td>';   // a machine that is also a domain controller in a connected forest says so
   if (key === 'vmJobName')      return '<td style="font-size:16px">' + wsEscape((r.vm && r.vm.jobName) || '—') + '</td>';
   if (key === 'vmBackupServer') return '<td style="font-size:16px">' + wsEscape((r.vm && r.vm.backupServer) || '—') + '</td>';
   if (key === 'vmPlatform') {
@@ -36901,7 +36919,7 @@ function renderSearchResults(query) {
     }
     var canRestoreSearch = r.status === 'protected';
     var activeWlSearch = planActiveWorkload();
-    var workloadLockedSearch = activeWlSearch !== null && r.wl !== activeWlSearch;
+    var workloadLockedSearch = activeWlSearch !== null && _wlMismatch(r, activeWlSearch);
     // Single-category lock — search results cross categories freely (the
     // bubble-up superset), so this is the surface most likely to hit it.
     var categoryLockedSearch = !workloadLockedSearch
@@ -37014,6 +37032,14 @@ function renderSearchResults(query) {
 // from a cat-rail click that scopes within "All Workloads" mode
 // (state.catWlScope) — both need to map to the same WL_MAP labels
 // the cart uses.
+function _vmCartLockHtml() {   // the action bar's line for a Virtual Machines cart: its job holds domain controllers of one forest, or plain virtual machines of one platform
+  if (!state.restorePlan.size) return '';
+  var first = null, allDc = true, allVm = true;
+  state.restorePlan.forEach(function(_, k){ if (!first) first = k; if (!_isAdDc(k)) allDc = false; if (!_isPlainVm(k)) allVm = false; });
+  if (allDc) { var f = _resById(_frForestOfDc(first)); return 'Restore job locked to <strong>domain controllers</strong>' + (f ? ' in <strong>' + wsEscape(f.name) + '</strong>' : ''); }
+  if (allVm) return 'Restore job locked to <strong>' + (_frVmPlat(_resById(first)) === 'hyperv' ? 'Hyper-V' : 'VMware') + '</strong> virtual machines';
+  return '';
+}
 function updateInvWorkloadLockBanner() {
   var banner = document.getElementById('invWorkloadLockBanner');
   if (!banner) return;
@@ -37152,7 +37178,7 @@ function renderTable() {
     // also pinned to a single workload at a time — once the user adds
     // anything, rows from other workloads become unselectable.
     var activeWl = planActiveWorkload();
-    var workloadLocked = activeWl !== null && r.wl !== activeWl;
+    var workloadLocked = activeWl !== null && _wlMismatch(r, activeWl);
     // Single-category lock (Okta/GitHub) — one level below the workload pin.
     var categoryLocked = !workloadLocked
       && (typeof _categoryLockBlocks === 'function') && _categoryLockBlocks(r);
@@ -37187,8 +37213,9 @@ function renderTable() {
     // Row reads as selected when it's directly in the plan OR
     // covered by an ancestor that is. Matches the drill-down's
     // row-selected styling for covered rows.
-    var rowSelectedCls = (state.selectedIds.has(r.id) || isCoveredByPlan) ? ' class="row-selected"' : '';
-    var cbChecked = (state.selectedIds.has(r.id) || isCoveredByPlan) ? ' checked' : '';
+    var _rowSel = state.selectedIds.has(r.id) || !!(r.vm && r.vm.dcId && state.restorePlan.has(r.vm.dcId));   // picked in either view
+    var rowSelectedCls = (_rowSel || isCoveredByPlan) ? ' class="row-selected"' : '';
+    var cbChecked = (_rowSel || isCoveredByPlan) ? ' checked' : '';
     // Availability rules from §17.7 also gate the row checkbox — a
     // content leaf (Branch / Issue / Wiki / etc.) or an export-only
     // row (Audit Log entry) must NOT be addable via the checkbox
@@ -37660,6 +37687,7 @@ function toggleSelectAll(cb) {
   document.querySelectorAll('#invTbody .row-cb:not(:disabled)').forEach(function(box){
     var id = box.closest('tr').dataset.id;
     if (cb.checked) {
+      if (!isInPlan(id) && typeof _categoryLockBlocks === 'function' && _categoryLockBlocks(id)) { box.checked = false; box.closest('tr').classList.remove('row-selected'); return; }   // refused by the job's lock once earlier rows are in; stays unticked like a disabled row
       addToPlan(id, { isPinned: false, source: 'bulk' });
       // Reflect the actual plan state on the row — addToPlan guards
       // against unprotected/excluded items so they stay unchecked
@@ -37717,7 +37745,7 @@ function _invRestorableRows() {
   return RESOURCES.filter(function(r){
     if (!resourcePassesFilters(r)) return false;
     if (!_isBulkSelectable(r)) return false;
-    if (activeWl !== null && r.wl !== activeWl) return false;
+    if (activeWl !== null && _wlMismatch(r, activeWl)) return false;
     if (typeof _categoryLockBlocks === 'function' && _categoryLockBlocks(r)) return false;   // single-category lock
     return true;
   });
@@ -37739,7 +37767,7 @@ function _invRestorableRowsForCurrentView() {
   var activeWl = (typeof planActiveWorkload === 'function') ? planActiveWorkload() : null;
   return groups.map(function(g){ return g.resource; }).filter(function(r){
     if (!_isBulkSelectable(r)) return false;
-    if (activeWl !== null && r.wl !== activeWl) return false;
+    if (activeWl !== null && _wlMismatch(r, activeWl)) return false;
     if (typeof _categoryLockBlocks === 'function' && _categoryLockBlocks(r)) return false;   // single-category lock
     return true;
   });
@@ -37900,7 +37928,7 @@ function _buildChildSelectAllOverflowMsg() {
       if (typesInScope && typesInScope.indexOf(r.type) < 0) return false;
       if (!_passesChildFilters(r)) return false;
       if (r.status !== 'protected') return false;
-      if (activeWl !== null && r.wl !== activeWl) return false;
+      if (activeWl !== null && _wlMismatch(r, activeWl)) return false;
       if (typeof _categoryLockBlocks === 'function' && _categoryLockBlocks(r)) return false;   // single-category lock
       return true;
     }).length;
@@ -37912,7 +37940,7 @@ function _buildChildSelectAllOverflowMsg() {
     var id = tr.dataset.id;
     var r = RESOURCES.find(function(x){ return x.id === id; });
     if (!r || r.status !== 'protected') return;
-    if (activeWl !== null && r.wl !== activeWl) return;
+    if (activeWl !== null && _wlMismatch(r, activeWl)) return;
     if (typeof _categoryLockBlocks === 'function' && _categoryLockBlocks(r)) return;   // single-category lock
     visibleRestorable++;
     if (isInPlan(id)) visibleInPlan++;
@@ -37997,7 +38025,7 @@ function _childExpandSelectionToAllPagesRun() {
       if (typesInScope && typesInScope.indexOf(r.type) < 0) return;
       if (!_passesChildFilters(r)) return;
       if (r.status !== 'protected') return;
-      if (activeWl !== null && r.wl !== activeWl) return;
+      if (activeWl !== null && _wlMismatch(r, activeWl)) return;
       if (typeof _categoryLockBlocks === 'function' && _categoryLockBlocks(r)) return;   // single-category lock
       addToPlan(r.id, { isPinned: false, source: 'bulk' });
       if (!state.childSelectedIds) state.childSelectedIds = new Set();
@@ -38094,7 +38122,7 @@ function updateInvSelectAllBanner() {
     var r = RESOURCES.find(function(x){ return x.id === id; });
     if (!r || r.status !== 'protected') return;
     var activeWl = (typeof planActiveWorkload === 'function') ? planActiveWorkload() : null;
-    if (activeWl !== null && r.wl !== activeWl) return;
+    if (activeWl !== null && _wlMismatch(r, activeWl)) return;
     if (typeof _categoryLockBlocks === 'function' && _categoryLockBlocks(r)) return;   // single-category lock
     visibleRestorable++;
     if (isInPlan(id)) visibleRestorableInPlan++;
@@ -38140,6 +38168,15 @@ function syncSelectAllCheckbox() {
     sa.disabled = true;
     return;
   }
+  // The Virtual Machines list mixes domain controllers and plain machines, which can't share a job (nor can machines from two platforms). From an empty cart, "select all" would pick whichever kind comes first, so it is off until the list can all go in one job.
+  var th = sa.closest('th'), mixed = false;
+  if (state.wl === 'hybrid-vms' && !state.restorePlan.size && typeof _categoryLockBlocks === 'function') {
+    var ids = [].map.call(rows, function(b){ return b.closest('tr').dataset.id; });
+    state.restorePlan.set(_planKey(ids[0]), {});
+    try { mixed = ids.some(function(id){ return _categoryLockBlocks(id); }); } finally { state.restorePlan.delete(_planKey(ids[0])); }
+  }
+  if (th) { if (mixed) th.setAttribute('data-tooltip', 'These items can’t all be restored in one job. Domain controllers and other virtual machines are restored separately, and each job uses one platform. Select items individually.'); else th.removeAttribute('data-tooltip'); }
+  if (mixed) { sa.checked = false; sa.indeterminate = false; sa.disabled = true; return; }
   sa.disabled = false;
   var checked = 0;
   rows.forEach(function(b){ if (b.checked) checked++; });
@@ -40259,6 +40296,7 @@ function _setCartRp(rpId) {
   if (typeof renderTreeNav === 'function') renderTreeNav();
 }
 function addToPlan(resourceId, opts) {
+  resourceId = _planKey(resourceId);
   // Bulk partial-add refusals (user 2026-07-16): items lacking the job's
   // restore point never enter the plan, whatever path tries.
   if (typeof _v1BulkRefusedIds !== 'undefined' && _v1BulkRefusedIds && _v1BulkRefusedIds.indexOf(resourceId) >= 0) return;
@@ -40278,7 +40316,7 @@ function addToPlan(resourceId, opts) {
   // why, and bounce the row's checkbox back to reality.
   var _lockSubject = r || ((typeof resourceId === 'string' && resourceId.indexOf(':') > 0) ? resourceId : null);
   if (_lockSubject && typeof _categoryLockBlocks === 'function' && _categoryLockBlocks(_lockSubject)) {
-    if (typeof showToast === 'function') showToast(_categoryLockMsg());
+    // No toast: every surface disables the row and explains the limit in its tooltip (_categoryLockMsg); a late click is refused silently.
     if (typeof refreshSegBtnForResource === 'function') refreshSegBtnForResource(resourceId);
     return;
   }
@@ -40516,7 +40554,13 @@ function addToPlan(resourceId, opts) {
     _enqueuePlanDedupeToast(r ? r.name : resourceId, dedupedDescendants);
   }
 }
+// A virtual machine that is also an AD domain controller is one cart item, whichever view it was picked in: its cart key is the domain controller's id.
+function _planKey(id) { var a = window.VM_DC_ALIAS; return (a && typeof id === 'string' && a[id]) || id; }
+// Whether a row sits outside the job's workload. A virtual machine that is also a domain controller belongs to the Active Directory job as well as the Virtual Machines one.
+function _wlMismatch(r, wl) { return r.wl !== wl && !(r.vm && r.vm.dcId && wl === 'Active Directory'); }
 function removeFromPlan(resourceId) {
+  var _rowId = resourceId; resourceId = _planKey(resourceId);
+  if (_rowId !== resourceId) { state.selectedIds.delete(_rowId); delete state.selectedRpOverrides[_rowId]; }   // a virtual machine row that is also a domain controller keeps its own selection entry
   state.restorePlan.delete(resourceId);
   state.selectedIds.delete(resourceId);
   delete state.selectedRpOverrides[resourceId];
@@ -40537,9 +40581,9 @@ function clearPlan() {
   // next add path starts from the default.
   state.diffScope = 'all';
 }
-function isInPlan(resourceId) { return state.restorePlan.has(resourceId); }
+function isInPlan(resourceId) { return state.restorePlan.has(_planKey(resourceId)); }
 function planSize() { return state.restorePlan.size; }
-function getPlanItem(resourceId) { return state.restorePlan.get(resourceId) || null; }
+function getPlanItem(resourceId) { return state.restorePlan.get(_planKey(resourceId)) || null; }
 
 // ─── DRILL — unified drill-down behavior ─────────────────────────────
 // Single source of truth for cart/selection/refresh behavior across
@@ -40883,8 +40927,10 @@ function planIsExportOnly() {
 
 // True when adding `keyOrResource` would cross the cart's category lock.
 // Shared by every add surface (row checkbox, seg-btn, folder card, drawer).
-var _frLockWhy = null, _frLockName = '';   // why the last forest lock check refused: 'plan' (the job holds a forest, the item is something else), 'other-forest' (both are forests) or 'cand' (the item is a forest and the job holds other items); the forest's name
+var _frLockWhy = null, _frLockName = '', _frLockName2 = '';   // why the last forest lock check refused: 'plan' (the job holds a forest, the item is something else), 'other-forest' (both are forests) or 'cand' (the item is a forest and the job holds other items); the forest's name
 function _categoryLockBlocks(keyOrResource) {
+  if (keyOrResource && typeof keyOrResource === 'object' && keyOrResource.vm && keyOrResource.vm.dcId) keyOrResource = keyOrResource.vm.dcId;   // a virtual machine that is also a domain controller is judged as the domain controller
+  else keyOrResource = _planKey(keyOrResource);
   // A forest restores on its own: once the job holds one, nothing else joins it, and a forest can't join a job that already holds something.
   _frLockWhy = null; _frLockName = '';
   if (state.restorePlan.size) {
@@ -40896,6 +40942,7 @@ function _categoryLockBlocks(keyOrResource) {
       var _planHasDc = false, _planHasOther = false; state.restorePlan.forEach(function(_, k){ if (_isAdDc(k)) _planHasDc = true; else if (!_exportCartEligibleKey(k)) _planHasOther = true; });   // an export-only item (a read-only domain controller) makes the job an export, which the purity rule below explains
       var _candR = (typeof keyOrResource === 'string') ? RESOURCES.find(function(x){ return x.id === keyOrResource; }) : keyOrResource;
       if (!_planForest && !_candIsForest && _planHasDc && _candR && _candR.wl === 'Active Directory' && _candR.type === 'Domain Controller' && !_isAdDc(_candR)) { _frLockWhy = 'cand-rodc'; _frLockName = _candR.name; return true; }   // a read-only domain controller is export-only, so it can't join a restore job
+      if (!_planForest && !_candIsForest && !_planHasDc && _isPlainVm(_candR)) { var _pv = null; state.restorePlan.forEach(function(_, k){ if (!_pv && _isPlainVm(k)) _pv = _resById(k); }); if (_pv && _frVmPlat(_pv) !== _frVmPlat(_candR)) { _frLockWhy = 'vm-platform'; _frLockName = _frVmPlat(_pv) === 'hyperv' ? 'Hyper-V' : 'VMware'; _frLockName2 = _frVmPlat(_candR) === 'hyperv' ? 'Hyper-V' : 'VMware'; return true; } }
       if (!_planForest && !_candIsForest && _planHasDc && !_isAdDc(keyOrResource)) { _frLockWhy = 'plan-dc'; return true; }
       if (!_planForest && !_candIsForest && _isAdDc(keyOrResource) && _planHasOther) { var _cd = (typeof keyOrResource === 'string') ? RESOURCES.find(function(x){ return x.id === keyOrResource; }) : keyOrResource; _frLockWhy = 'cand-dc'; _frLockName = _cd ? _cd.name : 'This'; return true; }
       if (_candIsForest) { var _cf = (typeof keyOrResource === 'string') ? RESOURCES.find(function(x){ return x.id === keyOrResource; }) : keyOrResource; _frLockWhy = 'cand'; _frLockName = _cf ? _cf.name : 'This'; return true; }
@@ -40917,7 +40964,7 @@ function _categoryLockBlocks(keyOrResource) {
   if (state.restorePlan.size) {
     var _actC = (typeof planActiveContainerNode === 'function') ? planActiveContainerNode() : null;
     var _candC = (typeof _restoreContainerOf === 'function') ? _restoreContainerOf(keyOrResource) : null;
-    if (_actC && _candC && _candC.id !== _actC.id) return true;
+    if (_actC && _candC && _candC.id !== _actC.id && !(_actC.wl === 'Virtual Machines' && _candC.wl === 'Virtual Machines')) return true;   // a flat workload: every virtual machine is its own top-level item, so there is no container to hold the job to
   }
   var active = planActiveCategory();
   if (active === null) return false;
@@ -40936,6 +40983,7 @@ function _categoryLockMsg() {
   if (_frLockWhy === 'plan') return 'This job is restoring the forest ' + _frLockName + ', and a forest can\u2019t be restored alongside other items. Remove it from the job to add anything else.';
   if (_frLockWhy === 'cand') return _frLockName + ' is a forest, and a forest can\u2019t be restored alongside other items. Clear the job to add it.';
   if (_frLockWhy === 'plan-dc') return 'This job is restoring domain controllers, and they can’t be restored alongside other items. Remove them from the job to add anything else.';
+  if (_frLockWhy === 'vm-platform') return 'This job restores virtual machines backed up from ' + _frLockName + ', and ones from ' + _frLockName2 + ' can’t join it. Clear the job to add them.';
   if (_frLockWhy === 'cand-rodc') return _frLockName + ' is a read-only domain controller, which can’t be restored, only exported. Clear the job to export it.';
   if (_frLockWhy === 'cand-dc') return _frLockName + ' is a domain controller, and domain controllers can’t be restored alongside other items. Clear the job to add it.';
   if (typeof planIsExportOnly === 'function' && planIsExportOnly()) {
@@ -41235,6 +41283,8 @@ function renderTopActionBar() {
         + '<span class="tab-left-text"><strong>' + total + '</strong> result' + (total === 1 ? '' : 's') + ' for "' + wsEscape(invQuery) + '"</span>'
         + '<button class="tab-left-link" type="button" onclick="toggleSearchIncludeSubfolders()">' + invToggleLabel + '</button>';
     }
+  } else if (onInventory && state.wl === 'hybrid-vms' && (window._vmLockTxt = _vmCartLockHtml())) {
+    leftHtml = infoSvg + '<span class="tab-left-text">' + window._vmLockTxt + '</span>';   // what a Virtual Machines job is locked to: one forest's domain controllers, or one platform's virtual machines
   } else if (lockedWl && onInventory) {
     // Terse (user 2026-07-16 — the bar's own Clear selection button IS the
     // remedy; spelling it out forced truncation).
@@ -41912,10 +41962,12 @@ function _v1ExpressTeardown() {
 // Per-type express entry points (the row button onclicks route here).
 function restoreNow(resourceId) {
   if (!resourceId) return;
+  resourceId = _planKey(resourceId);   // a virtual machine that is also a domain controller restores as the domain controller
   var r = (typeof RESOURCES !== 'undefined') ? RESOURCES.find(function(x){ return x.id === resourceId; }) : null;
   if (r && ((r.status === 'excluded' && !_excludedActionable(r)) || r.status === 'unprotected')) return;   // nothing to restore (window-aware excluded rows DO have one)
   if (_isAdForest(r)) return recoverForest(resourceId);   // a forest opens the forest wizard
-  if (_isAdDc(r)) return recoverDc(resourceId);   // a domain controller opens the same wizard, one card per domain controller
+  if (_isAdDc(r)) return recoverDc(resourceId);
+  if (_isPlainVm(r)) return recoverVm(resourceId);   // a virtual machine opens the same wizard, one card per machine   // a domain controller opens the same wizard, one card per domain controller
   _v1ExpressRestore(function(){ addToPlan(resourceId, { source: 'express' }); });
 }
 function restoreNowFolder(compositeId) {
@@ -41930,9 +41982,11 @@ function showWorkspace() {
   // A cart holding a forest (it can hold nothing else) opens the forest wizard, the same one the row's Recover forest button opens.
   if (!ws._expressMode) {
     var _soleKey = null; if (state.restorePlan && state.restorePlan.size === 1) state.restorePlan.forEach(function(_, k){ _soleKey = k; });
+    var _allVms = !!(state.restorePlan && state.restorePlan.size), _firstVm = null; if (_allVms) state.restorePlan.forEach(function(_, k){ if (!_isPlainVm(k)) _allVms = false; else if (!_firstVm) _firstVm = k; });
     var _allDcs = !!(state.restorePlan && state.restorePlan.size), _firstDc = null; if (_allDcs) state.restorePlan.forEach(function(_, k){ if (!_isAdDc(k)) _allDcs = false; else if (!_firstDc) _firstDc = k; });
-    if (_soleKey && _isAdForest(_soleKey)) { if (!ws.forest || ws.forest.id !== _soleKey || ws.forest.kind === 'dc') _frInit(_soleKey); }
-    else if (_allDcs) { if (!ws.forest || ws.forest.kind !== 'dc') _frInit(_firstDc, 'dc'); }   // a cart of domain controllers (and nothing else) opens the same wizard
+    if (_soleKey && _isAdForest(_soleKey)) { if (!ws.forest || ws.forest.id !== _soleKey || ws.forest.kind !== 'forest') _frInit(_soleKey); }
+    else if (_allDcs) { if (!ws.forest || ws.forest.kind !== 'dc') _frInit(_firstDc, 'dc'); }
+    else if (_allVms) { if (!ws.forest || ws.forest.kind !== 'vm') _frInit(_firstVm, 'vm'); }   // a cart of domain controllers (and nothing else) opens the same wizard
     else if (ws.forest) ws.forest = null;
   }
   // Scenario B (PM 2026-07-07): a whole-repo cart built ENTIRELY from
@@ -44529,12 +44583,24 @@ function _frKeysFor(d) {   // the settings each domain controller shows, in orde
   return ['server', 'host', 'pool', 'network'].concat(two ? ['network2'] : [], ['folder', 'datastore']);
 }
 function _frAdapter2On(d) { return _frNics(d) > 1 && (ws.forest.envRows[d.res.id] || {}).network2 !== FR_NONE; }   // a disconnected adapter has no network, so no address
-function _frGridKeys(d) { var ks = _frKeysFor(d); if (ws.forest.target !== 'windows' && _frNics(d) > 1) { if (_frAdapter2On(d)) ks.splice(ks.indexOf('network2') + 1, 0, 'ip2'); ks.splice(ks.indexOf('network') + 1, 0, 'ip'); } return ks; }   // with two adapters each address follows its own network   // each adapter's IP address follows its network
+function _frGridKeys(d) { var ks = _frKeysFor(d); if (_frKind() === 'vm') return ks; if (ws.forest.target !== 'windows' && _frNics(d) > 1) { if (_frAdapter2On(d)) ks.splice(ks.indexOf('network2') + 1, 0, 'ip2'); ks.splice(ks.indexOf('network') + 1, 0, 'ip'); } return ks; }   // with two adapters each address follows its own network   // each adapter's IP address follows its network
 
 function _frG(show, html) { return show ? html : ''; }
 function _frIsVmware() { return !ws.forest || ws.forest.target === 'vmware'; }
 // Where each domain controller was backed up from. They differ: a forest's domain controllers sit on different hosts, datastores, folders and networks.
 var FR_S = '@source';   // marker: "Same as source", resolved per domain controller
+var FR_VM_SRC_VMW = {   // where the plain (non-domain-controller) virtual machines were backed up from on VMware; mock
+  'US-VMs-DB003': { host: 'esx-prod-02.meridian.local', pool: 'Databases', datastore: 'DS-Prod-SSD', folder: 'HQ-Boston/Production/Databases', network: 'VLAN-Prod-Data', network2: 'VLAN-Backup' },
+  'US-VMs-WEB01': { host: 'esx-prod-01.meridian.local', pool: 'Web', datastore: 'DS-Prod-SSD', folder: 'HQ-Boston/Production/Web', network: 'VLAN-DMZ' },
+  'US-VMs-APP02': { host: 'esx-prod-02.meridian.local', pool: 'Applications', datastore: 'DS-Prod-SSD', folder: 'HQ-Boston/Production/Applications', network: 'VLAN-Prod-App' },
+  'EU-VMs-SQL01': { host: 'esx-eu-01.meridian.local', pool: 'Databases', datastore: 'DS-EU-Standard', folder: 'EU-Frankfurt/Finance', network: 'VLAN-EU-Data' },
+  'EU-VMs-FILE02': { host: 'esx-eu-01.meridian.local', pool: 'Infrastructure', datastore: 'DS-EU-Standard', folder: 'EU-Frankfurt/HR', network: 'VLAN-EU-Corp' },
+  'US-VMs-DC001': { host: 'esx-prod-01.meridian.local', pool: 'Infrastructure', datastore: 'DS-Prod-SSD', folder: 'HQ-Boston/Production/Infrastructure', network: 'VLAN-Mgmt' }
+};
+var FR_VM_SRC_HV = {   // the same, for the virtual machines backed up from Hyper-V; mock
+  'EDGE-VMs-KIOSK01': { host: 'hv-edge-01.meridian.local', datastore: 'D:\\Hyper-V\\Edge', network: 'External-Edge' },
+  'DEV-VMs-BUILD01': { host: 'hv-prod-02.meridian.local', datastore: 'D:\\Hyper-V\\VMs', network: 'External-Prod' }
+};
 var FR_SRC_DEFAULT = { host: 'esx-prod-01.meridian.local', pool: 'Identity', datastore: 'DS-Prod-SSD', folder: 'HQ-Boston/Production/Identity', network: 'VLAN-Prod-Identity' };
 var FR_SRC_BY = {
   'DC-01': { host: 'esx-prod-01.meridian.local', pool: 'Identity', datastore: 'DS-Prod-SSD', folder: 'HQ-Boston/Production/Identity', network: 'VLAN-Prod-Identity', network2: 'VLAN-Mgmt' },
@@ -44542,8 +44608,8 @@ var FR_SRC_BY = {
   'EM-DC01': { host: 'esx-dr-01.meridian.local', pool: 'Identity', datastore: 'DS-DR-Standard', folder: 'DR-Dallas/Identity', network: 'VLAN-DR-Test' },
   'FB-DC01': { host: 'esx-prod-01.meridian.local', pool: 'Infrastructure', datastore: 'DS-Archive', folder: 'HQ-Boston/Production/Infrastructure', network: 'VLAN-Mgmt' }
 };
-function _frSrcVm(d) { return (d && d.auth && FR_SRC_BY[d.auth.name]) || FR_SRC_DEFAULT; }   // where the domain controller sat on VMware: also tells how many adapters it has
-function _frSrcOf(d) { return (ws.forest && ws.forest.srcPlatform === 'hyperv') ? ((d && d.auth && FR_HV_SRC_BY[d.auth.name]) || FR_HV_SRC_DEFAULT) : _frSrcVm(d); }   // where it was backed up from, on the platform it was backed up from
+function _frSrcVm(d) { return (d && d.auth && (FR_SRC_BY[d.auth.name] || FR_VM_SRC_VMW[d.auth.name])) || FR_SRC_DEFAULT; }   // where the domain controller sat on VMware: also tells how many adapters it has
+function _frSrcOf(d) { return (ws.forest && ws.forest.srcPlatform === 'hyperv') ? ((d && d.auth && (FR_HV_SRC_BY[d.auth.name] || FR_VM_SRC_HV[d.auth.name])) || FR_HV_SRC_DEFAULT) : _frSrcVm(d); }   // where it was backed up from, on the platform it was backed up from
 function _frHasOrig() { var f = ws.forest; return !!f && f.target !== 'windows' && f.target === f.srcPlatform; }   // restoring to the platform the backups came from: every setting has an original to start at
 function _frShown(d, k, v) {   // the value that will actually be used for a domain controller
   if (v === FR_NONE) return 'Disconnected';
@@ -44594,6 +44660,23 @@ function _isAdDc(keyOrResource) {   // a writable domain controller: restorable 
   var r = (typeof keyOrResource === 'string') ? RESOURCES.find(function(x){ return x.id === keyOrResource; }) : keyOrResource;
   return !!r && r.wl === 'Active Directory' && r.type === 'Domain Controller' && !/RODC/i.test(r.name || '');
 }
+function _isPlainVm(keyOrResource) {   // a virtual machine that is not also a domain controller (a domain controller VM is the AD domain controller, see _planKey)
+  var r = (typeof keyOrResource === 'string') ? RESOURCES.find(function(x){ return x.id === keyOrResource; }) : keyOrResource;
+  return !!r && r.wl === 'Virtual Machines' && r.type === 'VM' && !(r.vm && r.vm.dcId);
+}
+function _frVmIds() { var ids = []; state.restorePlan.forEach(function(_, k){ if (_isPlainVm(k)) ids.push(k); }); return ids; }
+function _frVmPlat(r) { return (r && r.vm && /hyper-?v/i.test(r.vm.platform || '')) ? 'hyperv' : 'vmware'; }
+function _frVmSrc(id) { var p = _frVmPlat(_resById(id)); return p === 'hyperv' ? { platform: 'hyperv', server: 'hv-cluster-01.meridian.local' } : FR_SRC_DEFAULT_PLAT; }
+function _frVmModel() {   // the model of a virtual machine job: one entry per selected virtual machine, shaped like the domain controller job's entries (res.id is the machine's id, res.name its backup job)
+  var pt = _frPoint(), ids = _frVmIds();
+  var domains = ids.map(function(id){
+    var c = _resById(id);
+    if (!ws.forest.dom[id]) ws.forest.dom[id] = {};
+    return { res: { id: id, name: (c.vm && c.vm.jobName) || '', type: 'Domain' }, root: false, dcs: [c], cand: [c], auth: c, rp: pt, siblings: [] };
+  });
+  return { forest: null, point: pt, domains: domains, dcCount: domains.length };
+}
+function _frNoun(plural) { var k = _frKind(); return k === 'vm' ? (plural ? 'virtual machines' : 'virtual machine') : (plural ? 'domain controllers' : 'domain controller'); }
 function _frKind() { return (ws.forest && ws.forest.kind) || 'forest'; }   // 'forest' (one forest recovery) or 'dc' (one or more domain controllers restored on their own)
 function _frForestOfDc(id) { var x = _resById(id); while (x && x.type !== 'Forest') x = _resById(x.parentId); return x ? x.id : null; }
 function _frDomainOfDc(c) { var x = c; while (x && x.type !== 'Domain') x = _resById(x.parentId); return x; }
@@ -44609,11 +44692,16 @@ function _frDcModel() {   // the model of a domain controller job: one entry per
 }
 function wsIsForest() {
   if (!(typeof ws !== 'undefined' && ws.isOpen && ws.forest && state.restorePlan && state.restorePlan.has)) return false;
-  if (ws.forest.kind === 'dc') { var any = false, all = true; state.restorePlan.forEach(function(_, k){ any = true; if (!_isAdDc(k)) all = false; }); return any && all; }
+  if (ws.forest.kind === 'dc' || ws.forest.kind === 'vm') { var any = false, all = true, own = ws.forest.kind === 'dc' ? _isAdDc : _isPlainVm; state.restorePlan.forEach(function(_, k){ any = true; if (!own(k)) all = false; }); return any && all; }
   return state.restorePlan.has(ws.forest.id);
 }
 function recoverDc(id) {   // a domain controller's Restore button: the same wizard as a forest, with one card per domain controller
   _frInit(id, 'dc');
+  _v1ExpressRestore(function(){ addToPlan(id, { source: 'express' }); });
+  if (!state.restorePlan.has(id)) ws.forest = null;
+}
+function recoverVm(id) {   // a virtual machine's Restore button: the same wizard as a domain controller, minus the directory settings
+  _frInit(id, 'vm');
   _v1ExpressRestore(function(){ addToPlan(id, { source: 'express' }); });
   if (!state.restorePlan.has(id)) ws.forest = null;
 }
@@ -44626,14 +44714,14 @@ function _frModeSection() {   // non-authoritative (the usual case, other domain
     + _frChoice(auth, "wsFrSetMode('authoritative')", 'Authoritative', 'The restored domain controller becomes the source of truth for its domain. Use this only when every domain controller in the domain has been lost.')
     + '</div></div></div>';
 }
-function _frActionLabel() { var n = _frKind() === 'dc' ? _frDcIds().length : 1; return _frKind() === 'dc' ? 'Restore domain controller' + (n === 1 ? '' : 's') : 'Recover forest'; }
+function _frActionLabel() { var k = _frKind(), n = k === 'dc' ? _frDcIds().length : k === 'vm' ? _frVmIds().length : 1; return k === 'forest' ? 'Recover forest' : 'Restore ' + _frNoun(n !== 1); }
 function _isAdForest(keyOrResource) {
   var r = (typeof keyOrResource === 'string') ? RESOURCES.find(function(x){ return x.id === keyOrResource; }) : keyOrResource;
   return !!r && r.wl === 'Active Directory' && r.type === 'Forest';
 }
 function _frInit(id, kind) {
-  var src = FR_FOREST_SRC[kind === 'dc' ? _frForestOfDc(id) : id] || FR_SRC_DEFAULT_PLAT;
-  ws.forest = { id: id, kind: kind || 'forest', mode: 'non-authoritative', dest: 'original', target: src.platform, srcPlatform: src.platform, srcServer: src.server, tInfo: { vmware: _frConnInit('vmware', src), hyperv: _frConnInit('hyperv', src), windows: { user: '', pass: '' } }, win: {}, dom: {}, envRows: {}, sel: {}, pend: undefined, msg: '', menu: false, q: '', exp: {}, nameMode: 'same', prefix: '', suffix: '', name: '', uuid: 'preserve', disk: 'same', collide: 'replace', collideSuffix: '-recovered', pop: null,
+  var src = kind === 'vm' ? _frVmSrc(id) : (FR_FOREST_SRC[kind === 'dc' ? _frForestOfDc(id) : id] || FR_SRC_DEFAULT_PLAT);
+  ws.forest = { id: id, kind: kind || 'forest', mode: 'non-authoritative', dest: 'original', target: src.platform, srcPlatform: src.platform, srcServer: src.server, tInfo: { vmware: _frConnInit('vmware', src), hyperv: _frConnInit('hyperv', src), windows: { user: '', pass: '' } }, win: {}, dom: {}, envRows: {}, sel: {}, pend: undefined, msg: '', menu: false, q: '', exp: {}, nameMode: 'same', prefix: '', suffix: '', name: '', uuid: 'preserve', disk: 'same', collide: 'replace', collideSuffix: '-recovered', pop: null, quick: false, secure: false, powerOn: true,
     ownCreds: false, tags: true, confirm: false, t0: null };
   ws.frAdvOpen = false;
   _frSeedRows();
@@ -44654,6 +44742,7 @@ function _frPoint() {
 }
 function _frModel() {
   if (_frKind() === 'dc') return _frDcModel();
+  if (_frKind() === 'vm') return _frVmModel();
   var forest = _resById(ws.forest.id);
   var doms = RESOURCES.filter(function(r){ return r.wl === 'Active Directory' && r.type === 'Domain' && r.parentId === forest.id; });
   var dcs = RESOURCES.filter(function(r){ return r.wl === 'Active Directory' && r.type === 'Domain Controller'; });
@@ -44685,6 +44774,7 @@ function _frDcChecks(m) {   // what a domain controller restore needs before it 
 }
 function _frChecks(m) {
   if (_frKind() === 'dc') return _frDcChecks(m);
+  if (_frKind() === 'vm') return [];   // a virtual machine restore has no directory prerequisites; the backup itself is verified first (wsFrPreChecks)
   var out = [], oldRp = m.point && m.point.daysBack > FR_METADATA_DAYS;
   out.push({ id: 'fr-meta', ok: !oldRp, label: 'Forest metadata is in the backups', detail: oldRp ? 'Backups before ' + new Date(Date.now() - FR_METADATA_DAYS * 864e5).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' predate forest metadata collection. Pick a later point in time.' : 'Every selected domain controller was backed up with forest topology, FSMO and schema details.' });
   var noDc = m.domains.filter(function(d){ return !d.auth; });
@@ -44737,6 +44827,7 @@ function _frWarnNames() {   // domain controllers with an adapter still on the n
   return _frModel().domains.filter(function(d){ var e = f.dest === 'original' ? {} : (f.envRows[d.res.id] || {}); return ['network', 'network2'].slice(0, _frNics(d)).some(function(k){ var v = e[k]; return v === undefined || v === FR_S || v === _frSrcOf(d)[k]; }); }).map(function(d){ return d.auth ? d.auth.name : d.res.name; });
 }
 function _frProdWarning() {
+  if (_frKind() !== 'forest') return '';   // isolation belongs to a forest recovery; a restored domain controller or virtual machine is meant to reach its peers
   if (!_frHasOrig()) return '';   // follows the network, not a choice: shown while any domain controller is still on its original network
   var l = _frWarnNames(), all = _frModel().domains.length; if (!l.length) return '';
   var who = l.length === all && all > 1 ? 'Every domain controller is still on its' : (l.length === 1 ? l[0] + ' is still on its' : l.slice(0, -1).join(', ') + ' and ' + l[l.length - 1] + ' are still on their');
@@ -44879,6 +44970,7 @@ function _frPlacePop() {
   var bulk = f.pop.dom === '_sel';
   place(p, document.getElementById(bulk ? 'fr-c-_sel-' + f.pop.key : 'fr-c-' + f.pop.dom + '-' + f.pop.key), bulk, f.pop.dom === '_conn');
 }
+document.addEventListener('click', function(e){ if (ws && ws.forest && ws.forest.platOpen && !e.target.closest('.ws-cross-org-wrap')) { ws.forest.platOpen = false; wsRenderAll(); } });   // the platform list closes on an outside click
 (function(){   // close an open picker on outside click or when the wizard body scrolls (it is fixed-positioned)
   document.addEventListener('click', function(e){ if (ws && ws.forest && (ws.forest.pop || ws.forest.menu) && !e.target.closest('.fr-pop, .fr-sel, .fr-envsel, .fr-abtn, #fr-menu')) { ws.forest.pop = null; ws.forest.menu = false; wsRenderAll(); } });
   document.addEventListener('scroll', function(e){ if (ws && ws.forest && ws.forest.pop && e.target && e.target.id === 'wsBody') { ws.forest.pop = null; wsRenderAll(); } }, true);
@@ -44907,22 +44999,21 @@ function wsRenderForestConfig() {
       var sv = function(l, v){ return '<div class="fr-rec-sv"><div class="fr-dtr-l">' + l + '</div><span class="fr-ro" data-tip-clip="' + wsEscape(v) + '">' + wsEscape(v) + '</span></div>'; };
       if (f.target === 'windows') return '<div class="fr-rec-sum">' + sv('Target server', String((f.win || {})[d.res.id] || '').trim() || '\u2014') + '</div>';
       var host = ro ? _frSrcOf(d).host : _frShown(d, 'host', e.host);
+      if (_frKind() === 'vm') return '<div class="fr-rec-sum">' + sv('Host or cluster', host) + sv('Datastore', ro ? _frSrcOf(d).datastore : _frShown(d, 'datastore', e.datastore)) + '</div>';
       var ip = _frNics(d) > 1 ? _frNics(d) + ' addresses' : (ro ? _frIpOf(d.auth, false) : (st.ip || _frIpOf(d.auth, false)));
       return '<div class="fr-rec-sum">' + sv('Host or cluster', host) + sv('IP address', ip) + '</div>';
     };
     var nm = d.auth ? d.auth.name : '\u2014', isOpen = _frCardOpen(d.res.id, di);
     return '<div class="fr-rec' + (isOpen ? '' : ' is-closed') + '" role="group" aria-label="' + wsEscape(nm) + '"><div class="fr-rec-h"><button type="button" class="fr-rec-tg" onclick="wsFrToggleCard(\'' + d.res.id + '\',' + di + ')" aria-expanded="' + isOpen + '">' + (isOpen ? _ADV_EXP_OPEN : _ADV_EXP_CLOSED) + '<span class="fr-rec-id"><span class="fr-rec-n">' + wsEscape(nm) + '</span><span class="fr-rec-d">' + wsEscape(d.res.name) + '</span></span></button>'
-      + (isOpen ? '<div class="fr-rec-ip">' + ((f.target === 'windows' || _frNics(d) > 1) ? '' : field('ip')) + '</div>' : (_frDcReady(d) ? sumHtml() : '<span class="fr-tag">Needs input</span>')) + '</div>'
+      + (isOpen ? '<div class="fr-rec-ip">' + ((f.target === 'windows' || _frNics(d) > 1 || _frKind() === 'vm') ? '' : field('ip')) + '</div>' : (_frDcReady(d) ? sumHtml() : '<span class="fr-tag">Needs input</span>')) + '</div>'
       + (isOpen ? '<div class="fr-rec-g">' + (f.target === 'windows' ? winField() : _frGridKeys(d).map(field).join('')) + '</div>' + _frCoverage(d) : '') + '</div>';
   }).join('');
-  var table = (!vm ? '' : '<div class="fr-bt" role="group" aria-label="Environment">'
-      + '<button type="button" data-t="Original environment" class="' + (ro ? 'on' : '') + '" aria-pressed="' + ro + '"' + (ro ? '' : ' id="fr-exit" onclick="wsFrExit()"') + '>Original environment</button>'
-      + '<button type="button" data-t="Different environment" class="' + (ro ? '' : 'on') + '" aria-pressed="' + !ro + '"' + (ro ? ' onclick="wsFrSetDest(\'different\')"' : '') + '>Different environment</button></div>')
+  var table = ''   // the original / new location decision is made on Restore options
     + '<div class="fr-rec-list">' + cards + '</div>'
-    + (ro || !vm ? '' : '<div class="fr-dtr-hint" style="margin-top:8px"><span style="color:var(--black-60)">Grey</span> is the value the domain controller was backed up with; <span style="color:var(--em-green);font-weight:500">green</span> has been changed.</div>');
+    + (ro || !vm ? '' : '<div class="fr-dtr-hint" style="margin-top:8px"><span style="color:var(--black-60)">Grey</span> is the value the ' + _frNoun() + ' was backed up with; <span style="color:var(--em-green);font-weight:500">green</span> has been changed.</div>');
 
   var sections = [];
-  sections.push(_frSection('Domain controllers', _frSubFor(), table + popHtml + _frProdWarning()));
+  sections.push(_frSection(_frKind() === 'vm' ? 'Virtual machines' : 'Domain controllers', _frSubFor(), table + popHtml + _frProdWarning()));
   sections.push(wsReasonTicketSections(cfg));
   // Advanced settings — collapsed by default (user 2026-10-20). Same chrome as wsAdvancedSectionHtml, with room for per-DC detail.
   var open = !!ws.frAdvOpen;
@@ -44944,14 +45035,17 @@ function wsRenderForestConfig() {
       + _frG(f.target === 'vmware' || f.target === 'hyperv', '<div class="fr-advf"><div class="fr-dtr-l">BIOS UUID</div>' + _frRadios('uuid', [['preserve', 'Preserve the source UUID'], ['new', 'Generate a new UUID']], f.uuid) + '</div>')
       + _frG(f.target !== 'windows', '<div class="fr-advf"><div class="fr-dtr-l">Disk type</div>' + _frRadios('disk', FR_DISK, f.disk) + '<div class="fr-dtr-hint">Applies to every virtual disk of each recovered virtual machine.</div></div>')
       + '</div><div class="ws-adv-list">'
-      + tog(!f.ownCreds, 'Use the connection’s credentials', 'Recovery signs in to each domain controller with the credentials from the Active Directory connection. Turn off to enter a Domain Admin account per domain controller.', "wsFrTog('ownCreds')")
-      + (f.ownCreds ? '<div class="fr-sub">' + allDcs.map(function(c){ return '<div class="fr-cred"><span>' + wsEscape(c.name) + '</span><input class="form-input" placeholder="Domain\\username" aria-label="Username for ' + wsEscape(c.name) + '"><input class="form-input" type="password" placeholder="Password" aria-label="Password for ' + wsEscape(c.name) + '"></div>'; }).join('') + '<div class="fr-dtr-hint">Domain Admin is required. Only a username and password are supported.</div></div>' : '')
+      + (_frKind() === 'vm' ? '' : tog(!f.ownCreds, 'Use the connection’s credentials', 'Recovery signs in to each domain controller with the credentials from the Active Directory connection. Turn off to enter a Domain Admin account per domain controller.', "wsFrTog('ownCreds')")
+      + (f.ownCreds ? '<div class="fr-sub">' + allDcs.map(function(c){ return '<div class="fr-cred"><span>' + wsEscape(c.name) + '</span><input class="form-input" placeholder="Domain\\username" aria-label="Username for ' + wsEscape(c.name) + '"><input class="form-input" type="password" placeholder="Password" aria-label="Password for ' + wsEscape(c.name) + '"></div>'; }).join('') + '<div class="fr-dtr-hint">Domain Admin is required. Only a username and password are supported.</div></div>' : ''))
+      + _frG(_frKind() === 'vm' && _frHasOrig() && f.dest === 'original', tog(f.quick, 'Quick rollback', 'Restore only the blocks that changed since the restore point, which shortens the restore. Use it for guest operating system problems, not for hardware, storage or power-loss incidents.', "wsFrTog('quick')"))
+      + _frG(_frKind() === 'vm', tog(f.secure, 'Scan for malware before the restored machine starts', 'Secure restore: an antivirus scan of the machine data before it returns to production.', "wsFrTog('secure')"))
+      + _frG(_frKind() === 'vm', tog(f.powerOn, 'Power on after restoring', 'Start each virtual machine once the restore finishes.', "wsFrTog('powerOn')"))
       + _frG(_frIsVmware(), tog(f.tags, 'Restore VM tags', 'Reassign the original virtual machine tags to the recovered virtual machines.', "wsFrTog('tags')"))
       + '</div>';
   }
   sections.push(adv + '</div>');
   setTimeout(_frPlacePop, 0);
-  return _frPage('Configure restore options', 'Review where each domain controller will be recovered, then record why you’re running it.', '<div class="ws-cfg-card"><div class="ws-cfg-sections">' + sections.join('') + '</div></div>');
+  return _frPage('Configure restore options', 'Review where each ' + _frNoun() + ' will be ' + (_frKind() === 'vm' ? 'restored' : 'recovered') + ', then record why you’re running it.', '<div class="ws-cfg-card"><div class="ws-cfg-sections">' + sections.join('') + '</div></div>');
 }
 function wsFrPop(dom, key) { var p = ws.forest.pop; ws.forest.pop = (p && p.dom === dom && p.key === key) ? null : { dom: dom, key: key }; ws.forest.q = ''; ws.forest.pend = undefined; ws.forest.msg = ''; wsRenderAll(); setTimeout(function(){ _frPlacePop(); var i = document.querySelector('.fr-pop .wlp-search input, .fr-pop #fr-q'); if (i) i.focus(); }, 0); }
 function wsFrPick(dom, key, val) {
@@ -45041,7 +45135,7 @@ function _frRuleLines(d, st) {   // one labelled line per setting of each re-add
   return out;
 }
 function _frCoverageMsg(d) {   // the Veeam rule: if one adapter of a domain controller gets a re-IP rule, every adapter must
-  var f = ws.forest; if (!_frAdapter2On(d) || f.target === 'windows' || (_frHasOrig() && f.dest === 'original')) return '';
+  var f = ws.forest; if (_frKind() === 'vm' || !_frAdapter2On(d) || f.target === 'windows' || (_frHasOrig() && f.dest === 'original')) return '';
   var st = f.dom[d.res.id] || {}; if (!!st.ip === !!st.ip2) return '';
   return 'Set a new IP address for adapter ' + (st.ip ? 2 : 1) + ' too. When one adapter gets a new address, every adapter of the domain controller must.';
 }
@@ -45051,10 +45145,11 @@ function wsFrFixDc() {   // from a failed domain controller check: back to Confi
   setTimeout(function(){ var e = document.getElementById('fr-adv-dc'); if (e) e.scrollIntoView({ block: 'center' }); }, 50);
 }
 function _frSubFor() {
-  if (_frKind() === 'dc') { var _n = _frDcIds().length; return 'Restoring ' + _n + (_n === 1 ? ' domain controller' : ' domain controllers') + ' from the restore point on the Select step. ' + (ws.forest.mode === 'authoritative' ? 'Each becomes the source of truth for its domain. ' : 'Each syncs from its domain\u2019s other domain controllers once it is back. ') + (_frHasOrig() ? '' : (ws.forest.target === 'windows' ? 'Each one is restored onto the clean Windows Server machine you name.' : 'Choose where each one lands on ' + (ws.forest.target === 'hyperv' ? 'Hyper-V' : 'VMware') + '.')); }
+  if (_frKind() === 'vm') { var _v = _frVmIds().length; return 'Restoring ' + _v + (_v === 1 ? ' virtual machine' : ' virtual machines') + ' from the restore point on the Select step. ' + (_frHasOrig() && ws.forest.dest === 'original' ? 'Each goes back to the host it was backed up from.' : 'Choose where each one lands on ' + (ws.forest.target === 'hyperv' ? 'Hyper-V' : 'VMware') + '.'); }
+  if (_frKind() === 'dc') { var _n = _frDcIds().length; return 'Restoring ' + _n + (_n === 1 ? ' domain controller' : ' domain controllers') + ' from the restore point on the Select step. ' + (ws.forest.mode === 'authoritative' ? 'Each becomes the source of truth for its domain. ' : 'Each syncs from its domain\u2019s other domain controllers once it is back. ') + (_frHasOrig() && ws.forest.dest === 'original' ? '' : (ws.forest.target === 'windows' ? 'Each one is restored onto the clean Windows Server machine you name.' : 'Choose where each one lands on ' + (ws.forest.target === 'hyperv' ? 'Hyper-V' : 'VMware') + '.')); }
   var t = ws.forest.target, m = _frModel(), kept = m.domains.filter(function(d){ return d.auth; }).length, total = m.domains.reduce(function(n, d){ return n + d.dcs.length; }, 0);
   var lead = (total > kept ? 'Restoring ' + kept + ' of ' + total + ' backed-up domain controllers: one per domain, and it takes over all FSMO roles. The others are rebuilt after recovery. ' : 'One domain controller per domain is restored, and it takes over all FSMO roles. ') + 'Domains recover root first, then children. ';
-  return lead + (_frHasOrig() ? '' : t === 'windows' ? 'Each one is restored onto the clean Windows Server machine you name.' : 'Choose where each one lands on ' + (t === 'hyperv' ? 'Hyper-V' : 'VMware') + '.');
+  return lead + (_frHasOrig() && ws.forest.dest === 'original' ? '' : t === 'windows' ? 'Each one is restored onto the clean Windows Server machine you name.' : 'Choose where each one lands on ' + (t === 'hyperv' ? 'Hyper-V' : 'VMware') + '.');
 }
 function _frChoice(sel, fn, title, body, badge) {
   return '<button class="ws-cfg-choice' + (sel ? ' is-selected' : '') + '" type="button" onclick="' + fn + '"><span class="ws-cfg-radio"></span><span class="ws-cfg-choice-text"><span class="ws-cfg-choice-title">' + title + '</span>' + (badge ? '<span class="ws-cfg-choice-chiprow"><span class="ws-cfg-choice-chip">Current</span></span>' : '') + '<span class="ws-cfg-choice-body">' + body + '</span></span></button>';
@@ -45068,16 +45163,46 @@ function _frField(label, hint, tgt, key, type, ph) {   // the wizard's standard 
 function _frTargetSection() {   // what the chosen destination needs before Configure: a second section of the same card, titled like the Reason section below Configure
   var f = ws.forest, t = f.target, title, sub, fields;
   if (t !== 'windows') return '';   // VMware and Hyper-V: the server is chosen on Configure
-  { title = 'Clean Windows Server machines'; sub = 'Each domain controller is restored onto its own machine, which you name on the next step. The machines must run Windows Server 2016 or later and must not already be domain controllers.';
+  { title = 'New Windows Server'; sub = 'Each domain controller is restored onto its own machine, which you name on the next step. The machines must run Windows Server 2016 or later and must not already be domain controllers.';
     fields = _frField('Administrator user name', 'Recovery signs in to every machine with this account to install Active Directory Domain Services and restore the domain controller.', 'windows', 'user', 'text', 'Administrator') + _frField('Password', '', 'windows', 'pass', 'password', ''); }
   return '<div class="ws-cfg-section"><div class="ws-cfg-section-hdr"><div class="ws-cfg-section-title">' + title + '</div><div class="ws-cfg-section-sub">' + sub + '</div></div><div class="ws-cfg-section-body"><div class="fr-tfields">' + fields + '</div></div></div>';
 }
+// Restore options: the job-wide decision first (Original location, New location on the source platform, or a Different platform), as the other workloads ask it. The platform list lives inside the Different platform card.
+var FR_PLAT_ROWS = { vmware: ['VMware', 'vCenter Server or ESXi host', 'A vCenter Server or ESXi host.'], hyperv: ['Microsoft Hyper-V', 'Hyper-V host or cluster', 'A Hyper-V host or cluster.'], windows: ['New Windows Server', 'Clean Windows Server machine', 'A clean Windows Server machine.'] };
+function _frPlatName(p) { return p === 'hyperv' ? 'Hyper-V' : 'VMware'; }
+function _frMode3() { var f = ws.forest; return f.target !== f.srcPlatform ? 'plat' : (f.dest === 'different' ? 'new' : 'orig'); }
+function _frOtherPlats() { var f = ws.forest; return ['vmware', 'hyperv', 'windows'].filter(function(p){ return p !== f.srcPlatform && !(p === 'windows' && _frKind() === 'vm'); }); }   // every platform but the one the backups came from; a clean Windows Server is for domain controllers only
+function wsFrSetMode3(m) {
+  var f = ws.forest; f.platOpen = false;
+  if (m === 'plat') { if (f.target === f.srcPlatform) wsFrSetTarget(_frOtherPlats()[0]); else wsRenderAll(); return; }
+  if (f.target !== f.srcPlatform) wsFrSetTarget(f.srcPlatform);
+  if (m === 'orig' && f.dest === 'different') { _frSeedRows(); Object.keys(f.dom).forEach(function(k){ _frClearIp(f.dom[k]); }); }   // going back to the original location drops edits made for a new one
+  f.dest = m === 'new' ? 'different' : 'original'; f.pop = null; f.pend = undefined; f.msg = ''; wsRenderAll();
+}
+function wsFrTogglePlat(e) { if (e) e.stopPropagation(); ws.forest.platOpen = !ws.forest.platOpen; wsRenderAll(); }
+function wsFrPickPlat(id, e) { if (e) e.stopPropagation(); ws.forest.platOpen = false; if (ws.forest.target === id) wsRenderAll(); else wsFrSetTarget(id); }
+function _frPlatDD() {
+  var f = ws.forest, others = _frOtherPlats(), cur = others.indexOf(f.target) >= 0 ? f.target : others[0], r = FR_PLAT_ROWS[cur], open = !!f.platOpen && _frMode3() === 'plat';
+  if (others.length === 1) return '<div class="ws-target-org-detail"><div class="ws-target-org-detail-name">' + r[0] + '</div><div class="ws-target-org-detail-meta">' + r[1] + '</div></div>';   // one choice: shown, not picked from
+  var chev = '<svg class="ws-target-org-trigger-chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>';
+  return '<div class="ws-cross-org-wrap"><button class="ws-target-org-trigger' + (open ? ' is-open' : '') + '" type="button" aria-expanded="' + open + '" onclick="wsFrTogglePlat(event)"' + (_frMode3() === 'plat' ? '' : ' tabindex="-1"') + '><span class="ws-target-org-trigger-text"><span class="ws-target-org-trigger-name">' + r[0] + '</span><span class="ws-target-org-trigger-meta">' + r[1] + '</span></span>' + chev + '</button>'
+    + (open ? '<div class="ws-cross-org-popover fr-platpop" role="listbox" aria-label="Choose platform">' + others.map(function(id){ var q = FR_PLAT_ROWS[id]; return '<button class="fr-li2' + (id === cur ? ' on' : '') + '" type="button" role="option" aria-selected="' + (id === cur) + '" onclick="wsFrPickPlat(\'' + id + '\', event)"><span class="fr-li2-n">' + q[0] + '</span><span class="fr-li2-m">' + q[2] + '</span></button>'; }).join('') + '</div>' : '') + '</div>';
+}
+function _frTCard(sel, fn, title, meta, body, detail) {
+  return '<div class="ws-target-card' + (sel ? ' is-selected' : '') + '" role="radio" aria-checked="' + sel + '" tabindex="0" onclick="' + fn + '"><span class="ws-target-card-dot"></span><span class="ws-target-card-title">' + title + '</span>'
+    + [].concat(meta || []).map(function(m){ return '<span class="ws-target-card-meta fr-clip" data-tip-clip="' + wsEscape(m) + '">' + wsEscape(m) + '</span>'; }).join('') + '<span class="ws-target-card-body">' + body + '</span>'
+    + (detail ? '<span class="ws-target-card-detail' + (sel ? '' : ' is-reserved') + '" aria-hidden="' + !sel + '">' + detail + '</span>' : '') + '</div>';
+}
 function wsRenderForestDest() {
-  var f = ws.forest, pop = '';
-  var cards = '<div class="ws-cfg-choices ws-cfg-choices-3 fr-targets">' + FR_TARGETS.map(function(t){ return _frChoice(f.target === t[0], "wsFrSetTarget('" + t[0] + "')", t[1], t[2], t[0] === f.srcPlatform); }).join('') + '</div>';
+  var f = ws.forest, pop = '', mode = _frMode3(), src = _frPlatName(f.srcPlatform), _n = _frKind() === 'vm' ? _frVmIds().length : _frKind() === 'dc' ? _frDcIds().length : 2, _nn = _frNoun(_n !== 1);   // the cards name what is being restored
+  var cards = '<div class="ws-cfg-choices ws-cfg-choices-3">'
+    + _frTCard(mode === 'orig', "wsFrSetMode3('orig')", 'Original location', ['Platform: ' + src, 'Server: ' + f.srcServer], 'Replaces the existing ' + _nn + ' with the backup.')
+    + _frTCard(mode === 'new', "wsFrSetMode3('new')", 'New location', ['Platform: ' + src], 'Creates ' + (_n === 1 ? 'a new ' : 'new ') + _nn + ' where you choose next.')
+    + _frTCard(mode === 'plat', "wsFrSetMode3('plat')", 'Different platform', mode === 'plat' ? '' : '— pick on select', 'Moves the ' + _nn + ' to another platform.', _frPlatDD())
+    + '</div>';
 
   setTimeout(_frPlacePop, 0);
-  return '<div class="ws-step-pad"><div class="ws-step-header"><div class="ws-step-title">Restore Options</div><div class="ws-step-description">Choose where the domain controllers are restored.</div></div>'
+  return '<div class="ws-step-pad"><div class="ws-step-header"><div class="ws-step-title">Restore Options</div><div class="ws-step-description">Choose where the ' + _frNoun(true) + ' are restored.</div></div>'
     + '<div class="ws-cfg-card"><div class="ws-cfg-sections"><div class="ws-cfg-section"><div class="ws-cfg-section-body">' + cards + '</div></div>' + _frTargetSection() + _frModeSection() + '</div></div></div>' + pop;
 }
 function wsFrSetTarget(t) {
@@ -45160,7 +45285,7 @@ function wsFrConfigRows() {
   else rows.push({ label: 'Destination', value: _frTargetName() + ', ' + (used.some(function(v){ return v !== f.srcServer; }) ? used.join(', ') : f.dest === 'different' ? 'a different environment' : 'original infrastructure') });
   if (f.dest === 'different' && _frHasOrig()) {
     var moved = m.domains.filter(function(d){ return _frChangedLines(d).length; }).length;
-    rows.push({ label: 'Recovery environment', value: moved ? 'Changed for ' + moved + ' of ' + m.domains.length + (_frKind() === 'dc' ? (m.domains.length === 1 ? ' domain controller' : ' domain controllers') : (m.domains.length === 1 ? ' domain' : ' domains')) + '. Expand the list below to see where each one lands.' : 'No changes from the original environment' });
+    rows.push({ label: 'Recovery environment', value: moved ? 'Changed for ' + moved + ' of ' + m.domains.length + (_frKind() !== 'forest' ? (m.domains.length === 1 ? ' ' + _frNoun() : ' ' + _frNoun(true)) : (m.domains.length === 1 ? ' domain' : ' domains')) + '. Expand the list below to see where each one lands.' : 'No changes from the original environment' });
   }
   var nameTxt = f.nameMode === 'affix' ? ((f.prefix ? 'prefix ' + f.prefix : '') + (f.prefix && f.suffix ? ' and ' : '') + (f.suffix ? 'suffix ' + f.suffix : '')) : (f.nameMode === 'set' && f.name ? f.name : '');
   var vm = [];
@@ -45169,8 +45294,13 @@ function wsFrConfigRows() {
   if (f.disk !== 'same' && f.target !== 'windows') vm.push('Disk type: ' + FR_DISK.filter(function(o){ return o[0] === f.disk; })[0][1]);
   if (!f.tags && _frIsVmware()) vm.push('VM tags: Not restored');
   if (vm.length) rows.push({ label: 'Virtual machines', value: vm.join('\n') });
-  if (f.target !== 'windows') rows.push({ label: 'Existing virtual machines', value: f.collide === 'suffix' ? 'Kept; the recovered virtual machines get the suffix ' + (f.collideSuffix || '(none)') : 'Deleted before recovery starts' });
-  if (f.ownCreds) rows.push({ label: 'Credentials', value: 'Entered per domain controller' });
+  if (f.target !== 'windows' && !(_frKind() === 'vm' && _frHasOrig() && f.dest === 'original')) rows.push({ label: 'Existing virtual machines', value: f.collide === 'suffix' ? 'Kept; the ' + (_frKind() === 'vm' ? 'restored' : 'recovered') + ' virtual machines get the suffix ' + (f.collideSuffix || '(none)') : 'Deleted before ' + (_frKind() === 'vm' ? 'the restore' : 'recovery') + ' starts' });
+  if (_frKind() === 'vm') {
+    if (f.quick && _frHasOrig() && f.dest === 'original') rows.push({ label: 'Quick rollback', value: 'Only the blocks that changed since the restore point are restored' });
+    if (f.secure) rows.push({ label: 'Secure restore', value: 'Scanned for malware before the machine starts' });
+    if (!f.powerOn) rows.push({ label: 'Power on', value: 'Not powered on after restoring' });
+  }
+  if (f.ownCreds && _frKind() !== 'vm') rows.push({ label: 'Credentials', value: 'Entered per domain controller' });
   if ((cfg.restoreReason || '').trim()) rows.push({ label: 'Restore reason', value: cfg.restoreReason.trim() });
   if ((cfg.ticketNumber || '').trim()) rows.push({ label: 'Ticket number', value: cfg.ticketNumber.trim() });
   return rows;
@@ -45180,8 +45310,20 @@ function wsFrItemRows() {
   return '<div class="fr-sum-kids">' + m.domains.map(function(d){
     var extra = _frChangedLines(d).map(function(l){ return '<span class="ws-progress-row-sub">' + wsEscape(l) + '</span>'; }).join('');
     return '<div class="ws-progress-row fr-sum-kid" style="display:flex;align-items:center;gap:10px"><div class="ws-progress-row-id"><span class="ws-progress-row-name">' + wsEscape(d.auth ? d.auth.name : d.res.name) + '</span>'
-      + '<span class="ws-progress-row-sub">' + (d.root ? 'Root domain ' + wsEscape(d.res.name) + ', restored first' : 'Child domain ' + wsEscape(d.res.name) + ', restored after ' + wsEscape(m.domains[0].res.name)) + '</span>' + extra + '</div></div>';
+      + '<span class="ws-progress-row-sub">' + (_frKind() !== 'forest' ? wsEscape(d.res.name) : d.root ? 'Root domain ' + wsEscape(d.res.name) + ', restored first' : 'Child domain ' + wsEscape(d.res.name) + ', restored after ' + wsEscape(m.domains[0].res.name)) + '</span>' + extra + '</div></div>';
   }).join('') + '</div>';
+}
+function wsFrVmWarningsHtml() {
+  var f = ws.forest, ids = _frVmIds(), names = ids.map(function(id){ return _resById(id).name; }).join(', '), orig = _frHasOrig() && f.dest === 'original';
+  return '<ul class="fr-warn">' + (orig ? '<li>Restoring to the original location powers off ' + (ids.length === 1 ? 'the original virtual machine' : 'any original virtual machine that is still running') + ' and replaces its disks with the backed-up ones.</li>' : '')
+    + (!orig && f.collide === 'replace' ? '<li>Existing virtual machines named ' + wsEscape(names) + ' at the destination are deleted before the restore starts. You can change this in Advanced settings.</li>' : '')
+    + '<li>A failed restore can’t be retried or resumed. You restart from the beginning, and any restored virtual machines and agent files stay behind until you remove them.</li></ul>';
+}
+function wsFrVmChecklist() {
+  var f = ws.forest, out = [];
+  if (!f.powerOn) out.push({ title: 'Power on the restored virtual machines', body: 'They were left off. Start them when you are ready.' });
+  if (!(_frHasOrig() && f.dest === 'original')) out.push({ title: 'Add the restored virtual machines to a backup job', body: 'A virtual machine restored to a new location is a new object, so the jobs that protected the original do not protect it.' });
+  return out;
 }
 function wsFrDcWarningsHtml() {
   var f = ws.forest, auth = f.mode === 'authoritative';
@@ -45202,6 +45344,7 @@ function wsFrDcChecklist() {
 }
 function wsFrChecklist() {
   if (_frKind() === 'dc') return wsFrDcChecklist();
+  if (_frKind() === 'vm') return wsFrVmChecklist();
   var m = _frModel(), left = [];
   m.domains.forEach(function(d){ d.dcs.forEach(function(c){ if (!d.auth || c.id !== d.auth.id) left.push(c.name); }); });
   return [
@@ -45213,6 +45356,7 @@ function wsFrChecklist() {
 
 function wsFrWarningsHtml() {
   if (_frKind() === 'dc') return wsFrDcWarningsHtml();
+  if (_frKind() === 'vm') return wsFrVmWarningsHtml();
   var f = ws.forest, m = _frModel(), names = m.domains.map(function(d){ return d.auth ? d.auth.name : ''; }).filter(Boolean).join(', ');
   var kept = m.domains.filter(function(d){ return d.auth; }).length, total = m.domains.reduce(function(n, d){ return n + d.dcs.length; }, 0), rest = total - kept, ro = m.domains.some(function(d){ return d.dcs.some(function(c){ return /RODC/i.test(c.name); }); });
   return '<ul class="fr-warn">' + (rest > 0 ? '<li>Only one domain controller per domain is restored: ' + wsEscape(names) + '. ' + (rest === 1 ? 'The other backed-up domain controller is' : 'The other ' + rest + ' backed-up domain controllers are') + ' not restored; you rebuild ' + (rest === 1 ? 'it' : 'them') + ' after recovery' + (ro ? ', and a read-only domain controller can\u2019t be restored at all' : '') + '.</li>' : '') + (f.collide === 'replace' ? '<li>Existing virtual machines named ' + wsEscape(names) + ' at the destination are deleted before recovery starts. You can change this in Advanced settings.</li>' : '')
@@ -48492,7 +48636,29 @@ function wsLaunchReturn() {
   if (typeof wsFinishAndClose === 'function') wsFinishAndClose();
   else if (typeof closeWorkspace === 'function') closeWorkspace();
 }
+function _frConfirmCopy() {   // what a restore that replaces or overwrites something must say before it starts; null when it only adds
+  if (!ws.forest || _frKind() === 'forest') return null;
+  var f = ws.forest, orig = _frHasOrig() && f.dest === 'original', auth = _frKind() === 'dc' && f.mode === 'authoritative';
+  if (!orig && !auth) return null;
+  var ids = _frKind() === 'vm' ? _frVmIds() : _frDcIds(), names = ids.map(function(id){ return _resById(id).name; }), n = names.length, one = n === 1, noun = _frKind() === 'vm' ? 'virtual machine' : 'domain controller';
+  var list = one ? names[0] : n + ' ' + noun + 's', when = _frLabel(), lines = [];
+  if (auth) lines.push('An authoritative restore makes ' + (one ? names[0] + ' the source of truth for its domain' : 'each restored domain controller the source of truth for its domain') + '. Changes made after the backup are lost unless another domain controller holds them.');
+  if (orig) lines.push(_frKind() === 'vm'
+    ? (one ? names[0] + ' is powered off if it is running, and its disks are replaced' : 'Any of these ' + n + ' virtual machines that are running are powered off, and all ' + n + ' have their disks replaced') + ' with the ' + when + ' backup.'
+    : (one ? 'The existing virtual machine ' + names[0] + ' is' : 'The existing virtual machines for these ' + n + ' domain controllers are') + ' deleted, then restored from the ' + when + ' backup.');
+  return { title: (orig ? 'Replace ' : 'Restore ') + list + '?', text: lines.join(' '), ok: orig ? 'Replace and restore' : 'Restore as authoritative' };
+}
+function wsFrCloseRun() { document.getElementById('frRunBackdrop').style.display = 'none'; document.getElementById('frRunModal').style.display = 'none'; }
+function wsFrConfirmRun() { wsFrCloseRun(); ws._frConfirmed = true; try { wsBeginExecute(); } finally { ws._frConfirmed = false; } }
 function wsBeginExecute() {
+  if (wsIsForest() && !ws._frConfirmed) {   // a restore that replaces an existing machine, or an authoritative one, asks first
+    var _cc = _frConfirmCopy();
+    if (_cc) {
+      document.getElementById('frRunTitle').textContent = _cc.title; document.getElementById('frRunText').textContent = _cc.text; document.getElementById('frRunOk').textContent = _cc.ok;
+      document.getElementById('frRunBackdrop').style.display = ''; document.getElementById('frRunModal').style.display = '';
+      return;
+    }
+  }
   if (wsIsForest()) wsFrPrepRun();
   if (!wsOktaReasonValid()) {
     if (typeof showToast === 'function') showToast('A restore reason (minimum 10 characters) is required for Okta WIC.');
@@ -48720,7 +48886,7 @@ function wsRenderProgress() {
       // it. The Okta 6-priority ordering detail moved to the help drawer.
       subLine     = 'You can track progress in the Activity log once it starts.';
       headerTitle = 'Summary';
-      headerDesc  = wsIsForest() ? (_frKind() === 'dc' ? 'Here\'s the final plan for this domain controller restore. When you\'re ready, click ' + _frActionLabel() + ' to start the job.' : 'Here\'s the final plan for this forest recovery. When you\'re ready, click Recover forest to start the job.') : 'Here\'s the final list of items in this restore. When you\'re ready, click Restore ' + noun + ' to start the job.';
+      headerDesc  = wsIsForest() ? (_frKind() !== 'forest' ? 'Here\'s the final plan for this ' + _frNoun() + ' restore. When you\'re ready, click ' + _frActionLabel() + ' to start the job.' : 'Here\'s the final plan for this forest recovery. When you\'re ready, click Recover forest to start the job.') : 'Here\'s the final list of items in this restore. When you\'re ready, click Restore ' + noun + ' to start the job.';
     }
     // Dry-run states reuse this card — only the copy + the rollup/pills change.
     if (ws.dryRunPhase === 'running') {
@@ -73827,7 +73993,6 @@ window.D365X.recChip = function (key, item) {
     opts = opts || {};
     /* record and field keys have no resource row, so the funnel's own lock check never sees them: apply the same lock here */
     if (typeof key === 'string' && /^(rec|field)-/.test(key) && state.restorePlan.size && !state.restorePlan.has(key) && typeof _categoryLockBlocks === 'function' && _categoryLockBlocks(key)) {
-      if (typeof showToast === 'function') showToast(_categoryLockMsg());
       if (typeof refreshSegBtnForResource === 'function') refreshSegBtnForResource(key);
       return;
     }
