@@ -2796,6 +2796,7 @@ body.okov-mode .floating-thead { display: none !important; }
 .ws-hd-chip svg { width: 16px; height: 16px; display: block; flex: none; }
 .ws-hd-act { width: 36px; height: 36px; border-radius: 4px; border: 1px solid var(--border); background: var(--white); color: var(--black-100); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; padding: 0; box-sizing: border-box; }
 .ws-hd-act:hover { background: var(--black-5); }
+.ws-hd-act + .ws-hd-act { margin-left: -8px; }   /* the header's own gap is 16px; the help and close buttons sit 8px apart */
 .ws-topbar-icon { width: 32px; height: 32px; border-radius: 4px; background: var(--blue-light); color: var(--blue); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .page-title-area { display: flex; flex-direction: column; gap: 2px; }
 
@@ -2840,36 +2841,75 @@ body.ai-open { --ai-w: 420px; }
 }
 body.ai-open #aiWorkingGlow { right: var(--ai-w); }
 #aiWorkingGlow.on { opacity: 1; }
-/* iOS-style edge glow: one rainbow field masked by a radial falloff —
-   fully saturated at the viewport edges, dissolving to completely
-   transparent toward the center. No ring, no band, no hard boundary
-   anywhere; just colored light breathing in from the edges. */
-#aiWorkingGlow::before {
-  content: ""; position: absolute; inset: 0;
-  background: var(--ai-grad);
-  /* Border-region falloff: four per-side fades give a uniform ~40px
-     glow depth on every edge — vivid at the edge, fully transparent by
-     40px in, gently pooling at the corners where the fades overlap.
-     (A radial mask can't do this: it only reaches the corners.) */
-  -webkit-mask:
-    linear-gradient(to right,  #000, transparent 40px),
-    linear-gradient(to left,   #000, transparent 40px),
-    linear-gradient(to bottom, #000, transparent 40px),
-    linear-gradient(to top,    #000, transparent 40px);
-          mask:
-    linear-gradient(to right,  #000, transparent 40px),
-    linear-gradient(to left,   #000, transparent 40px),
-    linear-gradient(to bottom, #000, transparent 40px),
-    linear-gradient(to top,    #000, transparent 40px);
-  filter: blur(26px) saturate(1.35);
-  animation: aiGlowBreathe 2.4s ease-in-out infinite;
-}
-@keyframes aiGlowBreathe {
-  0%, 100% { opacity: 0.9;  filter: blur(26px) saturate(1.35) hue-rotate(0deg); }
-  50%      { opacity: 0.55; filter: blur(30px) saturate(1.35) hue-rotate(24deg); }
-}
+/* Running edge + agent pill (user 2026-10-23, prototyped in agent-takeover-options.html option G and agent-pill-character.html option E):
+   a 4px rainbow edge runs around the workspace; a fixed-width pill names the current action, carries the agent mark with a ring that
+   fills over each step at the scrubber's own pace, and offers Pause / Resume. It dismisses with the x and lets go when the user
+   touches the workspace. */
+@property --ang { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+@property --p { syntax: '<angle>'; initial-value: 0deg; inherits: true; }
+#aiWorkingGlow:not(.on) { visibility: hidden; transition: opacity 0.35s ease, visibility 0s 0.4s; }
+#aiWorkingGlow::before, #aiWorkingGlow::after { content: ""; position: absolute; inset: 0; padding: 4px;
+  background: conic-gradient(from var(--ang), transparent 0deg, #5bbc7b 40deg, #119ee7 105deg, #d83dcf 170deg, #ee6b36 235deg, #8fd131 290deg, transparent 340deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+          mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: aiEdgeRun 3.2s linear infinite; }
+#aiWorkingGlow::after { filter: blur(8px); opacity: .7; }
+#aiWorkingGlow.paused::before, #aiWorkingGlow.paused::after { animation-play-state: paused; opacity: .45; }
+@keyframes aiEdgeRun { to { --ang: 360deg; } }
+.ai-pill { position: absolute; left: 50%; bottom: 20px; width: min(340px, calc(100% - 24px)); display: flex; align-items: center; gap: 12px; padding: 8px; border: 2px solid transparent; border-radius: 28px; pointer-events: auto;
+  background: linear-gradient(var(--white), var(--white)) padding-box, var(--ai-grad) border-box; box-shadow: 0 6px 20px rgba(31,34,41,.16); transform: translateX(-50%);
+  transition: opacity .22s ease, transform .3s cubic-bezier(.34,1.3,.64,1); }
+#aiWorkingGlow:not(.on) .ai-pill { transform: translateX(-50%) translateY(14px) scale(.97); }
+#aiWorkingGlow.pill-off .ai-pill { opacity: 0; transform: translateX(-50%) translateY(18px) scale(.94); pointer-events: none; transition: opacity .2s ease, transform .24s cubic-bezier(.4,0,1,1); }
+.ai-pill-tile { position: relative; width: 36px; height: 36px; border-radius: 50%; background: var(--ai-grad); display: inline-flex; align-items: center; justify-content: center; flex: 0 0 36px; }
+.ai-pill-tile svg { width: 30px; height: 30px; display: block; }
+.ai-pill-tile::before { content: ""; position: absolute; inset: -5px; border-radius: 50%; background: var(--ai-grad);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px)), conic-gradient(#000 var(--p, 0deg), transparent 0); -webkit-mask-composite: source-in;
+          mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px)), conic-gradient(#000 var(--p, 0deg), transparent 0); mask-composite: intersect; }
+.ai-pill-tile::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 1px solid var(--black-10); }
+.ai-pill.land .ai-pill-tile { animation: aiPillPop .45s cubic-bezier(.34,1.56,.64,1); }
+@keyframes aiPillPop { 0% { transform: scale(1); } 40% { transform: scale(1.22); } 100% { transform: scale(1); } }
+.ai-pill { gap: 4px; padding: 6px 8px 6px 6px; }
+.ai-pill-mark { position: relative; width: 44px; height: 44px; padding: 4px; border: none; background: transparent; border-radius: 50%; cursor: pointer; flex: 0 0 44px; }
+.ai-pill-mark:hover .ai-pill-tile { box-shadow: 0 0 0 4px rgba(17,158,231,.18); }
+.ai-pill-spd { position: absolute; right: -11px; bottom: -7px; min-width: 24px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--black-100); color: #fff; font-size: 11px; line-height: 16px; font-weight: 500; text-align: center; }
+.ai-pill-tx { display: flex; flex-direction: column; flex: 1; min-width: 0; border: none; background: transparent; text-align: left; font: inherit; padding: 2px 8px; border-radius: 12px; cursor: pointer; }
+.ai-pill-tx:hover { background: var(--black-5); }
+.ai-pill-tx b { display: flex; align-items: center; gap: 4px; font-size: 14px; line-height: 18px; font-weight: 500; color: var(--black-100); }
+.ai-pill-tx b svg { width: 12px; height: 12px; color: var(--black-60); }
+.ai-pill-tx > span { font-size: 14px; line-height: 18px; color: var(--black-60); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 18px; }
+.ai-pop { position: absolute; bottom: calc(100% + 10px); background: var(--white); border: 1px solid var(--black-10); border-radius: 8px; box-shadow: 0 8px 24px rgba(31,34,41,.16); padding: 4px; display: none; z-index: 2; }
+.ai-pop.open { display: block; }
+#aiSpdPop { left: 4px; width: 200px; }
+#aiListPop { left: 50%; transform: translateX(-50%); width: 420px; max-width: calc(100vw - var(--ai-w, 0px) - 96px); max-height: 280px; overflow-y: auto; }   /* as wide as the assistant panel, centred over the pill */
+.ai-li { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 12px; border: none; border-radius: 4px; background: transparent; font: inherit; font-size: 16px; line-height: 22px; color: var(--black-100); text-align: left; cursor: pointer; }
+.ai-li:hover { background: var(--em-green-tint); }
+.ai-li.on { background: var(--em-green-tint); box-shadow: inset 2px 0 0 var(--em-green); border-radius: 0; color: var(--em-green); font-weight: 500; }
+.ai-li.up { color: var(--black-60); cursor: default; }
+.ai-li.up:hover { background: transparent; }
+.ai-li small { margin-left: auto; font-size: 14px; color: var(--black-60); font-weight: 450; }
+.ai-li .ic { width: 16px; height: 16px; flex: 0 0 16px; display: inline-flex; align-items: center; justify-content: center; color: var(--em-green); }
+.ai-li .dt { width: 6px; height: 6px; border-radius: 50%; background: var(--black-30); }
+.ai-li .sp { width: 12px; height: 12px; border: 2px solid var(--green-s10, #cce6db); border-top-color: var(--em-green); border-radius: 50%; animation: aiPillRot .8s linear infinite; }
+@keyframes aiPillRot { to { transform: rotate(360deg); } }
+/* finished: nothing is running, so the edge stops; the pill stays as a status until dismissed, touched past, or the plan is approved */
+#aiWorkingGlow.done::before, #aiWorkingGlow.done::after { opacity: 0; transition: opacity .4s ease; }
+#aiWorkingGlow.done #aiPillGo { display: none; }
+#aiWorkingGlow.done .ai-pill-tx { margin-right: 40px; }   /* the text's hover area stops short of the x */
+#aiWorkingGlow.done #aiPillX { opacity: 1; transform: translateY(-50%) scale(1); pointer-events: auto; }
+#aiWorkingGlow.done .ai-pill-tile { animation: aiPillBreathe 3s ease-in-out infinite; }
+@keyframes aiPillBreathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+#aiWorkingGlow.paused .ai-pill-tx span { opacity: .55; }
+#aiPillGo { flex: 0 0 auto; min-width: 84px; height: 32px; padding: 0 16px; border-radius: 16px; border: none; background: var(--em-green); color: #fff; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; transition: margin-right .26s cubic-bezier(.4,0,.2,1); }
+#aiWorkingGlow.paused #aiPillGo { margin-right: 32px; }
+#aiPillGo[hidden] { display: none; }
+#aiPillX { position: absolute; right: 8px; top: 50%; width: 28px; height: 28px; padding: 0; border: none; border-radius: 50%; background: transparent; color: var(--black-60); font: inherit; font-size: 20px; line-height: 26px; cursor: pointer; opacity: 0; transform: translateY(-50%) scale(.6); pointer-events: none;
+  transition: opacity .18s ease .06s, transform .26s cubic-bezier(.34,1.56,.64,1) .04s; }
+#aiWorkingGlow.paused:not(.done) #aiPillX { opacity: 1; transform: translateY(-50%) scale(1); pointer-events: auto; }
+#aiWorkingGlow.paused #aiPillX:hover,#aiWorkingGlow.done #aiPillX:hover { background: var(--black-5); color: var(--black-100); }
 @media (prefers-reduced-motion: reduce) {
-  #aiWorkingGlow::before { animation: none; }
+  #aiWorkingGlow::before, #aiWorkingGlow::after { animation: none; }
+  .ai-pill, .ai-pill *, #aiPillGo, #aiPillX { transition: none !important; animation: none !important; }
 }
 .app { transition: padding-right 0.24s ease; }
 body.ai-open .app { padding-right: var(--ai-w); }
@@ -32899,7 +32939,10 @@ function renderInvCell(r, key, ctx) {
   // (brand-vmware); Hyper-V doesn't, so it renders label-only rather
   // than drawing one.
   if (key === 'vmType')         return '<td><span class="res-type">' + ((r.vm && r.vm.dcId) ? 'Domain Controller' : 'Virtual Machine') + '</span></td>';   // a machine that is also a domain controller in a connected forest says so
-  if (key === 'vmJobName')      return '<td style="font-size:16px">' + wsEscape((r.vm && r.vm.jobName) || '—') + '</td>';
+  if (key === 'vmJobName') {   // one long name must not set the column's width: the cell caps at 284px (the widest other name is 280) and clips, with the full name in a tooltip while it is cut off
+    var _jn = (r.vm && r.vm.jobName) || '—';
+    return '<td style="font-size:16px"><div data-tip-clip="' + wsEscape(_jn) + '" style="max-width:284px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + wsEscape(_jn) + '</div></td>';
+  }
   if (key === 'vmBackupServer') return '<td style="font-size:16px">' + wsEscape((r.vm && r.vm.backupServer) || '—') + '</td>';
   if (key === 'vmPlatform') {
     var _vmPlat = (r.vm && r.vm.platform) || '—';
@@ -48649,6 +48692,7 @@ function _frConfirmCopy() {   // what a restore that replaces or overwrites some
   return { title: (orig ? 'Replace ' : 'Restore ') + list + '?', text: lines.join(' '), ok: orig ? 'Replace and restore' : 'Restore as authoritative' };
 }
 function wsFrCloseRun() { document.getElementById('frRunBackdrop').style.display = 'none'; document.getElementById('frRunModal').style.display = 'none'; }
+function _aiBeginExecute() { ws._frConfirmed = true; try { wsBeginExecute(); } finally { ws._frConfirmed = false; } }   // the agent's own approval already asked; the wizard's replace-and-restore dialog would ask twice
 function wsFrConfirmRun() { wsFrCloseRun(); ws._frConfirmed = true; try { wsBeginExecute(); } finally { ws._frConfirmed = false; } }
 function wsBeginExecute() {
   if (wsIsForest() && !ws._frConfirmed) {   // a restore that replaces an existing machine, or an authoritative one, asks first
@@ -66051,7 +66095,7 @@ window.__devJumpResolve = function(h) {
      overlay/modal by var(--ai-w) when body.ai-open. The agent narrates +
      gates here while DRIVING the real on-screen UI (search, select, cart,
      wizard) — we don't rebuild restore inside the chat. -->
-<div id="aiWorkingGlow" aria-hidden="true"></div>
+<div id="aiWorkingGlow"><div class="ai-pill" role="status" aria-live="polite"><div class="ai-pop" id="aiSpdPop" role="menu"></div><div class="ai-pop" id="aiListPop" role="listbox"></div><button type="button" class="ai-pill-mark" id="aiPillMark" onclick="aiPillSpeedMenu(event)" aria-label="Playback speed" title="Speed"><span class="ai-pill-tile"><svg viewBox="0 0 36 36"><path fill="#fff" d="M18 9.75C18.5502 9.75 19.0272 10.1307 19.1492 10.6672L19.8013 13.5349C20.1029 14.8613 21.1387 15.8971 22.4651 16.1987L25.3328 16.8508C25.8693 16.9728 26.25 17.4498 26.25 18C26.25 18.5502 25.8693 19.0272 25.3328 19.1492L22.4651 19.8013C21.1387 20.1029 20.1029 21.1387 19.8013 22.4651L19.1492 25.3328C19.0272 25.8693 18.5502 26.25 18 26.25C17.4498 26.25 16.9728 25.8693 16.8508 25.3328L16.1987 22.4651C15.8971 21.1387 14.8613 20.1029 13.5349 19.8013L10.6672 19.1492C10.1307 19.0272 9.75 18.5502 9.75 18C9.75 17.4498 10.1307 16.9728 10.6672 16.8508L13.5349 16.1987C14.8613 15.8971 15.8971 14.8613 16.1987 13.5349L16.8508 10.6672C16.9728 10.1307 17.4498 9.75 18 9.75Z"/></svg></span><span class="ai-pill-spd" id="aiPillSpd">1×</span></button><button type="button" class="ai-pill-tx" id="aiPillTx" onclick="aiPillListMenu(event)" aria-label="Show the steps"><b><span id="aiPillT">Agent is working</span> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg></b><span id="aiPillA"></span></button><button type="button" id="aiPillGo" onclick="aiPillToggle()">Pause</button><button type="button" id="aiPillX" aria-label="Dismiss" title="Dismiss" onclick="aiPillDismiss()">×</button></div></div>
 <aside class="ai-panel" id="aiPanel" aria-label="Veeam assistant" aria-hidden="true">
   <!-- Header restored (user 2026-08-13, same day): white bg matching the
        panel, title + expand/close controls. Expand toggles a full-screen
@@ -66310,6 +66354,8 @@ var AI_SCENARIOS = [
   { id:'ms365DeletedMail', act:true,   /* acts on the workspace — the task exists from launch (2026-09-16) */   wl:'ms365', menu:'Find a deleted email',            prompt:'Find the contract renewal email John Voight deleted and restore it' },
   { id:'ms365Offboard', act:true,   /* acts on the workspace — the task exists from launch (2026-09-16) */      wl:'ms365', menu:'Recover a departed user',         prompt:"Mark Aldridge left the company — recover his mailbox so his manager can take it over" },
   { id:'ms365SiteRollback', act:true,   /* acts on the workspace — the task exists from launch (2026-09-16) */  wl:'ms365', menu:'Roll back a SharePoint folder',   prompt:'The Taxes folder on the Retail Division site was mangled yesterday — roll it back' },
+  // Active Directory (2026-10-23): a single domain controller restored as a machine, the same wizard the row's Restore button opens.
+  { id:'adDcRestore', act:true, wl:'active-directory', menu:'Restore a domain controller', prompt:'DC-02 in corp.meridian.local has a corrupted AD database — restore it' },
   { id:'ms365MassDelete', act:true,   /* acts on the workspace — the task exists from launch (2026-09-16) */    wl:'ms365', menu:'Investigate OneDrive deletions',  prompt:'There was unusual deletion activity across OneDrive this morning — investigate' },
   // Estate Q&A (PRD "Backup Admin Agent — M365 Scenarios": Featured tier +
   // the 016 composite; ported 2026-09-02 w/ the answer-card design. Copy is
@@ -66399,6 +66445,9 @@ function aiClose(){
   if (aiAgent.activeGate && aiAgent.activeGate.gate && !aiAgent.activeGate.gate.resolved){
     var _vb2 = document.querySelector('.btn-veeam-ai'); if (_vb2) _vb2.classList.add('has-pending');
   }
+  // Closing the panel ends the on-screen walk-through: the replay holds where it is, the edge and pill go, and nothing is rewound. The run itself carries on.
+  if (aiAgent._live && aiAgent.showing === true){ aiAgent._released = true; if (aiAgent._live.playing && typeof aiLivePause === 'function') aiLivePause(); }
+  if (typeof aiGlow === 'function') aiGlow(false);
   document.body.classList.remove('ai-open');
   document.body.classList.remove('ai-full');
   // _aiWApply (resize drag, and aiWidthRestore on every open) sets --ai-w as
@@ -66791,6 +66840,12 @@ var AI_HOME_CARDS = {
   },
   // Estate Q&A on more workloads (2026-09-02): each demos a different
   // claim-shape vis form. These workloads keep the universal volume card.
+  'active-directory': {
+    guided: [
+      ['adDcRestore', 'Domain controller restore', 'DC-02 in corp.meridian.local has a corrupted AD database — restore it']
+    ],
+    ask: []
+  },
   'github': {
     guided: [],
     ask: [ ['ghGrowth', 'Backup footprint growth', 'How fast is our GitHub backup footprint growing?'] ]
@@ -66885,7 +66940,7 @@ function _aiFreshRunReset(opts){
   aiAgent._stageShow = null;
   aiAgent._trail = []; aiAgent._keyFact = null; aiAgent._recapAt = 0;
   aiAgent._stageRuns = [];
-  aiAgent._live = null;
+  aiAgent._live = null; aiAgent._watchedOnce = false; aiAgent._released = false;   // a new run has not been watched yet
   aiAgent._recAccepted = aiAgent._recAccepted || {};
   aiAgent._boardUserCollapsed = false;
   aiAgent._boardUserOpened = false;
@@ -67179,7 +67234,7 @@ function aiNewChat(){
   aiAgent._replayHold = false;
   // a task staged but not yet manifested belonged to the abandoned run
   aiAgent._pendingTask = null; aiAgent._dockArriving = false;
-  aiAgent._live = null;   // the watched step list belongs to the abandoned run
+  aiAgent._live = null; aiAgent._watchedOnce = false; aiAgent._released = false;   // the watched step list belongs to the abandoned run
   aiAgent._recAccepted = aiAgent._recAccepted || {};   // accepted tiles keep their state across runs in one conversation
   // A carried approval still owns its plan: the agent's off-screen cart is
   // exactly what that approval authorizes, so it survives the reset — and so
@@ -67560,7 +67615,7 @@ function aiRender(){
       // "Show me" — the Approve/Deny buttons stay put beside it, always (see
       // the .ai-scrub CSS comment for why the scrubber never covers the
       // commit step itself).
-      var apEmbedded = aiAgent._live && aiAgent._live.embedHost === m && aiAgent.showing === true;
+      var apEmbedded = false;   // the playback controls live on the pill, not in the card
       // GLYPHS (2026-09-24, user: "add the glyphs to the approve and follow
       // buttons"). Show-me gets the same play glyph the scrubber's own play
       // button uses (_aiScrubHtml) — it's the button that MORPHS INTO that
@@ -67581,9 +67636,7 @@ function aiRender(){
       // recommendation the approval card is missing the show me option."
       // Now the gate is the ONLY Show-me, so it renders whenever the run
       // isn't already being watched, full stop.
-      var apShowMe = apEmbedded ? _aiScrubHtml(aiAgent._live)
-        : (aiAgent.showing === false)
-          ? ' <button type="button" class="ai-gate-btn" onclick="aiShowStart(aiAgent.msgs[' + i + '])">' + apShowMeIc + 'Watch</button>' : '';
+      var apShowMe = _aiWatchBtnHtml(apShowMeIc);   // one button: Watch, Watching…, Watch again
       var apBtns = m.gate.resolved ? '' :
         // ICON-ONLY AT NARROW WIDTHS (2026-09-24, user: "when [the panel] is
         // resized down to 450 or under, lets update the approve button to a
@@ -68405,7 +68458,7 @@ function _aiRemoteWatchRun(mode){
               aiPushAgent(aiAction('Selected 1 mailbox \u00b7 added to the restore job'));
               setTimeout(function(){
                 aiGlow(false);
-                if (typeof wsBeginExecute === 'function') { try { wsBeginExecute(); } catch(e){} }
+                if (typeof wsBeginExecute === 'function') { try { _aiBeginExecute(); } catch(e){} }
                 aiOnRestoreStarted(1);
               }, 900);
             }, 400);
@@ -68417,7 +68470,7 @@ function _aiRemoteWatchRun(mode){
   }
   setTimeout(function(){
     aiGlow(false);
-    if (typeof wsBeginExecute === 'function') { try { wsBeginExecute(); } catch(e){} }
+    if (typeof wsBeginExecute === 'function') { try { _aiBeginExecute(); } catch(e){} }
     aiOnRestoreStarted(1);
   }, 4600);
 }
@@ -69583,10 +69636,90 @@ function _aiVoice(screenText, dataText){
   return (aiAgent.showing === false) ? dataText : screenText;
 }
 // Frame glow while the agent is actively driving on-screen elements.
-function aiGlow(on){
-  var g = document.getElementById('aiWorkingGlow');
-  if (g) g.classList.toggle('on', !!on);
+// The card's one playback control: Watch, then Watching… while the walk-through plays, then Watch again.
+function _aiWatchBtnHtml(ic){
+  var L = aiAgent._live, on = !!(L && L.playing && aiAgent.showing === true && !aiAgent._released && !L.frontier);
+  return ' <button type="button" class="ai-gate-btn"' + (on ? ' disabled' : '') + ' onclick="aiShowStart()">' + ic + (on ? 'Watching\u2026' : (aiAgent._watchedOnce ? 'Watch again' : 'Watch')) + '</button>';
 }
+function aiGlow(on){
+  var g = document.getElementById('aiWorkingGlow'); if (!g) return;
+  var L0 = aiAgent._live;
+  if (!on && aiAgent.showing === true && L0 && L0.frontier && !aiAgent._released && !_aiWriteApproved()) on = true;   // the walk-through is finished but the plan awaits you: the pill stays as a status
+  if (on && !g.classList.contains('on')) g.classList.remove('pill-off');   // a new stretch of work brings the pill back
+  g.classList.toggle('on', !!on);
+  if (on) _aiPillSync();
+}
+// The agent pill: current action (typed in), a ring that fills over the step at the scrubber's own pace, Pause / Resume that mirror the scrubber.
+var _aiPillCap = '', _aiPillIdx = -2, _aiPillTypeT = null, _aiPillLandT = null, _aiPillLast = 0;
+function _aiPillType(text){
+  var el = document.getElementById('aiPillA'); if (!el) return;
+  clearTimeout(_aiPillTypeT); el.title = text; el.textContent = ''; var i = 0;
+  (function n(){ el.textContent = text.slice(0, ++i); if (i < text.length) _aiPillTypeT = setTimeout(n, 34); })();
+}
+function _aiPillSync(){
+  var g = document.getElementById('aiWorkingGlow'); if (!g || !g.classList.contains('on')) return;
+  var L = aiAgent._live, tile = g.querySelector('.ai-pill-tile'), pill = g.querySelector('.ai-pill'), btn = document.getElementById('aiPillGo'), title = document.getElementById('aiPillT');
+  var hasL = !!(L && L.all && L.all.length), done = hasL && !!L.frontier && !aiAgent.busy, paused = hasL && !L.playing && !done, idx = -1, frac = 0, cap = '';
+  if (hasL){
+    idx = Math.max(0, Math.min(L.i, L.all.length) - 1); var a = L.all[idx]; cap = (a && a.cap) || '';
+    if (L.frontier || L.i > L.all.length) frac = 1;                               // caught up: the last step is done
+    else if (L.playing) frac = _aiPillLast = _aiLiveFrac(a);                      // the scrubber's own clock
+    else frac = (idx === _aiPillIdx) ? _aiPillLast : 0;                           // paused: the ring holds where it was
+  }
+  if (tile) tile.style.setProperty('--p', Math.min(1, Math.max(0, frac)) * 360 + 'deg');
+  if (done){ cap = 'The plan is ready in the panel'; frac = 1; if (tile) tile.style.setProperty('--p', '360deg'); }
+  g.classList.toggle('paused', paused); g.classList.toggle('done', done);
+  if (title) title.textContent = done ? 'Waiting for your approval' : (paused ? 'Paused' : 'Agent is working');
+  var spd = document.getElementById('aiPillSpd'); if (spd) spd.textContent = (_aiWatchSpeed || 1) + '\u00d7';
+  if (btn){ btn.hidden = !hasL || done; btn.textContent = paused ? 'Resume' : 'Pause'; }
+  if (idx !== _aiPillIdx || cap !== _aiPillCap){
+    var landed = _aiPillIdx >= 0 && idx !== _aiPillIdx;
+    _aiPillIdx = idx; _aiPillCap = cap; _aiPillType(cap);
+    if (landed && pill){ pill.classList.remove('land'); void pill.offsetWidth; pill.classList.add('land'); clearTimeout(_aiPillLandT); _aiPillLandT = setTimeout(function(){ pill.classList.remove('land'); }, 500); }
+  }
+}
+var AI_WATCH_BASE = 1.7;   // 1\u00d7 is the walk-through at a followable pace: each step runs 1.7 times as long as the recorded dwell
+var _aiWatchSpeed = 1, AI_SPEEDS = [[0.5, 'Slower'], [1, 'Normal'], [1.5, 'Faster'], [2, 'Fastest']];
+function aiPillClosePops(){ ['aiSpdPop', 'aiListPop'].forEach(function(id){ var e = document.getElementById(id); if (e) e.classList.remove('open'); }); }
+function aiPillSpeedMenu(e){
+  if (e) e.stopPropagation();
+  var pop = document.getElementById('aiSpdPop'), was = pop.classList.contains('open'); aiPillClosePops(); if (was) return;
+  pop.innerHTML = AI_SPEEDS.map(function(x){ return '<button type="button" class="ai-li' + (x[0] === _aiWatchSpeed ? ' on' : '') + '" role="menuitem" onclick="aiSetWatchSpeed(' + x[0] + ', event)">' + x[0] + '\u00d7<small>' + x[1] + '</small></button>'; }).join('');
+  pop.classList.add('open');
+}
+function aiSetWatchSpeed(v, e){
+  if (e) e.stopPropagation();
+  _aiWatchSpeed = v; var L = aiAgent._live;
+  if (L){
+    L.speedMul = AI_WATCH_BASE / v;
+    if (L.playing && L.all && L.all.length && L.i < L.all.length){ var k = Math.min(L.i, L.all.length), a = L.all[k - 1], keep = a ? _aiLiveFrac(a) : 0, d = ((a && a.dwell) || 1800) * L.speedMul; L.rowStart[k] = Date.now() - keep * d; clearTimeout(L.timer); L.timer = setTimeout(_aiLiveCatchUp, Math.max(0, (1 - keep) * d)); }   // keep the place in the step; only the pace changes
+  }
+  aiPillClosePops(); _aiPillSync();
+}
+function aiPillListMenu(e){
+  if (e) e.stopPropagation();
+  var pop = document.getElementById('aiListPop'), L = aiAgent._live; var was = pop.classList.contains('open'); aiPillClosePops(); if (was || !L || !L.all) return;
+  var cur = Math.min(L.i, L.all.length) - 1, reach = Math.min((aiAgent._stageRuns || []).length, L.all.length);
+  var chk = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  pop.innerHTML = L.all.map(function(a, i){
+    var allDone = L.frontier && !aiAgent.busy, done = allDone || i < cur, now = i === cur && !allDone;
+    var ic = (done && !now) ? '<span class="ic">' + chk + '</span>' : (now ? '<span class="ic"><span class="sp"></span></span>' : '<span class="ic"><span class="dt"></span></span>');
+    var go = i < reach;
+    return '<button type="button" class="ai-li' + (now ? ' on' : (!go ? ' up' : '')) + '" role="option"' + (go ? ' onclick="aiPillJump(' + i + ', event)"' : ' disabled') + '>' + ic + '<span>' + _aiEsc(a.cap || ('Step ' + (i + 1))) + '</span></button>';
+  }).join('');
+  pop.classList.add('open');
+}
+function aiPillJump(i, e){ if (e) e.stopPropagation(); var L = aiAgent._live, was = !!(L && L.playing); aiPillClosePops(); aiAgent._released = false; aiLiveGo(i); if (was) aiLivePlay(); }
+document.addEventListener('click', function(e){ if (!e.target.closest('.ai-pill')) aiPillClosePops(); });
+function aiPillToggle(){ var L = aiAgent._live; if (!L) return; if (L.playing) aiLivePause(); else aiLivePlay(); _aiPillSync(); }
+function aiPillDismiss(){ var g = document.getElementById('aiWorkingGlow'); if (g) g.classList.add('pill-off'); }
+// Touching the workspace while the agent is on screen lets it go: the replay holds where it is and the frame and pill leave. Nothing is rewound under the user's hand.
+document.addEventListener('pointerdown', function(e){
+  var g = document.getElementById('aiWorkingGlow'); if (!g || !g.classList.contains('on')) return;
+  if (aiAgent._driving || e.target.closest('#aiPanel, .ai-pill, #aiToasts, .toast')) return;
+  if (aiAgent._live && aiAgent._live.playing && typeof aiLivePause === 'function') aiLivePause();
+  aiAgent._released = true; aiGlow(false);
+}, true);
 /* ── ONE RUN, ONE THINKING STEP (user 2026-09-16) ────────────────────────
    "If the agent is thinking it should be presented as a comprehensive step
    and they should only pause for approval or when a real outcome is met."
@@ -70034,7 +70167,8 @@ function _wsReveal(){
   if (ov && !ov.classList.contains('open')){ ov.classList.add('open'); document.body.style.overflow = 'hidden'; }
 }
 function aiShowStart(embedHost, embedFlow){
-  aiAgent.showing = true; aiAgent._showStopped = false;
+  embedHost = null; embedFlow = null;       // the card no longer morphs into a scrubber
+  aiAgent.showing = true; aiAgent._showStopped = false; aiAgent._released = false;
   // was: a "Catching you up" recap message posted on join — RETIRED (user
   // 2026-09-10: the trail wall-of-text is not how anyone wants to catch up).
   // Joining now just lands on the stage; the collapsed "How we got here"
@@ -70080,7 +70214,7 @@ function aiShowStart(embedHost, embedFlow){
     // engine (aiLiveGo, _aiLivePaint, etc.) has an anchor, it's just never
     // painted as its own bubble (see the m._embedScrub skip in the message
     // map).
-    if (embedHost) _msg._embedScrub = true;
+    _msg._embedScrub = true;                 // simplified Watch (2026-10-23): no list in the transcript and no scrubber in the card; the pill carries the playback
     if (aiAgent.msgs.indexOf(_msg) === -1) aiAgent.msgs.push(_msg);
     aiAgent._sayBlock = null;                // the list block owns itself
     // embedFlow (2026-09-24): disambiguates WHICH recommendation tile owns
@@ -70088,7 +70222,7 @@ function aiShowStart(embedHost, embedFlow){
     // action tiles (only the tile whose own flow matches morphs; siblings
     // are untouched) — the approval-gate embed doesn't need this since a
     // gate message has exactly one Show-me slot, so it stays null there.
-    aiAgent._live = { all: _all, i: 0, playing: false, msg: _msg, anchored: 0, rowStart: {}, timer: null, embedHost: embedHost || null, embedFlow: embedFlow || null, scrubMounted: false, speedMul: 1 };
+    aiAgent._live = { all: _all, i: 0, playing: false, msg: _msg, anchored: 0, rowStart: {}, timer: null, embedHost: embedHost || null, embedFlow: embedFlow || null, scrubMounted: false, speedMul: AI_WATCH_BASE / (_aiWatchSpeed || 1) };
     if (embedHost) aiAgent._live.morph = _aiMorphMeasure(embedHost);   // measured before the first morph render
     aiAgent._replayHold = true;              // the catch-up loop owns progression
     _aiLivePaint();
@@ -70241,6 +70375,7 @@ function _aiLiveTick(){
   if (!L){ clearInterval(_aiLiveTimer); _aiLiveTimer = null; return; }
   var el = document.querySelector('.ai-rstep.is-current .ai-rstep-bar span');
   if (el) el.style.transform = 'scaleX(' + _aiLiveFrac(L.all[L.i - 1]).toFixed(3) + ')';
+  _aiPillSync();   // the pill's ring reads the same clock
   // COMPACT SCRUBBER (2026-09-24, user: "when play is progressing, i need to
   // see the play indicator moving between steps, rather than simply jumping
   // to steps"): _aiScrubFrac already interpolates WITHIN a step, but nothing
@@ -70516,10 +70651,15 @@ function _aiLivePaint(){
   var L = aiAgent._live; if (!L || !L.msg) return;
   L.msg.html = _aiLiveHtml();
   aiRender();
+  // The frame glow follows the Watch playback: on while the recorded actions play toward the frontier, off while held or once caught up (the live run owns it from there, via busy).
+  // On while the replay plays or sits paused (the pill stays so it can be resumed); off once caught up with nothing running, or once the user has let go.
+  if (aiAgent.showing !== false) aiGlow(!aiAgent._released && !_aiWriteApproved());
+  _aiPillSync();
 }
 // Clicking a COMPLETED row rewinds the workspace to that frame and holds the
 // run there; Play resumes from that step forward.
 function aiLiveGo(i){
+  if (aiAgent._live) aiAgent._live.frontier = false;
   var L = aiAgent._live; if (!L) return;
   // Forward OR back (user 2026-09-17: "i should also be allowed to click on a
   // not-yet-completed step if i wish to skip forward"). The limit is what has
@@ -70584,7 +70724,7 @@ function _aiLiveCatchUp(){
   // L.all.length reads as "still finishing the last visible step" instead
   // of fabricating a new one — that's what actually fixed the restart.
   if (L.i >= acts.length){
-    L.anchored = null;
+    L.anchored = null; L.frontier = true; aiAgent._watchedOnce = true;
     aiAgent._replayHold = false;             // frontier reached — hand back to the run
     _aiLivePaint();
     if (typeof aiNext === 'function' && aiAgent.busy && !aiAgent.activeGate) aiNext();
@@ -70602,7 +70742,7 @@ function _aiLiveCatchUp(){
 }
 function aiLivePlay(){
   var L = aiAgent._live; if (!L) return;
-  L.playing = true;
+  L.playing = true; L.frontier = false; aiAgent._released = false;
   clearTimeout(L.timer);
   _aiLiveTickStart();
   if (!L.rowStart) L.rowStart = {};
@@ -70848,6 +70988,7 @@ function aiBuildSteps(){
   if (sc === 'ms365DeletedMail')   return aiStepsMs365DeletedMail();
   if (sc === 'ms365Offboard')      return aiStepsMs365Offboard();
   if (sc === 'ms365SiteRollback')  return aiStepsMs365SiteRollback();
+  if (sc === 'adDcRestore')    return aiStepsAdDcRestore();
   if (sc === 'ms365MassDelete')    return aiStepsMs365MassDelete();
   if (sc === 'ms365Overnight')     return aiStepsMs365Overnight();
   if (sc === 'ms365Coverage')      return aiStepsMs365Coverage();
@@ -71271,6 +71412,74 @@ function aiStepsMs365DeletedMail(){
   ].concat(aiWizardTailSteps('1 message', { of: 'John Voight’s deleted message “' + m.name + '”' }));
 }
 // 2 · Departed-user handoff: the seeded deprovisioned mailbox exemplar.
+
+// Active Directory · restore a domain controller. Same shape as the Microsoft 365 recoveries: read the clues, scope to the one machine, drive the real controls, then the shared wizard tail.
+function _aiAdNav(){
+  aiAgent._navigated = false;
+  if(typeof state!=='undefined' && state.wl !== 'active-directory'){
+    if(typeof selectWl==='function') selectWl('Active Directory', 'active-directory');
+    aiAgent._navigated = true;
+  }
+  if(typeof state!=='undefined' && state.invMode === 'drill' && typeof setInvMode==='function') setInvMode('list');
+}
+function aiStepsAdDcRestore(){
+  var dc = (typeof RESOURCES !== 'undefined') ? RESOURCES.find(function(r){ return r.id === 'ad-dc-02'; }) : null;
+  if (!dc) return [{ say: function(){ return "I couldn't find DC-02 in the backed-up estate — the seed may have changed."; } }];
+  var peers = RESOURCES.filter(function(r){ return r.type === 'Domain Controller' && r.parentId === dc.parentId && r.id !== dc.id && !/RODC/i.test(r.name); });
+  var peerNames = peers.map(function(r){ return r.name; }), peerList = peerNames.length > 1 ? peerNames.slice(0, -1).join(', ') + ' and ' + peerNames[peerNames.length - 1] : peerNames[0];
+  return [
+    { trace: [
+        { kind:'route', label:'Interpreting request — machine: DC-02 · domain: corp.meridian.local · state: corrupted directory database', ms:400, chip:'3 clues',
+          detail:[['machine','DC-02'],['domain','corp.meridian.local'],['state','corrupted AD database']], result:'One domain controller restored as a machine — a forest recovery isn’t needed' },
+        { kind:'agent', label:'Spawning a recovery agent', ms:300, spawn:{ task:'Restore the domain controller you select', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
+        { kind:'tool',  label:'domain.peers — corp.meridian.local · writable domain controllers', ms:600, chip:peers.length + ' healthy',
+          detail:[['domain','corp.meridian.local'],['other writable',peerNames.join(', ')],['read-only','RODC-01 · can’t be restored']], result:peers.length + ' other writable domain controllers are still working — DC-02 can sync from them' }
+      ],
+      say: function(){ return "<p>Got it — restore <strong>DC-02</strong> from backup. This is one domain controller, not the whole forest, so I'll restore it as a machine.</p><p>The domain still has <strong>" + peers.length + " other working domain controllers</strong> (" + _aiEsc(peerList) + "), so the safe choice is a <strong>non-authoritative</strong> restore: DC-02 comes back and catches up with them, and nothing made since the backup is lost.</p><p>1 · open the Domain Controllers folder → 2 · select DC-02 → 3 · lock the restore point → 4 · configure → 5 · your approval.</p>"; } },
+    { trace: [
+        { kind:'tool',  label:'inventory.open — Active Directory › corp.meridian.local › Domain Controllers', ms:700, chip:'6 machines',
+          detail:[['path','Forests › corp.meridian.local › Domain Controllers']], result:'6 domain controllers listed · 5 restorable, 1 read-only' }
+      ],
+      run: function(){
+        _aiAdNav();
+        if(typeof state!=='undefined'){ state.treeExpanded['ad-forest-corp-meridian-local'] = true; state.treeExpanded['ad-domain-corp-meridian-local'] = true; }
+        if(typeof treeNavSelect==='function') treeNavSelect('ad-sec-dc');
+        else if(typeof drillChildDeeper==='function') drillChildDeeper('ad-sec-dc');
+      },
+      say: function(){
+        var nav = aiAgent._navigated ? "I switched you to <strong>Active Directory</strong>, then " : "I ";
+        return nav + "opened the <strong>Domain Controllers</strong> folder of <strong>corp.meridian.local</strong>. The read-only domain controller can't be restored, so it's greyed out." + aiAction((aiAgent._navigated ? 'Switched to Active Directory · ' : '') + 'Opened Domain Controllers · corp.meridian.local');
+      },
+      gate: { watchOnly: true,
+        decided: function(){ return "Taking <strong>DC-02</strong> and nothing else."; },
+        q: "<strong>DC-02</strong> is in the list. Select it for restore?",
+        buttons: [ { label:'Yes, select DC-02', primary:true, choice:'Approved', fn: aiNext } ] } },
+    { trace: [
+        { kind:'tool', label:'rows.select — DC-02 · row checkbox · add to restore job', ms:300, chip:'1 in cart',
+          detail:[['row','DC-02'],['via','row checkbox']], result:'Restore cart · 1 domain controller · latest restore point' }
+      ],
+      run: function(){
+        if(typeof drill !== 'undefined' && drill.setRow) drill.setRow('child', dc.id, true);
+        else if(typeof addToPlan==='function') addToPlan(dc.id, { isPinned:false, source:'bulk' });
+        if(typeof updatePlanDock==='function') updatePlanDock();
+      },
+      say: function(){ return "<strong>DC-02</strong> is in your restore cart, set to the <strong>latest restore point</strong>. The other rows are now unavailable — a domain controller job can't mix in other items." + aiAction('Selected DC-02 · added to restore cart'); },
+      gate: { scope: 'cart', watchOnly: true,
+        decided: "Setting up the restore now — the job carries exactly what’s in the cart.", q: "Ready to set up the restore?",
+        buttons: [ { label:'Set up the restore', primary:true, choice:'Approved', fn: aiNext } ] } }
+  ].concat(aiWizardTailSteps('1 domain controller', {
+    of: 'domain controller DC-02',
+    planWhat: 'restore mode and destination',
+    planSay: 'restored non-authoritatively to its original location, replacing the existing virtual machine',
+    scope: 'Original location, replacing the existing virtual machine · non-authoritative',
+    reversal: 'Not reversible in place — the existing virtual machine is replaced. The backup it is restored from is untouched.',
+    destStep: {
+      run: function(){ if(typeof wsFrSetMode3==='function' && ws && ws.forest){ wsFrSetMode3('orig'); if(typeof wsFrSetMode==='function') wsFrSetMode('non-authoritative'); } },
+      say: function(){ return "Restore point locked. On <strong>Restore options</strong> I chose <strong>Original location</strong> \u2014 <strong>DC-02</strong> goes back to the host, datastore and network it was backed up from, replacing the existing virtual machine \u2014 with the <strong>non-authoritative</strong> mode, since the other domain controllers are working." + aiAction('Restore options \u00b7 Original location \u00b7 non-authoritative'); }
+    },
+    configSay: function(){ return "On <strong>Configure</strong> DC-02's settings are read only at its original location \u2014 nothing to change. I left the reason and ticket blank." + aiAction('Configure \u00b7 read only \u00b7 no changes'); }
+  }));
+}
 function aiStepsMs365Offboard(){
   var mbx = (typeof RESOURCES !== 'undefined') ? RESOURCES.find(function(r){ return r.id === 'ms365-mbx-gone'; }) : null;
   if (!mbx) return [{ say: function(){ return "I couldn't find Mark Aldridge's mailbox in the backed-up estate."; } }];
@@ -72346,6 +72555,10 @@ function aiWizardTailSteps(noun, opts){
         gate: rpGate
       };
     })(),
+    // A scenario whose Restore options step carries a real decision visits it (opts.destStep = { run, say }); the others keep going straight to Configure.
+    (opts.destStep ? { run: function(){ if(typeof wsGotoStep==='function') wsGotoStep(2); if (opts.destStep.run) opts.destStep.run(); },
+      show: function(){ _wsReveal(); if(typeof wsGotoStep==='function') wsGotoStep(2); },
+      say: function(){ return opts.destStep.say(); }, delay: 900 } : null),
     { run: function(){
         // The wizard is universally 4 steps now (Configure = 3, Summary = 4)
         // — was: a stale d365?3:2 fork that landed non-D365 carts on
@@ -72356,7 +72569,7 @@ function aiWizardTailSteps(noun, opts){
       show: function(){ _wsReveal(); if(typeof wsGotoStep==='function') wsGotoStep(ws && ws.step ? ws.step : 3); },
       // wl-aware destination noun (2026-09-02) — the shared tail served
       // every workload the hardcoded "Dynamics org" copy
-      say: function(){ var wlLbl = (typeof WL_MAP !== 'undefined' && WL_MAP[state.wl]) || 'source'; return "Restore point locked. I've moved to the destination + options — set to write back to your <strong>source " + _aiEsc(wlLbl) + " environment</strong>, <strong>skipping</strong> items that already exist." + aiAction('Destination = source · conflicts = skip'); },
+      say: function(){ if (opts.configSay) return opts.configSay(); var wlLbl = (typeof WL_MAP !== 'undefined' && WL_MAP[state.wl]) || 'source'; return "Restore point locked. I've moved to the destination + options — set to write back to your <strong>source " + _aiEsc(wlLbl) + " environment</strong>, <strong>skipping</strong> items that already exist." + aiAction('Destination = source · conflicts = skip'); },
       delay: 600 },
     // was (removed 2026-09-02): a "dry run" gate + two dry-run steps — the
     // product has NO dry-run restore concept (user); the tail now goes
@@ -72372,7 +72585,7 @@ function aiWizardTailSteps(noun, opts){
             if(typeof wsGotoStep==='function') wsGotoStep(4);
             setTimeout(function(){
               var _n = (typeof planSize==='function') ? planSize() : 0;
-              if(typeof wsBeginExecute==='function') wsBeginExecute();
+              if(typeof wsBeginExecute==='function') _aiBeginExecute();
               aiOnRestoreStarted(_n, { grant: AS_PROC_LABEL[_proc] + ' \u00b7 Automatic' });
             }, 1400);
           },
@@ -72396,10 +72609,10 @@ function aiWizardTailSteps(noun, opts){
       // June 18") gets no reason clause; restating the user's own choice
       // back to them is noise, not help.
       say: function(){ var _why = (_aiPlanIsOne() && opts.rpWhy) ? ', ' + opts.rpWhy : ''; return _aiVoice(
-          "I've moved to the <strong>Summary</strong> — the full plan is on the left: " + (_aiPlanIsOne() ? "the restore point (" + rpChip + ")" + _why + ", destination and conflict handling" : "every item, its restore point, destination and conflict handling") + ". Nothing is written until you approve." + aiAction('Summary step'),
+          "I've moved to the <strong>Summary</strong> — the full plan is on the left: " + (_aiPlanIsOne() ? "the restore point (" + rpChip + ")" + _why + ", " + (opts.planWhat || "destination and conflict handling") : "every item, its restore point, destination and conflict handling") + ". Nothing is written until you approve." + aiAction('Summary step'),
           // DATA VOICE: state the plan, don't point at a surface the user is
           // not looking at. Was a screen-deictic line + "Watch to see it".
-          "Here's the plan, ready for your approval: <strong>" + (aiAgent._tailNoun || ((typeof planSize === 'function') ? (planSize() + ' item' + (planSize() === 1 ? '' : 's')) : 'the selected items')) + "</strong>, at " + (_aiPlanIsOne() ? rpChip : "each item's own restore point") + _why + ", written back to the source environment and skipping anything that already exists. Nothing is written until you approve." + aiAction('Plan assembled \u00b7 nothing written yet')); },
+          "Here's the plan, ready for your approval: <strong>" + (aiAgent._tailNoun || ((typeof planSize === 'function') ? (planSize() + ' item' + (planSize() === 1 ? '' : 's')) : 'the selected items')) + "</strong>, at " + (_aiPlanIsOne() ? rpChip : "each item's own restore point") + _why + ", " + (opts.planSay || "written back to the source environment and skipping anything that already exists") + ". Nothing is written until you approve." + aiAction('Plan assembled \u00b7 nothing written yet')); },
       delay: 1000,
       // APPROVAL BLOCK (PRD FR-13/14, UC-02): the write action renders as the
       // distinct proposal card — what / scope / evidence / reversal.
@@ -72413,22 +72626,22 @@ function aiWizardTailSteps(noun, opts){
           // was: trailing "from backup", redundant (user 2026-09-18: obvious in implication)
           action: "Restore <strong>"+(opts.of || noun)+"</strong>" + (_aiPlanIsOne() ? " from " + rpChip : ""),
           // was: hardcoded "Production Dynamics 365 org" — the tail is shared
-          scope: "Source environment, in place · conflicts: skip existing",
+          scope: opts.scope || "Source environment, in place · conflicts: skip existing",
           // was: "Dry-run projection…" — no dry-run concept in the product
           evidence: function(){ return (aiAgent._keyFact ? aiAgent._keyFact + ' \u00b7 ' : '')
             + _aiVoice((_aiPlanIsOne() ? 'staged on the Summary \u2014 resolved to its restore point' : 'staged on the Summary \u2014 every item resolved to its restore point'),
                        (_aiPlanIsOne() ? 'resolved to its restore point in the plan above' : 'every item resolved to its own restore point in the plan above')); },
-          reversal: "Reversible — restoring writes new record versions; today's values remain in backup and can be restored from the pre-change point"
+          reversal: opts.reversal || "Reversible — restoring writes new record versions; today's values remain in backup and can be restored from the pre-change point"
         },
         buttons: [
           { label:'Approve', primary:true, choice:'Approved', fn: function(){
               var n = (typeof planSize==='function') ? planSize() : 0;   // before execute clears the cart
-              if(typeof wsBeginExecute==='function') wsBeginExecute();
+              if(typeof wsBeginExecute==='function') _aiBeginExecute();
               aiOnRestoreStarted(n);
             } }
         ] } };
     })()
-  ];
+  ].filter(Boolean);
 }
 // RECEIPT CARD, IMMEDIATE (2026-09-02, user: the "Restore in progress" wait
 // took too long — jobs are async in the product; the agent confirms the job
@@ -72436,6 +72649,7 @@ function aiWizardTailSteps(noun, opts){
 // on completion). was: a spinner line + a 600ms poll of wsOverallJobState
 // that posted a "Restore complete" card only when the simulated job ended.
 function aiOnRestoreStarted(n, rcOpts){
+  aiAgent._released = true; if (typeof aiGlow === 'function') aiGlow(false);   // approved: the walk-through pill has nothing left to say
   if(aiAgent.restoreNarrated) return; aiAgent.restoreNarrated = true;
   // consumable marker for the job-bridge publisher: this dispatch is the
   // agent's (the publisher runs a beat later, after the board task is done,
