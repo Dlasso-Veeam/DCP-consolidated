@@ -4085,6 +4085,7 @@ body.ai-hx-transcript .ai-foot { display: none; }
    neighbor. Every cell clips + ellipsizes — content-agnostic, so it holds
    for every workload's column schema without per-column fixes. */
 .ws-td { overflow: hidden; text-overflow: ellipsis; }
+.ws-td.ws-col-target { text-overflow: clip; }   /* the chip never shrinks and ends in its own edge: a cell that clips it must not paint an ellipsis after it */
 .ws-td.is-primary { overflow: hidden; }   /* long names truncate via the inner span */
 .ws-table .res-type { max-width: 100%; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; }   /* fixed-layout cells: long type chips clip, never bleed (user catch 2026-08-07) */
 .ws-table thead { position: sticky; top: 0; z-index: 2; background: var(--white); }
@@ -4565,6 +4566,14 @@ body.ai-hx-transcript .ai-foot { display: none; }
 .fr-rec { border: 1px solid var(--border-light); border-radius: 8px; padding: 12px 16px 16px; background: var(--white); }
 .fr-rec-h { display: flex; align-items: flex-start; gap: 12px; }
 .fr-rec-id { flex: 1; min-width: 0; }
+.fr-rec-tg { display: flex; align-items: flex-start; gap: 8px; flex: 1; min-width: 0; padding: 0; border: none; background: transparent; font-family: inherit; text-align: left; cursor: pointer; }
+.fr-rec-tg > svg { flex: 0 0 20px; margin-top: 1px; display: block; }
+.fr-rec.is-closed { padding-bottom: 12px; }
+.fr-rec-sum { display: flex; gap: 24px; flex: 0 0 auto; min-width: 0; }
+.fr-rec-sv { min-width: 0; max-width: 168px; }
+.fr-rec .fr-rec-sv .fr-dtr-l { margin-bottom: 0; }
+.fr-rec .fr-rec-sv .fr-ro { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; overflow-wrap: normal; }
+.fr-rec.is-closed .fr-rec-h { align-items: center; }
 .fr-rec-n { display: block; font-size: 16px; line-height: 22px; font-weight: 500; color: var(--black-100); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fr-rec-d { display: block; font-size: 14px; line-height: 20px; color: var(--black-60); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fr-rec-ip { flex: 0 0 auto; }
@@ -7010,6 +7019,7 @@ body.pol-drawer-open { overflow: hidden; }
    etc.) keep their interactive treatment unchanged. */
 .rw-rp-picker-btn-hdr[aria-disabled="true"],
 .rw-rp-picker-btn-hdr[aria-disabled="true"]:hover { background: transparent !important; border-color: transparent !important; box-shadow: none !important; cursor: default !important; }
+.rw-rp-picker-btn-hdr[aria-disabled="true"] { padding-left: 0; padding-right: 0; border-left-width: 0; border-right-width: 0; }   /* a read-only value, not a dropdown: no trigger padding, so it lines up with the caption beneath it */
 .rw-rp-picker-btn-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; text-align: left; }
 .rw-rp-menu-right { left: auto; right: 0; }
 /* ── Restore-point picker: calendar + anchored history list in ONE overlay ──
@@ -18798,6 +18808,12 @@ function toggleChildSelectAll(cb) {
       box.closest('tr').classList.remove('row-selected');
       return;
     }
+    // A row the job's lock refuses once earlier rows are in (a read-only domain controller after the restorable ones) stays unticked, like a disabled row.
+    if (intended && !state.restorePlan.has(id) && typeof _categoryLockBlocks === 'function' && _categoryLockBlocks(id)) {
+      box.checked = false;
+      box.closest('tr').classList.remove('row-selected');
+      return;
+    }
     box.checked = intended;
     // Route through drill.setRow so (a) the cart gets the item (the
     // 'child' table has keyPrefix:'' so bare id is the cart key), (b)
@@ -18921,7 +18937,20 @@ function clearChildSelection() {
   if (all) { all.checked = false; all.indeterminate = false; }
   updateChildBulkBar();
 }
+// A row's lock depends on what the job holds, so ticking one row can lock others; the table was drawn before that, so bring each unticked row's checkbox and its explanation up to date.
+function _syncChildRowLocks() {
+  if (typeof _categoryLockBlocks !== 'function') return;
+  document.querySelectorAll('#childTbody input.row-cb[data-id]').forEach(function(cb){
+    var id = cb.getAttribute('data-id'), td = cb.closest('td');
+    if (!td || state.restorePlan.has(id)) return;
+    var lock = _categoryLockBlocks(id), msg = lock ? _categoryLockMsg() : '';
+    if (lock) { cb.disabled = true; td.setAttribute('data-tooltip', msg); }
+    else if (td.hasAttribute('data-tooltip') && cb.disabled && cb.dataset.lockSync) { cb.disabled = false; td.removeAttribute('data-tooltip'); }
+    if (lock) cb.dataset.lockSync = '1'; else delete cb.dataset.lockSync;
+  });
+}
 function updateChildBulkBar() {
+  _syncChildRowLocks();
   var bar = document.getElementById('childBulkBar');
   if (bar) bar.classList.remove('visible');
   // Child resource IDs are RESOURCES-level ids — sync them into the plan
@@ -23326,7 +23355,11 @@ function _firstColEntityLabel(fallback) {
   if (state && state.wl === 'hybrid-vms') return fallback;
   // Active Directory containers hold mixed object types (OUs next to default containers, computers, groups):
   // the dominant-type noun would mislabel most rows, so the drill column is plainly 'Name'.
-  if (state && state.wl === 'active-directory' && state.invMode === 'drill') return 'Name';
+  // A forest holds only domains, so inside a forest the column is 'Domain'; below that the rows are mixed (sections, then OUs, users, groups, computers), so it stays 'Name'.
+  if (state && state.wl === 'active-directory' && state.invMode === 'drill') {
+    var _adDrillP = (typeof childState !== 'undefined' && childState && childState.parentId && typeof RESOURCES !== 'undefined') ? RESOURCES.find(function(x){ return x.id === childState.parentId; }) : null;
+    return (_adDrillP && _adDrillP.type === 'Forest') ? 'Domain' : 'Name';
+  }
   // Custom first-column labels win (2026-08-12): only generic headers get
   // the dominant-type rename. PRD grids name their first column explicitly
   // ('#ID Title', 'Page', 'Tag', 'Key', 'Alert'…) — never override those.
@@ -39795,7 +39828,8 @@ function _restoreAvailability(r) {
     // Hierarchy nodes are navigation only. Domain Controller objects and system-managed containers (System, Keys, Program Data) are captured but not restorable (export only).
     if (r.type === 'Forest') return 'add';   // a forest restores as its own job: addable to the cart, but only ever on its own (see _categoryLockBlocks)
     if (r.type === 'Domain' || r.type === 'Folder') return 'context';
-    if (r.type === 'Domain Controller' || r.type === 'System Object') return 'export';
+    if (r.type === 'Domain Controller') return _isAdDc(r) ? 'add' : 'export';   // a writable domain controller restores as a machine (non-authoritative by default, as in VBR); a read-only one can't be restored
+    if (r.type === 'System Object') return 'export';
     return 'add';
   }
   if (r.wl === 'Entra ID') return (r.type === 'Forest' || r.type === 'Folder') ? 'context' : 'add';
@@ -40859,6 +40893,11 @@ function _categoryLockBlocks(keyOrResource) {
       var _planForest = null; state.restorePlan.forEach(function(_, k){ if (_isAdForest(k)) _planForest = RESOURCES.find(function(x){ return x.id === k; }); });
       var _candIsForest = _isAdForest(keyOrResource);
       if (_planForest) { _frLockWhy = _candIsForest ? 'other-forest' : 'plan'; _frLockName = _planForest.name; return true; }
+      var _planHasDc = false, _planHasOther = false; state.restorePlan.forEach(function(_, k){ if (_isAdDc(k)) _planHasDc = true; else if (!_exportCartEligibleKey(k)) _planHasOther = true; });   // an export-only item (a read-only domain controller) makes the job an export, which the purity rule below explains
+      var _candR = (typeof keyOrResource === 'string') ? RESOURCES.find(function(x){ return x.id === keyOrResource; }) : keyOrResource;
+      if (!_planForest && !_candIsForest && _planHasDc && _candR && _candR.wl === 'Active Directory' && _candR.type === 'Domain Controller' && !_isAdDc(_candR)) { _frLockWhy = 'cand-rodc'; _frLockName = _candR.name; return true; }   // a read-only domain controller is export-only, so it can't join a restore job
+      if (!_planForest && !_candIsForest && _planHasDc && !_isAdDc(keyOrResource)) { _frLockWhy = 'plan-dc'; return true; }
+      if (!_planForest && !_candIsForest && _isAdDc(keyOrResource) && _planHasOther) { var _cd = (typeof keyOrResource === 'string') ? RESOURCES.find(function(x){ return x.id === keyOrResource; }) : keyOrResource; _frLockWhy = 'cand-dc'; _frLockName = _cd ? _cd.name : 'This'; return true; }
       if (_candIsForest) { var _cf = (typeof keyOrResource === 'string') ? RESOURCES.find(function(x){ return x.id === keyOrResource; }) : keyOrResource; _frLockWhy = 'cand'; _frLockName = _cf ? _cf.name : 'This'; return true; }
     }
   }
@@ -40896,6 +40935,9 @@ function _categoryLockMsg() {
   if (_frLockWhy === 'other-forest') return 'A restore job can include only one forest. Remove ' + _frLockName + ' from the job to add a different one.';
   if (_frLockWhy === 'plan') return 'This job is restoring the forest ' + _frLockName + ', and a forest can\u2019t be restored alongside other items. Remove it from the job to add anything else.';
   if (_frLockWhy === 'cand') return _frLockName + ' is a forest, and a forest can\u2019t be restored alongside other items. Clear the job to add it.';
+  if (_frLockWhy === 'plan-dc') return 'This job is restoring domain controllers, and they can’t be restored alongside other items. Remove them from the job to add anything else.';
+  if (_frLockWhy === 'cand-rodc') return _frLockName + ' is a read-only domain controller, which can’t be restored, only exported. Clear the job to export it.';
+  if (_frLockWhy === 'cand-dc') return _frLockName + ' is a domain controller, and domain controllers can’t be restored alongside other items. Clear the job to add it.';
   if (typeof planIsExportOnly === 'function' && planIsExportOnly()) {
     return 'This job is an export — only export-only items can join it. Clear the job to restore items.';
   }
@@ -41873,6 +41915,7 @@ function restoreNow(resourceId) {
   var r = (typeof RESOURCES !== 'undefined') ? RESOURCES.find(function(x){ return x.id === resourceId; }) : null;
   if (r && ((r.status === 'excluded' && !_excludedActionable(r)) || r.status === 'unprotected')) return;   // nothing to restore (window-aware excluded rows DO have one)
   if (_isAdForest(r)) return recoverForest(resourceId);   // a forest opens the forest wizard
+  if (_isAdDc(r)) return recoverDc(resourceId);   // a domain controller opens the same wizard, one card per domain controller
   _v1ExpressRestore(function(){ addToPlan(resourceId, { source: 'express' }); });
 }
 function restoreNowFolder(compositeId) {
@@ -41887,7 +41930,9 @@ function showWorkspace() {
   // A cart holding a forest (it can hold nothing else) opens the forest wizard, the same one the row's Recover forest button opens.
   if (!ws._expressMode) {
     var _soleKey = null; if (state.restorePlan && state.restorePlan.size === 1) state.restorePlan.forEach(function(_, k){ _soleKey = k; });
-    if (_soleKey && _isAdForest(_soleKey)) { if (!ws.forest || ws.forest.id !== _soleKey) _frInit(_soleKey); }
+    var _allDcs = !!(state.restorePlan && state.restorePlan.size), _firstDc = null; if (_allDcs) state.restorePlan.forEach(function(_, k){ if (!_isAdDc(k)) _allDcs = false; else if (!_firstDc) _firstDc = k; });
+    if (_soleKey && _isAdForest(_soleKey)) { if (!ws.forest || ws.forest.id !== _soleKey || ws.forest.kind === 'dc') _frInit(_soleKey); }
+    else if (_allDcs) { if (!ws.forest || ws.forest.kind !== 'dc') _frInit(_firstDc, 'dc'); }   // a cart of domain controllers (and nothing else) opens the same wizard
     else if (ws.forest) ws.forest = null;
   }
   // Scenario B (PM 2026-07-07): a whole-repo cart built ENTIRELY from
@@ -42479,7 +42524,7 @@ function wsRenderFooterV2() {
       inner.innerHTML = '<button class="ws-cta ws-cta-secondary" type="button" style="flex:0 0 auto;padding:0 28px" onclick="wsGotoStep(' + _sumBackTo + ')">Back</button>'
         + (_isExp
             ? '<button class="ws-cta ws-cta-primary" type="button" onclick="wsBeginOktaExport()">Export ' + noun + '</button>'
-            : '<button class="ws-cta ws-cta-primary" type="button" onclick="wsBeginExecute()">' + (wsIsForest() ? 'Recover forest' : 'Restore ' + noun) + '</button>');
+            : '<button class="ws-cta ws-cta-primary" type="button" onclick="wsBeginExecute()">' + (wsIsForest() ? _frActionLabel() : 'Restore ' + noun) + '</button>');
     } else {
       inner.innerHTML = '<button class="ws-cta ws-cta-primary" type="button" onclick="wsFinishAndClose()">Return to protected data</button>';
     }
@@ -42885,7 +42930,7 @@ var WS_SELECT_COLUMNS = [
   { key: 'details', label: 'Details' },
   // Restore point chip (reactivated 2026-10-21): the job restores from one point in time, so the chip is not a picker. It is the way in to that item's metadata
   // at the point (the Metadata Explorer in single-point mode). It closes the row, next to the remove button.
-  { key: 'target',  label: 'Restore point', w: '160px' },   // sized to the chip: its label and the chip share one left edge, and the chip ends beside the remove button
+  { key: 'target',  label: 'Restore point', w: '176px' },   // sized to the chip plus slack for a wider font: its label and the chip share one left edge, and the chip ends beside the remove button
   { key: 'actions', label: '', w: '48px', align: 'right' } /* was 42px — sized for the old 28px row button; 32px buttons (2026-08-05) + 14px cell padding clipped under the overflow guard */
 ];
 // Details cell text — the most identifying metadata available per row shape.
@@ -42920,7 +42965,7 @@ var WS_SELECT_COLUMNS_USERS = [
   { key: 'oktaStatus',label: 'Status', w: '100px' },
   { key: 'oktaUserType', label: 'User type', w: '100px' },
   { key: 'oktaDept',  label: 'Department', w: '110px' },
-  { key: 'target',    label: 'Restore point', w: '160px' },
+  { key: 'target',    label: 'Restore point', w: '176px' },
   { key: 'actions',   label: '', w: '48px', align: 'right' }
 ];
 // [parked 2026-07-14] SINGLE-RP: the multi-RP users column set (per-item
@@ -44544,14 +44589,51 @@ function _frPoolInv(d) { return [{ n: _frClusterOf(_frHostOf(d)) || '', t: 'Clus
 function _frRowSeed() { return { server: FR_S, host: FR_S, pool: FR_S, datastore: FR_S, folder: FR_S, network: FR_S, network2: FR_S, clres: FR_S }; }
 function _frClearIp(st) { st.ip = ''; st.ip2 = ''; st.rule = null; st.rule2 = null; st.draft = null; st.errs = null; st.ipDraft = ''; st.ipErr = ''; }
 var FR_DISK = [['same', 'Same as source'], ['thin', 'Thin'], ['lazy', 'Thick lazy zeroed'], ['eager', 'Thick eager zeroed']];   // VBR full VM restore, Disk Type Settings
-function wsIsForest() { return !!(typeof ws !== 'undefined' && ws.isOpen && ws.forest && state.restorePlan && state.restorePlan.has && state.restorePlan.has(ws.forest.id)); }
+var FR_TSL_DAYS = 180;   // the default tombstone lifetime: a backup older than this can bring back lingering objects
+function _isAdDc(keyOrResource) {   // a writable domain controller: restorable as a machine on its own (read-only domain controllers are not)
+  var r = (typeof keyOrResource === 'string') ? RESOURCES.find(function(x){ return x.id === keyOrResource; }) : keyOrResource;
+  return !!r && r.wl === 'Active Directory' && r.type === 'Domain Controller' && !/RODC/i.test(r.name || '');
+}
+function _frKind() { return (ws.forest && ws.forest.kind) || 'forest'; }   // 'forest' (one forest recovery) or 'dc' (one or more domain controllers restored on their own)
+function _frForestOfDc(id) { var x = _resById(id); while (x && x.type !== 'Forest') x = _resById(x.parentId); return x ? x.id : null; }
+function _frDomainOfDc(c) { var x = c; while (x && x.type !== 'Domain') x = _resById(x.parentId); return x; }
+function _frDcIds() { var ids = []; state.restorePlan.forEach(function(_, k){ if (_isAdDc(k)) ids.push(k); }); return ids; }
+function _frDcModel() {   // the model of a domain controller job: one entry per selected domain controller, shaped like a forest's per-domain entry so the cards, pickers and summary work unchanged (res.id is the domain controller's id, res.name its domain)
+  var pt = _frPoint(), ids = _frDcIds();
+  var domains = ids.map(function(id){
+    var c = _resById(id), dom = _frDomainOfDc(c), sibs = RESOURCES.filter(function(r){ return r.type === 'Domain Controller' && _frDomainOfDc(r) === dom; });
+    if (!ws.forest.dom[id]) ws.forest.dom[id] = {};
+    return { res: { id: id, name: dom ? dom.name : '', type: 'Domain', domainId: dom && dom.id }, root: false, dcs: [c], cand: [c], auth: c, rp: pt, siblings: sibs };
+  });
+  return { forest: _resById(_frForestOfDc(ids[0] || ws.forest.id)), point: pt, domains: domains, dcCount: domains.length };
+}
+function wsIsForest() {
+  if (!(typeof ws !== 'undefined' && ws.isOpen && ws.forest && state.restorePlan && state.restorePlan.has)) return false;
+  if (ws.forest.kind === 'dc') { var any = false, all = true; state.restorePlan.forEach(function(_, k){ any = true; if (!_isAdDc(k)) all = false; }); return any && all; }
+  return state.restorePlan.has(ws.forest.id);
+}
+function recoverDc(id) {   // a domain controller's Restore button: the same wizard as a forest, with one card per domain controller
+  _frInit(id, 'dc');
+  _v1ExpressRestore(function(){ addToPlan(id, { source: 'express' }); });
+  if (!state.restorePlan.has(id)) ws.forest = null;
+}
+function wsFrSetMode(m) { ws.forest.mode = m; wsRenderAll(); }
+function _frModeSection() {   // non-authoritative (the usual case, other domain controllers still work) or authoritative (every domain controller was lost), as in Veeam's restore guidance
+  if (_frKind() !== 'dc') return '';
+  var auth = ws.forest.mode === 'authoritative';
+  return '<div class="ws-cfg-section"><div class="ws-cfg-section-hdr"><div class="ws-cfg-section-title">Restore mode</div><div class="ws-cfg-section-sub">How each restored domain controller rejoins its domain.</div></div><div class="ws-cfg-section-body"><div class="ws-cfg-choices">'
+    + _frChoice(!auth, "wsFrSetMode('non-authoritative')", 'Non-authoritative', 'The restored domain controller syncs the latest directory state from its domain’s other domain controllers. Use this while other domain controllers are still working.')
+    + _frChoice(auth, "wsFrSetMode('authoritative')", 'Authoritative', 'The restored domain controller becomes the source of truth for its domain. Use this only when every domain controller in the domain has been lost.')
+    + '</div></div></div>';
+}
+function _frActionLabel() { var n = _frKind() === 'dc' ? _frDcIds().length : 1; return _frKind() === 'dc' ? 'Restore domain controller' + (n === 1 ? '' : 's') : 'Recover forest'; }
 function _isAdForest(keyOrResource) {
   var r = (typeof keyOrResource === 'string') ? RESOURCES.find(function(x){ return x.id === keyOrResource; }) : keyOrResource;
   return !!r && r.wl === 'Active Directory' && r.type === 'Forest';
 }
-function _frInit(id) {
-  var src = FR_FOREST_SRC[id] || FR_SRC_DEFAULT_PLAT;
-  ws.forest = { id: id, dest: 'original', target: src.platform, srcPlatform: src.platform, srcServer: src.server, tInfo: { vmware: _frConnInit('vmware', src), hyperv: _frConnInit('hyperv', src), windows: { user: '', pass: '' } }, win: {}, dom: {}, envRows: {}, sel: {}, pend: undefined, msg: '', menu: false, q: '', exp: {}, nameMode: 'same', prefix: '', suffix: '', name: '', uuid: 'preserve', disk: 'same', collide: 'replace', collideSuffix: '-recovered', pop: null,
+function _frInit(id, kind) {
+  var src = FR_FOREST_SRC[kind === 'dc' ? _frForestOfDc(id) : id] || FR_SRC_DEFAULT_PLAT;
+  ws.forest = { id: id, kind: kind || 'forest', mode: 'non-authoritative', dest: 'original', target: src.platform, srcPlatform: src.platform, srcServer: src.server, tInfo: { vmware: _frConnInit('vmware', src), hyperv: _frConnInit('hyperv', src), windows: { user: '', pass: '' } }, win: {}, dom: {}, envRows: {}, sel: {}, pend: undefined, msg: '', menu: false, q: '', exp: {}, nameMode: 'same', prefix: '', suffix: '', name: '', uuid: 'preserve', disk: 'same', collide: 'replace', collideSuffix: '-recovered', pop: null,
     ownCreds: false, tags: true, confirm: false, t0: null };
   ws.frAdvOpen = false;
   _frSeedRows();
@@ -44571,6 +44653,7 @@ function _frPoint() {
   return (t && rps.filter(function(r){ return r.id === t.rpId; })[0]) || rps[0];
 }
 function _frModel() {
+  if (_frKind() === 'dc') return _frDcModel();
   var forest = _resById(ws.forest.id);
   var doms = RESOURCES.filter(function(r){ return r.wl === 'Active Directory' && r.type === 'Domain' && r.parentId === forest.id; });
   var dcs = RESOURCES.filter(function(r){ return r.wl === 'Active Directory' && r.type === 'Domain Controller'; });
@@ -44589,7 +44672,19 @@ function _frModel() {
   });
   return { forest: forest, point: pt, domains: domains, dcCount: dcs.length };
 }
+function _frDcChecks(m) {   // what a domain controller restore needs before it starts
+  var f = ws.forest, out = [], old = m.point && m.point.daysBack > FR_TSL_DAYS, picked = {};
+  m.domains.forEach(function(d){ picked[d.auth.id] = true; });
+  var stuck = f.mode === 'authoritative' ? [] : m.domains.filter(function(d, i){   // a non-authoritative restore needs one writable domain controller of its domain left to sync from
+    return d.siblings.filter(function(s){ return !/RODC/i.test(s.name) && !picked[s.id]; }).length === 0 && m.domains.findIndex(function(x){ return x.res.domainId === d.res.domainId; }) === i; });
+  out.push({ id: 'fr-vm', ok: true, label: 'Domain controllers were backed up as virtual machines', detail: 'Recovery restores them as virtual machines.' });
+  out.push({ id: 'fr-mount', ok: true, label: 'A Windows mount server is available', detail: 'The repository that stores these backups has a mount server.' });
+  out.push({ id: 'fr-tsl', ok: !old, label: 'The backup is newer than the tombstone lifetime', detail: old ? 'This restore point is older than the forest’s tombstone lifetime, so the restored domain controller could bring back lingering objects. Pick a later point in time.' : 'The restore point is within the tombstone lifetime.' });
+  out.push({ id: 'fr-peers', ok: !stuck.length, label: 'Another domain controller is left to sync from', detail: stuck.length ? 'Every writable domain controller in ' + stuck.map(function(d){ return d.res.name; }).join(', ') + ' is selected, so none is left to sync from. Leave one out, or restore authoritatively.' : 'Each restored domain controller has a working peer to sync from.' });
+  return out;
+}
 function _frChecks(m) {
+  if (_frKind() === 'dc') return _frDcChecks(m);
   var out = [], oldRp = m.point && m.point.daysBack > FR_METADATA_DAYS;
   out.push({ id: 'fr-meta', ok: !oldRp, label: 'Forest metadata is in the backups', detail: oldRp ? 'Backups before ' + new Date(Date.now() - FR_METADATA_DAYS * 864e5).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' predate forest metadata collection. Pick a later point in time.' : 'Every selected domain controller was backed up with forest topology, FSMO and schema details.' });
   var noDc = m.domains.filter(function(d){ return !d.auth; });
@@ -44617,7 +44712,7 @@ function _frPage(title, desc, inner) {
 function _frSeedRows() {
   var f = ws.forest; f.envRows = {}; f.sel = {}; f.pend = undefined;
   var seed = function(d){ f.envRows[d.res.id] = _frRowSeed(); };
-  var rs = RESOURCES.filter(function(r){ return r.wl === 'Active Directory' && r.type === 'Domain' && r.parentId === f.id; });
+  var rs = (_frKind() === 'dc' ? [] : RESOURCES.filter(function(r){ return r.wl === 'Active Directory' && r.type === 'Domain' && r.parentId === f.id; }));
   rs.forEach(function(r){ seed({ res: r }); });
 }
 function wsFrSetDest(v) { var f = ws.forest; f.dest = v; f.pop = null; f.pend = undefined; f.msg = ''; wsRenderAll(); }
@@ -44796,9 +44891,9 @@ function wsRenderForestConfig() {
   // Values are the real ones: grey while the source's own, green once changed. A value is set per domain controller; the picker's Apply chevron applies it to all of them.
   var vm = _frHasOrig(), ro = vm && f.dest === 'original';
   var lblOf = function(k, d){ return (k === 'ip' || k === 'ip2') ? 'IP address' + (_frNics(d) > 1 ? ' (adapter ' + (k === 'ip2' ? 2 : 1) + ')' : '') : _frTLabel(k, d); };
-  var cards = m.domains.map(function(d){
+  var cards = m.domains.map(function(d, di){
     var st = f.dom[d.res.id] || (f.dom[d.res.id] = {}), e = f.envRows[d.res.id] || (f.envRows[d.res.id] = _frRowSeed());
-    if (f.pop && f.pop.dom === d.res.id) popHtml = (f.pop.key === 'ip' || f.pop.key === 'ip2') ? _frIpPop(d, st) : _frPopRows(d, f.pop.key);
+    if (f.pop && f.pop.dom === d.res.id && _frCardOpen(d.res.id, di)) popHtml = (f.pop.key === 'ip' || f.pop.key === 'ip2') ? _frIpPop(d, st) : _frPopRows(d, f.pop.key);
     var field = function(k){
       var inner;
       if (ro) inner = '<span class="fr-ro">' + wsEscape((k === 'ip' || k === 'ip2') ? _frIpOf(d.auth, k === 'ip2') : k === 'server' ? f.srcServer : _frSrcOf(d)[k]) + '</span>';   // Original infrastructure: what will be used, read only
@@ -44807,9 +44902,18 @@ function wsRenderForestConfig() {
       return '<div class="fr-rec-f"><div class="fr-dtr-l">' + lblOf(k, d) + '</div>' + inner + '</div>';
     };
     var winField = function(){ var v = (f.win || {})[d.res.id] || ''; return '<div class="fr-rec-f" style="grid-column:1/-1"><div class="fr-dtr-l">Target server</div><input id="fr-win-' + d.res.id + '" class="ws-field-input' + (_frWinMsg(d.res.id).err ? ' has-error' : '') + '" value="' + wsEscape(v) + '" placeholder="Host name or IP address of a clean Windows Server machine" oninput="wsFrWin(\'' + d.res.id + '\', this.value)" aria-label="Target Windows Server for ' + wsEscape(d.auth ? d.auth.name : d.res.name) + '"><div id="fr-wchk-' + d.res.id + '" class="' + _frWinMsg(d.res.id).cls + '" role="alert">' + wsEscape(_frWinMsg(d.res.id).text) + '</div></div>'; };
-    var nm = d.auth ? d.auth.name : '\u2014';
-    return '<div class="fr-rec" role="group" aria-label="' + wsEscape(nm) + '"><div class="fr-rec-h"><div class="fr-rec-id"><span class="fr-rec-n">' + wsEscape(nm) + '</span><span class="fr-rec-d">' + wsEscape(d.res.name) + '</span></div><div class="fr-rec-ip">' + ((f.target === 'windows' || _frNics(d) > 1) ? '' : field('ip')) + '</div></div>'
-      + '<div class="fr-rec-g">' + (f.target === 'windows' ? winField() : _frGridKeys(d).map(field).join('')) + '</div>' + _frCoverage(d) + '</div>';
+    // What a closed card still shows: the two values most worth checking without opening it, labelled (never joined into one string).
+    var sumHtml = function(){
+      var sv = function(l, v){ return '<div class="fr-rec-sv"><div class="fr-dtr-l">' + l + '</div><span class="fr-ro" data-tip-clip="' + wsEscape(v) + '">' + wsEscape(v) + '</span></div>'; };
+      if (f.target === 'windows') return '<div class="fr-rec-sum">' + sv('Target server', String((f.win || {})[d.res.id] || '').trim() || '\u2014') + '</div>';
+      var host = ro ? _frSrcOf(d).host : _frShown(d, 'host', e.host);
+      var ip = _frNics(d) > 1 ? _frNics(d) + ' addresses' : (ro ? _frIpOf(d.auth, false) : (st.ip || _frIpOf(d.auth, false)));
+      return '<div class="fr-rec-sum">' + sv('Host or cluster', host) + sv('IP address', ip) + '</div>';
+    };
+    var nm = d.auth ? d.auth.name : '\u2014', isOpen = _frCardOpen(d.res.id, di);
+    return '<div class="fr-rec' + (isOpen ? '' : ' is-closed') + '" role="group" aria-label="' + wsEscape(nm) + '"><div class="fr-rec-h"><button type="button" class="fr-rec-tg" onclick="wsFrToggleCard(\'' + d.res.id + '\',' + di + ')" aria-expanded="' + isOpen + '">' + (isOpen ? _ADV_EXP_OPEN : _ADV_EXP_CLOSED) + '<span class="fr-rec-id"><span class="fr-rec-n">' + wsEscape(nm) + '</span><span class="fr-rec-d">' + wsEscape(d.res.name) + '</span></span></button>'
+      + (isOpen ? '<div class="fr-rec-ip">' + ((f.target === 'windows' || _frNics(d) > 1) ? '' : field('ip')) + '</div>' : (_frDcReady(d) ? sumHtml() : '<span class="fr-tag">Needs input</span>')) + '</div>'
+      + (isOpen ? '<div class="fr-rec-g">' + (f.target === 'windows' ? winField() : _frGridKeys(d).map(field).join('')) + '</div>' + _frCoverage(d) : '') + '</div>';
   }).join('');
   var table = (!vm ? '' : '<div class="fr-bt" role="group" aria-label="Environment">'
       + '<button type="button" data-t="Original environment" class="' + (ro ? 'on' : '') + '" aria-pressed="' + ro + '"' + (ro ? '' : ' id="fr-exit" onclick="wsFrExit()"') + '>Original environment</button>'
@@ -44947,6 +45051,7 @@ function wsFrFixDc() {   // from a failed domain controller check: back to Confi
   setTimeout(function(){ var e = document.getElementById('fr-adv-dc'); if (e) e.scrollIntoView({ block: 'center' }); }, 50);
 }
 function _frSubFor() {
+  if (_frKind() === 'dc') { var _n = _frDcIds().length; return 'Restoring ' + _n + (_n === 1 ? ' domain controller' : ' domain controllers') + ' from the restore point on the Select step. ' + (ws.forest.mode === 'authoritative' ? 'Each becomes the source of truth for its domain. ' : 'Each syncs from its domain\u2019s other domain controllers once it is back. ') + (_frHasOrig() ? '' : (ws.forest.target === 'windows' ? 'Each one is restored onto the clean Windows Server machine you name.' : 'Choose where each one lands on ' + (ws.forest.target === 'hyperv' ? 'Hyper-V' : 'VMware') + '.')); }
   var t = ws.forest.target, m = _frModel(), kept = m.domains.filter(function(d){ return d.auth; }).length, total = m.domains.reduce(function(n, d){ return n + d.dcs.length; }, 0);
   var lead = (total > kept ? 'Restoring ' + kept + ' of ' + total + ' backed-up domain controllers: one per domain, and it takes over all FSMO roles. The others are rebuilt after recovery. ' : 'One domain controller per domain is restored, and it takes over all FSMO roles. ') + 'Domains recover root first, then children. ';
   return lead + (_frHasOrig() ? '' : t === 'windows' ? 'Each one is restored onto the clean Windows Server machine you name.' : 'Choose where each one lands on ' + (t === 'hyperv' ? 'Hyper-V' : 'VMware') + '.');
@@ -44973,7 +45078,7 @@ function wsRenderForestDest() {
 
   setTimeout(_frPlacePop, 0);
   return '<div class="ws-step-pad"><div class="ws-step-header"><div class="ws-step-title">Restore Options</div><div class="ws-step-description">Choose where the domain controllers are restored.</div></div>'
-    + '<div class="ws-cfg-card"><div class="ws-cfg-sections"><div class="ws-cfg-section"><div class="ws-cfg-section-body">' + cards + '</div></div>' + _frTargetSection() + '</div></div></div>' + pop;
+    + '<div class="ws-cfg-card"><div class="ws-cfg-sections"><div class="ws-cfg-section"><div class="ws-cfg-section-body">' + cards + '</div></div>' + _frTargetSection() + _frModeSection() + '</div></div></div>' + pop;
 }
 function wsFrSetTarget(t) {
   var f = ws.forest; if (f.target === t) return;
@@ -45003,7 +45108,11 @@ function _frTargetReady() {   // Restore options only needs the platform, and th
 }
 function _frConfigReady() {   // a clean Windows Server needs a machine for every domain controller; every other domain controller needs a server and, off its original infrastructure, every setting chosen (a resource pool defaults); a re-addressed domain controller needs every adapter re-addressed
   var f = ws.forest, m = _frModel();
-  return m.domains.every(function(d){
+  return m.domains.every(_frDcReady);
+}
+function _frDcReady(d) {
+  var f = ws.forest;
+  {
     if (_frCoverageMsg(d)) return false;
     if (f.target === 'windows') return String((f.win || {})[d.res.id] || '').trim() !== '' && (f.winChk || {})[d.res.id] === 'ok';
     if (!_frDcServer(d)) return false;
@@ -45011,8 +45120,10 @@ function _frConfigReady() {   // a clean Windows Server needs a machine for ever
     if (_frHasOrig() && f.dest === 'original') return true;
     var ho = _frDcHasOrig(d);
     return _frKeysFor(d).every(function(k){ return k === 'server' || (ho && k !== 'clres' && e[k] === FR_S) || k === 'pool' || (e[k] !== undefined && e[k] !== FR_S); });
-  });
+  }
 }
+function wsFrToggleCard(id, idx) { var f = ws.forest; if (!f.open) f.open = {}; f.open[id] = !_frCardOpen(id, idx); if (f.pop && f.pop.dom === id) f.pop = null; wsRenderAll(); }
+function _frCardOpen(id, idx) { var o = (ws.forest.open || {})[id]; return o === undefined ? idx === 0 : o; }   // the first card starts open, the rest closed
 
 
 function wsFrToggleAdv() { ws.frAdvOpen = !ws.frAdvOpen; wsRenderAll(); }
@@ -45020,7 +45131,7 @@ function wsFrTog(k) { ws.forest[k] = !ws.forest[k]; wsRenderAll(); }
 
 // ── Step 4 · Summary ─────────────────────────────────────────────────────────
 // Forest prerequisites run through the EXISTING pre-flight ticker (where a restore's checks already surface) — a failed one halts the job there.
-var FR_TICKER = { 'fr-meta': 'Verifying forest metadata in the backups', 'fr-dc': 'Confirming every domain has a domain controller backup', 'fr-schema': 'Checking the Active Directory schema is supported', 'fr-vm': 'Confirming the domain controllers were backed up as virtual machines', 'fr-mount': 'Confirming a Windows mount server is available' };
+var FR_TICKER = { 'fr-meta': 'Verifying forest metadata in the backups', 'fr-dc': 'Confirming every domain has a domain controller backup', 'fr-schema': 'Checking the Active Directory schema is supported', 'fr-vm': 'Confirming the domain controllers were backed up as virtual machines', 'fr-mount': 'Confirming a Windows mount server is available', 'fr-tsl': 'Checking the backup is within the tombstone lifetime', 'fr-peers': 'Confirming another domain controller is left to sync from' };
 function wsFrPreChecks() { return [{ id: 'source-rp', label: 'Verifying backup is accessible' }].concat(_frChecks(_frModel()).map(function(c){ return { id: c.id, label: FR_TICKER[c.id], remedy: c.detail }; })); }
 // Forest-specific content for the standard Summary's slots (config rows, item rows, follow-ups, warnings).
 function wsFrPrepRun() {
@@ -45043,12 +45154,13 @@ function _frChangedLines(d) {
 function wsFrConfigRows() {
   // Only what the user decided: defaults are not repeated. Per-domain-controller detail lives in the collapsible items list below.
   var f = ws.forest, m = _frModel(), cfg = ws.config || {}, rows = [];
+  if (_frKind() === 'dc') rows.push({ label: 'Restore mode', value: f.mode === 'authoritative' ? 'Authoritative' : 'Non-authoritative' });
   var used = []; m.domains.forEach(function(d){ var v = _frDcServer(d); if (v && used.indexOf(v) < 0) used.push(v); });
   if (!_frHasOrig()) rows.push({ label: 'Destination', value: _frTargetName() + (f.target === 'windows' || !used.length ? '' : ', ' + used.join(', ')) });
   else rows.push({ label: 'Destination', value: _frTargetName() + ', ' + (used.some(function(v){ return v !== f.srcServer; }) ? used.join(', ') : f.dest === 'different' ? 'a different environment' : 'original infrastructure') });
   if (f.dest === 'different' && _frHasOrig()) {
     var moved = m.domains.filter(function(d){ return _frChangedLines(d).length; }).length;
-    rows.push({ label: 'Recovery environment', value: moved ? 'Changed for ' + moved + ' of ' + m.domains.length + (m.domains.length === 1 ? ' domain' : ' domains') + '. Expand the list below to see where each one lands.' : 'No changes from the original environment' });
+    rows.push({ label: 'Recovery environment', value: moved ? 'Changed for ' + moved + ' of ' + m.domains.length + (_frKind() === 'dc' ? (m.domains.length === 1 ? ' domain controller' : ' domain controllers') : (m.domains.length === 1 ? ' domain' : ' domains')) + '. Expand the list below to see where each one lands.' : 'No changes from the original environment' });
   }
   var nameTxt = f.nameMode === 'affix' ? ((f.prefix ? 'prefix ' + f.prefix : '') + (f.prefix && f.suffix ? ' and ' : '') + (f.suffix ? 'suffix ' + f.suffix : '')) : (f.nameMode === 'set' && f.name ? f.name : '');
   var vm = [];
@@ -45071,7 +45183,25 @@ function wsFrItemRows() {
       + '<span class="ws-progress-row-sub">' + (d.root ? 'Root domain ' + wsEscape(d.res.name) + ', restored first' : 'Child domain ' + wsEscape(d.res.name) + ', restored after ' + wsEscape(m.domains[0].res.name)) + '</span>' + extra + '</div></div>';
   }).join('') + '</div>';
 }
+function wsFrDcWarningsHtml() {
+  var f = ws.forest, auth = f.mode === 'authoritative';
+  return '<ul class="fr-warn"><li>' + (auth
+      ? 'An authoritative restore makes the restored domain controller the source of truth for its domain, so changes made after the backup are lost unless another domain controller holds them. You might need to seize the FSMO roles afterwards.'
+      : 'A non-authoritative restore syncs from the domain’s other domain controllers, so at least one of them must be working.') + '</li>'
+    + (f.collide === 'replace' ? '<li>Existing virtual machines named ' + wsEscape(_frDcIds().map(function(id){ return _resById(id).name; }).join(', ')) + ' at the destination are deleted before the restore starts. You can change this in Advanced settings.</li>' : '')
+    + '<li>A failed restore can’t be retried or resumed. You restart from the beginning, and any restored virtual machines and agent files stay behind until you remove them.</li></ul>';
+}
+function wsFrDcChecklist() {
+  var auth = ws.forest.mode === 'authoritative';
+  return [
+    { title: 'Verify replication and DNS', body: 'Check that each restored domain controller replicates with its domain’s other domain controllers and that DNS resolves.' }
+  ].concat(auth ? [
+    { title: 'Seize the FSMO roles if needed', body: 'After an authoritative restore the roles may need to be seized, if the domain controller that held them was not the one restored.' },
+    { title: 'Redeploy the other domain controllers', body: 'The domain’s other domain controllers were not restored. Redeploy and promote them so they replicate from the restored one.' }
+  ] : []);
+}
 function wsFrChecklist() {
+  if (_frKind() === 'dc') return wsFrDcChecklist();
   var m = _frModel(), left = [];
   m.domains.forEach(function(d){ d.dcs.forEach(function(c){ if (!d.auth || c.id !== d.auth.id) left.push(c.name); }); });
   return [
@@ -45080,7 +45210,9 @@ function wsFrChecklist() {
     { title: 'Add the global catalogs', body: 'Global catalog is enabled only on the restored domain controllers. Add it to the other domain controllers that hosted it originally.' }
   ];
 }
+
 function wsFrWarningsHtml() {
+  if (_frKind() === 'dc') return wsFrDcWarningsHtml();
   var f = ws.forest, m = _frModel(), names = m.domains.map(function(d){ return d.auth ? d.auth.name : ''; }).filter(Boolean).join(', ');
   var kept = m.domains.filter(function(d){ return d.auth; }).length, total = m.domains.reduce(function(n, d){ return n + d.dcs.length; }, 0), rest = total - kept, ro = m.domains.some(function(d){ return d.dcs.some(function(c){ return /RODC/i.test(c.name); }); });
   return '<ul class="fr-warn">' + (rest > 0 ? '<li>Only one domain controller per domain is restored: ' + wsEscape(names) + '. ' + (rest === 1 ? 'The other backed-up domain controller is' : 'The other ' + rest + ' backed-up domain controllers are') + ' not restored; you rebuild ' + (rest === 1 ? 'it' : 'them') + ' after recovery' + (ro ? ', and a read-only domain controller can\u2019t be restored at all' : '') + '.</li>' : '') + (f.collide === 'replace' ? '<li>Existing virtual machines named ' + wsEscape(names) + ' at the destination are deleted before recovery starts. You can change this in Advanced settings.</li>' : '')
@@ -48588,7 +48720,7 @@ function wsRenderProgress() {
       // it. The Okta 6-priority ordering detail moved to the help drawer.
       subLine     = 'You can track progress in the Activity log once it starts.';
       headerTitle = 'Summary';
-      headerDesc  = wsIsForest() ? 'Here\'s the final plan for this forest recovery. When you\'re ready, click Recover forest to start the job.' : 'Here\'s the final list of items in this restore. When you\'re ready, click Restore ' + noun + ' to start the job.';
+      headerDesc  = wsIsForest() ? (_frKind() === 'dc' ? 'Here\'s the final plan for this domain controller restore. When you\'re ready, click ' + _frActionLabel() + ' to start the job.' : 'Here\'s the final plan for this forest recovery. When you\'re ready, click Recover forest to start the job.') : 'Here\'s the final list of items in this restore. When you\'re ready, click Restore ' + noun + ' to start the job.';
     }
     // Dry-run states reuse this card — only the copy + the rollup/pills change.
     if (ws.dryRunPhase === 'running') {
@@ -58418,6 +58550,7 @@ function rdBuildSideAction(side, sel, resource) {
     var _anchorRp = (typeof _rdCartCommittedRpId === 'function') ? _rdCartCommittedRpId() : null;
     var _cartCount = state.restorePlan.size;
     if (sel === _anchorRp) {
+      if (rdState.singleSnap && rdState.noCompare) return '';   // the only point on screen is necessarily the selected one; the card's green top and tint already say so
       // Same light-blue OUTLINED treatment as the inventory "Added" badge, so
       // "this is the selected point" reads identically across inventory + cart.
       // Says "Selected" and drops the × — the cart's point isn't dismissable here
@@ -60498,7 +60631,9 @@ function renderRdBody() {
     // column; a grey caption says how old the point is; the add action sits on its own row. The green accent appears
     // only on the column whose point has been added to the restore job.
     // The column holding the job's restore point wears the same green as an item added to the cart: in the wizard that column carries the Selected tag instead of the Added toggle.
-    var _addedL = /rw-added-toggle|rw-restore-target-tag/.test(leftAction || '');
+    // In the wizard's one-point layout the Selected badge is not shown (the card says it), so the highlight cannot be read from the badge's markup: it follows the point itself, which is the job's restore point.
+    var _soloCartPoint = !!(rdState.singleSnap && rdState.noCompare && typeof _rdCartReanchorActive === 'function' && _rdCartReanchorActive() && typeof _rdCartCommittedRpId === 'function' && rdState.leftSel === _rdCartCommittedRpId());
+    var _addedL = _soloCartPoint || /rw-added-toggle|rw-restore-target-tag/.test(leftAction || '');
     var _addedR = !rdState.singleSnap && /rw-added-toggle|rw-restore-target-tag/.test(rightAction || '');
     function _hcCap(info) {
       if (!info) return '';
