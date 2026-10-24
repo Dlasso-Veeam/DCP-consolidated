@@ -4571,6 +4571,7 @@ body.ai-hx-transcript .ai-foot { display: none; }
 .fr-tn-n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; } .fr-tn-t { font-size: 14px; line-height: 20px; color: var(--black-60); white-space: nowrap; font-weight: 450; }
 /* DS Button Tabs: grey container, 36px tabs, active = white + neutral border + semibold (never green) */
 .fr-li2 { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; padding: 12px; border: none; border-radius: 4px; background: transparent; font: inherit; color: var(--black-100); cursor: pointer; text-align: left; } .fr-li2:hover { background: var(--em-green-tint); }
+.fr-li2-n .ws-cfg-choice-chip { margin-left: 8px; vertical-align: middle; box-sizing: border-box; background: transparent; border: 1px solid var(--green-s70); }   /* Vision Chip, Type Green / Mode Outline: the Light fill disappears into the selected row's tint */
 .fr-li2-n { font-size: 16px; line-height: 22px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .fr-li2-m { font-size: 14px; line-height: 20px; color: var(--black-60); font-weight: 450; }
 .fr-li2.on { background: var(--em-green-tint); box-shadow: inset 2px 0 0 var(--em-green); border-radius: 0; } .fr-li2.on .fr-li2-n { color: var(--em-green); font-weight: 500; }
 .fr-li2.src { margin-bottom: 4px; border-bottom: 1px solid var(--border-light); border-radius: 4px 4px 0 0; } .fr-li2.src.on { border-radius: 0; }
@@ -45210,26 +45211,25 @@ function _frTargetSection() {   // what the chosen destination needs before Conf
     fields = _frField('Administrator user name', 'Recovery signs in to every machine with this account to install Active Directory Domain Services and restore the domain controller.', 'windows', 'user', 'text', 'Administrator') + _frField('Password', '', 'windows', 'pass', 'password', ''); }
   return '<div class="ws-cfg-section"><div class="ws-cfg-section-hdr"><div class="ws-cfg-section-title">' + title + '</div><div class="ws-cfg-section-sub">' + sub + '</div></div><div class="ws-cfg-section-body"><div class="fr-tfields">' + fields + '</div></div></div>';
 }
-// Restore options: the job-wide decision first (Original location, New location on the source platform, or a Different platform), as the other workloads ask it. The platform list lives inside the Different platform card.
+// Restore options: the job-wide decision first, as the other workloads ask it: Original location (replace in place) or New location (create new; any change counts, the platform included). The platform list lives inside the New location card.
 var FR_PLAT_ROWS = { vmware: ['VMware', 'vCenter Server or ESXi host', 'A vCenter Server or ESXi host.'], hyperv: ['Microsoft Hyper-V', 'Hyper-V host or cluster', 'A Hyper-V host or cluster.'], windows: ['New Windows Server', 'Clean Windows Server machine', 'A clean Windows Server machine.'] };
 function _frPlatName(p) { return p === 'hyperv' ? 'Hyper-V' : 'VMware'; }
-function _frMode3() { var f = ws.forest; return f.target !== f.srcPlatform ? 'plat' : (f.dest === 'different' ? 'new' : 'orig'); }
-function _frOtherPlats() { var f = ws.forest; return ['vmware', 'hyperv', 'windows'].filter(function(p){ return p !== f.srcPlatform && !(p === 'windows' && _frKind() === 'vm'); }); }   // every platform but the one the backups came from; a clean Windows Server is for domain controllers only
+function _frMode3() { var f = ws.forest; return (f.target !== f.srcPlatform || f.dest === 'different') ? 'new' : 'orig'; }   // two outcomes: replace in place, or create new (any change at all, the platform included)
+function _frPlats() { var f = ws.forest; return ['vmware', 'hyperv', 'windows'].filter(function(p){ return !(p === 'windows' && _frKind() === 'vm'); }); }   // a clean Windows Server is for domain controllers only
 function wsFrSetMode3(m) {
   var f = ws.forest; f.platOpen = false;
-  if (m === 'plat') { if (f.target === f.srcPlatform) wsFrSetTarget(_frOtherPlats()[0]); else wsRenderAll(); return; }
+  if (m === 'new') { if (_frMode3() === 'new') return; f.dest = 'different'; f.pop = null; f.pend = undefined; f.msg = ''; wsRenderAll(); return; }   // clicking the card again keeps the platform already chosen
   if (f.target !== f.srcPlatform) wsFrSetTarget(f.srcPlatform);
-  if (m === 'orig' && f.dest === 'different') { _frSeedRows(); Object.keys(f.dom).forEach(function(k){ _frClearIp(f.dom[k]); }); }   // going back to the original location drops edits made for a new one
-  f.dest = m === 'new' ? 'different' : 'original'; f.pop = null; f.pend = undefined; f.msg = ''; wsRenderAll();
+  else if (f.dest === 'different') { _frSeedRows(); Object.keys(f.dom).forEach(function(k){ _frClearIp(f.dom[k]); }); }   // going back to the original location drops edits made for a new one
+  f.dest = 'original'; f.pop = null; f.pend = undefined; f.msg = ''; wsRenderAll();
 }
 function wsFrTogglePlat(e) { if (e) e.stopPropagation(); ws.forest.platOpen = !ws.forest.platOpen; wsRenderAll(); }
-function wsFrPickPlat(id, e) { if (e) e.stopPropagation(); ws.forest.platOpen = false; if (ws.forest.target === id) wsRenderAll(); else wsFrSetTarget(id); }
+function wsFrPickPlat(id, e) { if (e) e.stopPropagation(); var f = ws.forest; f.platOpen = false; if (f.target !== id) wsFrSetTarget(id); if (id === f.srcPlatform) f.dest = 'different'; wsRenderAll(); }   // the source platform inside New location is still a new location
 function _frPlatDD() {
-  var f = ws.forest, others = _frOtherPlats(), cur = others.indexOf(f.target) >= 0 ? f.target : others[0], r = FR_PLAT_ROWS[cur], open = !!f.platOpen && _frMode3() === 'plat';
-  if (others.length === 1) return '<div class="ws-target-org-detail"><div class="ws-target-org-detail-name">' + r[0] + '</div><div class="ws-target-org-detail-meta">' + r[1] + '</div></div>';   // one choice: shown, not picked from
+  var f = ws.forest, others = _frPlats(), cur = f.target, r = FR_PLAT_ROWS[cur], open = !!f.platOpen && _frMode3() === 'new';
   var chev = '<svg class="ws-target-org-trigger-chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>';
-  return '<div class="ws-cross-org-wrap"><button class="ws-target-org-trigger' + (open ? ' is-open' : '') + '" type="button" aria-expanded="' + open + '" onclick="wsFrTogglePlat(event)"' + (_frMode3() === 'plat' ? '' : ' tabindex="-1"') + '><span class="ws-target-org-trigger-text"><span class="ws-target-org-trigger-name">' + r[0] + '</span><span class="ws-target-org-trigger-meta">' + r[1] + '</span></span>' + chev + '</button>'
-    + (open ? '<div class="ws-cross-org-popover fr-platpop" role="listbox" aria-label="Choose platform">' + others.map(function(id){ var q = FR_PLAT_ROWS[id]; return '<button class="fr-li2' + (id === cur ? ' on' : '') + '" type="button" role="option" aria-selected="' + (id === cur) + '" onclick="wsFrPickPlat(\'' + id + '\', event)"><span class="fr-li2-n">' + q[0] + '</span><span class="fr-li2-m">' + q[2] + '</span></button>'; }).join('') + '</div>' : '') + '</div>';
+  return '<div class="ws-cross-org-wrap"><button class="ws-target-org-trigger' + (open ? ' is-open' : '') + '" type="button" aria-expanded="' + open + '" onclick="wsFrTogglePlat(event)"' + (_frMode3() === 'new' ? '' : ' tabindex="-1"') + '><span class="ws-target-org-trigger-text"><span class="ws-target-org-trigger-name">' + r[0] + '</span><span class="ws-target-org-trigger-meta">' + r[1] + '</span></span>' + chev + '</button>'
+    + (open ? '<div class="ws-cross-org-popover fr-platpop" role="listbox" aria-label="Choose platform">' + others.map(function(id){ var q = FR_PLAT_ROWS[id]; return '<button class="fr-li2' + (id === f.srcPlatform ? ' src' : '') + (id === cur ? ' on' : '') + '" type="button" role="option" aria-selected="' + (id === cur) + '" onclick="wsFrPickPlat(\'' + id + '\', event)"><span class="fr-li2-n">' + q[0] + (id === f.srcPlatform ? '<span class="ws-cfg-choice-chip">Current</span>' : '') + '</span><span class="fr-li2-m">' + q[2] + '</span></button>'; }).join('') + '</div>' : '') + '</div>';
 }
 function _frTCard(sel, fn, title, meta, body, detail) {
   return '<div class="ws-target-card' + (sel ? ' is-selected' : '') + '" role="radio" aria-checked="' + sel + '" tabindex="0" onclick="' + fn + '"><span class="ws-target-card-dot"></span><span class="ws-target-card-title">' + title + '</span>'
@@ -45238,10 +45238,9 @@ function _frTCard(sel, fn, title, meta, body, detail) {
 }
 function wsRenderForestDest() {
   var f = ws.forest, pop = '', mode = _frMode3(), src = _frPlatName(f.srcPlatform), _n = _frKind() === 'vm' ? _frVmIds().length : _frKind() === 'dc' ? _frDcIds().length : 2, _nn = _frNoun(_n !== 1);   // the cards name what is being restored
-  var cards = '<div class="ws-cfg-choices ws-cfg-choices-3">'
+  var cards = '<div class="ws-cfg-choices">'
     + _frTCard(mode === 'orig', "wsFrSetMode3('orig')", 'Original location', ['Platform: ' + src, 'Server: ' + f.srcServer], 'Replaces the existing ' + _nn + ' with the backup.')
-    + _frTCard(mode === 'new', "wsFrSetMode3('new')", 'New location', ['Platform: ' + src], 'Creates ' + (_n === 1 ? 'a new ' : 'new ') + _nn + ' where you choose next.')
-    + _frTCard(mode === 'plat', "wsFrSetMode3('plat')", 'Different platform', mode === 'plat' ? '' : '— pick on select', 'Moves the ' + _nn + ' to another platform.', _frPlatDD())
+    + _frTCard(mode === 'new', "wsFrSetMode3('new')", 'New location', [], 'Creates ' + (_n === 1 ? 'a new ' : 'new ') + _nn + ' with the settings you choose next.', _frPlatDD())
     + '</div>';
 
   setTimeout(_frPlacePop, 0);
