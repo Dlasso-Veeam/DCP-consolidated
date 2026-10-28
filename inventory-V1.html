@@ -7811,6 +7811,7 @@ body.ai-open.ai-full #toast { right: 24px; }   /* full screen: nothing beside it
 .rl-dlf { padding: 16px 24px; border-top: 1px solid var(--border-light); display: flex; justify-content: flex-end; gap: 8px; }
 .rl-orow { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(180px, 1.4fr) auto; gap: 12px; align-items: start; }
 .rl-orows { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.rl-orow .ws-basket-row-remove { width: 36px; height: 36px; }   /* the row's fields are 36px tall */
 
 /* Pagination dropdown: the design system's list-item menu, used for every pager select (page size, Go to page) */
 .pgds-menu { position: fixed; z-index: 900; background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; box-shadow: 0 8px 24px rgba(31,34,41,.16); padding: 4px; max-height: 280px; overflow: auto; }
@@ -41283,8 +41284,8 @@ function renderTopActionBar() {
         ? RESOURCES.find(function(x){ return x.id === childState.parentId; }) : null;
       var _viewCat = _drillResForCat && typeof _restoreCategoryOf === 'function'
         ? _restoreCategoryOf(_drillResForCat) : null;
-      // D365: a table opened to its records IS the place those records live, so what you are viewing is "Records from <table>" (not the table's own "Tables" category).
-      if (_drillResForCat && _drillResForCat.wl === 'Dynamics 365' && _drillResForCat.drillTarget === 'records') _viewCat = 'Records from ' + _drillResForCat.name;
+      // D365: a table opened to its records IS the place those records live, so what you are viewing is "<table> records" (not the table's own "Tables" category).
+      if (_drillResForCat && _drillResForCat.wl === 'Dynamics 365' && _drillResForCat.drillTarget === 'records') _viewCat = _drillResForCat.name + ' records';
       if (_viewCat && _viewCat !== _activeCat) lockedCat = _activeCat;
     }
   }
@@ -42388,22 +42389,27 @@ function wsCancel() {
   _wsCancelCommit();
 }
 // The actual teardown — reached directly (express / empty) or via the confirm.
+// Every Configure-step edit goes back to the documented defaults, so choices never silently persist into the next wizard session. Runs when a job is abandoned AND when one has finished.
+function _wsResetJobDrafts() {
+  ws.config = JSON.parse(JSON.stringify(_WS_DEFAULT_CONFIG));
+  ws.scopeStrategy = 'full';
+  ws.itemTs = {};
+  ws.configEdits = {};
+  ws.catConfigs = {};
+  ws.catCollapsed = {};
+  ws.compareRpIds = {};
+  ws.compareLeftRpIds = {};
+  ws.collapsedGroups = {};
+  ws.contentExpanded = null;
+  ws.globalDate = null;
+  ws.scopeDates = null;
+  ws.d365AdvExpanded = false;
+  ws.summaryItemsExpanded = false;
+  if (window.D365X && D365X.resetScope) D365X.resetScope();   // the Dynamics 365 restore scope belongs to the job too
+}
 function _wsCancelCommit(clearCart) {
   if (!ws._expressMode) {
-    // Reset every Configure-step edit to the documented defaults so choices
-    // never silently persist into the next wizard session.
-    ws.config = JSON.parse(JSON.stringify(_WS_DEFAULT_CONFIG));
-    ws.scopeStrategy = 'full';
-    ws.itemTs = {};
-    ws.configEdits = {};
-    ws.catConfigs = {};
-    ws.catCollapsed = {};
-    ws.compareRpIds = {};
-    ws.compareLeftRpIds = {};
-    ws.collapsedGroups = {};
-    ws.contentExpanded = null;
-    ws.globalDate = null;
-    ws.scopeDates = null;
+    _wsResetJobDrafts();
     // Abandon the whole job: empty the cart (mirrors the inventory bar's
     // Clear-selection so the two paths to an empty cart behave identically).
     if (clearCart && typeof clearPlanFromDock === 'function') clearPlanFromDock();
@@ -46775,6 +46781,8 @@ function _d365RelPlus() { return _d365RelCalc().plus ? '+' : ''; }
 function _d365RelShow(n) { if (!_d365RelPlus()) return _d365RelFmt(n); return _d365RelFmt(n >= D365REL_TOTAL_CAP ? D365REL_TOTAL_CAP : Math.floor(n / 1000) * 1000) + '+'; }
 function _d365RelRp() { var r = _d365RelRoots()[0]; if (r && typeof wsItemTargetTs === 'function' && typeof _wsRpChipLabel === 'function') return _wsRpChipLabel(wsItemTargetTs(r.key)); var t = (typeof _v1ActiveRestoreTarget === 'function') ? _v1ActiveRestoreTarget() : null; return (t && t.fullLabel) || ((typeof _v1LatestRpLabel === 'function') ? _v1LatestRpLabel() : 'Latest'); }
 function _d365RelFmt(n) { return Number(n).toLocaleString('en-US'); }
+var _D365REL_CB_ON = '<svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3.5 1h9A2.5 2.5 0 0 1 15 3.5v9a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5v-9A2.5 2.5 0 0 1 3.5 1Zm7.9 4.4L7 9.8 4.6 7.4 3.5 8.5 7 12l5.5-5.5-1.1-1.1Z"/></svg>';
+var _D365REL_CB_OFF = '<svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3.5 1h9A2.5 2.5 0 0 1 15 3.5v9a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5v-9A2.5 2.5 0 0 1 3.5 1Zm0 1.5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1h-9Z"/></svg>';
 var _D365REL_TRASH = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
 // handlers
 function wsRelRender(focusId) {
@@ -46786,7 +46794,7 @@ function wsRelRender(focusId) {
 var D365REL_COUNT_MS = 1300, D365REL_ROWS_MS = 1500;
 function wsRelToggle(on) {
   var c = _d365RelCfg(); c.on = on; c.open = on; c.pop = false; c.page = 1; clearTimeout(c._lt); clearTimeout(c._lt2);
-  c.loading = !!on; c.rowsLoading = !!on;
+  c.loading = !!on; c.rowsLoading = !!on; c.pageLoading = false; clearTimeout(c._lp);
   if (on) {
     var t1 = D365REL_COUNT_MS + Math.round(Math.random() * 500), t2 = t1 + D365REL_ROWS_MS + Math.round(Math.random() * 900);
     c._lt = setTimeout(function(){ c.loading = false; wsRelRender(); }, t1);
@@ -46812,8 +46820,14 @@ function wsRelAll(on) { var c = _d365RelCfg(); _d365RelShownTables().forEach(fun
 function wsRelPop(e) { if (e) e.stopPropagation(); var c = _d365RelCfg(); c.pop = !c.pop; c.lvpop = false; c.tq = ''; wsRelRender(); }
 function wsRelTq(v) { _d365RelCfg().tq = v; wsRelRender('wsRelTq'); }
 function wsRelSearch(v) { var c = _d365RelCfg(); c.q = v; c.page = 1; wsRelRender('wsRelQ'); }
-function wsRelPage(p) { _d365RelCfg().page = p; wsRelRender(); }
-function wsRelSize(n) { var c = _d365RelCfg(); c.size = n; c.page = 1; wsRelRender(); }
+// Each page is fetched on its own (only the rows on screen are requested), so moving to another page, or changing how many rows a page holds, shows the shimmer rows until the new page arrives. A page is 10 to 100 rows, much less than the first load, so it is quicker.
+function _d365RelPageLoad() {
+  var c = _d365RelCfg(); clearTimeout(c._lp); c.pageLoading = true;
+  c._lp = setTimeout(function(){ c.pageLoading = false; wsRelRender(); }, 350 + Math.round(Math.random() * 450));
+  wsRelRender();
+}
+function wsRelPage(p) { _d365RelCfg().page = p; _d365RelPageLoad(); }
+function wsRelSize(n) { var c = _d365RelCfg(); c.size = n; c.page = 1; _d365RelPageLoad(); }
 function wsRelRm(id) { _d365RelCfg().ex[id] = true; wsRelRender(); wsRelDrwPaint(); }
 function wsRelBack(id) { delete _d365RelCfg().ex[id]; wsRelRender(); wsRelDrwPaint(); }
 function wsRelUndo() { _d365RelCfg().ex = {}; wsRelRender(); wsRelDrwPaint(); }
@@ -46821,9 +46835,9 @@ function wsRelIncParents() { var c = _d365RelCfg(); c.on = true; c.open = true; 
 document.addEventListener('click', function(e){ var c = ws && ws.config && ws.config.d365Rel; if (c && c.pop && !e.target.closest('.rl-popwrap')) { c.pop = false; wsRenderAll(); } });
 // the block
 // The block's body while related records are being retrieved: the same toolbar and table, as shimmer bars (the app's skeleton), with the real column headings so nothing shifts when the data arrives.
-function _d365RelSkelRows() {
+function _d365RelSkelRows(n) {
   var bar = function(w){ return '<span class="rd-skel-bar" style="width:' + w + ';display:block"></span>'; }, rows = '', w = ['62%', '48%', '71%', '55%', '66%', '44%', '58%', '69%'];
-  for (var i = 0; i < 8; i++) rows += '<tr class="ws-tr" aria-hidden="true"><td class="ws-td is-primary"><div style="display:flex;flex-direction:column;gap:8px">' + bar(w[i]) + bar('38%') + '</div></td><td class="ws-td ws-col-type">' + bar('48px') + '</td><td class="ws-td ws-col-target">' + bar('96px') + '</td><td class="ws-td is-actions-col"></td></tr>';
+  for (var i = 0; i < (n || 8); i++) rows += '<tr class="ws-tr" aria-hidden="true"><td class="ws-td is-primary">' + bar(w[i]) + '</td><td class="ws-td ws-col-type">' + bar('48px') + '</td><td class="ws-td ws-col-target">' + bar('96px') + '</td><td class="ws-td is-actions-col"></td></tr>';
   return rows;
 }
 function _d365RelSkeleton() {
@@ -46839,14 +46853,16 @@ function _d365RelBlock() {
   var sw = '<button class="ws-adv-toggle" type="button" role="switch" aria-checked="' + c.on + '" onclick="event.stopPropagation();wsRelToggle(' + !c.on + ')" style="flex:none">' + (c.on ? _ADV_TOG_ON : _ADV_TOG_OFF) + '</button>';
   var loading = !!(c.on && c.loading);
   var sm = loading ? '<span class="rd-skel-bar" style="width:160px;display:inline-block;vertical-align:middle" role="status" aria-label="Loading related records"></span>' : (c.on ? '<b>' + _d365RelShow(total) + ' records</b> in ' + nOn + ' tables' + (_d365RelDepth() > 1 ? ', ' + _d365RelLvLbl() : '') : '');
-  var tip = 'Related records are the records that point to your selection (children, such as contacts and cases) and the records it points to (parents, such as a parent account). Only direct links are followed. Related records follow the conflict handling you choose on the next step, except a parent that already exists at the destination, which is never changed.';
+  var tip = 'Related records are the records that point to your selection (children, such as contacts and cases) and the records it points to (parents, such as a parent account). Only direct links are followed. Related records follow the conflict handling you choose on the next step, except parents: a parent record that already exists at the destination is left as it is.';
   var cl = c.lvC || 1, pl = c.lvP || 1, lvChipLbl = cl === pl ? String(cl) : cl + ' child, ' + pl + ' parent';
   var lvBoth = _d365RelLvRow('c', 'Child levels') + _d365RelLvRow('p', 'Parent levels') + '<div class="rl-lvhelp">' + _D365REL_LVHELP + '</div>';
-  var head = '<div class="rl-hit" onclick="' + (c.on ? 'wsRelOpen()' : 'wsRelToggle(true)') + '"><div class="rl-head">' + sw + '<span class="rl-tt">Include related records</span><span class="rl-sm">' + sm + '</span>'
-    + (c.on ? '<button type="button" class="rl-xb" onclick="event.stopPropagation();wsRelOpen()" aria-expanded="' + !!c.open + '" aria-label="' + (c.open ? 'Collapse' : 'Expand') + ' related records"><span style="display:inline-flex;transform:rotate(' + (c.open ? 180 : 0) + 'deg)">' + chev + '</span></button>' : '') + '</div>'
-    + '<div class="rl-def">Records directly linked to your selection, like an account’s contacts and cases. <span class="rl-how" onclick="event.stopPropagation()" data-tooltip="' + wsEscape(tip) + '">How this works</span></div></div>';
+  // The card is the app's selection card (.ws-cfg-choice.sc): icon and title, one checkbox at the right, a description below. Ticking it is what opens the card, so there is nothing else to click to show or hide the list.
+  var _rcIcon = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('child-roles-outlined', 20)) || '';
+  var _rcKey = "if (event.key === ' ' || event.key === 'Enter') { event.preventDefault(); wsRelToggle(" + !c.on + "); }";
+  var head = '<div class="sc-header" role="checkbox" aria-checked="' + !!c.on + '" tabindex="0" onclick="wsRelToggle(' + !c.on + ')" onkeydown="' + _rcKey + '"><span class="rc-icon">' + _rcIcon + '</span><span class="ws-cfg-choice-title">Include related records</span><span class="rc-cb">' + (c.on ? _D365REL_CB_ON : _D365REL_CB_OFF) + '</span></div>'
+    + '<div class="sc-desc"><div class="rl-def">Records directly linked to your selection, like an account’s contacts and cases. <span class="rl-how" data-tooltip="' + wsEscape(tip) + '">How this works</span></div>' + (c.on ? '<div class="rc-line">' + sm + '</div>' : '') + '</div>';
   var body = '';
-  if (c.on && c.open) {
+  if (c.on) {
     // the table dropdown (n of y, records per table), left of search
     var q = c.tq.trim().toLowerCase(), cat = c.cat || 'all';
     var nChild = tabs.filter(function(t){ return !t.par; }).length, nPar = tabs.filter(function(t){ return t.par; }).length;
@@ -46872,11 +46888,12 @@ function _d365RelBlock() {
     var start = (c.page - 1) * size, slice = flat.slice(start, start + size), trs = '', last = null, rp = _d365RelRp();
     slice.forEach(function(r, i){
       if (r.t !== last) { var t = _d365RelT(r.t), n = counts[r.t], cont = (i === 0 && start > 0 && flat[start - 1].t === r.t); trs += '<tr class="rl-sec"><td colspan="4"><span class="rl-gt">' + t.n + '</span><span class="rl-gc">' + ((n.shown < n.n || n.cap) ? 'Showing ' + _d365RelFmt(n.shown) + ' of ' + _d365RelFmt(n.n) + (n.cap ? '+' : '') + (qq ? (n.n === 1 ? ' match' : ' matches') : '') : _d365RelFmt(n.n) + (qq ? (n.n === 1 ? ' match' : ' matches') : (n.n === 1 ? ' record' : ' records'))) + (cont ? ', continued' : '') + '</span></td></tr>'; last = r.t; }
-      trs += '<tr class="ws-tr"><td class="ws-td is-primary"><div style="min-width:0"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + wsEscape(r.name) + '</div><div class="rl-sub">' + wsEscape(_d365RelSub(r)) + '</div></div></td>'
-        + '<td class="ws-td ws-col-type"><span class="res-type">Record</span></td><td class="ws-td ws-col-target"><button type="button" class="ws-rp-chip" onclick="wsRelDrw(\'' + r.id + '\')" aria-haspopup="dialog" data-tooltip="View this record’s metadata at the restore point">' + wsEscape(rp) + '</button></td>'
+      trs += '<tr class="ws-tr"><td class="ws-td is-primary"><div style="min-width:0"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + wsEscape(r.name) + '</div></div></td>'
+        + '<td class="ws-td ws-col-type"><span class="res-type" tabindex="0" data-tooltip="' + wsEscape(_d365RelSub(r)) + '" aria-label="' + wsEscape(((_d365RelT(r.t) || {}).par ? 'Parent' : 'Child') + ' record. ' + _d365RelSub(r)) + '">' + ((_d365RelT(r.t) || {}).par ? 'Parent' : 'Child') + ' record</span></td><td class="ws-td ws-col-target"><button type="button" class="ws-rp-chip" onclick="wsRelDrw(\'' + r.id + '\')" aria-haspopup="dialog" data-tooltip="View this record’s metadata at the restore point">' + wsEscape(rp) + '</button></td>'
         + '<td class="ws-td is-actions-col"><div style="display:flex;align-items:center;justify-content:flex-end;gap:6px"><button class="btn-icon btn-icon-sm ws-basket-row-remove" type="button" data-tooltip="Remove from restore" aria-label="Remove ' + wsEscape(r.name) + ' from restore" onclick="wsRelRm(\'' + r.id + '\')">' + _D365REL_TRASH + '</button></div></td></tr>';
     });
     if (c.rowsLoading) trs = _d365RelSkelRows();   // stage 2: the counts are in, the rows are still on their way
+    else if (c.pageLoading) trs = _d365RelSkelRows(Math.max(1, Math.min(slice.length, 25)));   // a page change: the pager already shows the new page, its rows are on their way
     else if (!trs) trs = '<tr><td colspan="4" style="padding:24px;text-align:center;color:var(--black-60)">' + (qq ? 'No related records match “' + wsEscape(c.q) + '”.' : 'No related tables are selected.') + '</td></tr>';
     body = '<div class="rl-body"><div class="rl-tools">' + chip + lvChip + '<div style="flex:1;min-width:0"><input id="wsRelQ" class="ws-field-input" style="width:100%" placeholder="Search related records by name" value="' + wsEscape(c.q) + '" oninput="wsRelSearch(this.value)"></div>' + (Object.keys(c.ex).length ? '<span class="rl-rmd" role="status"><b>' + _d365RelFmt(Object.keys(c.ex).length) + '</b> removed <button type="button" class="rl-lvbtn" onclick="wsRelUndo()" data-tooltip="Reset: bring back the removed records" aria-label="Reset removed records">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('undo-outlined', 20)) || 'Reset') + '</button></span>' : '') + (qq ? '<span class="rl-note" style="margin:0;white-space:nowrap">' + _d365RelFmt(flat.length) + (flat.length === 1 ? ' match' : ' matches') + '</span>' : '') + '</div>'
       + (trunc && !c.rowsLoading ? '<div class="vis-alert" role="note" style="margin:12px 0">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('info-outlined', 24)) || '') + '<div class="vis-alert-txt">' + (qq ? 'Search looks through every record in each table and shows the first ' + D365REL_PREVIEW + ' matches.' : 'Showing the first ' + D365REL_PREVIEW + ' records of each table.') + ' All related records are restored. To leave a table out, turn it off in Related tables.</div></div>' : '')
@@ -46884,9 +46901,9 @@ function _d365RelBlock() {
       + (c.rowsLoading ? '' : _wsPgBar(flat.length, c.page, size, 'wsRelPage', 'wsRelSize', 'listed record'))
       + '</div>';
   }
-  if (loading && c.open) body = _d365RelSkeleton();
+  if (loading) body = _d365RelSkeleton();
   var nex = Object.keys(c.ex).length;
-  return '<div class="rl-block">' + head + body + '</div>' + (loading ? '<div class="rl-note"><span class="rd-skel-bar" style="width:320px;display:inline-block;vertical-align:middle"></span></div>' : c.on ? '<div class="rl-note">This job restores <b>' + _d365RelShow(roots.length + total) + ' records</b> from the selected records and their related records.' + (nex ? ' ' + _d365RelFmt(nex) + ' removed.' : '') + '</div>' : '');
+  return '<div class="ws-cfg-choice sc rc-card' + (c.on ? ' is-selected' : '') + '" role="group" aria-label="Include related records">' + head + (c.on ? '<div class="rc-body">' + body + '</div>' : '') + '</div>' + (loading ? '<div class="rl-note"><span class="rd-skel-bar" style="width:320px;display:inline-block;vertical-align:middle"></span></div>' : c.on ? '<div class="rl-note">This job restores <b>' + _d365RelShow(roots.length + total) + ' records</b> from the selected records and their related records.' + (nex ? ' ' + _d365RelFmt(nex) + ' removed.' : '') + '</div>' : '');
 }
 // ── D365 Override field values: a field and a new fixed value, applied to every restored record that has the field ─────────
 function _d365OvrFields() {
@@ -46911,11 +46928,11 @@ function _d365OvrInline() {
     return '<div class="rl-orow"><div style="position:relative"><button type="button" class="ws-target-org-trigger' + (open ? ' is-open' : '') + '" aria-expanded="' + open + '" onclick="wsOvrDd(' + i + ',event)"><span class="ws-target-org-trigger-text"><span class="ws-target-org-trigger-name">' + wsEscape(o.f) + '</span></span>' + chev + '</button>'
       + (open ? '<div class="ws-cross-org-popover" role="listbox" style="max-height:260px;overflow:auto" onclick="event.stopPropagation()">' + fields.map(function(f){ var dis = taken.indexOf(f) >= 0 && f !== o.f; return '<button class="ws-cross-org-row' + (f === o.f ? ' is-selected' : '') + '" type="button" role="option"' + (dis ? ' disabled style="opacity:.5"' : '') + ' onclick="wsOvrPick(' + i + ',\'' + wsEscape(f) + '\',event)"><span class="ws-cross-org-row-text"><span class="ws-cross-org-row-name">' + wsEscape(f) + '</span></span></button>'; }).join('') + '</div>' : '') + '</div>'
       + '<input class="ws-field-input" style="width:100%" placeholder="New value" aria-label="New value for ' + wsEscape(o.f) + '" value="' + wsEscape(o.v) + '" oninput="wsOvrSet(' + i + ',this.value)" onchange="wsRenderAll()">'
-      + '<button type="button" class="ws-btn ws-btn-secondary" data-tooltip="Return this column to its backed-up value" onclick="wsOvrRm(' + i + ')">Reset</button></div>';
+      + '<button type="button" class="btn-icon btn-icon-sm ws-basket-row-remove" data-tooltip="Remove this column" aria-label="Remove the ' + wsEscape(o.f) + ' override" onclick="wsOvrRm(' + i + ')">' + _D365REL_TRASH + '</button></div>';
   }).join('');
   var more = fields.filter(function(f){ return taken.indexOf(f) < 0; }).length;
   return (rows ? '<div class="rl-orows">' + rows + '</div>' : '<div class="rl-av">None</div>')
-    + '<div class="rl-aacts"><button type="button" class="ws-btn ws-btn-secondary"' + (more ? '' : ' disabled') + ' onclick="wsOvrAdd()">Add a column</button>' + (d.length ? '<button type="button" class="ws-btn ws-btn-secondary" onclick="wsOvrResetCfg()">Reset all</button>' : '') + '</div>';
+    + '<div class="rl-aacts"><button type="button" class="ws-btn ws-btn-secondary"' + (more ? '' : ' disabled') + ' onclick="wsOvrAdd()">Add a column</button>' + (d.length ? '<button type="button" class="ws-btn ws-btn-secondary" data-tooltip="Remove every column override" onclick="wsOvrResetCfg()">Reset</button>' : '') + '</div>';
 }
 // Job totals: the records the user selected plus the related records they chose to include (D365 only; 0 otherwise). Every count the wizard states about the job goes through this.
 function _wsRelExtra() { return (typeof _d365RelTotal === 'function' && typeof wsIsD365Cart === 'function' && wsIsD365Cart()) ? _d365RelTotal() : 0; }
@@ -47736,7 +47753,7 @@ function wsRenderReviewD365(variant, n, noun, cfg) {
       + '</div>'
       + '<div class="ws-cfg-section-body">'
         + '<div class="ws-cfg-choices" style="grid-template-columns:repeat(' + conflictCols + ',1fr)">' + conflictBody + '</div>'
-        + ((cfg.d365Rel && cfg.d365Rel.on) ? '<div class="vis-alert vis-alert-info" role="note" style="margin-top:12px">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('info-outlined', 24)) || '') + '<div class="vis-alert-txt">Related records follow this choice. A parent that already exists is never changed.</div></div>' : '')
+        + ((cfg.d365Rel && cfg.d365Rel.on) ? '<div class="vis-alert vis-alert-info" role="note" style="margin-top:12px">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('info-outlined', 24)) || '') + '<div class="vis-alert-txt">' + (cm === 'override' ? 'Related records follow this choice, except parents. A parent record that already exists is left as it is.' : 'Related records follow this choice.') + '</div></div>' : '')
       + '</div>'
     + '</div>'
   );
@@ -50202,6 +50219,7 @@ function wsBuildConfigSummary() {
 }
 function wsFinishAndClose() {
   closeWorkspace();
+  if (!ws._expressMode) _wsResetJobDrafts();   // the next cart starts from the defaults, not from this job's choices
   // Job dispatched — wipe the cart AND every per-table selection set so no rows
   // linger as "selected" after returning to inventory, regardless of which view
   // (top-level or any drill level) is underneath the wizard. clearPlan() only
@@ -74066,7 +74084,7 @@ document.addEventListener('DOMContentLoaded', function () {
       var _txt = _whole
         ? plural(sc.mod + sc.del, 'record') + ' changed since ' + esc(X.short(sc.rpTs)) + ': ' + plural(sc.mod, 'modified record') + ' (earlier values are written back to the existing records) and ' + plural(sc.del, 'deleted record') + ' (recreated). Records that did not change are left alone.'
         : 'Restoring ' + esc(_cn) + ' for ' + plural(sc.mod, 'record') + ' that changed since ' + esc(X.short(sc.rpTs)) + '. The earlier values are written back to the existing records, and everything else on them is left alone.' + (sc.del ? ' ' + plural(sc.del, 'deleted record') + ' (recreated whole).' : '');
-      var _rel = (ws.config && ws.config.d365Rel && ws.config.d365Rel.on) ? ' Related records are restored the same way, and a parent that already exists is never changed.' : '';
+      var _rel = (ws.config && ws.config.d365Rel && ws.config.d365Rel.on) ? ' Related records are restored the same way, except parents: a parent record that already exists is left as it is.' : '';
       _txt += _rel;
       var note = '<div class="vis-alert" role="note" style="margin-top:12px">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('info-outlined', 24)) || '') + '<div class="vis-alert-txt">' + _txt + '</div></div>';
       html = html.replace('Review how this Dynamics 365 restore will run.</div>', 'Review how this Dynamics 365 restore will run.</div>' + note);
@@ -74347,8 +74365,8 @@ window.D365X.recChip = function (key, item) {
   };
   X.renderSelectCenter = function (bar) {
     var center = bar.querySelector('.tab-center'); var c = X.selCounts(); if (!center || !c) return;
-    var pl = function (n) { return n + ' ' + c.noun + (n === 1 ? '' : 's'); };
-    center.innerHTML = c.sel ? '<span class="tab-left-text"><strong>' + pl(c.sel) + '</strong> selected</span>' : '';   // choosing what to select lives in the header checkbox menu
+    if (/job locked to/i.test(center.textContent || '')) return;   // the lock message ("Restore job locked to Accounts records…") lives in this slot: leave it
+    center.innerHTML = '';   // nothing else here: the chip on the right already says how many are selected, and choosing what to select lives in the header checkbox menu (was: "N records selected")
   };
   var origOow = window._v1OowBarHtml;
   window._v1OowBarHtml = function () { return (X.on() && X.level()) ? '' : origOow.apply(this, arguments); };
@@ -74777,7 +74795,7 @@ window.D365X.recChip = function (key, item) {
 (function () {
   'use strict';
   var X = window.D365X;
-  /* what an item is, as a category: 'Tables' | 'Records from <table>' | 'Fields from <record>' | the type of any other item (a journey, a segment) */
+  /* what an item is, as a category: 'Tables' | '<table> records' | 'Fields from <record>' | the type of any other item (a journey, a segment) */
   function d365Category(key) {
     if (typeof key !== 'string') key = key && key.id; if (!key) return null;
     if (/^field-/.test(key)) {
@@ -74786,7 +74804,7 @@ window.D365X.recChip = function (key, item) {
     }
     if (/^rec-/.test(key)) {
       var rr = _resolveD365Record(key);
-      return { id: 'records:' + (rr ? rr.schemaKey : key), name: 'Records from ' + (rr && rr.tableResource ? rr.tableResource.name : 'one table'), type: 'Category' };
+      return { id: 'records:' + (rr ? rr.schemaKey : key), name: (rr && rr.tableResource ? rr.tableResource.name + ' records' : 'Records from one table'), type: 'Category' };   // was "Records from <table>"
     }
     var r = _resById(key.indexOf(':') > 0 ? key.split(':')[0] : key);
     if (!r || r.wl !== 'Dynamics 365') return null;
@@ -74953,6 +74971,7 @@ window.D365X.recChip = function (key, item) {
     return out;
   }
   function reset() { S.mode = 'whole'; S.cols = {}; S.userMode = false; S.autoSet = false; S.rec = {}; S.pop = false; S.cat = ''; S.q = ''; closeMenu(); closePop(); }
+  X.resetScope = reset;
 
   /* ── File and Image columns on Accounts ("name, size"), with edits where only the name, only the size, or both changed ── */
   (function seedFiles() {
@@ -75084,7 +75103,7 @@ window.D365X.recChip = function (key, item) {
   }
   X.chooseColumns = function () { var k = rdState.scopeKey; if (!k) return; S.rec[k] = allCols().slice(); recChanged(); };
   X.restoreWholeRecord = function () { var k = rdState.scopeKey; if (!k) return; delete S.rec[k]; recChanged(); };
-  /* "Restore job locked to Records from Accounts": the link goes back to where the job lives. Records open their table (nothing happens when it is already open, so the table keeps its state); tables open the environment they sit in. */
+  /* "Restore job locked to Accounts records": the link goes back to where the job lives. Records open their table (nothing happens when it is already open, so the table keeps its state); tables open the environment they sit in. */
   X.jumpToLocked = function () {
     var first = null; state.restorePlan.forEach(function (_, k) { if (first == null && typeof k === 'string') first = k; }); if (first == null) return;
     var rr = /^(rec|field)-/.test(first) ? _resolveD365Record(/^field-/.test(first) ? first.replace(/^field-([^~]+)~(\d+)~.*$/, 'rec-$1-$2') : first) : null, res = rr && rr.tableResource;
@@ -75315,6 +75334,11 @@ window.D365X.recChip = function (key, item) {
     '.dxs-btn:hover:not(:disabled) { background: var(--black-5); } .dxs-btn[aria-expanded="true"] { background: var(--black-10); }',
     '.dxs-btn:disabled { border-color: var(--black-10); cursor: not-allowed; } .dxs-btn:disabled .dxs-k { color: var(--black-40); } .dxs-btn:disabled .dxs-v { background: var(--black-5); color: var(--black-40); }',
     '.dxs-k { color: var(--black-60); }',
+    '.rc-card { display: block; width: 100%; margin-top: 16px; cursor: default; text-align: left; }',   /* 16px under the cart table, as the old block had */
+    '.rc-card .sc-header { cursor: pointer; gap: 8px; padding-right: 44px; } .rc-card:not(.is-selected) .sc-header:hover { background: var(--black-5); } .rc-card .sc-header:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--em-green); }',
+    '.rc-icon { display: inline-flex; flex: none; } .rc-cb { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; display: inline-flex; color: var(--black-40); } .rc-card.is-selected .rc-cb { color: var(--em-green); } .rc-cb svg { display: block; }',
+    '.rc-card .sc-desc { display: block; } .rc-card .sc-desc .rl-def { margin: 0; padding: 0; font: inherit; color: inherit; } .rc-line { margin-top: 4px; font-size: 14px; line-height: 20px; color: var(--black-60); } .rc-line b { font-weight: 500; color: var(--black-100); }',
+    '.rc-body { border-top: 1px solid var(--black-10); padding: 0; background: var(--white); border-radius: 0 0 3px 3px; }',
     '.dxs-alert { padding: 0; } .dxs-alert + .rd-rel-sec { margin-top: 12px; } .dxs-alert .ws-btn { font-size: 16px; line-height: 22px; }',
     '.dxs-type-btn { border: 0; font-family: inherit; cursor: pointer; } .dxs-type-btn:hover { background: var(--black-10); } .dxs-type-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px #008436; }',
     '.dxs-line { margin-left: auto; font-size: 14px; line-height: 20px; color: var(--black-60); }',
