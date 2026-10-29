@@ -839,11 +839,22 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
    close ✕ at the card's top-right. No leading icon badge (was: white
    center-top card with circular tone icon). Slides in from the right. */
 .toast-stack { position: fixed; top: calc(24px + var(--devjump-h)); right: 24px; z-index: 200; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; pointer-events: none; }
-.toast { display: flex; align-items: flex-start; gap: 12px; min-width: 320px; max-width: 380px; padding: 12px 16px; border-radius: 8px; font-size: 14px; line-height: 20px; color: var(--black-100); pointer-events: auto; opacity: 0; transform: translateX(16px); transition: opacity 200ms ease, transform 200ms ease; box-shadow: 0 4px 14px rgba(31,34,41,0.10); }
+/* Veeam Vision "New Components / Toast" — read live 2026-10-29 (file RAziAkHGE5CMmwTsyb52O7, set 566:9932,
+   Type=Success 566:9942). Measured off the component, not guessed: w438 · padding 12 all round (was 12/16) ·
+   gap 12 · radius 4 (was 8) · Body/B2 16/22 (was 14/20 — the "text looks small" the user spotted).
+   NOTE: the cached design-system-veeam-vision.md still says toast has no Vision source of truth; that is STALE —
+   the component set was published 2026-08-17. */
+.toast { display: flex; align-items: flex-start; gap: 12px; width: 438px; max-width: calc(100vw - 48px); padding: 12px; border-radius: 4px; font-size: 16px; line-height: 22px; color: var(--black-100); pointer-events: auto; opacity: 0; transform: translateX(16px); transition: opacity 200ms ease, transform 200ms ease; box-shadow: 0 4px 14px rgba(31,34,41,0.10); }
 .toast.show { opacity: 1; transform: translateX(0); }
-.toast.toast-success { background: var(--val-green-bg); border: 1px solid color-mix(in srgb, var(--val-green) 40%, white); }
+/* Success tone from the Vision component (566:9942): Secondary/Lime/S5 ground + a FULL-strength Veeam Green/S80
+   border. Was --val-green-bg (#f6fbf9, a near-white grey-green) with the border washed to a 40% color-mix, which is
+   what made the toast read as a plain grey card rather than a success one. --lime-5 added beside the existing
+   --lime-20 rather than inlining the hex. */
+.toast.toast-success { background: var(--lime-5); border: 1px solid var(--val-green); }
 .toast.toast-info { background: var(--val-blue-bg); border: 1px solid color-mix(in srgb, var(--val-blue) 40%, white); }
-.toast-title { font-weight: 700; color: var(--black-100); margin-bottom: 2px; }
+/* Body/B2/Semi Bold = Circular Pro MEDIUM 500, not bold. The DS text styles say so explicitly ("Bold font weight is
+   not used or encouraged unless explicitly requested"); this was 700. 2px gap between the two lines per the component. */
+.toast-title { font-weight: 500; color: var(--black-100); margin-bottom: 2px; }
 .toast-body { font-weight: 450; color: var(--black-100); }
 .toast-body a, .toast-body .toast-link { color: var(--em-green); text-decoration: none; } /* was underlined — Vision Link */
 .toast-close { margin-left: auto; cursor: pointer; color: var(--btn-success); display: flex; align-items: center; padding: 2px; flex-shrink: 0; }
@@ -870,7 +881,13 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
    step of the journey without walking through every preceding one. */
 #devjump { position: sticky; top: 0; z-index: 9999; background: #1f2229; color: #e4e4e7; display: flex; align-items: center; gap: 8px; padding: 6px 10px; font-family: -apple-system,'Helvetica Neue',sans-serif; font-size: 14px; font-weight: 500; border-bottom: 1px solid #3a3d44; }
 #devjump.hidden { display: none; }
-#devjump.collapsed .devjump-scroll, #devjump.collapsed .devjump-close { display: none; }
+#devjump.collapsed .devjump-scroll, #devjump.collapsed .devjump-reset, #devjump.collapsed .devjump-close { display: none; }
+/* Matches the bar's own links (#devjump a) — borderless, same ink, same hover fill. It is an action rather than
+   navigation, but the bar's only other action (.devjump-close) is borderless too, so a bordered uppercase pill was
+   the odd one out. (It was also unstyled in the normal state until now: these declarations had been spliced into
+   the #devjump.collapsed rule above, so the button fell back to the browser's default chrome.) */
+.devjump-reset { display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; padding: 3px 8px; border: none; border-radius: 4px; background: transparent; color: #cfd1d6; font: inherit; white-space: nowrap; cursor: pointer; transition: background 0.1s, color 0.1s; }
+.devjump-reset:hover { background: #2f323a; color: #fff; }
 .devjump-toggle { background: #35383e; color: #fff; border: none; display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 4px; cursor: pointer; font: inherit; flex-shrink: 0; }
 .devjump-toggle:hover { background: #4a4d54; }
 .devjump-scroll { display: flex; align-items: center; gap: 4px; overflow-x: auto; flex: 1; min-width: 0; scrollbar-width: none; }
@@ -894,7 +911,7 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
 :root {
   --em-green: #01804a;          /* Veeam Green/S80 — links, selection, CTA (EXACT Veeam Vision match) */
   --em-green-accent: #1a9e66;   /* was 01b166 — Veeam Green/S70 (solid-primary HOVER) */
-  --em-green-tint: #f6fbf9;     /* was f3f8f6 — Veeam Green/S5 (selection/hover tint) */
+  --em-green-tint: #f6fbf9; --green-s30: #9cd8be;   /* Vision Green/S20 — card target-hover border (2026-10-29) */     /* was f3f8f6 — Veeam Green/S5 (selection/hover tint) */
   --blue: var(--em-green);
   --dark-blue: var(--em-green-accent);
   --blue-light: var(--em-green-tint);
@@ -912,10 +929,11 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
   --green: var(--val-green);
   --green-10: var(--val-green-bg);
   /* Canonical workload-picker tokens (ported with the tnwl component from
-     inventory-V1.html, user 2026-08-13; same values as the source file). */
+     protected-data.html, user 2026-08-13; same values as the source file). */
   --black-3: #f8f8f9;
   --btn-success: #01804a;          /* was 70b246 — Veeam Green/S80 */
   --securiti-blue-50: #F3FAFD;     /* picker current-row fill */
+  --lime-5: #f1fef5;   /* Secondary/Lime/S5 — Vision Toast success ground (566:9942, read live 2026-10-29) */
   --lime-20: #c1fbd4;              /* was d1ffd4 — Secondary/Lime/S20 (current-row ring) */
   --soft-green-bg: #f6fbf9;        /* was eff6ea (Chart/Soft green T160) — Green/S5 active cat chip */
   /* GenCore Assistant gradient — verbatim from securiti_gencore-assistant.svg
@@ -1171,7 +1189,7 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
 .plv-modebar [data-plv-tip]:hover::after { left: auto; right: 0; }
 
 /* ═══ CANONICAL WORKLOAD PICKER (tnwl, ported verbatim from
-   inventory-V1.html's chrome-row variant, user 2026-08-13) ═══
+   protected-data.html's chrome-row variant, user 2026-08-13) ═══
    Sits in a chrome row under the title, same as Protected Data. */
 .wl-chrome-row { display: flex; align-items: center; gap: 12px; margin: 0 24px; padding-bottom: 4px; }
 .wl-chrome-row .tree-nav-wl-picker { position: relative; display: inline-block; }
@@ -1421,7 +1439,7 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
 .prio-impact-none { font-size: 14px; color: var(--black-50); }
 .prio-preview-empty { padding: 24px 8px; font-size: 14px; color: var(--black-60); text-align: center; }
 
-/* Sortable column headers — cloned verbatim from inventory-V1.html's
+/* Sortable column headers — cloned verbatim from protected-data.html's
    sort-th/sort-arrow pattern (DS Table Cell "Mode=Sorted" header variant,
    Figma 28079:7667). Browse mode only: prioritization mode pins the table
    to the priority ladder, so headers go inert there. */
@@ -1448,7 +1466,7 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
 #hscrollProxy::-webkit-scrollbar-track { background: transparent; }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   RESILIENCE ASSISTANT SHELL — cloned from inventory-V1.html (Protected Data):
+   RESILIENCE ASSISTANT SHELL — cloned from protected-data.html (Protected Data):
    panel/glow/composer CSS ~2674–2903, .btn-veeam-ai/.vai-tile ~435–444,
    .disc-spinner ~733–734 (2026-08-17). Adaptations, each noted inline:
    • raw hex → tokens (raw-hex ratchet: black mask stops as keyword,
@@ -1498,6 +1516,45 @@ body.ai-open #aiWorkingGlow { right: var(--ai-w); }
 }
 .app { transition: padding-right 0.24s ease; }
 body.ai-open .app { padding-right: var(--ai-w); }
+
+/* --- One scrollbar beside the panel ------------------------------------
+   The panel is position:fixed;right:0, so for a fixed element "right:0" is the
+   viewport CONTENT edge — the document's own bar then sits immediately to its
+   right and you get two bars touching. Freeze the document and let .app scroll
+   instead: .app ENDS at the panel's left edge, so its bar is over there and the
+   panel's own is at the far right, the whole panel apart.
+   --devjump-h must go to 0 here: the sticky children offset by it because they
+   stick against the viewport while the DOCUMENT scrolls; once .app is the
+   scroller they stick against .app, and the offset would double-count. */
+body.ai-open { overflow: hidden; }
+/* The devjump leaves the flow and overlays instead, so .app can be the FULL viewport height. That is the whole
+   trick: the scrollport's top edge then coincides with the viewport's, which is what every sticky offset on this
+   page was already written against. --devjump-h keeps its real value, .sidenav still pins at top:40 and measures
+   calc(100vh - 40px), the table heads still stack under it — nothing about the sticky system has to know the
+   panel is open. The first attempt zeroed --devjump-h instead and broke the rail, because that variable carries
+   BOTH the offset and the height and only the offset wanted to change. */
+body.ai-open #devjump { position: fixed; top: 0; left: 0; right: 0; }
+/* The bar's height is given back as a MARGIN on the flex children, never as padding on .app. Padding would move
+   the scrollport's content edge down, and Chrome measures a sticky element's offset from that edge — so every
+   `top: var(--devjump-h)` would have been counted twice and the rail sat at 80px instead of 40 (seen on Activity
+   and Settings, where the rail was already stuck). A margin shifts where the children START without moving the
+   edge the offsets resolve against. */
+body.ai-open .app > * { margin-top: var(--devjump-h, 0px); }
+body.ai-open .app { min-height: 0; height: 100vh;
+  overflow-y: auto; overscroll-behavior: contain;
+  /* Flush to the panel. An 8px gutter was tried here and rejected (user 2026-10-29) — with the panel open the
+     panel IS the page's right edge, and the page's scrollbar belongs against it exactly as it sits against the
+     window edge when the panel is closed. */
+  padding-right: 0; width: calc(100% - var(--ai-w)); transition: width 0.24s ease; }
+/* The scroller's bar is left NATIVE on purpose (user 2026-10-29: "why does the page scrollbar look so different
+   when the conversational panel is open? its a light grey"). It was briefly given a 10px track and a
+   --border-light thumb; moving which element scrolls should not change what the page's scrollbar LOOKS like, and
+   a restyled bar beside the panel's untouched native one reads as two different controls. */
+
+/* --ai-w goes to 100vw in both of these, which would collapse .app to zero width. */
+body.ai-open.ai-full .app { width: 100%; }
+
+
 /* (inventory also shifts .ws-overlay/.ws-modal/.record-drawer here — those
    surfaces don't exist on this page, rules not ported) */
 .ai-panel {
@@ -1534,7 +1591,16 @@ body.ai-open.ai-full { --ai-w: 100vw; overflow: hidden; }
 body.ai-full .ai-head, body.ai-full .ai-body, body.ai-full .ai-foot { padding-left: max(16px, calc((100vw - 720px) / 2)); padding-right: max(16px, calc((100vw - 720px) / 2)); }
 body.ai-full #aiWorkingGlow { display: none; }
 .ai-head-close:hover { background: var(--black-5); color: var(--black-100); }
-.ai-body { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: var(--white); }
+.ai-body { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: var(--white); scrollbar-width: thin; }
+/* The panel is fixed at right:0 on a page that scrolls, so its own 15px scrollbar lands flush against the document's
+   — 30px of adjacent track reading as "dual scrollbars on the panel" (user 2026-10-29). The page scrollbar is not
+   ours to remove (the content behind legitimately overflows), so the INNER one stops competing: the file's existing
+   internal-scroll treatment (.ws-sum-items-scroll) — 10px, transparent track, --border-light thumb inset by a 2px
+   white border — instead of a second full-weight bar. */
+.ai-body::-webkit-scrollbar { width: 10px; }
+.ai-body::-webkit-scrollbar-track { background: transparent; }
+.ai-body::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; border: 2px solid var(--white); background-clip: padding-box; }
+.ai-body::-webkit-scrollbar-thumb:hover { background: var(--border); border-color: var(--white); background-clip: padding-box; }
 .ai-msg { display: flex; flex-wrap: wrap; }
 .ai-msg.user { justify-content: flex-end; }
 .ai-bubble { max-width: 88%; font-size: 14px; line-height: 1.55; border-radius: 8px; padding: 8px 12px; }
@@ -1588,7 +1654,7 @@ body.ai-full #aiWorkingGlow { display: none; }
 .ai-home-sub { font-size: 12px; color: var(--black-60); line-height: 1.5; }
 .ai-home-label { font-size: 12px; font-weight: 500; color: var(--black-60); margin-top: 16px; }
 .ai-home-card { text-align: left; border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); padding: 12px; cursor: pointer; font-family: inherit; }
-.ai-home-card:hover { border-color: var(--blue-30); background: var(--blue-light); }
+.ai-home-card:hover { border-color: var(--green-s30); background: var(--em-green-tint); }   /* was --blue-30/--blue-light: pre-Vision Securiti blue (2026-10-29) */
 .ai-home-card-t { font-size: 14px; font-weight: 500; color: var(--black-100); }
 .ai-home-card-p { font-size: 12px; color: var(--black-60); margin-top: 2px; line-height: 1.4; }
 /* Composer: one bordered box — textarea + tool row */
@@ -1635,12 +1701,12 @@ body.ai-full #aiWorkingGlow { display: none; }
 .ai-send:disabled { opacity: 0.45; cursor: not-allowed; }
 @media (max-width: 860px) {
   body.ai-open { --ai-w: 100vw; }
-  body.ai-open .app { padding-right: 0; }
+  body.ai-open .app { padding-right: 0; width: 100%; }
   /* Panel is full-screen here — there's no visible workspace to frame. */
   body.ai-open #aiWorkingGlow { display: none; }
 }
 /* Launcher — Veeam AI header button, gradient border + gradient sparkle
-   tile (verbatim .btn-veeam-ai/.vai-tile from inventory-V1.html ~435–444;
+   tile (verbatim .btn-veeam-ai/.vai-tile from protected-data.html ~435–444;
    sparkle glyph now injected from the DS store at runtime). */
 .btn-veeam-ai {
   display: inline-flex; align-items: center; gap: 8px;
@@ -1652,7 +1718,7 @@ body.ai-full #aiWorkingGlow { display: none; }
 .btn-veeam-ai:hover { box-shadow: 0 1px 4px rgba(31, 34, 41, 0.16); }
 .vai-tile { width: 20px; height: 20px; border-radius: 4px; background: var(--ai-grad); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .vai-tile svg { width: 18px; height: 18px; display: block; }
-/* Spinner used by the reasoning bar (cloned from inventory-V1.html ~733). */
+/* Spinner used by the reasoning bar (cloned from protected-data.html ~733). */
 .disc-spinner { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; margin-top: 1px; border: 2px solid var(--blue-30); border-top-color: var(--blue); animation: disc-spin 0.8s linear infinite; }
 @keyframes disc-spin { to { transform: rotate(360deg); } }
 /* "Ask about this impact" — foot affordance of the prio AI card.
@@ -1696,6 +1762,12 @@ body.ai-full #aiWorkingGlow { display: none; }
     <a href="backup-policies.html#1">New policy</a>
     <a href="backup-policies.html#default/github">GitHub default</a>
   </div>
+  <!-- Reset the agent demo to a clean slate. Dev-only, sits beside the hide control. Implementation is shared
+       (vdcResetAgentDemo in vdc-notifications.js) so the key list lives in one place. -->
+  <button class="devjump-reset" onclick="if(window.vdcResetAgentDemo) vdcResetAgentDemo(); else alert('Agent demo reset is unavailable on this page.')" title="Reset agent scenarios — clears the ROT recommendation, pending approvals, what the assistant has said, and any carried conversation, then reloads">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/></svg>
+    <span>Reset agent</span>
+  </button>
   <button class="devjump-close" onclick="hideDevJump()" title="Hide dev bar (re-enable with showDevJump() in console)" aria-label="Hide dev bar">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
   </button>
@@ -2336,6 +2408,7 @@ td.as-td-actions { position: relative; }
   </div>
 </div>
 <script src="securiti-icons-data.js?v=20260910a"></script>
+<script src="vdc-notifications.js?v=20261029a"></script>
 <script>
 (function() {
   'use strict';
@@ -2448,7 +2521,7 @@ VN_ICONS['agent'] = '<svg width="24" height="24" viewBox="0 0 24 24" fill="curre
 // })();
 // CORE-NAV IA (designer 2026-07-14): Data Resilience is no longer an APP —
 // these eight sections ARE the product's main navigation. Wired pages:
-// Protected Data = inventory-V1.html, Activity Log = activity.html, and
+// Protected Data = protected-data.html, Activity Log = activity.html, and
 // Settings carries the Integrations/Connections link (index.html onboarding).
 // hrefs stay RELATIVE .html paths (file:// safe). Unbuilt sections disabled.
 var VN_ITEMS = [
@@ -2458,18 +2531,18 @@ var VN_ITEMS = [
   // Workflows — with the prototype's own wired pages (Protected Data,
   // Activity Log) slotted after Policies. Notifications + Reporting from the
   // 2026-07-14 leadership IA are parked below, not deleted.
-  { id: 'dashboards',   label: 'Dashboard', disabled: true },
+  { id: 'dashboards',   label: 'Dashboard', href: 'identity-dashboard.html', rail: true },   // wired 2026-10-29 — opens the dashboards; the Dashboards panel on each dashboard page lists them (no sub-links in this nav)
   { id: 'findings',     label: 'Findings', disabled: true },
   { id: 'policies',     label: 'Policies', href: 'backup-policies.html', rail: true },   // wired 2026-08-13 (VIRO rail port — THIS page; was: disabled: true in activity.html)
-  { id: 'protected',    label: 'Protected Data', href: 'inventory-V1.html', rail: true },
+  { id: 'protected',    label: 'Protected Data', href: 'protected-data.html', rail: true },
   // [parked 2026-09-09, user: no nav link until broader agreement on the approach]
   // was: { id: 'agentstudio',  label: 'Agentic Studio', href: 'agent-studio.html' },
-  { id: 'activitylog',  label: 'Activity', href: 'activity.html', rail: true, subs: [{ label: 'Audit log', href: 'activity.html#audit' }] },
+  { id: 'activitylog',  label: 'Activity', href: 'activity.html', rail: true },
   { id: 'graphexplorer',label: 'Graph Explorer', disabled: true },
   { id: 'inventory',    label: 'Inventory', disabled: true },
   { id: 'helpcenter',   label: 'Help Center', disabled: true },
   { id: 'integrations', label: 'Integrations', href: 'index.html', rail: true },
-  { id: 'settings',     label: 'Settings', disabled: true },   // disabled 2026-07-15 (was rail:true w/ subs Appliances/Email Notification Templates)
+  { id: 'settings',     label: 'Settings', href: 'agent-settings.html', rail: true },   // wired 2026-10-15 — the only way into Settings. was: disabled: true (2026-07-15; earlier rail:true w/ subs Appliances/Email Notification Templates)
   { id: 'workflows',    label: 'Workflows', disabled: true }
   // [parked 2026-07-15] { id: 'notifications', label: 'Notifications', disabled: true },
   // [parked 2026-07-15] { id: 'reporting',     label: 'Reporting', disabled: true },

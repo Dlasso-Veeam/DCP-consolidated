@@ -238,7 +238,7 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
 .btn-blue:hover { opacity: 1; background: var(--green-70); border-color: var(--green-70); } /* was opacity .9 — Vision Primary hover = Green/S70 */
 .btn-blue:active { background: var(--green-90); border-color: var(--green-90); } /* Vision Primary active = Green/S90 */
 .btn-blue-light { background: var(--green-30); color: var(--white); border-color: var(--green-30); } /* was blue-30 — Vision Primary disabled = Green/S30 */
-/* Ported from inventory-V1.html/backup-policies.html (2026-09-28) — the
+/* Ported from protected-data.html/backup-policies.html (2026-09-28) — the
    established "clear an active filter" button family, reused by the
    Connections screen's workload-picker reset instead of a one-off styled
    link. */
@@ -859,7 +859,13 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
    Collapsible and hide-able; state persists in localStorage. */
 #devjump { position: sticky; top: 0; z-index: 9999; background: #1f2229; color: #e4e4e7; display: flex; align-items: center; gap: 8px; padding: 6px 10px; font-family: -apple-system,'Helvetica Neue',sans-serif; font-size: 14px; font-weight: 500; border-bottom: 1px solid #3a3d44; }
 #devjump.hidden { display: none; }
-#devjump.collapsed .devjump-scroll, #devjump.collapsed .devjump-close { display: none; }
+#devjump.collapsed .devjump-scroll, #devjump.collapsed .devjump-reset, #devjump.collapsed .devjump-close { display: none; }
+/* Matches the bar's own links (#devjump a) — borderless, same ink, same hover fill. It is an action rather than
+   navigation, but the bar's only other action (.devjump-close) is borderless too, so a bordered uppercase pill was
+   the odd one out. (It was also unstyled in the normal state until now: these declarations had been spliced into
+   the #devjump.collapsed rule above, so the button fell back to the browser's default chrome.) */
+.devjump-reset { display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; padding: 3px 8px; border: none; border-radius: 4px; background: transparent; color: #cfd1d6; font: inherit; white-space: nowrap; cursor: pointer; transition: background 0.1s, color 0.1s; }
+.devjump-reset:hover { background: #2f323a; color: #fff; }
 .devjump-toggle { background: #35383e; color: #fff; border: none; display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 4px; cursor: pointer; font: inherit; flex-shrink: 0; }
 .devjump-toggle:hover { background: #4a4d54; }
 .devjump-scroll { display: flex; align-items: center; gap: 4px; overflow-x: auto; flex: 1; min-width: 0; scrollbar-width: none; }
@@ -955,7 +961,7 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
 .conn-search { padding: 12px; border-bottom: 1px solid var(--border-light); background: var(--white); }
 /* Search field itself — was .conn-search-box (white fill, right-side icon,
    border on the input). Reference is Protected Data's actual .inv-search-inner
-   (inventory-V1.html:2282-2286): icon LEADS inside a bordered/filled
+   (protected-data.html:2282-2286): icon LEADS inside a bordered/filled
    container, border lives on the container not the input, grey fill,
    14px input text (user 2026-09-28: "why is the search bar styled
    differently from the one on protected data"). */
@@ -977,7 +983,7 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
 .conn-stat-val { font-family: 'Circular Pro', sans-serif; font-size: 28px; font-weight: 500; color: var(--black-100); line-height: 34px; }
 /* Corrected (user 2026-09-28: "reference protected data" — this was
    wrongly copied from backup-policies.html's Policies table instead).
-   was bare thead th / tbody td in inventory-V1.html (lines 5229, 5243) —
+   was bare thead th / tbody td in protected-data.html (lines 5229, 5243) —
    14px/450/grey header on white, 16px/black-100 body text, no separator
    between rows (no border-bottom on td at all). */
 /* CORRECTED 2026-09-28: entity header + search + KPI stats now scroll
@@ -985,7 +991,7 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
    header row should pin vertically... KPI, search, and entity header
    should scroll away leaving more room for the table content") — so
    .conn-scroll-region, not .table-scroll, is the vertical scroll
-   container. That reproduces the EXACT scenario inventory-V1.html's own
+   container. That reproduces the EXACT scenario protected-data.html's own
    comment (still true, see setupFloatingThead) flags as CSS-sticky-
    incompatible: table-scroll needs its own horizontal scroll (for the
    pinned columns) while the vertical scroll happens on an ANCESTOR —
@@ -1001,7 +1007,7 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
 .table-scroll { width: 100%; overflow-x: auto; }
 .data-table { width: 100%; border-collapse: collapse; }
 .data-table th { text-align: left; padding: 10px 16px; font-size: 14px; font-weight: 450; color: var(--black-60); border-bottom: 1px solid var(--border-light); background: var(--white); white-space: nowrap; }
-/* Floating thead clone — ported from inventory-V1.html (.floating-thead,
+/* Floating thead clone — ported from protected-data.html (.floating-thead,
    setupFloatingThead). cloneTable gets class="data-table" so it inherits
    every th rule (incl. the pinned-column rules below) for free instead
    of duplicating them. */
@@ -1012,7 +1018,7 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
 .data-table tbody tr:hover td:first-child, .data-table tbody tr:hover td:last-child { background: var(--black-3); }
 
 /* Pinned first column (Instance Name) + last column (actions) — ported
-   from inventory-V1.html's #invTable .name-col / td:last-child rules
+   from protected-data.html's #invTable .name-col / td:last-child rules
    (that table's `left: var(--cb-col-w)` offset was for its checkbox
    column; this table has none, so left: 0). Shadow-on-scroll via ::after/
    ::before is a pseudo-element (not box-shadow) for the same Chromium
@@ -1312,8 +1318,14 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
     <a href="index.html#jira-test">Test Connection (Jira)</a>
     <a href="index.html#jira-summary">Summary (Jira)</a>
     <span class="devjump-divider"></span>
-    <a href="inventory-V1.html" title="Open the restore inventory prototype">Restore</a>
+    <a href="protected-data.html" title="Open the restore inventory prototype">Restore</a>
   </div>
+  <!-- Reset the agent demo to a clean slate. Dev-only, sits beside the hide control. Implementation is shared
+       (vdcResetAgentDemo in vdc-notifications.js) so the key list lives in one place. -->
+  <button class="devjump-reset" onclick="if(window.vdcResetAgentDemo) vdcResetAgentDemo(); else alert('Agent demo reset is unavailable on this page.')" title="Reset agent scenarios — clears the ROT recommendation, pending approvals, what the assistant has said, and any carried conversation, then reloads">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/></svg>
+    <span>Reset agent</span>
+  </button>
   <button class="devjump-close" onclick="hideDevJump()" title="Hide dev bar (re-enable with showDevJump() in console)" aria-label="Hide dev bar">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
   </button>
@@ -3941,7 +3953,7 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
                     <div style="font-size:14px;color:var(--black-60);margin-top:4px">Running for: 1m 55s</div>
                     <div id="summary-discovery-count" style="font-size:14px;color:var(--black-60);margin-top:4px"><strong style="font-weight:500;color:var(--black-100)">12</strong> resources indexed so far...</div>
                   </div>
-                  <div style="display:flex;flex-shrink:0"><button class="btn btn-outline" onclick="window.location.href='inventory-V1.html'" style="height:36px;padding:0 12px;font-size:14px;border-radius:4px">View Inventory</button></div>
+                  <div style="display:flex;flex-shrink:0"><button class="btn btn-outline" onclick="window.location.href='protected-data.html'" style="height:36px;padding:0 12px;font-size:14px;border-radius:4px">View Inventory</button></div>
                 </div>
 
                 <!-- Data backup. Icon swaps based on policy state:
@@ -9188,12 +9200,12 @@ var NEXT_STEPS = {
     iconBg: '#fef1ea',
     iconColor: 'var(--orange)',
     icon: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>',
-    onClick: "window.location.href='inventory-V1.html'"
+    onClick: "window.location.href='protected-data.html'"
   },
   // Protected Data is a distinct product area from Inventory (Inventory =
   // discovery/config for this connection; Protected Data = what's already
   // backed up + how it maps to policies, VN_ITEMS id 'protected' ->
-  // inventory-V1.html) — added as its OWN next step, not folded into
+  // protected-data.html) — added as its OWN next step, not folded into
   // 'inventory' above (user 2026-09-28, explicit: "inventory and protected
   // data are actually 2 different areas of the product"). Shown on the
   // summary for every connector, new or established, in both orderings
@@ -9205,7 +9217,7 @@ var NEXT_STEPS = {
     iconBg: 'var(--green-10)',
     iconColor: 'var(--green)',
     icon: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/>',
-    onClick: "window.location.href='inventory-V1.html'"
+    onClick: "window.location.href='protected-data.html'"
   },
   'dashboard': {
     title: 'Go to the Overview Dashboard',
@@ -14673,9 +14685,10 @@ window.__devJumpResolve = function(h) {
      glyph set at load time. Data file MUST load first so the runtime
      finds window.__SECURITI_ICONS already populated. -->
 <script src="securiti-icons-data.js?v=20260924a"></script>
+<script src="vdc-notifications.js?v=20261029a"></script>
 <script src="securiti-icons.js"></script>
 <!-- Shared workload picker (2026-09-28) — same one codebase/one component
-     inventory-V1.html, backup-policies.html, and activity.html already
+     protected-data.html, backup-policies.html, and activity.html already
      load; used by the new Connections screen's workload filter. -->
 <script src="workload-picker.js"></script>
 <script>
@@ -14747,7 +14760,7 @@ function toggleConnSidebar() {
   if (wrap) setTimeout(function(){ updateTableScrollShadows(wrap); }, 200);
 }
 
-// Generic clear-button handler — ported verbatim from inventory-V1.html
+// Generic clear-button handler — ported verbatim from protected-data.html
 // (clearSearchInput), which every .search-clear-btn in the suite already
 // wires to. Not workload/screen-specific, safe to share as-is.
 function clearSearchInput(inputId) {
@@ -14958,7 +14971,7 @@ VN_ICONS['app-gencore'] = '<svg viewBox="0 0 48 48" fill="none" aria-hidden="tru
 VN_ICONS['activitylog'] = VN_ICONS['activity'];   // Activity Log keeps the VIRO activity glyph
 // CORE-NAV IA (designer 2026-07-14): Data Resilience is no longer an APP —
 // these eight sections ARE the product's main navigation. Wired pages:
-// Protected Data = inventory-V1.html, Activity Log = activity.html, and
+// Protected Data = protected-data.html, Activity Log = activity.html, and
 // Settings carries the Integrations/Connections link (index.html onboarding).
 // hrefs stay RELATIVE .html paths (file:// safe). Unbuilt sections disabled.
 var VN_ITEMS = [
@@ -14968,10 +14981,10 @@ var VN_ITEMS = [
   // Workflows — with the prototype's own wired pages (Protected Data,
   // Activity Log) slotted after Policies. Notifications + Reporting from the
   // 2026-07-14 leadership IA are parked below, not deleted.
-  { id: 'dashboards',   label: 'Dashboard', disabled: true },
+  { id: 'dashboards',   label: 'Dashboard', href: 'identity-dashboard.html', rail: true },   // wired 2026-10-29 — opens the dashboards; the Dashboards panel on each dashboard page lists them (no sub-links in this nav)
   { id: 'findings',     label: 'Findings', disabled: true },
   { id: 'policies',     label: 'Policies', href: 'backup-policies.html', rail: true },   // re-wired 2026-09-28 (user: "turn on the link to backup policies on all files again")
-  { id: 'protected',    label: 'Protected Data', href: 'inventory-V1.html', rail: true },
+  { id: 'protected',    label: 'Protected Data', href: 'protected-data.html', rail: true },
   // Activity UNLINKED everywhere in this nav (user 2026-08-11, second pass —
   // rail:false only hid the rail icon; the expanded panel still linked it).
   // disabled:true = the greyed placeholder treatment the other non-wired
@@ -14982,7 +14995,7 @@ var VN_ITEMS = [
   // Panel link only — no rail icon.
   // [parked 2026-09-09, user: no nav link until broader agreement on the approach]
   // was: { id: 'agentstudio',  label: 'Agentic Studio', href: 'agent-studio.html' },
-  { id: 'activitylog',  label: 'Activity', href: 'activity.html', subs: [{ label: 'Audit log', href: 'activity.html#audit' }] },
+  { id: 'activitylog',  label: 'Activity', href: 'activity.html' },
   { id: 'graphexplorer',label: 'Graph Explorer', disabled: true },
   { id: 'inventory',    label: 'Inventory', disabled: true },
   { id: 'helpcenter',   label: 'Help Center', disabled: true },
@@ -15180,7 +15193,7 @@ var VN_ITEMS = [
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && lch.classList.contains('open')) vnToggleLauncher(); });
 })();
 
-// Sticky-column scroll-shadow controller (ported from inventory-V1.html).
+// Sticky-column scroll-shadow controller (ported from protected-data.html).
 // Toggles .has-h-scroll-left/-right on every .table-wrap based on its
 // current horizontal scroll state; the CSS gates the pinned-column shadow
 // pseudo-elements on those classes so the depth cue only paints when
@@ -15213,7 +15226,7 @@ function refreshAllTableScrollShadows() {
   window.addEventListener('resize', refreshAllTableScrollShadows);
 })();
 
-// Floating thead for the Connections table — ported from inventory-V1.html's
+// Floating thead for the Connections table — ported from protected-data.html's
 // setupFloatingThead, adapted from window-scroll to .conn-scroll-region's
 // own internal scroll (see the CSS comment above .conn-scroll-region for
 // why plain CSS `position: sticky` can't do this once the table's

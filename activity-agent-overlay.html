@@ -1505,6 +1505,13 @@ body.ai-open.ai-full #toast { right: 24px; }
 .sd-overlay.open { display: block; }
 .sd-modal { position: fixed; top: calc(var(--devjump-h, 0px) + 24px); left: calc(72px + 24px); right: 24px; bottom: 24px; background: var(--white); border-radius: 12px; border: 1px solid var(--border-light); box-shadow: 0 16px 48px rgba(0,0,0,0.18); display: none; flex-direction: column; overflow: hidden; z-index: 941; }
 .sd-modal.open { display: flex; }
+/* THE PANEL SHARES SPACE, IT NEVER OVERLAYS (user 2026-10-27). --ai-w is the one property every full-bleed surface has to
+   respect — .app padding, the toast, the working glow and the drawers already do. The session-detail overlay/modal were added
+   later and went to the viewport edge, so an open panel sat on top of the task detail and clipped its Properties column and the
+   right half of the graph. Same recipe as #toast: subtract the panel, and transition in step with .app so they reflow together. */
+body.ai-open .sd-overlay { right: var(--ai-w); }
+body.ai-open .sd-modal { right: calc(24px + var(--ai-w)); }
+.sd-overlay, .sd-modal { transition: right 0.24s ease; }
 /* Entrance/exit (user pick 2026-09-04, option A from modal-transition-
    options.html): scrim fades 150ms; card fades + settles from 98% scale
    with an 8px rise, 200ms ease-out. Exits are FASTER (120ms plain fade —
@@ -13959,12 +13966,12 @@ var VN_ITEMS = [
   { id: 'protected',    label: 'Protected Data', href: 'inventory-V1-agent-overlay.html', rail: true },
   // [parked 2026-09-09, user: no nav link until broader agreement on the approach]
   // was: { id: 'agentstudio',  label: 'Agentic Studio', href: 'agent-studio-agent-overlay.html' },
-  { id: 'activitylog',  label: 'Activity', href: 'activity-agent-overlay.html', rail: true, subs: [{ label: 'Audit log', href: 'activity-agent-overlay.html#audit' }] },   // was activity.html (the original page, no agent panel)
+  { id: 'activitylog',  label: 'Activity', href: 'activity-agent-overlay.html', rail: true },   // was activity.html (the original page, no agent panel)
   { id: 'graphexplorer',label: 'Graph Explorer', disabled: true },
   { id: 'inventory',    label: 'Inventory', disabled: true },
   { id: 'helpcenter',   label: 'Help Center', disabled: true },
   { id: 'integrations', label: 'Integrations', href: 'index.html', rail: true },
-  { id: 'settings',     label: 'Settings', href: 'agent-settings-overlay.html', rail: true, subs: [{ label: 'Agent Settings', href: 'agent-settings-overlay.html' }] },   // wired 2026-10-15 — the only way into Settings. was: disabled: true (2026-07-15; earlier rail:true w/ subs Appliances/Email Notification Templates)
+  { id: 'settings',     label: 'Settings', href: 'agent-settings-overlay.html', rail: true },   // wired 2026-10-15 — the only way into Settings. was: disabled: true (2026-07-15; earlier rail:true w/ subs Appliances/Email Notification Templates)
   { id: 'workflows',    label: 'Workflows', disabled: true }
   // [parked 2026-07-15] { id: 'notifications', label: 'Notifications', disabled: true },
   // [parked 2026-07-15] { id: 'reporting',     label: 'Reporting', disabled: true },
