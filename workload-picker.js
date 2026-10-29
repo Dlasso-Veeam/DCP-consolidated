@@ -321,7 +321,7 @@
     { id: 'entra-id',           name: 'Entra ID',          cat: 'SaaS platforms', colorKey: null, monoKey: 'iam-identity-provider-outlined' },
     // ENABLED 2026-09-18 (was: disabled 'Not connected' placeholder, same
     // pattern as ms365 above) — seeds a flat VM list (no hierarchy; the tree
-    // explorer collapses for this workload, see selectWl in inventory-V1.html).
+    // explorer collapses for this workload, see selectWl in protected-data.html).
     { id: 'hybrid-vms',         name: 'Virtual Machines',  cat: 'Datacenter',     colorKey: null, monoKey: 'dc-vms' },
     // Active Directory: an on-premises directory service, so it is a Datacenter workload of its own (the computers and users are objects INSIDE the forest, not a sub-type of Computers).
     { id: 'active-directory',   name: 'Active Directory',  cat: 'Datacenter',     colorKey: null, monoKey: 'dc-computers' },

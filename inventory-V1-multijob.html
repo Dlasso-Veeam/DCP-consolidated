@@ -4832,7 +4832,7 @@ body.drawer-open { overflow: hidden; }
    column — the info text drops below the nav controls instead of
    overflowing or being pushed off past the visible edge. overflow:hidden
    stops any residual min-content from bleeding past the box. */
-/* === PAGINATION (unified 2026-09-30 with inventory-V1.html, the canonical
+/* === PAGINATION (unified 2026-09-30 with protected-data.html, the canonical
    Protected Data pagination bar) === This page previously ran the retired
    grey-band "Page X of Y" pager instead of the current DS component. The old
    PgLabel/PgSize/PgPrev/PgNext ids and their onclick handlers are unchanged
@@ -5182,7 +5182,7 @@ body.drawer-open { overflow: hidden; }
     <a href="index.html#overview">Summary</a>
     <a href="index.html#protect">Add default protection</a>
     <span class="devjump-divider"></span>
-    <a href="inventory-V1.html" title="Open the restore inventory prototype">Restore</a>
+    <a href="protected-data.html" title="Open the restore inventory prototype">Restore</a>
 
   </div>
   <button class="devjump-close" onclick="hideDevJump()" title="Hide dev bar (re-enable with showDevJump() in console)" aria-label="Hide dev bar">
@@ -46228,7 +46228,7 @@ function aiPostSummary(){
 </script>
 <script>
 // DS Pagination wire (shared, 2026-07-10; ported 2026-09-30 to unify this
-// page's pagination with inventory-V1.html): the legacy update sites keep
+// page's pagination with protected-data.html): the legacy update sites keep
 // writing "Page X of Y" into the (now hidden) PgLabel; a MutationObserver
 // per bar parses it and renders the canonical numbered chips + Go-to-Page,
 // jumping through the same delta function the arrows use (data-jump).

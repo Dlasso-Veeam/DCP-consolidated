@@ -7871,7 +7871,7 @@ input[type="checkbox"] { accent-color: var(--em-green); }
     <a href="index.html#protect">Add default protection</a>
     <span class="devjump-divider"></span>
     <span class="devjump-section">Restore</span>
-    <a href="inventory-V1.html" title="Restore inventory — Protected Data">Protected Data</a>
+    <a href="protected-data.html" title="Restore inventory — Protected Data">Protected Data</a>
 
   </div>
   <button class="devjump-close" onclick="hideDevJump()" title="Hide dev bar (re-enable with showDevJump() in console)" aria-label="Hide dev bar">
@@ -64232,8 +64232,8 @@ function refreshAllTableScrollShadows() {
 })();
 
 // Deep link from the Identity Resilience dashboard (finding → "Restore to <point>"):
-//   inventory-V1.html#compare=<workload-id>&items=…&point=…  opens the record drawer on the first item: LEFT = its latest restore point, RIGHT = the point given (backup vs backup, never production)
-//   inventory-V1.html#restore=<workload-id>&items=<resourceId,...>&point=<YYYY-MM-DD[THH:MM]>   (hash, not query: static servers drop the query on the .html redirect)
+//   protected-data.html#compare=<workload-id>&items=…&point=…  opens the record drawer on the first item: LEFT = its latest restore point, RIGHT = the point given (backup vs backup, never production)
+//   protected-data.html#restore=<workload-id>&items=<resourceId,...>&point=<YYYY-MM-DD[THH:MM]>   (hash, not query: static servers drop the query on the .html redirect)
 // Opens that workload, pins each item to its latest restore point at or before `point`, and opens the restore wizard (express: the cart is untouched)
 // on its first step with the item(s) already staged. Workloads / items this prototype doesn't have get a toast instead.
 (function(){
@@ -64277,7 +64277,7 @@ function refreshAllTableScrollShadows() {
 })();
 
 
-// Deep link from the Identity Resilience dashboard to the list a group of items lives in:  inventory-V1.html#view=<workload-id>&parent=<folder id>
+// Deep link from the Identity Resilience dashboard to the list a group of items lives in:  protected-data.html#view=<workload-id>&parent=<folder id>
 (function(){
   var q = new URLSearchParams((window.location.hash || '').replace(/^#/, '')), wlId = q.get('view'), parent = q.get('parent');
   if (!wlId || !parent) return;
@@ -64291,7 +64291,7 @@ function refreshAllTableScrollShadows() {
 
 // ═══════════════════════════════════════════════════════════════════
 // MULTI-CART (restore carts across workloads) — HIDDEN unless the page is opened from a multi-item finding:
-//   inventory-V1.html#carts=<finding id>     e.g. #carts=FND-24551
+//   protected-data.html#carts=<finding id>     e.g. #carts=FND-24551
 // The Identity Resilience dashboard writes the carts for that finding to localStorage ('dcc-restore-carts'). This layer only adds a cart button
 // (+ tray) beside the existing selection chip and Restore button. Each cart is exactly today's single-workload cart and restores through today's
 // wizard, one at a time; Select in the tray switches the workload and loads that cart, Restore starts its wizard, submitting returns to the next
@@ -66481,7 +66481,7 @@ function _aiPersistTranscript(){
   try {
     var _mk = sessionStorage.getItem('vdc-ai-handoff');
     if (_mk) sessionStorage.removeItem('vdc-ai-handoff');   // one-shot
-    if (_mk !== 'inventory-V1.html') return;
+    if (_mk !== 'protected-data.html') return;
   } catch(e){ return; }
   try {
     var raw = JSON.parse(localStorage.getItem('vdc-ai-transcript'));
@@ -71302,7 +71302,7 @@ VN_ICONS['app-gencore'] = '<svg viewBox="0 0 48 48" fill="none" aria-hidden="tru
 VN_ICONS['activitylog'] = VN_ICONS['activity'];   // Activity Log keeps the VIRO activity glyph
 // CORE-NAV IA (designer 2026-07-14): Data Resilience is no longer an APP —
 // these eight sections ARE the product's main navigation. Wired pages:
-// Protected Data = inventory-V1.html, Activity Log = activity.html, and
+// Protected Data = protected-data.html, Activity Log = activity.html, and
 // Settings carries the Integrations/Connections link (index.html onboarding).
 // hrefs stay RELATIVE .html paths (file:// safe). Unbuilt sections disabled.
 var VN_ITEMS = [
@@ -71552,7 +71552,7 @@ var VN_ITEMS = [
 // cut off, a slim fixed scrollbar at the viewport bottom mirrors and drives
 // its scrollLeft. Page-level tables only — wizard overlay, record drawer,
 // and modal tables keep their own contained scrolling. IDENTICAL block in
-// activity.html + inventory-V1.html (shared-helper rule).
+// activity.html + protected-data.html (shared-helper rule).
 (function(){
   var proxy = null, inner = null, activeWrap = null, syncing = false;
   function ensure() {

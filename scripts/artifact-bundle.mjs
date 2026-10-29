@@ -5,7 +5,7 @@ import fs from 'fs';
 import path from 'path';
 const SRC = '/Users/d.lasso/Desktop/data resilience';
 const OUT = process.argv[2] || 'artifact-trial';
-const PAGES = ['index.html', 'activity.html', 'inventory-V1.html', 'backup-policies.html'];
+const PAGES = ['index.html', 'activity.html', 'protected-data.html', 'backup-policies.html'];
 const urls = fs.existsSync(new URL('./artifact-urls.json', import.meta.url)) ? JSON.parse(fs.readFileSync(new URL('./artifact-urls.json', import.meta.url),'utf8')) : null;
 const fontCache = {};
 for (const page of PAGES) {
@@ -44,12 +44,12 @@ for (const page of PAGES) {
     // JS rail objects (href: '...'), and location.href assignments — with the
     // optional #hash preserved. Refs outside the trial set (../, legacy
     // designs/) are left untouched: they're dead on the live server too.
-    html = html.replace(/(["'])(index|activity|inventory-V1|backup-policies)\.html(#[^"']*)?\1/g, (m, q, name, hash) => {
+    html = html.replace(/(["'])(index|activity|protected-data|backup-policies)\.html(#[^"']*)?\1/g, (m, q, name, hash) => {
       const url = urls[name + '.html'];
       return url ? q + url + (hash || '') + q : m;
     });
     // the picker-variant page isn't in the trial set — point at the main inventory
-    if (urls['inventory-V1.html']) html = html.split('href="inventory-V1-picker.html"').join('href="' + urls['inventory-V1.html'] + '"');
+    if (urls['protected-data.html']) html = html.split('href="inventory-V1-picker.html"').join('href="' + urls['protected-data.html'] + '"');
     // The artifact sandbox blocks in-place navigation to another URL, so
     // cross-artifact links must open a NEW TAB. Two mechanisms:
     // (a) JS navigation: location.href = '<artifact url>' → window.open(...)

@@ -22,7 +22,7 @@ import os, re, sys
 
 # Files to lint — keep this in sync with the prototype roster.
 PROTOTYPE_FILES = [
-    "inventory-v1.html",
+    "protected-data.html",
     "inventory.html",
     "activity.html",
     "backup-policies.html",

@@ -8929,7 +8929,7 @@ var _ACT_PINNED = [
 ];
 // Segmented job-type tabs. state.actTypeTab: null = All jobs.
 // Topbar kebab menu (2026-07-15) — hosts actions demoted from the header
-// (Saved Views). IDENTICAL helper in inventory-V1.html (shared-helper rule).
+// (Saved Views). IDENTICAL helper in protected-data.html (shared-helper rule).
 function toggleTopbarKebab(ev) {
   if (ev) ev.stopPropagation();
   var m = document.getElementById('topbarKebabMenu');
@@ -11239,7 +11239,7 @@ VN_ICONS['auditlog-icon'] = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="t
 })();
 // CORE-NAV IA (designer 2026-07-14): Data Resilience is no longer an APP —
 // these eight sections ARE the product's main navigation. Wired pages:
-// Protected Data = inventory-V1.html, Activity Log = activity.html, and
+// Protected Data = protected-data.html, Activity Log = activity.html, and
 // Settings carries the Integrations/Connections link (index.html onboarding).
 // hrefs stay RELATIVE .html paths (file:// safe). Unbuilt sections disabled.
 var VN_ITEMS = [
@@ -11467,7 +11467,7 @@ var VN_ITEMS = [
 // cut off, a slim fixed scrollbar at the viewport bottom mirrors and drives
 // its scrollLeft. Page-level tables only — wizard overlay, record drawer,
 // and modal tables keep their own contained scrolling. IDENTICAL block in
-// activity.html + inventory-V1.html (shared-helper rule).
+// activity.html + protected-data.html (shared-helper rule).
 (function(){
   var proxy = null, inner = null, activeWrap = null, syncing = false;
   function ensure() {

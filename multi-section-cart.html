@@ -187,7 +187,7 @@ a.vn-fly-title:hover { color: var(--blue); }
 /* '…' renders as a STANDARD rail tile (production reference 2026-07-13:
    same dark rounded square as the module icons, white dots). */
 .vn-rail-more { border: none; }
-/* Rail AI launcher — ported verbatim from inventory-V1.html (.vn-ai-launcher,
+/* Rail AI launcher — ported verbatim from protected-data.html (.vn-ai-launcher,
    user 2026-09-29/30, verified against the live QA "Gencore Assistant" tile):
    borderless soft rainbow glow (--ai-grad, 14px blur, kept inside the 72px
    rail) behind a 24px white sparkle that pulses in size while rotating. */
@@ -201,7 +201,7 @@ a.vn-fly-title:hover { color: var(--blue); }
   100% { transform: scale(0.85) rotate(360deg); }
 }
 /* Decorative ambient loops exempted from any file-wide reduced-motion reset
-   (same call as inventory-V1.html). */
+   (same call as protected-data.html). */
 @media (prefers-reduced-motion: reduce) {
   .vn-ai-launcher::before { animation-duration: 6s !important; animation-iteration-count: infinite !important; }
   .vn-ai-launcher svg { animation-duration: 2.4s !important; animation-iteration-count: infinite !important; }
@@ -290,7 +290,7 @@ a.vn-fly-link:hover { color: var(--blue); }
   --green: var(--val-green);
   --green-10: var(--val-green-bg);
   /* Canonical workload-picker tokens (ported with the tnwl component from
-     inventory-V1.html, user 2026-08-13; same values as the source file). */
+     protected-data.html, user 2026-08-13; same values as the source file). */
   --black-3: #f8f8f9;
   --btn-success: #01804a;          /* was 70b246 — Veeam Green/S80 */
   --securiti-blue-50: #F3FAFD;     /* picker current-row fill */
@@ -335,7 +335,7 @@ a.vn-fly-link:hover { color: var(--blue); }
    Everything else clones an existing recipe — the source is cited inline.
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* Status chip — cloned from inventory-V1.html .ws-status-chip (lines 5604-5607);
+/* Status chip — cloned from protected-data.html .ws-status-chip (lines 5604-5607);
    light variant, borderless (feedback: badges are borderless). Red = Chip Red Light. */
 .ws-status-chip { display: inline-block; padding: 2px 8px; border-radius: 2px; font-size: 16px; font-weight: 500; line-height: 22px; white-space: nowrap; }
 .ws-status-chip.ok   { background: var(--green-bg); color: var(--em-green); }
@@ -343,7 +343,7 @@ a.vn-fly-link:hover { color: var(--blue); }
 .ws-status-chip.err  { background: var(--red-10); color: var(--red); }
 .ws-status-chip.neutral { background: var(--black-5); color: var(--black-100); }
 
-/* Tooltip readout — cloned from inventory-V1.html .app-tooltip (DS Tooltip WHITE theme) */
+/* Tooltip readout — cloned from protected-data.html .app-tooltip (DS Tooltip WHITE theme) */
 .app-tooltip { position: fixed; z-index: 10000; pointer-events: none; background: var(--white); color: var(--black-100); border: 1px solid var(--border-light); font-size: 14px; line-height: 1.35; font-weight: 450; padding: 6px 9px; border-radius: 4px; box-shadow: 0 4px 14px rgba(0,0,0,0.22); max-width: 260px; opacity: 0; transition: opacity 0.12s ease; }
 .app-tooltip.show { opacity: 1; }
 

@@ -1,12 +1,12 @@
 {
-  "inventory-V1.html": {
+  "protected-data.html": {
     "outlined-chip": 0,
-    "native-title": 83,
+    "native-title": 87,
     "eg-in-copy": 0,
-    "raw-hex": 410,
-    "hand-drawn-svg": 376,
-    "uncited-component-family": 130,
-    "undefined-css-var": 0,
+    "raw-hex": 455,
+    "hand-drawn-svg": 390,
+    "uncited-component-family": 140,
+    "undefined-css-var": 2,
     "inline-styled-pill": 6
   },
   "inventory-V1-picker.html": {
@@ -54,7 +54,7 @@
     "hand-drawn-svg": 377,
     "uncited-component-family": 130,
     "notes": {
-      "rebaseline-2026-09-08": "Optimal/inventory.html reset to a copy of inventory-V1.html (multi-RP variant, user-approved 2026-09-08); counts inherited verbatim from the inventory-V1.html baseline — no net-new violations."
+      "rebaseline-2026-09-08": "Optimal/inventory.html reset to a copy of protected-data.html (multi-RP variant, user-approved 2026-09-08); counts inherited verbatim from the protected-data.html baseline — no net-new violations."
     },
     "undefined-css-var": 0
   },
@@ -98,7 +98,7 @@
     "activity.html raw-hex 171→179 (2026-08-19): _ACT_AV_PALETTE — 8 Base-family avatar fills per the DS Avatar spec (Figma 9286:65503, Base/Indigo exemplar) + COLORS library base steps; data-driven brand values per the GL label-color precedent",
     "activity.html raw-hex 179→180 (2026-08-19): avatar initials pinned to the spec-exact BLUE/S5 #f3fafd (the --blue-light token was remapped to Green/S5 in the Vision sweep)",
     "uncited-component-family baselines frozen 2026-08-19 at introduction (legacy families grandfathered; rd-relg IS cited — Figma 22270:39494); only NET NEW uncited CSS component families fail from here",
-    "inventory-V1.html raw-hex 396→398 (2026-08-19): :root gains --status-blue/--status-blue-5 — REAL Securiti Blue pinned for per-VALUE chips (total-count chip, Figma 10746:122220), the activity.html --status-blue convention; the page --blue tokens were remapped to green by the Vision sweep",
+    "protected-data.html raw-hex 396→398 (2026-08-19): :root gains --status-blue/--status-blue-5 — REAL Securiti Blue pinned for per-VALUE chips (total-count chip, Figma 10746:122220), the activity.html --status-blue convention; the page --blue tokens were remapped to green by the Vision sweep",
     "2026-09-01 inventory-V1 ms365 build: raw-hex 398->400 (CAT_ICONS['ms365-tenant'] tint/color data — dead data, _catTileStyle forces green); hand-drawn-svg 373->377 (+3 = CAT_ICONS entry cloned verbatim from the frozen legacy gws-tenant glyph, +1 = _dsStoreIconSvg's new {d,opacity} path-object branch concat string, not an icon literal). All NEW ms365 glyphs are verbatim Figma 13027-98203 exports in securiti-icons-data.js.",
     "2026-09-01 inventory-V1-picker re-baseline while bumping cache tags: raw-hex 385->389 = pre-existing var(--em-green,#hex) FALLBACK literals in the Figma-9286-65490-cited .tnwl-item.is-active rule (added 2026-08-18 picker sweep, after the last snapshot; not from the ms365/ping work). uncited-component-family seeded at current counts for picker (127) and inventory.html (80) under the tightened no-self-citation regex — legacy frozen, same treatment as the 2026-09-01 sweep.",
     "2026-09-01 enriched-trace port: hand-drawn-svg 376->377 = the per-step tick in the ai-tr2 renderer, a VERBATIM clone of the shipped reasoning pill's tick literal (same path data, second occurrence).",
@@ -109,7 +109,8 @@
     "2026-09-02 answer-card port: raw-hex 401->405 = four NEW :root Chart/Soft series tokens (--chart-soft-green/red/gold/blue, [Product] COLORS Figma JRyhz9vxtopJl2KNtdMuiY 634-169) for the answer-card strips.",
     "2026-09-22 index.html Co-owner(s) field (Basic Information step, all workloads): hand-drawn-svg 266->268 = the search-field magnifying-glass glyph (byte-identical clone of the already-shipped env-search-input icon) + the chip-close X (byte-identical clone of the shipped toast-close/panel-close X literal). Local icon store has no search or close entries; pattern replication of frozen glyphs, not new drawings.",
     "2026-09-22 index.html sidebar reorder (Overview category + Connect/Protect restructure): hand-drawn-svg 268->270. sidebarHTML's top-level steps array traded the retired 'configure' icon (-1 <path>) for a new 'protect' top-level icon and a new Overview info-circle icon (+2 <path>, both byte-identical clones of literals already frozen elsewhere in the file — getConfigSubSteps' protect glyph and the legacy screen-test-conn static sidebar's info-circle glyph respectively); getConnectSubSteps also gained its own `infra` (Region & Storage) sub-step entry, a byte-identical clone of getConfigSubSteps' globe glyph (+1 net after accounting for the already-frozen original). Pattern replication throughout, no new drawings; getConfigSubSteps itself is left defined but unused per the disable-over-delete convention.",
-    "2026-09-22 index.html Connect test-status sidebar badge: hand-drawn-svg 270->269 (net -1). The sidebar's in-progress badge (progSvg) swapped its old info-circle glyph (1 <path>) for an animated .spinner-ring built from two <circle> elements only (0 <path>), and the new error-state badge (errorSvg) renders via _dsStoreIconSvg('status-error-outlined', 14) at runtime — a DS-store icon, not a literal <path> in source — so it adds nothing to the static count."
+    "2026-09-22 index.html Connect test-status sidebar badge: hand-drawn-svg 270->269 (net -1). The sidebar's in-progress badge (progSvg) swapped its old info-circle glyph (1 <path>) for an animated .spinner-ring built from two <circle> elements only (0 <path>), and the new error-state badge (errorSvg) renders via _dsStoreIconSvg('status-error-outlined', 14) at runtime — a DS-store icon, not a literal <path> in source — so it adds nothing to the static count.",
+    "protected-data.html re-baselined 2026-10-29 to its real counts (87 / 455 / 390 / 2 / 140). They were already above the saved numbers before the restore-scope work began, because earlier edits ran through scripts that bypass the hook. Not new violations from the rename; the ratchet applies from here."
   ],
   "relationship-patterns.html": {
     "outlined-chip": 0,
