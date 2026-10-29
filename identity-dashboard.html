@@ -187,7 +187,7 @@ a.vn-fly-title:hover { color: var(--blue); }
 /* '…' renders as a STANDARD rail tile (production reference 2026-07-13:
    same dark rounded square as the module icons, white dots). */
 .vn-rail-more { border: none; }
-/* Rail AI launcher — ported verbatim from inventory-V1.html (.vn-ai-launcher,
+/* Rail AI launcher — ported verbatim from protected-data.html (.vn-ai-launcher,
    user 2026-09-29/30, verified against the live QA "Gencore Assistant" tile):
    borderless soft rainbow glow (--ai-grad, 14px blur, kept inside the 72px
    rail) behind a 24px white sparkle that pulses in size while rotating. */
@@ -201,7 +201,7 @@ a.vn-fly-title:hover { color: var(--blue); }
   100% { transform: scale(0.85) rotate(360deg); }
 }
 /* Decorative ambient loops exempted from any file-wide reduced-motion reset
-   (same call as inventory-V1.html). */
+   (same call as protected-data.html). */
 @media (prefers-reduced-motion: reduce) {
   .vn-ai-launcher::before { animation-duration: 6s !important; animation-iteration-count: infinite !important; }
   .vn-ai-launcher svg { animation-duration: 2.4s !important; animation-iteration-count: infinite !important; }
@@ -290,7 +290,7 @@ a.vn-fly-link:hover { color: var(--blue); }
   --green: var(--val-green);
   --green-10: var(--val-green-bg);
   /* Canonical workload-picker tokens (ported with the tnwl component from
-     inventory-V1.html, user 2026-08-13; same values as the source file). */
+     protected-data.html, user 2026-08-13; same values as the source file). */
   --black-3: #f8f8f9;
   --btn-success: #01804a;          /* was 70b246 — Veeam Green/S80 */
   --securiti-blue-50: #F3FAFD;     /* picker current-row fill */
@@ -335,7 +335,7 @@ a.vn-fly-link:hover { color: var(--blue); }
    Everything else clones an existing recipe — the source is cited inline.
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* Status chip — cloned from inventory-V1.html .ws-status-chip (lines 5604-5607);
+/* Status chip — cloned from protected-data.html .ws-status-chip (lines 5604-5607);
    light variant, borderless (feedback: badges are borderless). Red = Chip Red Light. */
 .ws-status-chip { display: inline-block; padding: 2px 8px; border-radius: 2px; font-size: 16px; font-weight: 500; line-height: 22px; white-space: nowrap; }
 .ws-status-chip.ok   { background: var(--green-bg); color: var(--em-green); }
@@ -343,7 +343,7 @@ a.vn-fly-link:hover { color: var(--blue); }
 .ws-status-chip.err  { background: var(--red-10); color: var(--red); }
 .ws-status-chip.neutral { background: var(--black-5); color: var(--black-100); }
 
-/* Tooltip readout — cloned from inventory-V1.html .app-tooltip (DS Tooltip WHITE theme) */
+/* Tooltip readout — cloned from protected-data.html .app-tooltip (DS Tooltip WHITE theme) */
 .app-tooltip { position: fixed; z-index: 10000; pointer-events: none; background: var(--white); color: var(--black-100); border: 1px solid var(--border-light); font-size: 14px; line-height: 1.35; font-weight: 450; padding: 6px 9px; border-radius: 4px; box-shadow: 0 4px 14px rgba(0,0,0,0.22); max-width: 260px; opacity: 0; transition: opacity 0.12s ease; }
 .app-tooltip.show { opacity: 1; }
 
@@ -1193,7 +1193,7 @@ a.idd-ibtn { text-decoration: none; } .idd-ibtn.is-disabled { opacity: .4; curso
         <span class="bc-current" id="bcCur">Overview</span>
       </div>
       <div class="topbar-row">
-        <div class="plv-title" id="pageTitle">Overview</div>
+        <div class="plv-title" id="pageTitle">Identity Resilience Overview</div>
         <div class="idd-hdr-actions">
           <span class="idd-fresh" id="iddFresh">Last fetched 10:14 AM</span>
           <!-- Refresh glyph = verbatim DS export (Threat Center Figma 1876:32032 Circular Button icon), fill currentColor -->
@@ -1219,6 +1219,12 @@ a.idd-ibtn { text-decoration: none; } .idd-ibtn.is-disabled { opacity: .4; curso
           <span class="rp-chip-val" id="iddRangeChipVal">Last 7 days</span>
         </button>
       </div>
+
+      <!-- DASHBOARDS panel (shared component, dashboards-panel.js): the product's Dashboards list beside the dashboard — this page and the Agent Hub are both in it. -->
+      <div class="dsh-split" id="dshSplit">
+        <div class="dsh-side" id="dshSide"></div>
+        <div class="dsh-main">
+
 
       <!-- ═══════════ VIEW 1 · OVERVIEW (rail tile 1) — verdict, top issues, threats, comparison, trends ═══════════ -->
       <div class="idd-view" id="viewOverview">
@@ -1299,6 +1305,8 @@ a.idd-ibtn { text-decoration: none; } .idd-ibtn.is-disabled { opacity: .4; curso
           <div class="idd-tbl-wrap" id="fndTable"></div>
           <div class="fnd-foot" id="fndFoot"></div>
         </div>
+      </div>
+            </div>
       </div>
     </div>
   </div>
@@ -1392,7 +1400,10 @@ a.idd-ibtn { text-decoration: none; } .idd-ibtn.is-disabled { opacity: .4; curso
 
 
 <script src="securiti-icons-data.js?v=20261001a"></script>
+<script src="vdc-notifications.js?v=20261029b"></script>
 <script src="workload-picker.js?v=20261007"></script>
+<script src="dashboards-panel.js?v=20261029c"></script>
+<script>DashboardsPanel.mount({ host: document.getElementById('dshSide'), current: 'identity' });</script>
 <script>
 function _dsStoreIconSvg(name, size) {
   var e = (typeof window !== 'undefined' && window.__SECURITI_ICONS) ? window.__SECURITI_ICONS[name] : null;
@@ -1444,7 +1455,7 @@ VN_ICONS['agent'] = '<svg width="24" height="24" viewBox="0 0 24 24" fill="curre
 // })();
 // CORE-NAV IA (designer 2026-07-14): Data Resilience is no longer an APP —
 // these eight sections ARE the product's main navigation. Wired pages:
-// Protected Data = inventory-V1.html, Activity Log = activity.html, and
+// Protected Data = protected-data.html, Activity Log = activity.html, and
 // Settings carries the Integrations/Connections link (index.html onboarding).
 // hrefs stay RELATIVE .html paths (file:// safe). Unbuilt sections disabled.
 var VN_ITEMS = [
@@ -1454,13 +1465,13 @@ var VN_ITEMS = [
   // Workflows — with the prototype's own wired pages (Protected Data,
   // Activity Log) slotted after Policies. Notifications + Reporting from the
   // 2026-07-14 leadership IA are parked below, not deleted.
-  { id: 'dashboards',   label: 'Dashboard', href: 'identity-dashboard.html', rail: true, subs: [{ label: 'Overview', href: 'identity-dashboard.html' }] },   // wired 2026-10-05 — Identity Resilience overview lives under Dashboard (was: disabled: true)
+  { id: 'dashboards',   label: 'Dashboard', href: 'identity-dashboard.html', rail: true },   // wired 2026-10-29 — opens the dashboards; the Dashboards panel on each dashboard page lists them (no sub-links in this nav)
   { id: 'findings',     label: 'Findings', disabled: true },
   { id: 'policies',     label: 'Policies', href: 'backup-policies.html', rail: true },   // wired 2026-08-13 (VIRO rail port — THIS page; was: disabled: true in activity.html)
-  { id: 'protected',    label: 'Protected Data', href: 'inventory-V1.html', rail: true },
+  { id: 'protected',    label: 'Protected Data', href: 'protected-data.html', rail: true },
   // [parked 2026-09-09, user: no nav link until broader agreement on the approach]
   // was: { id: 'agentstudio',  label: 'Agentic Studio', href: 'agent-studio.html' },
-  { id: 'activitylog',  label: 'Activity', href: 'activity.html', rail: true, subs: [{ label: 'Audit log', href: 'activity.html#audit' }] },
+  { id: 'activitylog',  label: 'Activity', href: 'activity.html', rail: true },
   { id: 'graphexplorer',label: 'Graph Explorer', disabled: true },
   { id: 'inventory',    label: 'Inventory', disabled: true },
   { id: 'helpcenter',   label: 'Help Center', disabled: true },
@@ -1720,7 +1731,7 @@ var OBJ = {   // [total, protected] per object type
   google: { 'Users': [6200, 0],      'Groups': [1900, 0],    'Apps and service accounts': [300, 0],     'Devices and computers': [0, 0],       'Policies, roles and GPOs': [0, 0] }
 };
 var INV = { dest: 'Inventory', href: '' },   // Inventory = EVERYTHING (protected + unprotected); Protected Data = only what is protected. Inventory is not in the prototype yet: set href here to wire it.
-    PD = { dest: 'Protected Data', href: 'inventory-V1.html' }, ACT = { dest: 'Activity', href: 'activity.html' }, POL = { dest: 'Policies', href: 'backup-policies.html' }, INT = { dest: 'Integrations', href: 'index.html' };
+    PD = { dest: 'Protected Data', href: 'protected-data.html' }, ACT = { dest: 'Activity', href: 'activity.html' }, POL = { dest: 'Policies', href: 'backup-policies.html' }, INT = { dest: 'Integrations', href: 'index.html' };
 var ISSUES = [
   { sev: 'err',  wl: ['okta'],          title: 'Okta backup failed: API rate limit exceeded',          desc: 'The 06:00 org backup stopped after 3 retries. 3 more runs this week had warnings.', act: 'Review session',  dest: 'Activity',       href: 'activity.html', since: 'Today, 06:00', ago: 254 },
   { sev: 'err',  wl: ['google'],        title: 'Google Identity is connected but not protected',       desc: 'About 8,400 objects were discovered and no backup policy applies to them.',                        act: 'Create policy',   dest: 'Policies',       href: 'backup-policies.html#1', since: 'Oct 2', ago: 4300 },
@@ -2312,7 +2323,7 @@ var VIEW = 'overview';
 function setView_old_parked(v, fromHash) {   // PARKED (superseded below)
   VIEW = v === 'issues' ? 'issues' : 'overview';
   document.getElementById('viewOverview').hidden = VIEW !== 'overview'; document.getElementById('viewIssues').hidden = VIEW !== 'issues';
-  document.getElementById('pageTitle').textContent = VIEW === 'issues' ? 'Issues' : 'Overview'; document.getElementById('bcCur').textContent = VIEW === 'issues' ? 'Issues' : 'Overview';
+  document.getElementById('pageTitle').textContent = VIEW === 'issues' ? 'Issues' : 'Identity Resilience Overview'; document.getElementById('bcCur').textContent = VIEW === 'issues' ? 'Issues' : 'Identity Resilience Overview';
   [['vnViewOverview', 'overview'], ['vnViewIssues', 'issues']].forEach(function(p){ var el = document.getElementById(p[0]); if (el) el.classList.toggle('is-view-active', VIEW === p[1]); });
   if (!fromHash && window.history && history.replaceState) history.replaceState(null, '', VIEW === 'issues' ? '#issues' : location.pathname + location.search);
   if (VIEW === 'overview') renderTrends(); else renderIssuesView();
@@ -2339,8 +2350,8 @@ var RULES = {
 var FSEV = { 5: 'Critical', 4: 'High', 3: 'Medium', 2: 'Low' };
 var USERS = ['Darren Lasso', 'Sarah Rivera', 'Mira Khan', 'Unassigned'];
 function T(off, h, m) { return { off: off, h: h, m: m }; }
-function pdCompare(wl, items, point) { return { dest: 'Protected Data', href: 'inventory-V1.html#compare=' + wl + '&items=' + items.join(',') + '&point=' + point }; }
-function pdRestore(wl, items, point) { return { dest: 'Protected Data', href: 'inventory-V1.html#restore=' + wl + '&items=' + items.join(',') + '&point=' + point }; }
+function pdCompare(wl, items, point) { return { dest: 'Protected Data', href: 'protected-data.html#compare=' + wl + '&items=' + items.join(',') + '&point=' + point }; }
+function pdRestore(wl, items, point) { return { dest: 'Protected Data', href: 'protected-data.html#restore=' + wl + '&items=' + items.join(',') + '&point=' + point }; }
 var FINDINGS = [
   { id: '24550', rule: 'RES-107', lvl: 5, status: 'Open', wl: 'ad', name: 'Forest corp.meridian.local shows signs of compromise: forest recovery recommended', c: T(0, 3, 5), u: T(0, 3, 5), rOff: null, assignee: 'Unassigned',
     evidence: 'Within 48 minutes of each other: svc-syncgw was added to Domain Admins (2:14 AM), a DCSync replication request came from a non-DC host (2:52 AM) and Default Domain Policy gained a startup script (3:02 AM). The krbtgt account may be exposed. The 2:00 AM scheduled backup is the last point before any of these changes; the 2:52 AM immutable snapshot, taken by the automated response, already contains them.', policy: 'Forest protection', conn: 'corp.meridian.local', asset: 'Forest',
@@ -2774,8 +2785,8 @@ function syncCartHistory(f) {
   var rec = cartRec(f); if (!rec) return; var fresh = rec.carts.filter(function(c){ return c.status !== 'pending' && !c.logged; });
   if (!fresh.length) return; fresh.forEach(function(c){ c.logged = true; touch(f, 'Restore started: ' + (c.wlLabel || c.wlName), c.sessionName ? 'Session ' + c.sessionName : ''); }); cartSave(f, rec);
 }
-function pdHref(f, i) { return 'inventory-V1.html#carts=' + fndKey(f) + (i == null ? '' : '&cart=' + PD_WL[f.multi.items[i].wl][0]); }
-function pdCompareHref(f, i) { var it = f.multi.items[i]; return 'inventory-V1.html#compare=' + PD_WL[it.wl][0] + '&items=' + it.pdItem + '&point=' + mpIso(mpoint(it)[0]); }
+function pdHref(f, i) { return 'protected-data.html#carts=' + fndKey(f) + (i == null ? '' : '&cart=' + PD_WL[f.multi.items[i].wl][0]); }
+function pdCompareHref(f, i) { var it = f.multi.items[i]; return 'protected-data.html#compare=' + PD_WL[it.wl][0] + '&items=' + it.pdItem + '&point=' + mpIso(mpoint(it)[0]); }
 function activityHref(f) { var rec = cartRec(f); var names = rec ? rec.carts.filter(function(c){ return c.status !== 'pending'; }).map(function(c){ return c.wlName; }) : []; return 'activity.html#jobs?workload=' + encodeURIComponent(names.join(',')) + '&q=' + encodeURIComponent(f.multi.person.toLowerCase().replace(/[^a-z0-9]+/g, '-')); }
 function cchip(s) { return s === 'cart' ? chip('neutral', 'In your cart') : s === 'run' ? chip('info', 'Running') : s === 'ok' ? chip('ok', 'Success') : s === 'bad' ? chip('err', 'Failed') : ''; }
 /* One logic for every restore finding. The unit of restore is a GROUP: the items in one workload, restored together by one session.
@@ -2809,7 +2820,7 @@ function singlePanel(f, d) {
   var w = fWl(f), r = f.restore, names = (f.cmp || []).map(function(o){ return o.name; }), what = names.length ? names.slice(0, 3).join(', ') + (names.length > 3 ? ' and ' + (names.length - 3) + ' more' : '') : r.objects;
   var ids = (/[#&]items=([^&]+)/.exec(d.href) || [0, ''])[1].split(',').filter(Boolean), wlId = (/#restore=([^&]+)/.exec(d.href) || [0, ''])[1], iso = (/point=([^&]+)/.exec(d.href) || [0, ''])[1];
   var kindOf = function(id){ return /-user-/.test(id) ? 'User' : /-grp-/.test(id) ? 'Group' : /-pol-/.test(id) ? 'Policy' : /-forest-/.test(id) ? 'Forest' : ''; };
-  var tbl = restoreTable(ids.map(function(id, k){ return { w: w, item: (names.length === ids.length ? names[k] : (r.item || r.objects)), kind: kindOf(id), href: 'inventory-V1.html#compare=' + wlId + '&items=' + id + '&point=' + iso, point: r.point }; }), false);
+  var tbl = restoreTable(ids.map(function(id, k){ return { w: w, item: (names.length === ids.length ? names[k] : (r.item || r.objects)), kind: kindOf(id), href: 'protected-data.html#compare=' + wlId + '&items=' + id + '&point=' + iso, point: r.point }; }), false);
   return '<div class="pg"><div class="pg-h"><div class="cf"><b>Restore ' + esc(r.item ? (kindOf(ids[0]) || 'item').toLowerCase() + ' ' + r.item : r.objects) + '</b><span>One restore session in ' + esc(w.name) + (r.incl ? ' · ' + esc(r.incl.charAt(0).toLowerCase() + r.incl.slice(1)) : '') + '</span></div><span class="idd-sp"></span><a class="plv-btn plv-btn-tertiary" href="' + d.href + '" target="_blank" rel="noopener" aria-label="Restore ' + esc(r.objects) + ' in Protected Data (opens in a new tab)">Restore' + ico('open-in-new-outlined', 20) + '</a></div>' + tbl + '</div>';
 }
 function renderMultiRestore(M) {
@@ -3141,7 +3152,7 @@ function renderRestorePoints(M) {
   var changed = 0; M.cmp.forEach(function(o){ o.rows.forEach(function(r){ if (r[2] !== r[1]) changed++; }); });
   var iso = rpIso(rec.label), restoreHref = M.restoreHref ? M.restoreHref.replace(/point=[^&]+/, 'point=' + iso) : '', compareHref = M.restoreHref ? M.restoreHref.replace('#restore=', '#compare=').replace(/point=[^&]+/, 'point=' + iso) : '';
   var _ids = M.restoreHref ? (/[#&]items=([^&]+)/.exec(M.restoreHref) || [0, ''])[1].split(',').filter(Boolean) : [], _wl = M.restoreHref ? (/#restore=([^&]+)/.exec(M.restoreHref) || [0, ''])[1] : '';
-  if (_ids.length > 1 && pdParentOf(_ids[0])) compareHref = 'inventory-V1.html#view=' + _wl + '&parent=' + pdParentOf(_ids[0]);   // several items: the list they live in, not just the first one
+  if (_ids.length > 1 && pdParentOf(_ids[0])) compareHref = 'protected-data.html#view=' + _wl + '&parent=' + pdParentOf(_ids[0]);   // several items: the list they live in, not just the first one
   var rbtn = restoreHref ? '<a class="plv-btn plv-btn-tertiary idd-rp-restore" href="' + restoreHref + '" target="_blank" rel="noopener" aria-label="Restore ' + esc(M.item.restore.objects) + ' from ' + esc(rec.label) + ' in Protected Data (opens in a new tab)">Restore' + ico('open-in-new-outlined', 20) + '</a>' : '';
   /* Headers name the ROLE of each column (Variant 1 of the compare-panel options): Now = the latest backup (includes the change); After restore = the recommended restore point, with the Restore button */
   var gone = !!M.item.restore.nowDeleted;   // deleted objects are in NO backup after the restore point, so "Now" describes the objects, not a backup
@@ -3387,7 +3398,7 @@ function setView(v, fromHash) {
   VIEW = 'overview';   // [2026-10-05] one view: the Findings view is PARKED — findings live in Threat Center (filtered link), not a copy here
   document.getElementById('viewOverview').hidden = VIEW !== 'overview'; document.getElementById('viewFindings').hidden = VIEW !== 'findings';
   document.getElementById('iddFilterBar').style.display = VIEW === 'overview' ? '' : 'none';
-  document.getElementById('pageTitle').textContent = VIEW === 'findings' ? 'Findings' : 'Overview'; document.getElementById('bcCur').textContent = VIEW === 'findings' ? 'Findings' : 'Overview';
+  document.getElementById('pageTitle').textContent = VIEW === 'findings' ? 'Findings' : 'Identity Resilience Overview'; document.getElementById('bcCur').textContent = VIEW === 'findings' ? 'Findings' : 'Identity Resilience Overview';
   [['vnViewOverview', 'overview'], ['vnViewFindings', 'findings']].forEach(function(pp){ var el = document.getElementById(pp[0]); if (el) el.classList.toggle('is-view-active', VIEW === pp[1]); });
   if (!fromHash && window.history && history.replaceState) history.replaceState(null, '', VIEW === 'findings' ? '#findings' : location.pathname + location.search);
   if (VIEW === 'overview') renderTrends(); else renderFindingsView();

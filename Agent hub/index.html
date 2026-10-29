@@ -812,6 +812,21 @@ a.vn-fly-title:hover { color: var(--blue); }
 .hb-tt-r .k { flex: 1; }
 .hb-tt-r .v { font-weight: 500; color: var(--black-100); }
 
+/* Click-through marks (every mark that shows session information links to Activity). Hover says so without a banner: a pointer, and a
+   state change matched to the mark. The KPI cards are the whole-card target the identity dashboard uses (border steps up). */
+.hb-act { cursor: pointer; }
+.widget.hb-act:hover { border-color: var(--black-20); }
+.tmap-tile.hb-act:hover { box-shadow: inset 0 0 0 2px rgba(31,34,41,0.4); }
+.gauge-wrap.hb-act:hover .gauge-num { color: var(--em-green); }
+.w-legend .lg.hb-act:hover, .donut-wrap .lg.hb-act:hover { text-decoration: underline; }
+circle.hb-act:hover { stroke-width: 19; }
+.hb-sr.hb-act:hover .hb-sr-l { text-decoration: underline; }
+.hb-sr-bar i.hb-act:hover { filter: brightness(0.9); }
+.hb-act:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px #008436; }
+circle.hb-act:focus-visible { outline: 2px solid #008436; outline-offset: 2px; box-shadow: none; }
+.donut-center .dc-txt { pointer-events: none; }   /* the centre label sat over the arcs and swallowed their clicks */
+.hb-tt-hint { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border-light); font-size: 12px; line-height: 16px; color: var(--black-60); }
+
 /* Approval rows — the page's one actionable block. */
 .hb-ap { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--border-light); }
 .hb-ap-ic { width: 20px; height: 20px; flex-shrink: 0; color: var(--black-60); }
@@ -901,6 +916,7 @@ a.vn-fly-title:hover { color: var(--blue); }
 <script src="../workload-picker.js?v=20261029"></script>
 <script>window.VDC_BASE = '../';   /* this page lives one folder below the prototypes it links to */</script>
 <script src="../dashboards-panel.js?v=20261029c"></script>
+<script src="../agent-sessions.js?v=20261029a"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/js/jsvectormap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/maps/world.js"></script>
 <style id="hub-vision-port">
@@ -3025,12 +3041,12 @@ function lineChart(series, startLabel, endLabel){
   return svg + xs + legend;
 }
 /* Semicircular gauge (reference: the "99% Protected" card) */
-function gauge(pct, color, num, unit, cap, w){
+function gauge(pct, color, num, unit, cap, w, attrs){
   var GW = w || 140, GH = Math.round(GW * 78 / 140);   /* w: render at the card's size — the fixed 140px sat as a speck in a 398px card */
   var r = 46, cx = 60, cy = 54, len = Math.PI * r;
   var val = Math.max(0, Math.min(100, pct)) / 100 * len;
   var arc = 'M ' + (cx - r) + ' ' + cy + ' A ' + r + ' ' + r + ' 0 0 1 ' + (cx + r) + ' ' + cy;
-  return '<div class="gauge-wrap"><svg width="' + GW + '" height="' + GH + '" viewBox="0 0 120 66">'
+  return '<div class="gauge-wrap' + (attrs ? ' hb-act' : '') + '"' + (attrs || '') + '><svg width="' + GW + '" height="' + GH + '" viewBox="0 0 120 66">'
     + '<path d="' + arc + '" fill="none" stroke="var(--black-10)" stroke-width="10" stroke-linecap="round"></path>'
     + '<path d="' + arc + '" fill="none" stroke="' + color + '" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + val.toFixed(1) + ' ' + (len * 2).toFixed(1) + '"></path>'
     + '</svg><div class="gauge-num">' + num + (unit ? '<span class="u">' + esc(unit) + '</span>' : '') + '</div><div class="gauge-cap">' + esc(cap) + '</div></div>';
@@ -3049,7 +3065,7 @@ function treemap(items){
   return '<div class="tmap">' + rows.map(function(row){
     return '<div class="tmap-row" style="flex:' + row.sum + ' 1 0">' + row.items.map(function(it){
       var big = it.value / total > 0.05;
-      return '<div class="tmap-tile" style="flex:' + it.value + ' 1 0;background:' + it.color + '"><div class="tmt-l">' + esc(it.label) + '</div>' + (big ? '<div class="tmt-v">' + esc(it.disp) + '</div>' : '') + '</div>';
+      return '<div class="tmap-tile' + (it.attrs ? ' hb-act' : '') + '"' + (it.attrs ? it.attrs + ' title="' + esc(it.label) + ' \u2014 view these sessions in Activity"' : '') + ' style="flex:' + it.value + ' 1 0;background:' + it.color + '"><div class="tmt-l">' + esc(it.label) + '</div>' + (big ? '<div class="tmt-v">' + esc(it.disp) + '</div>' : '') + '</div>';
     }).join('') + '</div>';
   }).join('') + '</div>';
 }
@@ -3060,12 +3076,12 @@ function donut(segs, centerNum, centerLbl, size){
   var r = 52, C = 2 * Math.PI * r, off = 0;
   var circles = segs.map(function(x){
     var len = x.value / total * C;
-    var el = '<circle cx="60" cy="60" r="' + r + '" fill="none" stroke="' + x.color + '" stroke-width="16" stroke-dasharray="' + len.toFixed(2) + ' ' + (C - len).toFixed(2) + '" stroke-dashoffset="' + (-off).toFixed(2) + '" transform="rotate(-90 60 60)"></circle>';
+    var el = '<circle' + (x.attrs ? ' class="hb-act"' + x.attrs : '') + ' cx="60" cy="60" r="' + r + '" fill="none" stroke="' + x.color + '" stroke-width="16" stroke-dasharray="' + len.toFixed(2) + ' ' + (C - len).toFixed(2) + '" stroke-dashoffset="' + (-off).toFixed(2) + '" transform="rotate(-90 60 60)">' + (x.attrs ? '<title>' + esc(x.label) + ' \u2014 view these sessions in Activity</title>' : '') + '</circle>';
     off += len; return el;
   }).join('');
   var center = '<div class="donut-center" style="width:' + DS + 'px;height:' + DS + 'px"><svg width="' + DS + '" height="' + DS + '" viewBox="0 0 120 120">' + circles + '</svg>'
     + '<div class="dc-txt"><div class="dc-num">' + centerNum + '</div><div class="dc-lbl">' + esc(centerLbl) + '</div></div></div>';
-  var legend = '<div class="w-legend" style="flex-direction:column;gap:8px">' + segs.map(function(x){ return '<div class="lg"><span class="sw" style="background:' + x.color + '"></span>' + esc(x.label) + ' · <strong style="color:var(--black-100);font-weight:500;margin-left:2px">' + x.value + '</strong></div>'; }).join('') + '</div>';
+  var legend = '<div class="w-legend" style="flex-direction:column;gap:8px">' + segs.map(function(x){ return '<div class="lg' + (x.attrs ? ' hb-act' : '') + '"' + (x.attrs || '') + '><span class="sw" style="background:' + x.color + '"></span>' + esc(x.label) + ' · <strong style="color:var(--black-100);font-weight:500;margin-left:2px">' + x.value + '</strong></div>'; }).join('') + '</div>';
   return '<div class="donut-wrap' + (DS > 140 ? ' donut-lg' : '') + '">' + center + legend + '</div>';
 }
 function brkList(rows){
@@ -3117,19 +3133,10 @@ function agentRollup(a){
 /* The skills, mirrored from Agent Settings' CAPS — id, name, access, the
    live autonomy tier and the period's session count. Reach is attributed to
    SKILLS and their workload scope, never to named standing agents. */
-var HUB_SKILLS = [
-  { id:'monitor',      name:'Monitor & report',         access:'Read',                    tier:'Report',    auto:false, runs:38, cats:'*' },
-  { id:'restore',      name:'Restore data',             access:'Write \u00b7 restores data',  tier:'Ask first', auto:false, runs:15, cats:'*' },
-  { id:'exportd',      name:'Export data',              access:'Write \u00b7 produces files', tier:'Ask first', auto:false, runs:6,  cats:['SaaS platforms'] },
-  { id:'policies',     name:'Manage policies',          access:'Write \u00b7 policy settings',tier:'Recommend', auto:false, runs:3,  cats:'*' },
-  { id:'jobs',         name:'Backup jobs',              access:'Write \u00b7 runs jobs',      tier:'Ask first', auto:false, runs:0,  cats:'*' },
-  { id:'findings',     name:'Findings and alerts',      access:'Write \u00b7 finding status', tier:'Report',    auto:false, runs:0,  cats:['SaaS platforms'] },
-  { id:'integrations', name:'Assist with integrations', access:'Assist only',             tier:'Pre-fill',  auto:false, runs:0,  cats:'*' }
-];
-/* The workloads a skill may act on, resolved against the live registry. */
-function hubSkillWls(sk){
-  return hubWlLive().filter(function(w){ return sk.cats === '*' || sk.cats.indexOf(w.cat) >= 0; });
-}
+/* The sessions and their skills come from the SHARED module (../agent-sessions.js): the hub counts them, Activity lists them,
+   so a chart's number is the number of rows you land on when you click it. */
+var HUB_SKILLS = VDC_SESSIONS.SKILLS;
+function hubSkillWls(sk){ return VDC_SESSIONS.skillWls(sk); }
 /* Reader for the shared DS icon store — cloned verbatim from identity-dashboard.html.
    securiti-icons-data.js only publishes window.__SECURITI_ICONS; each page brings this
    accessor. The hub's own DSICON map stays for the glyphs that were already inlined. */
@@ -3160,8 +3167,6 @@ function hubCats(){
 /* Scope: null = everything, {cat} = one category, {wl} = one workload. The picker's category rows and
    its per-workload rows each map onto a real column grouping in the matrix below. */
 var HUB = { days: 30, wl: null, cat: null };
-/* Decisions made on this page survive the re-render — hubModel rebuilds from the seed each time. */
-var HUB_RESOLVED = {};
 
 /* The collapsed chip takes the registry's own MONO mark — the true brand silhouette, same call the
    other pickers make — so a selected workload reads as itself and not as a generic glyph. */
@@ -3208,57 +3213,10 @@ window.hubWlToggle = function(e){
   } else document.removeEventListener('click', hubWlOutside);
 };
 
-/* Seeded so a reload shows the same estate — a dashboard whose numbers move
-   on refresh can't be reasoned about. */
-function hubRnd(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
-
-/* THE one model. Each session: which skill, which workload category, when,
-   and how it was decided. Everything on the page is a count over this. */
+/* THE model: the shared 90-day session set, filtered to this page's window and scope. ONE place applies the scope, so a
+   workload or category selection cannot be honoured by the charts and quietly ignored by a KPI. */
 function hubModel(){
-  var scale = HUB.days / 30, r = hubRnd(99), out = [];
-  HUB_SKILLS.forEach(function(sk){
-    var n = Math.round(sk.runs * scale);
-    for (var i = 0; i < n; i++){
-      /* Pick the WORKLOAD and derive its category, rather than picking a
-         category directly — that way the broadest category is naturally the
-         busiest (it holds more workloads) and the scope picker can filter to
-         a single workload without the totals going incoherent. */
-      var pool = hubSkillWls(sk); if (!pool.length) continue;
-      var w = pool[Math.floor(r() * pool.length)], cat = w.cat;
-      var age = Math.floor(r() * HUB.days);
-      var d;
-      /* How a session resolves follows the skill's TIER, which is the whole
-         point of the page: a read-only skill never asks, an ask-first skill
-         produces the approvals, and denials are what say the tier is wrong. */
-      /* STAGED, NOT DRAWN. Denials and failures follow a fixed cadence per skill (every Nth session) instead of a
-         random draw: a seeded draw can land on zero failures, which makes a success-rate chart read 100% across the
-         board and shows nothing of what the chart is for. A cadence also scales with the period, so 7 / 30 / 90 days
-         tell the same story. */
-      var DENY_EVERY = { restore: 5, exportd: 6 }, FAIL_EVERY = { monitor: 19, restore: 7, exportd: 5 };
-      if (sk.access === 'Read' || sk.access === 'Assist only') d = 'auto';
-      else if (sk.auto) d = r() < 0.82 ? 'auto' : 'approved';
-      else d = (DENY_EVERY[sk.id] && i % DENY_EVERY[sk.id] === DENY_EVERY[sk.id] - 1) ? 'denied' : 'approved';
-      /* WAITING IS ITS OWN STATE. A request still waiting on you has not been approved or denied, but this model
-         used to tag it approved/denied AND flag it open — so the queue was counted twice, inside "You approved"
-         and inside "Waiting on you". It is now exactly one of auto / approved / denied / waiting, and the four
-         always sum to Sessions. (Staged so the queue is visibly non-empty: an empty one hides the row this page
-         exists to raise.) */
-      var waiting = d !== 'auto' && age < 4 && r() < 0.55;
-      var failed = !!(FAIL_EVERY[sk.id] && i % FAIL_EVERY[sk.id] === FAIL_EVERY[sk.id] - 1);
-      var decided = waiting ? 'waiting' : d;
-      out.push({ skill: sk.id, wl: w.id, cat: cat, age: age, decided: decided,
-                 /* OUTCOME only exists for a session that actually ran: auto or approved. A denied session was
-                    declined, not failed, and a waiting one has not run — neither belongs in a success rate. */
-                 outcome: (decided === 'auto' || decided === 'approved') ? (failed ? 'failed' : 'success') : null,
-                 wait: d === 'auto' ? 0 : Math.round(4 + r() * 180),
-                 reversed: decided === 'approved' && r() < 0.035,
-                 open: waiting });
-    }
-  });
-  /* ONE place applies the scope. Everything downstream counts over what comes
-     back, so a workload or category selection cannot be honoured by the charts
-     and quietly ignored by a KPI. */
-  out.forEach(function(x){ if (HUB_RESOLVED[x.skill + '|' + x.wl + '|' + x.age]){ x.open = false; x.decided = 'approved'; x.outcome = x.outcome || 'success'; } });
+  var out = VDC_SESSIONS.sessions().filter(function(x){ return x.ageF < HUB.days; });
   if (HUB.wl) return out.filter(function(x){ return x.wl === HUB.wl; });
   if (HUB.cat) return out.filter(function(x){ return x.cat === HUB.cat; });
   return out;
@@ -3314,8 +3272,8 @@ function renderHub(){
   /* Same header as every other card (title / age / refresh / kebab), then the ported tile in a
      .w-body. was: .is-stat's fixed 168px height, which stretched the card and pushed the tile
      down the box. */
-  function kpiW(title, kind, num, sub){
-    return '<div class="widget w-3 w-auto">' + wHead(title)
+  function kpiW(title, kind, num, sub, act){
+    return '<div class="widget w-3 w-auto' + (act ? ' hb-act' : '') + '"' + (act ? hubAct(act) : '') + '>' + wHead(title)
       /* SUB-LINES PARKED, as identity-dashboard parks them (SHOW_KPI_SUBS = false, 2026-10-06: "the number tile +
          widget title carry the card"). They were printed inside the tile here, which made these cards 192px tall
          against the reference's 154. The context is not lost — it moves to the tile's tooltip, and the flag brings
@@ -3327,30 +3285,32 @@ function renderHub(){
   }
   /* SMALL SAMPLE. Scoping to one workload can leave 1 decision, and "100%" off a denominator of 1 is a lie with a
      number on it. Under the sample a tile shows the count and does not flag; the share appears once it means something. */
-  var kpis = kpiW('Sessions', '', total, 'across ' + liveSkills + ' skills')
+  var A_RAN = { decision: 'auto,approved', label: 'Sessions that ran' };
+  var kpis = kpiW('Sessions', '', total, 'across ' + liveSkills + ' skills', { decision: HUB_ALL, label: 'All sessions' })
     + (doneAll >= 8
-        ? kpiW('Success rate', rate >= 95 ? 'ok' : rate >= 85 ? 'warn' : 'err', rate + '%', okAll + ' of ' + doneAll + ' sessions completed successfully')
-        : kpiW('Success rate', '', doneAll ? okAll + ' of ' + doneAll : '—', 'sessions completed successfully'))
-    + kpiW('Waiting on you', open.length ? 'warn' : '', open.length, med ? 'median wait ' + hubDur(med) : 'nothing queued')
+        ? kpiW('Success rate', rate >= 95 ? 'ok' : rate >= 85 ? 'warn' : 'err', rate + '%', okAll + ' of ' + doneAll + ' sessions completed successfully', A_RAN)
+        : kpiW('Success rate', '', doneAll ? okAll + ' of ' + doneAll : '\u2014', 'sessions completed successfully', A_RAN))
+    + kpiW('Waiting on you', open.length ? 'warn' : '', open.length, med ? 'median wait ' + hubDur(med) : 'nothing queued', { decision: 'waiting', status: 'pending', label: 'Waiting on you' })
     + (asked >= 8
-        ? kpiW('Turned down', denyPct >= 15 ? 'err' : '', denyPct + '%', deny + ' of ' + asked + ' it asked for')
-        : kpiW('Turned down', '', deny, asked ? 'of ' + asked + ' it asked for' : 'it asked for nothing'));
+        ? kpiW('Turned down', denyPct >= 15 ? 'err' : '', denyPct + '%', deny + ' of ' + asked + ' it asked for', { decision: 'denied', status: 'dismissed', label: 'Turned down' })
+        : kpiW('Turned down', '', deny, asked ? 'of ' + asked + ' it asked for' : 'it asked for nothing', { decision: 'denied', status: 'dismissed', label: 'Turned down' }));
 
   /* ── 2 · How the decisions went — gauge + donut + treemap, sized to the 398 x 270 the card actually gives them
      (they were rendering at 140 and 120 px, specks floating in the middle of the card). ── */
   var trust = asked ? Math.round(appr / asked * 100) : 100;
   var gaugeW = widget('w-4', 'Requests you approve', '', gauge(trust, trust >= 85 ? 'var(--d-green)' : trust >= 70 ? 'var(--d-amber)' : 'var(--d-red)',
-      trust, '%', asked ? (deny ? 'You turned down ' + deny + ' of ' + asked : 'You approved all ' + asked) : 'No decisions yet', 280), '');
+      trust, '%', asked ? (deny ? 'You turned down ' + deny + ' of ' + asked : 'You approved all ' + asked) : 'No decisions yet', 280,
+      hubAct({ decision: 'approved,denied', label: 'Requests you decided' })), '');
   var donutW = widget('w-4', 'Session decisions', '', donut([
-      { label: 'Ran on its own', value: auto, color: 'var(--d-green)' },
-      { label: 'You approved',   value: appr, color: 'var(--d-blue)' },
-      { label: 'You denied',     value: deny, color: 'var(--d-red)' },
-      { label: 'Waiting on you', value: waitN, color: 'var(--d-amber)' }
+      { label: 'Ran on its own', value: auto,  color: 'var(--d-green)', attrs: hubAct({ decision: 'auto', label: 'Ran on its own' }) },
+      { label: 'You approved',   value: appr,  color: 'var(--d-blue)',  attrs: hubAct({ decision: 'approved', label: 'You approved' }) },
+      { label: 'You denied',     value: deny,  color: 'var(--d-red)',   attrs: hubAct({ decision: 'denied', status: 'dismissed', label: 'You denied' }) },
+      { label: 'Waiting on you', value: waitN, color: 'var(--d-amber)', attrs: hubAct({ decision: 'waiting', status: 'pending', label: 'Waiting on you' }) }
     ], total, 'sessions', 184), '');
   var tmColors = ['var(--d-blue)', 'var(--d-green)', 'var(--d-amber)', 'var(--d-slate)', 'var(--d-orange)', 'var(--d-gray)', 'var(--d-outside)'];
   var tmItems = HUB_SKILLS.filter(function(sk){ return cnt(function(x){ return x.skill === sk.id; }); })
     .map(function(sk, i){ var v = cnt(function(x){ return x.skill === sk.id; });
-      return { label: sk.name, value: v, disp: String(v), color: tmColors[i % tmColors.length] }; });
+      return { label: sk.name, value: v, disp: String(v), color: tmColors[i % tmColors.length], attrs: hubAct({ decision: HUB_ALL, skill: sk.id, label: sk.name }) }; });
   var tmapW = widget('w-4', 'Sessions by skill', '', tmItems.length ? treemap(tmItems) : '<div class="hb-kpi-sub">No sessions in this period.</div>', '');
 
   /* ── 3 · SUCCESS RATE BY SKILL — the question the page lacked: of the sessions that ran, how many completed? Each
@@ -3358,14 +3318,15 @@ function renderHub(){
      (Replaces "Where it reached": bars of session counts relative to the busiest workload, which said nothing.) ── */
   var srRows = HUB_SKILLS.map(function(sk){
       var done = S.filter(function(x){ return x.skill === sk.id && x.outcome; }), ok = done.filter(function(x){ return x.outcome === 'success'; }).length;
-      return { name: sk.name, n: done.length, ok: ok };
+      return { id: sk.id, name: sk.name, n: done.length, ok: ok };
     }).filter(function(r2){ return r2.n; }).sort(function(a2, b2){ return b2.n - a2.n; });
   var srBody = doneAll
     ? '<div class="hb-sr-sum"><span class="hb-sr-big">' + rate + '%</span><span class="hb-sr-of">' + okAll + ' of ' + doneAll + ' sessions completed successfully</span></div>'
       + '<div class="hb-sr-list">' + srRows.map(function(r2){
           var pct = Math.round(r2.ok / r2.n * 100), bad = r2.n - r2.ok, badW = bad ? Math.max(3, bad / r2.n * 100) : 0;
-          return '<div class="hb-sr"><div class="hb-sr-l" title="' + esc(r2.name) + '">' + esc(r2.name) + '</div>'
-            + '<div class="hb-sr-bar"><i class="ok" style="width:' + (100 - badW) + '%"></i>' + (bad ? '<i class="bad" style="width:' + badW + '%"></i>' : '') + '</div>'
+          return '<div class="hb-sr hb-act"' + hubAct({ decision: 'auto,approved', skill: r2.id, label: r2.name + ', sessions that ran' }) + '><div class="hb-sr-l">' + esc(r2.name) + '</div>'
+            + '<div class="hb-sr-bar"><i class="ok hb-act" style="width:' + (100 - badW) + '%"' + hubAct({ decision: 'auto,approved', status: 'success', skill: r2.id, label: r2.name + ', completed' }) + ' title="Completed \u2014 view in Activity"></i>'
+            + (bad ? '<i class="bad hb-act" style="width:' + badW + '%"' + hubAct({ decision: 'auto,approved', status: 'failed', skill: r2.id, label: r2.name + ', failed' }) + ' title="Failed \u2014 view in Activity"></i>' : '') + '</div>'
             + '<div class="hb-sr-n">' + r2.ok + ' of ' + r2.n + '</div><div class="hb-sr-p">' + pct + '%</div></div>';
         }).join('') + '</div>'
       + '<div class="w-legend" style="margin-top:auto"><div class="lg"><span class="sw" style="background:var(--d-green);height:8px;width:8px"></span>Completed</div>'
@@ -3379,24 +3340,25 @@ function renderHub(){
     var vals = [];
     for (var b3 = buckets - 1; b3 >= 0; b3--){
       var lo = b3 * per, hi = (b3 + 1) * per;
-      vals.push(cnt(function(x){ return x.age >= lo && x.age < hi && x.decided === key; }));
+      vals.push(cnt(function(x){ return x.ageF >= lo && x.ageF < hi && x.decided === key; }));   /* by the fractional age, so a bucket's time range selects exactly the sessions counted in it */
     }
     return vals;
   }
   var DAY = 86400000, labels = [];
   for (var b4 = buckets - 1; b4 >= 0; b4--){
     var d1 = new Date(Date.now() - (b4 + 1) * per * DAY), d2 = new Date(Date.now() - b4 * per * DAY);
-    labels.push({ short: hubMD(new Date(Date.now() - (b4 + 0.5) * per * DAY)), range: hubMD(d1) + ' – ' + hubMD(d2) });
+    labels.push({ short: hubMD(new Date(Date.now() - (b4 + 0.5) * per * DAY)), range: hubMD(d1) + ' \u2013 ' + hubMD(d2),
+                  from: VDC_SESSIONS.BASE - (b4 + 1) * per * DAY, to: VDC_SESSIONS.BASE - b4 * per * DAY });
   }
   HUB_TREND = { labels: labels, series: [
-    { label: 'Ran on its own', vals: band('auto'),     color: 'var(--d-green)' },
-    { label: 'You approved',   vals: band('approved'), color: 'var(--d-blue)' },
-    { label: 'You denied',     vals: band('denied'),   color: 'var(--d-red)' }
+    { label: 'Ran on its own', key: 'auto',     vals: band('auto'),     color: 'var(--d-green)' },
+    { label: 'You approved',   key: 'approved', vals: band('approved'), color: 'var(--d-blue)' },
+    { label: 'You denied',     key: 'denied',   vals: band('denied'),   color: 'var(--d-red)' }
   ] };
   var trendW = widget('w-6', 'Session decisions over time', '',
       '<div class="hb-trend" id="hubTrend"></div>'
     + '<div class="w-legend" style="margin-top:0">' + HUB_TREND.series.map(function(z){
-        return '<div class="lg"><span class="sw" style="background:' + z.color + '"></span>' + esc(z.label) + '</div>'; }).join('') + '</div>', '');
+        return '<div class="lg hb-act"' + hubAct({ decision: z.key, status: z.key === 'denied' ? 'dismissed' : '', label: z.label }) + '><span class="sw" style="background:' + z.color + '"></span>' + esc(z.label) + '</div>'; }).join('') + '</div>', '');
 
   /* ── 4 · APPROVALS. Its own section, and ACTIONABLE — the one thing a page about
      whether the arrangement is working must let you unblock. An earlier pass folded
@@ -3424,7 +3386,7 @@ function renderHub(){
         ? '<div class="w-sub">' + pend.length + (pend.length === 1 ? ' request is waiting on you' : ' requests are waiting on you')
           + (med ? ' · median wait ' + hubDur(med) : '') + '</div>'
           + pend.map(apprRow).join('')
-          + '<div class="hb-ap-foot"><button type="button" class="plv-btn plv-btn-secondary" onclick="hubOpenActivity(\'approvals\')">See every decision in Activity' + hubExtIc() + '</button></div>'
+          + '<div class="hb-ap-foot"><button type="button" class="plv-btn plv-btn-secondary" onclick="location.href = hubActivityLink({ decision: \'approved,denied,waiting\' })">See every decision in Activity' + hubExtIc() + '</button></div>'
         : '<div class="hb-kpi-sub">Nothing is waiting on you.</div>')
     + '</div></div>';
 
@@ -3433,6 +3395,56 @@ function renderHub(){
   host.innerHTML = idStrip + '<div class="dash">' + kpis + apprW + gaugeW + donutW + tmapW + successW + trendW + '</div>';
   hubDrawTrend();   /* needs the laid-out width, so it runs after the markup is in */
 }
+
+/* ══ CLICK-THROUGH TO ACTIVITY ═══════════════════════════════════════════════════════════════════════════════════
+   Every mark that shows session information is a link to the Agents lens of Activity, pre-filtered to exactly the sessions
+   it counted. A mark carries data-act-decision (auto|approved|denied|waiting, comma-separated), optional data-act-status
+   (pending|dismissed|success|failed — Activity's own Status vocabulary) and data-act-skill. The page's CURRENT scope (the
+   workload picker) and window (the range chip) are added at click time, so the link always matches what the chart shows.
+   Activity reads the same shared session set (../agent-sessions.js), which is why the row count equals the number you clicked. */
+function hubAct(o){
+  return ' data-act="1"'
+    + (o.decision ? ' data-act-decision="' + o.decision + '"' : '')
+    + (o.status ? ' data-act-status="' + o.status + '"' : '')
+    + (o.skill ? ' data-act-skill="' + o.skill + '"' : '')
+    + ' role="link" tabindex="0"' + (o.label ? ' aria-label="' + esc(o.label).replace(/"/g, '&quot;') + ' — view these sessions in Activity"' : '');
+}
+var HUB_ALL = 'auto,approved,denied,waiting';
+function hubScopeWls(){
+  var live = VDC_SESSIONS.liveWls();
+  var ids = HUB.wl ? [HUB.wl] : HUB.cat ? live.filter(function(w){ return w.cat === HUB.cat; }).map(function(w){ return w.id; }) : live.map(function(w){ return w.id; });
+  var seen = {}, out = [];
+  ids.forEach(function(id){ var n = VDC_SESSIONS.actWl(id); if (!seen[n]){ seen[n] = 1; out.push(n); } });
+  return out;
+}
+function hubActivityLink(o){
+  var p = new URLSearchParams();
+  if (o.decision) p.set('decision', o.decision);
+  if (o.status) p.set('status', o.status);
+  if (o.skill) p.set('skill', o.skill);
+  p.set('workload', hubScopeWls().join(','));
+  /* exact timestamps, relative to the shared session clock — a preset like "last 30 days" would be measured from a different
+     moment in Activity and drop or add the sessions on the edge */
+  var base = VDC_SESSIONS.BASE;
+  p.set('from', String(o.from != null ? Math.round(o.from) : base - HUB.days * VDC_SESSIONS.DAY));
+  p.set('to', String(o.to != null ? Math.round(o.to) : base));
+  return '../activity.html#agents?' + p.toString();
+}
+function hubGoActivity(el, over){
+  var o = { decision: el.getAttribute('data-act-decision'), status: el.getAttribute('data-act-status'), skill: el.getAttribute('data-act-skill') };
+  if (over) for (var k in over) o[k] = over[k];
+  location.href = hubActivityLink(o);
+}
+document.addEventListener('click', function(e){
+  var el = e.target.closest && e.target.closest('#screen-hub [data-act]'); if (!el) return;
+  if (e.target.closest('button, a')) return;   // a real control inside a linked card keeps its own job
+  hubGoActivity(el);
+});
+document.addEventListener('keydown', function(e){
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  var el = e.target.closest && e.target.closest('#screen-hub [data-act]'); if (!el || e.target !== el) return;
+  e.preventDefault(); hubGoActivity(el);
+});
 var HUB_PENDING = [];
 function hubSkillOf(x){ return HUB_SKILLS.filter(function(k){ return k.id === x.skill; })[0] || { id: x.skill, name: x.skill, access: '', tier: '' }; }
 function hubWlOf(x){ return hubWlAll().filter(function(k){ return k.id === x.wl; })[0] || { id: x.wl, name: x.wl }; }
@@ -3442,9 +3454,9 @@ function hubWlOf(x){ return hubWlAll().filter(function(k){ return k.id === x.wl;
    at a different request by the time it was clicked. */
 function hubApprResolve(x){
   if (!x || x._approved) return;
-  x.open = false; x._approved = true;
-  HUB_RESOLVED[x.skill + '|' + x.wl + '|' + x.age] = true;
-  showToast({ tone: 'success', title: 'Approved — ' + hubSkillOf(x).name + ' on ' + hubWlOf(x).name });
+  x._approved = true;
+  VDC_SESSIONS.resolve(x.id);   /* persisted, so Activity lists it as Approved and a reload keeps it */
+  showToast({ tone: 'success', title: 'Approved \u2014 ' + hubSkillOf(x).name + ' on ' + hubWlOf(x).name });
   renderHub();
 }
 function hubApprApprove(i){ hubApprResolve(HUB_PENDING[i]); }
@@ -3541,11 +3553,22 @@ function hubDrawTrend(){
     guide.setAttribute('x1', X(i)); guide.setAttribute('x2', X(i)); guide.setAttribute('visibility', 'visible');
     T.series.forEach(function(z, k){ dots[k].setAttribute('cx', X(i)); dots[k].setAttribute('cy', Y(z.vals[i])); dots[k].setAttribute('visibility', 'visible'); });
     tip.innerHTML = '<div class="hb-tt-h">' + T.labels[i].range + '</div>' + T.series.map(function(z){
-      return '<div class="hb-tt-r"><span class="sw" style="background:' + z.color + '"></span><span class="k">' + esc(z.label) + '</span><span class="v">' + z.vals[i] + '</span></div>'; }).join('');
+      return '<div class="hb-tt-r"><span class="sw" style="background:' + z.color + '"></span><span class="k">' + esc(z.label) + '</span><span class="v">' + z.vals[i] + '</span></div>'; }).join('')
+      + '<div class="hb-tt-hint">Click to view these sessions in Activity</div>';
     tip.hidden = false;
     var tw = tip.offsetWidth, th = tip.offsetHeight;
     tip.style.left = Math.max(0, Math.min(W - tw, X(i) + 14 + tw > W ? X(i) - tw - 14 : X(i) + 14)) + 'px';
     tip.style.top = Math.max(0, Math.min(H - th, e.clientY - host.getBoundingClientRect().top - th / 2)) + 'px';
+  });
+  /* Click = the nearest series at the nearest bucket, in that bucket's own time range — so the link lands on exactly the sessions
+     the point counted (Activity gets exact timestamps, not a day-granular range). */
+  svg.style.cursor = 'pointer';
+  svg.addEventListener('click', function(e){
+    var box = host.getBoundingClientRect(), x = e.clientX - box.left, y = e.clientY - box.top;
+    var i = Math.max(0, Math.min(n - 1, Math.round((x - pl - inset) / (iw || 1) * (n - 1))));
+    var best = 0, bd = 1e9; T.series.forEach(function(z, k){ var d = Math.abs(Y(z.vals[i]) - y); if (d < bd){ bd = d; best = k; } });
+    var z = T.series[best];
+    location.href = hubActivityLink({ decision: z.key, status: z.key === 'denied' ? 'dismissed' : '', from: T.labels[i].from, to: T.labels[i].to });
   });
   svg.addEventListener('mouseleave', function(){ guide.setAttribute('visibility', 'hidden'); [].forEach.call(dots, function(d){ d.setAttribute('visibility', 'hidden'); }); tip.hidden = true; });
 }
