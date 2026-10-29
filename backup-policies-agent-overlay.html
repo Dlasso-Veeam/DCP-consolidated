@@ -968,11 +968,22 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
    close ✕ at the card's top-right. No leading icon badge (was: white
    center-top card with circular tone icon). Slides in from the right. */
 .toast-stack { position: fixed; top: calc(24px + var(--devjump-h)); right: 24px; z-index: 200; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; pointer-events: none; }
-.toast { display: flex; align-items: flex-start; gap: 12px; min-width: 320px; max-width: 380px; padding: 12px 16px; border-radius: 8px; font-size: 14px; line-height: 20px; color: var(--black-100); pointer-events: auto; opacity: 0; transform: translateX(16px); transition: opacity 200ms ease, transform 200ms ease; box-shadow: 0 4px 14px rgba(31,34,41,0.10); }
+/* Veeam Vision "New Components / Toast" — read live 2026-10-29 (file RAziAkHGE5CMmwTsyb52O7, set 566:9932,
+   Type=Success 566:9942). Measured off the component, not guessed: w438 · padding 12 all round (was 12/16) ·
+   gap 12 · radius 4 (was 8) · Body/B2 16/22 (was 14/20 — the "text looks small" the user spotted).
+   NOTE: the cached design-system-veeam-vision.md still says toast has no Vision source of truth; that is STALE —
+   the component set was published 2026-08-17. */
+.toast { display: flex; align-items: flex-start; gap: 12px; width: 438px; max-width: calc(100vw - 48px); padding: 12px; border-radius: 4px; font-size: 16px; line-height: 22px; color: var(--black-100); pointer-events: auto; opacity: 0; transform: translateX(16px); transition: opacity 200ms ease, transform 200ms ease; box-shadow: 0 4px 14px rgba(31,34,41,0.10); }
 .toast.show { opacity: 1; transform: translateX(0); }
-.toast.toast-success { background: var(--val-green-bg); border: 1px solid color-mix(in srgb, var(--val-green) 40%, white); }
+/* Success tone from the Vision component (566:9942): Secondary/Lime/S5 ground + a FULL-strength Veeam Green/S80
+   border. Was --val-green-bg (#f6fbf9, a near-white grey-green) with the border washed to a 40% color-mix, which is
+   what made the toast read as a plain grey card rather than a success one. --lime-5 added beside the existing
+   --lime-20 rather than inlining the hex. */
+.toast.toast-success { background: var(--lime-5); border: 1px solid var(--val-green); }
 .toast.toast-info { background: var(--val-blue-bg); border: 1px solid color-mix(in srgb, var(--val-blue) 40%, white); }
-.toast-title { font-weight: 700; color: var(--black-100); margin-bottom: 2px; }
+/* Body/B2/Semi Bold = Circular Pro MEDIUM 500, not bold. The DS text styles say so explicitly ("Bold font weight is
+   not used or encouraged unless explicitly requested"); this was 700. 2px gap between the two lines per the component. */
+.toast-title { font-weight: 500; color: var(--black-100); margin-bottom: 2px; }
 .toast-body { font-weight: 450; color: var(--black-100); }
 .toast-body a, .toast-body .toast-link { color: var(--em-green); text-decoration: none; } /* was underlined — Vision Link */
 .toast-close { margin-left: auto; cursor: pointer; color: var(--btn-success); display: flex; align-items: center; padding: 2px; flex-shrink: 0; }
@@ -1048,6 +1059,7 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
   --black-3: #f8f8f9;
   --btn-success: #01804a;          /* was 70b246 — Veeam Green/S80 */
   --securiti-blue-50: #F3FAFD;     /* picker current-row fill */
+  --lime-5: #f1fef5;   /* Secondary/Lime/S5 — Vision Toast success ground (566:9942, read live 2026-10-29) */
   --lime-20: #c1fbd4;              /* was d1ffd4 — Secondary/Lime/S20 (current-row ring) */
   --soft-green-bg: #f6fbf9;        /* was eff6ea (Chart/Soft green T160) — Green/S5 active cat chip */
   /* GenCore Assistant gradient — verbatim from securiti_gencore-assistant.svg
@@ -9789,12 +9801,12 @@ var VN_ITEMS = [
   { id: 'protected',    label: 'Protected Data', href: 'inventory-V1-agent-overlay.html', rail: true },
   // [parked 2026-09-09, user: no nav link until broader agreement on the approach]
   // was: { id: 'agentstudio',  label: 'Agentic Studio', href: 'agent-studio-agent-overlay.html' },
-  { id: 'activitylog',  label: 'Activity', href: 'activity-agent-overlay.html', rail: true, subs: [{ label: 'Audit log', href: 'activity-agent-overlay.html#audit' }] },
+  { id: 'activitylog',  label: 'Activity', href: 'activity-agent-overlay.html', rail: true },
   { id: 'graphexplorer',label: 'Graph Explorer', disabled: true },
   { id: 'inventory',    label: 'Inventory', disabled: true },
   { id: 'helpcenter',   label: 'Help Center', disabled: true },
   { id: 'integrations', label: 'Integrations', href: 'index.html', rail: true },
-  { id: 'settings',     label: 'Settings', href: 'agent-settings-overlay.html', rail: true, subs: [{ label: 'Agent Settings', href: 'agent-settings-overlay.html' }] },   // wired 2026-10-15 — the only way into Settings. was: disabled: true (2026-07-15; earlier rail:true w/ subs Appliances/Email Notification Templates)
+  { id: 'settings',     label: 'Settings', href: 'agent-settings-overlay.html', rail: true },   // wired 2026-10-15 — the only way into Settings. was: disabled: true (2026-07-15; earlier rail:true w/ subs Appliances/Email Notification Templates)
   { id: 'workflows',    label: 'Workflows', disabled: true }
   // [parked 2026-07-15] { id: 'notifications', label: 'Notifications', disabled: true },
   // [parked 2026-07-15] { id: 'reporting',     label: 'Reporting', disabled: true },
@@ -12103,7 +12115,7 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
       + '<div class="form-group"><label class="form-label">Name<span class="req">*</span>' + (blank ? '' : mark()) + '</label><input class="form-input" id="rotfName" value="' + esc(p.name) + '" oninput="rotValidate()"></div>'
       + '<div class="form-group"><label class="form-label">Description' + (blank ? '' : mark()) + '</label><textarea class="form-input rot-ta" id="rotfDesc">' + esc(p.desc) + '</textarea></div>'
       + '<div class="form-group"><label class="form-label">Severity<span class="req">*</span>' + (blank ? '' : mark()) + '</label><select class="form-select" id="rotfSev">' + opts(['Low','Medium','High','Critical'], p.severity) + '</select></div>'
-      + '<div class="form-group"><label class="form-label">Owner <span class="req">*</span></label><div class="rot-own"><span class="rot-av">D</span><select class="form-select" id="rotfOwner"><option>Daren Lasso</option><option>Sarah Chen</option><option>Maria Gonzalez</option></select></div></div>'
+      + '<div class="form-group"><label class="form-label">Owner <span class="req">*</span></label><div class="rot-own"><span class="rot-av">D</span><select class="form-select" id="rotfOwner"><option>Darren Lasso</option><option>Sarah Chen</option><option>Maria Gonzalez</option></select></div></div>'
       + '<div class="form-group"><label class="form-label">Co-owners</label><select class="form-select" id="rotfCo"><option value="">Please select co-owners</option><option>Sarah Chen</option><option>Maria Gonzalez</option><option>Alex Kim</option></select></div>'
       + '<div class="form-group"><label class="rot-check"><input type="checkbox" id="rotfActive"' + (p.active ? ' checked' : '') + '> Activate Policy</label></div>'
       + '<div class="rot-sec">Scope</div><div class="rot-sec-sub">Scope defines the boundaries and context within which the policy\u2019s rules and privileges are enforced.</div>'
@@ -12154,7 +12166,7 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
   window.rotSave = function(){
     if (!draft) return; readDraft(); if (!draft.name || !draft.actions.length) return;
     var s = st(); if (s.rec) return;
-    s.policy = { name:draft.name, desc:draft.desc, severity:draft.severity, owner:draft.owner || 'Daren Lasso', active:draft.active, sites:draft.sites, months:draft.months, size:draft.size, actions:draft.actions,
+    s.policy = { name:draft.name, desc:draft.desc, severity:draft.severity, owner:draft.owner || 'Darren Lasso', active:draft.active, sites:draft.sites, months:draft.months, size:draft.size, actions:draft.actions,
       crit:queryText(draft), actionText:draft.actions.join('; ') };
     s.rec = 'approved'; s.by = 'Darren Lasso'; s.ts = Date.now(); s.scope = 'once'; save(s);
     document.getElementById('rotEditor').classList.remove('open'); draft = null; rotRender();
@@ -12239,7 +12251,7 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
   var accBusy = false;
   function rotCommitAccept(animated){
     var s = st(); if (s.rec) { accBusy = false; return; }
-    var d = JSON.parse(JSON.stringify(PROPOSED)); d.owner = 'Daren Lasso'; d.active = true;
+    var d = JSON.parse(JSON.stringify(PROPOSED)); d.owner = 'Darren Lasso'; d.active = true;
     s.policy = { name:d.name, desc:d.desc, severity:d.severity, owner:d.owner, active:true, sites:d.sites, months:d.months, size:d.size, actions:d.actions, crit:queryText(d), actionText:d.actions.join('; ') };
     s.rec = 'approved'; s.by = 'Darren Lasso'; s.ts = Date.now(); s.scope = 'once'; s.how = 'quick'; save(s); rotRender();
     if (animated) rotAcceptSettle();

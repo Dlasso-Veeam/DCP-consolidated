@@ -1104,7 +1104,8 @@ tbody tr:hover .policy-inherited-name { text-decoration: underline; text-decorat
 
 /* ─── Generic Column Picker (shared component) ──────────────────────
    Single popover instance used by every table in the prototype. Mount
-   point lives at the end of <body> (#colPickerPopover); the ColPicker
+   point lives at the end of <body>
+ (#colPickerPopover); the ColPicker
    JS API positions + populates it on open. Pattern matches the
    Securiti web app's column picker. Drag handle + per-row trend icon
    are intentionally omitted in this build. */
@@ -2913,11 +2914,54 @@ body.ai-open #aiWorkingGlow { right: var(--ai-w); }
 }
 .app { transition: padding-right 0.24s ease; }
 body.ai-open .app { padding-right: var(--ai-w); }
+/* ONE SCROLLBAR, NOT TWO (user 2026-10-29, raised twice). The panel is fixed at right:0, which for a fixed element
+   means the viewport's CONTENT edge — so the document's own scrollbar sits immediately to its right and the two
+   read as a doubled bar. Styling the inner one thinner only made it quieter; the pair was still there.
+   Fix: while the panel is open the DOCUMENT stops scrolling and .app scrolls instead. .app ends at the panel's
+   left edge, so its scrollbar is over there and the panel's own is at the far right — separated by the whole
+   panel rather than touching.
+   Sticky children inside .app offset by var(--devjump-h) because they stick against the viewport while the
+   document scrolls. Once .app is the scroller they stick against .app, whose top is already below the dev bar, so
+   the variable is redefined to 0 inside that context and every sticky lands correctly without being enumerated. */
+body.ai-open { overflow: hidden; }
+/* The devjump leaves the flow and overlays instead, so .app can be the FULL viewport height. That is the whole
+   trick: the scrollport's top edge then coincides with the viewport's, which is what every sticky offset on this
+   page was already written against. --devjump-h keeps its real value, .sidenav still pins at top:40 and measures
+   calc(100vh - 40px), the table heads still stack under it — nothing about the sticky system has to know the
+   panel is open. The first attempt zeroed --devjump-h instead and broke the rail, because that variable carries
+   BOTH the offset and the height and only the offset wanted to change. */
+body.ai-open #devjump { position: fixed; top: 0; left: 0; right: 0; }
+/* The bar's height is given back as a MARGIN on the flex children, never as padding on .app. Padding would move
+   the scrollport's content edge down, and Chrome measures a sticky element's offset from that edge — so every
+   `top: var(--devjump-h)` would have been counted twice and the rail sat at 80px instead of 40 (seen on Activity
+   and Settings, where the rail was already stuck). A margin shifts where the children START without moving the
+   edge the offsets resolve against. */
+body.ai-open .app > * { margin-top: var(--devjump-h, 0px); }
+body.ai-open .app { min-height: 0; height: 100vh;
+  overflow-y: auto; overscroll-behavior: contain;
+  /* Flush to the panel. An 8px gutter was tried here and rejected (user 2026-10-29) — with the panel open the
+     panel IS the page's right edge, and the page's scrollbar belongs against it exactly as it sits against the
+     window edge when the panel is closed. */
+  padding-right: 0; width: calc(100% - var(--ai-w)); transition: width 0.24s ease; }
+/* The scroller's bar is left NATIVE on purpose (user 2026-10-29: "why does the page scrollbar look so different
+   when the conversational panel is open? its a light grey"). It was briefly given a 10px track and a
+   --border-light thumb; moving which element scrolls should not change what the page's scrollbar LOOKS like, and
+   a restyled bar beside the panel's untouched native one reads as two different controls. */
+
+/* --ai-w goes to 100vw in both of these, which would collapse .app to zero width. */
+body.ai-open.ai-full .app { width: 100%; }
+
 body.ai-open .ws-overlay { right: var(--ai-w); }
 body.ai-open .ws-modal { right: calc(var(--ai-w) + 24px); }
 /* Metadata preview drawer yields to the AI panel instead of being overlapped
    (user 2026-08-13): it slides in beside the panel, shrinking if needed. */
 body.ai-open .record-drawer { right: calc(var(--ai-w) + 16px); max-width: calc(100vw - var(--ai-w) - 32px); }
+/* CARRIED PANEL ARRIVES ALREADY OPEN (user 2026-10-29: "theres a weird transition animation... it should look more
+   like it persists perfectly from one page to another"). The panel's width IS its open/closed state (--ai-w 0 -> 420)
+   and that width is transitioned, so restoring it after a handoff animated the whole panel in from the right as if it
+   were being opened for the first time. For one frame on landing, every transition that width drives is off. */
+body.ai-nofx .ai-panel, body.ai-nofx .app, body.ai-nofx #aiWorkingGlow,
+body.ai-nofx .sd-overlay, body.ai-nofx .sd-modal, body.ai-nofx #toast, body.ai-nofx .toast-stack { transition: none !important; }
 .ai-panel {
   position: fixed; top: var(--devjump-h, 0px); right: 0; bottom: 0;
   width: var(--ai-w); z-index: 950; overflow: hidden;
@@ -3017,7 +3061,16 @@ body.ai-open.ai-full { --ai-w: 100vw !important; overflow: hidden; }
 body.ai-full .ai-head, body.ai-full .ai-body, body.ai-full .ai-foot { padding-left: max(16px, calc((100vw - 720px) / 2)); padding-right: max(16px, calc((100vw - 720px) / 2)); }
 body.ai-full #aiWorkingGlow { display: none; }
 .ai-head-close:hover { background: var(--black-5); color: var(--black-100); }
-.ai-body { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: var(--white); }
+.ai-body { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: var(--white); scrollbar-width: thin; }
+/* The panel is fixed at right:0 on a page that scrolls, so its own 15px scrollbar lands flush against the document's
+   — 30px of adjacent track reading as "dual scrollbars on the panel" (user 2026-10-29). The page scrollbar is not
+   ours to remove (the content behind legitimately overflows), so the INNER one stops competing: the file's existing
+   internal-scroll treatment (.ws-sum-items-scroll) — 10px, transparent track, --border-light thumb inset by a 2px
+   white border — instead of a second full-weight bar. */
+.ai-body::-webkit-scrollbar { width: 10px; }
+.ai-body::-webkit-scrollbar-track { background: transparent; }
+.ai-body::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; border: 2px solid var(--white); background-clip: padding-box; }
+.ai-body::-webkit-scrollbar-thumb:hover { background: var(--border); border-color: var(--white); background-clip: padding-box; }
 .ai-msg { display: flex; flex-wrap: wrap; }
 .ai-msg.user { justify-content: flex-end; }
 .ai-bubble { max-width: 88%; font-size: 14px; line-height: 1.55; border-radius: 8px; padding: 8px 12px; }
@@ -3042,7 +3095,12 @@ body.ai-full #aiWorkingGlow { display: none; }
    pad · 16/22 title · 14 support), cf. .aiac-act (chip Figma 10746:122213,
    button Figma 13218:113044). was: gate = bare prose over a hairline. */
 .ai-gate { margin-top: 10px; border: 1px solid var(--border-light); border-radius: 8px; padding: 12px 16px; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
-.ai-gate:not(.resolved):hover { border-color: var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+/* CARD SYSTEM (user 2026-10-29) — see agent-card-system.html. Role decides the response: a card that IS a
+   control tints and shows a pointer; a card that merely HOLDS controls acknowledges the pointer with its border
+   while the decision is open, and nothing once settled. The drop shadow is retired everywhere in the panel: in
+   this file shadow-on-hover otherwise means "this navigates" (.wl-cat-card, .okov-catcard), which these cards
+   do not. was: border-color var(--border) + box-shadow 0 2px 8px rgba(0,0,0,0.06). */
+.ai-gate:not(.resolved):hover { border-color: var(--border); }
 /* quiet sync caption (2026-09-03): the in-place scope-update note inside a
    live question gate — muted, one line, replaced (never stacked) per edit */
 .ai-gate-sync { display: flex; align-items: flex-start; gap: 5px; margin: -4px 0 10px; font-size: 13px; line-height: 18px; color: var(--black-50); } .ai-gate-sync svg { flex-shrink: 0; margin-top: 2.5px; }
@@ -3241,6 +3299,11 @@ body.ai-full #aiWorkingGlow { display: none; }
 .ai-scenario-opt:hover { background: var(--blue-10); color: var(--blue-dark); }
 .ai-input-row { display: flex; align-items: center; gap: 8px; }
 .ai-home { display: flex; flex-direction: column; gap: 8px; padding: 44px 8px 8px; }
+/* The arrival block once it has been committed into the transcript: same column and gap, no home-screen top inset. */
+.ai-home.is-inthread { padding: 0; }
+/* A concern already taken up in this thread: sealed, not an open offer. Clones .aiac-act.sealed. */
+.ai-home-card.is-picked { opacity: 0.72; cursor: default; }
+.ai-home-card.is-picked .ai-home-card-t { color: var(--black-60); }
 .ai-home-glyph {
   position: relative;
   width: 44px; height: 44px; border-radius: 8px; flex-shrink: 0;
@@ -3253,12 +3316,20 @@ body.ai-full #aiWorkingGlow { display: none; }
 .ai-home-glyph::before { content: ""; position: absolute; inset: 2px; border-radius: 6px; background: var(--ai-grad); }
 .ai-home-glyph svg { position: relative; z-index: 1; width: 40px; height: 40px; display: block; }
 .ai-home-title { font-size: 16px; font-weight: 500; color: var(--black-100); line-height: 1.4; }
-.ai-home-sub { font-size: 12px; color: var(--black-60); line-height: 1.5; }
-.ai-home-label { font-size: 12px; font-weight: 500; color: var(--black-60); margin-top: 16px; }
+.ai-home-sub { font-size: 14px; color: var(--black-60); line-height: 1.5; }
+.ai-home-label { font-size: 14px; font-weight: 500; color: var(--black-60); margin-top: 16px; }
+/* Arrival screen's one secondary route — secondary .aiac-btn + open-in-new glyph, per the LOOK-HERE grammar.
+   was (2026-10-29, same day): .ai-home-link, a green text link — the treatment already parked on 2026-09-09 for
+   this exact job ("too subtle beside the gates' primary buttons") and confusable with .aiac-more. */
+.ai-home-foot { margin-top: 4px; }
+.ai-home-foot .aiac-btn { margin-top: 0; }
+/* Travel marker on a concern that leaves the panel. Inline with the title so it reads as part of the label. */
+.ai-home-card-nav { display: inline-flex; vertical-align: -2px; margin-left: 6px; color: var(--black-50); }
+.ai-home-card.travels:hover .ai-home-card-nav { color: var(--black-80); }
 .ai-home-card { text-align: left; border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); padding: 12px; cursor: pointer; font-family: inherit; }
-.ai-home-card:hover { border-color: var(--blue-30); background: var(--blue-light); }
+.ai-home-card:hover { border-color: var(--green-s30); background: var(--em-green-tint); }   /* was --blue-30/--blue-light: pre-Vision Securiti blue (2026-10-29) */
 .ai-home-card-t { font-size: 14px; font-weight: 500; color: var(--black-100); }
-.ai-home-card-p { font-size: 12px; color: var(--black-60); margin-top: 2px; line-height: 1.4; }
+.ai-home-card-p { font-size: 14px; color: var(--black-60); margin-top: 2px; line-height: 1.4; }
 .ai-key-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
 /* Composer (mock spec 2026-08-13): one bordered box — textarea + tool row */
 .ai-composer { display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--border); border-radius: 8px; background: var(--white); padding: 8px 8px 8px 12px; }
@@ -3296,7 +3367,7 @@ body.ai-full #aiWorkingGlow { display: none; }
    was: background var(--orange-10) + border var(--orange-30); title 700. */
 .ai-approval { margin-top: 10px; border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); padding: 12px 16px; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
 /* hover only while the decision is live — a sealed record isn't interactive */
-.ai-approval:not(.resolved):hover { border-color: var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.ai-approval:not(.resolved):hover { border-color: var(--border); }
 .ai-approval-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .ai-approval-title { font-size: 16px; line-height: 22px; font-weight: 500; color: var(--black-100); }
 .ai-approval-auto { margin-left: auto; font-size: 12px; font-weight: 500; color: var(--black-60); background: var(--black-5); border-radius: 2px; padding: 2px 6px; cursor: help; }
@@ -3655,15 +3726,15 @@ body.ai-hx-transcript .ai-foot { display: none; }
    lh22 ink); strip/legend = Chart/Soft series (divs, flagged pattern —
    no DS chart component exists). */
 .aiac { border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); width: 100%; overflow: hidden; }
-.aiac-head { padding: 14px 14px 0; }
-.aiac-head:last-child { padding-bottom: 14px; }   /* a card that is only a headline + chart still needs its bottom inset */
+.aiac-head { padding: 12px 16px 0; }
+.aiac-head:last-child { padding-bottom: 12px; }   /* a card that is only a headline + chart still needs its bottom inset */
 /* Open bottom is correct while a .aiac-sec follows (sections carry their own
    10px 14px). When the head is the card's LAST child — a headline-only card
    like the restore-job receipt, or one with a strip but no actions/table —
    nothing supplies that padding and the copy sat against the border
    (user 2026-09-16). Matches the head's own 14px sides, not the 12/16 scale
    step, so the four edges read as one inset. */
-.aiac-head:last-child { padding-bottom: 14px; }
+.aiac-head:last-child { padding-bottom: 12px; }
 /* Card type ladder on the DS B-scale (2026-09-02, user: 13px titles +
    12px subs were dwarfed by the DS components' fixed 16px text — chips 28,
    buttons 36). Headline B2 Medium · content B2 Book · meta B3 · labels
@@ -3702,7 +3773,7 @@ body.ai-hx-transcript .ai-foot { display: none; }
 .aiac-trend svg { display: block; width: 100%; }
 .aiac-trend .axis { display: flex; justify-content: space-between; font-size: 12px; color: var(--black-60); margin-top: 4px; }
 .aiac-trend-readout { position: absolute; z-index: 5; pointer-events: none; background: var(--white); color: var(--black-100); border: 1px solid var(--border-light); font-size: 14px; line-height: 1.35; font-weight: 450; padding: 4px 8px; border-radius: 4px; box-shadow: 0 4px 14px rgba(0,0,0,0.22); white-space: nowrap; }
-.aiac-sec { padding: 10px 14px; }
+.aiac-sec { padding: 12px 16px; }
 /* was: 4px top/bottom + button margin-top:0 — read squished (user
    2026-09-21 catch), not just tight against the card edge (the earlier fix).
    Padding now carries ALL the vertical space itself (button margin-top
@@ -3741,7 +3812,7 @@ body.ai-hx-transcript .ai-foot { display: none; }
 .aiac-act + .aiac-act { margin-top: 8px; }
 /* subtle hover (user 2026-09-02) — border deepens one ramp step + a soft
    lift; same treatment on the approval tile (decision-unit grammar) */
-.aiac-act:hover { border-color: var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.aiac-act:hover { border-color: var(--border); }
 .aiac-chip { display: inline-block; max-width: 100%; height: 28px; padding: 3px 8px; border-radius: 2px; font-size: 16px; font-weight: 500; line-height: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; box-sizing: border-box; margin-bottom: 4px; }
 .aiac-chip.ok { background: var(--em-green-tint); color: var(--em-green); }
 .aiac-chip.warn { background: var(--orange-10); color: var(--orange); }
@@ -3802,7 +3873,7 @@ body.ai-hx-transcript .ai-foot { display: none; }
 .aiac-agent-note { display: flex; align-items: center; gap: 4px; margin-top: 4px; font-size: 12px; line-height: 16px; color: var(--black-50); }
 .aiac-agent-note svg { width: 12px; height: 12px; flex-shrink: 0; }
 .aiac-more:hover { color: var(--em-green-accent); }
-.aiac-accept-row { padding: 8px 14px 12px; }
+.aiac-accept-row { padding: 8px 16px 12px; }
 /* Decision footer of the recommendation block — the card's own .aiac-sec geometry, and the panel's existing
    .ai-gate-btns row (Vision Button, Solid Primary) for the verb, so a recommendation's ask is the same control an
    approval's is. Separated from the evidence above by the section border the card already uses. */
@@ -3810,8 +3881,8 @@ body.ai-hx-transcript .ai-foot { display: none; }
    :last-child rule above, which a decision footer silently cancels (the charts then ran flush into the hairline).
    The head declares `has-decide` when one follows so the inset survives. Footer uses the card's own 14px gutter
    rather than .aiac-sec's 10px, so the rule has equal air above and below — same recipe as .fp-footer. */
-.aiac-head.has-decide { padding-bottom: 14px; }
-.aiac-decide { border-top: 1px solid var(--border-light); padding: 14px; }
+.aiac-head.has-decide { padding-bottom: 12px; }
+.aiac-decide { border-top: 1px solid var(--border-light); padding: 12px 16px; }
 .aiac-decide-ask { font-size: 14px; line-height: 20px; color: var(--black-100); margin-bottom: 12px; }
 /* SEAL-ON-RETURN (2026-09-11): a tile whose workspace fact resolved —
    sealed-gate grammar (muted, claim kept as history, no button) */
@@ -3911,7 +3982,7 @@ body.ai-hx-transcript .ai-foot { display: none; }
    but it keeps the title's type and truncation so the row reads unchanged. */
 .ai-board-title.is-link { border: none; background: none; padding: 0; font-family: inherit; font-size: inherit; font-weight: 450; text-align: left; cursor: pointer; }
 .ai-board-title.is-link:hover { text-decoration: underline; }
-.aiac-details-row { border-top: 1px solid var(--border-light); padding: 4px 14px; text-align: center; }
+.aiac-details-row { border-top: 1px solid var(--border-light); padding: 4px 16px; text-align: center; }
 .aiac-details-btn { display: inline-flex; align-items: center; gap: 6px; height: 28px; border: none; background: transparent; font-family: inherit; font-size: 14px; font-weight: 450; line-height: 22px; color: var(--black-100); padding: 4px 12px; cursor: pointer; border-radius: 4px; }
 .aiac-details-btn:hover { color: var(--black-80); }
 .aiac-details-btn:active { background: var(--black-10); }
@@ -3981,6 +4052,11 @@ body.ai-hx-transcript .ai-foot { display: none; }
 .ai-next-title { margin-top: 8px; font-size: 12px; font-weight: 500; color: var(--black-60); }
 .ai-next-list { margin: 4px 0 0; padding-left: 16px; font-size: 14px; }
 .ai-live-foot { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-light); font-size: 12px; color: var(--black-60); }
+/* Live status that replaces the playback button while the agent is showing — see _aiWatchBtnHtml. No border and no
+   background: it is feedback, not an affordance. Spinner is the panel's own .disc-spinner (as .ai-tr2-state uses);
+   36px height matches .ai-gate-btn so swapping one for the other does not move the row. */
+.ai-showing { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 4px; box-sizing: border-box; font-size: 16px; font-weight: 450; line-height: 22px; color: var(--black-60); }
+.ai-showing .disc-spinner { width: 14px; height: 14px; margin-top: 0; }
 .ai-input { flex: 1; min-width: 0; height: 44px; border: 1px solid var(--border); border-radius: 4px; padding: 0 12px; font-family: inherit; font-size: 14px; color: var(--black-100); outline: none; }
 .ai-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-10); }
 .ai-send { width: 44px; height: 44px; flex-shrink: 0; border: none; border-radius: 4px; background: var(--blue); color: var(--white); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
@@ -3988,7 +4064,7 @@ body.ai-hx-transcript .ai-foot { display: none; }
 .ai-send:disabled { opacity: 0.45; cursor: not-allowed; }
 @media (max-width: 860px) {
   body.ai-open { --ai-w: 100vw; }
-  body.ai-open .app { padding-right: 0; }
+  body.ai-open .app { padding-right: 0; width: 100%; }
   /* Panel is full-screen here — there's no visible workspace to frame. */
   body.ai-open #aiWorkingGlow { display: none; }
 }
@@ -6299,7 +6375,7 @@ td.cb-col input:disabled, th.cb-col input:disabled { pointer-events: none; }
 .rd-none-grid { display: grid; grid-template-columns: minmax(0, calc(180px + (100% - 180px) / 2)) minmax(0, calc((100% - 180px) / 2)); gap: 0; align-items: stretch; }
 .rd-none-stack { min-width: 0; }
 .rd-none-side { margin-top: 16px; align-self: stretch; }
-.rd-none-side .inv-empty-state { position: sticky; top: 40px; padding: 24px 12px; }
+.rd-none-side .inv-empty-state { position: sticky; top: var(--devjump-h, 40px); padding: 24px 12px; }   /* was a hardcoded 40px — the only sticky here not reading the variable, so it ignored a collapsed/hidden dev bar */
 /* Comparison table. border-collapse:separate is forced because the
    sibling class `.rw-preview-tbl` defaults to collapse, which silently
    defeats border-radius in some browsers and produces corner gaps. */
@@ -7560,7 +7636,13 @@ body.ai-open.ai-full #toast { right: 24px; }   /* full screen: nothing beside it
    step of the journey without walking through every preceding one. */
 #devjump { position: sticky; top: 0; z-index: 9999; background: #1f2229; color: #e4e4e7; display: flex; align-items: center; gap: 8px; padding: 6px 10px; font-family: -apple-system,'Helvetica Neue',sans-serif; font-size: 14px; font-weight: 500; border-bottom: 1px solid #3a3d44; }
 #devjump.hidden { display: none; }
-#devjump.collapsed .devjump-scroll, #devjump.collapsed .devjump-close { display: none; }
+#devjump.collapsed .devjump-scroll, #devjump.collapsed .devjump-reset, #devjump.collapsed .devjump-close { display: none; }
+/* Matches the bar's own links (#devjump a) — borderless, same ink, same hover fill. It is an action rather than
+   navigation, but the bar's only other action (.devjump-close) is borderless too, so a bordered uppercase pill was
+   the odd one out. (It was also unstyled in the normal state until now: these declarations had been spliced into
+   the #devjump.collapsed rule above, so the button fell back to the browser's default chrome.) */
+.devjump-reset { display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; padding: 3px 8px; border: none; border-radius: 4px; background: transparent; color: #cfd1d6; font: inherit; white-space: nowrap; cursor: pointer; transition: background 0.1s, color 0.1s; }
+.devjump-reset:hover { background: #2f323a; color: #fff; }
 .devjump-toggle { background: #35383e; color: #fff; border: none; display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 4px; cursor: pointer; font: inherit; flex-shrink: 0; }
 .devjump-toggle:hover { background: #4a4d54; }
 .devjump-scroll { display: flex; align-items: center; gap: 4px; overflow-x: auto; flex: 1; min-width: 0; scrollbar-width: none; }
@@ -8197,6 +8279,12 @@ input[type="checkbox"] { accent-color: var(--em-green); }
     <a href="protected-data.html" title="Restore inventory — Protected Data">Protected Data</a>
 
   </div>
+  <!-- Reset the agent demo to a clean slate. Dev-only, sits beside the hide control. Implementation is shared
+       (vdcResetAgentDemo in vdc-notifications.js) so the key list lives in one place. -->
+  <button class="devjump-reset" onclick="if(window.vdcResetAgentDemo) vdcResetAgentDemo(); else alert('Agent demo reset is unavailable on this page.')" title="Reset agent scenarios — clears the ROT recommendation, pending approvals, what the assistant has said, and any carried conversation, then reloads">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/></svg>
+    <span>Reset agent</span>
+  </button>
   <button class="devjump-close" onclick="hideDevJump()" title="Hide dev bar (re-enable with showDevJump() in console)" aria-label="Hide dev bar">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
   </button>
@@ -66647,7 +66735,7 @@ window.__devJumpResolve = function(h) {
      glyph set at load time. Data file MUST load first so the runtime
      finds window.__SECURITI_ICONS already populated. -->
 <script src="securiti-icons-data.js?v=20261028b"></script>
-<script src="vdc-notifications.js?v=20261027a"></script>
+<script src="vdc-notifications.js?v=20261029b"></script>
 <script src="workload-picker.js?v=20261007"></script>
 <script src="securiti-icons.js"></script>
 
@@ -66910,6 +66998,10 @@ var AI_PROMPT = AI_SCENARIOS[0].prompt; // back-compat for any free-text path
 
 function aiOpen(){
   if (typeof aiWidthRestore === 'function') aiWidthRestore();   // the user's chosen width is a preference (2026-09-17)
+  // Opening the panel is the arrival moment, so it clears the menu mode that + sets: if the agent is still holding
+  // concerns, a fresh open shows them again. Within one sitting + keeps giving the menu; it is not a sticky choice.
+  aiAgent._homeMode = null;
+  aiAgent._greetTyped = false;   // the greeting composes once per open, not on every re-render
   document.body.classList.add('ai-open');
   var _vb = document.querySelector('.btn-veeam-ai'); if (_vb) _vb.classList.remove('has-pending');   // pending-gate badge answered by opening
   setTimeout(function(){ aiSyncCheck(); }, 50);   // returning to the dialogue reconciles
@@ -67254,6 +67346,9 @@ function aiToggleReasonStep(i, si){
     : 'keep';
   aiRender();
 }
+// Tells vdc-notifications.js that this page shows the agent's offers on its home screen, so it must NOT push them
+// into the thread on open. Pages without this still get the old catch-up push (no regression while they opt in).
+window.VDC_SOLICIT_HOME = true;
 function aiRenderHome(){
   /* Empty state = a HOME SCREEN, not a conversation (research pass
      2026-08-13: Carbon AI Chat home-screen layer; M365 Copilot's clean-
@@ -67289,6 +67384,27 @@ function aiRenderHome(){
       ['infraRepoCapacity', 'Repository capacity', 'Give me a repository capacity plan.'],
       ['infraCapacityCharts', 'Repository capacity — in charts', 'Give me a comprehensive analysis of repository capacity — in charts.']
     ]);
+  // THE AGENT SOLICITS, IT DOES NOT SHOUT (user 2026-10-29): "I shouldn't be immediately greeted by the full
+  // 'While you were away I found a retention gap' response before I have even had a chance to show my interest in
+  // that specific topic." What the agent wants to raise appears HERE, in the same two-tier card grammar as the
+  // staged scenarios below it — a quiet offer, not an answer. Picking one speaks the full block into the thread
+  // (vdcNotifSpeak), which is the same block the panel used to push unprompted.
+  // Sits first because it is the only thing on this screen the agent initiated; everything below is the user's menu.
+  // TWO SCREENS, NOT ONE (user 2026-10-29): "i only want to see the staged scenarios if i hit the + button... Otherwise
+  // I want this initial panel screen to look more real — like a real scenario where the agent wants to tell me some
+  // things." So arrival and new-chat are different jobs and no longer share a layout:
+  //   ARRIVAL  — the agent greets you and lists ONLY what it is actually holding for you right now. No menu: a standing
+  //              list of things you could ask buries the things it needs you to look at.
+  //   MENU (+) — the staged scenarios, unchanged. An explicit "I want to start something" gesture.
+  // Arrival needs something to say; with nothing pending it falls through to the menu rather than greeting you emptily.
+  // ARRIVAL SCREEN — now the SHARED renderer (vdc-notifications.js). This page had its own copy, which is why a
+  // change made there (hiding the Activity footer when no approval is pending) did not reach it. One builder for
+  // all four pages; it also stashes aiAgent._arrivalHtml for commitArrival.
+  // was: ~25 lines duplicating the greeting, the concern cards and the footer.
+  if (aiAgent._homeMode !== 'menu' && typeof window.vdcNotifArrivalHtml === 'function'){
+    var _arr = window.vdcNotifArrivalHtml(glyphSrc ? glyphSrc.innerHTML : '');
+    if (_arr){ body.innerHTML = _arr; return; }
+  }
   body.innerHTML = '<div class="ai-home">'
     + '<span class="ai-home-glyph" aria-hidden="true">' + (glyphSrc ? glyphSrc.innerHTML : '') + '</span>'
     + '<div class="ai-home-title">How can I help with your protected data?</div>'
@@ -67787,6 +67903,7 @@ function aiNewChat(){
     aiRender();
   } else {
     aiAgent.activeGate = null;
+    aiAgent._homeMode = 'menu';   // + is an explicit "give me the menu" — never the arrival screen (user 2026-10-29)
     aiRenderHome();
   }
 }
@@ -67987,7 +68104,12 @@ function aiRender(){
       // ANSWER CARD (port 2026-09-02 — see the .aiac CSS block for full
       // provenance). Tiers: headline+sub answer EVERY prompt clause ·
       // strip vis · findings w/ their own actions · one details expander.
-      return '<div class="ai-msg agent"><div class="ai-bubble" style="max-width:100%">' + aiacCardHtml(m, i) + '</div></div>';
+      // A CARD IS AN AGENT RESPONSE, SO IT TAKES FEEDBACK (user 2026-10-29: "shouldnt i see the feedback options
+      // below this prompt just like with other agent responses?"). The agent branch has always appended aiFbRow;
+      // the card branch never did, so every answer card on every page was the one agent reply you could not rate.
+      // Row sits OUTSIDE .ai-bubble, same as the agent branch, and m.noFb still suppresses it where a card is not a
+      // response to rate. m.fbCfg (the ROT dismissal wording/hook) was already being set and was simply inert.
+      return '<div class="ai-msg agent" data-msgi="' + i + '"><div class="ai-bubble" style="max-width:100%">' + aiacCardHtml(m, i) + '</div>' + (m.noFb ? '' : aiFbRow(i)) + '</div>';
     }
     if(m.role==='reasoning'){
       if (m.done && !m.steps.length) return '';   // never an empty module (2026-09-16)
@@ -68029,6 +68151,14 @@ function aiRender(){
       // header: spinner while live; NO leading tick when done (Figma module
       // header is text + chevron only — the per-row ticks carry completion)
       var head = m.done ? '' : '<span class="disc-spinner"></span>';
+      // The live label crossfades when it CHANGES (see vdcLabelArrival). A settled bar never ticks — its label is
+      // a receipt, not a status line. vdcLabelArrival returns a fragment meant to be spliced inside a class
+      // attribute, so it is closed here rather than concatenated raw.
+      var _lblTick = '';
+      if (!m.done && typeof window.vdcLabelArrival === 'function'){
+        var _lt = window.vdcLabelArrival(m, label);
+        if (_lt) _lblTick = ' class="' + _lt.slice(1) + '"';
+      }
       var _trKindIc = function(kind, sz){
         // tool = integration-widget (tool/MCP calls ARE integrations); was
         // function-sum — a math sigma, a name-guess the user caught 2026-08-21.
@@ -68085,7 +68215,7 @@ function aiRender(){
       return '<div class="ai-reason'+(m.open?' open':'')+(m.named?' named':'')+' module" data-mi="'+i+'">'
         + '<div class="ai-reason-bar">'
         + '<button type="button" class="ai-reason-head'+(m.done?'':' live')+'" onclick="aiToggleReason('+i+')" aria-expanded="'+(m.open?'true':'false')+'">'
-        + head + '<span>' + _aiEsc(label) + '</span>' + _hkinds
+        + head + '<span' + _lblTick + '>' + _aiEsc(label) + '</span>' + _hkinds
         + '<svg class="ai-reason-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>'
         + '</button>'
         // was: a "Watch" link here — REMOVED same day: THINKING IS NOT
@@ -68097,6 +68227,9 @@ function aiRender(){
         + '</div>';
     }
     var gate='';
+    // ARRIVAL FOR THE DECISION BLOCK (2026-10-29) — computed once so the approval and question branches below
+    // cannot drift. A RESOLVED gate never animates: it is a receipt of something already decided, not an arrival.
+    var _gateArrive = (m.gate && !m.gate.resolved && typeof window.vdcGateArrival === 'function') ? window.vdcGateArrival(m.gate) : '';
     if(m.gate && m.gate.approval){
       // APPROVAL BLOCK (VeeamAI PRD FR-13/14, UC-02 — adapted 2026-08-21):
       // consequential writes render a distinct, unmissable proposal card —
@@ -68164,7 +68297,7 @@ function aiRender(){
           + '</button>'
           + (m.gate._trailOpen ? '<div class="ai-appr-trail">' + m.gate._trail.map(function(t){ return _aiActionHtml(t); }).join('') + '</div>' : '');
       }
-      gate = '<div class="ai-approval'+(m.gate.resolved?' resolved':'')+'">'
+      gate = '<div class="ai-approval'+(m.gate.resolved?' resolved':'')+_gateArrive+'">'
         + '<div class="ai-approval-hd">'
         +   '<span class="ai-approval-title">Approval required</span>'
         // was: an "Autonomy: Always ask" corner chip — removed 2026-09-02
@@ -68179,7 +68312,7 @@ function aiRender(){
       var btns = m.gate.resolved
         ? ''
         : '<div class="ai-gate-btns">'+m.gate.buttons.map(function(b,i){ return '<button type="button" class="ai-gate-btn'+(b.primary?' primary':'')+'" onclick="aiGateClick('+i+')">'+_aiEsc(b.label)+'</button>'; }).join('')+'</div>';
-      gate = '<div class="ai-gate'+(m.gate.resolved?' resolved':'')+'">'
+      gate = '<div class="ai-gate'+(m.gate.resolved?' resolved':'')+_gateArrive+'">'
         + '<div class="ai-gate-q">'+m.gate.q+'</div>'
         // quiet in-place sync (2026-09-03): ONE self-replacing delta caption
         // carries the whole finesse loop — latest truth only, never a stack.
@@ -68192,7 +68325,14 @@ function aiRender(){
     // data-msgi (2026-09-21): a stable per-message index the scroll-anchor
     // contract can target with a plain {reveal:...} selector — cards already
     // carry data-aiac from aiacCardHtml; this is the plain-bubble equivalent.
-    return '<div class="ai-msg agent" data-msgi="'+i+'"><div class="ai-bubble">'+m.html+gate+'</div>'+(m.noFb ? '' : aiFbRow(i))+'</div>';
+    // THE REPLY COMPOSES ITSELF (user 2026-10-29: "agent responses are still not consistently animating in…
+    // the text just appears"). The greeting has typed word by word since the A2 port, but this branch — every
+    // narration, every quick-prompt answer, every follow-up line — emitted m.html raw, so the panel spoke in two
+    // voices depending only on which block you were looking at. vdcSayHtml wraps the text nodes (markup, buttons
+    // and inline SVG untouched) and compensates each delay for time already elapsed, so an aiRender triggered
+    // mid-sentence resumes rather than restarting or snapping. m._noSay opts a message out.
+    var _sayHtml = (typeof window.vdcSayHtml === 'function') ? window.vdcSayHtml(m.html, m) : m.html;
+    return '<div class="ai-msg agent" data-msgi="'+i+'"><div class="ai-bubble vdc-typing">'+_sayHtml+gate+'</div>'+(m.noFb ? '' : aiFbRow(i))+'</div>';
   }).join('');
   if(aiAgent.thinking) html += '<div class="ai-thinking"><span></span><span></span><span></span></div>';
   // Defensive guard (bug fix 2026-09-18, same investigation as the aiOpen
@@ -68259,6 +68399,9 @@ function aiRender(){
 var _aiPersistT = null;
 function _aiPersistSoon(){ clearTimeout(_aiPersistT); _aiPersistT = setTimeout(_aiPersistTranscript, 300); }
 function _aiPersistTranscript(){
+  // Delegates to the shared implementation (vdc-notifications.js) so this page and the other three cannot drift.
+  // The body below is kept as the fallback for a load where the component is unavailable.
+  if (typeof window.vdcPersistTranscript === 'function') return window.vdcPersistTranscript();
   try {
     var out = [];
     aiAgent.msgs.slice(-40).forEach(function(m){
@@ -68303,13 +68446,26 @@ function _aiPersistTranscript(){
         r.gate.resolved = true; r.gate.superseded = true;
         r.gate.choice = 'Interrupted \u2014 the page was left mid-run';
       }
+      r._arrived = true;   // carried, not arriving — a restored card renders settled, it does not replay B7
       aiAgent.msgs.push(r);
     });
     aiAgent.greeted = true;   // a returning conversation never re-greets over itself
   } catch(e){}
   if (aiAgent.msgs.length){
     document.addEventListener('DOMContentLoaded', function(){
-      setTimeout(function(){ if (typeof aiOpen === 'function') aiOpen(); if (typeof aiRender === 'function') aiRender(); }, 150);
+      // No delay: a 150ms wait painted the page WITHOUT the panel first, so the carried panel
+      // visibly arrived instead of simply already being there.
+  // One frame with the panel's transitions off, so a handoff-restored panel is simply THERE rather than sliding
+  // in. Two rAFs: the first lets the class and the open state land in the same paint, the second releases it before
+  // any user-driven open/close or resize, which must keep animating.
+  function _aiNoFx(){
+    try {
+      document.body.classList.add('ai-nofx');
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ document.body.classList.remove('ai-nofx'); }); });
+    } catch(e){}
+  }
+      _aiNoFx(); if (typeof aiOpen === 'function') aiOpen(); if (typeof aiRender === 'function') aiRender();
+      if (window.vdcRestoreQuickPrompts) vdcRestoreQuickPrompts();   // the prompts belong to the carried answer
     });
   }
   // A flow APPROVED on the other page (its tile button) runs here, where
@@ -69218,7 +69374,17 @@ function _aiFactResolved(id){
 }
 function aiacCardHtml(m, i){
   var s = m.card;
-  var html = '<div class="aiac" data-aiac="' + i + '">';
+  // B7 ARRIVAL, RESUMED NOT REPLAYED (2026-10-29). aiRender rebuilds #aiBody wholesale — on scroll sync, on a gate
+  // resolving, on every new message — so an unconditional class would replay the whole sequence each time. The
+  // first fix was a one-shot flag set as the markup was built, and it traded one bug for its mirror image: any
+  // beat landing inside the ~1.3s sequence (a reasoning tick, the follow-up line, the quick-prompt dock) re-rendered
+  // the card with the class already spent, so it SNAPPED to settled — user: "the card appears immediately without
+  // animating in". vdcCardArrival keeps the class for the sequence's real duration and hands it --elapsed, the ms
+  // since first layout, which every delay subtracts: a rebuild picks the cascade up where it had got to.
+  // Cards restored from a carried transcript are pre-flagged _arrived at the restore, since they are not arriving.
+  var _arrive = (typeof window.vdcCardArrival === 'function') ? window.vdcCardArrival(m)
+              : (m._arrived ? '' : ((m._arrived = true), ' is-arriving'));
+  var html = '<div class="aiac' + _arrive + '" data-aiac="' + i + '">';
   // "Why it matters" (2026-09-02 rework): the insight is the DESCRIPTION'S
   // continuation — expanded inline via a Flat "Show more" under the headsub,
   // not a separate details drawer. The details tier is RETIRED: its tables
@@ -69236,7 +69402,11 @@ function aiacCardHtml(m, i){
   if (s.strip){
     var tot = s.strip.reduce(function(a, x){ return a + x[1]; }, 0);
     html += '<div class="aiac-strip">' + s.strip.map(function(x){ return '<span style="width:' + Math.max(2, Math.round(x[1] / tot * 100)) + '%;background:' + x[2] + '"></span>'; }).join('') + '</div>'
-      + '<div class="aiac-legend">' + s.strip.map(function(x){ return '<span class="li"><span class="dot" style="background:' + x[2] + '"></span>' + x[1] + ' ' + _aiEsc(x[0]).toLowerCase() + '</span>'; }).join('') + '</div>';
+      // AUTHORED LEGEND LABEL (2026-10-29). A strip entry may carry its own caption as x[3]; this page built
+      // the legend from x[1] + x[0] only, so '4.2 TB untouched for 36+ months (63%)' rendered as the
+      // derived '4.2 untouched for 36+ months' — losing the unit and the percentage. backup-policies
+      // already honoured x[3]; the renderers had diverged. was: x[1] + ' ' + x[0].toLowerCase()
+      + '<div class="aiac-legend">' + s.strip.map(function(x){ return '<span class="li"><span class="dot" style="background:' + x[2] + '"></span>' + _aiEsc(x[3] || (x[1] + ' ' + String(x[0]).toLowerCase())) + '</span>'; }).join('') + '</div>';
   }
   // per-category comparison rows (RPO-compliance grammar): label · thin
   // bar (fraction of its own max) · right value
@@ -69447,9 +69617,13 @@ function aiacCardHtml(m, i){
     var _d = s.decision;
     html += '<div class="aiac-sec aiac-decide">'
       + (_d.ask ? '<div class="aiac-decide-ask">' + _d.ask + '</div>' : '')
+      // `nav:true` = this verb LEAVES the panel, so it takes the look-here grammar: secondary weight + the trailing
+      // open-in-new glyph, never the green primary (which means "the agent acts here on your consent").
       + '<div class="ai-gate-btns">' + (_d.btns || []).map(function(b){
-          return '<button type="button" class="ai-gate-btn' + (b.primary === false ? '' : ' primary') + '"'
-            + (b.attr ? ' ' + b.attr : '') + ' onclick="' + b.onclick + '">' + _aiEsc(b.label) + '</button>';
+          var prim = b.nav ? false : (b.primary !== false);
+          return '<button type="button" class="ai-gate-btn' + (prim ? ' primary' : '') + '"'
+            + (b.attr ? ' ' + b.attr : '') + ' onclick="' + b.onclick + '">' + _aiEsc(b.label)
+            + (b.nav ? ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('open-in-new-outlined', 16)) || '') : '') + '</button>';
         }).join('') + '</div></div>';
   }
   return html + '</div>';
@@ -70160,10 +70334,21 @@ function _aiVoice(screenText, dataText){
   return (aiAgent.showing === false) ? dataText : screenText;
 }
 // Frame glow while the agent is actively driving on-screen elements.
-// The card's one playback control: Watch, then Watching… while the walk-through plays, then Watch again.
+// The card's one playback control. Two DIFFERENT KINDS OF THING, so two different elements (user 2026-10-29:
+// "'watching' just looks like a button... can it look more like status feedback?"):
+//   • before/after — an OFFER, so a button: Show me / Show me again
+//   • while playing — FEEDBACK about what the agent is doing, so a status, not a disabled button. A disabled button
+//     still reads as an affordance you are being denied, which is the wrong message: nothing is being withheld, the
+//     thing you asked for is happening. Borderless, muted, with the panel's own .disc-spinner (the in-progress
+//     indicator .ai-tr2-state already uses) and role=status/aria-live so it is announced like the file's toast.
+//   Height matches .ai-gate-btn (36px) so the row does not jump on the swap.
+// LABELS: 'Watch' → 'Show me' per the FIRM 2026-09-17 rename ("label AND code"); these three strings were stragglers
+// that rename missed — a ternary, so neither a >Watch< nor a plain quoted sweep caught them.
+// was: one button throughout — 'Watch' / disabled 'Watching…' / 'Watch again'
 function _aiWatchBtnHtml(ic){
   var L = aiAgent._live, on = !!(L && L.playing && aiAgent.showing === true && !aiAgent._released && !L.frontier);
-  return ' <button type="button" class="ai-gate-btn"' + (on ? ' disabled' : '') + ' onclick="aiShowStart()">' + ic + (on ? 'Watching\u2026' : (aiAgent._watchedOnce ? 'Watch again' : 'Watch')) + '</button>';
+  if (on) return ' <span class="ai-showing" role="status" aria-live="polite"><span class="disc-spinner"></span>Showing\u2026</span>';
+  return ' <button type="button" class="ai-gate-btn" onclick="aiShowStart()">' + ic + (aiAgent._watchedOnce ? 'Show me again' : 'Show me') + '</button>';
 }
 function aiGlow(on){
   var g = document.getElementById('aiWorkingGlow'); if (!g) return;
@@ -73297,7 +73482,7 @@ var VN_ITEMS = [
   // Workflows — with the prototype's own wired pages (Protected Data,
   // Activity Log) slotted after Policies. Notifications + Reporting from the
   // 2026-07-14 leadership IA are parked below, not deleted.
-  { id: 'dashboards',   label: 'Dashboard', disabled: true },
+  { id: 'dashboards',   label: 'Dashboard', href: 'identity-dashboard.html', rail: true },   // wired 2026-10-29 — opens the dashboards; the Dashboards panel on each dashboard page lists them (no sub-links in this nav)
   { id: 'findings',     label: 'Findings', disabled: true },
   { id: 'policies',     label: 'Policies', href: 'backup-policies.html', rail: true },   // re-wired 2026-09-28 (user: "turn on the link to backup policies on all files again")
   { id: 'protected',    label: 'Protected Data', href: 'protected-data.html', rail: true },
@@ -73311,12 +73496,12 @@ var VN_ITEMS = [
   // Panel link only — no rail icon.
   // [parked 2026-09-09, user: no nav link until broader agreement on the approach]
   // was: { id: 'agentstudio',  label: 'Agentic Studio', href: 'agent-studio.html' },
-  { id: 'activitylog',  label: 'Activity', href: 'activity.html', subs: [{ label: 'Audit log', href: 'activity.html#audit' }] },
+  { id: 'activitylog',  label: 'Activity', href: 'activity.html' },
   { id: 'graphexplorer',label: 'Graph Explorer', disabled: true },
   { id: 'inventory',    label: 'Inventory', disabled: true },
   { id: 'helpcenter',   label: 'Help Center', disabled: true },
   { id: 'integrations', label: 'Integrations', href: 'index.html', rail: true },
-  { id: 'settings',     label: 'Settings', href: 'agent-settings.html', rail: true, subs: [{ label: 'Agent Settings', href: 'agent-settings.html' }] },   // wired 2026-10-15 — the only way into Settings. was: disabled: true (2026-07-15; earlier rail:true w/ subs Appliances/Email Notification Templates)
+  { id: 'settings',     label: 'Settings', href: 'agent-settings.html', rail: true },   // wired 2026-10-15 — the only way into Settings. was: disabled: true (2026-07-15; earlier rail:true w/ subs Appliances/Email Notification Templates)
   { id: 'workflows',    label: 'Workflows', disabled: true }
   // [parked 2026-07-15] { id: 'notifications', label: 'Notifications', disabled: true },
   // [parked 2026-07-15] { id: 'reporting',     label: 'Reporting', disabled: true },
