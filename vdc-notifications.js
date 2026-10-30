@@ -39,6 +39,13 @@
   }
   /* The one status chip for an agent session that is waiting on the user (approval gate OR question gate: one state, one label).
      Vision Chip Default (grey light) with the AI gradient tile in the pre-icon position. Every page renders it from here. */
+  // THE VEEAM INTELLIGENCE GLYPH (user 2026-10-30): wherever the product points at the assistant — an "Ask Veeam Intelligence"
+  // button, a chip — it wears the rainbow-gradient tile with the white sparkle, never the plain one-colour sparkle. One builder
+  // so a button on the policy page and one on a session detail cannot drift. size = the tile's edge in px (16 in buttons).
+  window.vdcAiGlyph = function(size){
+    var n = size || 16;
+    return '<span class="vdc-ai-glyph" style="--g:' + n + 'px" aria-hidden="true">' + icon('ai-sparkle', Math.round(n * 1.5)) + '</span>';
+  };
   window.vdcDecisionChip = function(){
     return '<span class="vdc-decide"><span class="vdc-decide-ai" aria-hidden="true">' + icon('ai-sparkle', 24) + '</span>Awaiting decision</span>';
   };
@@ -104,6 +111,7 @@
     'vdc-agent-task-overrides',   // approve/decline on the pending agent tasks
     'vdc-ai-transcript',          // a conversation carried between pages
     'vdc-facts',                  // sealed facts that strike through resolved recommendations
+    'vdc-session-declined',       // requests declined from a session detail (agent-sessions.js)
     'vdc-session-resolved',       // requests approved from the Agent Hub (agent-sessions.js)
     'vdc-ai-topic',               // the open thread's title in the panel header
     'vdc-quick-prompts'           // Quick Prompts switched off from the thumbs-down: reset turns them back on (user 2026-10-30)
@@ -1134,6 +1142,8 @@
     + '.vdc-decide { display:inline-flex; align-items:center; gap:8px; min-height:28px; padding:2px 8px 2px 4px; border-radius:2px; font-size:16px; font-weight:500; line-height:22px; white-space:nowrap; background:var(--black-5, #f8f8f9); color:var(--black-100, #1f2229); }   /* Vision Chip Default: Black/S5 on Black/S100, r2 */\n'
     + '.ai-home-card-st { margin-bottom:8px; }\n'
     + '.ai-home-card-st .vdc-decide { min-height:24px; font-size:14px; line-height:20px; }   /* the panel text is 14px: at the page chip size (16px) the chip outranked the card title below it */\n'
+    + '.vdc-ai-glyph { flex-shrink:0; width:var(--g,16px); height:var(--g,16px); border-radius:2px; overflow:hidden; display:inline-flex; align-items:center; justify-content:center; background:var(--ai-grad, conic-gradient(from 90deg, #5bbc7b 0deg, #119ee7 57.6deg, #d83dcf 153deg, #ee6b36 234deg, #8fd131 320.4deg, #5bbc7b 360deg)); color:var(--white, #fff); }\n'
+    + '.vdc-ai-glyph svg { width:calc(var(--g,16px) * 1.5); height:calc(var(--g,16px) * 1.5); margin:calc(var(--g,16px) * -0.25); display:block; flex-shrink:0; }\n'
     + '.vdc-decide-ai { flex-shrink:0; width:16px; height:16px; border-radius:2px; overflow:hidden; display:inline-flex; align-items:center; justify-content:center; background:var(--ai-grad, conic-gradient(from 90deg, #5bbc7b 0deg, #119ee7 57.6deg, #d83dcf 153deg, #ee6b36 234deg, #8fd131 320.4deg, #5bbc7b 360deg)); color:var(--white, #fff); }\n'
     + '.vdc-decide-ai svg { width:24px; height:24px; margin:-4px; display:block; flex-shrink:0; }   /* glyph fills only the middle of its viewBox: oversized to read at 16px */\n'
     + '.vdc-np-empty { padding:48px 0; text-align:center; font-size:16px; color:var(--black-60, #62656b); }\n'

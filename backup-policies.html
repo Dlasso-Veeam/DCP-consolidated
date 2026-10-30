@@ -11815,7 +11815,7 @@ body.ai-open .rot-editor { right: var(--ai-w); }   /* the assistant pushes the p
     // panel opens or closes (see the observer below). DS buttons, same as Edit Policy above: Primary + Secondary at 36px.
     var panelOpen = document.body.classList.contains('ai-open');
     var acts = '<div class="rot-alert-acts"><button type="button" class="plv-btn plv-btn-primary" data-tooltip="Activates the policy exactly as drafted" onclick="rotAgentSave()">Activate</button>'
-      + (panelOpen ? '' : '<button type="button" class="plv-btn plv-btn-secondary" onclick="rotAsk()">' + ic('ai-sparkle', 16) + 'Ask Veeam Intelligence</button>')
+      + (panelOpen ? '' : '<button type="button" class="plv-btn plv-btn-secondary" onclick="rotAsk()">' + (typeof vdcAiGlyph === 'function' ? vdcAiGlyph(16) : ic('ai-sparkle', 16)) + 'Ask Veeam Intelligence</button>')
       + '<button type="button" class="plv-btn plv-btn-secondary" data-tooltip="Decline this recommendation. No policy is created." onclick="rotDismissAsk()">Dismiss</button></div>';
     if (p._mode === 'view') return '<div class="rot-alert rot-prop">' + sp + '<div class="rot-alert-txt"><strong>Proposed by Veeam Intelligence — not created yet</strong><span>4.2 TB (63%) of backed-up content in Retail Taxes, Retail Archive and Retail Ops has not been modified in 36 months, and no ROT policy covers it. Activate it as proposed, or edit the policy first. Nothing exists until you do.</span>' + acts + '</div></div>';
     return '<div class="rot-alert rot-prop">' + sp + '<div class="rot-alert-txt"><strong>Editing a proposal from Veeam Intelligence — not accepted yet</strong><span>Nothing exists until you update the policy. Cancel returns to the proposal as it was recommended.</span>' + acts + '</div></div>';

@@ -116,12 +116,21 @@
   /* Decisions made on the hub survive navigation (and are what Activity then lists as Approved). */
   function resolved() { try { return JSON.parse(localStorage.getItem(KEY_RESOLVED)) || {}; } catch (e) { return {}; } }
   function resolve(id) { try { var m = resolved(); m[id] = Date.now(); localStorage.setItem(KEY_RESOLVED, JSON.stringify(m)); } catch (e) {} }
-  function reset() { try { localStorage.removeItem(KEY_RESOLVED); } catch (e) {} }
+  /* Declined from a request's detail: the same store shape, its own key, so a decline reads as Denied everywhere (hub tiles, Activity). */
+  var KEY_DECLINED = 'vdc-session-declined';
+  function declined() { try { return JSON.parse(localStorage.getItem(KEY_DECLINED)) || {}; } catch (e) { return {}; } }
+  function decline(id) { try { var m = declined(); m[id] = Date.now(); localStorage.setItem(KEY_DECLINED, JSON.stringify(m)); } catch (e) {} }
+  function reset() { try { localStorage.removeItem(KEY_RESOLVED); localStorage.removeItem(KEY_DECLINED); } catch (e) {} }
 
   function sessions() {
     if (!_base) _base = build();
-    var res = resolved();
+    var res = resolved(), dec = declined();
     return _base.map(function (s) {
+      if (s.decided === 'waiting' && dec[s.id]) {
+        var d = {}; for (var j in s) d[j] = s[j];
+        d.decided = 'denied'; d.open = false; d.outcome = null;
+        return d;
+      }
       if (s.decided === 'waiting' && res[s.id]) {
         var c = {}; for (var k in s) c[k] = s[k];
         c.decided = 'approved'; c.open = false; c.outcome = 'success';
@@ -150,5 +159,5 @@
 
   window.VDC_SESSIONS = { BASE: BASE, SKILLS: SKILLS, WINDOW: WINDOW, DAY: DAY, DECISION_LABEL: DECISION_LABEL, DECISION_KEYS: DECISION_KEYS,
     sessions: sessions, activityRows: activityRows, skillWls: skillWls, skillById: skillById, actWl: actWl, wlName: wlName,
-    liveWls: liveWls, resolve: resolve, reset: reset };
+    liveWls: liveWls, resolve: resolve, decline: decline, reset: reset };
 })();

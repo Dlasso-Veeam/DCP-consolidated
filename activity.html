@@ -1509,6 +1509,10 @@ body.ai-open.ai-full #toast { right: 24px; }
    → Show Graph toolbar (10845:113155) → two-panel body: activity log
    (10845:113161, 40px rows + 12px connectors) | properties (10845:113250,
    258/258 label-value rows). All glyphs = verbatim store exports (sd-*). ═══ */
+.act-embed, .act-embed body { background: transparent !important; }
+.act-embed body > *:not(.sd-overlay):not(.sd-modal):not(script):not(style):not(#toast):not(.toast-stack) { display: none !important; }   /* embedded: the session detail only */
+.act-embed .sd-overlay { left: 0; right: 0; top: 0; }
+.act-embed .sd-modal { left: 24px; right: 24px; top: 24px; }
 .sd-overlay { position: fixed; top: var(--devjump-h, 0px); left: 72px; right: 0; bottom: 0; z-index: 940; background: rgba(31,34,41,0.4); display: none; }
 .sd-overlay.open { display: block; }
 .sd-modal { position: fixed; top: calc(var(--devjump-h, 0px) + 24px); left: calc(72px + 24px); right: 24px; bottom: 24px; background: var(--white); border-radius: 12px; border: 1px solid var(--border-light); box-shadow: 0 16px 48px rgba(0,0,0,0.18); display: none; flex-direction: column; overflow: hidden; z-index: 941; }
@@ -2117,6 +2121,20 @@ body.ai-full #aiWorkingGlow { display: none; }
 #sdSide button.sd-side-item:hover { background: var(--em-green-tint); }
 #sdSide button.sd-side-item.active { background: var(--em-green-tint); }
 .sd-hd-main { min-width: 0; }
+.sd-side-div { height: 1px; background: var(--border-light); margin: 12px; }   /* the template's divider under the section item: a section separator, not a row rule */
+.sd-chipwrap { position: relative; display: inline-flex; }
+.sd-chipbtn { border: none; background: none; padding: 0; cursor: pointer; font: inherit; border-radius: 4px; display: inline-flex; }
+.sd-chipbtn:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); }
+.sd-pop { display: none; position: absolute; top: 100%; right: 0; z-index: 30; width: 360px; margin-top: 8px; padding: 16px; background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; box-shadow: 0 8px 24px rgba(31,34,41,0.2); text-align: left; flex-direction: column; gap: 8px; }
+.sd-pop::before { content: ""; position: absolute; left: 0; right: 0; top: -8px; height: 8px; }   /* bridges the gap so the pointer can travel from the chip into the popover */
+.sd-chipwrap:hover .sd-pop, .sd-chipwrap:focus-within .sd-pop { display: flex; }
+.sd-pop-t { font-size: 16px; line-height: 22px; font-weight: 500; color: var(--black-100); }
+.sd-pop-p { font-size: 16px; line-height: 22px; color: var(--black-60); }
+.sd-pop-g { display: flex; flex-direction: column; gap: 4px; }
+.sd-pop-f { display: flex; gap: 16px; font-size: 14px; line-height: 20px; }
+.sd-pop-f .k { width: 104px; flex-shrink: 0; color: var(--black-60); }
+.sd-pop-f .v { color: var(--black-100); min-width: 0; }
+.sd-pop-b { display: flex; gap: 8px; justify-content: flex-end; padding-top: 8px; }
 .sd-hd-meta { display: flex; align-items: center; gap: 8px; }
 .sd-hd-acts { margin-left: auto; display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
 .sd-hd-upd { font-size: 16px; color: var(--black-60); white-space: nowrap; }
@@ -11513,6 +11531,30 @@ function agGraphHL(type){
   [].forEach.call(svg.querySelectorAll('g.ag-node'), function(n){ n.classList.toggle('hl', !!type && n.getAttribute('data-type') === type); });
   [].forEach.call(document.querySelectorAll('#sdSide .sd-side-item'), function(b){ b.classList.toggle('active', type ? b.getAttribute('data-agt') === type : b.id === 'agSideAll'); });
 }
+function agRunLogRows(){
+  var L = window._agRunLog; if (!L) return '';
+  var q = (L.q || '').trim().toLowerCase();
+  var shown = L.entries.filter(function(e){
+    if (L.st !== 'All' && (_JOB_STATUS_LABEL[e.status] || e.status) !== L.st) return false;
+    return !q || String(e.msg || '').toLowerCase().indexOf(q) >= 0;
+  });
+  return shown.map(function(e, i){
+    var glyph = (e.status === 'success') ? _sdIc('sd-log-check', 20) : (_JOB_STATUS_ICON[e.status] || _sdIc('sd-log-check', 20));
+    var dur = e.e != null ? _sdFmtDur(e.e - e.s) : '\u2013';
+    return (i ? '<div class="sd-log-conn"></div>' : '')
+      + '<div class="sd-log-row ' + e.status + '"><span class="sd-log-tile">' + glyph + '</span>'
+      + '<span class="sd-log-msg" data-tooltip="' + String(e.msg).replace(/"/g, '&quot;').replace(/</g,'&lt;') + '">' + String(e.msg).replace(/</g,'&lt;') + '</span>'
+      + '<span class="sd-log-dur">' + dur + '</span></div>';
+  }).join('') || '<div style="padding:12px 0;color:var(--black-60);font-size:14px">No log entries match.</div>';
+}
+function agRunLogSearch(v){ window._agRunLog.q = v; var el = document.getElementById('agRunLogRows'); if (el) el.innerHTML = agRunLogRows(); }
+function agRunLogStatus(v){ window._agRunLog.st = v; var l = document.getElementById('agRunStLbl'); if (l) l.textContent = 'Status: ' + v; var m = document.getElementById('agRunStatusMenu'); if (m) m.classList.remove('open'); var el = document.getElementById('agRunLogRows'); if (el) el.innerHTML = agRunLogRows(); }
+function agRunStatusMenu(ev){
+  ev.stopPropagation();
+  var m = document.getElementById('agRunStatusMenu'); if (!m) return;
+  var open = m.classList.toggle('open');
+  if (open) setTimeout(function(){ document.addEventListener('click', function f(){ m.classList.remove('open'); document.removeEventListener('click', f); }); }, 0);
+}
 function openAgentRunModal(runId){
   var r = (typeof AGENT_RUNS !== 'undefined' ? AGENT_RUNS : []).filter(function(x){ return x.id === runId; })[0];
   if (!r) return;
@@ -11528,21 +11570,17 @@ function openAgentRunModal(runId){
     + '</div>'
     + '<div class="sd-tabs-actions"><button class="sd-act-btn" type="button" data-tooltip="Close" aria-label="Close" onclick="closeSessionModal()">' + _sdIc('sd-close', 20) + '</button></div>';
   document.getElementById('sdHeader').innerHTML =
-    '<span class="sd-hd-tile">' + _sdIc('sd-session-log', 28) + '</span>'
+    (r.hub && r._st === 'pending') ? agRunPendingHeader(r, esc)
+    : '<span class="sd-hd-tile">' + _sdIc('sd-session-log', 28) + '</span>'
     + '<div><div class="sd-hd-eyebrow">Agent Run</div><div class="sd-hd-title">' + esc(r.capability) + '</div></div>';
   // ── Session detail (borrowed from the entity graph screen): related-object list with counts on the left;
   // the SPAWN GRAPH, then Properties, in the main pane. ──
   var model = _agEntFromRun(r);
   window._agGraph = model;
-  document.getElementById('sdSide').innerHTML = _agSideHtml(model);
-  var logRows = _agentRunSteps(r).map(function(e, i){
-    var glyph = (e.status === 'success') ? _sdIc('sd-log-check', 20) : (_JOB_STATUS_ICON[e.status] || _sdIc('sd-log-check', 20));
-    var dur = e.e != null ? _sdFmtDur(e.e - e.s) : '–';
-    return (i ? '<div class="sd-log-conn"></div>' : '')
-      + '<div class="sd-log-row ' + e.status + '"><span class="sd-log-tile">' + glyph + '</span>'
-      + '<span class="sd-log-msg" data-tooltip="' + String(e.msg).replace(/"/g, '&quot;').replace(/</g,'&lt;') + '">' + String(e.msg).replace(/</g,'&lt;') + '</span>'
-      + '<span class="sd-log-dur">' + dur + '</span></div>';
-  }).join('');
+  document.getElementById('sdSide').innerHTML = _agSideHtml(model, 'Run Details');
+  // RUN LOG with the template's tools (Search by message + Status filter), like the Session Details modal. Filtering redraws only the rows.
+  window._agRunLog = { entries: _agentRunSteps(r), q: '', st: 'All' };
+  var logRows = agRunLogRows();
   var initials = r.agent.split(/\s+/).map(function(w){ return w[0]; }).join('').slice(0, 2).toUpperCase();
   function prow(k, v){ return '<div class="sd-prop-row"><span class="k">' + k + '</span><span class="v">' + v + '</span></div>'; }
   var denied = (model.denied || '');
@@ -11553,17 +11591,24 @@ function openAgentRunModal(runId){
     + (r.parent ? prow('Spawned by', esc(r.parent)) : prow('Spawned by', 'Veeam Intelligence'))
     + prow('End Time', running ? 'In progress' : esc(_actFmtFull(new Date(r.started.getTime() + 58000))))
     + prow('Trigger', '<span class="sd-chip">' + esc(r.trigger) + '</span>')
+    + (r.hub ? prow('Decision', esc(r.decision || '\u2014')) + prow('Autonomy', esc(((window.VDC_SESSIONS && VDC_SESSIONS.skillById && (VDC_SESSIONS.skillById((VDC_SESSIONS.sessions().filter(function(x){ return x.id === r.sessionId; })[0] || {}).skill) || {}).tier) || '\u2014'))) : '')
     + prow('Duration', running ? 'In progress' : esc(r.dur))
     + prow('Granted', esc(r.granted || 'Read access'))
     + prow('Lifetime', 'Retired when the task completed')
     + (denied ? prow('Not granted', esc(denied)) : prow('Not granted', 'Restore · Export · Manage policies'))
     + prow('Human-in-the-loop', (r.kind === 'Restore' || r.kind === 'Review') ? 'Required before anything is written' : 'Not required — read-only')
     + prow('Guardrails', 'LLM Firewall · logged to the audit trail');
+  var _sdChev2 = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>';
+  var _stOpts = ['All'].concat(window._agRunLog.entries.map(function(e){ return _JOB_STATUS_LABEL[e.status] || e.status; }).filter(function(v, i, a){ return a.indexOf(v) === i; }));
+  var _stCtl = '<span class="ag-menu-wrap"><button class="sd-select" type="button" aria-haspopup="true" onclick="agRunStatusMenu(event)"><span id="agRunStLbl">Status: All</span>' + _sdChev2 + '</button>'
+    + '<div class="ag-menu" id="agRunStatusMenu" role="menu">' + _stOpts.map(function(o){ return '<button type="button" role="menuitem" onclick="agRunLogStatus(\'' + o + '\')">' + o + '</button>'; }).join('') + '</div></span>';
   document.getElementById('sdMain').innerHTML =
       '<div class="ag-tools"><button type="button" class="ag-btn" id="agHideBtn" onclick="agGraphToggle()">' + (_sdIc('sd-visibility', 20) || '') + '<span>Hide Graph</span></button></div>'
     + '<div class="ag-graph" id="agGraphWrap">' + _agentGraphSvg(model)
     +   '<div class="ag-zoom"><button type="button" aria-label="Zoom in" onclick="agGraphZoom(1.2)">+</button><button type="button" aria-label="Zoom out" onclick="agGraphZoom(1/1.2)">−</button><button type="button" aria-label="Fit" onclick="agGraphZoom(0)">⤢</button></div></div>'
-    + '<div class="sd-cols"><div class="sd-log"><div class="sd-props-hd">Run log</div><div class="sd-log-rows">' + logRows + '</div></div>'
+    + '<div class="sd-sec-hd">Run Details</div>'
+    + '<div class="sd-cols"><div class="sd-log"><div class="sd-log-toolbar"><div class="inv-search-inner" style="flex:1;min-width:160px;height:36px">' + _sdIc('search-outlined', 16)
+    +   '<input id="agRunLogSearch" placeholder="Search by message" oninput="agRunLogSearch(this.value)"></div>' + _stCtl + '</div><div class="sd-log-rows" id="agRunLogRows">' + logRows + '</div></div>'
     +   '<div class="sd-props"><div class="sd-props-hd">Properties</div>' + props + '</div></div>';
   _agPaneInit(model);   // keeps the graph on top; the part below it swaps between Overview and an entity list
   document.getElementById('sdOverlay').classList.add('open');
@@ -15137,6 +15182,87 @@ function _aiRestartOnActivity(jobName){
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', aiComposerIcons);
 else aiComposerIcons();
 </script>
+<script id="ag-embed">
+// SESSION DETAIL OVER ANOTHER PAGE (user 2026-10-30). The Agent Hub opens a request's detail as this page's full-page overlay,
+// in an iframe laid over the hub's content area, instead of sending the user here. ?embed=1#session/<run id> shows ONLY the overlay
+// (page chrome hidden, scrim transparent to the host); closing it, or deciding, tells the host through postMessage.
+(function(){
+  var EMBED = /[?&]embed=1\b/.test(location.search);
+  if (EMBED) document.documentElement.classList.add('act-embed');
+  function tell(m){ try { parent.postMessage(m, '*'); } catch(e){} }
+  window.agRunApprove = function(id){
+    var r = (typeof AGENT_RUNS !== 'undefined' ? AGENT_RUNS : []).filter(function(x){ return x.id === id; })[0]; if (!r) return;
+    if (window.VDC_SESSIONS) VDC_SESSIONS.resolve(r.sessionId);
+    r._st = 'success'; r.outcome = 'Success'; r.decision = (window.VDC_SESSIONS && VDC_SESSIONS.DECISION_LABEL.approved) || 'Approved';
+    if (EMBED){ tell({ type:'vdc-session-decided', id:r.sessionId, title:r.capability }); return; }
+    closeSessionModal();
+    if (typeof renderAgentsTable === 'function') renderAgentsTable();
+    if (typeof showToast === 'function') showToast('Approved \u2014 ' + r.capability);
+  };
+  window.agRunDecline = function(id){
+    var r = (typeof AGENT_RUNS !== 'undefined' ? AGENT_RUNS : []).filter(function(x){ return x.id === id; })[0]; if (!r) return;
+    if (window.VDC_SESSIONS) VDC_SESSIONS.decline(r.sessionId);
+    r._st = 'dismissed'; r.outcome = 'Dismissed'; r.decision = (window.VDC_SESSIONS && VDC_SESSIONS.DECISION_LABEL.denied) || 'Denied';
+    if (EMBED){ tell({ type:'vdc-session-decided', decision:'declined', id:r.sessionId, title:r.capability }); return; }
+    closeSessionModal();
+    if (typeof renderAgentsTable === 'function') renderAgentsTable();
+    if (typeof showToast === 'function') showToast('Declined \u2014 ' + r.capability);
+  };
+  window.agRunAsk = function(id){
+    var r = (typeof AGENT_RUNS !== 'undefined' ? AGENT_RUNS : []).filter(function(x){ return x.id === id; })[0]; if (!r) return;
+    if (EMBED){ tell({ type:'vdc-session-ask', id:r.sessionId }); return; }
+    if (typeof aiOpen === 'function') aiOpen();
+    if (typeof window.vdcSetPanelTopic === 'function') window.vdcSetPanelTopic(r.capability);
+  };
+  window.agRunCopyLink = function(id){
+    var u = location.href.split('#')[0].replace(/[?&]embed=1\b/, '') + '#session/' + id;
+    try { navigator.clipboard.writeText(u); } catch(e){}
+    if (typeof showToast === 'function') showToast('Link copied');
+  };
+  // THE HEADER OF A REQUEST WAITING ON YOU (user 2026-10-30, borrowed from the Finding detail's grammar): eyebrow + the
+  // Awaiting decision chip, the title, then Decline / Approve / Actions on the right, and under them "Why this request" — the
+  // reason and what the decision touches, beside the controls that decide it. The status is NOT a dropdown (a finding's status
+  // changes over time; an approval is a one-way decision), so while pending there are explicit verbs, and afterwards the
+  // header is the plain run header with the result in its status.
+  window.agRunPendingHeader = function(r, esc){
+    var S = window.VDC_SESSIONS, ses = S && S.sessions().filter(function(x){ return x.id === r.sessionId; })[0] || {};
+    var sk = (S && S.skillById(ses.skill)) || { name: r.skill, access: r.granted, tier: '' };
+    var age = ses.age == null ? '' : (ses.age === 0 ? 'less than a day' : ses.age === 1 ? '1 day' : ses.age + ' days');
+    var irreversible = sk.id === 'exportd';
+    var chev = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>';
+    var items = [];   // Ask lives in the chip's popover now
+    if (!EMBED) items.push(['View in the audit trail', "window.location.href='activity.html#audit'"]);
+    items.push(['Copy link', "agRunCopyLink('" + r.id + "')"]);
+    function f(k, v){ return '<div class="sd-pop-f"><span class="k">' + k + '</span><span class="v">' + esc(v) + '</span></div>'; }
+    // REFERENCE PATTERN (Finding detail): the Awaiting decision chip sits WITH the controls, and the context for the decision lives
+    // behind it — hover or focus the chip and a "Why this request?" popover opens with the reason and the facts.
+    var pop = '<div class="sd-pop" role="dialog" aria-label="Why this request"><div class="sd-pop-t">Why this request?</div>'
+      + '<div class="sd-pop-p">Veeam Intelligence asked to use ' + esc(sk.name) + ' on ' + esc(r.wl) + '.' + (sk.tier ? ' Its autonomy is \u201c' + esc(sk.tier) + '\u201d, so it' : ' It') + ' stopped here, and nothing runs until you decide.</div>'
+      + '<div class="sd-pop-g">' + f('Scope', r.wl + ' only') + f('Access', sk.access || r.granted || '') + f('Waiting', age) + f('Can be undone', irreversible ? 'No \u2014 an exported file cannot be recalled' : 'Yes, from Activity') + '</div>'
+      + '<div class="sd-pop-b"><button type="button" class="ag-abtn" onclick="agRunAsk(\'' + r.id + '\')">' + (typeof vdcAiGlyph === 'function' ? vdcAiGlyph(16) : (_sdIc('ai-sparkle', 16) || '')) + '<span>Ask Veeam Intelligence</span></button></div></div>';
+    return '<span class="sd-hd-tile">' + _sdIc('sd-session-log', 28) + '</span>'
+      + '<div class="sd-hd-main"><div class="sd-hd-eyebrow">Agent Run</div><div class="sd-hd-title">' + esc(r.capability) + '</div></div>'
+      // DECIDING IS VISIBLE (user 2026-10-30): Decline / Approve sit in the header beside the chip, as on the earlier run header —
+      // hiding them behind a hover made the one action the page exists for the hardest thing to find. The chip's popover carries
+      // the CONTEXT only, so there is still exactly one place to decide.
+      + '<div class="sd-hd-acts"><span class="sd-chipwrap"><button type="button" class="sd-chipbtn" aria-haspopup="dialog" aria-label="Awaiting decision \u2014 why this request">' + (typeof vdcDecisionChip === 'function' ? vdcDecisionChip() : 'Awaiting decision') + '</button>' + pop + '</span>'
+      + '<button type="button" class="ag-abtn" onclick="agRunDecline(\'' + r.id + '\')"><span>Decline</span></button>'
+      + '<button type="button" class="ag-pbtn" onclick="agRunApprove(\'' + r.id + '\')">Approve</button>'
+      + '<span class="ag-menu-wrap"><button type="button" class="ag-abtn" aria-haspopup="true" onclick="agTaskMenu(event)"><span>Actions</span>' + chev + '</button>'
+      + '<div class="ag-menu" id="agTaskMenu" role="menu">' + items.map(function(x){ return '<button type="button" role="menuitem" onclick="' + esc(x[1]) + '">' + esc(x[0]) + '</button>'; }).join('') + '</div></span></div>';
+  };
+  if (!EMBED) return;
+  var _close = window.closeSessionModal;
+  window.closeSessionModal = function(){ var v = _close.apply(this, arguments); tell({ type:'vdc-session-close' }); return v; };
+  function openFromHash(){
+    var m = /^#session\/([\w-]+)$/.exec(location.hash || ''); if (!m) return;
+    if (typeof openAgentRunModal === 'function') openAgentRunModal(m[1]);
+  }
+  window.addEventListener('load', function(){ setTimeout(openFromHash, 150); });
+  window.addEventListener('hashchange', openFromHash);
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') window.closeSessionModal(); });
+})();
+</script>
 <script id="ag-conv">
 // "Review in conversation" — opens THIS page's assistant on the held task, pre-populated: the request, the agent's reasoning,
 // its summary, and the approval card. The decision writes the same task override the Protected Data gate does.
@@ -15297,9 +15423,10 @@ function _entGraphSvg(m){
   }).join('');
   return '<svg class="ag-svg" id="agSvg" viewBox="0 0 ' + m.W + ' ' + m.H + '" style="aspect-ratio:' + m.W + '/' + m.H + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Relationship graph"><g id="agSvgG">' + edges + nodes + '</g></svg>';
 }
-function _agSideHtml(model){
+function _agSideHtml(model, firstLabel){
   var ico = { 'Workload':'workload-outlined', 'Connection':'integration-widget-outlined', 'Policy':'policy-outlined', 'Proposed policy':'policy-outlined', 'Objects':'objects-outlined', 'Restore point':'restore-point-outlined', 'Session':'history-outlined', 'Approval':'user-outlined', 'Agent task':'ai-sparkle', 'File ROT policy':'policy-outlined', 'Data System':'workload-outlined', 'Veeam User':'user-outlined' };
-  var side = '<button type="button" class="sd-side-item active" id="agSideAll" onclick="agGraphHL(null)"><span class="sd-side-tile">' + _sdIc('sd-session-log', 20) + '</span><span class="lbl">Overview</span></button>';
+  var side = '<button type="button" class="sd-side-item active" id="agSideAll" onclick="agGraphHL(null)"><span class="sd-side-tile">' + _sdIc('sd-session-log', 20) + '</span><span class="lbl">' + (firstLabel || 'Overview') + '</span></button>'
+    + '<div class="sd-side-div" role="separator"></div>';   // the template's divider between the section item and the related-object list
   model.types.forEach(function(t){
     side += '<button type="button" class="sd-side-item" data-agt="' + t[0] + '" onclick="agGraphHL(\'' + t[0] + '\')"><span class="sd-side-tile">' + (_sdIc(ico[t[0]] || 'objects-outlined', 20) || '') + '</span><span class="lbl">' + t[0] + '</span><span class="sd-side-count">' + (t[1] > 9999 ? '9999+' : t[1].toLocaleString('en-US')) + '</span></button>';
   });
@@ -15396,7 +15523,7 @@ var AG_ENT_DESC = {
 };
 var AG_ENT_TITLE = { 'Workload':'Workloads', 'Connection':'Connections', 'Policy':'Policies', 'Proposed policy':'Proposed policy', 'Objects':'Objects', 'Restore point':'Restore points', 'Session':'Sessions', 'Approval':'Approvals', 'Agent task':'Agent task' };
 function _agPaneInit(model){
-  var m = document.getElementById('sdMain'), h = m.innerHTML, i = h.indexOf('<div class="sd-cols">');
+  var m = document.getElementById('sdMain'), h = m.innerHTML, i = h.indexOf('<div class="sd-sec-hd">'); if (i < 0) i = h.indexOf('<div class="sd-cols">');
   if (i < 0){ window._agPane = null; return; }
   m.innerHTML = h.slice(0, i) + '<div id="agBottom">' + h.slice(i) + '</div>';
   window._agPane = { model: model, overview: h.slice(i) };

@@ -1964,6 +1964,28 @@ body.ai-hx-transcript .ai-foot { display: none; }
 .ai-fbx-sealed { flex-basis: 100%; margin-top: 4px; font-size: 12px; color: var(--black-50); display: flex; align-items: center; gap: 6px; }
 .ai-fbx-sealed .tick { color: var(--em-green); }
 </style>
+<style id="devjump-port">
+#devjump { position: sticky; top: 0; z-index: 9999; background: #1f2229; color: #e4e4e7; display: flex; align-items: center; gap: 8px; padding: 6px 10px; font-family: -apple-system,'Helvetica Neue',sans-serif; font-size: 14px; font-weight: 500; border-bottom: 1px solid #3a3d44; }
+#devjump.hidden { display: none; }
+#devjump.collapsed .devjump-scroll, #devjump.collapsed .devjump-reset, #devjump.collapsed .devjump-close { display: none; }
+/* Matches the bar's own links (#devjump a) — borderless, same ink, same hover fill. It is an action rather than
+   navigation, but the bar's only other action (.devjump-close) is borderless too, so a bordered uppercase pill was
+   the odd one out. (It was also unstyled in the normal state until now: these declarations had been spliced into
+   the #devjump.collapsed rule above, so the button fell back to the browser's default chrome.) */
+.devjump-reset { display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; padding: 3px 8px; border: none; border-radius: 4px; background: transparent; color: #cfd1d6; font: inherit; white-space: nowrap; cursor: pointer; transition: background 0.1s, color 0.1s; }
+.devjump-reset:hover { background: #2f323a; color: #fff; }
+.devjump-toggle { background: #35383e; color: #fff; border: none; display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 4px; cursor: pointer; font: inherit; flex-shrink: 0; }
+.devjump-toggle:hover { background: #4a4d54; }
+.devjump-scroll { display: flex; align-items: center; gap: 4px; overflow-x: auto; flex: 1; min-width: 0; scrollbar-width: none; }
+.devjump-scroll::-webkit-scrollbar { height: 0; display: none; }
+.devjump-section { color: #9ca3af; text-transform: uppercase; letter-spacing: 0.06em; font-size: 12px; font-weight: 700; padding: 0 4px 0 8px; flex-shrink: 0; }
+.devjump-divider { width: 1px; height: 14px; background: #3a3d44; flex-shrink: 0; margin: 0 4px; }
+#devjump a { color: #cfd1d6; text-decoration: none; padding: 3px 8px; border-radius: 4px; white-space: nowrap; flex-shrink: 0; transition: background 0.1s, color 0.1s; }
+#devjump a:hover { background: #2f323a; color: #fff; }
+#devjump a.devjump-current { background: #1ca8dd; color: #fff; }
+.devjump-close { background: transparent; color: #9ca3af; border: none; cursor: pointer; padding: 4px; border-radius: 4px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
+.devjump-close:hover { background: #2f323a; color: #fff; }
+</style>
 </head>
 <body>
 
@@ -2007,6 +2029,40 @@ body.ai-hx-transcript .ai-foot { display: none; }
   } catch(e) {}
 })();
 </script>
+
+<div class="devjump" id="devjump">
+  <button class="devjump-toggle" onclick="toggleDevJump()" title="Collapse/expand dev jump bar" aria-label="Toggle dev jump bar">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    <span>Dev jump</span>
+  </button>
+  <div class="devjump-scroll">
+    <span class="devjump-section">Onboard</span>
+    <a href="../index.html#welcome">Welcome</a>
+    <a href="../index.html#catalog">Catalog</a>
+    <a href="../index.html#basic-info">Configure</a>
+    <a href="../index.html#auth">Connect</a>
+    <a href="../index.html#test-conn">Test</a>
+    <a href="../index.html#overview">Summary</a>
+    <a href="../index.html#protect">Add default protection</a>
+    <span class="devjump-divider"></span>
+    <span class="devjump-section">Inventory</span>
+    <a href="../inventory.html#inventory">All resources</a>
+    <span class="devjump-divider"></span>
+    <span class="devjump-section">Policies</span>
+    <a href="backup-policies.html#0">All policies</a>
+    <a href="backup-policies.html#1">New policy</a>
+    <a href="backup-policies.html#default/github">GitHub default</a>
+  </div>
+  <!-- Reset the agent demo to a clean slate. Dev-only, sits beside the hide control. Implementation is shared
+       (vdcResetAgentDemo in vdc-notifications.js) so the key list lives in one place. -->
+  <button class="devjump-reset" onclick="if(window.vdcResetAgentDemo) vdcResetAgentDemo(); else alert('Agent demo reset is unavailable on this page.')" title="Reset agent scenarios — clears the ROT recommendation, awaiting decisions, what the assistant has said, and any carried conversation, then reloads">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/></svg>
+    <span>Reset agent</span>
+  </button>
+  <button class="devjump-close" onclick="hideDevJump()" title="Hide dev bar (re-enable with showDevJump() in console)" aria-label="Hide dev bar">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+</div>
 
 <div class="app">
   <!-- Sidenav (VIRO rail — cloned from backup-policies.html; wired for the Dashboard slot) -->
@@ -5936,6 +5992,32 @@ function setIddRange(k) { iddHooks.S.range = { k: k }; document.getElementById('
 <script>
 (function(){ var scr = document.querySelectorAll('.idd-tscrim'); function sync(){ var open = !!document.querySelector('.idd-tscrim.open'); document.documentElement.classList.toggle('idd-lock', open); }
   var mo = new MutationObserver(sync); scr.forEach(function(el){ mo.observe(el, { attributes: true, attributeFilter: ['class'] }); }); sync(); })();
+</script>
+<script id="devjump-js">
+(function(){
+  var bar = document.getElementById('devjump');
+  if (!bar) return;
+  var saved = localStorage.getItem('devjumpState');
+  if (saved === 'hidden') { localStorage.removeItem('devjumpState'); saved = null; }
+  if (saved === 'collapsed') bar.classList.add('collapsed');
+  // Keep the --devjump-h CSS var in sync with the bar's actual rendered
+  // height so every fixed/sticky element (sidenav, topbar, toast-stack,
+  // shadow-drawer) offsets itself correctly and doesn't clip under the bar.
+  function syncDevjumpHeight() {
+    var h = bar.classList.contains('hidden') ? 0 : (bar.offsetHeight || 0);
+    document.documentElement.style.setProperty('--devjump-h', h + 'px');
+  }
+  syncDevjumpHeight();
+  if (typeof ResizeObserver !== 'undefined') new ResizeObserver(syncDevjumpHeight).observe(bar);
+  window.addEventListener('resize', syncDevjumpHeight);
+  window.toggleDevJump = function() {
+    bar.classList.toggle('collapsed');
+    localStorage.setItem('devjumpState', bar.classList.contains('collapsed') ? 'collapsed' : 'open');
+    syncDevjumpHeight();
+  };
+  window.hideDevJump = function() { bar.classList.add('hidden');    localStorage.setItem('devjumpState','hidden'); syncDevjumpHeight(); };
+  window.showDevJump = function() { bar.classList.remove('hidden'); bar.classList.remove('collapsed'); localStorage.setItem('devjumpState','open'); syncDevjumpHeight(); };
+})();
 </script>
 </body>
 </html>
