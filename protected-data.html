@@ -68236,7 +68236,7 @@ function aiRender(){
     var gate='';
     // ARRIVAL FOR THE DECISION BLOCK (2026-10-29) — computed once so the approval and question branches below
     // cannot drift. A RESOLVED gate never animates: it is a receipt of something already decided, not an arrival.
-    var _gateArrive = (m.gate && !m.gate.resolved && typeof window.vdcGateArrival === 'function') ? window.vdcGateArrival(m.gate) : '';
+    var _gateArrive = (m.gate && !m.gate.resolved && typeof window.vdcGateArrival === 'function') ? window.vdcGateArrival(m.gate, m) : '';
     if(m.gate && m.gate.approval){
       // APPROVAL BLOCK (VeeamAI PRD FR-13/14, UC-02 — adapted 2026-08-21):
       // consequential writes render a distinct, unmissable proposal card —

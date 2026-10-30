@@ -3525,6 +3525,7 @@ function renderHub(){
 
   host.innerHTML = idStrip + '<div class="dash">' + kpis + apprW + gaugeW + donutW + tmapW + successW + trendW + '</div>';
   hubDrawTrend();   /* needs the laid-out width, so it runs after the markup is in */
+  hubWatchTrend();
 }
 
 /* ══ CLICK-THROUGH TO ACTIVITY ═══════════════════════════════════════════════════════════════════════════════════
@@ -3586,11 +3587,20 @@ function hubWlOf(x){ return hubWlAll().filter(function(k){ return k.id === x.wl;
 function hubApprResolve(x){
   if (!x || x._approved) return;
   x._approved = true;
+  hubCloseSession();   // deciding here closes the detail that was open for it
   VDC_SESSIONS.resolve(x.id);   /* persisted, so Activity lists it as Approved and a reload keeps it */
   showToast({ tone: 'success', title: 'Approved \u2014 ' + hubSkillOf(x).name + ' on ' + hubWlOf(x).name });
   renderHub();
 }
 function hubApprApprove(i){ hubApprResolve(HUB_PENDING[i]); }
+function hubApprDecline(x){
+  if (!x || x._approved || x._declined) return;
+  x._declined = true;
+  VDC_SESSIONS.decline(x.id);   /* persisted: the request leaves the list, Activity lists it as Denied, Reset agent brings it back */
+  hubCloseSession();
+  showToast({ tone: 'info', title: 'Declined \u2014 ' + hubSkillOf(x).name + ' on ' + hubWlOf(x).name });
+  renderHub();
+}
 
 /* REVIEW OPENS THE SESSION DETAIL OVER THIS PAGE (user 2026-10-30: no need to navigate to Activity — its session details are a
    full-page overlay, so they open over the dashboard). Activity's own overlay, shown through an iframe laid over the content area
@@ -3609,7 +3619,7 @@ window.addEventListener('message', function(e){
   if (d.type === 'vdc-session-close') hubCloseSession();
   if (d.type === 'vdc-session-ask'){   // the overlay stays; the conversation panel opens beside it for questions
     var qi = HUB_PENDING.map(function(p){ return p.id; }).indexOf(d.id);
-    if (qi >= 0) hubApprInfo(qi);
+    if (qi >= 0) hubApprInfo(qi, d.ctx);
     return;
   }
   if (d.type === 'vdc-session-decided' && d.decision === 'declined'){
@@ -3633,7 +3643,7 @@ window.addEventListener('message', function(e){
    thinking on screen (named steps, collapsed to "Thought for Xs"), then the answer as a real APPROVAL card with
    the single Approve action, so the decision can be made right there. The travel control uses the look-here
    style (secondary + open-in-new) because it LEAVES the panel for Activity and carries the conversation with it. */
-function hubApprInfo(i){
+function hubApprInfo(i, ctx){
   var x = HUB_PENDING[i]; if (!x) return;
   var sk = hubSkillOf(x), w = hubWlOf(x), age = hubAge(x.age);
   aiAgent.greeted = true;               // a thread is starting — never greet over it
@@ -3656,19 +3666,38 @@ function hubApprInfo(i){
   steps.forEach(function(en, k){ setTimeout(function(){ rs.steps.push(en); aiRender(); }, 350 + k * 700); });
   setTimeout(function(){
     aiFinishReasoning(rs);
-    var travel = '<button type="button" class="aiac-btn" onclick="aiacGo(\'nav\',\'activity.html#agents\')">Open in Activity'
-      + (_dsStoreIconSvg('open-in-new-outlined', 16) || '') + '</button>';
-    aiPushAgent('<p>I asked for <strong>' + _aiEsc(sk.name.toLowerCase()) + '</strong> on <strong>' + _aiEsc(w.name) + '</strong>, and it has been stopped for '
-      + _aiEsc(age) + '. Nothing has run.</p>' + '<div class="ai-home-foot" style="margin-top:12px">' + travel + '</div>', {
-        q: '',
-        approval: {
-          action: sk.name + ' on ' + w.name,
-          scope: w.name + ' only',
-          evidence: sk.access + ' · ' + sk.tier + ' tier, so it stops and asks',
-          reversal: irreversible ? 'None — an exported file cannot be recalled' : 'Reversible from Activity'
-        },
-        buttons: [{ label: 'Approve', primary: true, choice: 'Approved', fn: function(){ hubApprResolve(x); } }]
-      });
+    // A REAL ANSWER ABOUT THIS REQUEST (user 2026-10-30: the first version restated the title and offered to open Activity while the
+    // detail was already open). Built from what the open detail passed along: what it touches, from which restore point, under which
+    // policy, plus the skill's own rules (autonomy, reversibility). Anything the data does not carry is not claimed. No second
+    // Approve here: the decision stays on the detail that is open beside this panel.
+    ctx = ctx || {};
+    var verb = { restore: 'restore', exportd: 'export', policies: 'change the policy settings of' }[sk.id] || 'run ' + sk.name.toLowerCase() + ' on';
+    var noun = (ctx.noun || 'item').toLowerCase(), n = ctx.n;
+    var what = (n ? n + ' ' + noun + (n === 1 ? '' : 's') : 'the items in scope')
+      + (ctx.names && ctx.names.length ? ' (' + ctx.names.map(_aiEsc).join(', ') + (n && n > ctx.names.length ? ' and ' + (n - ctx.names.length) + ' more' : '') + ')' : '');
+    var doing = sk.id === 'policies' ? 'It would change the policy settings of ' + what + ' in <strong>' + _aiEsc(w.name) + '</strong>' + (ctx.conn ? ' (' + _aiEsc(ctx.conn) + ')' : '') + '.'
+      : 'It would ' + verb + ' ' + what + ' in <strong>' + _aiEsc(w.name) + '</strong>' + (ctx.conn ? ' (' + _aiEsc(ctx.conn) + ')' : '')
+        + (ctx.point && sk.id === 'restore' ? ', from the <strong>' + _aiEsc(ctx.point) + '</strong> restore point' : '') + '.';
+    var html = '<p>' + doing + (ctx.policy ? ' It falls under <strong>' + _aiEsc(ctx.policy) + '</strong>.' : '') + '</p>'
+      + '<p><strong>Why it stopped.</strong> ' + _aiEsc(sk.name) + ' is set to \u201c' + _aiEsc(sk.tier) + '\u201d, so a request that ' + (sk.access.indexOf('Write') === 0 ? 'writes' : 'acts') + ' always waits for you. It has waited ' + _aiEsc(age) + ' and nothing has run.</p>'
+      + '<p><strong>If you approve.</strong> It runs with the access it was granted (' + _aiEsc(sk.access) + '), limited to ' + _aiEsc(w.name) + ' only, and is logged to the audit trail. '
+      + (irreversible ? 'An exported file cannot be recalled once it exists.' : 'You can undo it afterwards from Activity.') + '</p>'
+      + '<p><strong>If you decline.</strong> Nothing runs and the request is recorded as Denied.</p>';
+    // THE DECISION IS RIGHT THERE (user 2026-10-30): the summary above and the approval card with both verbs, so the request can be
+    // approved or declined from the conversation as well as from the detail beside it. Either one decides and closes the other.
+    aiPushAgent(html, {
+      q: '',
+      approval: {
+        action: sk.name + ' on ' + w.name,
+        scope: w.name + ' only',
+        evidence: sk.access + ', ' + sk.tier + ' tier, so it stops and asks',
+        reversal: irreversible ? 'None \u2014 an exported file cannot be recalled' : 'Reversible from Activity'
+      },
+      buttons: [
+        { label: 'Approve', primary: true, choice: 'Approved', fn: function(){ hubApprResolve(x); } },
+        { label: 'Decline', primary: false, choice: 'Declined', fn: function(){ hubApprDecline(x); } }
+      ]
+    });
     aiSetBusy(false);
   }, 350 + steps.length * 700 + 400);
 }
@@ -3714,7 +3743,7 @@ function hubDrawTrend(){
   });
   g += '<line id="hubTrG" y1="' + pt + '" y2="' + (pt + ih) + '" style="stroke:var(--black-30)" stroke-width="1" stroke-dasharray="3 3" visibility="hidden"/>';
   T.series.forEach(function(z, k){ g += '<circle class="hubTrD" r="4.5" style="fill:' + z.color + ';stroke:var(--white)" stroke-width="2" visibility="hidden"/>'; });
-  host.innerHTML = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" style="display:block;overflow:visible">' + g + '</svg><div class="hb-tt" id="hubTrT" hidden></div>';
+  host.innerHTML = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" style="display:block;overflow:visible;position:absolute;left:0;top:0">' + g + '</svg><div class="hb-tt" id="hubTrT" hidden></div>';
   var svg = host.firstChild, guide = document.getElementById('hubTrG'), dots = host.querySelectorAll('.hubTrD'), tip = document.getElementById('hubTrT');
   svg.addEventListener('mousemove', function(e){
     var x = e.clientX - host.getBoundingClientRect().left;
@@ -3742,6 +3771,25 @@ function hubDrawTrend(){
   svg.addEventListener('mouseleave', function(){ guide.setAttribute('visibility', 'hidden'); [].forEach.call(dots, function(d){ d.setAttribute('visibility', 'hidden'); }); tip.hidden = true; });
 }
 (function(){ var t; window.addEventListener('resize', function(){ clearTimeout(t); t = setTimeout(hubDrawTrend, 120); }); })();
+/* THE CHART FOLLOWS ITS CARD (user 2026-10-30: "the chart isnt fitting again… a huge empty space on the right"). The chart is drawn at the
+   card's measured pixel width, and a window resize was the only thing that redrew it — so opening or closing the conversation panel, the
+   dev bar, or the session overlay changed the card's width and left the drawing at the old one. The drawing no longer sizes the card
+   (it is absolutely positioned), and a ResizeObserver on the card redraws whenever the card itself changes width. */
+var HUB_TREND_RO = null, HUB_TREND_OBS = null, HUB_TREND_W = 0;
+function hubWatchTrend(){
+  var host = document.getElementById('hubTrend'); if (!host || typeof ResizeObserver === 'undefined') return;
+  if (HUB_TREND_OBS === host) return;
+  if (HUB_TREND_RO) HUB_TREND_RO.disconnect();
+  HUB_TREND_OBS = host;
+  HUB_TREND_RO = new ResizeObserver(function(){
+    var w = host.clientWidth; if (!w || w === HUB_TREND_W) return;
+    HUB_TREND_W = w; setTimeout(hubDrawTrend, 0);
+  });
+  HUB_TREND_RO.observe(host);
+}
+/* The panel and the dev bar move the card by changing a class on <body>, with the page reflowing over ~240ms. The observer above
+   normally catches the new width; this is the belt to its braces — redraw once the reflow has settled. */
+new MutationObserver(function(){ clearTimeout(window._hubTrT); window._hubTrT = setTimeout(function(){ HUB_TREND_W = 0; hubDrawTrend(); }, 320); }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
 function hubExtIc(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>'; }
 function hubDur(m){ return m < 60 ? m + ' min' : (Math.round(m / 6) / 10) + ' h'; }
 function hubAge(d){ return d === 0 ? 'less than a day' : d === 1 ? '1 day' : d + ' days'; }
@@ -5981,7 +6029,7 @@ function aiRender(){
     var gate='';
     // ARRIVAL FOR THE DECISION BLOCK (2026-10-29) — computed once so the approval and question branches below
     // cannot drift. A RESOLVED gate never animates: it is a receipt of something already decided, not an arrival.
-    var _gateArrive = (m.gate && !m.gate.resolved && typeof window.vdcGateArrival === 'function') ? window.vdcGateArrival(m.gate) : '';
+    var _gateArrive = (m.gate && !m.gate.resolved && typeof window.vdcGateArrival === 'function') ? window.vdcGateArrival(m.gate, m) : '';
     if(m.gate && m.gate.approval){
       var ap = m.gate.approval;
       var apApproveIc = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';

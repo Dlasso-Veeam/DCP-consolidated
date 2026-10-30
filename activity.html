@@ -11215,9 +11215,14 @@ function renderAgentTasks(){
     sub.textContent = live + ' task' + (live === 1 ? '' : 's') + ' · ' + sched + ' scheduled';
   }
 }
+// The skill a row is shown under. Hub sessions carry a real one (r.skill); the seeded tasks and workload runs only have a kind, which
+// maps onto the skill that owns it (the same mapping the task detail already uses). It is deliberately a DISPLAY field: r.skill stays
+// unset on those rows, because a hub drill-down filters on r.skill and must not pick up rows the hub's chart never counted.
+var _AG_SKILL_OF_KIND = { Restore: 'Restore data', Backup: 'Backup jobs', Review: 'Manage policies', Report: 'Monitor & report', Analysis: 'Monitor & report', Question: 'Monitor & report' };
+function _agSkillCell(r){ return r.skill || _AG_SKILL_OF_KIND[r.kind] || 'Monitor & report'; }
 var AGENTS_COLUMNS = [
   { key:'capability', label:'Activity' },
-  { key:'kind',       label:'Type' },       // closed vocab (user 2026-09-12): Restore · Backup · Report · Analysis · Question · Review
+  { key:'skillLbl',   label:'Skill' },      // was 'Type' (Restore · Backup · Report · Analysis · Question · Review): every type belongs to a skill, and the hub names sessions by skill (user 2026-10-30)
   { key:'agent',      label:'Agent' },
   { key:'wl',         label:'Workload' },   // aggregate scopes (All SaaS / All Datacenter) need the row to name its estate (user 2026-09-12)
   /* Trigger column retired from the table (user 2026-10-29); it stays in the row drawer and as a filter. */
@@ -11335,7 +11340,7 @@ function renderAgentsTable(){
       if (f.attr === 'decision' && f.values.indexOf(r.decision) < 0) return false;   // rows without the attribute (seeded runs, tasks) fall out, by design
       if (f.attr === 'skill'    && f.values.indexOf(r.skill)    < 0) return false;
     }
-    if (q && [r.agent, r.capability, r.kind, r.wl, r.trigger, r.outcome].join(' ').toLowerCase().indexOf(q) < 0) return false;
+    if (q && [r.agent, r.capability, _agSkillCell(r), r.wl, r.trigger, r.outcome].join(' ').toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
   rows.sort(function(a, z){
@@ -11343,7 +11348,7 @@ function renderAgentsTable(){
     var pa = a.id === 'rot1' && _agStatus(a) === 'pending' ? 1 : 0, pz = z.id === 'rot1' && _agStatus(z) === 'pending' ? 1 : 0;
     if (pa !== pz) return pz - pa;
     var k = state.agentsSort.key, d = state.agentsSort.dir === 'asc' ? 1 : -1;
-    function sv(e){ return k === 'started' ? e.started.getTime() : String(e[k] || '').toLowerCase(); }
+    function sv(e){ return k === 'started' ? e.started.getTime() : (k === 'skillLbl' ? _agSkillCell(e) : String(e[k] || '')).toLowerCase(); }
     var av = sv(a), zv = sv(z);
     return av < zv ? -d : av > zv ? d : 0;
   });
@@ -11367,7 +11372,7 @@ function renderAgentsTable(){
     if (r._task){
       return '<tr style="cursor:pointer" onclick="openAgentTaskModal(\'' + r.id + '\')">' + cb
         + '<td class="name-col"><div class="cell-name" style="color:var(--blue)">' + esc(r.capability) + '</div></td>'
-        + '<td><span class="act-type-chip">' + esc(r.kind || '—') + '</span></td>'
+        + '<td><span class="act-type-chip">' + esc(_agSkillCell(r)) + '</span></td>'
         + '<td>' + esc(r.agent) + '</td>'
         + '<td style="font-size:16px">' + esc(r.wl || '—') + '</td>'
         + '<td style="white-space:nowrap">' + esc(_actFmtFull(r.started)) + '</td>'
@@ -11378,7 +11383,7 @@ function renderAgentsTable(){
     }
     return '<tr style="cursor:pointer" onclick="openAgentRunDrawer(\'' + r.id + '\')">' + cb
       + '<td class="name-col"><div class="cell-name" style="color:var(--blue)">' + esc(r.capability) + '</div></td>'
-      + '<td><span class="act-type-chip">' + esc(r.kind || '—') + '</span></td>'
+      + '<td><span class="act-type-chip">' + esc(_agSkillCell(r)) + '</span></td>'
       + '<td>' + esc(r.agent) + (r.parent ? '<div style="font-size:14px;color:var(--black-60)">Spawned by ' + esc(r.parent) + '</div>' : '') + '</td>'
       + '<td style="font-size:16px">' + esc(r.wl || '—') + '</td>'
       + '<td style="white-space:nowrap">' + esc(_actFmtFull(r.started)) + '</td>'
@@ -15210,7 +15215,13 @@ else aiComposerIcons();
   };
   window.agRunAsk = function(id){
     var r = (typeof AGENT_RUNS !== 'undefined' ? AGENT_RUNS : []).filter(function(x){ return x.id === id; })[0]; if (!r) return;
-    if (EMBED){ tell({ type:'vdc-session-ask', id:r.sessionId }); return; }
+    // What the open detail already knows travels with the question, so the answer can be about THIS request (what it touches,
+    // from which restore point, under which policy) instead of restating its title.
+    var m = window._agGraph || {}, R = m.rows || {}, ot = (m.types || []).filter(function(t){ return t[0] === 'Objects'; })[0];
+    var first = function(k){ return (R[k] && R[k].rows && R[k].rows[0]) ? R[k].rows[0] : null; };
+    var ctx = { n: ot ? ot[1] : null, noun: first('Objects') ? first('Objects')[1] : '', names: (R.Objects && R.Objects.rows ? R.Objects.rows.slice(0, 3).map(function(x){ return x[0]; }) : []),
+      point: first('Restore point') ? first('Restore point')[0] : null, conn: first('Connection') ? first('Connection')[0] : null, policy: first('Policy') ? first('Policy')[0] : null };
+    if (EMBED){ tell({ type:'vdc-session-ask', id:r.sessionId, ctx:ctx }); return; }
     if (typeof aiOpen === 'function') aiOpen();
     if (typeof window.vdcSetPanelTopic === 'function') window.vdcSetPanelTopic(r.capability);
   };
@@ -15978,7 +15989,7 @@ function aiRender(){
     var gate='';
     // ARRIVAL FOR THE DECISION BLOCK (2026-10-29) — computed once so the approval and question branches below
     // cannot drift. A RESOLVED gate never animates: it is a receipt of something already decided, not an arrival.
-    var _gateArrive = (m.gate && !m.gate.resolved && typeof window.vdcGateArrival === 'function') ? window.vdcGateArrival(m.gate) : '';
+    var _gateArrive = (m.gate && !m.gate.resolved && typeof window.vdcGateArrival === 'function') ? window.vdcGateArrival(m.gate, m) : '';
     if(m.gate && m.gate.approval){
       var ap = m.gate.approval;
       var apApproveIc = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';

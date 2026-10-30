@@ -3063,7 +3063,7 @@ function aiRender(){
     var gate='';
     // ARRIVAL FOR THE DECISION BLOCK (2026-10-29) — computed once so the approval and question branches below
     // cannot drift. A RESOLVED gate never animates: it is a receipt of something already decided, not an arrival.
-    var _gateArrive = (m.gate && !m.gate.resolved && typeof window.vdcGateArrival === 'function') ? window.vdcGateArrival(m.gate) : '';
+    var _gateArrive = (m.gate && !m.gate.resolved && typeof window.vdcGateArrival === 'function') ? window.vdcGateArrival(m.gate, m) : '';
     if(m.gate && m.gate.approval){
       var ap = m.gate.approval;
       var apApproveIc = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';

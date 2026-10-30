@@ -633,7 +633,7 @@
   //   '<div class="aiac' + arrive + '" data-aiac=…'
   var AIAC_ARRIVAL_MS = 1260;   // --cascade-end 640 + --gap 160 + 300 slowest delay + ~160 tail
   var GATE_ARRIVAL_MS = 760;
-  function arrival(o, total){
+  function arrival(o, total, lead){
     try {
       if (!o) return '';
       if (o._arrived) return '';                                   // carried/restored: renders settled
@@ -641,8 +641,8 @@
       if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return '';
       if (!o._arriveAt) o._arriveAt = Date.now();
       var el = Date.now() - o._arriveAt;
-      if (el > total){ o._arrived = true; return ''; }
-      return ' is-arriving" style="--elapsed:' + el + 'ms';
+      if (el > total + (lead || 0)){ o._arrived = true; return ''; }
+      return ' is-arriving" style="--elapsed:' + el + 'ms' + (lead ? ';--lead:' + lead + 'ms' : '');
     } catch(e){ return ''; }
   }
   window.vdcCardArrival = function(m){ return arrival(m, AIAC_ARRIVAL_MS); };
@@ -652,7 +652,24 @@
   // animated depended on which kind of block it happened to end in. Same contract, shorter sequence: an approval
   // is a short read (four labelled rows and a decision), not a chart to measure out. Keyed on m.gate, which is
   // the object that actually appears, so attaching a gate to an existing message still animates.
-  window.vdcGateArrival = function(g){ return arrival(g, GATE_ARRIVAL_MS); };
+  // THE DECISION WAITS FOR THE WORDS ABOVE IT (user 2026-10-30: "the approval card appears before the text above has finished
+  // animating in. i told you earlier content needs to appear linearly"). The card used to start its own clock the moment the
+  // message was laid out, in parallel with the sentence that introduces it. It now carries a lead — the time vdcSayHtml
+  // needs to say the message — and every delay in the card's cascade is offset by it (--lead).
+  function sayMs(html){
+    try {
+      var tpl = document.createElement('div'); tpl.innerHTML = String(html || ''); var words = 0;
+      (function walk(n){ for (var c = n.firstChild; c; c = c.nextSibling){
+        if (c.nodeType === 3){ words += c.nodeValue.split(/\s+/).filter(Boolean).length; }
+        else if (c.nodeType === 1 && !SAY_SKIP[c.tagName]) walk(c); } })(tpl);
+      if (!words) return 0;
+      return Math.round(words * Math.min(SAY_STEP, 760 / Math.max(1, words)) + SAY_WORD);
+    } catch(e){ return 0; }
+  }
+  window.vdcGateArrival = function(g, m){
+    var lead = (m && !m._noSay && !m._arrival) ? sayMs(m.html) : 0;
+    return arrival(g, GATE_ARRIVAL_MS, lead);
+  };
 
   // THE LIVE LABEL TICKS, IT DOESN'T JUMP. While a flow runs the reasoning bar is collapsed, so its header is the
   // only thing moving on screen — and it swapped text instantly every 700ms while everything around it composed.
@@ -1039,19 +1056,19 @@
     /* APPROVAL / QUESTION ARRIVAL — the same cascade, one beat shorter. The block rises, then its labelled rows
        build in reading order and the decision buttons land last, so the user reads the proposal before the
        controls for it appear. --elapsed works exactly as it does on .aiac above. */
-    + '.ai-approval.is-arriving, .ai-gate.is-arriving { --elapsed:0ms; animation:aiTaskRise 220ms cubic-bezier(.2,.7,.3,1) both; animation-delay:calc(0ms - var(--elapsed)); }\n'
+    + '.ai-approval.is-arriving, .ai-gate.is-arriving { --elapsed:0ms; --lead:0ms; animation:aiTaskRise 220ms cubic-bezier(.2,.7,.3,1) both; animation-delay:calc(var(--lead, 0ms) + 0ms - var(--elapsed)); }\n'
     + '.ai-approval.is-arriving .ai-approval-row, .ai-approval.is-arriving .ai-appr-trail-hd, .ai-approval.is-arriving .ai-gate-btns,\n'
     + '.ai-gate.is-arriving .ai-gate-q, .ai-gate.is-arriving .ai-gate-btns { animation:aiTaskRise 240ms cubic-bezier(.2,.7,.3,1) both; }\n'
     /* Counted with sibling chains, not :nth-of-type — the rows are divs preceded by .ai-approval-hd, which is also
        a div, so nth-of-type would start the cascade at 2 and collapse the first two rows onto one beat. */
-    + '.ai-approval.is-arriving .ai-approval-row { animation-delay:calc(120ms - var(--elapsed)); }\n'
-    + '.ai-approval.is-arriving .ai-approval-row + .ai-approval-row { animation-delay:calc(190ms - var(--elapsed)); }\n'
-    + '.ai-approval.is-arriving .ai-approval-row + .ai-approval-row + .ai-approval-row { animation-delay:calc(260ms - var(--elapsed)); }\n'
-    + '.ai-approval.is-arriving .ai-approval-row + .ai-approval-row + .ai-approval-row + .ai-approval-row { animation-delay:calc(330ms - var(--elapsed)); }\n'
-    + '.ai-approval.is-arriving .ai-appr-trail-hd { animation-delay:calc(400ms - var(--elapsed)); }\n'
-    + '.ai-approval.is-arriving .ai-gate-btns { animation-delay:calc(470ms - var(--elapsed)); }\n'
-    + '.ai-gate.is-arriving .ai-gate-q { animation-delay:calc(120ms - var(--elapsed)); }\n'
-    + '.ai-gate.is-arriving .ai-gate-btns { animation-delay:calc(260ms - var(--elapsed)); }\n'
+    + '.ai-approval.is-arriving .ai-approval-row { animation-delay:calc(var(--lead, 0ms) + 120ms - var(--elapsed)); }\n'
+    + '.ai-approval.is-arriving .ai-approval-row + .ai-approval-row { animation-delay:calc(var(--lead, 0ms) + 190ms - var(--elapsed)); }\n'
+    + '.ai-approval.is-arriving .ai-approval-row + .ai-approval-row + .ai-approval-row { animation-delay:calc(var(--lead, 0ms) + 260ms - var(--elapsed)); }\n'
+    + '.ai-approval.is-arriving .ai-approval-row + .ai-approval-row + .ai-approval-row + .ai-approval-row { animation-delay:calc(var(--lead, 0ms) + 330ms - var(--elapsed)); }\n'
+    + '.ai-approval.is-arriving .ai-appr-trail-hd { animation-delay:calc(var(--lead, 0ms) + 400ms - var(--elapsed)); }\n'
+    + '.ai-approval.is-arriving .ai-gate-btns { animation-delay:calc(var(--lead, 0ms) + 470ms - var(--elapsed)); }\n'
+    + '.ai-gate.is-arriving .ai-gate-q { animation-delay:calc(var(--lead, 0ms) + 120ms - var(--elapsed)); }\n'
+    + '.ai-gate.is-arriving .ai-gate-btns { animation-delay:calc(var(--lead, 0ms) + 260ms - var(--elapsed)); }\n'
     + '@media (prefers-reduced-motion: reduce) { .ai-approval.is-arriving, .ai-approval.is-arriving *, .ai-gate.is-arriving, .ai-gate.is-arriving * { animation:none !important; } }\n'
     + 'body.ai-nofx .ai-approval.is-arriving, body.ai-nofx .ai-approval.is-arriving *, body.ai-nofx .ai-gate.is-arriving, body.ai-nofx .ai-gate.is-arriving * { animation:none !important; }\n'
     + '.ai-reason-head span.vdc-tick { --elapsed:0ms; display:inline-block; animation:vdcWordIn 300ms cubic-bezier(.2,.7,.3,1) both; animation-delay:calc(0ms - var(--elapsed)); }\n'
