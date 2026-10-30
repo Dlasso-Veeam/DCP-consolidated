@@ -20,6 +20,8 @@
 @font-face { font-family: 'ITC Avant Garde Gothic Std'; src: url('./fonts/ITCAvantGardeStdBold.otf') format('opentype'); font-weight: 700; font-style: normal; font-display: swap; }
 
 :root {
+ /* Veeam AI brand gradient — single source, as on every other page. It was only declared on .filter-ai, so the rail launcher's glow (.vn-ai-launcher::before) had no background: it animated and showed nothing. */
+  --ai-grad: conic-gradient(from 90deg, #5bbc7b 0deg, #119ee7 57.6deg, #d83dcf 153deg, #ee6b36 234deg, #8fd131 320.4deg, #5bbc7b 360deg);
   /* tokens added 2026-09-09 — the undefined-css-var ratchet caught bare var() refs with NO in-file definition (silently unset since authoring); values from the sibling pages’ established ramp */
   --black-50: #797a7f;
   --black-80: #4c4e54;
@@ -1838,7 +1840,7 @@ body.ai-nofx .sd-overlay, body.ai-nofx .sd-modal, body.ai-nofx #toast, body.ai-n
 .ai-head-title { font-size: 16px; font-weight: 500; color: var(--black-100); }
 .ai-head-btn { width: 28px; height: 28px; border: none; background: none; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .ai-head-btn:hover { background: var(--black-5); color: var(--black-100); }
-body.ai-open.ai-full { --ai-w: 100vw; overflow: hidden; }
+body.ai-open.ai-full { --ai-w: 100vw !important; overflow: hidden; }   /* !important: a dragged panel width is stored inline on <body> and would otherwise beat this rule (same as protected-data) */
 body.ai-full .ai-head, body.ai-full .ai-body, body.ai-full .ai-foot { padding-left: max(16px, calc((100vw - 720px) / 2)); padding-right: max(16px, calc((100vw - 720px) / 2)); }
 body.ai-full #aiWorkingGlow { display: none; }
 .ai-body { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: var(--white); scrollbar-width: thin; }
@@ -2201,7 +2203,7 @@ body.ai-full #aiWorkingGlow { display: none; }
      parses. Without this, the gate flashes for a moment on refresh while the
      main password-gate IIFE (far below) finishes loading and runs its check. -->
 <script src="securiti-icons-data.js?v=20260910a"></script>
-<script src="vdc-notifications.js?v=20261029c"></script>
+<script src="vdc-notifications.js?v=20261029f"></script>
 <script src="workload-picker.js?v=20260908b"></script>
 <script src="agent-sessions.js?v=20261029a"></script>
 <script>
@@ -2242,7 +2244,7 @@ body.ai-full #aiWorkingGlow { display: none; }
   </div>
   <!-- Reset the agent demo to a clean slate. Dev-only, sits beside the hide control. Implementation is shared
        (vdcResetAgentDemo in vdc-notifications.js) so the key list lives in one place. -->
-  <button class="devjump-reset" onclick="if(window.vdcResetAgentDemo) vdcResetAgentDemo(); else alert('Agent demo reset is unavailable on this page.')" title="Reset agent scenarios — clears the ROT recommendation, pending approvals, what the assistant has said, and any carried conversation, then reloads">
+  <button class="devjump-reset" onclick="if(window.vdcResetAgentDemo) vdcResetAgentDemo(); else alert('Agent demo reset is unavailable on this page.')" title="Reset agent scenarios — clears the ROT recommendation, awaiting decisions, what the assistant has said, and any carried conversation, then reloads">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/></svg>
     <span>Reset agent</span>
   </button>
@@ -3119,7 +3121,7 @@ body.ai-full #aiWorkingGlow { display: none; }
           <!-- ══ TASK QUEUE (user 2026-09-10, realignment): the agent view is a
                dedicated Activity lens like the Audit log, and the QUEUE is its
                new content — the pre-job lifecycle (approved/queued/running/
-               pending approval/scheduled). Completed work is the Jobs table's
+               awaiting decision/scheduled). Completed work is the Jobs table's
                record; this panel never re-lists jobs. Live rows mirror the
                chat dock via localStorage (vdc-agent-tasks); seeded rows carry
                the standing overnight schedule. ══ -->
@@ -7092,7 +7094,7 @@ var FILTER_CONFIG = {
     attrs: [
       { id: 'agent',   label: 'Agent',   pinnedOnly: true },
       { id: 'trigger', label: 'Trigger', pinnedOnly: true },
-      { id: 'decision', label: 'Decision' },   // Ran on its own / Approved / Denied / Pending approval — what the Agent Hub's charts slice by
+      { id: 'decision', label: 'Decision' },   // Ran on its own / Approved / Denied / Awaiting decision — what the Agent Hub's charts slice by
       { id: 'skill',    label: 'Skill' }
     ],
     stateKey: 'agentsFilters',
@@ -10303,7 +10305,7 @@ function _actSessOutside(e) {
   var host = document.getElementById('actSessPicker');
   if (host && !host.contains(e.target)) { host.classList.remove('is-open'); document.removeEventListener('click', _actSessOutside); }
 }
-// Agent Sessions anchors on STATUS (not Session state): one status at a time, Pending approval first — the sessions to act on.
+// Agent Sessions anchors on STATUS (not Session state): one status at a time, Awaiting decision first — the sessions to act on.
 var AG_STATUS_ORDER = ['pending', 'running', 'scheduled', 'approved', 'success', 'warning', 'failed', 'dismissed', 'cancelled'];
 var _AG_TERMINAL = { approved: 1, success: 1, warning: 1, failed: 1, dismissed: 1, cancelled: 1 };
 function _agStatusSel() { return state.agentsStatus || 'pending'; }
@@ -10851,7 +10853,7 @@ function setAuditPageSize(v) {
 // A browser REFRESH restarts the scenario: decisions made on held tasks (and the policy recommendation) are forgotten, so the pending
 // sessions are waiting again. Navigating between pages keeps them, so Activity, Policies and the assistant stay consistent.
 /* RETIRED (user 2026-10-29: "rather than a refresh wipe out, can you add a control in the dev jump header").
-   Reloading Activity silently cleared the ROT policy and every pending approval — state created on OTHER pages —
+   Reloading Activity silently cleared the ROT policy and every awaiting decision — state created on OTHER pages —
    so a refresh here quietly undid work done elsewhere, with nothing saying so. The Dev jump bar's "Reset agent"
    button does this deliberately now, on every page, via vdcResetAgentDemo(). A reload is just a reload again.
    was: if (navigation.type === 'reload') { remove vdc-agent-task-overrides, vdc-rot-state, agent jobs } */
@@ -10973,17 +10975,18 @@ var AGENT_TASK_PILL = {
   scheduled: ['queued',  'Scheduled'],
   queued:    ['queued',  'Queued'],
   running:   ['started', 'In progress'],
-  awaiting:  ['warning', 'Pending approval'],
-  waiting:   ['warning', 'Waiting on you'],
+  awaiting:  ['warning', 'Awaiting decision'],
+  waiting:   ['warning', 'Awaiting decision'],   // one state with 'awaiting': a session waiting on the user
   done:      ['success', 'Done'],
   cancelled: ['aborted', 'Cancelled']
 };
 function _agentTaskPill(st, id){
   var c = AGENT_TASK_PILL[st] || AGENT_TASK_PILL.queued;
   if (id === 'rot1') c = { done:['success','Approved'], cancelled:['aborted','Dismissed'] }[st] || c;   // same words as the Status filter (AG_STATUS_LBL)
+  if ((st === 'awaiting' || st === 'waiting') && typeof vdcDecisionChip === 'function') return vdcDecisionChip();   // same chip on every page (vdc-notifications.js)
   return '<span class="act-status-pill ' + c[0] + '">' + (_JOB_STATUS_ICON[c[0]] || '') + c[1] + '</span>';
 }
-// A shared-set session wears the pill of its own status. Pending = the task pill ("Pending approval"); declined = the aborted style with
+// A shared-set session wears the pill of its own status. Pending = the task pill ("Awaiting decision"); declined = the aborted style with
 // the Status filter's word for it, so the column and the filter say the same thing.
 function _agRunPillFor(r){
   if (r._st === 'pending') return _agentTaskPill('awaiting', r.id);
@@ -11023,7 +11026,7 @@ function _rotTask(){
   var status = s.rec === 'approved' ? 'done' : (s.rec === 'dismissed' ? 'cancelled' : 'awaiting');
   return { id:'rot1', title:'Create ROT policy \u2014 Stale SharePoint content (Retail Division)', agent:'Veeam Intelligence', status:status, kind:'Review', wl:'Microsoft 365',
     trigger:'Proactive \u00b7 Veeam Intelligence', source:'Recommendation \u2014 Policies \u203a File ROT',
-    when: status === 'awaiting' ? 'Waiting on you since this morning' : (status === 'done' ? 'Approved by Darren Lasso' : 'Dismissed'),
+    when: status === 'awaiting' ? 'Awaiting decision since this morning' : (status === 'done' ? 'Approved by Darren Lasso' : 'Dismissed'),
     started: s.ts ? new Date(s.ts) : new Date(Date.now() - 2 * 36e5),
     href:'backup-policies.html#rot-review', cta:'Review', rs:s };
 }
@@ -11199,7 +11202,7 @@ var AGENTS_COLUMNS = [
   { key:'kind',       label:'Type' },       // closed vocab (user 2026-09-12): Restore · Backup · Report · Analysis · Question · Review
   { key:'agent',      label:'Agent' },
   { key:'wl',         label:'Workload' },   // aggregate scopes (All SaaS / All Datacenter) need the row to name its estate (user 2026-09-12)
-  { key:'trigger',    label:'Trigger' },
+  /* Trigger column retired from the table (user 2026-10-29); it stays in the row drawer and as a filter. */
   { key:'started',    label:'Started' },
   { key:'dur',        label:'Duration' },
   { key:'outcome',    label:'Status' }
@@ -11258,7 +11261,7 @@ function _agStatus(r){
   if (r._task) return (o === 'awaiting' || o === 'waiting') ? 'pending' : (o === 'running' ? 'running' : ((o === 'scheduled' || o === 'queued') ? 'scheduled' : (o === 'done' ? 'success' : 'cancelled')));
   return o === 'Running' ? 'running' : o === 'Success' ? 'success' : o === 'Warning' ? 'warning' : o === 'Error' ? 'failed' : 'success';
 }
-var AG_STATUS_LBL = { pending:'Pending approval', running:'In progress', scheduled:'Scheduled', approved:'Approved', success:'Succeeded', warning:'Warning', failed:'Failed', dismissed:'Dismissed', cancelled:'Cancelled' };
+var AG_STATUS_LBL = { pending:'Awaiting decision', running:'In progress', scheduled:'Scheduled', approved:'Approved', success:'Succeeded', warning:'Warning', failed:'Failed', dismissed:'Dismissed', cancelled:'Cancelled' };
 var AG_STATUS_ICON = { pending:'lock-outlined', running:'play-circle-outlined', scheduled:'history-outlined', approved:'sd-log-check', dismissed:'close-outlined', success:'sd-log-check', warning:'status-warning-outlined', failed:'status-error-outlined', cancelled:'close-outlined' };
 function _agCap(r){ return r._task ? null : String(r.granted || '').split(' · ')[0] || null; }
 // The strip summarises exactly the rows the table is showing (before paging): the same workload, status, time range, filter chips and search.
@@ -11270,7 +11273,7 @@ function renderAgentKpis(rows){
   var secs = function(s){ var m = /(\d+)m/.exec(s || ''), x = /(\d+)s/.exec(s || ''); return (m ? +m[1] * 60 : 0) + (x ? +x[1] : 0); };
   var avg = runs.length ? Math.round(runs.reduce(function(a, r){ return a + secs(r.dur); }, 0) / runs.length) : 0;
   var k = function(l, v){ return '<div class="ag-kpi"><div class="ag-kpi-lbl">' + l + '</div><div class="ag-kpi-val">' + v + '</div></div>'; };
-  host.innerHTML = k('Sessions', all.length) + k('Pending approval', pend) + k('Needed approval', runs.length ? Math.round(100 * gated / runs.length) + '%' : '—') + k('Avg duration', !runs.length ? '—' : (avg >= 60 ? Math.floor(avg / 60) + 'm ' + (avg % 60) + 's' : avg + 's'));
+  host.innerHTML = k('Sessions', all.length) + k('Awaiting decision', pend) + k('Needed approval', runs.length ? Math.round(100 * gated / runs.length) + '%' : '—') + k('Avg duration', !runs.length ? '—' : (avg >= 60 ? Math.floor(avg / 60) + 'm ' + (avg % 60) + 's' : avg + 's'));
   var tile = document.getElementById('agEntityTile'); if (tile && !tile.firstChild) tile.innerHTML = _sdIc('my-ai-agents-outlined', 28);
 }
 function renderAgentsThead(){
@@ -11349,7 +11352,6 @@ function renderAgentsTable(){
         + '<td><span class="act-type-chip">' + esc(r.kind || '—') + '</span></td>'
         + '<td>' + esc(r.agent) + '</td>'
         + '<td style="font-size:16px">' + esc(r.wl || '—') + '</td>'
-        + '<td>' + esc(r.trigger) + '</td>'
         + '<td style="white-space:nowrap">' + esc(_actFmtFull(r.started)) + '</td>'
         + '<td style="white-space:nowrap">' + esc(r.dur) + '</td>'
         + '<td>' + _agentTaskPill(r.outcome, r.id) + '</td>'
@@ -11361,7 +11363,6 @@ function renderAgentsTable(){
       + '<td><span class="act-type-chip">' + esc(r.kind || '—') + '</span></td>'
       + '<td>' + esc(r.agent) + (r.parent ? '<div style="font-size:14px;color:var(--black-60)">Spawned by ' + esc(r.parent) + '</div>' : '') + '</td>'
       + '<td style="font-size:16px">' + esc(r.wl || '—') + '</td>'
-      + '<td>' + esc(r.trigger) + '</td>'
       + '<td style="white-space:nowrap">' + esc(_actFmtFull(r.started)) + '</td>'
       + '<td style="white-space:nowrap">' + esc(r.dur) + '</td>'
       // one status vocabulary per column: an in-flight run wears the same
@@ -11369,7 +11370,7 @@ function renderAgentsTable(){
       + '<td>' + _agRunPillFor(r) + '</td>'
       + acts
     + '</tr>';
-  }).join('') || '<tr><td colspan="10"><div class="inv-empty-state" style="padding:32px;text-align:center;color:var(--black-60)">' + (_stSel === 'all' ? 'No sessions match.' : 'No sessions are ' + _agStatusLabel(_stSel).toLowerCase() + ' for this workload scope.') + '</div></td></tr>';
+  }).join('') || '<tr><td colspan="9"><div class="inv-empty-state" style="padding:32px;text-align:center;color:var(--black-60)">' + (_stSel === 'all' ? 'No sessions match.' : 'No sessions are ' + _agStatusLabel(_stSel).toLowerCase() + ' for this workload scope.') + '</div></td></tr>';
   // selection bookkeeping (Sessions convention): prune to the scoped set,
   // sync the header checkbox, render the bulk bar
   _agentsLastPageIds = pageRows.map(function(r){ return r.id; });
@@ -11609,7 +11610,7 @@ function openAgentTaskModal(taskId){
   var capName = t.kind === 'Review' ? 'Manage policies' : (t.kind === 'Backup' ? 'Backup jobs' : (t.kind === 'Restore' ? 'Restore data' : 'Read access'));
   var goHref = t.href || ('protected-data.html#agentgate/' + t.id);
   // ── header: type + status chip, title, then the actions (the Finding page's grammar: primary decision button
-  // + an Actions menu at the top right; a pending approval leads with the decision) ──
+  // + an Actions menu at the top right; a awaiting decision leads with the decision) ──
   var acts = [];
   if (rot && pending) acts.push(['Open the draft in Policies', "window.location.href='backup-policies.html#rot-review'"]);
   if (rot && t.outcome === 'done') acts.push(['Open File ROT policies', "window.location.href='backup-policies.html#rot'"]);
@@ -14872,7 +14873,7 @@ function aiacCardHtml(m, i){
   // the recommendation, and it carries the reversal assurance the way an approval card's Reversal row does.
   if (s.decision){
     var _d = s.decision;
-    html += '<div class="aiac-sec aiac-decide">'
+    html += '<div class="aiac-sec aiac-decide"' + (_d.key ? ' data-decide="' + _d.key + '"' : '') + '>'
       + (_d.ask ? '<div class="aiac-decide-ask">' + _d.ask + '</div>' : '')
       // `nav:true` = this verb LEAVES the panel, so it takes the look-here grammar: secondary weight + the trailing
       // open-in-new glyph, never the green primary (which means "the agent acts here on your consent").
@@ -14935,7 +14936,7 @@ function aiacAcceptAll(){
         return;
       }
       if (r.role === 'user' || r.role === 'agent'){
-        var m = { role: r.role, html: r.html };
+        var m = { role: r.role, html: r.html, _noSay: true };   /* carried, not arriving: a restored message is history, so the reply-typing helper must leave it alone */
         if (r.gate){
           m.gate = { q: r.gate.approval ? (r.gate.approval.action || 'Approval') : (r.gate.q || ''),
             buttons: [], resolved: true,
@@ -15166,7 +15167,7 @@ else aiComposerIcons();
   };
   function generic(t){
     return { user:'What is ' + t.capability + ' waiting on?', topic:t.capability,
-      steps:[['route','Interpreting request \u2014 ' + t.capability,[['workload',t.wl || '\u2014']],'A held task awaiting approval']],
+      steps:[['route','Interpreting request \u2014 ' + t.capability,[['workload',t.wl || '\u2014']],'A held task awaiting decision']],
       summary:'<p>\u201c' + E(t.capability) + '\u201d is paused at an approval. Nothing runs until you answer it.</p>',
       rows:[['Action',E(t.capability)],['Scope',E(t.wl || '\u2014')],['Evidence','Requested by ' + E(t.trigger || '\u2014')],['Reversal','Nothing runs until you approve it']],
       primary:'Approve', approved:'Approved \u2014 continuing.', denied:'Understood \u2014 I won\u2019t go ahead.' };
@@ -15358,7 +15359,7 @@ function _agEntFromTask(t, ses, pending){
     failedWhen: d.fail ? fmt(t.started) : null, sessionWhen: tov.ts ? fmt(tov.ts) : null, title: t.capability, status: _agStatusLabel ? '' : '', started: fmt(t.started),
     decision: t.outcome === 'cancelled' ? 'Denied' : (decided ? (rot && rs.rec === 'dismissed' ? 'Dismissed' : 'Approved') : 'Awaiting your decision'), decisionWhen: decided || '—',
     policyStatus: rs.rec === 'approved' ? 'Created' : (rs.rec === 'dismissed' ? 'Dismissed' : 'Draft — not created') });
-  var st = { awaiting:'Pending approval', waiting:'Waiting on you', scheduled:'Scheduled', queued:'Queued', running:'In progress', done:(rot ? 'Approved' : 'Done'), cancelled:(rot ? 'Dismissed' : 'Cancelled') }[t.outcome] || t.outcome;
+  var st = { awaiting:'Awaiting decision', waiting:'Awaiting decision', scheduled:'Scheduled', queued:'Queued', running:'In progress', done:(rot ? 'Approved' : 'Done'), cancelled:(rot ? 'Dismissed' : 'Cancelled') }[t.outcome] || t.outcome;
   spec.rows['Agent task'].rows[0][2] = st;
   return _agEntModel(spec);
 }

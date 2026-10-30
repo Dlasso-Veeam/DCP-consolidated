@@ -3267,6 +3267,8 @@ body.ai-full #aiWorkingGlow { display: none; }
 .ai-qp { margin: 0 0 8px; padding: 10px 14px 12px; border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); }
 .ai-qp-hd { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: var(--black-60); margin-bottom: 8px; }
 .ai-qp-hd svg { width: 14px; height: 14px; flex-shrink: 0; }
+.ai-qp-acts { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+.ai-qp-acts .ai-qp-x { margin-left: 0; }
 .ai-qp-x { margin-left: auto; border: none; background: none; padding: 2px; cursor: pointer; color: var(--black-60); display: flex; }
 .ai-qp-x:hover { color: var(--black-100); }
 .ai-qp-list { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -8281,7 +8283,7 @@ input[type="checkbox"] { accent-color: var(--em-green); }
   </div>
   <!-- Reset the agent demo to a clean slate. Dev-only, sits beside the hide control. Implementation is shared
        (vdcResetAgentDemo in vdc-notifications.js) so the key list lives in one place. -->
-  <button class="devjump-reset" onclick="if(window.vdcResetAgentDemo) vdcResetAgentDemo(); else alert('Agent demo reset is unavailable on this page.')" title="Reset agent scenarios — clears the ROT recommendation, pending approvals, what the assistant has said, and any carried conversation, then reloads">
+  <button class="devjump-reset" onclick="if(window.vdcResetAgentDemo) vdcResetAgentDemo(); else alert('Agent demo reset is unavailable on this page.')" title="Reset agent scenarios — clears the ROT recommendation, awaiting decisions, what the assistant has said, and any carried conversation, then reloads">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/></svg>
     <span>Reset agent</span>
   </button>
@@ -66735,7 +66737,7 @@ window.__devJumpResolve = function(h) {
      glyph set at load time. Data file MUST load first so the runtime
      finds window.__SECURITI_ICONS already populated. -->
 <script src="securiti-icons-data.js?v=20261028b"></script>
-<script src="vdc-notifications.js?v=20261029c"></script>
+<script src="vdc-notifications.js?v=20261029f"></script>
 <script src="workload-picker.js?v=20261007"></script>
 <script src="securiti-icons.js"></script>
 
@@ -67079,6 +67081,7 @@ function aiRenderChips(list){
 // the answer is a real one instead of an unhandled free-text fallback.
 function aiRenderQuickPrompts(list){
   var el = document.getElementById('aiChips'); if (!el || !list || !list.length) return;
+  if (typeof window.vdcQuickPromptsOn === 'function' && !window.vdcQuickPromptsOn()) return;   // turned off from the thumbs-down; Agent Settings turns them back on
   var esc = function(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
   // 2026-09-23: prompt-ai-filled, NOT ai-sparkle — see securiti-icons-data.js
   // comment (ai-sparkle has no real DS citation; this is the verified one).
@@ -67090,12 +67093,14 @@ function aiRenderQuickPrompts(list){
     // this panel (e.g. "Recommended actions"); the sparkle lives on the chip
     // only, where it marks the individual suggestion as AI-generated.
     + '<div class="ai-qp-hd"><span>Quick Prompts</span>'
-    + '<button type="button" class="ai-qp-x" onclick="aiRenderChips([])" aria-label="Dismiss">' + xIcon + '</button></div>'
+    + '<span class="ai-qp-acts"><button type="button" class="ai-qp-x" onclick="vdcQuickPromptsOff()" data-tooltip="Don\u2019t show quick prompts again" aria-label="Don\u2019t show quick prompts again">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('thumb-down-outlined', 14)) || '') + '</button>'
+    + '<button type="button" class="ai-qp-x" onclick="aiRenderChips([])" aria-label="Dismiss">' + xIcon + '</button></span></div>'
     + '<div class="ai-qp-list">' + list.map(function(q){
         var lbl = (typeof q === 'string') ? q : q.label;
         var sc = (typeof q === 'string') ? '' : (q.sc || '');
         return '<button type="button" class="ai-chip ai-chip-qp" data-q="' + esc(lbl) + '" data-sc="' + esc(sc) + '" onclick="aiQuickPromptGo(this)">' + sparkle + '<span>' + esc(lbl) + '</span></button>';
       }).join('') + '</div></div>';
+  if (typeof window.vdcFollowToEnd === 'function') window.vdcFollowToEnd();   // the footer just grew: keep the end of the response in view (shared, vdc-notifications.js)
 }
 function aiQuickPromptGo(btn){
   var q = btn.getAttribute('data-q'), sc = btn.getAttribute('data-sc');
@@ -67519,6 +67524,8 @@ function aiHomeWlRefresh(){
   }, 650);
 }
 function aiHomeCard(action){
+  // the thread's topic = the card's own title (shared header topic, vdc-notifications.js)
+  try { var _tc = document.querySelector('.ai-home-card[onclick*="aiHomeCard(\'' + action + '\')"] .ai-home-card-t'); if (_tc && typeof window.vdcSetPanelTopic === 'function') window.vdcSetPanelTopic(_tc.textContent.trim()); } catch(e){}
   // '__show:<id>' — the one intentional camera-on launch (home screen card)
   if (action.indexOf('__show:') === 0){ aiPickScenario(action.slice(8), { show: true }); return; }
   var sc = AI_SCENARIOS.filter(function(s){ return s.id === action; })[0];
@@ -68084,7 +68091,7 @@ function aiRender(){
     if(m._embedScrub) return '';
     if(m.role==='user') return '<div class="ai-msg user"><div class="ai-bubble">'+_aiEsc(m.html)+'</div></div>';
     if(m.role==='board'){
-      var BOARD_CHIP = { queued: ['n','Queued'], running: ['n','Running'], awaiting: ['warn','Awaiting approval'], done: ['ok','Done'], needsyou: ['warn','Needs you'] };
+      var BOARD_CHIP = { queued: ['n','Queued'], running: ['n','Running'], awaiting: ['warn','Awaiting decision'], done: ['ok','Done'], needsyou: ['warn','Needs you'] };
       return '<div class="ai-msg agent"><div class="ai-bubble" style="max-width:100%"><div class="ai-board">'
         + '<div class="ai-board-hd">Accepted recommendations</div>'
         + m.tasks.map(function(t, ti){
@@ -68095,7 +68102,7 @@ function aiRender(){
     if (t.status === 'waiting')  btn = '<button type="button" class="ai-board-btn" onclick="aiBoardGate()">Answer the question</button>';
             if (t.status === 'done')     btn = '<button type="button" class="ai-board-btn" onclick="aiBoardReview(' + i + ',' + ti + ')">Review what changed</button>';
             if (t.status === 'needsyou') btn = '<button type="button" class="ai-board-btn" onclick="aiacGo(\'nav\', \'' + _aiEsc(t.nav).replace(/'/g,'') + '\')">' + _aiEsc(t.btn) + '</button>';
-            return '<div class="ai-board-row"><span class="aiac-chip ' + c[0] + '">' + c[1] + '</span>'
+            return '<div class="ai-board-row">' + (t.status === 'awaiting' && typeof vdcDecisionChip === 'function' ? vdcDecisionChip() : '<span class="aiac-chip ' + c[0] + '">' + c[1] + '</span>')
               + '<span class="ai-board-title">' + _aiEsc(t.title) + '</span>' + btn + '</div>';
           }).join('')
         + '</div></div></div>';
@@ -68446,7 +68453,7 @@ function _aiPersistTranscript(){
         r.gate.resolved = true; r.gate.superseded = true;
         r.gate.choice = 'Interrupted \u2014 the page was left mid-run';
       }
-      r._arrived = true;   // carried, not arriving — a restored card renders settled, it does not replay B7
+      r._arrived = true; r._noSay = true;   // carried, not arriving — a restored card renders settled (does not replay B7) and restored text is not composed again
       aiAgent.msgs.push(r);
     });
     aiAgent.greeted = true;   // a returning conversation never re-greets over itself
@@ -68577,11 +68584,11 @@ function _aiBoardSet(flowId, status, info){
 }
 // Status truth (realigned 2026-09-10): decisions happen AT APPROVAL, so an
 // approved run has ONE legitimate pause — the destructive-commit approval
-// gate ('awaiting' / Pending approval, tier=ask). Question gates on a
+// gate ('awaiting' / Awaiting decision, tier=ask). Question gates on a
 // preapproved run auto-resolve to their primary (see aiPushAgent), so
 // 'waiting' survives only as a fallback; 'needsyou' is no longer created
 // (manual items left the tracker — they're transcript links, no lifecycle).
-var AI_BOARD_CHIP = { queued: ['n','Queued'], running: ['n','In progress'], awaiting: ['warn','Pending approval'], waiting: ['warn','Waiting on you'], done: ['ok','Done'], needsyou: ['n','Needs you'], cancelled: ['n','Cancelled'] };
+var AI_BOARD_CHIP = { queued: ['n','Queued'], running: ['n','In progress'], awaiting: ['warn','Awaiting decision'], waiting: ['warn','Awaiting decision'], done: ['ok','Done'], needsyou: ['n','Needs you'], cancelled: ['n','Cancelled'] };
 /* ══ TASKS DOCK — RETIRED 2026-09-17 ═════════════════════════════════════
    User: "we abandon the pinned tasks panel entirely and promote the approval
    summary card inside the context of the conversation to the place where you
@@ -68650,7 +68657,7 @@ function _aiBoardDockRenderParked(){
   var lead = null;
   for (var oi = 0; oi < order.length; oi++){ if (b.some(function(t){ return t.status === order[oi]; })){ lead = order[oi]; break; } }
   var allDone = b.every(function(t){ return t.status === 'done' || t.status === 'needsyou' || t.status === 'cancelled'; }) && b.some(function(t){ return t.status === 'done'; });
-  var badge = lead && !allDone ? '<span class="aiac-chip ' + AI_BOARD_CHIP[lead][0] + '">' + AI_BOARD_CHIP[lead][1] + '</span>'
+  var badge = lead && !allDone ? ((lead === 'awaiting' || lead === 'waiting') && typeof vdcDecisionChip === 'function' ? vdcDecisionChip() : '<span class="aiac-chip ' + AI_BOARD_CHIP[lead][0] + '">' + AI_BOARD_CHIP[lead][1] + '</span>')
             : (allDone ? '<span class="aiac-chip ok">Done</span>' : '');
   var rows = b.map(function(t, ti){
     var c = AI_BOARD_CHIP[t.status] || AI_BOARD_CHIP.queued;
@@ -68729,7 +68736,7 @@ function _aiBoardDockRenderParked(){
       x = '<span class="ai-dock-x" role="button" aria-label="Remove" onclick="aiBoardRemove(' + ti + ')">' + _AI_DOCK_X_SVG + '</span>';
     // STACKED row (user 2026-09-10 — the single-line row starved the title):
     // line 1 = chip + fixed-width controls, line 2 = full-width title.
-    // At a pending approval the title is the route back to the evidence —
+    // At a awaiting decision the title is the route back to the evidence —
     // a button, not a span, so the full card is one click away.
     var _titleEl = appr
       ? '<button type="button" class="ai-board-title is-link" onclick="aiBoardShowGate()">' + _aiEsc(t.title) + '</button>'
@@ -68739,7 +68746,7 @@ function _aiBoardDockRenderParked(){
     // three controls squeezed the chip into "Pending app…" (a DS Label must
     // not ellipsize). Drop it in that state only; rows without the decision
     // keep their chip, which is what distinguishes them when several stack.
-    var chip = appr ? '' : '<span class="aiac-chip ' + c[0] + '">' + c[1] + '</span>';
+    var chip = appr ? '' : ((t.status === 'awaiting' || t.status === 'waiting') && typeof vdcDecisionChip === 'function' ? vdcDecisionChip() : '<span class="aiac-chip ' + c[0] + '">' + c[1] + '</span>');
     // TITLE FIRST, then the controls beneath it (user 2026-09-17: "the buttons
     // are sitting above the text… the task card can stay left oriented — the
     // task, then the buttons below the text"). was: controls row on top with
@@ -68810,7 +68817,7 @@ function _aiTaskManifest(task){
 // editors live at once, but ONE AT A TIME CHOSEN BY STATE.
 //
 //   · approval card visible  → the dock has nothing to add: it collapses to
-//     its one-line bar, whose badge still reads "Pending approval";
+//     its one-line bar, whose badge still reads "Awaiting decision";
 //   · card scrolled out of view → the dock is the only surface: it expands
 //     and the row carries the decision.
 //
@@ -68938,7 +68945,7 @@ function _aiBoardActive(){
   var b = aiAgent._board; if (!b) return null;
   return b.filter(function(x){ return x.status === 'running' || x.status === 'awaiting' || x.status === 'waiting'; })[0] || null;
 }
-// ── GATE HANDOFF from Activity (user 2026-09-10): a pending approval on
+// ── GATE HANDOFF from Activity (user 2026-09-10): a awaiting decision on
 // Activity's Agent view deep-links here (#agentgate/<taskId>) — the dialog
 // opens with the held task's context and the approval card rendered IN THE
 // CONVERSATION, its one owner. The decision mirrors back to Activity via
@@ -69615,7 +69622,7 @@ function aiacCardHtml(m, i){
   // the recommendation, and it carries the reversal assurance the way an approval card's Reversal row does.
   if (s.decision){
     var _d = s.decision;
-    html += '<div class="aiac-sec aiac-decide">'
+    html += '<div class="aiac-sec aiac-decide"' + (_d.key ? ' data-decide="' + _d.key + '"' : '') + '>'
       + (_d.ask ? '<div class="aiac-decide-ask">' + _d.ask + '</div>' : '')
       // `nav:true` = this verb LEAVES the panel, so it takes the look-here grammar: secondary weight + the trailing
       // open-in-new glyph, never the green primary (which means "the agent acts here on your consent").
@@ -69873,7 +69880,7 @@ function aiSyncCheck(){
       _aiSupersede(m, 'Scope changed');
       _aiSyncTrace('workspace.sync — cart ' + wasN + ' → ' + nowN + ' · plan updated',
         [['was', wasN + ' item' + (wasN === 1 ? '' : 's')], ['now', nowN + ' item' + (nowN === 1 ? '' : 's')]],
-        'The pending approval was re-issued at the current scope');
+        'The awaiting decision was re-issued at the current scope');
       var ap2 = { action: g.approval.action, scope: nowN + ' item' + (nowN === 1 ? '' : 's') + ' currently in the cart (updated)', evidence: g.approval.evidence, reversal: g.approval.reversal };
       // Pure additions read as collaboration, not conflict — credit the
       // user's contribution instead of the neutral diff line.

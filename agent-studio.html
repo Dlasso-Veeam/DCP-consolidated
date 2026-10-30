@@ -1764,7 +1764,7 @@ body.ai-full #aiWorkingGlow { display: none; }
   </div>
   <!-- Reset the agent demo to a clean slate. Dev-only, sits beside the hide control. Implementation is shared
        (vdcResetAgentDemo in vdc-notifications.js) so the key list lives in one place. -->
-  <button class="devjump-reset" onclick="if(window.vdcResetAgentDemo) vdcResetAgentDemo(); else alert('Agent demo reset is unavailable on this page.')" title="Reset agent scenarios — clears the ROT recommendation, pending approvals, what the assistant has said, and any carried conversation, then reloads">
+  <button class="devjump-reset" onclick="if(window.vdcResetAgentDemo) vdcResetAgentDemo(); else alert('Agent demo reset is unavailable on this page.')" title="Reset agent scenarios — clears the ROT recommendation, awaiting decisions, what the assistant has said, and any carried conversation, then reloads">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/></svg>
     <span>Reset agent</span>
   </button>
@@ -2219,7 +2219,7 @@ td.as-td-actions { position: relative; }
         <!-- OVERVIEW default (user 2026-09-09): observation first — read-only
              capability summary; the levers live in the Configure overlay. -->
         <!-- Dashboard-first (user 2026-09-09): Overview = performance read
-             (KPIs · pending approvals · authorization trend · capability
+             (KPIs · awaiting decisions · authorization trend · capability
              status); the record tables live on the Recent activity tab. -->
         <div class="as-tabs" role="tablist">
           <button type="button" class="as-tab on" id="asTabOverview" role="tab" onclick="asTab('overview')">Overview</button>
@@ -3004,7 +3004,7 @@ var AS_AGENTS = [
         auth: 'Automatic', authSub: 'Access & visualize data', when: '2h ago' },
       { name: 'Restore job — 1 folder', sub: 'Taxes folder rollback · Retail Division site', outcome: 'Completed', tone: 'ok',
         auth: 'Gated approval', authSub: 'Approved by d.lasso@veeam.com', when: 'Yesterday' },
-      { name: 'Workspace staged — 3 drives', sub: 'Offboarding sweep · awaiting the approval gate', outcome: 'Awaiting approval', tone: 'warn',
+      { name: 'Workspace staged — 3 drives', sub: 'Offboarding sweep · awaiting the approval gate', outcome: 'Awaiting decision', tone: 'warn',
         auth: '—', authSub: 'Gate pending in conversation', when: 'Yesterday' },
       { name: 'Export job — legal hold', sub: 'carol.diaz account data + System Log package', outcome: 'Completed', tone: 'ok',
         auth: 'Gated approval', authSub: 'Approved by d.lasso@veeam.com', when: 'Sep 5' }
@@ -3240,7 +3240,7 @@ function asRenderDash(a) {
   document.getElementById('asKpis').innerHTML =
       '<div class="plv-stat"><div class="plv-stat-lbl">Runs (30d)</div><div class="plv-stat-val">' + tot + '</div></div>'
     + '<div class="plv-stat"><div class="plv-stat-lbl">Ran automatically</div><div class="plv-stat-val">' + (tot ? Math.round(100 * totAuto / tot) : 0) + '%</div></div>'
-    + '<div class="plv-stat"><div class="plv-stat-lbl">Awaiting approval</div><div class="plv-stat-val">' + pending + '</div></div>'
+    + '<div class="plv-stat"><div class="plv-stat-lbl">Awaiting decision</div><div class="plv-stat-val">' + pending + '</div></div>'
     + '<div class="plv-stat"><div class="plv-stat-lbl">Items recovered (30d)</div><div class="plv-stat-val">' + (recovered != null ? recovered : '\u2014') + '</div></div>';
   document.getElementById('asPendingHost').innerHTML = pending
     ? '<div class="as-pending">' + _asIcon('status-paused-outlined')
@@ -3311,7 +3311,7 @@ function asRenderRecent(a) {
   body.innerHTML = rows.map(function(r){
     return '<tr>'
       + '<td><div class="as-run-name">' + r.name + '</div><div class="as-run-sub">' + r.sub + '</div></td>'
-      + '<td><span class="as-chip ' + (r.tone || '') + '">' + r.outcome + '</span></td>'
+      + '<td>' + (r.outcome === 'Awaiting decision' && typeof vdcDecisionChip === 'function' ? vdcDecisionChip() : '<span class="as-chip ' + (r.tone || '') + '">' + r.outcome + '</span>') + '</td>'
       + '<td><span class="as-auth">' + r.auth + '<span class="sub">' + r.authSub + '</span></span></td>'
       + '<td><span class="as-when">' + r.when + '</span></td>'
     + '</tr>';

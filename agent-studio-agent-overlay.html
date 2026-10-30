@@ -2170,7 +2170,7 @@ td.as-td-actions { position: relative; }
         <!-- OVERVIEW default (user 2026-09-09): observation first — read-only
              capability summary; the levers live in the Configure overlay. -->
         <!-- Dashboard-first (user 2026-09-09): Overview = performance read
-             (KPIs · pending approvals · authorization trend · capability
+             (KPIs · awaiting decisions · authorization trend · capability
              status); the record tables live on the Recent activity tab. -->
         <div class="as-tabs" role="tablist">
           <button type="button" class="as-tab on" id="asTabOverview" role="tab" onclick="asTab('overview')">Overview</button>
@@ -2904,7 +2904,7 @@ var AS_AGENTS = [
   { id: 'resilience', name: 'Veeam Intelligence', desc: 'One agent for your protected estate. It answers questions, recommends changes, and for each task spawns a purpose-built agent granted only what that task needs.', icon: 'ai-sparkle', tint: 'green',
     tools: ['Protected Data Server','Restore Job Server','Export Server','Policy Server','Activity & Audit Server'],
     recent: [
-      { name: 'Recommendation \u2014 ROT policy', sub: 'Retail Division \u00b7 4.2 TB untouched, no policy covers it', outcome: 'Awaiting approval', tone: 'warn',
+      { name: 'Recommendation \u2014 ROT policy', sub: 'Retail Division \u00b7 4.2 TB untouched, no policy covers it', outcome: 'Awaiting decision', tone: 'warn',
         auth: 'Gated approval', authSub: 'Proposed by Veeam Intelligence \u00b7 not created', when: 'Today' },
       { name: 'Restore job \u2014 1 message', sub: 'John Voight\u2019s mailbox \u00b7 deleted \u201ccontract renewal\u201d email', outcome: 'Completed', tone: 'ok',
         auth: 'Standing grant', authSub: 'Restore data \u00b7 Automatic', when: '1h ago' },
@@ -2912,7 +2912,7 @@ var AS_AGENTS = [
         auth: 'Automatic', authSub: 'Access & visualize data', when: '2h ago' },
       { name: 'Restore job \u2014 1 folder', sub: 'Taxes folder rollback \u00b7 Retail Division site', outcome: 'Completed', tone: 'ok',
         auth: 'Gated approval', authSub: 'Approved by d.lasso@veeam.com', when: 'Yesterday' },
-      { name: 'Workspace staged \u2014 3 drives', sub: 'Offboarding sweep \u00b7 awaiting the approval gate', outcome: 'Awaiting approval', tone: 'warn',
+      { name: 'Workspace staged \u2014 3 drives', sub: 'Offboarding sweep \u00b7 awaiting the approval gate', outcome: 'Awaiting decision', tone: 'warn',
         auth: '\u2014', authSub: 'Gate pending in conversation', when: 'Yesterday' }
     ] }
 ];
@@ -3156,7 +3156,7 @@ function asRenderDash(a) {
   document.getElementById('asKpis').innerHTML =
       '<div class="plv-stat"><div class="plv-stat-lbl">Runs (30d)</div><div class="plv-stat-val">' + tot + '</div></div>'
     + '<div class="plv-stat"><div class="plv-stat-lbl">Ran automatically</div><div class="plv-stat-val">' + (tot ? Math.round(100 * totAuto / tot) : 0) + '%</div></div>'
-    + '<div class="plv-stat"><div class="plv-stat-lbl">Awaiting approval</div><div class="plv-stat-val">' + pending + '</div></div>'
+    + '<div class="plv-stat"><div class="plv-stat-lbl">Awaiting decision</div><div class="plv-stat-val">' + pending + '</div></div>'
     + '<div class="plv-stat"><div class="plv-stat-lbl">Items recovered (30d)</div><div class="plv-stat-val">' + (recovered != null ? recovered : '\u2014') + '</div></div>';
   document.getElementById('asPendingHost').innerHTML = pendList.map(function(it){
     return '<div class="as-pending">' + _asIcon('status-paused-outlined')

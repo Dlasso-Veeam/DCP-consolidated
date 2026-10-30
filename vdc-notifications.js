@@ -37,6 +37,54 @@
     var e = (window.__SECURITI_ICONS || {})[name]; if (!e || !e.paths) return '';
     return '<svg width="' + size + '" height="' + size + '" viewBox="' + e.viewBox + '" fill="currentColor" aria-hidden="true">' + e.paths.map(function(p){ return '<path d="' + p + '"/>'; }).join('') + '</svg>';
   }
+  /* The one status chip for an agent session that is waiting on the user (approval gate OR question gate: one state, one label).
+     Vision Chip Default (grey light) with the AI gradient tile in the pre-icon position. Every page renders it from here. */
+  window.vdcDecisionChip = function(){
+    return '<span class="vdc-decide"><span class="vdc-decide-ai" aria-hidden="true">' + icon('ai-sparkle', 24) + '</span>Awaiting decision</span>';
+  };
+  // ── THE THREAD'S TOPIC, IN THE PANEL HEADER (user 2026-10-30) ──────────────────────────────────────────────
+  // Once a thread has a subject the header says what it is ("Retail Division ROT policy recommendation") with the product
+  // name demoted to a small label above it; a thread with no subject keeps the single "Veeam Intelligence" title. The topic is
+  // set by whatever STARTS the thread (a pending recommendation, an open-ended starter, a staged scenario), never inferred
+  // from typed text, and it holds until + starts a new chat. Saved beside the conversation so it follows it across pages.
+  var KEY_TOPIC = 'vdc-ai-topic';
+  function applyTopic(){
+    var box = document.querySelector('#aiPanel .ai-head-text'); if (!box) return;
+    var cur = box.querySelector('.ai-head-title'); if (!cur) return;
+    var t = (typeof aiAgent !== 'undefined' && aiAgent._topic) || '', brand = box.querySelector('.ai-head-brand');
+    if (t){
+      if (!brand){ brand = document.createElement('div'); brand.className = 'ai-head-brand'; brand.textContent = 'Veeam Intelligence'; box.insertBefore(brand, cur); }
+      cur.innerHTML = '<span class="ai-head-tx">' + esc(t) + '</span>'; cur.setAttribute('data-tooltip', t); box.classList.add('has-topic');
+    } else {
+      if (brand) brand.remove();
+      cur.textContent = 'Veeam Intelligence'; cur.removeAttribute('data-tooltip'); box.classList.remove('has-topic');
+    }
+  }
+  window.vdcSetPanelTopic = function(t){
+    if (typeof aiAgent === 'undefined') return;
+    aiAgent._topic = t || null;
+    try { if (t) localStorage.setItem(KEY_TOPIC, t); else localStorage.removeItem(KEY_TOPIC); } catch(e){}
+    applyTopic();
+  };
+  // A carried or restored conversation brings its topic back; an empty panel never shows a stale one.
+  function restoreTopic(){
+    if (typeof aiAgent === 'undefined') return;
+    if (!aiAgent._topic && aiAgent.msgs && aiAgent.msgs.length){ try { aiAgent._topic = localStorage.getItem(KEY_TOPIC) || null; } catch(e){} }
+    if (aiAgent._topic && !(aiAgent.msgs && aiAgent.msgs.length)) aiAgent._topic = null;
+    applyTopic();
+  }
+  // QUICK PROMPTS ON/OFF (user 2026-10-30): the thumbs-down in the Quick Prompts header turns them off for good; Agent
+  // Settings has the switch to turn them back on. One personal preference, kept in the browser like the notification kinds.
+  var KEY_QP = 'vdc-quick-prompts';
+  window.vdcQuickPromptsOn = function(){ try { return localStorage.getItem(KEY_QP) !== 'off'; } catch(e){ return true; } };
+  window.vdcQuickPromptsSet = function(on){
+    try { localStorage.setItem(KEY_QP, on ? 'on' : 'off'); } catch(e){}
+    if (!on){ try { if (typeof window.vdcClearQuickPrompts === 'function') window.vdcClearQuickPrompts(); if (typeof aiRenderChips === 'function') aiRenderChips([]); } catch(e){} }
+  };
+  window.vdcQuickPromptsOff = function(){
+    window.vdcQuickPromptsSet(false);
+    if (typeof showToast === 'function') showToast('Quick prompts are off. You can turn them back on in Agent Settings.');
+  };
   window.vdcNotifConfig = function(){ var c = jget(KEY_CFG, {}), o = {}; for (var k in DEFAULTS) o[k] = c[k] == null ? DEFAULTS[k] : !!c[k]; return o; };
   window.vdcNotifSetConfig = function(k, on){ var c = window.vdcNotifConfig(); c[k] = !!on; jset(KEY_CFG, c); refresh(); };
 
@@ -46,7 +94,8 @@
   // half-reset is worse than none — activating the ROT policy alone leaves the recommendation permanently "done",
   // which is what made it disappear and look broken. Everything the agent scenarios write is listed here; add new
   // keys to this list, not to a per-page reset.
-  // NOT reset: the user's own preferences (notification choices, panel width, default workload) — those are not
+  // NOT reset: the user's own preferences (notification choices, panel width, default workload; Quick Prompts is the one
+  // preference the reset DOES restore, by request) — those are not
   // scenario state and wiping them would be a surprise.
   var VDC_DEMO_KEYS = [
     'vdc-rot-state',              // the ROT recommendation's decision + the policy it created
@@ -55,7 +104,9 @@
     'vdc-agent-task-overrides',   // approve/decline on the pending agent tasks
     'vdc-ai-transcript',          // a conversation carried between pages
     'vdc-facts',                  // sealed facts that strike through resolved recommendations
-    'vdc-session-resolved'        // requests approved from the Agent Hub (agent-sessions.js)
+    'vdc-session-resolved',       // requests approved from the Agent Hub (agent-sessions.js)
+    'vdc-ai-topic',               // the open thread's title in the panel header
+    'vdc-quick-prompts'           // Quick Prompts switched off from the thumbs-down: reset turns them back on (user 2026-10-30)
   ];
   window.vdcResetAgentDemo = function(opts){
     try { VDC_DEMO_KEYS.forEach(function(k){ localStorage.removeItem(k); sessionStorage.removeItem(k); }); } catch(e){}
@@ -69,6 +120,60 @@
     location.reload();   // the page rebuilt its UI from this state on load; a reload is the honest way to re-read it
   };
 
+  // ── A DECIDED RECOMMENDATION STOPS OFFERING THE DECISION (user 2026-10-30) ─────────────────────────────────────────
+  // Once the policy is activated the card must say so and stop offering Review and Dismiss: you cannot dismiss what you have
+  // just accepted (and, the other way, cannot activate what you declined). The card is saved data, so what it shows is derived
+  // from the shared decision state each time the panel renders, not stored in the card: it is right after a page hop, a
+  // reload and a reset. The click itself answers at once ("Activating…") so the press is visibly accepted before the page
+  // catches up.
+  window.vdcSyncDecisions = function(){
+    var s = jget(KEY_ROT, {}), els = document.querySelectorAll('#aiBody [data-decide="rot"]');
+    [].forEach.call(els, function(el){
+      var done = s.rec === 'approved' ? ['approved', 'Policy activated. It runs for the first time tonight.']
+               : s.rec === 'dismissed' ? ['dismissed', 'Recommendation dismissed. No policy was created.'] : null;
+      if (!done){ el.removeAttribute('data-decided'); return; }
+      if (el.getAttribute('data-decided') === done[0]) return;
+      el.setAttribute('data-decided', done[0]);
+      el.innerHTML = '<div class="aiac-decide-done ' + done[0] + '" role="status">' + esc(done[1]) + '</div>';
+    });
+  };
+  document.addEventListener('click', function(e){
+    var b = e.target.closest && e.target.closest('[data-rot-act]'); if (!b || b.disabled) return;
+    setTimeout(function(){ b.disabled = true; b.setAttribute('aria-busy', 'true'); b.textContent = 'Activating\u2026'; }, 0);   // after its own onclick has run
+  }, true);
+
+  // ── DISMISSING THE ROT RECOMMENDATION, SHARED (user 2026-10-30) ───────────────────────────────────────────────
+  // One flow on every page: the reasons card (same card as the thumbs-down's, opened on a message that says what dismissing
+  // does), Send = the dismissal. The Policies page owns richer machinery (its editor, the File ROT list), so it keeps
+  // rotDismissAsk and this delegates to it; everywhere else the decision is recorded straight into vdc-rot-state, which
+  // every page, the Notifications panel and Activity already read.
+  var ROT_DISMISS_CFG = { hook:'vdcRotDismissSent', title:'Why are you dismissing this?', send:'Dismiss recommendation', downTip:'Dismiss this recommendation',
+    reasons:['Wrong scope', 'Inaccurate', 'Not needed right now', 'Already handled elsewhere', 'Something else'],
+    note:'Sending dismisses the recommendation. Feedback helps improve the assistant. Your conversation is not shared unless you include it.' };
+  function say(html){ if (typeof aiPushAgent === 'function') aiPushAgent(html); else if (typeof aiAgent !== 'undefined'){ aiAgent.msgs.push({ role:'agent', html:html }); if (typeof aiRender === 'function') aiRender(); } }
+  window.vdcRotDismissAsk = function(){
+    if (typeof window.rotDismissAsk === 'function') return window.rotDismissAsk();
+    if (typeof aiAgent === 'undefined') return;
+    if (typeof aiOpen === 'function') aiOpen();
+    var s = jget(KEY_ROT, {});
+    if (s.rec){ say('<p>' + (s.rec === 'approved' ? 'That recommendation was already accepted.' : 'You already dismissed that recommendation.') + '</p>'); return; }
+    aiAgent.msgs = aiAgent.msgs.filter(function(m){ return !(m && m.fbCfg && m.fbCfg.hook === 'vdcRotDismissSent' && !m.fbSent); });   // one open dismissal at a time
+    aiAgent.msgs.push({ role:'agent', html:'<p>Dismissing this recommendation means no policy is created for Retail Taxes, Retail Archive and Retail Ops, and I won\u2019t raise this one again unless the situation changes.</p><p>Tell me what\u2019s off about it and I\u2019ll recommend better.</p>',
+      fb:'down', fbOpen:true, fbReasons:{}, fbCfg:ROT_DISMISS_CFG });
+    aiAgent._scrollAnchor = 'bottom'; if (typeof aiRender === 'function') aiRender();
+  };
+  window.vdcRotDismissSent = function(i, reasons, comment){
+    var s = jget(KEY_ROT, {}); if (s.rec) return;
+    s.rec = 'dismissed'; s.by = 'Darren Lasso'; s.note = comment || ''; s.ts = Date.now();
+    if (reasons && reasons.length){ s.reason = reasons.join('|'); s.reasonLabel = reasons.join(', '); }
+    jset(KEY_ROT, s);
+    window.vdcSyncDecisions();
+    // a plain string: every page's showToast takes one (the object form is not universal)
+    if (typeof showToast === 'function') showToast('Recommendation dismissed. ' + ((reasons && reasons.length) ? 'Reason recorded: ' + reasons.join(', ') + '. ' : '') + 'No policy was created.');
+    say('<p>Dismissed \u2014 no policy was created.' + ((reasons && reasons.length) ? ' I\u2019ve noted: ' + esc(reasons.join(', ').toLowerCase()) + '.' : '') + ' You can undo this from the File ROT list.</p>');
+    refresh();
+  };
+
   // ── the notification stream ─────────────────────────────────────────────────────────────────────────────────
   function at(daysAgo, h, m){ var d = new Date(); d.setDate(d.getDate() - daysAgo); d.setHours(h, m, 0, 0); return d; }
   var DEMO_APPROVALS = false;   // see the staging note inside build() — one switch, returns them everywhere
@@ -78,18 +183,18 @@
       var decided = rs.rec === 'approved' ? 'You activated this policy.' : (rs.rec === 'dismissed' ? 'You dismissed this recommendation' + (rs.reasonLabel ? ': ' + rs.reasonLabel + '.' : '.') : '');
       out.push({ id:'rot-rec', kind:'agent', at:at(0, 8, 41), title:'Veeam Intelligence recommends a ROT policy for Retail Division',
         body:'4.2 TB (63%) of backed-up content in Retail Taxes, Retail Archive and Retail Ops has not been modified in 36 months, and no ROT policy covers it.' + (decided ? ' ' + decided : ''),
-        href:'activity.html#agents/rot1', done:!!rs.rec, needs:true });
+        href:'activity.html#agents/rot1', done:!!rs.rec, needs:true, topic:'Retail Division ROT policy recommendation' });
     }
     // DEMO STAGING (user 2026-10-29: "stage this whole agent panel so that it just wants to bring the ROT policy to
-    // our attention"). The two pending approvals are switched OFF, not deleted — flip DEMO_APPROVALS back to true
+    // our attention"). The two awaiting decisions are switched OFF, not deleted — flip DEMO_APPROVALS back to true
     // and they return everywhere at once: the arrival screen, the catch-up line, the Notifications list and the
     // rail badge all read from this one build().
     if (DEMO_APPROVALS)
     {   // approval requests are not a choice: an agent that is waiting on a person must never wait silently
       if (!(ov.at3 && ov.at3.status)) out.push({ id:'appr-at3', kind:'agent', at:at(0, 3, 12), title:'Approval needed: re-run the failed SharePoint Sites backup',
-        body:'Veeam Intelligence paused the Retail Division retry and is waiting on you. Nothing runs until you answer.', href:'activity.html#agents/at3', needs:true, task:'at3' });
+        body:'Veeam Intelligence paused the Retail Division retry and is waiting on you. Nothing runs until you answer.', href:'activity.html#agents/at3', needs:true, task:'at3', topic:'Re-run failed SharePoint Sites backup' });
       if (!(ov.at5 && ov.at5.status)) out.push({ id:'appr-at5', kind:'agent', at:at(0, 7, 40), title:'Approval needed: restore Account records to the Dynamics 365 sandbox',
-        body:'Veeam Intelligence staged the restore from the Oct 12, 3:15 AM restore point and paused for your approval.', href:'activity.html#agents/at5', needs:true, task:'at5' });
+        body:'Veeam Intelligence staged the restore from the Oct 12, 3:15 AM restore point and paused for your approval.', href:'activity.html#agents/at5', needs:true, task:'at5', topic:'Restore Account records to the Dynamics 365 sandbox' });
     }
     if (cfg.on && cfg.actions){
       out.push({ id:'act-okta', kind:'agent', at:at(1, 16, 5), title:'Veeam Intelligence retried the failed Okta backup',
@@ -184,16 +289,20 @@
                 // fit on the same row?"): 'Review the proposed policy' -> 'Review first' -> 'Review'. The object is
                 // named by the headline and the ask above, and the glyph says it travels, so the verb alone carries
                 // it. Shortening the LABEL rather than .ai-gate-btn's padding keeps the DS button geometry intact.
-                { label:'Activate as proposed', onclick:'vdcNotifGo(\'rec-activate\')', attr:'data-rot-cta' },
-                { label:'Review', onclick:'vdcNotifGo(\'rec\')', nav:true }
-              ] }
+                { label:'Activate', onclick:'vdcNotifGo(\'rec-activate\')', attr:'data-rot-cta data-rot-act data-tooltip="Activates the policy exactly as drafted"' },
+                { label:'Review', onclick:'vdcNotifGo(\'rec\')', nav:true },
+                // DISMISS IS ITS OWN VERB (user 2026-10-30): declining the recommendation is a decision, which is not what the
+                // thumbs-down under the reply means (that rates the reply). It asks for a reason, then records the dismissal.
+                { label:'Dismiss', onclick:'vdcRotDismissAsk()', primary:false, attr:'data-dismiss' }
+              ], key:'rot' }
           } }
         : { role:'agent', _voiced:true, html:'<p>While you were away I found a retention gap. <strong>4.2 TB (63%)</strong> of backed-up content in Retail Taxes, Retail Archive and Retail Ops has not changed in 36 months, and no ROT policy covers it. I drafted a policy for those sites.</p>'
             + '<div class="ai-gate-btns"><button type="button" class="ai-gate-btn primary" data-rot-cta onclick="vdcNotifGo(\'rec\')">Review the proposed policy</button></div>' };
       // Where the policy page can record a dismissal, thumbs-down carries its reasons and hook; elsewhere the card
       // still takes the GENERIC feedback row — rating a response is always valid, it is only the dismissal wording
       // that is page-specific. was: `else m.noFb = true`, which silenced feedback on every page but Policies.
-      if (typeof window.rotFbCfg === 'function') m.fbCfg = window.rotFbCfg();
+      // The thumbs-down under this card is PLAIN FEEDBACK on every page now (it used to carry the dismissal hook on the Policies
+      // page only, so one icon meant "rate this reply" there and "decline the policy" there). Dismissing has its own button.
     aiAgent.msgs.push(m); (pendingVoice().filter(function(n){ return !n.task; })).forEach(function(n){ v[n.id] = 1; });
   }
   function speakAppr(appr, v, withOther){
@@ -312,7 +421,11 @@
     'Does this change my protected volume?':
       'Not immediately. Once the review window passes and the content is excluded, that 4.2 TB stops counting toward protected volume. Until then the figure is unchanged.',
     'Can I change the 36-month threshold?':
-      'Yes. The age threshold and the minimum file size are part of the policy — editable before you activate it, and afterwards as a new version. Changing the age changes which content matches.'
+      'Yes. The age threshold and the minimum file size are part of the policy — editable before you activate it, and afterwards as a new version. Changing the age changes which content matches.',
+    'Which sites does this cover?':
+      'Retail Taxes, Retail Archive and Retail Ops in the Retail Division. Together they hold the 4.2 TB that has not been modified in 36 months and that no ROT policy covers.',
+    'Can I stop it once it has started?':
+      'Yes. Stop it at any point in the 30-day review window and nothing changes. The flagged content stays backed up and recoverable until that window passes.'
   };
   var ROT_FOLLOWUPS = Object.keys(QP_ANSWERS);
   window.vdcRotFollowups = function(){ return ROT_FOLLOWUPS.slice(); };   // so a page that owns the flow can offer the same three
@@ -320,7 +433,10 @@
     var q = btn.getAttribute('data-q');
     if (typeof aiAgent === 'undefined') return;
     window.vdcClearQuickPrompts();
+    // A prompt that is another starter's opening ask hands over to that starter (it pushes the user turn itself).
+    var st = STARTERS_BY_ASK[q]; if (st){ window.vdcStarterGo(st.id); return; }
     aiAgent.msgs.push({ role:'user', html:q });
+    (aiAgent._qpAsked = aiAgent._qpAsked || {})[q] = 1;
     var a = QP_ANSWERS[q];
     if (!a){ if (typeof aiSend === 'function'){ aiSend(q); } return; }
     // THE AGENT ANSWERS IN TIME (user 2026-10-29: "the response just appears immediately"). The question and its
@@ -338,7 +454,18 @@
       aiAgent._scrollAnchor = 'bottom';
       if (typeof aiRender === 'function') aiRender();
       if (typeof aiSetBusy === 'function') aiSetBusy(false);
+      // QUICK PROMPTS ARE A REGULAR PART OF THE CONVERSATION, NOT A ONE-OFF (user 2026-10-30: after a follow-up was
+      // answered "no further guidance"). Each answer leaves the next unasked prompts of the same set under the
+      // composer; once the set is spent, the starters take over so there is always a way forward.
+      window.vdcNextQuickPrompts();
     }, 780);
+  };
+  window.vdcNextQuickPrompts = function(){
+    var pool = aiAgent._qpPool || [], asked = aiAgent._qpAsked || {}, started = aiAgent._qpStarted || {};
+    var next = pool.filter(function(p){ return !asked[p]; });
+    if (next.length){ paintQP(next.slice(0, 3), pool); return; }
+    next = STARTERS.map(function(o){ return o.ask; }).filter(function(p){ return !started[p]; });
+    if (next.length) paintQP(next.slice(0, 3), next);
   };
   // Clearing goes through one function so the DOM and the remembered list cannot disagree.
   window.vdcClearQuickPrompts = function(){
@@ -353,17 +480,37 @@
       if (raw && raw.qp && raw.qp.length) window.vdcRenderQuickPrompts(raw.qp);
     } catch(e){}
   };
+  // The public call starts a NEW set: the pool is the whole list, asked is reset, the first three are shown.
   window.vdcRenderQuickPrompts = function(list){
+    if (!list || !list.length) return;
+    try { aiAgent._qpPool = list.slice(); aiAgent._qpAsked = {}; } catch(e){}
+    paintQP(list.slice(0, 3), list);
+  };
+  // The chips live in the footer, BELOW the scrolling transcript, so painting them shrinks the transcript's viewport
+  // and the last lines of the response (the card's own actions) end up behind the footer's top edge (user 2026-10-30:
+  // the prompts "are covering the bottom of the response card and blocking the CTAs"). A response is read to its end,
+  // so once the footer has its new height the transcript follows to the bottom. Repeated on the next frame and after
+  // the card's arrival motion, because the card is still growing when the prompts first paint.
+  function followToEnd(){
+    var b = document.getElementById('aiBody'); if (!b) return;
+    var go = function(){ b.scrollTop = b.scrollHeight; };
+    go(); requestAnimationFrame(go); setTimeout(go, 350);
+  }
+  window.vdcFollowToEnd = followToEnd;
+  function paintQP(list, pool){
     var el = document.getElementById('aiChips'); if (!el || !list || !list.length) return;
-    try { aiAgent._qp = list.slice(); } catch(e){}
+    if (!window.vdcQuickPromptsOn()) return;
+    try { aiAgent._qp = list.slice(); aiAgent._qpPool = pool.slice(); } catch(e){}
     var sparkle = icon('prompt-ai-filled', 14), xIcon = icon('close-outlined', 14);
     el.innerHTML = '<div class="ai-qp">'
       + '<div class="ai-qp-hd"><span>Quick Prompts</span>'
-      + '<button type="button" class="ai-qp-x" onclick="vdcClearQuickPrompts()" aria-label="Dismiss">' + xIcon + '</button></div>'
+      + '<span class="ai-qp-acts"><button type="button" class="ai-qp-x" onclick="vdcQuickPromptsOff()" data-tooltip="Don\u2019t show quick prompts again" aria-label="Don\u2019t show quick prompts again">' + icon('thumb-down-outlined', 14) + '</button>'
+      + '<button type="button" class="ai-qp-x" onclick="vdcClearQuickPrompts()" aria-label="Dismiss">' + xIcon + '</button></span></div>'
       + '<div class="ai-qp-list">' + list.map(function(q){
           return '<button type="button" class="ai-chip ai-chip-qp" data-q="' + esc(q) + '" onclick="vdcQuickPromptGo(this)">' + sparkle + '<span>' + esc(q) + '</span></button>';
         }).join('') + '</div></div>';
-  };
+    followToEnd();
+  }
 
   // ── TRANSCRIPT HANDOFF, SHARED ──────────────────────────────────────────────────────────────────────────────
   // Travelling between pages carries the conversation: the destination reads vdc-ai-transcript and reopens the
@@ -412,10 +559,20 @@
   // Walks text nodes only, so markup, buttons and inline SVG inside a reply are untouched; skips interactive and
   // non-text subtrees so a control's label never animates away from its button.
   var SAY_STEP = 22, SAY_WORD = 260, SAY_SKIP = { BUTTON:1, SVG:1, SCRIPT:1, STYLE:1, INPUT:1, SELECT:1, TEXTAREA:1 };
+  /* word spans already baked into stored html (a transcript saved before the committed greeting was unwrapped) */
+  function unword(h){ return String(h).replace(/<span class="vdc-w"[^>]*>([^<]*)<\/span>/g, '$1'); }
   window.vdcSayHtml = function(html, m, from){
     try {
       if (!html || typeof html !== 'string') return html;
-      if (!m || m._noSay) return html;
+      if (!m) return html;
+      /* A RECORD IS NOT A REPLY. Two kinds of agent message are already-settled text and must never be composed again:
+         (1) the committed arrival greeting (_arrival) — it typed itself once on the home screen, and each reasoning step then
+             re-rendered the thread, re-hiding and re-typing it ("Welcome back" flashing as the steps changed); and
+         (2) a message carried in from another page or restored from storage (_noSay) — history, not an arrival. The code that
+             rebuilds a carried conversation sets the flag where the message is created; an earlier version GUESSED, by treating
+             whatever was in the thread at the first render as carried, and that swallowed the first live reply instead. */
+      if (m._arrival) return unword(html);
+      if (m._noSay) return unword(html);
       if (document.body.classList.contains('ai-nofx')) return html;
       if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return html;
       if (!m._sayAt) m._sayAt = Date.now();
@@ -506,6 +663,87 @@
     } catch(e){ return ''; }
   };
 
+  // ── OPEN-ENDED STARTERS (user 2026-10-30) ───────────────────────────────────────────────────────────────────
+  // The arrival lists only what the agent is holding for you. Under it, a quieter second tier says what ELSE it can
+  // do, phrased as the general thing a person would say before they know the specifics ("help me restore
+  // something"), not as a finished scenario ("restore Mark Aldridge"). Picking one opens the conversation with the
+  // agent's NARROWING question; the options under the composer (Quick Prompts) are the ways to answer it. Replies
+  // are authored and deliberately make no claims about the estate: they say what the agent would look at and that
+  // nothing changes without a decision. The scripted scenarios on the + menu are unchanged and remain the
+  // specific route. Four, per the ~4-suggestion cap that governs the staged cards.
+  var STARTERS = [
+    { id:'restore', topic:'Restore something', title:'Get something back', sub:'Help me restore something that has gone missing or changed.',
+      ask:'Help me restore something.',
+      reply:'Happy to. Tell me what went missing and roughly when, or start from one of these.',
+      opts:{
+        'It belongs to a person: a mailbox, files or a chat':'I’ll find the person first, then show the restore points that predate the loss so you can pick one. Nothing is restored until you approve the plan.',
+        'A folder or site was changed or emptied':'I’ll open the location, compare it across restore points to find the moment it changed, and propose rolling back only that part.',
+        'Records in Dynamics 365':'I’ll ask which table, then show what changed between two restore points so you can choose whole records or only specific columns.' } },
+    { id:'drift', topic:'Recovery target check', title:'Check my recovery targets', sub:'Tell me where protection is falling behind what I promised.',
+      ask:'Check whether my backups are meeting their recovery point targets.',
+      reply:'I can compare each policy’s recovery point target with what its recent runs actually delivered. Where should I look?',
+      opts:{
+        'Everything I protect':'I’ll go through every policy and rank them by how far the latest recovery point is from its target, worst first, with the cause for each.',
+        'One workload':'Name the workload and I’ll limit the check to its policies, including any that have no target set at all.',
+        'Only what slipped this week':'I’ll show just the policies that drifted over the last seven days, whether it was a missed run or a target that is now too tight.' } },
+    { id:'dashboard', topic:'Build a dashboard', title:'Build a dashboard', sub:'Help me put together a view of the things I keep checking.',
+      ask:'Help me build a dashboard.',
+      reply:'Let’s start from the decision it should help you make. What do you want to be able to tell at a glance?',
+      opts:{
+        'Whether I am protected':'I’d lead with coverage and recovery point health per workload, with anything outside its target pulled to the top.',
+        'Where storage is going':'I’d show consumption by workload over time, what is growing fastest, and what a retention change would free up.',
+        'What the agent has been doing':'I’d chart sessions by outcome and skill, with the decisions still waiting on you listed first.' } },
+    { id:'odd', topic:'Investigate something odd', title:'Look into something odd', sub:'Something seems off. Help me work out what happened.',
+      ask:'Something looks off. Help me work out what happened.',
+      reply:'Tell me what you noticed, or pick the closest match and I’ll start from there.',
+      opts:{
+        'Backups that failed or ran slow':'I’ll line up the affected jobs by time and workload, look for what they share, and tell you whether it is one cause or several.',
+        'Files or items disappearing':'I’ll look at deletion activity across your workloads, separate normal clean-up from unusual bursts, and show who or what was behind them.',
+        'A policy or setting that changed':'I’ll go through recent policy and setting changes, who made each one, and what it affected, so you can undo any you did not intend.' } }
+  ];
+  STARTERS.forEach(function(o){ Object.keys(o.opts).forEach(function(q){ QP_ANSWERS[q] = o.opts[q]; }); });   // at load, so the options still answer after a page hop restores them
+  var STARTERS_BY_ASK = {}; STARTERS.forEach(function(o){ STARTERS_BY_ASK[o.ask] = o; });
+  function starterCards(t, typed){
+    // READS DOWN THE PAGE IN ORDER (user 2026-10-30): the label types in like the greeting once everything above it has
+    // finished, and only then do the cards rise, so nothing here is on screen while the recommendation is still arriving.
+    var label = 'What else I can do for you', step = 24, words = label.split(/(\s+)/), k = 0;
+    var lblHtml = !typed ? esc(label) : words.map(function(w){
+      if (!w.trim()) return esc(w);
+      return '<span class="vdc-w" style="animation-delay:' + (t + 60 + (k++) * step) + 'ms">' + esc(w) + '</span>';
+    }).join('');
+    var cardsFrom = t + 60 + k * step + 260 + 40;
+    return '<div class="ai-home-label' + (typed ? ' vdc-typing' : '') + '">' + lblHtml + '</div>' + STARTERS.map(function(o, i){
+      var d = typed ? ' vdc-arrive" style="animation-delay:' + (cardsFrom + i * 80) + 'ms' : '';
+      return '<button type="button" class="ai-home-card' + d + '" onclick="vdcStarterGo(\'' + o.id + '\')">'
+        + '<div class="ai-home-card-t">' + esc(o.title) + '</div><div class="ai-home-card-p">' + esc(o.sub) + '</div></button>';
+    }).join('');
+  }
+  // One beat of thinking, then the narrowing question; the options then arrive as Quick Prompts. A chosen option
+  // gets its authored reply through vdcQuickPromptGo (QP_ANSWERS), the same path the ROT follow-ups use.
+  function beat(fn){
+    aiAgent._scrollAnchor = 'bottom'; aiAgent.thinking = true;
+    if (typeof aiSetBusy === 'function') aiSetBusy(true);
+    if (typeof aiRender === 'function') aiRender();
+    setTimeout(function(){
+      aiAgent.thinking = false; fn();
+      aiAgent._scrollAnchor = 'bottom';
+      if (typeof aiRender === 'function') aiRender();
+      if (typeof aiSetBusy === 'function') aiSetBusy(false);
+    }, 780);
+  }
+  window.vdcStarterGo = function(id){
+    if (typeof aiAgent === 'undefined' || aiAgent.busy) return;
+    var o = STARTERS.filter(function(x){ return x.id === id; })[0]; if (!o) return;
+    commitArrival('vdcStarterGo(\'' + id + '\')');
+    aiAgent.msgs.push({ role:'user', html:o.ask });
+    window.vdcSetPanelTopic(o.topic);
+    (aiAgent._qpStarted = aiAgent._qpStarted || {})[o.ask] = 1;
+    beat(function(){
+      aiAgent.msgs.push({ role:'agent', html:'<p>' + esc(o.reply) + '</p>' });
+      if (typeof window.vdcRenderQuickPrompts === 'function') window.vdcRenderQuickPrompts(Object.keys(o.opts));
+    });
+  };
+
   // ── THE ARRIVAL SCREEN, SHARED ──────────────────────────────────────────────────────────────────────────────
   // Every page with the panel shows the same greeting-and-concerns screen, so it is built here rather than copied
   // into four aiRenderHome functions (user 2026-10-29: opening the panel on Settings still pushed the full
@@ -534,7 +772,7 @@
       + (list.length === 1 ? 'There\u2019s one thing' : 'There are ' + list.length + ' things') + ' I\u2019d like you to look at.';
     var titleHtml = say('Welcome back.', 0);
     var subHtml = say(subTxt, 60);
-    var cardFrom = 60 + tEnd * step;   // the concerns follow the sentence that introduces them
+    var cardFrom = 60 + tEnd * step + 260 + 40;   // the concerns follow the sentence that introduces them: after its LAST word has finished fading in, not when it starts
     var inner = '<span class="ai-home-glyph" aria-hidden="true">' + (glyphHtml || '') + '</span>'
       + '<div class="ai-home-title' + (typed ? ' vdc-typing' : '') + '">' + titleHtml + '</div>'
       + '<div class="ai-home-sub' + (typed ? ' vdc-typing' : '') + '">' + subHtml + '</div>'
@@ -548,22 +786,29 @@
           return '<button type="button" class="ai-home-card' + (travels ? ' travels' : '') + (typed ? ' vdc-arrive' : '') + '"'
             + _cd + ' onclick="' + click + '"'
             + (travels ? ' aria-label="' + esc(o.title) + ' \u2014 opens in Agent activity"' : '') + '>'
+            // A concern is a decision the agent is waiting on you for, so it wears the one "Awaiting decision" chip (user
+            // 2026-10-30); the starter cards below are a menu and carry none.
+            + (typeof window.vdcDecisionChip === 'function' ? '<div class="ai-home-card-st">' + window.vdcDecisionChip() + '</div>' : '')
             + '<div class="ai-home-card-t">' + esc(o.title) + glyph + '</div>'
             + '<div class="ai-home-card-p">' + esc(o.sub) + '</div></button>';
         }).join('')
       // Only when something here actually lives in Activity. With approvals staged out, this footer would send the
       // user to a lens with nothing in it.
       + (list.some(function(o){ return o.kind === 'appr'; })
-          ? '<div class="ai-home-foot"><button type="button" class="aiac-btn" onclick="vdcNotifGo(\'appr\')">Review these in Agent activity'
+          ? '<div class="ai-home-foot' + (typed ? ' vdc-arrive" style="animation-delay:' + (cardFrom + (list.length - 1) * 80 + 260) + 'ms' : '') + '"><button type="button" class="aiac-btn" onclick="vdcNotifGo(\'appr\')">Review these in Agent activity'
             + icon('open-in-new-outlined', 16) + '</button></div>'
-          : '');
+          : '')
+      + starterCards(cardFrom + (list.length - 1) * 80 + 260 + (list.some(function(o){ return o.kind === 'appr'; }) ? 260 : 0), typed);
     // THE COMMITTED COPY IS STATIC (user 2026-10-29: the greeting "restarts its animation a couple times while the
     // agent responds"). Once this block is committed into the transcript, every aiRender rebuilds #aiBody and
     // re-inserts it — and fresh elements restart their CSS animations, so the reasoning steps made the greeting
     // re-type on each beat. The live screen keeps its motion; the transcript copy is stripped of the triggers.
     try {
       var frozen = inner.replace(/ vdc-typing/g, '').replace(/ vdc-arrive/g, '')
-                        .replace(/ style="animation-delay:[^"]*"/g, '');
+                        .replace(/ style="animation-delay:[^"]*"/g, '')
+                        /* and UNWRAP the word spans. Dropping the class and the delays was not enough: every agent bubble now carries
+                           .vdc-typing, so the spans left behind in the committed greeting animated again on each re-render. */
+                        .replace(/<span class="vdc-w"[^>]*>([^<]*)<\/span>/g, '$1');
       aiAgent._arrivalHtml = '<div class="ai-home is-inthread">' + frozen + '</div>';
     } catch(e){}
     return '<div class="ai-home">' + inner + '</div>';
@@ -583,6 +828,7 @@
     }
     var n = list.filter(function(x){ return x.id === id; })[0]; if (!n) return;
     commitArrival(n.id);
+    if (n.topic) window.vdcSetPanelTopic(n.topic);
     aiAgent.msgs.push({ role:'user', html:askFor(n) });   // user bubbles render _aiEsc(m.html): plain text, never markup
     recs_mark(v, n);
     // The policy page already authors this whole flow for this recommendation — use it rather than a second copy.
@@ -744,9 +990,9 @@
     /* Greeting composition — A2. Each word fades up 3px; the concern cards rise in behind the sentence. */
     + '@keyframes vdcWordIn { from { opacity:0; transform:translateY(3px); } to { opacity:1; transform:none; } }\n'
     + '.vdc-typing .vdc-w { display:inline-block; white-space:pre; animation:vdcWordIn 260ms cubic-bezier(.2,.7,.3,1) both; }\n'
-    + '.ai-home-card.vdc-arrive { animation:aiTaskRise 260ms cubic-bezier(.2,.7,.3,1) both; }\n'
-    + '@media (prefers-reduced-motion: reduce) { .vdc-typing .vdc-w, .ai-home-card.vdc-arrive { animation:none !important; } }\n'
-    + 'body.ai-nofx .vdc-typing .vdc-w, body.ai-nofx .ai-home-card.vdc-arrive { animation:none !important; }\n'
+    + '.ai-home .vdc-arrive { animation:aiTaskRise 260ms cubic-bezier(.2,.7,.3,1) both; }\n'
+    + '@media (prefers-reduced-motion: reduce) { .vdc-typing .vdc-w, .ai-home .vdc-arrive { animation:none !important; } }\n'
+    + 'body.ai-nofx .vdc-typing .vdc-w, body.ai-nofx .ai-home .vdc-arrive { animation:none !important; }\n'
     /* CARD ARRIVAL — B7 "cascade then draw" (user 2026-10-29, picked from agent-panel-motion.html). Two beats:
        the card builds in reading order (headline → sub → strip → caption → rows), then after --gap the strip and
        bars measure out from zero, and the decision lands with the last bar. The agent states the finding, pauses,
@@ -815,6 +1061,16 @@
     + '@media (prefers-reduced-motion: reduce) { .ai-qp, .ai-qp .ai-chip-qp { animation:none !important; } }\n'
     + 'body.ai-nofx .ai-qp, body.ai-nofx .ai-qp .ai-chip-qp { animation:none !important; }\n'
     + '.ai-qp-hd { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:500; color:var(--black-60,#626469); margin-bottom:8px; }\n'
+    + '.aiac-decide { container-type:inline-size; }\n'
+    + '.aiac-decide .ai-gate-btns [data-dismiss] { margin-left:auto; }   /* the decline sits apart from the two actions that move the recommendation forward */\n'
+    + '@container (max-width: 303px) { .aiac-decide .ai-gate-btns [data-dismiss] { margin-left:0; } }   /* row wrapped: left-aligned on its own line */\n'
+    + '.aiac-decide-done { font-size:14px; line-height:20px; font-weight:500; color:var(--em-green,#01804a); }\n'
+    + '.aiac-decide-done.dismissed { color:var(--black-60,#626469); }\n'
+    + '.ai-head-brand { font-size:12px; line-height:16px; font-weight:450; color:var(--black-60,#626469); }\n'
+    + '.ai-head-text.has-topic .ai-head-title { line-height:22px; }\n'
+    + '.ai-head-tx { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }\n'
+    + '.ai-qp-acts { margin-left:auto; display:flex; align-items:center; gap:4px; }\n'
+    + '.ai-qp-acts .ai-qp-x { margin-left:0; }\n'
     + '.ai-qp-x { margin-left:auto; border:none; background:none; padding:2px; cursor:pointer; color:var(--black-60,#626469); display:flex; }\n'
     + '.ai-qp-x:hover { color:var(--black-100,#1f2229); }\n'
     + '.ai-qp-list { display:flex; flex-wrap:wrap; gap:8px; }\n'
@@ -875,6 +1131,11 @@
     + '.vdc-np-dot { display:inline-block; width:8px; height:8px; margin:0 8px 1px 0; border-radius:50%; background:var(--red, #ed2c3d); vertical-align:middle; }\n'
     + '.vdc-np-ai { flex-shrink:0; width:28px; height:28px; border-radius:4px; overflow:hidden; display:inline-flex; align-items:center; justify-content:center; background:var(--ai-grad, conic-gradient(from 90deg, #5bbc7b 0deg, #119ee7 57.6deg, #d83dcf 153deg, #ee6b36 234deg, #8fd131 320.4deg, #5bbc7b 360deg)); color:var(--white, #fff); }\n'
     + '.vdc-np-ai svg { width:40px; height:40px; margin:-6px; display:block; flex-shrink:0; }   /* the sparkle glyph fills only the middle of its viewBox: oversized so the mark reads at tile scale, as on the assistant\'s badges */\n'
+    + '.vdc-decide { display:inline-flex; align-items:center; gap:8px; min-height:28px; padding:2px 8px 2px 4px; border-radius:2px; font-size:16px; font-weight:500; line-height:22px; white-space:nowrap; background:var(--black-5, #f8f8f9); color:var(--black-100, #1f2229); }   /* Vision Chip Default: Black/S5 on Black/S100, r2 */\n'
+    + '.ai-home-card-st { margin-bottom:8px; }\n'
+    + '.ai-home-card-st .vdc-decide { min-height:24px; font-size:14px; line-height:20px; }   /* the panel text is 14px: at the page chip size (16px) the chip outranked the card title below it */\n'
+    + '.vdc-decide-ai { flex-shrink:0; width:16px; height:16px; border-radius:2px; overflow:hidden; display:inline-flex; align-items:center; justify-content:center; background:var(--ai-grad, conic-gradient(from 90deg, #5bbc7b 0deg, #119ee7 57.6deg, #d83dcf 153deg, #ee6b36 234deg, #8fd131 320.4deg, #5bbc7b 360deg)); color:var(--white, #fff); }\n'
+    + '.vdc-decide-ai svg { width:24px; height:24px; margin:-4px; display:block; flex-shrink:0; }   /* glyph fills only the middle of its viewBox: oversized to read at 16px */\n'
     + '.vdc-np-empty { padding:48px 0; text-align:center; font-size:16px; color:var(--black-60, #62656b); }\n'
     + '@media (max-width: 900px) { .vdc-np-side { display:none; } .vdc-np-search { width:160px; } }\n';
 
@@ -885,9 +1146,13 @@
       b.setAttribute('data-fly', 'Notifications'); b.setAttribute('aria-label', 'Notifications'); b.removeAttribute('title');
       b.onclick = function(e){ e.preventDefault(); window.vdcNotifToggle(); };
     }
-    ['aiOpen', 'aiClose'].forEach(function(fn){
+    ['aiRender'].forEach(function(fn){   // every panel render re-derives decided cards from the shared state
       var orig = window[fn]; if (typeof orig !== 'function') return;
-      window[fn] = function(){ var r = orig.apply(this, arguments); if (fn === 'aiOpen'){ if (!voice()) voiceSoon(); } paintDot(); return r; };   // told at once when the moment is quiet, else as soon as it is
+      window[fn] = function(){ var r = orig.apply(this, arguments); try { window.vdcSyncDecisions(); } catch(e){} return r; };
+    });
+    ['aiOpen', 'aiClose', 'aiNewChat'].forEach(function(fn){
+      var orig = window[fn]; if (typeof orig !== 'function') return;
+      window[fn] = function(){ var r = orig.apply(this, arguments); if (fn === 'aiNewChat') window.vdcSetPanelTopic(null); if (fn === 'aiOpen'){ restoreTopic(); if (!voice()) voiceSoon(); } paintDot(); return r; };   // told at once when the moment is quiet, else as soon as it is
     });
     paintBadge();
     window.addEventListener('storage', refresh);

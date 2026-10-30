@@ -1847,7 +1847,7 @@ body.ai-nofx .sd-overlay, body.ai-nofx .sd-modal, body.ai-nofx #toast, body.ai-n
 .ai-head-btn:hover { background: var(--black-5); color: var(--black-100); }
 /* Full-screen conversational mode: the panel takes the whole viewport;
    the conversation column stays readable, centered. */
-body.ai-open.ai-full { --ai-w: 100vw; overflow: hidden; }
+body.ai-open.ai-full { --ai-w: 100vw !important; overflow: hidden; }   /* !important: a dragged panel width is stored inline on <body> and would otherwise beat this rule (same as protected-data) */
 body.ai-full .ai-head, body.ai-full .ai-body, body.ai-full .ai-foot { padding-left: max(16px, calc((100vw - 720px) / 2)); padding-right: max(16px, calc((100vw - 720px) / 2)); }
 body.ai-full #aiWorkingGlow { display: none; }
 .ai-head-close:hover { background: var(--black-5); color: var(--black-100); }
@@ -2041,7 +2041,7 @@ body.ai-full #aiWorkingGlow { display: none; }
   </div>
   <!-- Reset the agent demo to a clean slate. Dev-only, sits beside the hide control. Implementation is shared
        (vdcResetAgentDemo in vdc-notifications.js) so the key list lives in one place. -->
-  <button class="devjump-reset" onclick="if(window.vdcResetAgentDemo) vdcResetAgentDemo(); else alert('Agent demo reset is unavailable on this page.')" title="Reset agent scenarios — clears the ROT recommendation, pending approvals, what the assistant has said, and any carried conversation, then reloads">
+  <button class="devjump-reset" onclick="if(window.vdcResetAgentDemo) vdcResetAgentDemo(); else alert('Agent demo reset is unavailable on this page.')" title="Reset agent scenarios — clears the ROT recommendation, awaiting decisions, what the assistant has said, and any carried conversation, then reloads">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/></svg>
     <span>Reset agent</span>
   </button>
@@ -3484,7 +3484,7 @@ body.ai-full #aiWorkingGlow { display: none; }
 </aside>
 
 <script src="securiti-icons-data.js?v=20261001a"></script>
-<script src="vdc-notifications.js?v=20261029c"></script>
+<script src="vdc-notifications.js?v=20261029f"></script>
 <script src="workload-picker.js?v=20260908b"></script>
 <script>
 // ── DS ICON STORE HELPERS (cloned from protected-data.html) ───────────────────
@@ -7678,6 +7678,10 @@ function filterWorkload(wl, el) {
   }
   activeWl = wl;
   polPage = 1;
+  // FILE ROT IS A MICROSOFT 365 POLICY (user 2026-10-30: the same File ROT content showed whichever workload was picked
+  // above it). The ROT page therefore belongs to the Microsoft 365 scope only: picking any other workload leaves it for
+  // that workload's policies, and opening it (rotShowView) selects Microsoft 365 first.
+  if (wl !== 'ms365' && document.body.classList.contains('rot-on') && typeof window.rotShowPolicies === 'function') window.rotShowPolicies();
   // The Workload filter only makes sense in "All Workloads" view — switching
   // to a single workload makes that chip redundant (and can produce empty
   // results if the chip targeted a different workload). Drop it on switch.
@@ -10832,7 +10836,7 @@ else aiComposerIcons();
 // to protected-data.html#ai, warn tint on gate-valence states (2026-09-10).
 (function(){
   return;   // pill disabled — body kept for lineage
-  var LBL = { awaiting:'Pending approval', waiting:'Waiting on you', running:'In progress', queued:'Queued' };
+  var LBL = { awaiting:'Awaiting decision', waiting:'Waiting on you', running:'In progress', queued:'Queued' };
   function render(){
     var host = document.getElementById('vdcTasksPill');
     var raw = null; try { raw = JSON.parse(localStorage.getItem('vdc-agent-tasks')); } catch (e) {}
@@ -10879,7 +10883,7 @@ else aiComposerIcons();
         return;
       }
       if (r.role === 'user' || r.role === 'agent'){
-        var m = { role: r.role, html: r.html };
+        var m = { role: r.role, html: r.html, _noSay: true };   /* carried, not arriving: a restored message is history, so the reply-typing helper must leave it alone */
         if (r.gate){
           m.gate = { q: r.gate.approval ? (r.gate.approval.action || 'Approval') : (r.gate.q || ''),
             buttons: [], resolved: true,
@@ -11304,7 +11308,7 @@ function aiacCardHtml(m, i){
   // the recommendation, and it carries the reversal assurance the way an approval card's Reversal row does.
   if (s.decision){
     var _d = s.decision;
-    html += '<div class="aiac-sec aiac-decide">'
+    html += '<div class="aiac-sec aiac-decide"' + (_d.key ? ' data-decide="' + _d.key + '"' : '') + '>'
       + (_d.ask ? '<div class="aiac-decide-ask">' + _d.ask + '</div>' : '')
       // `nav:true` = this verb LEAVES the panel, so it takes the look-here grammar: secondary weight + the trailing
       // open-in-new glyph, never the green primary (which means "the agent acts here on your consent").
@@ -11721,7 +11725,7 @@ body.ai-open .rot-editor { right: var(--ai-w); }   /* the assistant pushes the p
       + '<td><span class="rot-bar">' + x.files + '</span></td><td><span class="rot-bar">' + x.vol + '</span></td>'
       + '<td><span class="plv-chip plv-chip-scope">Files&nbsp;' + ic('insights-outlined', 16) + '</span></td><td style="white-space:nowrap">' + esc(x.date) + '</td>'
       + '<td><span class="rot-rowact"><button type="button" class="rot-ibtn rot-ibtn-act" onclick="rotOpenDetail()" data-plv-tip="Details" aria-label="Open recommended policy details">' + ic('policy-outlined', 20) + '</button>'
-      + '<button type="button" class="rot-ibtn rot-ibtn-act rot-ibtn-bad" onclick="rotDismissAsk()" data-plv-tip="Dismiss" aria-label="Dismiss recommendation">' + ic('thumb-down-outlined', 20) + '</button></span></td></tr>';
+      + '<button type="button" class="rot-ibtn rot-ibtn-act rot-ibtn-bad" onclick="rotDismissAsk()" data-plv-tip="Dismiss" aria-label="Dismiss recommendation">' + ic('close-outlined', 20) + '</button></span></td></tr>';
   }
   function list(){
     var s = st(), all = rows(), r = all.filter(function(x){ return !x.prop; }), act = r.filter(function(x){ return !x.inactive; }).length;
@@ -11805,9 +11809,15 @@ body.ai-open .rot-editor { right: var(--ai-w); }   /* the assistant pushes the p
     // The summary is not closable: it is the recommendation, and its two actions are the only ways to act on it from here.
     if (p._created) return '<div class="rot-alert rot-prop">' + sp + '<div class="rot-alert-txt"><strong>' + (p.active ? 'Policy created and active' : 'Policy created') + '</strong><span>' + (p.active ? 'Created from a Veeam Intelligence recommendation. It runs for the first time tonight.' : 'Created from a Veeam Intelligence recommendation. It is not active yet.') + '</span></div></div>';
     if (!p._proposal) return '';
-    var acts = '<div class="rot-alert-acts"><button type="button" class="rot-alert-dis" onclick="rotAsk()">' + ic('ai-sparkle', 16) + 'Ask Veeam Intelligence</button>'
-      + '<button type="button" class="rot-alert-dis" data-tooltip="Decline this recommendation. No policy is created." onclick="rotDismissAsk()">' + ic('thumb-down-outlined', 16) + 'Dismiss recommendation</button></div>';
-    if (p._mode === 'view') return '<div class="rot-alert rot-prop">' + sp + '<div class="rot-alert-txt"><strong>Proposed by Veeam Intelligence — not created yet</strong><span>4.2 TB (63%) of backed-up content in Retail Taxes, Retail Archive and Retail Ops has not been modified in 36 months, and no ROT policy covers it. To accept it, edit the policy, tick Activate Policy and update it. Nothing exists until you do.</span>' + acts + '</div></div>';
+    // THE BANNER'S ACTIONS MIRROR THE CONVERSATION'S (user 2026-10-30): Activate and Dismiss, the same two verbs the panel's
+    // recommendation card offers. "Ask Veeam Intelligence" only makes sense while the panel is closed — with it already open
+    // beside the page it reads like a mistake — so it appears for a visitor who arrived here directly. The strip redraws when the
+    // panel opens or closes (see the observer below). DS buttons, same as Edit Policy above: Primary + Secondary at 36px.
+    var panelOpen = document.body.classList.contains('ai-open');
+    var acts = '<div class="rot-alert-acts"><button type="button" class="plv-btn plv-btn-primary" data-tooltip="Activates the policy exactly as drafted" onclick="rotAgentSave()">Activate</button>'
+      + (panelOpen ? '' : '<button type="button" class="plv-btn plv-btn-secondary" onclick="rotAsk()">' + ic('ai-sparkle', 16) + 'Ask Veeam Intelligence</button>')
+      + '<button type="button" class="plv-btn plv-btn-secondary" data-tooltip="Decline this recommendation. No policy is created." onclick="rotDismissAsk()">Dismiss</button></div>';
+    if (p._mode === 'view') return '<div class="rot-alert rot-prop">' + sp + '<div class="rot-alert-txt"><strong>Proposed by Veeam Intelligence — not created yet</strong><span>4.2 TB (63%) of backed-up content in Retail Taxes, Retail Archive and Retail Ops has not been modified in 36 months, and no ROT policy covers it. Activate it as proposed, or edit the policy first. Nothing exists until you do.</span>' + acts + '</div></div>';
     return '<div class="rot-alert rot-prop">' + sp + '<div class="rot-alert-txt"><strong>Editing a proposal from Veeam Intelligence — not accepted yet</strong><span>Nothing exists until you update the policy. Cancel returns to the proposal as it was recommended.</span>' + acts + '</div></div>';
   }
   function editorBody(blank){
@@ -11832,7 +11842,7 @@ body.ai-open .rot-editor { right: var(--ai-w); }   /* the assistant pushes the p
       + '<div class="rot-sg-c rot-sg-r">' + (view ? '' : '<button type="button" class="rot-editq" onclick="rotToggleQuery()">Edit Query ' + ic('insights-outlined', 20) + '</button>') + '</div></div>';
     var addwrap = view ? '' : '<div class="rot-addwrap"><button type="button" class="rot-add" onclick="rotToggleMenu()"><span class="rot-add-ic">' + ic('add-outlined', 20) + '</span>Add Actions</button><div class="rot-menu" id="rotMenu" hidden>' + lib + '</div></div>';
     var foot = view ? '' : '<div class="rot-ed-foot"><button type="button" class="plv-btn plv-btn-primary rot-create" id="rotCreate2" onclick="' + (p._created ? 'rotSaveEdits()' : 'rotSave()') + '">' + (p._blank ? 'Create Policy' : 'Update Policy') + '</button><button type="button" class="plv-btn plv-btn-secondary" onclick="rotCancelEdit()">Cancel</button></div>';
-    return '<div class="rot-ed-col">' + strip + head + fields
+    return '<div class="rot-ed-col"><div id="rotStrip">' + strip + '</div>' + head + fields
       + '<div class="rot-sec">Scope</div><div class="rot-sec-sub">Scope defines the boundaries and context within which the policy’s rules and privileges are enforced.</div>'
       + '<div class="rot-scope-box">' + (blank ? '<div class="rot-scope-tab"><span class="rot-scope-chip">Files</span></div>' : queryHtml(p)) + grid + '</div>'
       + '<div class="rot-sec" style="margin-top:32px">Actions</div>'
@@ -11856,6 +11866,11 @@ body.ai-open .rot-editor { right: var(--ai-w); }   /* the assistant pushes the p
     document.getElementById('rotEdBody').innerHTML = editorBody(!!draft._blank);
     rotValidate(); ed.scrollTop = 0;
   }
+  // keep the banner's buttons honest about whether the conversation is open (Ask Veeam Intelligence only when it is not)
+  new MutationObserver(function(){
+    var slot = document.getElementById('rotStrip');
+    if (slot && draft && draft._proposal && typeof stripHtml === 'function') slot.innerHTML = stripHtml(draft);
+  }).observe(document.body, { attributes:true, attributeFilter:['class'] });
   function openEditor(blank){
     var s = st();
     if (blank) draft = { name:'', desc:'', severity:'Medium', sites:PROPOSED.sites, months:'36', size:'1 MB', actions:[], active:false, _blank:true, _proposal:false, _mode:'edit' };
@@ -11910,7 +11925,7 @@ body.ai-open .rot-editor { right: var(--ai-w); }   /* the assistant pushes the p
     var wasProp = !!draft._proposal;   // accepting a recommendation, as opposed to creating a policy from nothing
     s.policy = { name:draft.name, desc:draft.desc, severity:draft.severity, owner:draft.owner || 'Darren Lasso', active:draft.active, sites:draft.sites, months:draft.months, size:draft.size, actions:draft.actions,
       crit:queryText(draft), actionText:draft.actions.join('; ') };
-    s.rec = 'approved'; s.by = 'Darren Lasso'; s.ts = Date.now(); s.scope = 'once'; save(s);
+    s.rec = 'approved'; s.by = 'Darren Lasso'; s.ts = Date.now(); s.scope = 'once'; save(s); if (typeof vdcSyncDecisions === 'function') vdcSyncDecisions();
     if (keepOpen === true || wasProp) { draft = draftFromCreated(s.policy); rotDraw(); }   // stay on the policy, now in its read-only state
     else { document.getElementById('rotEditor').classList.remove('open'); draft = null; }
     rotRender();
@@ -11918,6 +11933,12 @@ body.ai-open .rot-editor { right: var(--ai-w); }   /* the assistant pushes the p
   };
   window.rotShowView = function(closePanel, openDetail){
     var lr = document.querySelector('.list-right'); if (!lr) return;
+    // The ROT policy is Microsoft 365's: make that the selected workload before showing it, so the workload picker, the
+    // policies list we return to and the policy row all agree. A cancelled switch (unsaved reorder) leaves ROT closed.
+    if (typeof activeWl !== 'undefined' && activeWl !== 'ms365' && typeof filterWorkload === 'function'){
+      filterWorkload('ms365');
+      if (activeWl !== 'ms365') return;
+    }
     lr.classList.add('is-rot'); document.body.classList.add('rot-on');
     var t = document.querySelector('.plv-title'); if (t) t.textContent = 'File ROT Policies';
     [].forEach.call(document.querySelectorAll('#wl-list .wl-item'), function(e){ e.classList.toggle('active', e.getAttribute('data-cat') === 'rot'); });
@@ -12027,7 +12048,7 @@ body.ai-open .rot-editor { right: var(--ai-w); }   /* the assistant pushes the p
     var s = st(); if (s.rec) { accBusy = false; return; }
     var d = JSON.parse(JSON.stringify(PROPOSED)); d.owner = 'Darren Lasso'; d.active = true;
     s.policy = { name:d.name, desc:d.desc, severity:d.severity, owner:d.owner, active:true, sites:d.sites, months:d.months, size:d.size, actions:d.actions, crit:queryText(d), actionText:d.actions.join('; ') };
-    s.rec = 'approved'; s.by = 'Darren Lasso'; s.ts = Date.now(); s.scope = 'once'; s.how = 'quick'; save(s); rotRender();
+    s.rec = 'approved'; s.by = 'Darren Lasso'; s.ts = Date.now(); s.scope = 'once'; s.how = 'quick'; save(s); rotRender(); if (typeof vdcSyncDecisions === 'function') vdcSyncDecisions();
     // THE OPEN DETAIL UPDATES IN PLACE (user 2026-10-29: "the toast message appears but the page does not update").
     // rotRender() only rebuilds #rotView — the LIST. With the detail open over it, the list updated invisibly behind
     // the editor while the editor kept rendering the pre-activation draft, so the only evidence of what happened was
@@ -12068,7 +12089,7 @@ body.ai-open .rot-editor { right: var(--ai-w); }   /* the assistant pushes the p
     if (chip) chip.animate([{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(.85)' }], { duration: 240, delay: 140, easing: 'ease-in', fill: 'both' });
     setTimeout(function(){ rotCommitAccept(true); }, 460);                                                                                         // beat 3 — commit, then settle
   };
-  window.rotDismiss = function(note, reason){ var s = st(); if (s.rec) return; s.rec = 'dismissed'; s.by = 'Darren Lasso'; s.note = note || ''; if (reason){ s.reason = reason.k; s.reasonLabel = reason.label; } s.ts = Date.now(); save(s); rotRender(); };
+  window.rotDismiss = function(note, reason){ var s = st(); if (s.rec) return; s.rec = 'dismissed'; s.by = 'Darren Lasso'; s.note = note || ''; if (reason){ s.reason = reason.k; s.reasonLabel = reason.label; } s.ts = Date.now(); save(s); rotRender(); if (typeof vdcSyncDecisions === 'function') vdcSyncDecisions(); };
   // Dismissing is a decision and a signal to the agent, so it asks the way the assistant's thumbs-down does (reason chips, optional
   // detail, what happens next) — but the reasons are about WHY the recommendation is not wanted, and each one changes what the
   // agent does next. Choosing a reason is optional: the dismissal never waits on feedback.
@@ -12143,15 +12164,16 @@ body.ai-open .rot-editor { right: var(--ai-w); }   /* the assistant pushes the p
     var ed = document.getElementById('rotEditor'), v = document.getElementById('rotView');
     var inEd = !!(ed && ed.classList.contains('open')), editing = inEd && !!draft && draft._mode === 'edit', inList = !!(v && !v.hidden) && !inEd;
     if (inEd) return { ask: editing ? 'I\u2019ve configured this policy for those three sites \u2014 you\u2019re editing it now. Nothing is created until you create it.' : 'I\u2019ve configured this policy for those three sites \u2014 what\u2019s open now is exactly that. Nothing is created until you activate it.',
-      btns: [{ label: editing ? 'Update and activate policy' : 'Activate policy', onclick:'rotAgentSave()', attr:'data-rot-cta' }] };
+      btns: [{ label: editing ? 'Update and activate policy' : 'Activate policy', onclick:'rotAgentSave()', attr:'data-rot-cta data-rot-act' }, { label:'Dismiss', onclick:'rotDismissAsk()', primary:false, attr:'data-dismiss' }], key:'rot' };
     if (inList) return { ask:'I\u2019ve configured a policy for those three sites and it\u2019s waiting in the list. Nothing runs until you activate it.',
-      btns: [{ label:'Activate policy', onclick:'rotActivate()', attr:'data-rot-cta' }] };
+      btns: [{ label:'Activate policy', onclick:'rotActivate()', attr:'data-rot-cta data-rot-act' }, { label:'Dismiss', onclick:'rotDismissAsk()', primary:false, attr:'data-dismiss' }], key:'rot' };
     return { ask:'I\u2019ve configured a policy for those three sites. Open it to adjust anything, then activate \u2014 nothing is created until you do.',
-      btns: [{ label:'Review the proposed policy', onclick:'rotShowView(true, true)', attr:'data-rot-cta' }] };
+      btns: [{ label:'Review the proposed policy', onclick:'rotShowView(true, true)', attr:'data-rot-cta' }, { label:'Dismiss', onclick:'rotDismissAsk()', primary:false, attr:'data-dismiss' }], key:'rot' };
   };
 
   // ── assistant: the same recommendation, as a conversation that ends at the policy form ──
   window.rotGapFlow = function(){
+    if (typeof window.vdcSetPanelTopic === 'function') window.vdcSetPanelTopic('Retail Division ROT policy recommendation');
     if (aiAgent.busy) return;
     var s = st();
     aiAgent.msgs.push({ role:'user', html:'Review the ROT gap you found in Retail Division' });

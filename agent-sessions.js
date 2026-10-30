@@ -45,7 +45,7 @@
   var FAIL_EVERY = { monitor: 19, restore: 7, exportd: 5 };
 
   /* The vocabulary both pages share. */
-  var DECISION_LABEL = { auto: 'Ran on its own', approved: 'Approved', denied: 'Denied', waiting: 'Pending approval' };
+  var DECISION_LABEL = { auto: 'Ran on its own', approved: 'Approved', denied: 'Denied', waiting: 'Awaiting decision' };
   var DECISION_KEYS = ['auto', 'approved', 'denied', 'waiting'];
 
   /* Registry id -> the workload string Activity carries on its rows (its own _ACT_WL_JOBWL). A workload Activity has no
@@ -143,7 +143,7 @@
         agent: KIND_AGENT[sk.type] || 'Analysis agent', parent: 'Veeam Intelligence',
         capability: sk.title(name), kind: sk.type, wl: name, trigger: trigger(s),
         started: new Date(s.started), dur: s.decided === 'waiting' || s.decided === 'denied' ? '–' : s.dur,
-        outcome: st === 'failed' ? 'Error' : st === 'success' ? 'Success' : st === 'pending' ? 'Awaiting approval' : 'Dismissed',
+        outcome: st === 'failed' ? 'Error' : st === 'success' ? 'Success' : st === 'pending' ? 'Awaiting decision' : 'Dismissed',
         granted: sk.grant, skill: sk.name, decision: DECISION_LABEL[s.decided], _st: st };
     });
   }

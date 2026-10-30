@@ -3045,7 +3045,7 @@ body.ai-full #aiWorkingGlow { display: none; }
           <!-- ══ TASK QUEUE (user 2026-09-10, realignment): the agent view is a
                dedicated Activity lens like the Audit log, and the QUEUE is its
                new content — the pre-job lifecycle (approved/queued/running/
-               pending approval/scheduled). Completed work is the Jobs table's
+               awaiting decision/scheduled). Completed work is the Jobs table's
                record; this panel never re-lists jobs. Live rows mirror the
                chat dock via localStorage (vdc-agent-tasks); seeded rows carry
                the standing overnight schedule. ══ -->
@@ -10223,7 +10223,7 @@ function _actSessOutside(e) {
   var host = document.getElementById('actSessPicker');
   if (host && !host.contains(e.target)) { host.classList.remove('is-open'); document.removeEventListener('click', _actSessOutside); }
 }
-// Agent Sessions anchors on STATUS (not Session state): one status at a time, Pending approval first — the sessions to act on.
+// Agent Sessions anchors on STATUS (not Session state): one status at a time, Awaiting decision first — the sessions to act on.
 var AG_STATUS_ORDER = ['pending', 'running', 'scheduled', 'success', 'warning', 'failed', 'cancelled'];
 var _AG_TERMINAL = { success: 1, warning: 1, failed: 1, cancelled: 1 };
 function _agStatusSel() { return state.agentsStatus || 'pending'; }
@@ -10884,7 +10884,7 @@ var AGENT_TASK_PILL = {
   scheduled: ['queued',  'Scheduled'],
   queued:    ['queued',  'Queued'],
   running:   ['started', 'In progress'],
-  awaiting:  ['warning', 'Pending approval'],
+  awaiting:  ['warning', 'Awaiting decision'],
   waiting:   ['warning', 'Waiting on you'],
   done:      ['success', 'Done'],
   cancelled: ['aborted', 'Cancelled']
@@ -11159,7 +11159,7 @@ function _agStatus(r){
   if (r._task) return (o === 'awaiting' || o === 'waiting') ? 'pending' : (o === 'running' ? 'running' : ((o === 'scheduled' || o === 'queued') ? 'scheduled' : (o === 'done' ? 'success' : 'cancelled')));
   return o === 'Running' ? 'running' : o === 'Success' ? 'success' : o === 'Warning' ? 'warning' : o === 'Error' ? 'failed' : 'success';
 }
-var AG_STATUS_LBL = { pending:'Pending approval', running:'In progress', scheduled:'Scheduled', success:'Succeeded', warning:'Warning', failed:'Failed', cancelled:'Cancelled' };
+var AG_STATUS_LBL = { pending:'Awaiting decision', running:'In progress', scheduled:'Scheduled', success:'Succeeded', warning:'Warning', failed:'Failed', cancelled:'Cancelled' };
 var AG_STATUS_ICON = { pending:'lock-outlined', running:'play-circle-outlined', scheduled:'history-outlined', success:'sd-log-check', warning:'status-warning-outlined', failed:'status-error-outlined', cancelled:'close-outlined' };
 function _agCap(r){ return r._task ? null : String(r.granted || '').split(' · ')[0] || null; }
 function renderAgentKpis(){
@@ -11170,7 +11170,7 @@ function renderAgentKpis(){
   var secs = function(s){ var m = /(\d+)m/.exec(s || ''), x = /(\d+)s/.exec(s || ''); return (m ? +m[1] * 60 : 0) + (x ? +x[1] : 0); };
   var avg = runs.length ? Math.round(runs.reduce(function(a, r){ return a + secs(r.dur); }, 0) / runs.length) : 0;
   var k = function(l, v){ return '<div class="ag-kpi"><div class="ag-kpi-lbl">' + l + '</div><div class="ag-kpi-val">' + v + '</div></div>'; };
-  host.innerHTML = k('Sessions', all.length) + k('Pending approval', pend) + k('Needed approval', runs.length ? Math.round(100 * gated / runs.length) + '%' : '—') + k('Avg duration', avg >= 60 ? Math.floor(avg / 60) + 'm ' + (avg % 60) + 's' : avg + 's');
+  host.innerHTML = k('Sessions', all.length) + k('Awaiting decision', pend) + k('Needed approval', runs.length ? Math.round(100 * gated / runs.length) + '%' : '—') + k('Avg duration', avg >= 60 ? Math.floor(avg / 60) + 'm ' + (avg % 60) + 's' : avg + 's');
   var tile = document.getElementById('agEntityTile'); if (tile && !tile.firstChild) tile.innerHTML = _sdIc('my-ai-agents-outlined', 28);
 }
 function renderAgentsThead(){
@@ -11504,7 +11504,7 @@ function openAgentTaskModal(taskId){
   var capName = t.kind === 'Review' ? 'Manage policies' : (t.kind === 'Backup' ? 'Backup jobs' : (t.kind === 'Restore' ? 'Restore data' : 'Read access'));
   var goHref = t.href || ('inventory-V1-agent-overlay.html#agentgate/' + t.id);
   // ── header: type + status chip, title, then the actions (the Finding page's grammar: primary decision button
-  // + an Actions menu at the top right; a pending approval leads with the decision) ──
+  // + an Actions menu at the top right; a awaiting decision leads with the decision) ──
   var acts = [];
   if (rot && pending) acts.push(['Open the draft in Policies', "window.location.href='backup-policies-agent-overlay.html#rot-review'"]);
   if (rot && t.outcome === 'done') acts.push(['Open File ROT policies', "window.location.href='backup-policies-agent-overlay.html#rot'"]);
@@ -15491,7 +15491,7 @@ aiWidthRestore = function(){ document.body.style.removeProperty('--ai-w'); };   
   };
   function generic(t){
     return { user:'What is ' + t.capability + ' waiting on?', topic:t.capability,
-      steps:[['route','Interpreting request \u2014 ' + t.capability,[['workload',t.wl || '\u2014']],'A held task awaiting approval']],
+      steps:[['route','Interpreting request \u2014 ' + t.capability,[['workload',t.wl || '\u2014']],'A held task awaiting decision']],
       summary:'<p>\u201c' + E(t.capability) + '\u201d is paused at an approval. Nothing runs until you answer it.</p>',
       rows:[['Action',E(t.capability)],['Scope',E(t.wl || '\u2014')],['Evidence','Requested by ' + E(t.trigger || '\u2014')],['Reversal','Nothing runs until you approve it']],
       primary:'Approve', approved:'Approved \u2014 continuing.', denied:'Understood \u2014 I won\u2019t go ahead.' };
@@ -15653,7 +15653,7 @@ function _agEntFromTask(t, ses, pending){
     failedWhen: d.fail ? fmt(t.started) : null, sessionWhen: tov.ts ? fmt(tov.ts) : null, title: t.capability, status: _agStatusLabel ? '' : '', started: fmt(t.started),
     decision: t.outcome === 'cancelled' ? 'Denied' : (decided ? (rot && rs.rec === 'dismissed' ? 'Dismissed' : 'Approved') : 'Awaiting your decision'), decisionWhen: decided || '—',
     policyStatus: rs.rec === 'approved' ? 'Created' : (rs.rec === 'dismissed' ? 'Dismissed' : 'Draft — not created') });
-  var st = { awaiting:'Pending approval', waiting:'Waiting on you', scheduled:'Scheduled', queued:'Queued', running:'In progress', done:(rot ? 'Created' : 'Done'), cancelled:(rot ? 'Dismissed' : 'Cancelled') }[t.outcome] || t.outcome;
+  var st = { awaiting:'Awaiting decision', waiting:'Waiting on you', scheduled:'Scheduled', queued:'Queued', running:'In progress', done:(rot ? 'Created' : 'Done'), cancelled:(rot ? 'Dismissed' : 'Cancelled') }[t.outcome] || t.outcome;
   spec.rows['Agent task'].rows[0][2] = st;
   return _agEntModel(spec);
 }

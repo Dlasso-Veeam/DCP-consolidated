@@ -10748,7 +10748,7 @@ else aiComposerIcons();
 // to inventory-V1-agent-overlay.html#ai, warn tint on gate-valence states (2026-09-10).
 (function(){
   return;   // pill disabled — body kept for lineage
-  var LBL = { awaiting:'Pending approval', waiting:'Waiting on you', running:'In progress', queued:'Queued' };
+  var LBL = { awaiting:'Awaiting decision', waiting:'Waiting on you', running:'In progress', queued:'Queued' };
   function render(){
     var host = document.getElementById('vdcTasksPill');
     var raw = null; try { raw = JSON.parse(localStorage.getItem('vdc-agent-tasks')); } catch (e) {}

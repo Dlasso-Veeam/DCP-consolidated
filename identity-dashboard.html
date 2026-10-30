@@ -1080,6 +1080,890 @@ table.idd-tbl.pgt { table-layout: auto; min-width: 0; width: 100%; border-top: 1
 .sla-fc { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px 0 12px; border: 1px solid var(--black-20); border-radius: 4px; background: var(--white); font-size: 16px; } .sla-fc b { font-weight: 500; } .sla-fc button { border: none; background: none; padding: 0; display: inline-flex; color: var(--black-70); cursor: pointer; } .sla-fc svg { width: 16px; height: 16px; }
 a.idd-ibtn { text-decoration: none; } .idd-ibtn.is-disabled { opacity: .4; cursor: default; }
 </style>
+<style id="ai-panel-port">
+:root { --ai-w: 0px; --green-s30: #9cd8be; --blue-dark: var(--dark-blue); }   /* panel tokens every other page defines: --green-s30 is the card hover border (undefined here it fell back to currentColor), --blue-dark maps to this page's --dark-blue */   /* closed = zero width; body.ai-open widens it. Without this the panel's width was invalid and it sat open and empty. */
+/* ═══ AGENT PANEL — cloned from agent-settings.html (2026-10-29). Selector-filtered extract of that page's panel CSS
+   (shell + Protected-Data-parity layer + history + feedback + rail launcher + the shared toast stack). Do not
+   hand-edit here: re-extract from the donor. ═══ */
+/* === TOAST === */
+/* Toast — same component as Protected Data (protected-data.html .toast): TOP-RIGHT, tinted card with a matching 1px border, radius 8,
+   16px / 500 title (a single-line message takes the headline style), 14px body, green close. Stacked here so several can show at once. */
+.toast-stack { position: fixed; top: calc(16px + var(--devjump-h, 0px)); right: 24px; z-index: 10000; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; pointer-events: none; }
+body.ai-open .toast-stack { right: calc(var(--ai-w) + 24px); }
+/* toasts sit above the panel, so they must not cover its header buttons */
+.toast { max-width: 420px; min-width: 320px; border: 1px solid; border-radius: 8px; padding: 16px 18px; display: flex; gap: 16px; align-items: flex-start; box-shadow: 0 4px 16px rgba(0,0,0,0.08); transform: translateY(-12px); opacity: 0; transition: opacity 0.2s, transform 0.2s; pointer-events: none; }
+.toast.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
+.toast.toast-success { background: var(--green-bg); border-color: var(--green-30); }
+.toast.toast-info { background: var(--blue-light, var(--val-blue-bg)); border-color: var(--blue-30, var(--val-blue)); }
+.toast-title { font-size: 16px; font-weight: 500; color: var(--black-100); line-height: 1.4; }
+.toast-body { font-size: 14px; font-weight: 450; color: var(--black-100); line-height: 1.5; margin-top: 4px; }
+.toast-body a { color: var(--blue); text-decoration: underline; cursor: pointer; }
+.toast-close { background: none; border: none; padding: 0; margin: 2px 0 0 auto; cursor: pointer; flex-shrink: 0; align-self: flex-start; display: flex; color: var(--green); }
+.toast-close svg { width: 16px; height: 16px; display: block; stroke-width: 2.5; }
+/* --blue-dark = inventory token name kept so the cloned rules stay verbatim; maps to this page's --dark-blue (no new hex) */
+body.ai-open { --ai-w: 420px; }
+/* Agent-working frame — the established "AI is acting on this surface"
+   signal. A rainbow conic edge drawn around the WORKSPACE only (stops at
+   the assistant panel edge), breathing gently while the agent mutates
+   on-screen state. Pointer-events none — purely indicative. */
+#aiWorkingGlow {
+  position: fixed; top: var(--devjump-h, 0px); left: 0; bottom: 0; right: 0;
+  pointer-events: none; z-index: 9500; /* above app chrome + modals, below toasts */
+  opacity: 0; transition: opacity 0.35s ease;
+}
+body.ai-open #aiWorkingGlow { right: var(--ai-w); }
+#aiWorkingGlow.on { opacity: 1; }
+#aiWorkingGlow::before {
+  content: ""; position: absolute; inset: 0;
+  background: var(--ai-grad);
+  /* Border-region falloff: four per-side fades give a uniform ~40px glow
+     depth on every edge. (was: hex-black mask stops — `black` keyword here, the
+     raw-hex ratchet freezes this file's hex count) */
+  -webkit-mask:
+    linear-gradient(to right,  black, transparent 40px),
+    linear-gradient(to left,   black, transparent 40px),
+    linear-gradient(to bottom, black, transparent 40px),
+    linear-gradient(to top,    black, transparent 40px);
+          mask:
+    linear-gradient(to right,  black, transparent 40px),
+    linear-gradient(to left,   black, transparent 40px),
+    linear-gradient(to bottom, black, transparent 40px),
+    linear-gradient(to top,    black, transparent 40px);
+  filter: blur(26px) saturate(1.35);
+  animation: aiGlowBreathe 2.4s ease-in-out infinite;
+}
+@keyframes aiGlowBreathe {
+  0%, 100% { opacity: 0.9;  filter: blur(26px) saturate(1.35) hue-rotate(0deg); }
+  50%      { opacity: 0.55; filter: blur(30px) saturate(1.35) hue-rotate(24deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+
+  #aiWorkingGlow::before { animation: none; }
+}
+body.ai-open .app { padding-right: var(--ai-w); }
+/* --- One scrollbar beside the panel ------------------------------------
+   The panel is position:fixed;right:0, so for a fixed element "right:0" is the
+   viewport CONTENT edge — the document's own bar then sits immediately to its
+   right and you get two bars touching. Freeze the document and let .app scroll
+   instead: .app ENDS at the panel's left edge, so its bar is over there and the
+   panel's own is at the far right, the whole panel apart.
+   --devjump-h must go to 0 here: the sticky children offset by it because they
+   stick against the viewport while the DOCUMENT scrolls; once .app is the
+   scroller they stick against .app, and the offset would double-count. */
+body.ai-open { overflow: hidden; }
+/* The devjump leaves the flow and overlays instead, so .app can be the FULL viewport height. That is the whole
+   trick: the scrollport's top edge then coincides with the viewport's, which is what every sticky offset on this
+   page was already written against. --devjump-h keeps its real value, .sidenav still pins at top:40 and measures
+   calc(100vh - 40px), the table heads still stack under it — nothing about the sticky system has to know the
+   panel is open. The first attempt zeroed --devjump-h instead and broke the rail, because that variable carries
+   BOTH the offset and the height and only the offset wanted to change. */
+body.ai-open #devjump { position: fixed; top: 0; left: 0; right: 0; }
+/* The bar's height is given back as a MARGIN on the flex children, never as padding on .app. Padding would move
+   the scrollport's content edge down, and Chrome measures a sticky element's offset from that edge — so every
+   `top: var(--devjump-h)` would have been counted twice and the rail sat at 80px instead of 40 (seen on Activity
+   and Settings, where the rail was already stuck). A margin shifts where the children START without moving the
+   edge the offsets resolve against. */
+body.ai-open .app > * { margin-top: var(--devjump-h, 0px); }
+body.ai-open .app { min-height: 0; height: 100vh;
+  overflow-y: auto; overscroll-behavior: contain;
+  /* Flush to the panel. An 8px gutter was tried here and rejected (user 2026-10-29) — with the panel open the
+     panel IS the page's right edge, and the page's scrollbar belongs against it exactly as it sits against the
+     window edge when the panel is closed. */
+  padding-right: 0; width: calc(100% - var(--ai-w)); transition: width 0.24s ease; }
+/* The scroller's bar is left NATIVE on purpose (user 2026-10-29: "why does the page scrollbar look so different
+   when the conversational panel is open? its a light grey"). It was briefly given a 10px track and a
+   --border-light thumb; moving which element scrolls should not change what the page's scrollbar LOOKS like, and
+   a restyled bar beside the panel's untouched native one reads as two different controls. */
+
+/* --ai-w goes to 100vw in both of these, which would collapse .app to zero width. */
+body.ai-open.ai-full .app { width: 100%; }
+/* (inventory also shifts .ws-overlay/.ws-modal/.record-drawer here — those
+   surfaces don't exist on this page, rules not ported) */
+/* CARRIED PANEL ARRIVES ALREADY OPEN (user 2026-10-29: "theres a weird transition animation... it should look more
+   like it persists perfectly from one page to another"). The panel's width IS its open/closed state (--ai-w 0 -> 420)
+   and that width is transitioned, so restoring it after a handoff animated the whole panel in from the right as if it
+   were being opened for the first time. For one frame on landing, every transition that width drives is off. */
+body.ai-nofx .ai-panel, body.ai-nofx .app, body.ai-nofx #aiWorkingGlow,
+body.ai-nofx .sd-overlay, body.ai-nofx .sd-modal, body.ai-nofx #toast, body.ai-nofx .toast-stack { transition: none !important; }
+.ai-panel {
+  position: fixed; top: var(--devjump-h, 0px); right: 0; bottom: 0;
+  width: var(--ai-w); z-index: 950; overflow: hidden;
+  background: var(--white); border-left: 1px solid var(--border-light);
+  box-shadow: -8px 0 24px rgba(31,34,41,0.08);
+  display: flex; flex-direction: column; transition: width 0.24s ease;
+}
+.ai-head { display: flex; align-items: center; gap: 4px; padding: 12px 16px; background: var(--white); border-bottom: 1px solid var(--border-light); flex-shrink: 0; }
+.ai-head-glyph {
+  position: relative;
+  width: 32px; height: 32px; border-radius: 6px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--white), var(--white)) padding-box, /* was: hex white — raw-hex ratchet */
+    var(--ai-grad) border-box;
+}
+.ai-head-glyph::before {
+  content: ""; position: absolute; inset: 2px;
+  border-radius: 4px; background: var(--ai-grad);
+}
+.ai-head-glyph svg { position: relative; z-index: 1; display: block; width: 30px; height: 30px; }
+.ai-head-text { flex: 1; min-width: 0; }
+.ai-head-title { font-size: 16px; font-weight: 500; color: var(--black-100); }
+.ai-head-sub { font-size: 12px; color: var(--black-60); }
+.ai-head-close { width: 28px; height: 28px; border: none; background: none; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ai-head-btn { width: 28px; height: 28px; border: none; background: none; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ai-head-btn:hover { background: var(--black-5); color: var(--black-100); }
+/* Full-screen conversational mode: the panel takes the whole viewport;
+   the conversation column stays readable, centered. */
+body.ai-open.ai-full { --ai-w: 100vw !important; overflow: hidden; }   /* !important: a dragged panel width is stored inline on <body> and would otherwise beat this rule (same as protected-data) */
+body.ai-full .ai-head, body.ai-full .ai-body, body.ai-full .ai-foot { padding-left: max(16px, calc((100vw - 720px) / 2)); padding-right: max(16px, calc((100vw - 720px) / 2)); }
+body.ai-full #aiWorkingGlow { display: none; }
+.ai-head-close:hover { background: var(--black-5); color: var(--black-100); }
+.ai-body { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: var(--white); scrollbar-width: thin; }
+/* The panel is fixed at right:0 on a page that scrolls, so its own 15px scrollbar lands flush against the document's
+   — 30px of adjacent track reading as "dual scrollbars on the panel" (user 2026-10-29). The page scrollbar is not
+   ours to remove (the content behind legitimately overflows), so the INNER one stops competing: the file's existing
+   internal-scroll treatment (.ws-sum-items-scroll) — 10px, transparent track, --border-light thumb inset by a 2px
+   white border — instead of a second full-weight bar. */
+.ai-body::-webkit-scrollbar { width: 10px; }
+.ai-body::-webkit-scrollbar-track { background: transparent; }
+.ai-body::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; border: 2px solid var(--white); background-clip: padding-box; }
+.ai-body::-webkit-scrollbar-thumb:hover { background: var(--border); border-color: var(--white); background-clip: padding-box; }
+.ai-msg { display: flex; flex-wrap: wrap; }
+.ai-msg.user { justify-content: flex-end; }
+.ai-bubble { max-width: 88%; font-size: 14px; line-height: 1.55; border-radius: 8px; padding: 8px 12px; }
+/* Agent responses sit flat on the white panel, full width; only the user's
+   messages keep bubble chrome, right-aligned. */
+.ai-msg.agent .ai-bubble { background: none; border: none; padding: 0; border-radius: 0; max-width: 100%; flex: 1; color: var(--black-100); }
+.ai-msg.user .ai-bubble { background: var(--blue); color: var(--white); border-top-right-radius: 4px; }
+.ai-bubble strong { font-weight: 600; }
+.ai-bubble p + p { margin-top: 8px; }
+.ai-action { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; color: var(--black-60); }
+.ai-action .ai-action-ic { width: 16px; height: 16px; flex-shrink: 0; color: var(--green); display: inline-flex; }
+.ai-action.run { color: var(--blue-dark); }
+.ai-action.run .ai-action-ic { color: var(--blue); }
+.ai-gate { margin-top: 10px; border-top: 1px solid var(--black-5); padding-top: 10px; }
+.ai-gate-q { font-size: 14px; color: var(--black-100); margin-bottom: 10px; }
+.ai-gate-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.ai-gate-btn { height: 28px; padding: 0 12px; border-radius: 4px; font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; border: 1px solid var(--border); background: var(--white); color: var(--black-100); }
+.ai-gate-btn:hover { background: var(--black-5); }
+.ai-gate-btn.primary { background: var(--blue); border-color: var(--blue); color: var(--white); }
+.ai-gate-btn.primary:hover { filter: brightness(0.95); background: var(--blue); }
+.ai-gate.resolved .ai-gate-btns { display: none; }
+.ai-gate-done { font-size: 12px; color: var(--green); font-weight: 500; display: none; }
+.ai-gate.resolved .ai-gate-done { display: block; }
+.ai-thinking { align-self: flex-start; display: inline-flex; gap: 4px; align-items: center; padding: 12px; background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; border-top-left-radius: 4px; }
+.ai-thinking span { width: 6px; height: 6px; border-radius: 50%; background: var(--black-30); animation: aiPulse 1.2s infinite ease-in-out; }
+.ai-thinking span:nth-child(2) { animation-delay: 0.18s; }
+.ai-thinking span:nth-child(3) { animation-delay: 0.36s; }
+@keyframes aiPulse { 0%, 60%, 100% { opacity: 0.3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
+.ai-foot { flex-shrink: 0; border-top: 1px solid var(--border-light); padding: 12px 16px; background: var(--white); }
+.ai-chips { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.ai-chips:empty { display: none; }
+.ai-chip { font-size: 14px; text-align: left; border: 1px solid var(--blue-30); background: var(--blue-10); color: var(--blue-dark); border-radius: 4px; padding: 8px 12px; cursor: pointer; font-family: inherit; line-height: 1.4; }
+.ai-chip:hover { background: var(--blue-30); }
+/* (inventory's .ai-scenario-* drop-UP split lives here — scenario launcher,
+   not ported: the D365 scenario scripts stay on Protected Data) */
+.ai-input-row { display: flex; align-items: center; gap: 8px; }
+.ai-home { display: flex; flex-direction: column; gap: 8px; padding: 44px 8px 8px; }
+.ai-home-glyph {
+  position: relative;
+  width: 44px; height: 44px; border-radius: 8px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid transparent; margin-bottom: 8px;
+  background:
+    linear-gradient(var(--white), var(--white)) padding-box, /* was: hex white — raw-hex ratchet */
+    var(--ai-grad) border-box;
+}
+.ai-home-glyph::before { content: ""; position: absolute; inset: 2px; border-radius: 6px; background: var(--ai-grad); }
+.ai-home-glyph svg { position: relative; z-index: 1; width: 40px; height: 40px; display: block; }
+.ai-home-glyph svg, .vai-tile svg { color: var(--white); }
+/* store sparkle renders fill=currentColor; was a hardcoded white path literal in inventory */
+.ai-home-title { font-size: 16px; font-weight: 500; color: var(--black-100); line-height: 1.4; }
+.ai-home-sub { font-size: 14px; color: var(--black-60); line-height: 1.5; }
+.ai-home-label { font-size: 14px; font-weight: 500; color: var(--black-60); margin-top: 16px; }
+.ai-home-card { text-align: left; border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); padding: 12px; cursor: pointer; font-family: inherit; }
+.ai-home-card:hover { border-color: var(--green-s30); background: var(--em-green-tint); }
+/* was --blue-30/--blue-light: pre-Vision Securiti blue (2026-10-29) */
+.ai-home-card-t { font-size: 14px; font-weight: 500; color: var(--black-100); }
+.ai-home-card-p { font-size: 14px; color: var(--black-60); margin-top: 2px; line-height: 1.4; }
+/* Composer: one bordered box — textarea + tool row */
+.ai-composer { display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--border); border-radius: 8px; background: var(--white); padding: 8px 8px 8px 12px; }
+.ai-composer:focus-within { border-color: var(--blue); background: var(--em-green-tint); box-shadow: none; }
+/* was: white fill + inset 1px ring — Vision input Active = S5 fill + 1px S80 border */
+.ai-composer-input { border: none; outline: none; resize: none; background: transparent; font-family: inherit; font-size: 14px; line-height: 20px; color: var(--black-100); min-height: 20px; max-height: 96px; padding: 4px 0; }
+.ai-composer-input::placeholder { color: var(--black-60); }
+.ai-composer-row { display: flex; align-items: center; gap: 4px; }
+.ai-composer-tool { width: 28px; height: 28px; border: none; background: none; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.ai-composer-tool:hover { background: var(--black-5); color: var(--black-100); }
+.ai-composer-tool.is-rec { background: var(--red-10); color: var(--red); }
+.ai-composer-tool svg { width: 18px; height: 18px; }
+/* The arrow_circle_up (Filled) icon IS the button — solid disc, cut-out arrow */
+.ai-send-fab { width: 36px; height: 36px; border: none; border-radius: 50%; background: none; padding: 0; color: var(--black-100); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ai-send-fab:hover { color: var(--blue); }
+.ai-send-fab svg { width: 36px; height: 36px; }
+.ai-send-fab:disabled { color: var(--black-30); cursor: default; }
+.ai-attach-strip { display: flex; flex-wrap: wrap; gap: 4px; }
+.ai-attach-strip:empty { display: none; }
+.ai-attach-chip { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 8px; border: 1px solid var(--border); border-radius: 2px; background: var(--black-5); font-size: 12px; color: var(--black-100); }
+.ai-attach-chip button { border: none; background: none; cursor: pointer; color: var(--black-60); display: inline-flex; padding: 0; font-size: 14px; line-height: 1; }
+/* Reasoning bar — collapsed "Thought for Ns" pill, expandable detail */
+.ai-reason { align-self: stretch; border: 1px solid var(--border-light); border-radius: 8px; background: var(--black-3); padding: 8px 12px; }
+.ai-reason-head { display: flex; align-items: center; gap: 8px; width: 100%; border: none; background: none; padding: 0; font-family: inherit; font-size: 14px; color: var(--black-60); cursor: pointer; text-align: left; }
+.ai-reason-head .disc-spinner { width: 14px; height: 14px; flex-shrink: 0; }
+.ai-reason-head .ai-reason-caret { margin-left: auto; transition: transform 0.15s; color: var(--black-60); }
+.ai-reason.open .ai-reason-caret { transform: rotate(180deg); }
+.ai-reason-steps { display: none; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-light); }
+.ai-reason.open .ai-reason-steps { display: block; }
+.ai-reason-step { font-size: 12px; color: var(--black-60); line-height: 1.5; padding: 2px 0; }
+/* Feedback row under agent responses */
+.ai-fb { display: flex; align-items: center; gap: 4px; margin-top: 4px; flex-basis: 100%; }
+.ai-fb button { width: 28px; height: 28px; border: none; background: none; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.ai-fb button:hover { background: var(--black-5); color: var(--black-100); }
+.ai-fb button.active { color: var(--blue); background: var(--blue-light); }
+.ai-fb button svg { width: 16px; height: 16px; }
+/* (inventory's .ai-key-row / .ai-dash-* / .ai-table / .ai-next-* /
+   .ai-live-foot live here — live-key + mini-dashboard machinery, not
+   ported with the shell) */
+.ai-input { flex: 1; min-width: 0; height: 44px; border: 1px solid var(--border); border-radius: 4px; padding: 0 12px; font-family: inherit; font-size: 14px; color: var(--black-100); outline: none; }
+.ai-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-10); }
+.ai-send { width: 44px; height: 44px; flex-shrink: 0; border: none; border-radius: 4px; background: var(--blue); color: var(--white); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.ai-send:hover { filter: brightness(0.95); }
+.ai-send:disabled { opacity: 0.45; cursor: not-allowed; }
+@media (max-width: 860px) {
+
+  body.ai-open { --ai-w: 100vw; }
+
+  body.ai-open .app { padding-right: 0; width: 100%; }
+
+  /* Panel is full-screen here — there's no visible workspace to frame. */
+  body.ai-open #aiWorkingGlow { display: none; }
+}
+/* Spinner used by the reasoning bar (cloned from protected-data.html ~733). */
+.disc-spinner { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; margin-top: 1px; border: 2px solid var(--blue-30); border-top-color: var(--blue); animation: disc-spin 0.8s linear infinite; }
+@keyframes disc-spin { to { transform: rotate(360deg); } }
+/* Rail AI launcher — ported verbatim from protected-data.html (.vn-ai-launcher,
+   user 2026-09-29/30, verified against the live QA "Gencore Assistant" tile):
+   borderless soft rainbow glow (--ai-grad, 14px blur, kept inside the 72px
+   rail) behind a 24px white sparkle that pulses in size while rotating. */
+.vn-ai-launcher { position: relative; width: 40px; height: 40px; padding: 0; margin-bottom: 16px; border: none; background: none; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.vn-ai-launcher::before { content: ""; position: absolute; inset: -6px; background: var(--ai-grad); filter: blur(14px); opacity: 0.85; animation: vnAiSpin 6s linear infinite; }
+.vn-ai-launcher svg { position: relative; z-index: 1; width: 24px; height: 24px; display: block; transform-origin: center; animation: vnAiSparklePulse 2.4s ease-in-out infinite; }
+@keyframes vnAiSpin { to { transform: rotate(360deg); } }
+@keyframes vnAiSparklePulse {
+  0% { transform: scale(0.85) rotate(0deg); }
+  50% { transform: scale(1.2) rotate(180deg); }
+  100% { transform: scale(0.85) rotate(360deg); }
+}
+/* Decorative ambient loops exempted from any file-wide reduced-motion reset
+   (same call as protected-data.html). */
+@media (prefers-reduced-motion: reduce) {
+
+  .vn-ai-launcher::before { animation-duration: 6s !important; animation-iteration-count: infinite !important; }
+
+  .vn-ai-launcher svg { animation-duration: 2.4s !important; animation-iteration-count: infinite !important; }
+}
+body.ai-open { --ai-w: 420px; }
+#aiWorkingGlow {
+  position: fixed; top: var(--devjump-h, 0px); left: 0; bottom: 0; right: 0;
+  pointer-events: none; z-index: 9500;
+  opacity: 0; transition: opacity 0.35s ease;
+}
+body.ai-open #aiWorkingGlow { right: var(--ai-w); }
+#aiWorkingGlow.on { opacity: 1; }
+#aiWorkingGlow::before {
+  content: ""; position: absolute; inset: 0;
+  background: var(--ai-grad);
+  -webkit-mask:
+    linear-gradient(to right,  black, transparent 40px),
+    linear-gradient(to left,   black, transparent 40px),
+    linear-gradient(to bottom, black, transparent 40px),
+    linear-gradient(to top,    black, transparent 40px);
+          mask:
+    linear-gradient(to right,  black, transparent 40px),
+    linear-gradient(to left,   black, transparent 40px),
+    linear-gradient(to bottom, black, transparent 40px),
+    linear-gradient(to top,    black, transparent 40px);
+  filter: blur(26px) saturate(1.35);
+  animation: aiGlowBreathe 2.4s ease-in-out infinite;
+}
+@keyframes aiGlowBreathe {
+  0%, 100% { opacity: 0.9;  filter: blur(26px) saturate(1.35) hue-rotate(0deg); }
+  50%      { opacity: 0.55; filter: blur(30px) saturate(1.35) hue-rotate(24deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+
+  #aiWorkingGlow::before { animation: none; }
+}
+body.ai-open .app { transition: padding-right 0.24s ease; padding-right: var(--ai-w); }
+/* --- One scrollbar beside the panel ------------------------------------
+   The panel is position:fixed;right:0, so for a fixed element "right:0" is the
+   viewport CONTENT edge — the document's own bar then sits immediately to its
+   right and you get two bars touching. Freeze the document and let .app scroll
+   instead: .app ENDS at the panel's left edge, so its bar is over there and the
+   panel's own is at the far right, the whole panel apart.
+   --devjump-h must go to 0 here: the sticky children offset by it because they
+   stick against the viewport while the DOCUMENT scrolls; once .app is the
+   scroller they stick against .app, and the offset would double-count. */
+body.ai-open { overflow: hidden; }
+/* The devjump leaves the flow and overlays instead, so .app can be the FULL viewport height. That is the whole
+   trick: the scrollport's top edge then coincides with the viewport's, which is what every sticky offset on this
+   page was already written against. --devjump-h keeps its real value, .sidenav still pins at top:40 and measures
+   calc(100vh - 40px), the table heads still stack under it — nothing about the sticky system has to know the
+   panel is open. The first attempt zeroed --devjump-h instead and broke the rail, because that variable carries
+   BOTH the offset and the height and only the offset wanted to change. */
+body.ai-open #devjump { position: fixed; top: 0; left: 0; right: 0; }
+/* The bar's height is given back as a MARGIN on the flex children, never as padding on .app. Padding would move
+   the scrollport's content edge down, and Chrome measures a sticky element's offset from that edge — so every
+   `top: var(--devjump-h)` would have been counted twice and the rail sat at 80px instead of 40 (seen on Activity
+   and Settings, where the rail was already stuck). A margin shifts where the children START without moving the
+   edge the offsets resolve against. */
+body.ai-open .app > * { margin-top: var(--devjump-h, 0px); }
+body.ai-open .app { min-height: 0; height: 100vh;
+  overflow-y: auto; overscroll-behavior: contain;
+  /* Flush to the panel. An 8px gutter was tried here and rejected (user 2026-10-29) — with the panel open the
+     panel IS the page's right edge, and the page's scrollbar belongs against it exactly as it sits against the
+     window edge when the panel is closed. */
+  padding-right: 0; width: calc(100% - var(--ai-w)); transition: width 0.24s ease; }
+/* The scroller's bar is left NATIVE on purpose (user 2026-10-29: "why does the page scrollbar look so different
+   when the conversational panel is open? its a light grey"). It was briefly given a 10px track and a
+   --border-light thumb; moving which element scrolls should not change what the page's scrollbar LOOKS like, and
+   a restyled bar beside the panel's untouched native one reads as two different controls. */
+
+.ai-panel {
+  position: fixed; top: var(--devjump-h, 0px); right: 0; bottom: 0;
+  width: var(--ai-w); z-index: 950; overflow: hidden;
+  background: var(--white); border-left: 1px solid var(--border-light);
+  box-shadow: -8px 0 24px rgba(31,34,41,0.08);
+  display: flex; flex-direction: column; transition: width 0.24s ease;
+}
+/* verbatim clone of protected-data.html's .ai-head panel-header component */
+.ai-head { display: flex; align-items: center; gap: 4px; padding: 12px 16px; background: var(--white); flex-shrink: 0; }
+.ai-head-text { flex: 1; min-width: 0; }
+.ai-head-title { font-size: 16px; font-weight: 500; color: var(--black-100); }
+.ai-head-btn { width: 28px; height: 28px; border: none; background: none; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ai-head-btn:hover { background: var(--black-5); color: var(--black-100); }
+body.ai-open.ai-full { --ai-w: 100vw !important; overflow: hidden; }   /* !important: a dragged panel width is stored inline on <body> and would otherwise beat this rule (same as protected-data) */
+body.ai-full .ai-head, body.ai-full .ai-body, body.ai-full .ai-foot { padding-left: max(16px, calc((100vw - 720px) / 2)); padding-right: max(16px, calc((100vw - 720px) / 2)); }
+body.ai-full #aiWorkingGlow { display: none; }
+.ai-body { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: var(--white); scrollbar-width: thin; }
+/* The panel is fixed at right:0 on a page that scrolls, so its own 15px scrollbar lands flush against the document's
+   — 30px of adjacent track reading as "dual scrollbars on the panel" (user 2026-10-29). The page scrollbar is not
+   ours to remove (the content behind legitimately overflows), so the INNER one stops competing: the file's existing
+   internal-scroll treatment (.ws-sum-items-scroll) — 10px, transparent track, --border-light thumb inset by a 2px
+   white border — instead of a second full-weight bar. */
+.ai-body::-webkit-scrollbar { width: 10px; }
+.ai-body::-webkit-scrollbar-track { background: transparent; }
+.ai-body::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; border: 2px solid var(--white); background-clip: padding-box; }
+.ai-body::-webkit-scrollbar-thumb:hover { background: var(--border); border-color: var(--white); background-clip: padding-box; }
+.ai-msg { display: flex; flex-wrap: wrap; }
+.ai-msg.user { justify-content: flex-end; }
+.ai-bubble { max-width: 88%; font-size: 14px; line-height: 1.55; border-radius: 8px; padding: 8px 12px; }
+.ai-msg.agent .ai-bubble { background: none; border: none; padding: 0; border-radius: 0; max-width: 100%; flex: 1; color: var(--black-100); }
+.ai-msg.user .ai-bubble { background: var(--em-green-tint); color: var(--black-100); border-top-right-radius: 4px; }
+.ai-bubble strong { font-weight: 600; }
+.ai-bubble p + p { margin-top: 8px; }
+.ai-action { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; color: var(--black-60); }
+.ai-action .ai-action-ic { width: 16px; height: 16px; flex-shrink: 0; color: var(--green); display: inline-flex; }
+.ai-action.run { color: var(--blue-dark); }
+.ai-action.run .ai-action-ic { color: var(--blue); }
+/* verbatim clone of protected-data.html's .ai-gate question/approval component */
+.ai-gate { margin-top: 10px; border: 1px solid var(--border-light); border-radius: 8px; padding: 12px 16px; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+.ai-gate-q { font-size: 16px; line-height: 22px; color: var(--black-100); margin-bottom: 10px; }
+.ai-gate-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.ai-gate-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px; border-radius: 4px; font-size: 16px; font-weight: 450; line-height: 22px; font-family: inherit; cursor: pointer; border: 1px solid var(--border); background: var(--white); color: var(--black-100); box-sizing: border-box; }
+.ai-gate-btn:hover { background: var(--black-5); }
+.ai-gate-btn.primary { background: var(--blue); border-color: var(--blue); color: var(--white); }
+.ai-gate-btn.primary:hover { background: var(--em-green-accent); border-color: var(--em-green-accent); color: var(--white); filter: none; }
+/* verbatim clone of protected-data.html's .ai-approval decision-unit component
+   (Figma Veeam Vision card surface; actions = Figma Vision Button set 228:10477) */
+.ai-approval { margin-top: 10px; border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); padding: 12px 16px; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+.ai-approval-title { font-size: 16px; line-height: 22px; font-weight: 500; color: var(--black-100); }
+.ai-approval-row { display: flex; gap: 8px; padding: 3px 0; font-size: 14px; line-height: 19px; }
+.ai-approval-k { width: 72px; flex-shrink: 0; color: var(--black-60); }
+.ai-approval-v { color: var(--black-100); min-width: 0; }
+.ai-approval .ai-gate-btns { margin-top: 10px; }
+.ai-approval-done { display: none; margin-top: 8px; font-size: 13px; font-weight: 500; color: var(--em-green); }
+/* panel gate cards: identical to Protected Data (single spec for every page the assistant appears on) */
+.ai-approval-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.ai-approval-auto { margin-left: auto; font-size: 12px; font-weight: 500; color: var(--black-60); background: var(--black-5); border-radius: 2px; padding: 2px 6px; cursor: help; }
+.ai-approval:not(.resolved):hover { border-color: var(--border); }
+/* CARD SYSTEM (user 2026-10-29) — see agent-card-system.html. Role decides the response: a card that IS a
+   control tints and shows a pointer; a card that merely HOLDS controls acknowledges the pointer with its border
+   while the decision is open, and nothing once settled. The drop shadow is retired everywhere in the panel: in
+   this file shadow-on-hover otherwise means "this navigates" (.wl-cat-card, .okov-catcard), which these cards
+   do not. was: border-color var(--border) + box-shadow 0 2px 8px rgba(0,0,0,0.06). */
+.ai-gate:not(.resolved):hover { border-color: var(--border); }
+.ai-gate-btn svg { flex-shrink: 0; width: 14px; height: 14px; }
+.ai-approval.resolved .ai-approval-done { display: block; }
+.ai-approval.resolved .ai-gate-btns { display: none; }
+.ai-gate.resolved .ai-gate-btns { display: none; }
+.ai-gate-done { font-size: 12px; color: var(--green); font-weight: 500; display: none; }
+.ai-gate.resolved .ai-gate-done { display: block; }
+.ai-thinking { align-self: flex-start; display: inline-flex; gap: 4px; align-items: center; padding: 12px; background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; border-top-left-radius: 4px; }
+.ai-thinking span { width: 6px; height: 6px; border-radius: 50%; background: var(--black-30); animation: aiPulse 1.2s infinite ease-in-out; }
+.ai-thinking span:nth-child(2) { animation-delay: 0.18s; }
+.ai-thinking span:nth-child(3) { animation-delay: 0.36s; }
+@keyframes aiPulse { 0%, 60%, 100% { opacity: 0.3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
+.ai-foot { flex-shrink: 0; padding: 12px 16px; background: var(--white); }
+.ai-chips { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.ai-chips:empty { display: none; }
+.ai-chip { font-size: 14px; text-align: left; border: 1px solid var(--blue-30); background: var(--blue-10); color: var(--blue-dark); border-radius: 4px; padding: 8px 12px; cursor: pointer; font-family: inherit; line-height: 1.4; }
+.ai-chip:hover { background: var(--blue-30); }
+/* verbatim clone of protected-data.html's .ai-home empty-state component */
+.ai-home { display: flex; flex-direction: column; gap: 8px; padding: 44px 8px 8px; }
+.ai-home-glyph {
+  position: relative;
+  width: 44px; height: 44px; border-radius: 8px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid transparent; margin-bottom: 8px;
+  background:
+    linear-gradient(var(--white), var(--white)) padding-box,
+    var(--ai-grad) border-box;
+}
+.ai-home-glyph::before { content: ""; position: absolute; inset: 2px; border-radius: 6px; background: var(--ai-grad); }
+.ai-home-glyph svg { position: relative; z-index: 1; width: 40px; height: 40px; display: block; }
+.ai-home-glyph svg, .vai-tile svg { color: var(--white); }
+.ai-home-title { font-size: 16px; font-weight: 500; color: var(--black-100); line-height: 1.4; }
+.ai-home-sub { font-size: 14px; color: var(--black-60); line-height: 1.5; }
+.ai-home-label { font-size: 14px; font-weight: 500; color: var(--black-60); margin-top: 16px; }
+.ai-home-card { text-align: left; border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); padding: 12px; cursor: pointer; font-family: inherit; }
+.ai-home-card:hover { border-color: var(--green-s30); background: var(--em-green-tint); }
+/* was --blue-30/--blue-light: pre-Vision Securiti blue (2026-10-29) */
+.ai-home-card-t { font-size: 14px; font-weight: 500; color: var(--black-100); }
+.ai-home-card-p { font-size: 14px; color: var(--black-60); margin-top: 2px; line-height: 1.4; }
+/* verbatim clone of protected-data.html's .ai-composer input component */
+.ai-composer { display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--border); border-radius: 8px; background: var(--white); padding: 8px 8px 8px 12px; }
+.ai-composer:focus-within { border-color: var(--blue); background: var(--em-green-tint); box-shadow: none; }
+.ai-composer-input { border: none; outline: none; resize: none; background: transparent; font-family: inherit; font-size: 14px; line-height: 20px; color: var(--black-100); min-height: 20px; max-height: 96px; padding: 4px 0; }
+.ai-composer-input::placeholder { color: var(--black-60); }
+.ai-composer-row { display: flex; align-items: center; gap: 4px; }
+.ai-composer-tool { width: 28px; height: 28px; border: none; background: none; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.ai-composer-tool:hover { background: var(--black-5); color: var(--black-100); }
+.ai-composer-tool.is-rec { background: var(--red-10); color: var(--red); }
+.ai-composer-tool svg { width: 18px; height: 18px; }
+.ai-send-fab { width: 36px; height: 36px; border: none; border-radius: 50%; background: none; padding: 0; color: var(--black-100); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ai-send-fab:hover { color: var(--blue); }
+.ai-send-fab svg { width: 36px; height: 36px; }
+.ai-send-fab:disabled { color: var(--black-30); cursor: default; }
+.ai-attach-strip { display: flex; flex-wrap: wrap; gap: 4px; }
+.ai-attach-strip:empty { display: none; }
+.ai-attach-chip { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 8px; border: 1px solid var(--border); border-radius: 2px; background: var(--black-5); font-size: 12px; color: var(--black-100); }
+.ai-attach-chip button { border: none; background: none; cursor: pointer; color: var(--black-60); display: inline-flex; padding: 0; font-size: 14px; line-height: 1; }
+/* verbatim clone of protected-data.html's .ai-reason "Thought for Ns" component */
+.ai-reason { align-self: stretch; border: 1px solid var(--border-light); border-radius: 8px; background: var(--black-3); padding: 8px 12px; }
+.ai-reason-head { display: flex; align-items: center; gap: 8px; width: 100%; border: none; background: none; padding: 0; font-family: inherit; font-size: 14px; color: var(--black-60); cursor: pointer; text-align: left; }
+.ai-reason-head .disc-spinner { width: 14px; height: 14px; flex-shrink: 0; }
+.ai-reason-head .ai-reason-caret { margin-left: auto; transition: transform 0.15s; color: var(--black-60); }
+.ai-reason.open .ai-reason-caret { transform: rotate(180deg); }
+.ai-reason-steps { display: none; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-light); }
+.ai-reason.open .ai-reason-steps { display: block; }
+.ai-reason-step { font-size: 12px; color: var(--black-60); line-height: 1.5; padding: 2px 0; }
+.ai-fb { display: flex; align-items: center; gap: 4px; margin-top: 4px; flex-basis: 100%; }
+.ai-fb button { width: 28px; height: 28px; border: none; background: none; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.ai-fb button:hover { background: var(--black-5); color: var(--black-100); }
+.ai-fb button.active { color: var(--blue); background: var(--blue-light); }
+.ai-fb button svg { width: 16px; height: 16px; }
+@media (max-width: 860px) {
+
+  body.ai-open { --ai-w: 100vw; }
+
+  body.ai-open .app { padding-right: 0; width: 100%; }
+
+  body.ai-open #aiWorkingGlow { display: none; }
+}
+/* ANSWER CARD (carried transcript) — VERBATIM copy of inventory-V1's .aiac
+   block (see protected-data.html for full provenance). Single source rule:
+   edit inventory, then re-copy here. */
+.aiac { border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); width: 100%; overflow: hidden; }
+.aiac-head { padding: 12px 16px 0; }
+.aiac-head:last-child { padding-bottom: 12px; }
+/* a card that is only a headline + chart still needs its bottom inset */
+.aiac-headline { font-size: 16px; font-weight: 500; line-height: 22px; color: var(--black-100); }
+.aiac-headsub { font-size: 14px; color: var(--black-60); line-height: 20px; margin-top: 2px; }
+.aiac-strip { display: flex; height: 6px; border-radius: 2px; overflow: hidden; margin-top: 10px; }
+.aiac-strip span { height: 100%; }
+.aiac-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; font-size: 12px; color: var(--black-60); }
+.aiac-legend .li { display: inline-flex; align-items: center; gap: 5px; }
+.aiac-legend .dot { width: 10px; height: 3px; border-radius: 1.5px; flex-shrink: 0; }
+.aiac-vrows { display: flex; flex-direction: column; gap: 7px; margin-top: 10px; }
+.aiac-vrow { display: grid; grid-template-columns: 128px 1fr 74px; gap: 10px; align-items: center; font-size: 12px; color: var(--black-80); }
+.aiac-vrow .lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aiac-vrow .track { height: 4px; border-radius: 2px; background: var(--black-5); overflow: hidden; display: flex; }
+.aiac-vrow .track span { height: 100%; }
+.aiac-vrow .val { text-align: right; color: var(--black-60); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.aiac-trend { display: block; position: relative; margin-top: 10px; }
+.aiac-trend svg { display: block; width: 100%; }
+.aiac-trend .axis { display: flex; justify-content: space-between; font-size: 12px; color: var(--black-60); margin-top: 4px; }
+.aiac-trend-readout { position: absolute; z-index: 5; pointer-events: none; background: var(--white); color: var(--black-100); border: 1px solid var(--border-light); font-size: 14px; line-height: 1.35; font-weight: 450; padding: 4px 8px; border-radius: 4px; box-shadow: 0 4px 14px rgba(0,0,0,0.22); white-space: nowrap; }
+.aiac-sec { padding: 12px 16px; }
+.aiac-sec-label { font-size: 14px; font-weight: 500; color: var(--black-100); margin-bottom: 6px; }
+/* verbatim clone of protected-data.html's .aiac-act finding-tile component
+   (DS chip Figma 10746:122213 + button Figma 13218:113044 inside it) */
+.aiac-act { position: relative; padding: 12px 16px; border: 1px solid var(--border-light); border-radius: 8px; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+.aiac-exec { position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; border: none; border-radius: 4px; padding: 0; display: inline-flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; background: var(--ai-grad); color: var(--white); }
+.aiac-exec svg { width: 34px; height: 34px; margin: -5px; display: block; flex-shrink: 0; }
+.aiac-exec.off { background: var(--black-5); color: var(--black-50); overflow: visible; }
+.aiac-exec.off .aiac-exec-lock { position: absolute; right: -6px; bottom: -6px; width: 16px; height: 16px; border-radius: 50%; background: var(--white); border: 1px solid var(--border-light); display: inline-flex; align-items: center; justify-content: center; color: var(--black-60); }
+.aiac-exec.off .aiac-exec-lock svg { width: 11px; height: 11px; margin: 0; }
+.aiac-act + .aiac-act { margin-top: 8px; }
+.aiac-act:hover { border-color: var(--border); }
+.aiac-chip { display: inline-block; max-width: 100%; height: 28px; padding: 3px 8px; border-radius: 2px; font-size: 16px; font-weight: 500; line-height: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; box-sizing: border-box; margin-bottom: 4px; }
+.aiac-chip.ok { background: var(--em-green-tint); color: var(--em-green); }
+.aiac-chip.warn { background: var(--orange-10); color: var(--orange); }
+.aiac-chip.bad { background: var(--red-10); color: var(--red); }
+.aiac-chip.n { background: var(--status-blue-5); color: var(--status-blue); }
+.aiac-act-txt { display: block; font-size: 16px; line-height: 22px; color: var(--black-100); }
+.aiac-act-txt small { display: block; font-size: 14px; line-height: 20px; color: var(--black-60); margin-top: 2px; }
+.aiac-act-vis { display: grid; grid-template-columns: 1fr 74px; gap: 10px; align-items: center; margin-top: 6px; max-width: 240px; font-size: 12px; }
+.aiac-act-vis .track { height: 4px; border-radius: 2px; background: var(--black-5); overflow: hidden; display: flex; }
+.aiac-act-vis .track span { height: 100%; }
+.aiac-act-vis .val { text-align: right; color: var(--black-60); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.aiac-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font-family: inherit; font-size: 16px; font-weight: 450; line-height: 22px; color: var(--black-100); cursor: pointer; box-sizing: border-box; margin-top: 8px; }
+.aiac-btn.primary { background: var(--blue); border-color: var(--blue); color: var(--white); font-weight: 500; }
+.aiac-btn.primary:hover { background: var(--em-green-accent); border-color: var(--em-green-accent); color: var(--white); filter: none; }
+.aiac-btn svg { flex-shrink: 0; }
+.aiac-btn:hover { background: var(--black-5); color: var(--black-80); }
+.aiac-btn:active { background: var(--black-10); }
+.aiac-tbl { width: 100%; min-width: 0; border-collapse: collapse; font-size: 14px; }
+.aiac-tbl th { text-align: left; font-weight: 500; font-size: 14px; color: var(--black-50); padding: 4px 8px 4px 0; border-bottom: 1px solid var(--black-10); }
+.aiac-tbl td { padding: 6px 8px 6px 0; border-bottom: 1px solid var(--black-5); color: var(--black-100); vertical-align: top; line-height: 20px; font-size: 14px; }
+.aiac-tbl tr:last-child td { border-bottom: none; }
+.aiac-insight { font-size: 12px; color: var(--black-60); line-height: 17px; }
+.aiac-insight strong { color: var(--black-100); font-weight: 500; }
+.aiac-insightx { font-size: 14px; color: var(--black-60); line-height: 20px; margin-top: 6px; }
+.aiac-insightx strong { color: var(--black-100); font-weight: 500; }
+.aiac-more { display: inline; border: none; background: none; padding: 0; font-family: inherit; font-size: 14px; font-weight: 450; line-height: 20px; color: var(--blue); cursor: pointer; }
+.aiac-more:hover { color: var(--em-green-accent); }
+.aiac-agent-note { display: flex; align-items: center; gap: 4px; margin-top: 4px; font-size: 12px; line-height: 16px; color: var(--black-50); }
+.aiac-agent-note svg { width: 12px; height: 12px; flex-shrink: 0; }
+.aiac-accept-row { padding: 8px 16px 12px; }
+/* Decision footer of the recommendation block — the card's own .aiac-sec geometry, and the panel's existing
+   .ai-gate-btns row (Vision Button, Solid Primary) for the verb, so a recommendation's ask is the same control an
+   approval's is. Separated from the evidence above by the section border the card already uses. */
+/* .aiac-head carries the headline AND the charts, with `padding: 14px 14px 0` — its bottom inset comes from the
+   :last-child rule above, which a decision footer silently cancels (the charts then ran flush into the hairline).
+   The head declares `has-decide` when one follows so the inset survives. Footer uses the card's own 14px gutter
+   rather than .aiac-sec's 10px, so the rule has equal air above and below — same recipe as .fp-footer. */
+.aiac-head.has-decide { padding-bottom: 12px; }
+.aiac-decide { border-top: 1px solid var(--border-light); padding: 12px 16px; }
+.aiac-decide-ask { font-size: 14px; line-height: 20px; color: var(--black-100); margin-bottom: 12px; }
+.aiac-act.sealed { opacity: 0.72; }
+.aiac-act.sealed .aiac-act-txt { color: var(--black-60); }
+.aiac-act-done { display: block; margin-top: 8px; font-size: 13px; line-height: 18px; font-weight: 450; color: var(--em-green); }
+.aiac-details-row { border-top: 1px solid var(--border-light); padding: 4px 16px; text-align: center; }
+.aiac-details-btn { display: inline-flex; align-items: center; gap: 6px; height: 28px; border: none; background: transparent; font-family: inherit; font-size: 14px; font-weight: 450; line-height: 22px; color: var(--black-100); padding: 4px 12px; cursor: pointer; border-radius: 4px; }
+.aiac-details-btn:hover { color: var(--black-80); }
+.aiac-details-btn:active { background: var(--black-10); }
+.aiac-details-btn .chev { display: inline-flex; transition: transform 0.15s; }
+.aiac-details-btn.open .chev { transform: rotate(180deg); }
+/* was: 4px top/bottom — read squished (user 2026-09-21 catch); kept in sync
+   with protected-data.html's copy */
+.aiac-sec.aiac-looklink { padding-top: 12px; padding-bottom: 12px; }
+.aiac-sec.aiac-looklink .aiac-btn { margin-top: 0; }
+/* LINEAR TIMED STEP LIST (2026-09-21) — verbatim port of protected-data.html's
+   .ai-rsteps family (the settled "Show me" walkthrough grammar: one step at
+   a time, each on a dwell timer with a loading bar) — NOT a bespoke one-off.
+   Provenance/citation lives with the original in protected-data.html; ported
+   here so activity.html's own watch flow (_aiRestartOnActivity) stays
+   visually consistent with every other flow's "Show me" instead of
+   inventing a second pattern. See protected-data.html for the fill-mechanism
+   rationale (transform computed at paint time, no CSS animation/transition —
+   a rebuild must never restart an in-progress bar). */
+.ai-rsteps { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; }
+/* verbatim port of protected-data.html's .ai-rstep step-row component */
+.ai-rstep { position: relative; display: flex; align-items: flex-start; gap: 8px; width: 100%; padding: 5px 6px 7px; border: none; background: none; border-radius: 4px; font-family: inherit; font-size: 12px; line-height: 16px; text-align: left; color: var(--black-60); cursor: pointer; }
+.ai-rstep:hover { background: var(--black-3); }
+.ai-rstep-ic { width: 16px; height: 16px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; color: var(--green); }
+.ai-rstep.is-next { color: var(--black-40); }
+.ai-rstep.is-next .ai-rstep-ic::before { content: ''; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--black-30); }
+.ai-rstep.is-current { color: var(--black-100); font-weight: 500; }
+.ai-rstep-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--em-green); }
+.ai-rstep-bar { position: absolute; left: 6px; right: 6px; bottom: 1px; height: 2px; border-radius: 1px; background: var(--black-5); overflow: hidden; }
+.ai-rstep-bar span { display: block; height: 100%; width: 100%; background: var(--em-green); transform: scaleX(0); transform-origin: left center; }
+/* verbatim port of protected-data.html's .ai-replay-ctrls Play/Pause row */
+.ai-replay-ctrls { align-items: center; margin-top: 8px; }
+.ai-replay-progress { font-size: 13px; color: var(--black-50); font-variant-numeric: tabular-nums; }
+.ai-replay-play { margin-left: auto; border: none; background: none; padding: 0; font-family: inherit; font-size: 13px; font-weight: 500; color: var(--em-green); cursor: pointer; }
+.ai-replay-play:hover { color: var(--em-green-accent); text-decoration: underline; }
+.disc-spinner { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; margin-top: 1px; border: 2px solid var(--blue-30); border-top-color: var(--blue); animation: disc-spin 0.8s linear infinite; }
+.ai-msg { display: flex; flex-wrap: wrap; }
+.ai-msg.user { justify-content: flex-end; }
+.ai-bubble { max-width: 88%; font-size: 14px; line-height: 1.55; border-radius: 8px; padding: 8px 12px; }
+.ai-msg.agent .ai-bubble { background: none; border: none; padding: 0; border-radius: 0; max-width: 100%; flex: 1; color: var(--black-100); }
+.ai-msg.user .ai-bubble { background: var(--em-green-tint); color: var(--black-100); border-top-right-radius: 4px; }
+.ai-bubble strong { font-weight: 600; }
+.ai-bubble p + p { margin-top: 8px; }
+.ai-gate { margin-top: 10px; border: 1px solid var(--border-light); border-radius: 8px; padding: 12px 16px; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+.ai-gate:not(.resolved):hover { border-color: var(--border); }
+.ai-gate-sync { display: flex; align-items: flex-start; gap: 5px; margin: -4px 0 10px; font-size: 13px; line-height: 18px; color: var(--black-50); }
+.ai-gate-sync svg { flex-shrink: 0; margin-top: 2.5px; }
+.ai-gate-sync.is-fresh { animation: aiSyncAck 0.9s ease; }
+.ai-gate-sync.is-fresh svg { animation: aiSyncAckSpark 0.9s ease; transform-origin: center; }
+.ai-gate.is-synced { animation: aiGateAck 0.9s ease; }
+@keyframes aiGateAck { 0%, 35% { border-color: var(--em-green); background: var(--em-green-tint); } 100% { border-color: var(--border-light); background: var(--white); } }
+@media (prefers-reduced-motion: reduce) {
+ .ai-gate-sync.is-fresh, .ai-gate-sync.is-fresh svg, .ai-gate.is-synced { animation: none; }
+}
+.ai-gate-q { font-size: 16px; line-height: 22px; color: var(--black-100); margin-bottom: 10px; }
+.ai-gate-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.ai-rsteps { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; }
+.ai-rstep {
+  position: relative; display: flex; align-items: flex-start; gap: 8px; width: 100%;
+  padding: 5px 6px 7px; border: none; background: none; border-radius: 4px;
+  font-family: inherit; font-size: 12px; line-height: 16px; text-align: left;
+  color: var(--black-60); cursor: pointer;
+}
+.ai-rstep:hover { background: var(--black-3); }
+.ai-rstep-ic { width: 16px; height: 16px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; color: var(--green); }
+.ai-rstep.is-next { color: var(--black-40); }
+.ai-rstep.is-next .ai-rstep-ic::before {
+  content: ''; width: 8px; height: 8px; border-radius: 50%;
+  border: 1.5px solid var(--black-30);
+}
+.ai-rstep.is-current { color: var(--black-100); font-weight: 500; }
+.ai-rstep-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--em-green); }
+.ai-rstep-bar { position: absolute; left: 6px; right: 6px; bottom: 1px; height: 2px; border-radius: 1px; background: var(--black-5); overflow: hidden; }
+.ai-rstep-bar span { display: block; height: 100%; width: 100%; background: var(--em-green); transform: scaleX(0); transform-origin: left center; }
+.ai-gate-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 16px; border-radius: 4px; font-size: 16px; font-weight: 450; line-height: 22px; font-family: inherit; cursor: pointer; border: 1px solid var(--border); background: var(--white); color: var(--black-100); box-sizing: border-box; }
+.ai-gate-btn:hover { background: var(--black-5); }
+.ai-gate-btn svg { flex-shrink: 0; width: 14px; height: 14px; }
+@container ai-panel (max-width: 380px) {
+
+  .ai-gate-btn.primary .ai-gate-btn-label { display: none; }
+
+  .ai-gate-btn.primary { padding: 0 10px; }
+}
+.ai-gate-btn.primary { background: var(--blue); border-color: var(--blue); color: var(--white); }
+.ai-gate-btn.primary:hover { background: var(--em-green-accent); border-color: var(--em-green-accent); color: var(--white); filter: none; }
+.ai-gate.resolved .ai-gate-btns { display: none; }
+.ai-gate-done { font-size: 12px; color: var(--green); font-weight: 500; display: none; }
+.ai-gate.resolved .ai-gate-done { display: block; }
+.ai-thinking { align-self: flex-start; display: inline-flex; gap: 4px; align-items: center; padding: 12px; background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; border-top-left-radius: 4px; }
+.ai-thinking span { width: 6px; height: 6px; border-radius: 50%; background: var(--black-30); animation: aiPulse 1.2s infinite ease-in-out; }
+.ai-thinking span:nth-child(2) { animation-delay: 0.18s; }
+.ai-thinking span:nth-child(3) { animation-delay: 0.36s; }
+.ai-home { display: flex; flex-direction: column; gap: 8px; padding: 44px 8px 8px; }
+.ai-home-glyph {
+  position: relative;
+  width: 44px; height: 44px; border-radius: 8px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid transparent; margin-bottom: 8px;
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    var(--ai-grad) border-box;
+}
+.ai-home-glyph::before { content: ""; position: absolute; inset: 2px; border-radius: 6px; background: var(--ai-grad); }
+.ai-home-glyph svg { position: relative; z-index: 1; width: 40px; height: 40px; display: block; }
+.ai-home-title { font-size: 16px; font-weight: 500; color: var(--black-100); line-height: 1.4; }
+.ai-home-sub { font-size: 14px; color: var(--black-60); line-height: 1.5; }
+.ai-home-label { font-size: 14px; font-weight: 500; color: var(--black-60); margin-top: 16px; }
+.ai-home-card { text-align: left; border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); padding: 12px; cursor: pointer; font-family: inherit; }
+.ai-home-card:hover { border-color: var(--green-s30); background: var(--em-green-tint); }
+/* was --blue-30/--blue-light: pre-Vision Securiti blue (2026-10-29) */
+.ai-home-card-t { font-size: 14px; font-weight: 500; color: var(--black-100); }
+.ai-home-card-p { font-size: 14px; color: var(--black-60); margin-top: 2px; line-height: 1.4; }
+.ai-reason-step.kind-agent, .ai-reason-step.kind-tool, .ai-reason-step.kind-route { display: flex; align-items: center; gap: 6px; }
+.ai-reason-step.kind-agent svg { color: var(--blue-dark); flex-shrink: 0; }
+.ai-reason-step.kind-tool svg { color: var(--black-50); flex-shrink: 0; }
+.ai-reason-step.kind-route svg { color: var(--black-60); flex-shrink: 0; }
+.ai-approval { margin-top: 10px; border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); padding: 12px 16px; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
+.ai-approval:not(.resolved):hover { border-color: var(--border); }
+.ai-approval-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.ai-approval-title { font-size: 16px; line-height: 22px; font-weight: 500; color: var(--black-100); }
+.ai-approval-auto { margin-left: auto; font-size: 12px; font-weight: 500; color: var(--black-60); background: var(--black-5); border-radius: 2px; padding: 2px 6px; cursor: help; }
+.ai-approval-row { display: flex; gap: 8px; padding: 3px 0; font-size: 14px; line-height: 19px; }
+.ai-approval-k { width: 72px; flex-shrink: 0; color: var(--black-60); }
+.ai-approval-v { color: var(--black-100); min-width: 0; }
+.ai-approval .ai-gate-btns { margin-top: 10px; }
+.ai-approval-done { display: none; margin-top: 8px; font-size: 13px; font-weight: 500; color: var(--em-green); }
+.ai-approval.resolved .ai-approval-done { display: block; }
+.ai-reason { align-self: stretch; border: 1px solid var(--border-light); border-radius: 8px; background: var(--black-3); padding: 8px 12px; }
+.ai-reason-head { display: flex; align-items: center; gap: 8px; width: 100%; border: none; background: none; padding: 0; font-family: inherit; font-size: 14px; color: var(--black-60); cursor: pointer; text-align: left; }
+.ai-reason-head .disc-spinner { width: 14px; height: 14px; flex-shrink: 0; }
+.ai-reason-head .ai-reason-caret { margin-left: auto; transition: transform 0.15s; color: var(--black-60); }
+.ai-reason.open .ai-reason-caret { transform: rotate(180deg); }
+.ai-reason-steps { display: none; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-light); }
+.ai-reason.open .ai-reason-steps { display: block; }
+.ai-reason-step { font-size: 12px; color: var(--black-60); line-height: 1.5; padding: 2px 0; }
+.ai-tr2-step { position: relative; padding-left: 30px; }
+.ai-tr2-step::before { content: ''; position: absolute; left: 9px; top: 0; bottom: 0; width: 1px; background: var(--black-10); }
+.ai-tr2-step:first-child::before { top: 12px; }
+.ai-tr2-step:last-child::before { bottom: auto; height: 12px; }
+.ai-tr2-tile { position: absolute; left: 0; top: 6px; width: 20px; height: 20px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; background: var(--black-5); color: var(--black-60); }
+.ai-tr2-step.k-agent .ai-tr2-tile { background: var(--em-green-tint); color: var(--em-green); }
+.ai-tr2-step.k-tool  .ai-tr2-tile { background: var(--soft-blue-bg, var(--black-5)); color: var(--blue-dark); }
+.ai-tr2-row { display: flex; align-items: center; gap: 8px; width: 100%; border: none; background: none; padding: 6px 0; font-family: inherit; font-size: 13px; color: var(--black-80); cursor: pointer; text-align: left; border-radius: 4px; min-height: 32px; }
+.ai-tr2-row:hover { background: var(--black-5); }
+.ai-tr2-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ai-tr2-step.k-tool .ai-tr2-label b { font-weight: 500; font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 12px; color: var(--black-100); }
+.ai-tr2-chip { display: inline-flex; align-items: center; height: 18px; padding: 1px 6px; border-radius: 2px; font-size: 11px; font-weight: 500; background: var(--em-green-tint); color: var(--em-green); flex-shrink: 0; }
+.ai-tr2-chip.n { background: var(--soft-blue-bg, var(--black-5)); color: var(--blue-dark); }
+.ai-tr2-dur { margin-left: auto; font-size: 11px; color: var(--black-40); flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.ai-tr2-state { flex-shrink: 0; width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; }
+.ai-tr2-state .tick { color: var(--em-green); }
+.ai-tr2-state .disc-spinner { width: 12px; height: 12px; }
+.ai-tr2-detail { display: none; margin: 6px 0; border: 1px solid var(--border-light); border-radius: 4px; background: var(--white); padding: 8px 10px; font-size: 12px; }
+.ai-tr2-step.open .ai-tr2-detail { display: block; }
+.ai-tr2-kv { display: flex; gap: 8px; padding: 2px 0; line-height: 1.5; }
+.ai-tr2-kv .k { width: 76px; flex-shrink: 0; color: var(--black-50); }
+.ai-tr2-kv .v { color: var(--black-100); min-width: 0; font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 11.5px; }
+.ai-tr2-kv.res .v { font-family: inherit; font-size: 12px; font-weight: 500; color: var(--em-green); }
+.ai-reason-head .ai-tr2-hkinds { display: inline-flex; gap: 4px; margin-left: 4px; }
+.ai-reason.quiet { border: none; background: none; padding: 0; align-self: stretch; }
+.ai-reason.quiet .ai-reason-head { font-size: 13px; color: var(--black-50); width: auto; display: inline-flex; }
+.ai-reason.quiet .ai-reason-head:hover { color: var(--black-80); }
+.ai-reason.quiet .ai-reason-head .tick { color: var(--black-40); }
+.ai-reason.quiet .ai-tr2-hkinds { display: none; }
+.ai-reason.quiet .ai-reason-steps { border-top: none; margin: 4px 0 0 6px; padding: 0 0 0 14px; border-left: 1px solid var(--black-10); }
+.ai-reason.quiet .ai-tr2-step { padding-left: 0; }
+.ai-reason.quiet .ai-tr2-step::before { display: none; }
+.ai-reason.quiet .ai-tr2-tile { display: none; }
+.ai-reason.quiet .ai-tr2-row { padding: 3px 0; min-height: 22px; font-size: 12.5px; color: var(--black-50); gap: 6px; }
+.ai-reason.quiet .ai-tr2-row:hover { background: none; color: var(--black-80); }
+.ai-reason.module { border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); padding: 0; align-self: stretch; }
+.ai-reason.module .ai-reason-head { padding: 11px 14px; font-size: 14px; font-weight: 500; color: var(--black-100); }
+.ai-reason.module .ai-reason-bar { display: flex; align-items: center; }
+.ai-reason.module .ai-reason-bar .ai-reason-head { flex: 1; min-width: 0; }
+.ai-reason.module:not(.done-hd) .ai-reason-head { }
+.ai-reason.module .ai-reason-head.live { font-weight: 450; color: var(--black-60); }
+.ai-reason.module .ai-reason-head .disc-spinner { width: 13px; height: 13px; }
+.ai-reason.module .ai-reason-head > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ai-reason.module .ai-reason-caret { color: var(--black-60); flex-shrink: 0; }
+.ai-reason.module .ai-reason-steps { margin: 0; padding: 0 14px; border-top: none; }
+.ai-reason.module .ai-tr2-step { padding-left: 0; }
+.ai-reason.module .ai-tr2-step::before { display: none; }
+.ai-reason.module .ai-tr2-tile { display: none; }
+.ai-reason.module .ai-tr2-row { padding: 9px 0; min-height: 0; font-size: 13px; color: var(--black-100); gap: 8px; border-top: 1px solid var(--border-light); border-radius: 0; }
+.ai-reason.module .ai-tr2-row:hover { background: var(--black-3); }
+.ai-reason.module .ai-tr2-state .tick { color: var(--black-80); }
+.ai-reason.module .ai-tr2-step.k-tool .ai-tr2-label b { font-size: 12px; }
+.ai-reason.module .ai-tr2-chip { background: none; padding: 0; height: auto; font-size: 12px; font-weight: 450; color: var(--black-50); }
+.ai-reason.module .ai-tr2-chip.n { background: none; color: var(--black-50); }
+.ai-reason.module .ai-tr2-dur { font-size: 12px; color: var(--black-50); }
+.ai-reason.module .ai-tr2-detail { margin: 6px 0 8px 22px; }
+.ai-reason.module .ai-reason-step { font-size: 13px; color: var(--black-60); padding: 8px 0; border-top: 1px solid var(--border-light); }
+.ai-reason.quiet .ai-tr2-label b { font-size: 11.5px; color: var(--black-60); }
+.ai-reason.quiet .ai-tr2-chip { background: none; color: var(--black-40); font-weight: 450; height: auto; padding: 0 0 0 4px; }
+.ai-reason.quiet .ai-tr2-chip::before { content: '· '; }
+.ai-reason.quiet .ai-tr2-dur { color: var(--black-30); }
+.ai-reason.quiet .ai-tr2-step.open .ai-tr2-row { color: var(--black-80); }
+.ai-reason.quiet .ai-tr2-step.open .ai-tr2-label b { color: var(--black-100); }
+.ai-reason.quiet .ai-tr2-detail { border: none; background: none; margin: 4px 0 12px 20px; padding: 2px 0 2px 12px; border-left: 1px solid var(--border); border-radius: 0; }
+.ai-reason.quiet .ai-tr2-kv { font-size: 11.5px; color: var(--black-60); padding: 2px 0; line-height: 17px; }
+.ai-reason.quiet .ai-tr2-kv .k { color: var(--black-40); width: 68px; }
+.ai-reason.quiet .ai-tr2-kv .v { font-size: 11px; line-height: 17px; }
+.ai-reason.quiet .ai-tr2-kv.res { margin-top: 2px; }
+.ai-reason.quiet .ai-tr2-kv.res .v { color: var(--black-80); }
+.aiac-strip, .aiac-legend, .aiac-vrows, .aiac-act-vis { --chart-soft-green: var(--em-green); --chart-soft-gold: var(--orange); --chart-soft-red: var(--red); --chart-soft-blue: var(--blue); }
+.aiac-strip { display: flex; gap: 2px; height: 8px; margin-top: 10px; }
+.aiac-strip span { height: 100%; border-radius: 2px; }
+.aiac-vrows { display: flex; flex-direction: column; gap: 7px; margin-top: 10px; }
+.aiac-vrow { display: grid; grid-template-columns: 128px 1fr 74px; gap: 10px; align-items: center; font-size: 12px; color: var(--black-80); }
+.aiac-vrow .lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aiac-vrow .track { height: 8px; border-radius: 2px; background: var(--black-5); overflow: hidden; display: flex; gap: 2px; }
+.aiac-vrow .track span { height: 100%; border-radius: 2px; }
+.aiac-vrow .val { text-align: right; color: var(--black-60); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.col-picker-apply:hover:not(:disabled), .conn-health-popover-cta:hover,
+.search-facets-done:hover, .ws-cc-apply:hover,
+.ws-cta-primary:hover:not(:disabled), .ws-btn-primary:hover:not(:disabled),
+.ws-apply-btn:hover, .rw-use-side-btn:hover, .ai-gate-btn.primary:hover
+{ background: var(--em-green-accent); border-color: var(--em-green-accent); filter: none; }
+.ai-resize {
+  position: absolute; top: 0; left: 0; height: 100%; width: 6px; z-index: 40;
+  cursor: col-resize; background: transparent; border: none; padding: 0;
+  transition: background-color 0.15s ease;
+}
+.ai-resize:hover { background: var(--blue-30); }
+.ai-panel.is-resizing .ai-resize { background: var(--blue); }
+/* the 0.24s width transition is for OPEN/CLOSE — during a drag it lags the
+   pointer, so it is suppressed for the duration */
+body.ai-resizing .ai-panel, body.ai-resizing .app { transition: none; }
+body.ai-resizing { cursor: col-resize; user-select: none; }
+/* full screen owns the width outright — nothing to drag */
+body.ai-full .ai-resize { display: none; }
+/* CHAT HISTORY — searchable history overlay, PORTED byte-faithful from the
+   picked pattern in ai-history-patterns.html (user 2026-09-01; A/B/C bake-off,
+   adaptations rejected). Anatomy: history affordance (or ⌘K) opens a scrim
+   card over the panel — full conversation list newest-first (rows = 28px
+   Green/S5 entity tile [picker/tree recipe] + title + time + workload chip;
+   sentence-case group headers), narrowing to ONE clickable card per matched
+   conversation; selection exits into a read-only in-panel transcript (no
+   back chevron — the history affordance is the way back). Search field =
+   drawer rd-search-band recipe; highlight = the shared rd-match-hl mark;
+   kb-active row = DS selected-list recipe (Figma 9286-65490). Overlay
+   chrome: no DS modal component exists (searched live 2026-09-01) —
+   flagged for a DS-team request. */
+.ai-hx-scrim { position: absolute; inset: 0; background: rgba(31,34,41,0.32); display: flex; align-items: flex-start; justify-content: center; padding-top: 56px; z-index: 30; }
+.ai-hx-card { width: calc(100% - 48px); max-width: 560px; max-height: calc(100% - 112px); background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; box-shadow: 0 12px 32px rgba(31,34,41,0.18); display: flex; flex-direction: column; overflow: hidden; }
+.ai-hx-search-band { padding: 8px; background: var(--white); }
+/* Same row the dock footer used (13px, S80 green link, hairline above) — the
+   grammar moved with the affordance rather than being redrawn. */
+.ai-hx-foot { padding: 10px 14px; border-top: 1px solid var(--border-light); font-size: 13px; flex-shrink: 0; }
+.ai-hx-foot a { color: var(--em-green); text-decoration: none; font-weight: 500; }
+.ai-hx-foot a:hover { text-decoration: underline; }
+.ai-hx-search { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--form-bg, var(--black-3)); padding: 0 10px; height: 36px; }
+.ai-hx-search:focus-within { border-color: var(--em-green); background: var(--em-green-tint); }
+.ai-hx-search input { flex: 1; min-width: 0; border: none; background: none; font-family: inherit; font-size: 14px; color: var(--black-100); outline: none; }
+.ai-hx-body { overflow-y: auto; padding: 4px 8px 8px; }
+.ai-hx-group { font-size: 13px; font-weight: 450; color: var(--black-50); padding: 12px 4px 4px; }
+.ai-hx-row { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: none; background: var(--white); border-radius: 4px; cursor: pointer; text-align: left; font-family: inherit; width: 100%; }
+.ai-hx-row:hover { background: var(--em-green-tint); }
+.ai-hx-row.is-kb { background: var(--em-green-tint); box-shadow: inset 2px 0 0 var(--em-green); }
+.ai-hx-tile { width: 28px; height: 28px; border-radius: 4px; background: var(--em-green-tint); color: var(--em-green); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; align-self: flex-start; margin-top: 2px; }
+.ai-hx-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ai-hx-title { font-size: 15px; line-height: 20px; color: var(--black-100); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ai-hx-sub { font-size: 13px; line-height: 18px; color: var(--black-60); display: flex; align-items: center; gap: 6px; min-width: 0; }
+.ai-hx-snip { font-size: 13px; line-height: 18px; color: var(--black-70, var(--black-60)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ai-hx-chipwl { display: inline-flex; align-items: center; height: 18px; padding: 1px 6px; border-radius: 2px; font-size: 11px; font-weight: 500; background: var(--blue-10); color: var(--blue-dark); flex-shrink: 0; }
+/* was: .ai-hx-hint persistent footer — replaced 2026-09-01 (user: teach-once,
+   not persistent chrome) by the dismissible top note below. */
+/* Teach-once keyboard note — DS Alerts INFO variant (Figma 7220:22946):
+   blue tint + 1px border (REAL Securiti Blue, pinned — the theme remaps
+   --blue-40 to green), r4, 12px pad; glyph = verbatim clone of the shipped
+   onboarding alert's info circle. Dismiss persists per browser. */
+.ai-hx-note { display: flex; align-items: flex-start; gap: 8px; background: var(--status-blue-5); border: 1px solid var(--status-blue-40); border-radius: 4px; padding: 12px; margin: 8px 8px 0; }
+.ai-hx-note-txt { flex: 1; min-width: 0; font-size: 13px; line-height: 18px; color: var(--black-100); }
+.ai-hx-note-txt strong { font-weight: 500; }
+.ai-hx-note-x { width: 20px; height: 20px; border: none; background: none; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ai-hx-note-x:hover { background: var(--black-5); color: var(--black-100); }
+.ai-hx-empty { font-size: 12px; color: var(--black-50); text-align: center; padding: 16px 0; }
+/* Read-only transcript view (takes over #aiBody; composer hidden) */
+.ai-hx-trhead { display: flex; align-items: center; gap: 8px; padding: 0 0 8px; border-bottom: 1px solid var(--border-light); }
+.ai-hx-trtitle { flex: 1; min-width: 0; font-size: 15px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ai-hx-readonly { font-size: 12px; color: var(--black-50); text-align: center; padding: 4px 0; }
+.ai-hx-continue { margin-top: 8px; }
+.ai-hx-continue button { width: 100%; height: 36px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font-family: inherit; font-size: 14px; font-weight: 450; color: var(--black-100); cursor: pointer; }
+.ai-hx-continue button:hover { background: var(--black-5); }
+.ai-hx-nav { display: inline-flex; gap: 2px; }
+.ai-hx-nav button { width: 22px; height: 22px; border: none; background: none; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.ai-hx-nav button:hover { background: var(--black-10); }
+.ai-hx-nav button:disabled { color: var(--black-30); cursor: default; }
+.ai-hx-count { font-size: 12px; color: var(--black-60); white-space: nowrap; }
+body.ai-hx-transcript .ai-foot { display: none; }
+.ai-fbx { flex-basis: 100%; margin-top: 4px; border: 1px solid var(--border-light); border-radius: 8px; background: var(--black-3); padding: 12px; }
+.ai-fbx-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.ai-fbx-title { font-size: 14px; font-weight: 500; color: var(--black-100); }
+.ai-fbx-x { margin-left: auto; width: 24px; height: 24px; border: none; background: none; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.ai-fbx-x:hover { background: var(--black-10); color: var(--black-100); }
+.ai-fbx-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+.ai-fbx-chip { height: 28px; padding: 0 10px; border: none; border-radius: 2px; background: var(--white); color: var(--black-80); font-family: inherit; font-size: 13px; font-weight: 450; cursor: pointer; }
+.ai-fbx-chip:hover { background: var(--black-10); }
+.ai-fbx-chip.is-on { background: var(--em-green-tint); color: var(--em-green); font-weight: 500; }
+.ai-fbx-inp { width: 100%; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font-family: inherit; font-size: 13px; color: var(--black-100); padding: 8px 10px; outline: none; margin-bottom: 8px; }
+.ai-fbx-inp:focus { border-color: var(--em-green); background: var(--em-green-tint); }
+.ai-fbx-row { display: flex; align-items: center; gap: 12px; }
+.ai-fbx-incl { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--black-80); cursor: pointer; user-select: none; }
+.ai-fbx-incl input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.ai-fbx-box { width: 16px; height: 16px; border: 1.5px solid var(--em-green); border-radius: 4px; background: var(--white); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ai-fbx-incl input:checked + .ai-fbx-box { background: var(--em-green); }
+.ai-fbx-incl input:checked + .ai-fbx-box::after { content: ''; width: 9px; height: 5px; border-left: 2px solid var(--white); border-bottom: 2px solid var(--white); transform: rotate(-45deg) translate(0.5px, -1px); }
+.ai-fbx-send { margin-left: auto; height: 28px; padding: 0 12px; border: none; border-radius: 4px; background: var(--em-green); color: var(--white); font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
+.ai-fbx-send:hover { background: var(--em-green-accent); }
+.ai-fbx-note { font-size: 12px; color: var(--black-50); line-height: 17px; margin-top: 8px; }
+.ai-fbx-sealed { flex-basis: 100%; margin-top: 4px; font-size: 12px; color: var(--black-50); display: flex; align-items: center; gap: 6px; }
+.ai-fbx-sealed .tick { color: var(--em-green); }
+</style>
 </head>
 <body>
 
@@ -1167,7 +2051,8 @@ a.idd-ibtn { text-decoration: none; } .idd-ibtn.is-disabled { opacity: .4; curso
       <button class="vn-module" id="vnModule" type="button" data-fly="Identity Resilience" aria-label="Identity Resilience" onclick="iddSetView('overview')"></button>
       <div class="vn-stack" id="vnStack"></div>
       <div style="flex:1"></div>
-      <!-- Rail AI launcher omitted: this page has no AI panel (flagged in hand-off) -->
+      <!-- The one AI entry point, as on every other page. -->
+      <button class="vn-ai-launcher" type="button" onclick="aiOpen()" data-fly="Veeam AI" aria-label="Open the Veeam AI assistant"><svg viewBox="0 0 36 36" aria-hidden="true"><path fill="#fff" d="M18 9.75C18.5502 9.75 19.0272 10.1307 19.1492 10.6672L19.8013 13.5349C20.1029 14.8613 21.1387 15.8971 22.4651 16.1987L25.3328 16.8508C25.8693 16.9728 26.25 17.4498 26.25 18C26.25 18.5502 25.8693 19.0272 25.3328 19.1492L22.4651 19.8013C21.1387 20.1029 20.1029 21.1387 19.8013 22.4651L19.1492 25.3328C19.0272 25.8693 18.5502 26.25 18 26.25C17.4498 26.25 16.9728 25.8693 16.8508 25.3328L16.1987 22.4651C15.8971 21.1387 14.8613 20.1029 13.5349 19.8013L10.6672 19.1492C10.1307 19.0272 9.75 18.5502 9.75 18C9.75 17.4498 10.1307 16.9728 10.6672 16.8508L13.5349 16.1987C14.8613 15.8971 15.8971 14.8613 16.1987 13.5349L16.8508 10.6672C16.9728 10.1307 17.4498 9.75 18 9.75Z"/></svg></button>
       <!-- System nav (production reference 2026-07-13): help videos,
            what's-new gift w/ badge, feedback chat — real Unified Icons
            assets (Help Videos 4774:1119, What's New set, Message 4774:877). -->
@@ -1399,11 +2284,1245 @@ a.idd-ibtn { text-decoration: none; } .idd-ibtn.is-disabled { opacity: .4; curso
 
 
 
+<div id="aiWorkingGlow" aria-hidden="true"></div>
+<aside class="ai-panel" id="aiPanel" aria-label="Veeam assistant" aria-hidden="true">
+  <button type="button" class="ai-resize" id="aiResize" aria-label="Resize panel"
+          aria-orientation="vertical" role="separator" onpointerdown="aiResizeStart(event)"></button>
+  <div class="ai-head">
+    <div class="ai-head-text">
+      <div class="ai-head-title">Veeam Intelligence</div>
+    </div>
+    <button class="ai-head-btn" type="button" id="aiNewChatBtn" onclick="aiNewChat()" data-tooltip="New chat — back to the scenario list" aria-label="New chat"></button>
+    <button class="ai-head-btn" type="button" id="aiHxBtn" onclick="aiHxToggle()" data-tooltip="Chat history (⌘K)" aria-label="Chat history"></button>
+    <button class="ai-head-btn" type="button" id="aiExpandBtn" onclick="aiToggleFull()" data-tooltip="Expand to full screen" aria-label="Expand to full screen" aria-pressed="false"></button>
+    <button class="ai-head-btn" type="button" onclick="aiClose()" data-tooltip="Close" aria-label="Close assistant">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <span id="aiSparkleTpl" hidden aria-hidden="true"></span>
+  <div class="ai-body" id="aiBody"></div>
+  <div class="ai-foot">
+    <div class="ai-chips" id="aiChips"></div>
+    <div class="ai-composer" id="aiComposer">
+      <div class="ai-attach-strip" id="aiAttachStrip"></div>
+      <textarea id="aiInput" class="ai-composer-input" placeholder="Type your message" rows="1" autocomplete="off"
+             onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();aiSendFromInput();}"></textarea>
+      <div class="ai-composer-row">
+        <button class="ai-composer-tool" type="button" id="aiAttachBtn" onclick="aiAttach()" data-tooltip="Attach a file" aria-label="Attach a file"></button>
+        <button class="ai-composer-tool" type="button" id="aiMicBtn" onclick="aiVoice()" data-tooltip="Voice input" aria-label="Voice input"></button>
+        <span style="flex:1"></span>
+        <button class="ai-send-fab" type="button" id="aiSend" onclick="aiSendFromInput()" data-tooltip="Send" aria-label="Send"></button>
+      </div>
+    </div>
+  </div>
+</aside>
 <script src="securiti-icons-data.js?v=20261001a"></script>
-<script src="vdc-notifications.js?v=20261029c"></script>
+<script src="vdc-notifications.js?v=20261029f"></script>
 <script src="workload-picker.js?v=20261007"></script>
 <script src="dashboards-panel.js?v=20261029c"></script>
 <script>DashboardsPanel.mount({ host: document.getElementById('dshSide'), current: 'identity' });</script>
+<script id="ai-shell">
+// Page shims so the copied shell code stays verbatim and diffable (Activity's helpers → this page's own).
+function _dsStoreIconSvg(name, size){ var e = (window.__SECURITI_ICONS || {})[name]; if (!e || !e.paths) return ''; return '<svg width="' + (size || 16) + '" height="' + (size || 16) + '" viewBox="' + e.viewBox + '" fill="currentColor" aria-hidden="true">' + e.paths.map(function(p){ return '<path d="' + p + '"/>'; }).join('') + '</svg>'; }
+function _sdIc(name, size){ return _dsStoreIconSvg(name, size); }
+function showToast(opts){
+  if (typeof opts === 'string') opts = { tone:'success', title: opts };   // the copied panel code passes plain strings
+  var stack = document.getElementById('toast-stack'); if (!stack || !opts) return;
+  var t = document.createElement('div');
+  t.className = 'toast ' + (opts.tone === 'success' ? 'toast-success' : 'toast-info');
+  t.innerHTML = '<div style="flex:1;min-width:0"><div class="toast-title">' + opts.title + '</div>' + (opts.body ? '<div class="toast-body">' + opts.body + '</div>' : '') + '</div>'
+    + '<div class="toast-close" onclick="dismissToast(this.parentElement)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>';
+  stack.appendChild(t);
+  requestAnimationFrame(function(){ t.classList.add('show'); });
+  setTimeout(function(){ dismissToast(t); }, 5000);
+}
+function dismissToast(t){ if (!t || !t.parentElement) return; t.classList.remove('show'); setTimeout(function(){ if (t.parentElement) t.parentElement.removeChild(t); }, 250); }
+/* ══════════════════════════════════════════════════════════════════════════
+   RESILIENCE ASSISTANT — CONVERSATION-LED HANDOFF ONLY (2026-09-18). This
+   page never launches its own scenarios: it hydrates a transcript carried
+   from protected-data.html (_aiHandoffHydrate below) and renders it at full
+   card fidelity so "the panel remains open with all the conversation
+   context intact" across the click-through (user 2026-09-18). A `flow`
+   action approved here is forwarded back to protected-data.html, where the
+   run machinery lives — same division of labor as backup-policies.html's
+   earlier port of this same shell. A typed message gets a short, honest
+   reply pointing back to Protected Data rather than a duplicated Q&A engine.
+   Single-source rule: aiacCardHtml/_aiacTrendHtml/toggles are verbatim
+   copies of protected-data.html's — edit there, then re-copy here.
+   ══════════════════════════════════════════════════════════════════════════ */
+var aiAgent = { greeted:false, busy:false, thinking:false, msgs:[] };
+function aiOpen(){
+  aiAgent._homeMode = null;
+  aiAgent._greetTyped = false;   // the greeting composes once per open, not on every re-render   // opening is the arrival moment: clear the menu mode + sets
+  document.body.classList.add('ai-open');
+  aiComposerIcons();
+  var p = document.getElementById('aiPanel'); if (p) p.setAttribute('aria-hidden','false');
+  if (!aiAgent.greeted){ aiAgent.greeted = true; aiRenderHome(); }
+  setTimeout(function(){ var i=document.getElementById('aiInput'); if(i && !aiAgent.busy) i.focus(); }, 280);
+}
+function aiToggleFull(){
+  var on = document.body.classList.toggle('ai-full');
+  var b = document.getElementById('aiExpandBtn');
+  if (b){
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    b.setAttribute('data-tooltip', on ? 'Exit full screen' : 'Expand to full screen');
+    b.setAttribute('aria-label', on ? 'Exit full screen' : 'Expand to full screen');
+  }
+}
+function aiClose(){
+  document.body.classList.remove('ai-open');
+  document.body.classList.remove('ai-full');
+  var p = document.getElementById('aiPanel'); if (p) p.setAttribute('aria-hidden','true');
+}
+function aiSetBusy(b){
+  aiAgent.busy = b;
+  var s=document.getElementById('aiSend'), i=document.getElementById('aiInput');
+  if(s) s.disabled = b; if(i) i.disabled = b;
+}
+function aiRenderChips(list){
+  var el=document.getElementById('aiChips'); if(!el) return;
+  el.innerHTML = (list||[]).map(function(t){ return '<button type="button" class="ai-chip" onclick="aiSend(this.getAttribute(\'data-q\'))" data-q="'+t.replace(/"/g,'&quot;')+'">'+t+'</button>'; }).join('');
+}
+function aiComposerIcons(){
+  var m = [['aiAttachBtn','attachment-outlined',18],['aiMicBtn','settings-voice-outlined',18],['aiSend','arrow-circle-up-filled',36],['aiExpandBtn','zoom-out-map-outlined',16]];
+  m.forEach(function(x){
+    var el = document.getElementById(x[0]);
+    if (el && !el.firstChild){ var svg = _dsStoreIconSvg(x[1], x[2]); if (svg) el.innerHTML = svg; }
+  });
+  var tpl = document.getElementById('aiSparkleTpl');
+  if (tpl && !tpl.firstChild) tpl.innerHTML = _dsStoreIconSvg('ai-sparkle', 40) || '';
+  var vt = document.getElementById('vaiTileGlyph');
+  if (vt && !vt.firstChild) vt.innerHTML = _dsStoreIconSvg('ai-sparkle', 18) || '';
+}
+var AI_ATTACH = [];
+var AI_ATTACH_SAMPLES = ['restore-scope.csv', 'audit-extract.json', 'incident-notes.pdf'];
+function aiAttach(){ AI_ATTACH.push(AI_ATTACH_SAMPLES[AI_ATTACH.length % AI_ATTACH_SAMPLES.length]); aiRenderAttach(); }
+function aiRenderAttach(){
+  var el = document.getElementById('aiAttachStrip'); if(!el) return;
+  el.innerHTML = AI_ATTACH.map(function(fname, i){
+    return '<span class="ai-attach-chip">' + _aiEsc(fname) + '<button type="button" aria-label="Remove ' + _aiEsc(fname) + '" onclick="aiRemoveAttach(' + i + ')">&times;</button></span>';
+  }).join('');
+}
+function aiRemoveAttach(i){ AI_ATTACH.splice(i, 1); aiRenderAttach(); }
+var AI_REC = null;
+function aiVoice(){
+  var btn = document.getElementById('aiMicBtn'), inp = document.getElementById('aiInput');
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (AI_REC){ try{ AI_REC.stop(); }catch(e){} AI_REC = null; btn.classList.remove('is-rec'); return; }
+  if (SR){
+    var r = new SR(); AI_REC = r; btn.classList.add('is-rec');
+    r.onresult = function(ev){ var t = ev.results[0][0].transcript; inp.value = (inp.value ? inp.value + ' ' : '') + t; inp.focus(); };
+    r.onend = function(){ AI_REC = null; btn.classList.remove('is-rec'); };
+    r.start();
+  } else {
+    btn.classList.add('is-rec');
+    setTimeout(function(){ btn.classList.remove('is-rec'); inp.value = (inp.value ? inp.value + ' ' : '') + 'Take me back to Protected Data'; inp.focus(); }, 1200);
+  }
+}
+function _aiToast(msg){ if (typeof showToast === 'function') showToast(msg); }
+function aiFb(i, dir){
+  var m = aiAgent.msgs[i]; if(!m) return;
+  m.fb = (m.fb === dir) ? null : dir; aiRender();
+  if (m.fb) _aiToast(dir === 'up' ? 'Thanks — glad that helped' : 'Thanks — feedback recorded');
+}
+function aiRead(i){
+  var m = aiAgent.msgs[i]; if(!m) return;
+  if (window.speechSynthesis && speechSynthesis.speaking){ speechSynthesis.cancel(); return; }
+  var d = document.createElement('div'); d.innerHTML = m.html;
+  var text = (d.textContent || '').replace(/\s+/g, ' ').trim();
+  if (window.speechSynthesis && text){ speechSynthesis.speak(new SpeechSynthesisUtterance(text)); }
+  else _aiToast('Read-aloud is not available in this browser');
+}
+function aiFbRow(i){
+  var m = aiAgent.msgs[i];
+  function ic(name, sz){ return _dsStoreIconSvg(name, sz) || ''; }
+  return '<div class="ai-fb">'
+    + '<button type="button" class="fb-up' + (m.fb === 'up' ? ' active' : '') + '" data-tooltip="Good response" aria-label="Good response" onclick="aiFb(' + i + ',\'up\')">' + ic('thumb-up-outlined', 16) + '</button>'
+    + '<button type="button" class="fb-down' + (m.fb === 'down' ? ' active' : '') + '" data-tooltip="Poor response" aria-label="Poor response" onclick="aiFb(' + i + ',\'down\')">' + ic('thumb-down-outlined', 16) + '</button>'
+    + '<button type="button" data-tooltip="Read aloud" aria-label="Read this response aloud" onclick="aiRead(' + i + ')">' + ic('volume-up-outlined', 16) + '</button>'
+    + '</div>';
+}
+function aiPushReasoning(){
+  var m = { role: 'reasoning', steps: [], t0: Date.now(), done: false, open: false };
+  aiAgent.msgs.push(m); aiRender();
+  return m;
+}
+function aiFinishReasoning(m){ if (!m || m.done) return; m.done = true; m.ms = Date.now() - m.t0; aiRender(); }
+function aiToggleReason(i){ var m = aiAgent.msgs[i]; if(!m || m.role !== 'reasoning') return; m.open = !m.open; aiRender(); }
+window.VDC_SOLICIT_HOME = true;   // offers go on the home screen, not pushed into the thread
+function aiRenderHome(){
+  // Empty state only shows on a manual open with no carried transcript —
+  // the handoff path sets aiAgent.greeted before aiOpen ever runs this.
+  var body = document.getElementById('aiBody'); if(!body) return;
+  var glyphSrc = document.getElementById('aiSparkleTpl');
+  // ARRIVAL SCREEN (shared — vdcNotifArrivalHtml). What the agent is holding is shown as quiet offers here rather
+  // than pushed into the thread on open; '' when it is holding nothing, so this page's own home still shows.
+  // + (aiNewChat) sets _homeMode='menu' to ask for the menu explicitly; aiOpen clears it, so a fresh open re-greets.
+  if (aiAgent._homeMode !== 'menu' && typeof window.vdcNotifArrivalHtml === 'function'){
+    var _arr = window.vdcNotifArrivalHtml(glyphSrc ? glyphSrc.innerHTML : '');
+    if (_arr){ body.innerHTML = _arr; return; }
+  }
+  body.innerHTML = '<div class="ai-home">'
+    + '<span class="ai-home-glyph" aria-hidden="true">' + (glyphSrc ? glyphSrc.innerHTML : '') + '</span>'
+    + '<div class="ai-home-title">Veeam Intelligence</div>'
+    + '<div class="ai-home-sub">This panel picks up a conversation carried from Protected Data — open the assistant there and click through to the Agent Hub to see it in context here.</div>'
+    + '</div>';
+}
+function _aiEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function aiRender(){
+  var body=document.getElementById('aiBody'); if(!body) return;
+  var html = aiAgent.msgs.map(function(m, i){
+    if(m.role==='user') return '<div class="ai-msg user"><div class="ai-bubble">'+_aiEsc(m.html)+'</div></div>';
+    if(m.role==='card' && typeof aiacCardHtml === 'function') // A CARD IS AN AGENT RESPONSE, SO IT TAKES FEEDBACK (user 2026-10-29: "shouldnt i see the feedback options
+      // below this prompt just like with other agent responses?"). The agent branch has always appended aiFbRow;
+      // the card branch never did, so every answer card on every page was the one agent reply you could not rate.
+      // Row sits OUTSIDE .ai-bubble, same as the agent branch, and m.noFb still suppresses it where a card is not a
+      // response to rate. m.fbCfg (the ROT dismissal wording/hook) was already being set and was simply inert.
+      return '<div class="ai-msg agent" data-msgi="' + i + '"><div class="ai-bubble" style="max-width:100%">' + aiacCardHtml(m, i) + '</div>' + (m.noFb ? '' : aiFbRow(i)) + '</div>';
+    if(m.role==='reasoning'){
+      var label = m.done ? ('Thought for ' + Math.max(1, Math.round((m.ms||0)/1000)) + 's') : (m.steps.length ? m.steps[m.steps.length-1] : 'Thinking…');
+      var head = m.done
+        ? '<svg class="tick" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+        : '<span class="disc-spinner"></span>';
+      return '<div class="ai-reason'+(m.open?' open':'')+'" data-mi="'+i+'">'
+        + '<button type="button" class="ai-reason-head" onclick="aiToggleReason('+i+')" aria-expanded="'+(m.open?'true':'false')+'">'
+        + head + '<span>' + _aiEsc(label) + '</span>'
+        + '<svg class="ai-reason-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>'
+        + '</button>'
+        + '<div class="ai-reason-steps">' + m.steps.map(function(st){ return '<div class="ai-reason-step">' + _aiEsc(st) + '</div>'; }).join('') + '</div>'
+        + '</div>';
+    }
+    var gate='';
+    if(m.gate){
+      var btns = m.gate.resolved
+        ? ''
+        : '<div class="ai-gate-btns">'+m.gate.buttons.map(function(b,j){ return '<button type="button" class="ai-gate-btn'+(b.primary?' primary':'')+'" onclick="aiGateClick('+j+')">'+_aiEsc(b.label)+'</button>'; }).join('')+'</div>';
+      if (m.gate.approval){
+        var apRows = m.gate.approval.rows.map(function(r){
+          return '<div class="ai-approval-row"><span class="ai-approval-k">'+_aiEsc(r[0])+'</span><span class="ai-approval-v">'+r[1]+'</span></div>';
+        }).join('');
+        gate = '<div class="ai-approval'+(m.gate.resolved?' resolved':'')+'">'
+          + '<div class="ai-approval-hd"><span class="ai-approval-title">Approval required</span></div>'
+          + apRows + btns
+          + '<div class="ai-approval-done">\u2713 '+_aiEsc(m.gate.choice||'Approved')+' \u00b7 you'+(m.gate.decidedAt?' \u00b7 '+m.gate.decidedAt:'')+'</div>'
+          + '</div>';
+      } else {
+      gate = '<div class="ai-gate'+(m.gate.resolved?' resolved':'')+'">'
+        + '<div class="ai-gate-q">'+m.gate.q+'</div>'
+        + btns
+        + '<div class="ai-gate-done">✓ '+_aiEsc(m.gate.choice||'Approved')+'</div>'
+        + '</div>';
+      }
+    }
+    return '<div class="ai-msg agent"><div class="ai-bubble">'+m.html+gate+'</div>'+aiFbRow(i)+'</div>';
+  }).join('');
+  if(aiAgent.thinking) html += '<div class="ai-thinking"><span></span><span></span><span></span></div>';
+  body.innerHTML = html;
+  if (typeof _aiacTrendDraw === 'function') _aiacTrendDraw(body);
+  body.scrollTop = body.scrollHeight;
+}
+function aiPushAgent(html, gate){
+  var m = { role:'agent', html: html };
+  if(gate){ m.gate = { q:gate.q, buttons:gate.buttons, approval:gate.approval||null, resolved:false, choice:null }; aiAgent.activeGate = m; }
+  aiAgent.msgs.push(m); aiRender();
+}
+function aiGateClick(i){
+  var m = aiAgent.activeGate; if(!m || !m.gate || m.gate.resolved) return;
+  var btn = m.gate.buttons[i]; if(!btn) return;
+  m.gate.resolved = true; m.gate.choice = btn.choice || btn.label; m.gate.decidedAt = new Date().toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+  aiAgent.activeGate = null; aiRender();
+  if(typeof btn.fn === 'function') btn.fn();
+}
+function aiAction(label, running){
+  var ic = running
+    ? '<span class="ai-action-ic"><span class="disc-spinner" style="width:14px;height:14px"></span></span>'
+    : '<span class="ai-action-ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>';
+  return '<div class="ai-action'+(running?' run':'')+'">'+ic+'<span>'+_aiEsc(label)+'</span></div>';
+}
+function aiGlow(on){ var g = document.getElementById('aiWorkingGlow'); if (g) g.classList.toggle('on', !!on); }
+function aiSendFromInput(){
+  var i=document.getElementById('aiInput'); if(!i) return;
+  var t=(i.value||'').trim(); if(!t || aiAgent.busy) return;
+  if (AI_ATTACH.length){ t += '  [attached: ' + AI_ATTACH.join(', ') + ']'; AI_ATTACH = []; aiRenderAttach(); }
+  i.value=''; aiSend(t);
+}
+// No duplicated Q&A engine on this page (out of scope for the handoff ask) —
+// a typed message gets one honest, short reply naming where full capability
+// lives, rather than faked intelligence detached from any real model.
+function aiSend(text){
+  if(aiAgent.busy) return;
+  aiAgent.msgs.push({ role: 'user', html: text }); aiRenderChips([]); aiRender();
+  aiSetBusy(true); aiAgent.thinking = true; aiRender();
+  setTimeout(function(){
+    aiAgent.thinking = false;
+    aiPushAgent('<p>I can keep showing you this conversation here, but I only act and answer new questions back on <strong>Protected Data</strong>.</p>', {
+      q: '', buttons: [
+        { label: 'Take me to Protected Data', primary:true, choice:'Returned to Protected Data', fn: function(){
+            try { sessionStorage.setItem('vdc-ai-handoff', 'protected-data.html'); } catch(e){}
+            window.location.href = (window.VDC_BASE || '') + 'protected-data.html';
+          } }
+      ] });
+    aiSetBusy(false);
+  }, 500);
+}
+/* ── CARRIED ANSWER-CARD RENDERER — verbatim copy of inventory-V1's
+   aiacCardHtml / trend vis / toggles (plus the lookLink self-adaptation),
+   so a conversation carried onto this page keeps its full card fidelity. */
+function _aiacTrendHtml(t){
+  return '<div class="aiac-trend" data-points="' + t.points.join(',') + '" data-color="' + _aiEsc(t.color) + '"'
+    + ' data-unit="' + _aiEsc(t.unit || '') + '" data-days="' + (t.days || 30) + '"></div>';
+}
+function _aiacTrendDraw(root){
+  var hosts = root.querySelectorAll('.aiac-trend[data-points]');
+  for (var hi = 0; hi < hosts.length; hi++){ (function(host){
+    if (host._drawn) return; host._drawn = true;
+    var pts = host.getAttribute('data-points').split(',').map(Number);
+    var color = host.getAttribute('data-color'), unit = host.getAttribute('data-unit');
+    var days = Number(host.getAttribute('data-days')) || 30;
+    var w = host.clientWidth || 300, h = 48, n = pts.length;
+    var mx = Math.max.apply(null, pts), mn = Math.min.apply(null, pts);
+    var xy = pts.map(function(v, i){ return [ (i / (n - 1)) * (w - 8) + 4, h - 6 - ((v - mn) / Math.max(1e-9, mx - mn)) * (h - 16) ]; });
+    var line = xy.map(function(p){ return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' ');
+    var area = '4,' + (h - 2) + ' ' + line + ' ' + (w - 4) + ',' + (h - 2);
+    var last = xy[n - 1];
+    var MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var now = Date.now();
+    var dates = pts.map(function(_, i){ var d = new Date(now - (days - i * (days / (n - 1))) * 86400000); return MO[d.getMonth()] + ' ' + d.getDate(); });
+    dates[n - 1] = 'Today';
+    host.innerHTML = '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" aria-hidden="true">'
+      + '<polygon points="' + area + '" fill="' + color + '" opacity="0.25"/>'
+      + '<polyline points="' + line + '" fill="none" stroke="' + color + '" stroke-width="1.5"/>'
+      + '<line class="aiac-trend-guide" x1="0" x2="0" y1="4" y2="' + (h - 2) + '" stroke="var(--border)" stroke-width="1" style="display:none"/>'
+      + '<circle class="aiac-trend-dot" cx="' + last[0].toFixed(1) + '" cy="' + last[1].toFixed(1) + '" r="2.5" fill="' + color + '"/>'
+      + '</svg>'
+      + '<div class="axis"><span>' + _aiEsc(dates[0]) + '</span><span>Today</span></div>'
+      + '<div class="aiac-trend-readout" hidden></div>';
+    var guide = host.querySelector('.aiac-trend-guide'), dot = host.querySelector('.aiac-trend-dot'), ro = host.querySelector('.aiac-trend-readout');
+    function reset(){ ro.hidden = true; guide.style.display = 'none'; dot.setAttribute('cx', last[0].toFixed(1)); dot.setAttribute('cy', last[1].toFixed(1)); }
+    host.addEventListener('mousemove', function(e){
+      var x = e.clientX - host.getBoundingClientRect().left;
+      var i = Math.max(0, Math.min(n - 1, Math.round((x - 4) / (w - 8) * (n - 1))));
+      guide.style.display = ''; guide.setAttribute('x1', xy[i][0].toFixed(1)); guide.setAttribute('x2', xy[i][0].toFixed(1));
+      dot.setAttribute('cx', xy[i][0].toFixed(1)); dot.setAttribute('cy', xy[i][1].toFixed(1));
+      var delta = pts[i] - pts[0], sign = delta >= 0 ? '+' : '−';
+      ro.textContent = dates[i] + ' · ' + pts[i] + (unit ? ' ' + unit : '')
+        + (i > 0 ? ' · ' + sign + Math.abs(Math.round(delta * 10) / 10) + (unit ? ' ' + unit : '') + ' since ' + dates[0] : '');
+      ro.hidden = false;
+      var rw = ro.offsetWidth;
+      ro.style.left = Math.max(0, Math.min(w - rw, xy[i][0] - rw / 2)) + 'px';
+      ro.style.top = (xy[i][1] - 34) + 'px';
+    });
+    host.addEventListener('mouseleave', reset);
+  })(hosts[hi]); }
+}
+function _aiFactResolved(id){
+  if (!id) return null;
+  try { var f = (JSON.parse(localStorage.getItem('vdc-facts')) || {})[id]; return (f && f.resolved) ? f : null; } catch(e){ return null; }
+}
+function aiacCardHtml(m, i){
+  var s = m.card;
+  // B7 ARRIVAL, RESUMED NOT REPLAYED (2026-10-29). aiRender rebuilds #aiBody wholesale — on scroll sync, on a gate
+  // resolving, on every new message — so an unconditional class would replay the whole sequence each time. The
+  // first fix was a one-shot flag set as the markup was built, and it traded one bug for its mirror image: any
+  // beat landing inside the ~1.3s sequence (a reasoning tick, the follow-up line, the quick-prompt dock) re-rendered
+  // the card with the class already spent, so it SNAPPED to settled — user: "the card appears immediately without
+  // animating in". vdcCardArrival keeps the class for the sequence's real duration and hands it --elapsed, the ms
+  // since first layout, which every delay subtracts: a rebuild picks the cascade up where it had got to.
+  // Cards restored from a carried transcript are pre-flagged _arrived at the restore, since they are not arriving.
+  var _arrive = (typeof window.vdcCardArrival === 'function') ? window.vdcCardArrival(m)
+              : (m._arrived ? '' : ((m._arrived = true), ' is-arriving'));
+  var html = '<div class="aiac' + _arrive + '" data-aiac="' + i + '">';
+  var moreLink = s.insight
+    ? ' <button type="button" class="aiac-more" aria-expanded="' + !!m.insightOpen + '" onclick="aiacToggleInsight(' + i + ')">' + (m.insightOpen ? 'Show less' : 'Show more') + '</button>'
+    : '';
+  html += '<div class="aiac-head' + (s.decision ? ' has-decide' : '') + '"><div class="aiac-headline">' + s.headline + '</div>'
+    + (s.headsub ? '<div class="aiac-headsub">' + s.headsub + (m.insightOpen ? '' : moreLink) + '</div>' : '')
+    + (s.insight && m.insightOpen ? '<div class="aiac-insightx">' + s.insight + moreLink + '</div>' : '');
+  if (s.strip){
+    var tot = s.strip.reduce(function(a, x){ return a + x[1]; }, 0);
+    html += '<div class="aiac-strip">' + s.strip.map(function(x){ return '<span style="width:' + Math.max(2, Math.round(x[1] / tot * 100)) + '%;background:' + x[2] + '"></span>'; }).join('') + '</div>'
+      // AUTHORED LEGEND LABEL (2026-10-29). A strip entry may carry its own caption as x[3]; this page built
+      // the legend from x[1] + x[0] only, so '4.2 TB untouched for 36+ months (63%)' rendered as the
+      // derived '4.2 untouched for 36+ months' — losing the unit and the percentage. backup-policies
+      // already honoured x[3]; the renderers had diverged. was: x[1] + ' ' + x[0].toLowerCase()
+      + '<div class="aiac-legend">' + s.strip.map(function(x){ return '<span class="li"><span class="dot" style="background:' + x[2] + '"></span>' + _aiEsc(x[3] || (x[1] + ' ' + String(x[0]).toLowerCase())) + '</span>'; }).join('') + '</div>';
+  }
+  if (s.vrows){
+    html += (s.vrows.legend ? '<div class="aiac-legend" style="margin-top:10px">' + s.vrows.legend.map(function(l){ return '<span class="li"><span class="dot" style="background:' + l[1] + '"></span>' + _aiEsc(l[0]) + '</span>'; }).join('') + '</div>' : '')
+      + '<div class="aiac-vrows">' + s.vrows.rows.map(function(r){
+          return '<div class="aiac-vrow"><span class="lbl" data-tooltip="' + _aiEsc(r.label) + '">' + _aiEsc(r.label) + '</span>'
+            + '<span class="track"><span style="width:' + Math.min(100, Math.max(2, Math.round(r.frac * 100))) + '%;background:' + r.color + '"></span></span>'
+            + '<span class="val">' + _aiEsc(r.val) + '</span></div>';
+        }).join('') + '</div>';
+  }
+  if (s.cap){
+    html += '<div class="aiac-vrows" style="margin-top:10px"><div class="aiac-vrow">'
+      + '<span class="lbl" data-tooltip="' + _aiEsc(s.cap.label) + '">' + _aiEsc(s.cap.label) + '</span>'
+      + '<span class="track"><span style="width:' + Math.min(100, Math.round(s.cap.val / s.cap.max * 100)) + '%;background:' + s.cap.color + '"></span></span>'
+      + '<span class="val">' + _aiEsc(s.cap.val + '/' + s.cap.max + ' ' + s.cap.unit) + '</span></div></div>';
+  }
+  if (s.trend){ html += _aiacTrendHtml(s.trend); }
+  html += '</div>';
+  if (s.lookLink){
+    // ALWAYS FORWARD (2026-09-21, was: SELF-ADAPTING 2026-09-18) — matches
+    // inventory-V1's copy: the card never mutates its own history. The
+    // "Back to Protected Data" affordance is now its OWN new turn, appended
+    // by _aiHandoffHydrate below rather than rewriting this button.
+    var _llIcon = _dsStoreIconSvg('open-in-new-outlined', 16) || '';
+    html += '<div class="aiac-sec aiac-looklink"><button type="button" class="aiac-btn" onclick="aiacGo(\'nav\', \'' + _aiEsc(s.lookLink.nav).replace(/'/g, '') + '\')">' + _aiEsc(s.lookLink.label) + _llIcon + '</button></div>';
+  }
+  if (s.actions && s.actions.length){
+    // AGENTIC-FIRST within the same tone (2026-09-21) — mirrors
+    // protected-data.html's copy; see its comment for the full rationale.
+    var rank = { bad: 0, warn: 1, ok: 2, n: 3 };
+    var acts = s.actions.map(function(a, ai){ return [a, ai]; })
+      .sort(function(x, y){ return (rank[x[0].tone] - rank[y[0].tone]) || ((x[0].flow ? 0 : 1) - (y[0].flow ? 0 : 1)) || (x[1] - y[1]); })
+      .map(function(p){ return p[0]; });
+    var CAP = 2;
+    var shown = (m.actsOpen || acts.length <= CAP) ? acts : acts.slice(0, CAP);
+    html += '<div class="aiac-sec aiac-acts"><div class="aiac-sec-label">' + _aiEsc(s.actionsLabel || 'Recommended actions') + '</div>'
+      + shown.map(function(a){
+          var _exec = '';
+          var _sparkle = _dsStoreIconSvg('ai-sparkle', 16) || '';
+          if (a.flow) _exec = '<button type="button" class="aiac-exec" data-tooltip="The agent can run this — review its grants in Agentic Studio" onclick="window.location.href=(window.VDC_BASE||\'\')+\'agent-studio.html#cfg\'">' + _sparkle + '</button>';
+          else if (a.grant) _exec = '<button type="button" class="aiac-exec off" data-tooltip="Yours to do — ' + _aiEsc(a.grant) + ' is off in Agentic Studio; click to review the grant" onclick="window.location.href=(window.VDC_BASE||\'\')+\'agent-studio.html#cfg\'">' + _sparkle
+            + '<span class="aiac-exec-lock">' + (_dsStoreIconSvg('lock-filled', 11) || '') + '</span></button>';
+          var _sealed = _aiFactResolved(a.factId) || ((a.flow && (aiAgent._recAccepted || {})[a.flow] === 'done') ? { note: 'the agent ran this' } : null);
+          if (_sealed){
+            return '<div class="aiac-act sealed">'
+              + '<span class="aiac-chip ' + a.tone + '">' + _aiEsc(a.chip) + '</span>'
+              + '<span class="aiac-act-txt">' + _aiEsc(a.txt) + (a.sub ? '<small>' + _aiEsc(a.sub) + '</small>' : '') + '</span>'
+              + '<span class="aiac-act-done">' + '✓ Resolved · ' + _aiEsc(_sealed.note || 'the workspace no longer shows this') + '</span>'
+              + '</div>';
+          }
+          return '<div class="aiac-act">' + _exec
+            + '<span class="aiac-chip ' + a.tone + '">' + _aiEsc(a.chip) + '</span>'
+            + '<span class="aiac-act-txt">' + _aiEsc(a.txt) + (a.sub ? '<small>' + _aiEsc(a.sub) + '</small>' : '') + '</span>'
+            + (a.cap ? '<span class="aiac-act-vis"><span class="track"><span style="width:' + Math.min(100, Math.round(a.cap.val / a.cap.max * 100)) + '%;background:' + a.cap.color + '"></span></span><span class="val">' + _aiEsc(a.cap.val + '/' + a.cap.max + ' ' + a.cap.unit) + '</span></span>' : '')
+            + (a.trend ? _aiacTrendHtml(a.trend) : '')
+            + (a.btn ? (
+                a.look
+                  ? '<button type="button" class="aiac-btn" onclick="aiacGo(\'nav\', \'' + _aiEsc(a.nav).replace(/'/g, '') + '\')">' + _aiEsc(a.btn) + (_dsStoreIconSvg('open-in-new-outlined', 16) || '') + '</button>'
+                  : '<button type="button" class="aiac-btn' + (a.flow ? ' primary' : '') + '" onclick="aiacGo(\'' + (a.flow ? 'flow' : (a.nav ? 'nav' : 'toast')) + '\', \'' + _aiEsc(a.flow || a.nav || a.toast || 'Queued').replace(/'/g, '') + '\')">' + _aiEsc(a.btn) + '</button>'
+              ) : '')
+            // SHOW ME, ON THE TILE ITSELF — mirrors inventory-V1's copy. This
+            // page IS the watch destination, so the click runs the walkthrough
+            // directly (_aiWatchHere below) instead of navigating again.
+            + (a.flow && a.watchJob
+                ? ' <button type="button" class="aiac-btn" onclick="_aiWatchHere(\'' + _aiEsc(a.flow).replace(/'/g, '') + '\', \'' + _aiEsc(a.watchJob).replace(/'/g, '') + '\')">Watch</button>'
+                : '')
+            + '</div>';
+        }).join('')
+      + '</div>';
+    if (acts.length > CAP){
+      html += '<div class="aiac-details-row">'
+        + '<button type="button" class="aiac-details-btn" aria-expanded="' + !!m.actsOpen + '" onclick="aiacToggleActs(' + i + ')">'
+        + (m.actsOpen ? 'Show fewer' : 'Show all ' + acts.length + ' recommendations')
+        + '<span class="chev"' + (m.actsOpen ? ' style="transform:rotate(180deg)"' : '') + '><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></span>'
+        + '</button></div>';
+    }
+  }
+  // ── DECISION FOOTER — the recommendation block (user 2026-10-27) ──────────────────────────────────────────
+  // A recommendation is a DECISION WITH EVIDENCE, structurally the same thing as an approval, and it had no block of
+  // its own: every one was a card followed by a hand-written '<p>ask</p><div class="ai-gate-btns" style="margin-top:12px">'
+  // — three ad-hoc copies, and the inline margin was the tell. Split across two messages, the evidence and the ask it
+  // justifies could drift apart (and did: the voiced catch-up carried the ask with NO evidence at all, while the same
+  // recommendation reached through the page carried the full card).
+  // `decision` closes that: claim (headline/headsub) + evidence (strip/vrows) + the ask, in ONE block that cannot
+  // separate. Distinct from `actions` above — those are suggested things to do; this is the single verb that RESOLVES
+  // the recommendation, and it carries the reversal assurance the way an approval card's Reversal row does.
+  if (s.decision){
+    var _d = s.decision;
+    html += '<div class="aiac-sec aiac-decide"' + (_d.key ? ' data-decide="' + _d.key + '"' : '') + '>'
+      + (_d.ask ? '<div class="aiac-decide-ask">' + _d.ask + '</div>' : '')
+      // `nav:true` = this verb LEAVES the panel, so it takes the look-here grammar: secondary weight + the trailing
+      // open-in-new glyph, never the green primary (which means "the agent acts here on your consent").
+      + '<div class="ai-gate-btns">' + (_d.btns || []).map(function(b){
+          var prim = b.nav ? false : (b.primary !== false);
+          return '<button type="button" class="ai-gate-btn' + (prim ? ' primary' : '') + '"'
+            + (b.attr ? ' ' + b.attr : '') + ' onclick="' + b.onclick + '">' + _aiEsc(b.label)
+            + (b.nav ? ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('open-in-new-outlined', 16)) || '') : '') + '</button>';
+        }).join('') + '</div></div>';
+  }
+  return html + '</div>';
+}
+window.addEventListener('focus', function(){ if (document.body.classList.contains('ai-open') && typeof aiRender === 'function' && !aiAgent.busy) aiRender(); });
+window.addEventListener('storage', function(e){ if (e.key === 'vdc-facts' && typeof aiRender === 'function' && !aiAgent.busy) aiRender(); });
+function aiacToggleInsight(i){ var m = aiAgent.msgs[i]; if(!m || m.role !== 'card') return; m.insightOpen = !m.insightOpen; aiRender(); }
+function aiacToggleActs(i){ var m = aiAgent.msgs[i]; if(!m || m.role !== 'card') return; m.actsOpen = !m.actsOpen; aiRender(); }
+function aiacToggleTable(i){ var m = aiAgent.msgs[i]; if(!m || m.role !== 'card') return; m.tblOpen = !m.tblOpen; aiAgent._scrollAnchor = m.tblOpen ? { reveal: '[data-aiac="' + i + '"] .ov-more-row' } : 'keep'; aiRender(); }
+// Local routing: nav carries the handoff marker so the target page can pick
+// the conversation up (works for both directions — forward to a page that
+// has this same shell, or back to protected-data.html); a flow is approved
+// here but runs where the run machinery lives (protected-data.html), via a
+// one-shot directive the inventory boot consumes.
+function aiacGo(kind, arg){
+  if (kind === 'nav'){
+    // Persist BEFORE setting the marker: the destination reopens the panel from vdc-ai-transcript, and without this
+    // it set the marker and landed on nothing (user 2026-10-29). Shared implementation in vdc-notifications.js.
+    try { if (typeof window.vdcPersistTranscript === 'function') window.vdcPersistTranscript(); } catch(e){}
+    try { sessionStorage.setItem('vdc-ai-handoff', String(arg).split('#')[0].split('?')[0]); } catch(e){}
+    window.location.href = (window.VDC_BASE || '') + arg; return;
+  }
+  if (kind === 'flow'){
+    try {
+      sessionStorage.setItem('vdc-ai-flow', arg);
+      sessionStorage.setItem('vdc-ai-handoff', 'protected-data.html');
+    } catch(e){}
+    window.location.href = (window.VDC_BASE || '') + 'protected-data.html'; return;
+  }
+  if (typeof showToast === 'function') showToast(arg);
+}
+function aiacAcceptAll(){
+  try { sessionStorage.setItem('vdc-ai-handoff', 'protected-data.html'); } catch(e){}
+  window.location.href = (window.VDC_BASE || '') + 'protected-data.html';
+}
+// ── CONVERSATION-LED HANDOFF (2026-09-18, same contract as backup-policies'
+// 2026-09-11 port): inventory-V1's aiacGo('nav') flushes its transcript
+// (localStorage vdc-ai-transcript) and sets a ONE-SHOT sessionStorage marker
+// = the destination filename. This page consumes the marker, hydrates its
+// own panel with the carried transcript at FULL card fidelity (the ported
+// aiacCardHtml above), and opens it. No marker (plain load, refresh) = no
+// carry — the panel stays closed until the user opens it themselves.
+(function _aiHandoffHydrate(){
+  try {
+    var _mk = sessionStorage.getItem('vdc-ai-handoff');
+    if (_mk) sessionStorage.removeItem('vdc-ai-handoff');
+    if (_mk !== 'agent-hub.html') return;
+    var raw = JSON.parse(localStorage.getItem('vdc-ai-transcript'));
+    if (!raw || !Array.isArray(raw.msgs) || !raw.msgs.length) return;
+    raw.msgs.forEach(function(r){
+      if (r.role === 'card' && r.card){
+        aiAgent.msgs.push({ role: 'card', card: r.card, _accepted: !!r._accepted, actsOpen: false, insightOpen: false, _arrived: true });   // carried, not arriving — render settled
+        return;
+      }
+      if (r.role === 'user' || r.role === 'agent'){
+        var m = { role: r.role, html: r.html, _noSay: true };   /* carried, not arriving: a restored message is history, so the reply-typing helper must leave it alone */
+        if (r.gate){
+          m.gate = { q: r.gate.approval ? (r.gate.approval.action || 'Approval') : (r.gate.q || ''),
+            buttons: [], resolved: true,
+            choice: r.gate.choice || (r.gate.superseded ? 'Superseded' : 'Approved') };
+        }
+        aiAgent.msgs.push(m);
+      }
+    });
+    aiAgent.greeted = true;   // the carried conversation never re-greets over itself
+    // Top-anchor the CARD, not the trailing note (same contract as
+    // aiPushCard/aiPushAgent in protected-data.html) — the headline/chart is
+    // what matters first; the short "now viewing" line can be reached by
+    // scrolling the rest of the way.
+    var _hoCardIdx = -1; for (var _hi = aiAgent.msgs.length - 1; _hi >= 0; _hi--) if (aiAgent.msgs[_hi].role === 'card') { _hoCardIdx = _hi; break; }
+    if (_hoCardIdx >= 0) aiAgent._scrollAnchor = { reveal: '[data-aiac="' + _hoCardIdx + '"]' };
+    function boot(){
+  // One frame with the panel's transitions off, so a handoff-restored panel is simply THERE rather than sliding
+  // in. Two rAFs: the first lets the class and the open state land in the same paint, the second releases it before
+  // any user-driven open/close or resize, which must keep animating.
+  function _aiNoFx(){
+    try {
+      document.body.classList.add('ai-nofx');
+      requestAnimationFrame(function(){ requestAnimationFrame(function(){ document.body.classList.remove('ai-nofx'); }); });
+    } catch(e){}
+  }
+      _aiNoFx(); aiOpen(); aiRender(); if (window.vdcRestoreQuickPrompts) vdcRestoreQuickPrompts();
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+    else boot();
+  } catch(e){}
+})();
+</script>
+<script id="ai-canon-js">
+/* ══ PANEL PARITY WITH PROTECTED DATA (user 2026-10-27) ═══════════════════════════════════════════════════════
+   Protected Data is the canonical conversation design: light-green user prompts, the reasoning module (named steps
+   with tools/agents, expandable detail, "Thought for Xs · N steps"), approvals inside a card, outlined gate cards.
+   This page's panel engine is older, so the rendering layer is replaced with Protected Data's (copied, minus the
+   watch / scrub / history features that only exist there). The CSS is the matching block, style id ai-canon. */
+(function(){
+  window.aiPushReasoning = function(){
+    var m = { role: 'reasoning', steps: [], t0: Date.now(), done: false, open: false, stepOpen: {} };
+    aiAgent.msgs.push(m); aiRender();
+    return m;
+  };
+  window.aiFinishReasoning = function(m){
+    if (!m || m.done) return;
+    if (!m.steps.length){
+      var ix = aiAgent.msgs.indexOf(m);
+      if (ix !== -1) aiAgent.msgs.splice(ix, 1);
+      if (aiAgent._traceBlock === m) aiAgent._traceBlock = null;
+      m.done = true; aiRender(); return;
+    }
+    m.done = true; m.ms = (m.ms || 0) + (Date.now() - (m._t0seg || m.t0));
+    if (m._autoOpen && !m._userToggled) m.open = false;
+    aiRender();
+  };
+  window.aiToggleReason = function(i){
+    var m = aiAgent.msgs[i]; if(!m || m.role !== 'reasoning') return;
+    m.open = !m.open; m._userToggled = true;
+    aiAgent._scrollAnchor = m.open ? i : 'keep';
+    aiRender();
+  };
+  window.aiToggleReasonStep = function(i, si){
+    var m = aiAgent.msgs[i]; if(!m || m.role !== 'reasoning') return;
+    if (!m.stepOpen) m.stepOpen = {};
+    m.stepOpen[si] = !m.stepOpen[si];
+    aiAgent._scrollAnchor = m.stepOpen[si] ? { reveal: '[data-mi="' + i + '"] .ai-tr2-step[data-si="' + si + '"] .ai-tr2-detail' } : 'keep';
+    aiRender();
+  };
+  var _gc = window.aiGateClick;
+  window.aiGateClick = function(i){
+    var m = aiAgent.activeGate;
+    if (m && m.gate && !m.gate.resolved) m.gate.decidedAt = new Date().toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+    return _gc.apply(this, arguments);
+  };
+  window.aiRender = (function(){
+function aiRender(){
+  var body=document.getElementById('aiBody'); if(!body) return;
+  var html = aiAgent.msgs.map(function(m, i){
+    if(m.role==='user') return '<div class="ai-msg user"><div class="ai-bubble">'+_aiEsc(m.html)+'</div></div>';
+    if(m.role==='card'){
+      // ANSWER CARD (port 2026-09-02 — see the .aiac CSS block for full
+      // provenance). Tiers: headline+sub answer EVERY prompt clause ·
+      // strip vis · findings w/ their own actions · one details expander.
+      // A CARD IS AN AGENT RESPONSE, SO IT TAKES FEEDBACK (user 2026-10-29: "shouldnt i see the feedback options
+      // below this prompt just like with other agent responses?"). The agent branch has always appended aiFbRow;
+      // the card branch never did, so every answer card on every page was the one agent reply you could not rate.
+      // Row sits OUTSIDE .ai-bubble, same as the agent branch, and m.noFb still suppresses it where a card is not a
+      // response to rate. m.fbCfg (the ROT dismissal wording/hook) was already being set and was simply inert.
+      return '<div class="ai-msg agent" data-msgi="' + i + '"><div class="ai-bubble" style="max-width:100%">' + aiacCardHtml(m, i) + '</div>' + (m.noFb ? '' : aiFbRow(i)) + '</div>';
+    }
+    if(m.role==='reasoning'){
+      if (m.done && !m.steps.length) return '';   // never an empty module (2026-09-16)
+      // DELEGATION TRACE (VeeamAI PRD FR-07 / UC-01, adapted 2026-08-21):
+      // named entries carry WHICH sub-agent / tool ran; auto-collapses to
+      // "Reasoning complete · N steps" per the PRD. Generic (unnamed)
+      // reasoning keeps the older "Thought for Ns" pill.
+      // live header = what the agent is DOING, not a decision receipt: the
+      // log now carries "Resolved from the plan · …" entries and those read
+      // as noise in the header (2026-09-16)
+      var _lastLbl = 'Thinking…';
+      for (var _li = m.steps.length - 1; _li >= 0; _li--){
+        var _sl = (typeof m.steps[_li] === 'string') ? m.steps[_li] : m.steps[_li].label;
+        if (_sl && !/^(Resolved from the plan|Decided at approval)/.test(_sl)){ _lastLbl = _sl; break; }
+      }
+      // Total duration: authored per-entry ms when every entry carries one
+      // (enriched traces), else the measured wall clock.
+      var _trTotal = null;
+      if (m.named && m.steps.length && m.steps.every(function(s){ return s && s.ms; })) {
+        _trTotal = (m.steps.reduce(function(sum, s){ return sum + s.ms; }, 0) / 1000).toFixed(1);
+      } else if (m.ms) { _trTotal = Math.max(1, Math.round(m.ms / 1000)); }
+      // THINKING vs REASONING (user 2026-09-15, codified): thinking is the
+      // ACTIVITY — measured in time, shown while the run is live and as the
+      // whole label when it left no steps behind. Reasoning is the RECORD —
+      // measured in steps, never in seconds ("reasoned for 10s" is a
+      // category error); the duration rides the receipt as elapsed time of
+      // auditable work. was (2026-09-02): one merged "Reasoned for Xs" label.
+      var label = m.done
+        ? (m.steps.length
+            // ONE VERB (user 2026-09-15, closing the thinking-vs-reasoning
+            // thread): "Thinking…" while live, "Thought for Xs · N steps"
+            // when settled — tense carries live-vs-record; "· N steps" +
+            // the chevron carry inspectability. "Reasoned" retired; NOTE:
+            // the PRD (FR-07) and the philosophy doc still say "reasoning
+            // trace" — vocabulary treaty consciously broken here.
+            ? ('Thought for ' + (_trTotal || 1) + 's · ' + m.steps.length + ' step' + (m.steps.length===1?'':'s'))
+            : ('Thought for ' + (_trTotal || 1) + 's'))
+        : _lastLbl;
+      // header: spinner while live; NO leading tick when done (Figma module
+      // header is text + chevron only — the per-row ticks carry completion)
+      var head = m.done ? '' : '<span class="disc-spinner"></span>';
+      // The live label crossfades when it CHANGES (see vdcLabelArrival). A settled bar never ticks — its label is
+      // a receipt, not a status line. vdcLabelArrival returns a fragment meant to be spliced inside a class
+      // attribute, so it is closed here rather than concatenated raw.
+      var _lblTick = '';
+      if (!m.done && typeof window.vdcLabelArrival === 'function'){
+        var _lt = window.vdcLabelArrival(m, label);
+        if (_lt) _lblTick = ' class="' + _lt.slice(1) + '"';
+      }
+      var _trKindIc = function(kind, sz){
+        // tool = integration-widget (tool/MCP calls ARE integrations); was
+        // function-sum — a math sigma, a name-guess the user caught 2026-08-21.
+        var nm = kind === 'agent' ? 'my-ai-agents-outlined' : kind === 'tool' ? 'integration-widget-outlined' : 'workflow-outlined';
+        return (typeof _dsStoreIconSvg === 'function' ? (_dsStoreIconSvg(nm, sz || 13) || '') : '');
+      };
+      // Kind-breakdown chips on the completed pill (enriched port).
+      var _hkinds = '';
+      // kind-breakdown chips RETIRED with the module port (2026-09-15 Figma:
+      // header carries only the label; delegation reads as row text)
+      if (false && m.done && m.named) {
+        var _kt = m.steps.filter(function(s){ return s && s.kind === 'tool'; }).length;
+        var _ka = m.steps.filter(function(s){ return s && s.kind === 'agent'; }).length;
+        _hkinds = '<span class="ai-tr2-hkinds">'
+          + (_kt ? '<span class="ai-tr2-chip n">' + _kt + ' tool' + (_kt===1?'':'s') + '</span>' : '')
+          + (_ka ? '<span class="ai-tr2-chip">' + _ka + ' agent' + (_ka===1?'':'s') + '</span>' : '') + '</span>';
+      }
+      // ENRICHED body (ported from ai-reasoning-trace.html, user pick
+      // 2026-09-01): rail + kind tiles + per-step tick/spinner + duration +
+      // result chip; entries with detail/result expand to a params block.
+      // Plain string steps keep the legacy flat row.
+      var _stepsHtml = m.steps.map(function(st, si){
+        if (typeof st === 'string') return '<div class="ai-reason-step">' + _aiEsc(st) + '</div>';
+        var running = !m.done && si === m.steps.length - 1;
+        var isDone = m.done || si < m.steps.length - 1;
+        var open = !!(m.stepOpen && m.stepOpen[si]);
+        var hasDetail = !!(st.detail || st.result || st.spawn);
+        // tool signature: the part before ' — ' gets the quiet mono <b>
+        var lbl = _aiEsc(st.label);
+        if (st.kind === 'tool' && lbl.indexOf(' — ') > 0) lbl = '<b>' + lbl.split(' — ')[0] + '</b> — ' + lbl.split(' — ').slice(1).join(' — ');
+        return '<div class="ai-tr2-step k-' + st.kind + (open ? ' open' : '') + '" data-si="' + si + '">'
+          + '<span class="ai-tr2-tile">' + _trKindIc(st.kind, 13) + '</span>'
+          + '<button type="button" class="ai-tr2-row" onclick="aiToggleReasonStep(' + i + ',' + si + ')" aria-expanded="' + open + '"' + (hasDetail ? '' : ' style="cursor:default"') + '>'
+          + '<span class="ai-tr2-state">' + (running ? '<span class="disc-spinner"></span>' : (isDone ? '<svg class="tick" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>' : '')) + '</span>'
+          + '<span class="ai-tr2-label">' + lbl + '</span>'
+          + (isDone && st.chip ? '<span class="ai-tr2-chip">' + _aiEsc(st.chip) + '</span>' : '')
+          + (isDone && st.ms ? '<span class="ai-tr2-dur">' + (st.ms / 1000).toFixed(1) + 's</span>' : '')
+          + '</button>'
+          + (hasDetail
+             ? '<div class="ai-tr2-detail">'
+               + (st.spawn ? [['task', st.spawn.task], ['granted', st.spawn.granted], ['not granted', st.spawn.denied], ['lifetime', 'Retired when the task completes']].map(function(kv){ return '<div class="ai-tr2-kv"><span class="k">' + _aiEsc(kv[0]) + '</span><span class="v">' + _aiEsc(kv[1]) + '</span></div>'; }).join('') : '')
+               + (st.detail || []).map(function(kv){ return '<div class="ai-tr2-kv"><span class="k">' + _aiEsc(kv[0]) + '</span><span class="v">' + _aiEsc(kv[1]) + '</span></div>'; }).join('')
+               + (st.result ? '<div class="ai-tr2-kv res"><span class="k">result</span><span class="v">' + _aiEsc(st.result) + '</span></div>' : '')
+               + (st.spawn ? '<div class="ai-tr2-kv"><span class="k"></span><button type="button" style="border:none;background:none;padding:0;font-family:inherit;font-size:12px;color:var(--em-green);cursor:pointer" onclick="event.stopPropagation();aiacGo(\'nav\', \'activity.html#agents\')">View in Agent activity</button></div>' : '')
+               + '</div>'
+             : '')
+          + '</div>';
+      }).join('');
+      // MODULE mode (user 2026-09-15, per product Figma DCP Hybrid SaaS Phase 1
+      // node 16947:161253 + expanded mock): contained white card, bold header
+      // + chevron, hairline rows w/ right-aligned meta. Supersedes 'quiet'
+      // (2026-09-02, parked below in CSS) — the Figma module is quiet enough:
+      // white, hairlines, grey meta; not the banned dramatic box.
+      return '<div class="ai-reason'+(m.open?' open':'')+(m.named?' named':'')+' module" data-mi="'+i+'">'
+        + '<div class="ai-reason-bar">'
+        + '<button type="button" class="ai-reason-head'+(m.done?'':' live')+'" onclick="aiToggleReason('+i+')" aria-expanded="'+(m.open?'true':'false')+'">'
+        + head + '<span' + _lblTick + '>' + _aiEsc(label) + '</span>' + _hkinds
+        + '<svg class="ai-reason-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>'
+        + '</button>'
+        // was: a "Watch" link here — REMOVED same day: THINKING IS NOT
+        // WATCHABLE. It is internal deliberation; only on-screen ACTIVITY
+        // can be watched, so the camera offer belongs on action surfaces
+        // (the Tasks dock while a run acts, and the approval) — never here.
+        + '</div>'
+        + '<div class="ai-reason-steps">' + _stepsHtml + '</div>'
+        + '</div>';
+    }
+    var gate='';
+    // ARRIVAL FOR THE DECISION BLOCK (2026-10-29) — computed once so the approval and question branches below
+    // cannot drift. A RESOLVED gate never animates: it is a receipt of something already decided, not an arrival.
+    var _gateArrive = (m.gate && !m.gate.resolved && typeof window.vdcGateArrival === 'function') ? window.vdcGateArrival(m.gate) : '';
+    if(m.gate && m.gate.approval){
+      var ap = m.gate.approval;
+      var apApproveIc = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      var apBtns = m.gate.resolved ? '' : '<div class="ai-gate-btns">' + m.gate.buttons.map(function(b, j){
+        return '<button type="button" class="ai-gate-btn' + (b.primary ? ' primary' : '') + '" onclick="aiGateClick(' + j + ')">' + (b.primary ? apApproveIc : '') + '<span class="ai-gate-btn-label">' + _aiEsc(b.label) + '</span></button>';
+      }).join('') + '</div>';
+      var apRows = [['Action', ap.action], ['Scope', ap.scope], ['Evidence', ap.evidence], ['Reversal', ap.reversal]].filter(function(r){ return r[1]; })
+        .map(function(r){ return '<div class="ai-approval-row"><span class="ai-approval-k">'+r[0]+'</span><span class="ai-approval-v">'+r[1]+'</span></div>'; }).join('');
+      if (!apRows && ap.rows) apRows = ap.rows.map(function(r){ return '<div class="ai-approval-row"><span class="ai-approval-k">'+_aiEsc(r[0])+'</span><span class="ai-approval-v">'+r[1]+'</span></div>'; }).join('');
+      gate = '<div class="ai-approval'+(m.gate.resolved?' resolved':'')+_gateArrive+'">'
+        + '<div class="ai-approval-hd"><span class="ai-approval-title">Approval required</span></div>'
+        + apRows + apBtns
+        + '<div class="ai-approval-done">\u2713 '+_aiEsc(m.gate.choice||'Approved')+' \u00b7 you'+(m.gate.decidedAt ? ' \u00b7 '+m.gate.decidedAt : '')+'</div>'
+        + '</div>';
+    } else if(m.gate){
+      var btns = m.gate.resolved ? '' : '<div class="ai-gate-btns">'+m.gate.buttons.map(function(b,j){ return '<button type="button" class="ai-gate-btn'+(b.primary?' primary':'')+'" onclick="aiGateClick('+j+')">'+_aiEsc(b.label)+'</button>'; }).join('')+'</div>';
+      gate = '<div class="ai-gate'+(m.gate.resolved?' resolved':'')+_gateArrive+'">'
+        + '<div class="ai-gate-q">'+m.gate.q+'</div>'
+        + btns
+        + '<div class="ai-gate-done">\u2713 '+_aiEsc(m.gate.choice||'Approved')+'</div>'
+        + '</div>';
+    }
+    // THE REPLY COMPOSES ITSELF (user 2026-10-29: "agent responses are still not consistently animating in…
+    // the text just appears"). The greeting has typed word by word since the A2 port, but this branch — every
+    // narration, every quick-prompt answer, every follow-up line — emitted m.html raw, so the panel spoke in two
+    // voices depending only on which block you were looking at. vdcSayHtml wraps the text nodes (markup, buttons
+    // and inline SVG untouched) and compensates each delay for time already elapsed, so an aiRender triggered
+    // mid-sentence resumes rather than restarting or snapping. m._noSay opts a message out.
+    var _sayHtml = (typeof window.vdcSayHtml === 'function') ? window.vdcSayHtml(m.html, m) : m.html;
+    return '<div class="ai-msg agent" data-msgi="'+i+'"><div class="ai-bubble vdc-typing">'+_sayHtml+gate+'</div>'+((m.noFb || typeof aiFbRow !== 'function') ? '' : aiFbRow(i))+'</div>';
+  }).join('');
+  if(aiAgent.thinking) html += '<div class="ai-thinking"><span></span><span></span><span></span></div>';
+  // Defensive guard (bug fix 2026-09-18, same investigation as the aiOpen
+  // fallback above): a reasoning message with zero steps renders as ''
+  // (line "never an empty module"), so if EVERY current message happens to
+  // collapse that way, non-empty msgs can still produce an empty string —
+  // leaving the panel blank while it's already open, no reopen needed to
+  // see it. Never paint nothing.
+  if (!html.trim()){ aiRenderHome(); return; }
+  var _prevScroll = body.scrollTop;
+  body.innerHTML = html;
+  _aiacTrendDraw(body);   // trends need the real laid-out width (full-bleed svg + hover wiring)
+  // Scroll anchoring — THE CONTRACT (systemic, user 2026-09-02: revealed
+  // content must always end up on screen; per-callsite guessing kept
+  // leaving expansions below the fold). Every interaction handler that
+  // re-renders sets aiAgent._scrollAnchor to ONE of:
+  //   {reveal: selector} — content GREW: restore position, then scroll the
+  //       MINIMUM needed to bring that element fully into view (never
+  //       yanks the clicked control off screen). Use for any expansion.
+  //   'keep'   — nothing grew (collapses, selections): hold position.
+  //   <number> — explicit ruling: opening a reasoning panel anchors its
+  //       TOP to the top of the view (user 2026-09-01).
+  //   unset    — conversation advanced: follow to the bottom (default).
+  var _anch = aiAgent._scrollAnchor; aiAgent._scrollAnchor = null;
+  if (_anch && typeof _anch === 'object' && _anch.reveal) {
+    body.scrollTop = _prevScroll;
+    var _revEl = body.querySelector(_anch.reveal);
+    if (_revEl) {
+      // rect math, not offsetTop — the element's offsetParent is the
+      // positioned panel, not the scroll container
+      var _bR = body.getBoundingClientRect();
+      var _eR = _revEl.getBoundingClientRect();
+      var _rTop = _eR.top - _bR.top + body.scrollTop;
+      var _rBot = _rTop + _eR.height;
+      if (_rBot > body.scrollTop + body.clientHeight) {
+        // bring the bottom into view, but never past the element's top
+        body.scrollTop = Math.min(_rTop - 8, _rBot - body.clientHeight + 8);
+      } else if (_rTop < body.scrollTop) {
+        body.scrollTop = Math.max(0, _rTop - 8);
+      }
+    }
+  } else if (_anch === 'keep') {
+    body.scrollTop = _prevScroll;
+  } else if (typeof _anch === 'number') {
+    var _anchEl = body.querySelector('[data-mi="' + _anch + '"]');
+    body.scrollTop = _anchEl ? Math.max(0, _anchEl.offsetTop - body.offsetTop - 8) : _prevScroll;
+  } else {
+    body.scrollTop = body.scrollHeight;
+  }
+  // The transcript was rebuilt and re-anchored, so the approval card may have
+  // just appeared, moved, or gone — re-evaluate whether the dock is still the
+  // only place the decision lives. Safe here: aiRender never calls the dock
+  // renderer, and the sync only re-renders on a flip. It also converges in
+  // one pass, since collapsing the dock only ever reveals MORE of the card.
+  if (typeof _aiGateVisSync === 'function') _aiGateVisSync();
+  if (typeof _aiPersistSoon === 'function') _aiPersistSoon();
+}
+    return aiRender;
+  })();
+})();
+</script>
+<script id="ai-hx-js">
+/* ── CHAT HISTORY — searchable history overlay (ported 2026-09-01 from the
+   picked pattern in ai-history-patterns.html; see the .ai-hx-* CSS block for
+   the full provenance note). One unified timeline — agents/orchestration
+   invisible (user ruling). Seed = the proto's 12 conversations verbatim;
+   past approvals render as SEALED .ai-approval records, never actionable. ── */
+var _AIHX_NOW = Date.now();
+function _aiHxDaysAgo(n, hh, mm){ var d = new Date(_AIHX_NOW - n*86400000); d.setHours(hh||10, mm||12, 0, 0); return d; }
+function _aiHxFmtDay(d){ return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()] + ' ' + d.getDate(); }
+function _aiHxFmtTime(d){ var h = d.getHours() % 12 || 12, ap = d.getHours() < 12 ? 'AM' : 'PM'; return h + ':' + String(d.getMinutes()).padStart(2,'0') + ' ' + ap; }
+function _aiHxRel(d){
+  var days = Math.floor((_AIHX_NOW - d.getTime()) / 86400000);
+  if (days === 0) return 'Today · ' + _aiHxFmtTime(d);
+  if (days === 1) return 'Yesterday · ' + _aiHxFmtTime(d);
+  if (days < 7) return days + ' days ago';
+  return _aiHxFmtDay(d);
+}
+function _aiHxReceipt(action, scope, decided){ return { role:'receipt', action: action, scope: scope, decided: decided }; }
+var AI_HISTORY = [
+  { id:'h1', title:'Deleted email recovery — John Voight', wlLabel:'Microsoft 365', at: _aiHxDaysAgo(0, 9, 41), msgs:[
+      { role:'user',  text:'Find the contract renewal email John Voight deleted and restore it' },
+      { role:'agent', text:'I searched John Voight’s backed-up mailbox and found one match: “Re: contract renewal timeline”, purged from his Deleted Items on Aug 26 — still held in backup.' },
+      { role:'agent', text:'Added the message to the restore cart targeting the latest restore point; it will restore back into the folder it came from.' },
+      _aiHxReceipt('Restore 1 message — “Re: contract renewal timeline”', 'John Voight · Deleted Items · latest restore point', '✓ Approved · you · Today · 9:44 AM') ] },
+  { id:'h2', title:'OneDrive deletion sweep', wlLabel:'Microsoft 365', at: _aiHxDaysAgo(0, 8, 5), msgs:[
+      { role:'user',  text:'There was unusual deletion activity across OneDrive this morning — investigate' },
+      { role:'agent', text:'Three accounts stand well outside their 30-day baseline: Mary Isabel, Abe Jefferson, Jewell Riddle — the deletions are concentrated in a 20-minute window, consistent with a scripted or bulk action.' },
+      { role:'agent', text:'Everything deleted this morning is still held in backup. I proposed restoring all three drives to their pre-incident point in one job.' },
+      _aiHxReceipt('Restore 3 OneDrive accounts to pre-incident point', 'Mary Isabel · Abe Jefferson · Jewell Riddle', '✓ Approved · you · Today · 8:19 AM') ] },
+  { id:'h3', title:'SharePoint rollback — Retail Division · Taxes', wlLabel:'Microsoft 365', at: _aiHxDaysAgo(1, 16, 22), msgs:[
+      { role:'user',  text:'The Taxes folder on the Retail Division site was mangled by a bulk edit — roll it back' },
+      { role:'agent', text:'I opened Retail Division › Taxes and pinned the folder to the last clean point before the edit. Rolling back restores the folder and everything in it; files legitimately edited after that point revert too.' },
+      _aiHxReceipt('Roll back 1 folder — Taxes (entire contents)', 'Retail Division · pinned to the pre-edit point', '✓ Approved · you · Yesterday · 4:31 PM') ] },
+  { id:'h4', title:'Departed-user handoff — Mark Aldridge', wlLabel:'Microsoft 365', at: _aiHxDaysAgo(2, 11, 3), msgs:[
+      { role:'user',  text:'Mark Aldridge left the company — recover his mailbox so his manager can take it over' },
+      { role:'agent', text:'His mailbox was deprovisioned with his account on Apr 17 — gone from the live tenant but fully restorable from backup. His OneDrive was never enrolled in backup, so there is nothing to recover there.' },
+      { role:'agent', text:'I restored the whole mailbox from its last protected point. IT can now grant his manager delegate access.' },
+      _aiHxReceipt('Restore 1 mailbox — full contents', 'Mark Aldridge · last point before deprovisioning', '✓ Approved · you · 2 days ago') ] },
+  { id:'h5', title:'Manufacturing records restore', wlLabel:'Dynamics 365', at: _aiHxDaysAgo(3, 14, 48), msgs:[
+      { role:'user',  text:'Restore all the Dynamics 365 records about manufacturing' },
+      { role:'agent', text:'I searched the backed-up column values for “Manufacturing” — every match lands on the Industry column. Selected 12 records and locked the latest restore point — approved from the summary.' },
+      _aiHxReceipt('Restore 12 records — Industry = Manufacturing', 'Dynamics 365 · Contoso Production · latest point', '✓ Approved · you · 3 days ago') ] },
+  { id:'h6', title:'Owner column rollback to June 12', wlLabel:'Dynamics 365', at: _aiHxDaysAgo(5, 10, 30), msgs:[
+      { role:'user',  text:'Restore all owner columns across all records back to June 12th' },
+      { role:'agent', text:'I scoped the restore to the Owner column only — every other column stays as it is today — across Accounts, Cases and Opportunities, pinned to June 12.' },
+      _aiHxReceipt('Restore Owner on 38 records', 'Accounts · Cases · Opportunities · June 12 point', '✓ Approved · you · 5 days ago') ] },
+  { id:'h7', title:'Backup volume question', wlLabel:'Dynamics 365', at: _aiHxDaysAgo(6, 9, 15), msgs:[
+      { role:'user',  text:'How much total space am I consuming?' },
+      { role:'agent', text:'Your protected estate totals 4.6 TB across ten workloads. Dynamics 365 accounts for 1.2 TB; the fastest-growing slice is Microsoft 365 OneDrive at +8% month over month.' } ] },
+  { id:'h8', title:'GitLab group config recovery', wlLabel:'GitLab', at: _aiHxDaysAgo(8, 15, 55), msgs:[
+      { role:'user',  text:'Someone wiped the protected-branch rules on acme-group — recover them' },
+      { role:'agent', text:'I found the Group Settings › Repository category in the last clean backup and restored the branch-protection rules for all 22 projects.' },
+      _aiHxReceipt('Restore Group Settings — Repository category', 'acme-group · point before the wipe', '✓ Approved · you · Aug 24') ] },
+  { id:'h9', title:'Okta group membership check', wlLabel:'Okta', at: _aiHxDaysAgo(10, 13, 20), msgs:[
+      { role:'user',  text:'Was alice.brennan in Finance-Admins before the March cleanup?' },
+      { role:'agent', text:'Yes — comparing the Mar 1 and Mar 20 points shows alice.brennan was removed from Finance-Admins on Mar 14, along with 3 other members. No restore was requested.' } ] },
+  { id:'h10', title:'Okta deprovisioned users restore', wlLabel:'Okta', at: _aiHxDaysAgo(13, 17, 5), msgs:[
+      { role:'user',  text:'Recover the users deprovisioned by the bad SCIM sync' },
+      { role:'agent', text:'The Apr sync deprovisioned 9 users that never should have matched the rule. I selected all 9 from the pre-sync point and ran the restore after your approval.' },
+      _aiHxReceipt('Restore 9 users', 'acme.okta.com · pre-sync point', '✓ Approved · you · Aug 19') ] },
+  { id:'h11', title:'Shared drive permissions rollback', wlLabel:'Google Workspace', at: _aiHxDaysAgo(16, 11, 40), msgs:[
+      { role:'user',  text:'The HR shared drive got opened to the whole org — roll the permissions back' },
+      { role:'agent', text:'I restored the drive ACLs from the previous night’s point — membership and external-sharing settings are back to HR-only.' },
+      _aiHxReceipt('Restore drive ACLs', 'HR Shared Drive · previous night’s point', '✓ Approved · you · Aug 16') ] },
+  { id:'h12', title:'GitLab project export', wlLabel:'GitLab', at: _aiHxDaysAgo(19, 14, 10), msgs:[
+      { role:'user',  text:'Export the audit events for the payments project for legal' },
+      { role:'agent', text:'Exported the project audit events for the requested range as a job — the archive is available from Activity.' } ] }
+];
+var aiHx = { open:false, view:'chat', openId:null, trQ:'', cur:0, kb:-1, q:'' };
+function _aiHxCountM(text, q){
+  if (!q) return 0;
+  var n = 0, low = String(text).toLowerCase(), ql = q.toLowerCase(), i = 0;
+  while ((i = low.indexOf(ql, i)) >= 0) { n++; i += ql.length; }
+  return n;
+}
+// Highlight via the SHARED rd-match-hl mark (drawer search grammar).
+function _aiHxHl(text, q, curIdx, counter){
+  if (!q) return _aiEsc(text);
+  var out = '', low = String(text).toLowerCase(), ql = q.toLowerCase(), i = 0;
+  while (true) {
+    var j = low.indexOf(ql, i);
+    if (j < 0) { out += _aiEsc(String(text).slice(i)); break; }
+    out += _aiEsc(String(text).slice(i, j));
+    var cls = (counter && counter.n === curIdx) ? ' is-current' : '';
+    if (counter) counter.n++;
+    out += '<mark class="rd-match-hl' + cls + '">' + _aiEsc(String(text).slice(j, j + q.length)) + '</mark>';
+    i = j + q.length;
+  }
+  return out;
+}
+function _aiHxConvText(c){ return c.title + ' ' + c.msgs.map(function(m){ return m.role === 'receipt' ? (m.action + ' ' + m.scope) : m.text; }).join(' '); }
+function _aiHxChip(c){ return '<span class="ai-hx-chipwl">' + _aiEsc(c.wlLabel) + '</span>'; }
+function _aiHxTile(){ return '<span class="ai-hx-tile">' + (_dsStoreIconSvg('ai-sparkle', 18) || '') + '</span>'; }
+function _aiHxMsgHtml(m, q, curIdx, counter){
+  if (m.role === 'user')  return '<div class="ai-msg user"><div class="ai-bubble">' + _aiHxHl(m.text, q, curIdx, counter) + '</div></div>';
+  if (m.role === 'agent') return '<div class="ai-msg agent"><div class="ai-bubble">' + _aiHxHl(m.text, q, curIdx, counter) + '</div></div>';
+  // SEALED receipt — the live .ai-approval card in its resolved state,
+  // stripped of buttons: a read-only record of a past decision.
+  return '<div class="ai-msg agent"><div class="ai-approval resolved" style="width:100%">'
+    + '<div class="ai-approval-hd"><span class="ai-approval-title">Approval — sealed record</span>'
+    + '<span class="ai-approval-auto" data-tooltip="Recorded when this restore was approved">Autonomy: Always ask</span></div>'
+    + '<div class="ai-approval-row"><span class="ai-approval-k">Action</span><span class="ai-approval-v">' + _aiHxHl(m.action, q, curIdx, counter) + '</span></div>'
+    + '<div class="ai-approval-row"><span class="ai-approval-k">Scope</span><span class="ai-approval-v">' + _aiHxHl(m.scope, q, curIdx, counter) + '</span></div>'
+    + '<div class="ai-approval-done" style="display:block">' + _aiEsc(m.decided) + '</div>'
+    + '</div></div>';
+}
+/* ── PANEL RESIZE (user 2026-09-17) ───────────────────────────────────────
+   One custom property does all the work: --ai-w already drives the panel's
+   width AND every page consumer (.app padding, wizard overlay, modal, record
+   drawer, glow), so a drag is a single variable write and the page reflows
+   with it. Nothing overlays.
+   Bounds measured, not guessed — see .ai-resize in the stylesheet.
+   The width is a PREFERENCE: persisted, and restored on every open, so a
+   click-through to another page does not reset what the user chose. */
+var _AI_W_MIN = 360, _AI_W_MAX = 560, _AI_W_DEFAULT = 420;
+function _aiWCap(){ return Math.min(_AI_W_MAX, Math.round(window.innerWidth * 0.5)); }
+function _aiWClamp(w){ return Math.max(_AI_W_MIN, Math.min(_aiWCap(), Math.round(w))); }
+function _aiWApply(w){ document.body.style.setProperty('--ai-w', _aiWClamp(w) + 'px'); }
+function _aiWSaved(){
+  try { var v = parseInt(localStorage.getItem('vdc-ai-panel-w'), 10); return v > 0 ? v : null; } catch(e) { return null; }
+}
+// Restore on open. Called by aiOpen; also safe to call at any time.
+function aiWidthRestore(){
+  var w = _aiWSaved();
+  if (w) _aiWApply(w);
+  else document.body.style.removeProperty('--ai-w');   // fall back to the stylesheet's 420px
+}
+function aiResizeStart(e){
+  if (document.body.classList.contains('ai-full')) return;
+  e.preventDefault();
+  var startX = e.clientX;
+  var startW = document.getElementById('aiPanel').getBoundingClientRect().width;
+  document.body.classList.add('ai-resizing');
+  document.getElementById('aiPanel').classList.add('is-resizing');   // same shape as .tree-nav.is-resizing
+  function move(ev){
+    // the panel is anchored RIGHT, so dragging its left edge leftwards widens it
+    _aiWApply(startW + (startX - ev.clientX));
+  }
+  function up(){
+    document.removeEventListener('pointermove', move);
+    document.removeEventListener('pointerup', up);
+    document.body.classList.remove('ai-resizing');
+    document.getElementById('aiPanel').classList.remove('is-resizing');
+    var w = Math.round(document.getElementById('aiPanel').getBoundingClientRect().width);
+    try { localStorage.setItem('vdc-ai-panel-w', String(w)); } catch(err) {}
+  }
+  document.addEventListener('pointermove', move);
+  document.addEventListener('pointerup', up);
+}
+// A narrowed viewport must not leave the page starved: re-clamp on resize,
+// but only when a stored width is actually in force.
+window.addEventListener('resize', function(){
+  if (document.body.style.getPropertyValue('--ai-w')) _aiWApply(parseInt(document.body.style.getPropertyValue('--ai-w'), 10) || _AI_W_DEFAULT);
+});
+function aiHxToggle(){
+  if (aiHx.open){ aiHxClose(); return; }
+  aiHx.open = true; aiHx.q = ''; aiHx.kb = -1;
+  aiHxRenderOverlay();
+}
+function aiHxClose(){
+  aiHx.open = false;
+  var s = document.getElementById('aiHxScrim'); if (s) s.remove();
+  var b = document.getElementById('aiHxBtn'); if (b) b.classList.remove('is-on');
+}
+function _aiHxFinderBody(q){
+  if (!q) {
+    var groups = [['Today', 0, 0], ['This week', 1, 6], ['Earlier', 7, 9999]];
+    return groups.map(function(g){
+      var inG = AI_HISTORY.filter(function(c){
+        var days = Math.floor((_AIHX_NOW - c.at.getTime()) / 86400000);
+        return days >= g[1] && days <= g[2];
+      });
+      if (!inG.length) return '';
+      return '<div class="ai-hx-group">' + g[0] + '</div>' + inG.map(function(c){
+        return '<button type="button" class="ai-hx-row" onclick="aiHxOpenTranscript(\'' + c.id + '\', \'\')">'
+          + _aiHxTile()
+          + '<span class="ai-hx-main">'
+          + '<span class="ai-hx-title">' + _aiEsc(c.title) + '</span>'
+          + '<span class="ai-hx-sub">' + _aiEsc(_aiHxRel(c.at)) + ' ' + _aiHxChip(c) + '</span>'
+          + '</span></button>';
+      }).join('');
+    }).join('');
+  }
+  var hits = AI_HISTORY.map(function(c){
+    var msgs = c.msgs.map(function(m){
+      var raw = m.role === 'receipt' ? (m.action + ' · ' + m.scope) : m.text;
+      return _aiHxCountM(raw, q) > 0 ? raw : null;
+    }).filter(Boolean);
+    if (!msgs.length && !_aiHxCountM(c.title, q)) return null;
+    return { c: c, msgs: msgs.slice(0, 2) };
+  }).filter(Boolean);
+  // ONE clickable card per matched conversation (headers never clickable —
+  // hierarchy ruling from the proto review).
+  return hits.length
+    ? '<div class="ai-hx-group">' + hits.length + ' matching conversation' + (hits.length === 1 ? '' : 's') + '</div>'
+      + hits.map(function(h){
+          return '<button type="button" class="ai-hx-row" onclick="aiHxOpenTranscript(\'' + h.c.id + '\', \'' + _aiEsc(q).replace(/'/g, "\\'") + '\')">'
+            + _aiHxTile()
+            + '<span class="ai-hx-main">'
+            + '<span class="ai-hx-title">' + _aiHxHl(h.c.title, q) + '</span>'
+            + '<span class="ai-hx-sub">' + _aiEsc(_aiHxRel(h.c.at)) + ' ' + _aiHxChip(h.c) + '</span>'
+            + h.msgs.map(function(raw){ return '<span class="ai-hx-snip">' + _aiHxHl(String(raw).slice(0, 110), q) + '</span>'; }).join('')
+            + '</span></button>';
+        }).join('')
+    : '<div class="ai-hx-empty">No matches for “' + _aiEsc(q) + '”</div>';
+}
+function aiHxRenderOverlay(){
+  var panel = document.getElementById('aiPanel'); if (!panel) return;
+  var old = document.getElementById('aiHxScrim'); if (old) old.remove();
+  var q = aiHx.q.trim();
+  // was: a teach-once dismissible info-alert note ("Your full history,
+  // newest first… ↑↓ move · Enter opens · Esc closes") — REMOVED entirely
+  // (user 2026-09-01: "let people intuit that on their own"; it had already
+  // been demoted from a persistent footer to a dismissible alert the same
+  // day). aiHxDismissHint + .ai-hx-note CSS parked below for the record.
+  panel.insertAdjacentHTML('beforeend',
+    '<div class="ai-hx-scrim" id="aiHxScrim" onclick="if(event.target===this){aiHxClose()}">'
+    + '<div class="ai-hx-card">'
+    + '<div class="ai-hx-search-band"><div class="ai-hx-search">' + (_dsStoreIconSvg('search-outlined', 15) || '')
+    + '<input id="aiHxQ" placeholder="Search chat history" value="' + _aiEsc(aiHx.q) + '" oninput="aiHx.q=this.value; aiHx.kb=-1; aiHxKeepFocus()">'
+    + '</div></div>'
+    + '<div class="ai-hx-body" id="aiHxBody">' + _aiHxFinderBody(q) + '</div>'
+    // The agent-activity door, rehomed from the retired dock footer (user
+    // 2026-09-17). History is where you go to look back at agent work, so the
+    // audit trail belongs beside it rather than pinned above the composer.
+    + '<div class="ai-hx-foot"><a href="activity.html#agent">View agent activity</a></div>'
+    + '</div></div>');
+  var b = document.getElementById('aiHxBtn'); if (b) b.classList.add('is-on');
+  aiHxKbPaint();
+  var i = document.getElementById('aiHxQ'); if (i) i.focus();
+}
+function aiHxDismissHint(){
+  try { localStorage.setItem('vdc-aihx-hint-dismissed', '1'); } catch(e){}
+  aiHxKeepFocus();
+}
+function aiHxKeepFocus(){
+  var el = document.getElementById('aiHxQ');
+  var pos = el ? el.selectionStart : 0;
+  aiHxRenderOverlay();
+  var el2 = document.getElementById('aiHxQ');
+  if (el2) { el2.focus(); el2.setSelectionRange(pos, pos); }
+}
+function _aiHxKbRows(){ return Array.prototype.slice.call(document.querySelectorAll('#aiHxBody .ai-hx-row')); }
+function aiHxKbPaint(){
+  _aiHxKbRows().forEach(function(r, i){ r.classList.toggle('is-kb', i === aiHx.kb); });
+  var cur = document.querySelector('#aiHxBody .ai-hx-row.is-kb');
+  if (cur) cur.scrollIntoView({ block: 'nearest' });
+}
+// Read-only transcript — takes over #aiBody; the history affordance is the
+// way back (no back chevron, user ruling); Continue returns to the live chat.
+function aiHxOpenTranscript(id, q){
+  var c = AI_HISTORY.filter(function(x){ return x.id === id; })[0]; if (!c) return;
+  aiHxClose();
+  aiHx.view = 'transcript'; aiHx.openId = id; aiHx.trQ = q || ''; aiHx.cur = 0;
+  document.body.classList.add('ai-hx-transcript');
+  aiHxRenderTranscript();
+}
+function aiHxRenderTranscript(){
+  var body = document.getElementById('aiBody');
+  var c = AI_HISTORY.filter(function(x){ return x.id === aiHx.openId; })[0];
+  if (!body || !c) return;
+  var q = (aiHx.trQ || '').trim();
+  var counter = { n: 0 };
+  var total = q ? c.msgs.reduce(function(s, m){ return s + _aiHxCountM(m.role === 'receipt' ? (m.action + ' ' + m.scope) : m.text, q); }, 0) : 0;
+  if (aiHx.cur >= total) aiHx.cur = Math.max(0, total - 1);
+  body.innerHTML =
+    '<div class="ai-hx-trhead"><span class="ai-hx-trtitle">' + _aiEsc(c.title) + '</span>' + _aiHxChip(c) + '</div>'
+    // was: an in-transcript "Search this conversation" bar (input + match
+    // counter + prev/next) — REMOVED 2026-09-11 (user: search lives in the
+    // history overlay; a result click lands here at the match). The carried
+    // query q still highlights matches and the render still scrolls the
+    // current one into view — only the duplicate search UI is gone.
+    + '<div class="ai-hx-readonly">Read-only transcript · ' + _aiEsc(_aiHxRel(c.at)) + ' · approvals are sealed records</div>'
+    + c.msgs.map(function(m){ return _aiHxMsgHtml(m, q, aiHx.cur, counter); }).join('')
+    + '<div class="ai-hx-continue"><button type="button" onclick="aiHxBackToChat()">Continue this conversation</button></div>';
+  var curM = body.querySelector('mark.rd-match-hl.is-current');
+  if (curM) curM.scrollIntoView({ block: 'center' });
+}
+function aiHxTrKeepFocus(){
+  var el = document.getElementById('aiHxTrQ');
+  var pos = el ? el.selectionStart : 0;
+  aiHxRenderTranscript();
+  var el2 = document.getElementById('aiHxTrQ');
+  if (el2) { el2.focus(); el2.setSelectionRange(pos, pos); }
+}
+function aiHxBackToChat(){
+  aiHx.view = 'chat'; aiHx.openId = null;
+  document.body.classList.remove('ai-hx-transcript');
+  if (aiAgent.msgs.length) aiRender(); else aiRenderHome();
+}
+document.addEventListener('keydown', function(e){
+  if (!document.body.classList.contains('ai-open')) return;
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k'){
+    e.preventDefault();
+    if (!aiHx.open) aiHxToggle();
+    return;
+  }
+  if (!aiHx.open) return;
+  if (e.key === 'Escape'){ aiHxClose(); return; }
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+    e.preventDefault();
+    var n = _aiHxKbRows().length;
+    if (!n) return;
+    aiHx.kb = e.key === 'ArrowDown' ? Math.min(n - 1, aiHx.kb + 1) : Math.max(0, aiHx.kb - 1);
+    aiHxKbPaint();
+  }
+  if (e.key === 'Enter'){
+    var cur = document.querySelector('#aiHxBody .ai-hx-row.is-kb');
+    if (cur){ e.preventDefault(); cur.click(); }
+  }
+});
+
+/* ── NEW CHAT (Protected Data parity) — resets the CONVERSATION only and returns to the
+   scenario home. A bump of _aiNewChatGen invalidates timers a scripted flow had queued. ── */
+window._aiNewChatGen = 0;
+function aiNewChat(){
+  aiAgent._homeMode = 'menu';   // + is an explicit "give me the menu" — never the arrival screen (2026-10-29)
+  window._aiNewChatGen++;
+  if (aiHx && aiHx.open) aiHxClose();
+  if (aiHx && aiHx.view === 'transcript') { aiHx.view = 'chat'; aiHx.openId = null; document.body.classList.remove('ai-hx-transcript'); }
+  aiAgent._epoch = (aiAgent._epoch || 0) + 1;
+  aiSetBusy(false); if (typeof aiGlow === 'function') aiGlow(false);
+  aiAgent.msgs = []; aiAgent.started = false; aiAgent.steps = []; aiAgent.idx = 0; aiAgent.scenario = null; aiAgent.activeGate = null;
+  try { localStorage.removeItem('vdc-ai-transcript'); } catch (e) {}
+  aiRenderHome();
+}
+/* header glyphs — DS store icons, filled at runtime like the composer's */
+(function(){
+  var _ci = aiComposerIcons;
+  function fill(){
+    [['aiNewChatBtn','add-outlined',16],['aiHxBtn','history-outlined',16]].forEach(function(x){
+      var el = document.getElementById(x[0]);
+      if (el && !el.firstChild && typeof _dsStoreIconSvg === 'function'){ var svg = _dsStoreIconSvg(x[1], x[2]); if (svg) el.innerHTML = svg; }
+    });
+  }
+  aiComposerIcons = function(){ _ci.apply(this, arguments); fill(); };
+  fill();
+  var _op = aiOpen;
+  aiOpen = function(){ var r = _op.apply(this, arguments); if (typeof aiWidthRestore === 'function') aiWidthRestore(); return r; };
+  // The restored/dragged width is an INLINE --ai-w on body, which outranks the closed state's 0px — drop it on close or the
+  // panel never collapses (the saved width stays in localStorage and is re-applied on the next open).
+  var _cl = aiClose;
+  aiClose = function(){ var r = _cl.apply(this, arguments); document.body.style.removeProperty('--ai-w'); return r; };
+})();
+</script>
+<script id="ai-fbx-js">
+/* ══ FEEDBACK CARD — Protected Data's thumbs-down pattern (reasons, optional comment, include conversation), ported so the panel
+   behaves the same on every page. A message may carry m.fbCfg to set the card's wording and what Send does (m.fbCfg.hook names a
+   global, so the config survives the transcript being saved): the Policies page uses it to make dismissing a recommendation the
+   same gesture as the assistant's thumbs-down instead of a second pattern. ══ */
+function _aiFbRecord(ev){ try { var k = 'vdc-ai-fb-events', arr = JSON.parse(localStorage.getItem(k) || '[]'); arr.push(ev); localStorage.setItem(k, JSON.stringify(arr)); } catch(e){} }
+function _aiFbEvent(m, extra){ var ev = { at:new Date().toISOString(), dir:m.fb, scenario:aiAgent.scenario || null, wl:(typeof state !== 'undefined' && state && state.wl) || null }; if (extra) for (var k in extra) ev[k] = extra[k]; return ev; }
+var AI_FBX_REASONS = ['Wrong scope', 'Inaccurate', "Didn't do what I asked", 'Too slow', 'Something else'];
+function _aiFbxList(m){ return (m && m.fbCfg && m.fbCfg.reasons) || AI_FBX_REASONS; }
+function aiFb(i, dir){
+  var m = aiAgent.msgs[i]; if(!m) return;
+  var was = m.fb;
+  m.fb = (m.fb === dir) ? null : dir;
+  aiAgent._scrollAnchor = 'keep';
+  if (m.fb === 'up'){
+    m.fbOpen = false;
+    if (!m.fbSent){ _aiFbRecord(_aiFbEvent(m)); m.fbSent = { at:'now', bare:true }; }
+    if (typeof showToast === 'function') showToast('Thanks — glad that helped');
+  } else if (m.fb === 'down'){
+    m.fbOpen = !m.fbSent; m.fbReasons = m.fbReasons || {};
+    if (m.fbOpen) aiAgent._scrollAnchor = { reveal: '.ai-fbx[data-fbi="' + i + '"]' };
+  } else { m.fbOpen = false; }
+  if (was && !m.fb) m.fbSent = null;
+  aiRender();
+}
+function aiFbxReason(i, ri){
+  var m = aiAgent.msgs[i]; if(!m) return;
+  var inp = document.getElementById('aiFbxC' + i); if (inp) m._fbDraft = inp.value;
+  m.fbReasons = m.fbReasons || {}; m.fbReasons[ri] = !m.fbReasons[ri];
+  var other = _aiFbxList(m).length - 1;
+  aiAgent._scrollAnchor = (ri === other && m.fbReasons[ri]) ? { reveal: '.ai-fbx[data-fbi="' + i + '"]' } : 'keep';
+  aiRender();
+  if (ri === other && m.fbReasons[ri]){ var ni = document.getElementById('aiFbxC' + i); if (ni) ni.focus(); }
+}
+function aiFbxIncl(i){ var m = aiAgent.msgs[i]; if(!m) return; var inp = document.getElementById('aiFbxC' + i); if (inp) m._fbDraft = inp.value; m.fbIncl = !m.fbIncl; aiAgent._scrollAnchor = 'keep'; aiRender(); }
+function aiFbxSend(i){
+  var m = aiAgent.msgs[i]; if(!m) return;
+  var inp = document.getElementById('aiFbxC' + i), list = _aiFbxList(m);
+  var reasons = list.filter(function(_, ri){ return m.fbReasons && m.fbReasons[ri]; });
+  var comment = (inp && inp.value.trim()) || null;
+  _aiFbRecord(_aiFbEvent(m, { reasons:reasons, comment:comment,
+    transcript: m.fbIncl ? aiAgent.msgs.filter(function(x){ return x.role === 'user' || x.role === 'agent'; }).map(function(x){ var d = document.createElement('div'); d.innerHTML = x.html; return x.role + ': ' + (d.textContent || '').replace(/\s+/g,' ').trim(); }) : null }));
+  m.fbSent = { reasons:reasons, at:new Date().toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' }) };
+  m.fbOpen = false; m._fbDraft = ''; aiAgent._scrollAnchor = 'keep';
+  aiRender();
+  if (m.fbCfg && m.fbCfg.hook && typeof window[m.fbCfg.hook] === 'function') window[m.fbCfg.hook](i, reasons, comment);
+  else if (typeof showToast === 'function') showToast('Feedback sent — thank you');
+}
+function aiFbxDismiss(i){
+  var m = aiAgent.msgs[i]; if(!m) return;
+  if (m.fbCfg){ m.fb = null; m.fbOpen = false; m._fbDraft = ''; aiAgent._scrollAnchor = 'keep'; aiRender(); return; }   // closing a decision card decides nothing
+  if (!m.fbSent){ _aiFbRecord(_aiFbEvent(m)); m.fbSent = { at:'now', bare:true }; }
+  m.fbOpen = false; m._fbDraft = ''; aiAgent._scrollAnchor = 'keep'; aiRender();
+}
+function aiFbRow(i){
+  var m = aiAgent.msgs[i], cfg = m.fbCfg || {}, list = _aiFbxList(m), other = list.length - 1;
+  function ic(name, sz){ return (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg(name, sz)) || ''; }
+  var row = '<div class="ai-fb">'
+    + '<button type="button" class="fb-up' + (m.fb === 'up' ? ' active' : '') + '" data-tooltip="Good response" aria-label="Good response" onclick="aiFb(' + i + ',\'up\')">' + ic('thumb-up-outlined', 16) + '</button>'
+    + '<button type="button" class="fb-down' + (m.fb === 'down' ? ' active' : '') + '" data-tooltip="' + (cfg.downTip || 'Poor response') + '" aria-label="' + (cfg.downTip || 'Poor response') + '" onclick="aiFb(' + i + ',\'down\')">' + ic('thumb-down-outlined', 16) + '</button>'
+    + '<button type="button" data-tooltip="Read aloud" aria-label="Read this response aloud" onclick="aiRead(' + i + ')">' + ic('volume-up-outlined', 16) + '</button>'
+    + '</div>';
+  if (m.fb === 'down' && m.fbOpen && !(m.fbSent && m.fbSent.reasons)) {
+    row += '<div class="ai-fbx" data-fbi="' + i + '">'
+      + '<div class="ai-fbx-hd"><span class="ai-fbx-title">' + _aiEsc(cfg.title || 'What went wrong?') + '</span>'
+      + '<button type="button" class="ai-fbx-x" aria-label="Close" onclick="aiFbxDismiss(' + i + ')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>'
+      + '<div class="ai-fbx-chips">' + list.map(function(r, ri){ return '<button type="button" class="ai-fbx-chip' + (m.fbReasons && m.fbReasons[ri] ? ' is-on' : '') + '" onclick="aiFbxReason(' + i + ',' + ri + ')" aria-pressed="' + !!(m.fbReasons && m.fbReasons[ri]) + '">' + _aiEsc(r) + '</button>'; }).join('') + '</div>'
+      + (m.fbReasons && m.fbReasons[other] ? '<input class="ai-fbx-inp" id="aiFbxC' + i + '" placeholder="Tell us what happened" value="' + _aiEsc(m._fbDraft || '') + '">' : '')
+      + '<div class="ai-fbx-row"><label class="ai-fbx-incl"><input type="checkbox"' + (m.fbIncl ? ' checked' : '') + ' onchange="aiFbxIncl(' + i + ')"><span class="ai-fbx-box" aria-hidden="true"></span>Include this conversation</label>'
+      + '<button type="button" class="ai-fbx-send" onclick="aiFbxSend(' + i + ')">' + _aiEsc(cfg.send || 'Send feedback') + '</button></div>'
+      + '<div class="ai-fbx-note">' + _aiEsc(cfg.note || 'Feedback helps improve the assistant. Your conversation is not shared unless you include it.') + '</div></div>';
+  }
+  if (m.fbSent && m.fbSent.reasons) {
+    row += '<div class="ai-fbx-sealed"><svg class="tick" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>'
+      + 'Feedback sent' + (m.fbSent.reasons.length ? ' · ' + m.fbSent.reasons.map(_aiEsc).join(' · ') : '') + ' · ' + _aiEsc(m.fbSent.at) + '</div>';
+  }
+  return row;
+}
+</script>
 <script>
 function _dsStoreIconSvg(name, size) {
   var e = (typeof window !== 'undefined' && window.__SECURITI_ICONS) ? window.__SECURITI_ICONS[name] : null;

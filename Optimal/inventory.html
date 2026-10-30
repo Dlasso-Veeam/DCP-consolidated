@@ -66153,7 +66153,7 @@ function aiRender(){
     if(m._embedScrub) return '';
     if(m.role==='user') return '<div class="ai-msg user"><div class="ai-bubble">'+_aiEsc(m.html)+'</div></div>';
     if(m.role==='board'){
-      var BOARD_CHIP = { queued: ['n','Queued'], running: ['n','Running'], awaiting: ['warn','Awaiting approval'], done: ['ok','Done'], needsyou: ['warn','Needs you'] };
+      var BOARD_CHIP = { queued: ['n','Queued'], running: ['n','Running'], awaiting: ['warn','Awaiting decision'], done: ['ok','Done'], needsyou: ['warn','Needs you'] };
       return '<div class="ai-msg agent"><div class="ai-bubble" style="max-width:100%"><div class="ai-board">'
         + '<div class="ai-board-hd">Accepted recommendations</div>'
         + m.tasks.map(function(t, ti){
@@ -66609,11 +66609,11 @@ function _aiBoardSet(flowId, status, info){
 }
 // Status truth (realigned 2026-09-10): decisions happen AT APPROVAL, so an
 // approved run has ONE legitimate pause — the destructive-commit approval
-// gate ('awaiting' / Pending approval, tier=ask). Question gates on a
+// gate ('awaiting' / Awaiting decision, tier=ask). Question gates on a
 // preapproved run auto-resolve to their primary (see aiPushAgent), so
 // 'waiting' survives only as a fallback; 'needsyou' is no longer created
 // (manual items left the tracker — they're transcript links, no lifecycle).
-var AI_BOARD_CHIP = { queued: ['n','Queued'], running: ['n','In progress'], awaiting: ['warn','Pending approval'], waiting: ['warn','Waiting on you'], done: ['ok','Done'], needsyou: ['n','Needs you'], cancelled: ['n','Cancelled'] };
+var AI_BOARD_CHIP = { queued: ['n','Queued'], running: ['n','In progress'], awaiting: ['warn','Awaiting decision'], waiting: ['warn','Waiting on you'], done: ['ok','Done'], needsyou: ['n','Needs you'], cancelled: ['n','Cancelled'] };
 /* ══ TASKS DOCK — RETIRED 2026-09-17 ═════════════════════════════════════
    User: "we abandon the pinned tasks panel entirely and promote the approval
    summary card inside the context of the conversation to the place where you
@@ -66761,7 +66761,7 @@ function _aiBoardDockRenderParked(){
       x = '<span class="ai-dock-x" role="button" aria-label="Remove" onclick="aiBoardRemove(' + ti + ')">' + _AI_DOCK_X_SVG + '</span>';
     // STACKED row (user 2026-09-10 — the single-line row starved the title):
     // line 1 = chip + fixed-width controls, line 2 = full-width title.
-    // At a pending approval the title is the route back to the evidence —
+    // At a awaiting decision the title is the route back to the evidence —
     // a button, not a span, so the full card is one click away.
     var _titleEl = appr
       ? '<button type="button" class="ai-board-title is-link" onclick="aiBoardShowGate()">' + _aiEsc(t.title) + '</button>'
@@ -66842,7 +66842,7 @@ function _aiTaskManifest(task){
 // editors live at once, but ONE AT A TIME CHOSEN BY STATE.
 //
 //   · approval card visible  → the dock has nothing to add: it collapses to
-//     its one-line bar, whose badge still reads "Pending approval";
+//     its one-line bar, whose badge still reads "Awaiting decision";
 //   · card scrolled out of view → the dock is the only surface: it expands
 //     and the row carries the decision.
 //
@@ -66970,7 +66970,7 @@ function _aiBoardActive(){
   var b = aiAgent._board; if (!b) return null;
   return b.filter(function(x){ return x.status === 'running' || x.status === 'awaiting' || x.status === 'waiting'; })[0] || null;
 }
-// ── GATE HANDOFF from Activity (user 2026-09-10): a pending approval on
+// ── GATE HANDOFF from Activity (user 2026-09-10): a awaiting decision on
 // Activity's Agent view deep-links here (#agentgate/<taskId>) — the dialog
 // opens with the held task's context and the approval card rendered IN THE
 // CONVERSATION, its one owner. The decision mirrors back to Activity via
@@ -67869,7 +67869,7 @@ function aiSyncCheck(){
       _aiSupersede(m, 'Scope changed');
       _aiSyncTrace('workspace.sync — cart ' + wasN + ' → ' + nowN + ' · plan updated',
         [['was', wasN + ' item' + (wasN === 1 ? '' : 's')], ['now', nowN + ' item' + (nowN === 1 ? '' : 's')]],
-        'The pending approval was re-issued at the current scope');
+        'The awaiting decision was re-issued at the current scope');
       var ap2 = { action: g.approval.action, scope: nowN + ' item' + (nowN === 1 ? '' : 's') + ' currently in the cart (updated)', evidence: g.approval.evidence, reversal: g.approval.reversal };
       // Pure additions read as collaboration, not conflict — credit the
       // user's contribution instead of the neutral diff line.

@@ -1579,7 +1579,7 @@ body.ai-nofx .sd-overlay, body.ai-nofx .sd-modal, body.ai-nofx #toast, body.ai-n
 .ai-head-btn:hover { background: var(--black-5); color: var(--black-100); }
 /* Full-screen conversational mode: the panel takes the whole viewport;
    the conversation column stays readable, centered. */
-body.ai-open.ai-full { --ai-w: 100vw; overflow: hidden; }
+body.ai-open.ai-full { --ai-w: 100vw !important; overflow: hidden; }   /* !important: a dragged panel width is stored inline on <body> and would otherwise beat this rule (same as protected-data) */
 body.ai-full .ai-head, body.ai-full .ai-body, body.ai-full .ai-foot { padding-left: max(16px, calc((100vw - 720px) / 2)); padding-right: max(16px, calc((100vw - 720px) / 2)); }
 body.ai-full #aiWorkingGlow { display: none; }
 .ai-head-close:hover { background: var(--black-5); color: var(--black-100); }
@@ -1865,7 +1865,7 @@ body.ai-open .app { min-height: 0; height: 100vh;
 .ai-head-title { font-size: 16px; font-weight: 500; color: var(--black-100); }
 .ai-head-btn { width: 28px; height: 28px; border: none; background: none; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .ai-head-btn:hover { background: var(--black-5); color: var(--black-100); }
-body.ai-open.ai-full { --ai-w: 100vw; overflow: hidden; }
+body.ai-open.ai-full { --ai-w: 100vw !important; overflow: hidden; }   /* !important: a dragged panel width is stored inline on <body> and would otherwise beat this rule (same as protected-data) */
 body.ai-full .ai-head, body.ai-full .ai-body, body.ai-full .ai-foot { padding-left: max(16px, calc((100vw - 720px) / 2)); padding-right: max(16px, calc((100vw - 720px) / 2)); }
 body.ai-full #aiWorkingGlow { display: none; }
 .ai-body { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: var(--white); scrollbar-width: thin; }
@@ -2439,7 +2439,7 @@ body.ai-nofx .ss-md-scrim, body.ai-nofx .ss-md { transition: none !important; }
   </div>
   <!-- Reset the agent demo to a clean slate. Dev-only, sits beside the hide control. Implementation is shared
        (vdcResetAgentDemo in vdc-notifications.js) so the key list lives in one place. -->
-  <button class="devjump-reset" onclick="if(window.vdcResetAgentDemo) vdcResetAgentDemo(); else alert('Agent demo reset is unavailable on this page.')" title="Reset agent scenarios — clears the ROT recommendation, pending approvals, what the assistant has said, and any carried conversation, then reloads">
+  <button class="devjump-reset" onclick="if(window.vdcResetAgentDemo) vdcResetAgentDemo(); else alert('Agent demo reset is unavailable on this page.')" title="Reset agent scenarios — clears the ROT recommendation, awaiting decisions, what the assistant has said, and any carried conversation, then reloads">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><polyline points="3 3 3 8 8 8"/></svg>
     <span>Reset agent</span>
   </button>
@@ -2938,7 +2938,7 @@ td.as-td-actions { position: relative; }
   </div>
 </aside>
 <script src="securiti-icons-data.js?v=20261028b"></script>
-<script src="vdc-notifications.js?v=20261029c"></script>
+<script src="vdc-notifications.js?v=20261029f"></script>
 <script id="ai-shell">
 // Page shims so the copied shell code stays verbatim and diffable (Activity's helpers → this page's own).
 function _dsStoreIconSvg(name, size){ var e = (window.__SECURITI_ICONS || {})[name]; if (!e || !e.paths) return ''; return '<svg width="' + (size || 16) + '" height="' + (size || 16) + '" viewBox="' + e.viewBox + '" fill="currentColor" aria-hidden="true">' + e.paths.map(function(p){ return '<path d="' + p + '"/>'; }).join('') + '</svg>'; }
@@ -3351,7 +3351,7 @@ function aiacCardHtml(m, i){
   // the recommendation, and it carries the reversal assurance the way an approval card's Reversal row does.
   if (s.decision){
     var _d = s.decision;
-    html += '<div class="aiac-sec aiac-decide">'
+    html += '<div class="aiac-sec aiac-decide"' + (_d.key ? ' data-decide="' + _d.key + '"' : '') + '>'
       + (_d.ask ? '<div class="aiac-decide-ask">' + _d.ask + '</div>' : '')
       // `nav:true` = this verb LEAVES the panel, so it takes the look-here grammar: secondary weight + the trailing
       // open-in-new glyph, never the green primary (which means "the agent acts here on your consent").
@@ -3415,7 +3415,7 @@ function aiacAcceptAll(){
         return;
       }
       if (r.role === 'user' || r.role === 'agent'){
-        var m = { role: r.role, html: r.html };
+        var m = { role: r.role, html: r.html, _noSay: true };   /* carried, not arriving: a restored message is history, so the reply-typing helper must leave it alone */
         if (r.gate){
           m.gate = { q: r.gate.approval ? (r.gate.approval.action || 'Approval') : (r.gate.q || ''),
             buttons: [], resolved: true,
@@ -4218,7 +4218,7 @@ function hydrateDefaultPolicyForm(wl) {
   // Option A (agent-settings-notifications-options.html): one switch for the optional kinds, a checklist, and the fixed rule as an info alert.
   function renderNotif(){
     var host = document.getElementById('ssNotifHost'); if (!host || typeof vdcNotifConfig !== 'function') return;
-    var cfg = vdcNotifConfig(), live = draftAvail === 'active';
+    var cfg = vdcNotifConfig(), live = draftAvail === 'active', quickOn = typeof vdcQuickPromptsOn === 'function' ? vdcQuickPromptsOn() : true;
     host.inert = !live;   // while the agent is inactive there is nothing to be notified about; the choices are kept
     // (the dimming moved onto .ss-notif-sec — the host is now just a mount point inside the availability card)
     // SAME SELECTION CARD AS AVAILABILITY (user 2026-10-29). The master switch becomes the header checkbox, for the
@@ -4240,8 +4240,17 @@ function hydrateDefaultPolicyForm(wl) {
           return '<label class="ss-ck" data-tooltip="' + esc(n.desc) + '"><input type="checkbox"' + (cfg[n.k] ? ' checked' : '') + (cfg.on ? '' : ' disabled') + ' onchange="ssNotifToggle(\'' + n.k + '\')"><span>' + esc(n.label) + '</span></label>';
         }).join('')
       + '<div class="ss-ck is-locked"><input type="checkbox" checked disabled aria-label="Approval requests \u2014 always sent"><span>Approval requests</span><span class="ss-always">Always sent</span></div>'
-      + '</div></div>';
+      + '</div>'
+      // QUICK PROMPTS live beside notifications: both are personal conversation preferences for this person only.
+      // The switch the thumbs-down in the panel's Quick Prompts header flips off; this is where it comes back on.
+      + '<label class="ss-nmaster" id="quick-prompts" style="margin-top:16px"><input type="checkbox"' + (quickOn ? ' checked' : '') + ' onchange="ssQuickPromptsToggle()"><span>Show quick prompts</span></label>'
+      + '<div class="ss-nscope">Suggested follow-up questions that appear below the conversation after the agent replies.</div>'
+      + '</div>';
   }
+  window.ssQuickPromptsToggle = function(){
+    var on = !vdcQuickPromptsOn(); vdcQuickPromptsSet(on); renderNotif();
+    toast(on ? 'Quick prompts on' : 'Quick prompts off');
+  };
   window.ssNotifToggle = function(k){
     var on = !vdcNotifConfig()[k]; vdcNotifSetConfig(k, on); renderNotif();
     var n = VDC_NOTIF_KINDS.filter(function(x){ return x.k === k; })[0];
