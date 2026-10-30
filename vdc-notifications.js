@@ -1166,6 +1166,88 @@
     + '.vdc-np-empty { padding:48px 0; text-align:center; font-size:16px; color:var(--black-60, #62656b); }\n'
     + '@media (max-width: 900px) { .vdc-np-side { display:none; } .vdc-np-search { width:160px; } }\n';
 
+
+  /* CHAT HISTORY — left-anchored sheet (user 2026-10-30, from the Agents Library reference): header with
+     close + title, New chat, search, then plain one-line titles under Today / Past 7 days / Earlier.
+     Replaces the centred card; keeps the page's own data (AI_HISTORY), search matching, keyboard rows
+     (.ai-hx-row / .is-kb) and transcript view, so only the presentation is shared here. */
+  function historySheet(){
+    if (typeof window.aiHxRenderOverlay !== 'function' || typeof window.AI_HISTORY === 'undefined') return;
+    var st = document.createElement('style'); st.id = 'vdc-hx-sheet-css';
+    st.textContent =
+      '#aiHxScrim.ai-hx-scrim { justify-content:flex-start; align-items:stretch; padding:0; }\n'
+      + '.ai-hx-card.ai-hx-sheet { width:calc(100% - 32px); max-width:340px; max-height:none; margin:8px 0 8px 8px; }\n'
+      + '.ai-hx-sheet-hd { display:flex; align-items:center; gap:8px; padding:12px 12px 8px; }\n'
+      + '.ai-hx-sheet-x { width:28px; height:28px; border:1px solid var(--border-light); background:var(--white); border-radius:4px; color:var(--black-80, var(--black-60)); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }\n'
+      + '.ai-hx-sheet-x:hover { background:var(--black-5); }\n'
+      + '.ai-hx-sheet-title { font-size:16px; line-height:22px; font-weight:500; color:var(--black-100); }\n'
+      + '.ai-hx-new { display:flex; align-items:center; justify-content:center; gap:8px; margin:4px 12px 8px; height:36px; border:none; border-radius:4px; background:var(--em-green); color:var(--white); font-family:inherit; font-size:14px; font-weight:500; cursor:pointer; flex-shrink:0; }\n'
+      + '.ai-hx-new:hover { background:var(--em-green-dark, var(--em-green)); filter:brightness(0.92); }\n'
+      + '.ai-hx-new svg { flex-shrink:0; }\n'
+      + '.ai-hx-sheet .ai-hx-search-band { padding:0 12px 4px; }\n'
+      + '.ai-hx-sheet .ai-hx-body { padding:0 12px 8px; flex:1; min-height:0; }\n'
+      + '.ai-hx-sheet .ai-hx-group { padding:16px 8px 4px; }\n'
+      + '.ai-hx-sheet .ai-hx-row { padding:0 8px; min-height:36px; }\n'
+      + '.ai-hx-sheet .ai-hx-row.has-snip { padding:6px 8px; }\n'
+      + '.ai-hx-sheet .ai-hx-title { font-size:14px; }\n';
+    document.head.appendChild(st);
+
+    function esc(x){ return typeof window._aiEsc === 'function' ? window._aiEsc(x) : String(x).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+    function days(c){ return Math.floor((window._AIHX_NOW - c.at.getTime()) / 86400000); }
+    function icon(n, sz){ return typeof window._dsStoreIconSvg === 'function' ? (window._dsStoreIconSvg(n, sz) || '') : ''; }
+
+    window._aiHxFinderBody = function(q){
+      if (!q){
+        return [['Today', 0, 0], ['Past 7 days', 1, 6], ['Earlier', 7, 9999]].map(function(g){
+          var inG = window.AI_HISTORY.filter(function(c){ var d = days(c); return d >= g[1] && d <= g[2]; });
+          if (!inG.length) return '';
+          return '<div class="ai-hx-group">' + g[0] + '</div>' + inG.map(function(c){
+            return '<button type="button" class="ai-hx-row" onclick="aiHxOpenTranscript(\'' + c.id + '\', \'\')">'
+              + '<span class="ai-hx-main"><span class="ai-hx-title">' + esc(c.title) + '</span></span></button>';
+          }).join('');
+        }).join('');
+      }
+      var hits = window.AI_HISTORY.map(function(c){
+        var msgs = c.msgs.map(function(m){
+          var raw = m.role === 'receipt' ? (m.action + ' · ' + m.scope) : m.text;
+          return window._aiHxCountM(raw, q) > 0 ? raw : null;
+        }).filter(Boolean);
+        if (!msgs.length && !window._aiHxCountM(c.title, q)) return null;
+        return { c: c, msgs: msgs.slice(0, 1) };
+      }).filter(Boolean);
+      return hits.length
+        ? '<div class="ai-hx-group">' + hits.length + ' matching conversation' + (hits.length === 1 ? '' : 's') + '</div>'
+          + hits.map(function(h){
+              return '<button type="button" class="ai-hx-row has-snip" onclick="aiHxOpenTranscript(\'' + h.c.id + '\', \'' + esc(q).replace(/'/g, "\\'") + '\')">'
+                + '<span class="ai-hx-main"><span class="ai-hx-title">' + window._aiHxHl(h.c.title, q) + '</span>'
+                + h.msgs.map(function(raw){ return '<span class="ai-hx-snip">' + window._aiHxHl(String(raw).slice(0, 110), q) + '</span>'; }).join('')
+                + '</span></button>';
+            }).join('')
+        : '<div class="ai-hx-empty">No matches for “' + esc(q) + '”</div>';
+    };
+
+    window.aiHxRenderOverlay = function(){
+      var panel = document.getElementById('aiPanel'); if (!panel) return;
+      var old = document.getElementById('aiHxScrim'); if (old) old.remove();
+      var q = window.aiHx.q.trim();
+      panel.insertAdjacentHTML('beforeend',
+        '<div class="ai-hx-scrim" id="aiHxScrim" onclick="if(event.target===this){aiHxClose()}">'
+        + '<div class="ai-hx-card ai-hx-sheet" role="dialog" aria-label="Chat history">'
+        + '<div class="ai-hx-sheet-hd"><button type="button" class="ai-hx-sheet-x" onclick="aiHxClose()" aria-label="Close chat history">' + icon('close-outlined', 16) + '</button>'
+        + (typeof window.vdcAiGlyph === 'function' ? window.vdcAiGlyph(20) : '')
+        + '<span class="ai-hx-sheet-title">Chat history</span></div>'
+        + '<button type="button" class="ai-hx-new" onclick="aiHxClose(); aiNewChat()">' + icon('edit-outlined', 16) + 'New chat</button>'
+        + '<div class="ai-hx-search-band"><div class="ai-hx-search">' + icon('search-outlined', 15)
+        + '<input id="aiHxQ" placeholder="Search chat history" value="' + esc(window.aiHx.q) + '" oninput="aiHx.q=this.value; aiHx.kb=-1; aiHxKeepFocus()"></div></div>'
+        + '<div class="ai-hx-body" id="aiHxBody">' + window._aiHxFinderBody(q) + '</div>'
+        + '<div class="ai-hx-foot"><a href="activity.html#agent">View agent activity</a></div>'
+        + '</div></div>');
+      var b = document.getElementById('aiHxBtn'); if (b) b.classList.add('is-on');
+      window.aiHxKbPaint();
+      var i = document.getElementById('aiHxQ'); if (i) i.focus();
+    };
+  }
+
   function init(){
     var st = document.createElement('style'); st.id = 'vdc-notif-css'; st.textContent = css; document.head.appendChild(st);
     var b = railBtn();
@@ -1181,6 +1263,7 @@
       var orig = window[fn]; if (typeof orig !== 'function') return;
       window[fn] = function(){ var r = orig.apply(this, arguments); if (fn === 'aiNewChat') window.vdcSetPanelTopic(null); if (fn === 'aiOpen'){ restoreTopic(); if (!voice()) voiceSoon(); } paintDot(); return r; };   // told at once when the moment is quiet, else as soon as it is
     });
+    historySheet();
     paintBadge();
     window.addEventListener('storage', refresh);
     window.addEventListener('focus', refresh);
