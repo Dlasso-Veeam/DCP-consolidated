@@ -11717,11 +11717,11 @@ body.ai-open .rot-editor { right: var(--ai-w); }   /* the assistant pushes the p
     var r = rows(), x = r[i]; if (!x || x.prop) return;
     var s = st(); s.off = s.off || {}; s.off[x.name] = !x.inactive; save(s); rotRender();
   };
-  // The recommendation as a line in the list: same columns as its neighbours, uniquely styled (tinted, sparkle tile, Recommended chip),
+  // The recommendation as a line in the list: same columns as its neighbours, uniquely styled (tinted, sparkle tile, Awaiting decision chip — was: Recommended),
   // with the decision in the row — Review opens the draft, Activate creates it active from this summary, X dismisses it.
   function propRow(x){
     return '<tr class="rot-prop-row"><td class="plv-col-status"><span class="rot-swtip" data-plv-tip="Turn on to create and activate this policy"><button type="button" class="plv-switch" role="switch" aria-checked="false" aria-label="Activate recommended policy" onclick="rotActivate()"></button></span></td>'
-      + '<td><span class="row-name is-link" role="link" tabindex="0" onclick="rotOpenDetail()" onkeydown="if(event.key===\'Enter\')rotOpenDetail()">' + esc(x.name) + '</span><span class="plv-chip rot-reco-chip" tabindex="0" data-rot-why="1"><span class="rot-reco-ic" aria-hidden="true">' + ic('ai-sparkle', 12) + '</span>Recommended</span></td>'
+      + '<td><span class="row-name is-link" role="link" tabindex="0" onclick="rotOpenDetail()" onkeydown="if(event.key===\'Enter\')rotOpenDetail()">' + esc(x.name) + '</span><span class="plv-chip rot-reco-chip" tabindex="0" data-rot-why="1"><span class="rot-reco-ic" aria-hidden="true">' + ic('ai-sparkle', 12) + '</span>Awaiting decision</span></td>'
       + '<td><span class="rot-bar">' + x.files + '</span></td><td><span class="rot-bar">' + x.vol + '</span></td>'
       + '<td><span class="plv-chip plv-chip-scope">Files&nbsp;' + ic('insights-outlined', 16) + '</span></td><td style="white-space:nowrap">' + esc(x.date) + '</td>'
       + '<td><span class="rot-rowact"><button type="button" class="rot-ibtn rot-ibtn-act" onclick="rotOpenDetail()" data-plv-tip="Details" aria-label="Open recommended policy details">' + ic('policy-outlined', 20) + '</button>'
