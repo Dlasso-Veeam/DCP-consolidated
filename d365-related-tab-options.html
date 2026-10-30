@@ -46914,8 +46914,8 @@ function _relSideAct(s) { if (s.sub) return ws.step === 1 && !!ws.relView; if (s
 function _relSideDone(s) { if (s.sub) return ws.step > 1; if (s.id === 1 && _relB()) return ws.step > 1 || !!ws.relView; return s.id < ws.step; }
 function _relSideGo(s) { if (s.sub) return 'wsRelViewGo(true)'; if (s.id === 1 && _relB()) return '_relForceSelect=true;ws.relView=false;wsGotoStep(1);_relForceSelect=false'; return 'wsGotoStep(' + s.id + ')'; }
 function _relStepBody() {
-  // The step is the app's own selection card (the one option A puts under the cart), on a step of its own.
-  return '<div class="ws-step-pad">' + _d365RelBlock() + '</div>';
+  // The step: the standard step header, then the app's own selection card (the one option A puts under the cart) on a step of its own.
+  return '<div class="ws-step-pad"><div class="ws-step-header"><div class="ws-step-title">Related records</div><div class="ws-step-description">Choose whether this job also restores the records connected to your selection, such as an account’s contacts and cases, or its parent account. A parent that already exists at the destination is left untouched.</div></div>' + _d365RelBlock() + '</div>';
 }
 function wsRelTab(t) { var c = _d365RelCfg(); c.tab = t; c.pop = false; c.lvpop = false; wsRenderAll(); }
 var _REL_TIP = 'Adds records directly linked to your selection: children, like an account’s contacts and cases, and parents, like its parent account. Parents that already exist at the destination are left as they are. Nothing is added until you include them.';
