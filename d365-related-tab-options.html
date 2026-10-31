@@ -43182,18 +43182,19 @@ function wsRenderConfigure() {
   ws.basketPage = _page;
   var _start = (_page - 1) * _size;
   var _pageRows = _visRows.slice(_start, _start + _size).join('');
-  var _d3 = typeof wsIsD365Cart === 'function' && wsIsD365Cart(), _rtOn = _d3 && REL_OPT === 'C', _rc = _d3 ? _d365RelCfg() : null;
+  var _d3 = typeof wsIsD365Cart === 'function' && wsIsD365Cart(), _rtOn = _d3 && (REL_OPT === 'C' || (REL_OPT === 'E' && _d365RelCfg().on)), _rc = _d3 ? _d365RelCfg() : null;
   var _rtRel = _rtOn && _rc.on && _rc.tab !== 'sel';
+  if (_d3 && REL_OPT === 'E') html += _d365RelBlock();   // E: the card leads, so it never moves when the tabs appear under it
   if (_rtOn) html += _relTabsBar2();
   if (_rtRel) {
-    html += _d365RelBlock();
+    html += _d365RelBlock('pane');
   } else if (_total === 0) {
     html += '<div class="ws-basket-empty">' + (q ? 'No items match "' + wsEscape(q) + '" — try clearing the search.' : 'No items in this restore.') + '</div>';
   } else {
     html += '<div class="ws-sel-cq"><div class="ws-table-wrap"><table class="ws-table">' + _colgroup + _theadHtml + '<tbody>' + _pageRows + '</tbody></table></div></div>';
     html += _wsPgBar(_total, _page, _size, 'wsBasketGotoPage', 'wsBasketSetSize', 'item');
   }
-  if (_d3 && REL_OPT === 'A') html += _d365RelBlock();   // A: the app's own selection card, under the cart
+  if (_d3 && (REL_OPT === 'A' || REL_OPT === 'D')) html += _d365RelBlock();   // A: the app's own selection card, under the cart
   html += '</div>';
   return html;
 }
@@ -46893,9 +46894,11 @@ function wsRelRender(focusId) {
 // So it loads in two stages. Stage 1: everything is a skeleton. Stage 2: the counts, toolbar and totals are real and only the table rows still load. The timings stand in for a real backend and carry a little jitter so they do not feel scripted.
 var D365REL_COUNT_MS = 1300, D365REL_ROWS_MS = 1500;
 // ═══ PROTO: the related-records tab as the affordance (options A / B / C) ═══════════════════════════════════════════════════════
-var REL_OPT = (location.hash.match(/opt=([ABC])/) || [])[1] || 'C';
-function _relB() { return REL_OPT === 'B' && typeof wsIsD365Cart === 'function' && wsIsD365Cart(); }
-var REL_OPTS = { A: 'Current: selection card', B: 'Dedicated step', C: 'Tabs' };
+var REL_OPT = (location.hash.match(/opt=([ABCDE])/) || [])[1] || 'C';
+// Is the dedicated Related records step part of the wizard right now? Only in B, where it is always there.
+function _relStepOn() { return REL_OPT === 'B' && typeof wsIsD365Cart === 'function' && wsIsD365Cart(); }
+function _relB() { return _relStepOn(); }
+var REL_OPTS = { A: 'Current: selection card', B: 'Dedicated step, always', C: 'Tabs', D: 'Card, list below it', E: 'Card + tabs' };
 function relOptSet(o) {
   REL_OPT = o; try { history.replaceState(null, '', '#opt=' + o); } catch (e) {}
   var c = _d365RelCfg(); clearTimeout(c._lt); clearTimeout(c._lt2); c.on = false; c.open = false; c.loading = false; c.rowsLoading = false; c.pageLoading = false; c.tab = 'sel'; c.page = 1; ws.relView = false; if (ws.isOpen) ws.step = 1;
@@ -46904,7 +46907,7 @@ function relOptSet(o) {
 function relOptBar() {
   var el = document.getElementById('relOptBar');
   if (!el) { el = document.createElement('div'); el.id = 'relOptBar'; document.body.appendChild(el); }
-  el.innerHTML = '<span class="rob-k">Option</span>' + ['A', 'B', 'C'].map(function(o){ return '<button type="button" class="rob-b' + (o === REL_OPT ? ' is-on' : '') + '" onclick="relOptSet(\'' + o + '\')">' + o + '<span>' + REL_OPTS[o] + '</span></button>'; }).join('');
+  el.innerHTML = '<span class="rob-k">Option</span>' + ['A', 'B', 'C', 'D', 'E'].map(function(o){ return '<button type="button" class="rob-b' + (o === REL_OPT ? ' is-on' : '') + '" onclick="relOptSet(\'' + o + '\')">' + o + '<span>' + REL_OPTS[o] + '</span></button>'; }).join('');
 }
 // B: a dedicated Related records step, between Select and Restore options. It is a view inside step 1 (ws.relView), so the wizard's numbered steps (and every hard-coded 2/3/4) stay as they are.
 function wsRelViewGo(on) { ws.relView = !!on; wsRenderAll(); var b = document.getElementById('wsBody'); if (b) b.scrollTop = 0; }
@@ -46927,8 +46930,12 @@ function _relTabsBar2() {
   var nRel = !on ? '' : (c.loading ? '<span class="rd-skel-bar" style="width:36px;height:12px;display:inline-block;vertical-align:middle"></span>' : '<span class="rt-n">' + _d365RelShow(_d365RelTotal()) + '</span>');
   var ic = function(n, z){ return (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg(n, z)) || ''; };
   // One view, so no tab strip: just the way to add the second (same height as the strip, so nothing jumps when it appears).
-  if (!on) return '<div class="rt-bar rt-bar-lone rt-u"><button type="button" class="ws-btn ws-btn-secondary rt-add" data-tooltip="' + wsEscape(_REL_TIP) + '" data-tooltip-wide onclick="wsRelToggle(true)">' + ic('add-outlined', 16) + 'Include related records</button></div>';
+  if (!on) return REL_OPT === 'E' ? '' : '<div class="rt-bar rt-bar-lone rt-u"><button type="button" class="ws-btn ws-btn-secondary rt-add" data-tooltip="' + wsEscape(_REL_TIP) + '" data-tooltip-wide onclick="wsRelToggle(true)">' + ic('add-outlined', 16) + 'Include related records</button></div>';
   var selTab = '<button type="button" role="tab" aria-selected="' + (tab === 'sel') + '" class="act-type-tab rt-tab' + (tab === 'sel' ? ' is-active' : '') + '" onclick="wsRelTab(\'sel\')">Selected records <span class="rt-n">' + nSel + '</span></button>';
+  if (REL_OPT === 'E') {   // E: the card owns on/off, so the tabs only switch the view and carry no close
+    var relTabE = '<button type="button" role="tab" aria-selected="' + (tab === 'rel') + '" class="act-type-tab rt-tab' + (tab === 'rel' ? ' is-active' : '') + '" onclick="wsRelTab(\'rel\')">Related records ' + nRel + '</button>';
+    return '<div class="rt-bar rt-u"><div class="rt-left"><div class="act-type-tabs rt-tabs" role="tablist">' + selTab + relTabE + '</div></div></div>';
+  }
   var relTab = '<div role="tab" aria-selected="' + (tab === 'rel') + '" class="act-type-tab rt-tab rt-tab-x' + (tab === 'rel' ? ' is-active' : '') + '"><button type="button" class="rt-tab-main" onclick="wsRelTab(\'rel\')">Related records ' + nRel + '</button><button type="button" class="rt-x" aria-label="Stop including related records" data-tooltip="Stop including related records" onclick="wsRelToggle(false)">' + ic('close-outlined', 16) + '</button></div>';
   return '<div class="rt-bar rt-u"><div class="rt-left"><div class="act-type-tabs rt-tabs" role="tablist">' + selTab + relTab + '</div></div></div>';
 }
@@ -46937,7 +46944,7 @@ function _relContinue() {
   if (typeof wsIsD365Cart !== 'function' || !wsIsD365Cart() || REL_OPT === 'A') return { label: 'Continue' };
   var c = _d365RelCfg(), n = state.restorePlan.size, rec = function(x){ return x + (x === 1 ? ' record' : ' records'); };
   if (REL_OPT === 'B' && (!ws.relView || !c.on)) return { label: 'Continue' };   // B: the total belongs to the Related records step, where it is decided
-  if (REL_OPT === 'C' && !c.on) return { label: 'Continue with ' + rec(n) };
+  if ((REL_OPT === 'C' || REL_OPT === 'D' || REL_OPT === 'E') && !c.on) return { label: 'Continue with ' + rec(n) };   // C, D and E keep everything on Select, so the button states the job
   if (c.loading) return { label: 'Counting related records…', disabled: true };
   // Named in two parts: the related total is rounded down once a table is capped (9,000+), which would swallow a small cart if it were added in.
   return { label: 'Continue with ' + rec(n) + ' and ' + _d365RelShow(_d365RelTotal()) + ' related' };
@@ -47009,7 +47016,7 @@ function _d365RelSkeletonA() {
   return '<div class="rl-body" role="status" aria-busy="true" aria-label="Loading related records"><div class="rl-tools"><div style="width:176px">' + bar('100%', '36px') + '</div><div style="width:36px">' + bar('100%', '36px') + '</div><div style="flex:1;min-width:0">' + bar('100%', '36px') + '</div></div>'
     + '<div class="ws-sel-cq"><div class="ws-table-wrap"><table class="ws-table"><colgroup><col class="ws-col-name"><col class="ws-col-type" style="width:190px"><col class="ws-col-target" style="width:176px"><col style="width:48px"></colgroup><thead><tr><th class="ws-th">Name</th><th class="ws-th">Type</th><th class="ws-th ws-col-target">Restore point</th><th class="ws-th is-actions-col"></th></tr></thead><tbody>' + rows + '</tbody></table></div></div></div>';
 }
-function _d365RelBlock() {
+function _d365RelBlock(part) {
   var roots = _d365RelRoots(); if (!roots.length) return '';
   var c = _d365RelCfg(), tabs = _d365RelTables(roots), total = _d365RelTotal(), plus = _d365RelPlus(), nOn = tabs.filter(function(t){ return _d365RelOn(t.k); }).length;
   var mag = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('search-outlined', 20)) || '';
@@ -47024,7 +47031,7 @@ function _d365RelBlock() {
   var _rcIcon = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('child-roles-outlined', 20)) || '';
   var _rcKey = "if (event.key === ' ' || event.key === 'Enter') { event.preventDefault(); wsRelToggle(" + !c.on + "); }";
   var head = '<div class="sc-header" role="checkbox" aria-checked="' + !!c.on + '" tabindex="0" onclick="wsRelToggle(' + !c.on + ')" onkeydown="' + _rcKey + '"><span class="rc-icon">' + _rcIcon + '</span><span class="ws-cfg-choice-title">Include related records</span><span class="rc-cb">' + _d365RelCb(c.on) + '</span></div>'
-    + '<div class="sc-desc"><div class="rl-def">Records directly linked to your selection, like an account’s contacts and cases. <span class="rl-how" data-tooltip="' + wsEscape(tip) + '">How this works</span></div>' + (c.on ? '<div class="rc-line">' + sm + '</div>' : '') + '</div>';
+    + '<div class="sc-desc"><div class="rl-def">Records directly linked to your selection, like an account’s contacts and cases. <span class="rl-how" data-tooltip="' + wsEscape(tip) + '">How this works</span></div>' + (c.on && REL_OPT !== 'E' ? '<div class="rc-line">' + sm + '</div>' : '') + '</div>';   // E: the Related records tab carries the count
   var body = '';
   if (c.on) {
     // the table dropdown (n of y, records per table), left of search
@@ -47075,9 +47082,10 @@ function _d365RelBlock() {
   }
   if (loading) body = (REL_OPT === 'A') ? _d365RelSkeletonA() : _d365RelSkeleton();
   var nex = Object.keys(c.ex).length;
+  if (REL_OPT === 'E') return part === 'pane' ? (c.on ? '<div class="rt-pane">' + body + '</div>' : '') : '<div class="ws-cfg-choice sc rc-card rc-lead' + (c.on ? ' is-selected' : '') + '" role="group" aria-label="Include related records">' + head + '</div>';   // E: the card is the one control; the list is the Related records tab's pane
   if (REL_OPT === 'C') { if (!c.on) return ''; return '<div class="rt-pane">' + body + '</div>'; }   // C shows the list on its own, under tabs
   // B: the selection card only decides whether the list exists; the list is its own card BELOW it, not inside it.
-  if (REL_OPT === 'B') return '<div class="ws-cfg-choice sc rc-card' + (c.on ? ' is-selected' : '') + '" role="group" aria-label="Include related records">' + head + '</div>' + (c.on ? '<div class="rt-pane rt-pane-below">' + body + '</div>' : '');
+  if (REL_OPT === 'B' || REL_OPT === 'D') return '<div class="ws-cfg-choice sc rc-card' + (c.on ? ' is-selected' : '') + '" role="group" aria-label="Include related records">' + head + '</div>' + (c.on ? '<div class="rt-pane rt-pane-below">' + body + '</div>' : '');   // the card only decides whether the list exists; the list is its own full-width card below it (B: on the step, D: on Select)
   return '<div class="ws-cfg-choice sc rc-card' + (c.on ? ' is-selected' : '') + '" role="group" aria-label="Include related records">' + head + (c.on ? '<div class="rc-body">' + body + '</div>' : '') + '</div>' + (loading ? '<div class="rl-note"><span class="rd-skel-bar" style="width:320px;display:inline-block;vertical-align:middle"></span></div>' : c.on ? '<div class="rl-note">This job restores <b>' + _d365RelShow(roots.length + total) + ' records</b> from the selected records and their related records.' + (nex ? ' ' + _d365RelFmt(nex) + ' removed.' : '') + '</div>' : '');
 }
 // ── D365 Override field values: a field and a new fixed value, applied to every restored record that has the field ─────────
@@ -75664,7 +75672,8 @@ window.D365X.recChip = function (key, item) {
 .rt-add { appearance: none; border: 0; background: none; font: inherit; font-size: 14px; font-weight: 500; color: var(--em-green); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 8px; border-radius: 4px; } .rt-add:hover { background: var(--em-green-tint); } .rt-add svg { display: block; }
 .rt-off { border: 1px dashed var(--border); border-radius: 8px; padding: 40px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; background: var(--white); }
 .rt-off-t { font-size: 16px; font-weight: 500; color: var(--black-100); } .rt-off-d { font-size: 14px; color: var(--black-60); max-width: 420px; } .rt-off-h { font-size: 14px; color: var(--black-60); } .rt-off .ws-btn { margin-top: 8px; }
-.rt-pane .rl-body { padding: 0; border-top: 0; } .rt-pane-below { margin-top: 12px; }
+.rc-card.rc-lead { margin: 0 0 16px; } .rt-pane .rl-body { padding: 0; border-top: 0; } .rt-pane-below { margin-top: 12px; }
+
 /* The related list is ONE card: the picker, levels and search form its header band; the table sits directly under them; the notice follows below. */
 .rt-card { border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); }
 .rt-card .ws-table-wrap { border: 0; border-radius: 0 0 8px 8px; }
