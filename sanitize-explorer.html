@@ -504,7 +504,7 @@ select.input.plain { padding: 0 40px 0 12px; }
 .mc-opt .t { flex: 1; font-weight: 500; }
 .mc-opt .v { flex-basis: 100%; padding-left: 36px; font-size: 14px; line-height: 20px; color: var(--black-100); font-weight: 500; min-width: 0; }
 /* Test run: original preview beside the output file */
-.pv { border: 1px solid var(--black-10); border-radius: 4px; background: var(--black-5); padding: 16px; min-height: 100%; box-sizing: border-box; }
+.pv { border: 1px solid var(--black-10); border-radius: 4px; background: var(--black-5); padding: 16px; box-sizing: border-box; }
 .pv-page { background: var(--white); border: 1px solid var(--black-10); border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 20px 24px; font-size: 14px; line-height: 22px; }
 .pv-title { font-size: 16px; line-height: 22px; font-weight: 500; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--black-10); }
 .pv-row { display: flex; gap: 12px; padding: 2px 0; }
@@ -522,7 +522,7 @@ select.input.plain { padding: 0 40px 0 12px; }
 .pv-code { background: var(--white); border: 1px solid var(--black-10); border-radius: 2px; padding: 12px 16px; font-family: Menlo, Consolas, monospace; font-size: 13px; line-height: 20px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .hl { background: var(--green-10); box-shadow: inset 0 -2px 0 var(--green); border-radius: 2px; padding: 0 2px; transition: box-shadow .1s; }
 .hl.x { background: var(--red-10); box-shadow: inset 0 -2px 0 var(--red); }
-.out { background: var(--white); border: 1px solid var(--black-10); border-radius: 4px; padding: 12px 16px; font-family: Menlo, Consolas, monospace; font-size: 13px; line-height: 20px; white-space: pre-wrap; overflow-wrap: anywhere; box-sizing: border-box; min-height: 100%; }
+.out { background: var(--white); border: 1px solid var(--black-10); border-radius: 4px; padding: 12px 16px; font-family: Menlo, Consolas, monospace; font-size: 13px; line-height: 20px; white-space: pre-wrap; overflow-wrap: anywhere; box-sizing: border-box; }
 .sb { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px 16px; align-items: stretch; }
 .sb-h { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 8px; font-size: 14px; line-height: 20px; color: var(--black-70); }
 .sb-h b { font-weight: 500; color: var(--black-100); }
@@ -536,6 +536,8 @@ select.input.plain { padding: 0 40px 0 12px; }
 .gap { color: var(--black-60); background: var(--black-5); text-align: center; font-size: 13px; line-height: 20px; padding: 2px 0; font-family: inherit; border-radius: 2px; margin: 2px 0; }
 .out { tab-size: 12; }
 .sb-col .pv-code, .sb-col .out { max-height: 420px; overflow: auto; }
+.sb-col > .pv, .sb-col > .out { min-height: 0; }
+.sb-col > .pv { max-height: 420px; overflow: auto; }
 .tk.hl { padding: 0 2px; }
 </style>
 </head>
@@ -1386,7 +1388,7 @@ function pxOut(W, smp) {
   var m = pxModel(smp), b = pxBase(m), L = [], ctr;
   if (m.kind === 'table' && smp.fmt === 'CSV') return '<div class="out" style="white-space:pre;overflow-x:auto">' + pxCsv(W, m, 'out') + '</div>';
   if (m.kind === 'log') return '<div class="out">' + pxLog2(W, m, b, 'out') + '</div>';
-  if (m.kind === 'table') { L.push(m.head.join('\t')); b.forEach(function (u) { ctr = { n: 0 }; L.push(m.units[u].cells.map(function (c) { return pxParts(W, 'out', u, c, ctr); }).join('\t')); }); return '<div class="out">' + L.join('\n') + '</div>'; }
+  if (m.kind === 'table') { L.push(m.head.join('\t')); b.forEach(function (u) { ctr = { n: 0 }; L.push(m.units[u].cells.map(function (c) { return pxParts(W, 'out', u, c, ctr); }).join('\t')); }); return '<div class="out" style="white-space:pre;overflow-x:auto;tab-size:6">' + L.join('\n') + '</div>'; }
   var u = b[0], un = m.units[u], w = m.style === 'email' ? pxEmailWin(un) : [0, un.lines.length - 1]; ctr = { n: 0 };
   if (m.style === 'email') { L.push('From: hr@contoso.com', 'Subject: Updated records', ''); if (w[0] > 0) L.push('… ' + w[0] + ' earlier lines'); } else L.push(esc2(un.title));
   un.lines.forEach(function (l, li) { var t = (l.k ? esc2(l.k) + ': ' : '') + pxParts(W, 'out', u, l.parts, ctr); if (li >= w[0] && li <= w[1]) L.push(t); });
