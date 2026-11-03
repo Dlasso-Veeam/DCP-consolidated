@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Universal Data Explorer — Sanitize</title>
+<style>
+@font-face { font-family: 'Circular Pro'; src: url('fonts/CircularPro-Book.otf') format('opentype'); font-weight: 400; }
+@font-face { font-family: 'Circular Pro'; src: url('fonts/CircularPro-Medium.otf') format('opentype'); font-weight: 500; }
+@font-face { font-family: 'Circular Pro'; src: url('fonts/CircularPro-Bold.otf') format('opentype'); font-weight: 700; }
+
+/* ═══ TOKENS — Veeam Vision (design-system-veeam-vision.md). Names follow the sibling pages (protected-data / identity-dashboard). ═══ */
+:root {
+  --green: #01804a;           /* Veeam Green/S80 — primary action */
+  --green-70: #1a9e66;        /* S70 — hover */
+  --green-90: #014c2c;        /* S90 — active */
+  --green-40: #4dbd8e;        /* S40 — current-page chip stroke */
+  --green-30: #9cd8be;        /* S30 — disabled primary */
+  --green-20: #c6eddd;
+  --green-10: #e4f6ee;        /* S10 — tiles, avatars */
+  --green-5: #f6fbf9;         /* S5 — hover / selected wash, chip bg */
+  --lime-30: #91f8b2;         /* rail active tile */
+  --black-100: #1f2229;
+  --black-90: #35383e;
+  --black-80: #4c4e54;
+  --black-70: #626469;        /* secondary text */
+  --black-60: #797a7f;        /* Black/S60 — summary row labels */
+  --black-50: #8f9094;
+  --black-30: #bcbdbf;        /* disabled text */
+  --black-20: #d2d3d4;        /* borders */
+  --black-10: #e9e9ea;
+  --black-5: #f8f8f9;
+  --form-bg: #f8f8f8;         /* Veeam Form BG */
+  --surface: #f4f6f8;         /* explorer surface behind the white cards (live product) */
+  --green-50: #3cb783;        /* Veeam Green/S50 — filter-add ring */
+  --white: #ffffff;
+  --red: #ed2c3d;             /* Ignis/S50 */
+  --red-10: #fde8e9;
+  --red-30: #f58a93;
+  --red-40: #f15b68;
+  --orange-10: #fef1ea;
+  --orange-border: #f89256;   /* Alerts set, warning border */
+  --gold-bg: #fcf8ea;
+  --gold-fg: #9d7f17;
+  --kpi-accent: #a745a9;      /* KPI tile bar — live product value (nearest DS style: Base/Plum #98269b) */
+  --ai-grad: conic-gradient(from 90deg, #5bbc7b 0deg, #119ee7 57.6deg, #d83dcf 153deg, #ee6b36 234deg, #8fd131 320.4deg, #5bbc7b 360deg); /* Veeam AI brand gradient (same as protected-data) */
+  --nav-dark: #1f2229;
+  --nav-icon-bg: #35383e;
+  --focus-ring: 0 0 0 2px #ffffff, 0 0 0 4px #008436;
+  --r-xs: 2px; --r-sm: 4px; --r-md: 8px;
+  --scrim: rgba(31, 34, 41, 0.4);
+  --shadow-lg: 0 12px 32px rgba(28, 32, 41, 0.18);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+html { min-width: 1320px; } /* the live explorer supports 1320px minimum — not responsive below that */
+body { font-family: 'Circular Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 22px; font-weight: 400; color: var(--black-100); background: var(--layout-bg); display: flex; }
+button { font: inherit; color: inherit; }
+svg { display: block; flex-shrink: 0; }
+
+/* ═══ Page chrome — measured live (Universal Data Explorer, 1440 viewport) ═══ */
+html { min-width: 1320px; }
+body { background: var(--white); }
+.sidenav { width: 72px; display: flex; flex-direction: column; align-items: center; flex-shrink: 0; position: fixed; left: 0; top: 0; bottom: 0; background: var(--nav-dark); z-index: 50; }
+.sidenav-logo { height: 72px; width: 72px; flex-shrink: 0; overflow: hidden; }
+.sidenav-logo svg { display: block; }
+.rail-menu { width: 40px; height: 40px; margin-top: 24px; padding: 0; border: none; border-radius: 8px; background: var(--nav-icon-bg); color: var(--white); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.rail-menu svg, .rail-module svg { width: 24px; height: 24px; }
+.rail-module { width: 40px; height: 40px; margin-top: 40px; border-radius: 8px; background: var(--green); color: var(--white); display: flex; align-items: center; justify-content: center; }
+.rail-module svg { width: 32px; height: 32px; }
+.rail-stack { margin-top: 32px; display: flex; flex-direction: column; gap: 16px; align-items: center; }
+.nav-btn { width: 32px; height: 32px; padding: 0; border: none; border-radius: 8px; background: var(--nav-icon-bg); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--white); flex-shrink: 0; }
+.nav-btn:hover { background: var(--black-80); }
+.nav-btn.active { background: var(--lime-30); color: var(--black-100); }
+.nav-btn svg { width: 24px; height: 24px; }
+.rail-bottom { margin-top: auto; padding-bottom: 24px; display: flex; flex-direction: column; align-items: center; gap: 24px; }
+.rail-ai { width: 40px; height: 40px; border-radius: 50%; background: var(--ai-grad); display: flex; align-items: center; justify-content: center; color: var(--white); border: none; padding: 0; }
+.nav-avatar { width: 36px; height: 36px; border-radius: 50%; background: #284fb8; color: var(--white); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; }
+
+.main { margin-left: 72px; padding: 16px 24px 18px; min-width: 1248px; }
+.page-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.breadcrumbs { display: flex; align-items: center; gap: 4px; height: 20px; margin-bottom: 8px; font-size: 14px; line-height: 20px; color: var(--black-70); }
+.breadcrumbs svg { width: 16px; height: 16px; }
+.breadcrumbs .sep { display: flex; color: var(--black-30); }
+.page-title { font-size: 24px; line-height: 24px; font-weight: 500; letter-spacing: -0.02em; margin: 0; padding-bottom: 3.6px; }
+.topbar-actions { display: flex; align-items: center; gap: 8px; }
+
+.btn { height: 36px; padding: 0 12px; border-radius: 4px; border: 1px solid transparent; background: none; display: inline-flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer; white-space: nowrap; font-weight: 400; }
+.btn svg { width: 20px; height: 20px; }
+.btn-primary { background: var(--green); color: var(--white); font-weight: 500; }
+.btn-primary:hover { background: var(--green-70); }
+.btn-primary:active { background: var(--green-90); }
+.btn-primary:disabled { background: var(--green-30); cursor: default; }
+.btn-secondary { background: var(--white); border-color: transparent; box-shadow: inset 0 0 0 1px var(--black-20); }
+.btn-secondary:hover { background: var(--black-5); color: var(--black-80); }
+.btn-secondary:active { background: var(--black-10); }
+.btn-secondary:disabled { color: var(--black-30); box-shadow: inset 0 0 0 1px var(--black-10); background: var(--white); cursor: default; }
+.btn-flat:hover:not(:disabled) { color: var(--black-80); }
+.btn-flat:active:not(:disabled) { background: var(--black-10); }
+.btn-flat:disabled { color: var(--black-30); cursor: default; background: none; }
+.btn-tertiary { background: var(--green-5); border-color: var(--green); color: var(--green); }
+.btn-tertiary:hover { background: var(--green-10); }
+.btn-sm { height: 28px; padding: 0 8px; }
+.btn-icon { width: 36px; padding: 0; }
+.btn:focus-visible, .cb:focus-visible, .sw:focus-visible, .li:focus-visible, .row-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* page content box: 1px #e9e9ea, r4; panels stack flush, separated only by 1px lines */
+.page-content { border: 1px solid var(--black-10); border-radius: 4px; }
+.filter-row { padding: 12px; min-height: 60px; border-bottom: 1px solid var(--black-10); }
+.filter-in { display: flex; align-items: center; gap: 8px; min-height: 36px; flex-wrap: wrap; }
+.filter-add { width: 36px; height: 36px; padding: 0; border: none; background: var(--green-5); color: var(--green); border-radius: 4px; box-shadow: inset 0 0 0 1px var(--green-50); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+.filter-add:hover { background: var(--green-10); }
+.filter-hint { color: var(--black-70); padding: 0 24px 0 0; }
+/* Chip — Veeam Vision component set (72bd3895…), read live from Figma. ALWAYS build chips with chip() below; never write chip markup by hand.
+   Size: Default 28 only (pad 3/4, Body/B2/Semi Bold 16/22). Radius 2. This product does not use the Small (24) or Mini (20) sizes.
+   Mode: Light = no stroke · Outline = 1px stroke. Type sets fill + text. */
+.chip { display: inline-flex; align-items: center; gap: 4px; box-sizing: border-box; height: 28px; padding: 3px 4px; border-radius: 2px; background: var(--black-5); color: var(--black-100); font-size: 16px; line-height: 22px; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+.chip.green { background: var(--green-5); color: var(--green); }
+.chip.red { background: var(--red-10); color: var(--red); }
+.chip.gold { background: var(--gold-bg); color: var(--gold-fg); }
+.chip.outline { box-shadow: inset 0 0 0 1px var(--black-50); }
+.chip.green.outline { box-shadow: inset 0 0 0 1px var(--green-70); }
+.chip.red.outline { box-shadow: inset 0 0 0 1px var(--red-30); }
+.chip.gold.outline { box-shadow: inset 0 0 0 1px #c49f1d; }
+.chip button { border: none; background: none; padding: 0; cursor: pointer; color: inherit; display: flex; }
+.chip svg { width: 16px; height: 16px; }
+.chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }   /* chips wrap inside their cell — never clipped */
+
+.kpis { display: flex; gap: 1px; background: var(--black-10); margin-bottom: 1px; }
+.kpi { flex: 1 1 0; background: var(--white); border-radius: 2px; padding: 12px; height: 92px; min-width: 0; }
+.kpi-in { height: 68px; padding-left: 16px; box-shadow: inset 4px 0 0 var(--kpi-accent); display: flex; flex-direction: column; justify-content: center; }
+.kpi-label { display: flex; align-items: center; gap: 4px; height: 28px; margin-bottom: 8px; color: var(--black-70); white-space: nowrap; }
+.kpi-label .chev { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; }
+.kpi-label svg { width: 20px; height: 20px; }
+.kpi-value { font-size: 32px; line-height: 32px; font-weight: 500; letter-spacing: -0.64px; font-variant-numeric: tabular-nums; color: var(--black-100); }
+
+/* explorer: #f4f6f8 surface with two white cards and a 1px seam */
+.explorer { position: relative; display: flex; background: var(--surface); border-radius: 2px; height: calc(100vh - 261px); min-height: 480px; border-top: 1px solid var(--black-10); }
+.tree-card { width: 319px; flex-shrink: 0; background: var(--white); border-radius: 2px; display: flex; flex-direction: column; min-height: 0; margin-right: 1px; }
+.explorer.collapsed .tree-card { display: none; }
+.collapse-btn { position: absolute; left: 312px; top: 44px; width: 16px; height: 32px; padding: 0; border: none; border-radius: 16px; background: var(--white); box-shadow: inset 0 0 0 1px var(--black-20); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 5; color: var(--black-100); }
+.explorer.collapsed .collapse-btn { left: -8px; }
+.collapse-btn svg { width: 16px; height: 16px; transform: rotate(90deg); }
+.explorer.collapsed .collapse-btn svg { transform: rotate(-90deg); }
+.tree-hd { padding: 12px; display: flex; flex-direction: column; gap: 16px; flex-shrink: 0; }
+.graph-btn { width: 100%; }
+.sfield { position: relative; }
+.sfield input { width: 100%; height: 36px; border: none; border-radius: 4px; background: var(--form-bg); box-shadow: inset 0 0 0 1px var(--black-20); padding: 0 12px; font: inherit; color: var(--black-100); }
+.sfield input::placeholder { color: var(--black-50); }
+.sfield input:focus { outline: none; background: var(--green-5); box-shadow: inset 0 0 0 1px var(--green); }
+.sfield.lead input { padding-left: 40px; }
+.sfield.trail input { padding-right: 40px; }
+.sfield > span { position: absolute; top: 8px; width: 20px; height: 20px; display: flex; color: var(--black-100); pointer-events: none; }
+.sfield.lead > span { left: 8px; }
+.sfield.trail > span { right: 8px; }
+.tree-list { flex: 1; overflow-y: auto; min-height: 0; }
+.tree-group-h { display: flex; align-items: center; gap: 8px; height: 44px; padding: 12px; width: 100%; border: none; background: var(--white); text-align: left; cursor: pointer; font: inherit; color: var(--black-100); line-height: 20px; }
+.tree-group-h .gchev { width: 20px; height: 20px; border-radius: 4px; background: var(--green-10); color: var(--green); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform .15s; }
+.tree-group-h .gchev svg { width: 20px; height: 20px; }
+.tree-group.closed .gchev { transform: rotate(-90deg); }
+.tree-group.closed .tree-items { display: none; }
+.tree-items { margin-left: 24px; }
+.li { display: flex; align-items: center; gap: 8px; height: 44px; padding: 8px 12px; border: none; background: var(--white); width: 100%; text-align: left; cursor: pointer; border-radius: 0; font: inherit; color: var(--black-100); line-height: 22px; }
+.li:hover { background: var(--green-5); }
+.li.is-active { background: var(--green-5); box-shadow: inset 2px 0 0 var(--green); color: var(--green); font-weight: 500; }
+.li .tile { width: 28px; height: 28px; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.li .tile svg { width: 16px; height: 16px; }
+.li .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.li .count { height: 28px; min-width: 33.6px; padding: 0 4px; border-radius: 2px; background: var(--green-5); color: var(--green); font-size: 13px; line-height: 28px; font-weight: 400; text-align: center; font-variant-numeric: tabular-nums; }
+.li.is-active .count { background: var(--green); color: var(--white); }
+
+.content-card { flex: 1; min-width: 0; background: var(--white); border-radius: 2px; display: flex; flex-direction: column; min-height: 0; }
+.entity-hd { padding: 12px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+.entity-row { display: flex; align-items: center; gap: 16px; }
+.entity-tile { width: 52px; height: 52px; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.entity-tile svg { width: 32px; height: 32px; }
+.entity-title { font-size: 18px; line-height: 24px; letter-spacing: -0.09px; }
+.entity-desc { color: var(--black-70); }
+hr.line { border: none; border-top: 1px solid var(--black-10); margin: 0; flex-shrink: 0; }
+.mini-kpis { display: flex; flex-shrink: 0; }
+.mkpi { flex: 1 1 0; background: var(--white); border-radius: 2px; padding: 12px; height: 84px; min-width: 0; }
+.mkpi + .mkpi { box-shadow: inset 1px 0 0 var(--black-10); }
+.mkpi-top { display: flex; align-items: center; height: 28px; color: var(--black-70); font-size: 14px; line-height: 20px; }
+.mkpi-top .l { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mkpi-top .chev { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; }
+.mkpi-top svg { width: 20px; height: 20px; }
+.mkpi-v { font-size: 24px; line-height: 32px; font-variant-numeric: tabular-nums; }
+
+/* bulk action bar (52, pad 8/16, gap 8, 0 1px 0 #edf0f0) */
+.bulk { display: flex; align-items: center; gap: 8px; height: 52px; padding: 8px 16px; background: var(--white); box-shadow: 0 1px 0 #edf0f0; flex-shrink: 0; position: relative; z-index: 4; }
+.tip { position: relative; display: inline-flex; }
+
+/* grid: th 14/20 black-70 pad 8 + 1px #f4f6f8 underline; td 16/22 pad 0 8, row 48; no row hairlines */
+.table-wrap { overflow: auto; flex: 1; min-height: 0; border-radius: 0 0 2px 2px; }
+table { border-collapse: separate; border-spacing: 0; table-layout: fixed; }
+thead th { position: sticky; top: 0; z-index: 2; background: var(--white); height: 40px; padding: 8px; text-align: left; font-size: 14px; line-height: 20px; font-weight: 400; color: var(--black-70); white-space: nowrap; border-bottom: 1px solid var(--surface); }
+thead th.sortable { cursor: pointer; }
+thead th .sort { display: inline-flex; vertical-align: middle; margin-left: 4px; opacity: 0; }
+thead th:hover .sort, thead th.sorted .sort { opacity: 1; }
+thead th .sort svg { width: 16px; height: 16px; }
+tbody td { height: 48px; padding: 0 8px; background: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+tbody tr:hover td { background: var(--green-5); }
+tbody tr.is-selected td { background: var(--green-5); }
+tbody tr.is-ineligible td:not(.cb-col):not(.gut) { color: var(--black-70); }
+th.gut, td.gut { width: 48px; min-width: 48px; position: sticky; left: 0; z-index: 3; padding: 0 8px 0 16px; }
+th.cb-col, td.cb-col { width: 76px; min-width: 76px; position: sticky; left: 48px; z-index: 3; padding: 0 8px; }
+thead th.gut, thead th.cb-col { z-index: 5; }
+td.act, th.act { position: sticky; right: 0; z-index: 3; width: 72px; min-width: 72px; text-align: right; }
+.gut-btns { display: none; flex-direction: column; gap: 0; }
+tbody tr:hover .gut-btns { display: flex; }
+.row-btn { width: 24px; height: 24px; padding: 0; border: none; background: none; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--black-100); }
+.row-btn:hover { background: var(--black-10); }
+.row-btn svg { width: 16px; height: 16px; }
+.act-in { display: flex; justify-content: flex-end; }
+.act-in .row-btn { width: 28px; height: 28px; }
+.act-in .row-btn svg { width: 20px; height: 20px; }
+.cell-flex { display: flex; align-items: center; gap: 8px; }
+.av { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.av img { width: 20px; height: 20px; display: block; }
+.fico { width: 28px; height: 28px; border-radius: 4px; background: var(--surface); color: var(--black-70); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.fico svg { width: 20px; height: 20px; }
+.muted { color: var(--black-50); }
+
+/* checkbox — Vision Selection: 16px shape, Green/S80, r4 */
+.cb { appearance: none; -webkit-appearance: none; width: 16px; height: 16px; margin: 0; border: 2px solid var(--green); border-radius: 4px; background: var(--white); cursor: pointer; position: relative; display: block; }
+.cb:checked, .cb:indeterminate { background: var(--green); }
+.cb:checked::after { content: ''; position: absolute; left: 3px; top: -1px; width: 4px; height: 8px; border: solid var(--white); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.cb:indeterminate::after { content: ''; position: absolute; left: 2px; top: 5px; width: 8px; height: 2px; background: var(--white); }
+.cb-head { display: flex; align-items: center; gap: 0; }
+.cb-caret { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; margin-left: 4px; padding: 0; border: 0; border-radius: 4px; background: var(--black-5); color: var(--black-100); cursor: pointer; flex-shrink: 0; }
+.cb-caret:hover { background: var(--black-10); }
+.cb-caret svg { width: 20px; height: 20px; }
+.cb-caret:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.cbw { display: inline-flex; }
+/* header-checkbox menu — same recipe as protected-data (.dx-bm / .dx-mi / .dx-md) */
+.dx-bm { position: fixed; z-index: 3200; min-width: 260px; max-width: 360px; padding: 4px 0; background: var(--white); border: 1px solid var(--black-20); border-radius: 4px; box-shadow: 0 8px 24px rgba(31,34,41,.16); }
+.dx-mi { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; padding: 10px 16px; border: 0; background: transparent; text-align: left; font-family: inherit; font-size: 16px; line-height: 22px; color: var(--black-100); cursor: pointer; }
+.dx-mi:hover:not(:disabled) { background: var(--black-5); }
+.dx-mi:disabled { color: var(--black-30); cursor: default; }
+.dx-md { height: 1px; margin: 4px 0; background: var(--black-10); }
+/* Toast — the shared component (protected-data / activity): anchored top-right, above modals, title + optional body/action, type-tinted surface */
+.toast { position: fixed; top: 16px; right: 24px; max-width: 420px; min-width: 320px; border: 1px solid; border-radius: 8px; padding: 16px 18px; display: flex; gap: 16px; align-items: flex-start; z-index: 10000; box-shadow: 0 4px 16px rgba(0,0,0,0.08); transform: translateY(-12px); opacity: 0; transition: opacity 0.2s, transform 0.2s; pointer-events: none; }
+.toast.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
+.toast.toast-success { background: var(--green-5); border-color: var(--green-30); }
+.toast-content { flex: 1; min-width: 0; }
+.toast-title { font-size: 16px; font-weight: 500; color: var(--black-100); line-height: 1.4; }
+.toast-body { font-size: 14px; color: var(--black-100); line-height: 1.5; margin-top: 4px; }
+.toast-body a { color: var(--green); text-decoration: underline; cursor: pointer; }
+.toast-close { background: none; border: none; padding: 0; cursor: pointer; flex-shrink: 0; align-self: flex-start; margin-top: 2px; }
+.toast-close svg { width: 16px; height: 16px; display: block; stroke-width: 2.5; }
+.toast.toast-success .toast-close { color: var(--green); }
+#ttip { position: fixed; z-index: 4000; display: none; max-width: 320px; padding: 4px 8px; border-radius: 4px; background: var(--black-100); color: var(--white); font-size: 14px; line-height: 20px; pointer-events: none; }
+.pager { display: flex; align-items: center; justify-content: flex-end; gap: 16px; height: 52px; padding: 0 16px; color: var(--black-70); font-size: 14px; flex-shrink: 0; background: var(--white); }
+.pager select { height: 28px; border: none; box-shadow: inset 0 0 0 1px var(--black-20); border-radius: 4px; background: var(--form-bg); font: inherit; padding: 0 4px; }
+
+.input { height: 36px; width: 100%; border: none; border-radius: 4px; background: var(--form-bg); box-shadow: inset 0 0 0 1px var(--black-20); padding: 8px 12px; font: inherit; font-size: 16px; line-height: 22px; font-weight: 400; color: var(--black-100); }
+/* Dropdown = the same field, with the Text Input's trailing arrow_drop_down (20px, filled triangle) in place of the browser chevron */
+select.input { -webkit-appearance: none; appearance: none; padding-right: 40px; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='%23626469'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 20px 20px; }
+select.input:disabled { color: var(--black-30); cursor: default; }
+.input::placeholder { color: var(--black-50); }
+.input:focus { outline: none; background: var(--green-5); box-shadow: inset 0 0 0 1px var(--green); }
+
+/* ═══ Wizard — ported from the restore wizard (.ws-* in protected-data.html, measured live) ═══ */
+.scrim { position: fixed; top: 0; right: 0; bottom: 0; left: 72px; background: var(--scrim); z-index: 100; display: none; }
+.scrim.open { display: block; }
+.wiz { position: absolute; inset: 24px; background: var(--white); border: 1px solid var(--black-10); border-radius: 12px; box-shadow: 0 16px 48px rgba(0,0,0,0.18); display: flex; flex-direction: column; overflow: hidden; }
+.wiz-hd { display: flex; align-items: center; gap: 16px; padding: 0 12px; height: 64px; flex-shrink: 0; }
+.wiz-hd-tile { width: 40px; height: 40px; border-radius: 4px; background: var(--black-5); border: 1px solid var(--black-20); color: var(--black-100); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.wiz-hd-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.wiz-kick { display: flex; align-items: center; gap: 8px; height: 28px; font-size: 14px; line-height: 20px; color: var(--black-70); white-space: nowrap; }
+.wiz-title { font-size: 18px; line-height: 22px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wiz-act { width: 36px; height: 36px; padding: 0; border-radius: 4px; border: 1px solid var(--black-20); background: var(--white); color: var(--black-100); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+.wiz-act:hover { background: var(--black-5); }
+.wiz-body { flex: 1; display: flex; min-height: 0; }
+.wiz-steps { width: 320px; flex-shrink: 0; padding: 4px 12px; overflow: auto; }
+.wiz-steps-label { height: 48px; display: flex; align-items: center; padding: 0 12px; font-size: 14px; line-height: 16px; color: var(--black-70); font-weight: 500; }
+.step-item { display: flex; align-items: center; gap: 8px; width: 100%; height: 44px; padding: 4px 12px; border: none; border-radius: 0; background: transparent; font: inherit; color: var(--black-100); text-align: left; cursor: default; }
+.step-item.clickable { cursor: pointer; }
+.step-item.clickable:hover { background: var(--green-5); }
+.step-item.active { background: var(--green-5); box-shadow: inset 2px 0 0 var(--green); color: var(--green); font-weight: 500; }
+.step-tile { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 4px; background: var(--green-5); border-radius: 4px; flex-shrink: 0; color: var(--green); }
+.step-item.active .step-tile { background: var(--green); color: var(--white); }
+.step-check .chip svg { width: 20px; height: 20px; }
+.step-check { display: inline-flex; flex-shrink: 0; margin-left: auto; }   /* List Item post icon: a Green Light Default chip holding the 20px check (DCP file 9460:84132) */
+.wiz-main { flex: 1 1 0; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.wiz-scroll { flex: 1 1 0; overflow-y: auto; min-height: 0; }
+.step-pad { max-width: 780px; margin: 0 auto; padding: 32px 24px 48px; }
+.step-header { margin-bottom: 24px; }
+.step-title { font-size: 18px; font-weight: 500; line-height: 1.3; }
+.step-description { color: var(--black-70); margin-top: 6px; }
+.wiz-ft { padding: 16px 32px; background: var(--white); border-top: 1px solid var(--black-10); display: flex; justify-content: center; flex-shrink: 0; }
+.wiz-ft-in { max-width: 780px; width: 100%; display: flex; align-items: center; gap: 8px; }
+.ws-remove { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; background: var(--white); color: var(--black-100); border: 1px solid var(--black-20); border-radius: 4px; cursor: pointer; font-family: inherit; transition: background .12s ease, border-color .12s ease, color .12s ease; }
+.ws-remove:hover, .ws-remove:active { background: var(--red-10); border-color: var(--red); color: var(--red); }
+.ws-remove:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.plain-list { margin: 0; padding: 12px 16px 12px 36px; color: var(--black-70); font-size: 14px; line-height: 20px; }
+.plain-list li + li { margin-top: 4px; }
+.plain-list b { color: var(--black-100); font-weight: 500; }
+.dr-hd { display: flex; align-items: center; gap: 12px; padding: 16px; }
+.dr-ic { display: flex; color: var(--green); width: 24px; height: 24px; align-items: center; justify-content: center; flex-shrink: 0; }
+.dr-hd .t { font-weight: 500; }
+.dr-hd .d { color: var(--black-70); font-size: 14px; line-height: 20px; font-weight: 400; }
+.dr-spin { display: block; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--green-20); border-top-color: var(--green); animation: dr-rot 1s linear infinite; }
+@keyframes dr-rot { to { transform: rotate(360deg); } }
+.bt { display: grid; gap: 2px; padding: 2px; margin: 0 16px 12px; background: var(--black-5); border-radius: 4px; }   /* Vision Button Tabs: S5 container, r4, gap 2 */
+.bt-tab { display: flex; align-items: center; gap: 8px; min-width: 0; height: 36px; padding: 8px 12px; border: 1px solid transparent; border-radius: 4px; background: none; color: var(--black-70); font: inherit; cursor: pointer; }
+.bt-tab svg { width: 16px; height: 16px; }
+.bt-tab span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bt-tab:hover:not(.is-on) { background: var(--black-10); }
+.bt-tab.is-on { background: var(--white); border-color: var(--black-20); color: var(--black-100); font-weight: 500; }   /* active = white + neutral border, never green */
+.bt-tab:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.tk { border-radius: 2px; padding: 0 2px; transition: box-shadow .1s; }
+.tk-b { background: var(--black-10); color: var(--black-100); }
+.tk-a { background: var(--green-10); color: var(--green); font-weight: 700; }
+.tk-x { background: var(--red-10); color: var(--red); font-weight: 700; }
+.tk.is-hot, .tr-counts .chip.is-hot { box-shadow: 0 0 0 2px var(--green); }
+.tr-counts .chip { cursor: default; }
+.tr-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 0 16px 8px; }
+.tr-out { font-weight: 500; }
+.tr-note { color: var(--black-70); font-size: 14px; line-height: 20px; }
+.tr-counts { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 16px 12px; }
+.tr-panes { padding: 0 16px 16px; }
+.mask-sum { padding: 16px; }
+.mask-sum-hd { display: flex; align-items: center; gap: 12px; }
+.mask-sum-hd .ok { color: var(--green); display: flex; flex-shrink: 0; }
+.mask-sum-hd .t { flex: 1; min-width: 0; font-weight: 500; }
+.mask-sum-hd .d { color: var(--black-70); font-size: 14px; line-height: 20px; font-weight: 400; }
+.mask-sum-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.mask-sum-ft { display: flex; margin-top: 16px; }
+.wiz-ft-note { color: var(--black-70); font-size: 14px; line-height: 20px; }
+.btn-lg { height: 44px; padding: 0 16px; font-size: 18px; }
+.btn-block { flex: 1; }
+.ws-card { background: var(--white); border: 1px solid var(--black-10); border-radius: 8px; }
+.ws-card + .ws-card, .ws-card + .sect-label, .sect-label { margin-top: 16px; }
+.sect-label { font-size: 14px; line-height: 20px; font-weight: 500; color: var(--black-70); margin: 24px 0 8px; }
+.ws-card-hd { padding: 12px 16px 4px; font-weight: 500; }
+.ws-card-sub { padding: 0 16px 12px; color: var(--black-70); font-size: 14px; line-height: 20px; }
+.ws-controls { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; color: var(--black-70); font-size: 14px; line-height: 20px; }
+.ws-controls .l, .ws-controls .r { display: inline-flex; align-items: center; gap: 8px; }
+.ws-controls svg { width: 16px; height: 16px; }
+.ws-table { width: 100%; min-width: 0; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
+.nmwrap { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.nmwrap .av, .nmwrap .fico { width: 28px; height: 28px; }   /* restore's row icon tile is 28 */
+.nmtxt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ws-table td.nm, .ws-table td:nth-child(2) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ws-table th { position: static; background: var(--white); height: 40px; padding: 10px 12px; font-size: 14px; line-height: 20px; font-weight: 400; color: var(--black-70); cursor: default; white-space: nowrap; }
+.ws-table td { height: 53px; padding: 10px 12px; background: transparent; max-width: none; white-space: normal; }
+.ws-table td.nm { font-weight: 500; }
+.ws-table td.de { white-space: normal; overflow: visible; }
+.ws-table tbody tr:hover td { background: var(--green-5); }
+.ws-table tr:first-child th:first-child, .ws-table tr:first-child td:first-child { border-top-left-radius: 7px; }
+.ws-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.ws-table th.num { text-align: right; }
+.ws-table .trash { width: 36px; height: 36px; }
+.stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.stat { background: var(--black-5); border-radius: 8px; padding: 12px 16px; }
+.stat .v { font-size: 24px; line-height: 28px; font-weight: 500; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.stat .l { color: var(--black-70); font-size: 14px; line-height: 20px; }
+.stat.warn .v { color: var(--gold-fg); }
+.row { display: flex; align-items: center; gap: 12px; }
+.row.between { justify-content: space-between; }
+.field { margin-bottom: 16px; }
+.field label { display: block; color: var(--black-70); font-size: 14px; line-height: 20px; margin-bottom: 4px; }
+.input.plain { padding: 0 12px; }
+select.input.plain { padding: 0 40px 0 12px; }
+.crow { display: flex; align-items: center; gap: 12px; padding: 12px 16px; }
+.crow .de { font-weight: 500; min-width: 140px; }
+.crow .ex { flex: 1; color: var(--black-70); font-size: 14px; line-height: 20px; }
+.crow .ex b { color: var(--black-100); font-weight: 500; }
+.crow .t { flex: 1; }
+.crow .d { color: var(--black-70); font-size: 14px; line-height: 20px; }
+.sw { appearance: none; -webkit-appearance: none; width: 32px; height: 16px; border-radius: 99px; border: 1px solid var(--green); background: var(--green-5); position: relative; cursor: pointer; margin: 0; flex-shrink: 0; }
+.sw::after { content: ''; position: absolute; width: 8px; height: 8px; border-radius: 50%; background: var(--green); left: 3px; top: 3px; transition: left .15s; }
+.sw:checked { background: var(--green); }
+.sw:checked::after { background: var(--white); left: 19px; }
+.sw:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+/* Selection Card — same component as the restore wizard (Figma 9590:66530): Header band + 24px radio, Description below. Selected = green border, Green/S5 header, bold green title. */
+.sel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.sel-card { position: relative; display: flex; flex-direction: column; align-items: stretch; gap: 0; padding: 0; background: var(--white); border: 1px solid var(--black-10); border-radius: 4px; cursor: pointer; text-align: left; font-family: inherit; color: inherit; min-width: 0; }
+.sel-card:hover:not(.is-selected) { border-color: var(--black-30); }
+.sel-card.is-selected { border-color: var(--green); }
+.sel-card:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.sc-header { position: relative; display: flex; align-items: center; gap: 8px; min-height: 38px; padding: 8px 36px 8px 12px; background: var(--black-5); border-radius: 3px 3px 0 0; font-size: 16px; font-weight: 400; line-height: 22px; color: var(--black-100); }
+.is-selected > .sc-header { background: var(--green-5); color: var(--green); font-weight: 700; line-height: 20px; }
+.sc-radio { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; color: var(--green); }
+.sc-radio svg { display: block; width: 24px; height: 24px; }
+.sc-radio .sc-on { display: none; }
+.is-selected > .sc-header .sc-radio .sc-on { display: block; }
+.is-selected > .sc-header .sc-radio .sc-off { display: none; }
+.sc-desc { flex: 1 1 auto; display: flex; flex-direction: column; gap: 4px; padding: 8px 12px; background: var(--white); border-radius: 0 0 3px 3px; font-size: 14px; line-height: 20px; color: var(--black-70); }
+.sc-meta { color: var(--black-100); font-weight: 500; }
+.sc-cons { margin-top: 4px; }
+.sc-cons b { color: var(--black-100); font-weight: 500; }
+@keyframes sc-slide-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+.sc-reveal { animation: sc-slide-in .18s ease; }
+.sc-detail { display: block; margin-top: 8px; }
+.sc-detail .input { height: 36px; }
+.sc-note { display: block; margin-top: 8px; }
+.lnk { border: none; background: none; padding: 0 4px; font: inherit; font-weight: 500; color: var(--green); cursor: pointer; border-radius: 2px; }
+.lnk:hover { color: var(--green-70); }
+.lnk:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.alert { display: flex; gap: 12px; padding: 12px; border-radius: 4px; border: 1px solid; margin-bottom: 16px; align-items: flex-start; }
+.alert svg { width: 24px; height: 24px; }
+.alert.warn { background: var(--orange-10); border-color: var(--orange-border); }
+.alert.info { background: var(--green-5); border-color: var(--green-30); }
+.alert .alert-t { flex: 1; }
+.ba { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.pane { border: 1px solid var(--black-10); border-radius: 8px; overflow: hidden; }
+.pane-h { padding: 8px 12px; background: var(--black-5); font-size: 14px; line-height: 20px; color: var(--black-70); display: flex; justify-content: space-between; }
+.pane-b { padding: 12px; font-size: 14px; line-height: 22px; white-space: pre-wrap; min-height: 140px; }
+.hit { background: var(--red-10); color: var(--red); border-radius: 2px; padding: 0 2px; }
+.mask { background: var(--green-10); color: var(--green); border-radius: 2px; padding: 0 2px; font-weight: 500; }
+/* Shared wizard pager — .wspg / .pg-bar / .pgds-* from protected-data (_wsPgBar), tokens mapped to Vision */
+.pg-bar { display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 8px; border-top: 1px solid var(--black-10); background: var(--white); font-size: 16px; color: var(--black-70); flex-shrink: 0; border-bottom-left-radius: 7px; border-bottom-right-radius: 7px; overflow: hidden; }
+.pgds-left, .pgds-pages, .pgds-right { font-size: 14px; }
+.pgds-left { display: flex; align-items: center; gap: 8px; flex-shrink: 0; white-space: nowrap; }
+.pgds-pages { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+.pgds-right { display: flex; align-items: center; gap: 16px; flex: 0 0 auto; min-width: 0; white-space: nowrap; }
+.pgds-select { height: 28px; padding: 0 30px 0 12px; border: 1px solid var(--black-20); border-radius: 4px; background: var(--form-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23626469'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 10px center; appearance: none; -webkit-appearance: none; font-family: inherit; font-size: 16px; color: var(--black-100); cursor: pointer; }
+.pgds-goto { color: var(--black-70); min-width: 0; width: 124px; }   /* restore uses 104 here and clips the label; 124 shows "Go to Page" whole */
+.pgds-chips { display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
+.pgds-gap { color: var(--black-70); padding: 0 2px; }
+.pgds-chip { min-width: 24px; height: 24px; padding: 0 6px; border: 1px solid transparent; border-radius: 2px; background: transparent; font-family: inherit; font-size: 14px; color: var(--black-100); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.pgds-chip:hover { background: var(--black-5); }
+.pgds-chip.current, .pgds-chip.current:hover { background: var(--green-5); border-color: var(--green-40); color: var(--green); }
+.pgds-arrow { width: 24px; height: 24px; border: 0; padding: 0; background: transparent; border-radius: 4px; color: var(--black-70); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.pgds-arrow:hover:not(:disabled) { background: var(--black-5); color: var(--black-100); }
+.pgds-arrow:disabled { opacity: 0.35; cursor: default; }
+.pgds-txt { display: none; }   /* the wizard column is under 900px: "Showing … per page" labels are hidden, as in restore */
+.sample-tabs { display: flex; gap: 8px; margin: 12px 0 4px; flex-wrap: wrap; }
+.progress { height: 8px; border-radius: 4px; background: var(--black-10); overflow: hidden; }
+.progress > i { display: block; height: 100%; background: var(--green); width: 0; transition: width .3s; }
+.job-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.empty-note { color: var(--black-70); }
+.arrow { color: var(--black-50); }
+.sum-card { background: var(--white); border: 1px solid var(--black-10); border-radius: 4px; margin-bottom: 24px; }
+.sum-row { display: flex; align-items: center; gap: 8px; padding: 16px 12px; }
+.sum-row + .sum-row { border-top: 1px solid var(--black-10); }
+.sum-ic { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 4px; background: var(--black-5); color: var(--black-100); flex-shrink: 0; }
+.sum-text { min-width: 0; }
+.adv-head { display: flex; align-items: center; gap: 12px; padding-top: 16px; margin-top: 24px; border-top: 1px solid var(--black-10); margin-bottom: 16px; }   /* index.html .bi-co-head (Co-owners) */
+.adv-chev { width: 24px; height: 24px; border: 0; border-radius: 4px; background: var(--green-10); color: var(--green); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; transition: transform .15s ease; flex-shrink: 0; }
+.adv-chev:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.adv-title { font-size: 18px; line-height: 22px; font-weight: 500; color: var(--black-100); }
+.adv-sub { font-size: 14px; line-height: 20px; color: var(--black-70); }
+.adv-body .crow { padding: 12px 0; }
+.sum-label { font-size: 14px; line-height: 18px; font-weight: 500; color: var(--black-60); }
+.sum-val { font-size: 16px; line-height: 22px; font-weight: 500; color: var(--black-80); }
+.kv { display: flex; gap: 16px; padding: 8px 16px; }
+.kv .k { width: 160px; flex-shrink: 0; color: var(--black-70); }
+.kv .v { flex: 1; min-width: 0; }
+.kv:last-child { padding-bottom: 16px; }
+
+/* A — hovercard on the Sanitize action */
+.hc { position: fixed; z-index: 3300; width: 340px; padding: 16px; background: var(--white); border: 1px solid var(--black-20); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.16); display: none; }
+.hc-t { font-size: 16px; line-height: 22px; font-weight: 500; color: var(--black-100); }
+.hc-d { margin-top: 4px; font-size: 14px; line-height: 20px; color: var(--black-70); }
+.hc-rows { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+.hc-row { display: flex; gap: 12px; align-items: flex-start; }
+.hc-row b { display: block; font-size: 14px; line-height: 20px; font-weight: 500; color: var(--black-100); }
+.hc-row span.x { display: block; font-size: 14px; line-height: 20px; color: var(--black-70); }
+.rl { padding: 16px; display: flex; flex-direction: column; gap: 24px; }
+.rl-r { display: flex; gap: 12px; align-items: flex-start; }
+.rl-r b { display: block; font-size: 16px; line-height: 22px; font-weight: 500; color: var(--black-100); }
+.rl-r span.x { display: block; font-size: 14px; line-height: 20px; color: var(--black-70); }
+.rl-eg { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 14px; line-height: 20px; color: var(--black-70); }
+.rl-eg span:last-child { color: var(--black-100); font-weight: 500; }
+.rl-a { display: inline-flex; color: var(--black-50); transform: rotate(-90deg); }
+/* Masking: read-only card (two-column list) and the customize view (element list + control panel) */
+.cb-body { margin-top: 12px; }
+.cb-two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 32px; }
+.cb-tr { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.cb-tr .n { font-weight: 500; white-space: nowrap; }
+.cb-tr .v { font-size: 14px; line-height: 20px; color: var(--black-70); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.cb-tr.mk-off .n, .cb-tr.mk-off .v { opacity: .5; }
+.cb-edit-hd { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.cb-edit-hd .t { font-size: 18px; line-height: 22px; font-weight: 500; }
+.cb-edit-hd .r { display: flex; gap: 8px; }
+.me { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 12px; align-items: stretch; }
+.me > .ws-card { margin: 0 !important; }
+.me > .me-p { padding: 16px; }
+.me .md-doc { padding: 0; display: block; overflow: hidden; }
+.me-row { display: grid; grid-template-columns: 110px minmax(0, 1fr) 20px; gap: 12px; align-items: center; width: 100%; min-height: 52px; padding: 4px 12px; border: 0; border-radius: 0; background: transparent; font: inherit; text-align: left; cursor: pointer; color: inherit; }
+.me-row:hover { background: var(--green-5); }
+.me-row:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.me-row.is-sel { background: var(--green-5); box-shadow: inset 2px 0 0 var(--green); }
+.me-row .k { color: var(--black-70); font-size: 14px; line-height: 20px; }
+.me-row .vv { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+.me-row .fnl { font-size: 14px; line-height: 20px; color: var(--black-70); }
+.me-row .chv { display: inline-flex; color: var(--black-50); transform: rotate(-90deg); }
+.me-row.is-sel .chv { color: var(--green); }
+.md-tok { display: inline-block; padding: 1px 4px; border-radius: 2px; background: var(--green-5); color: var(--green); font-weight: 500; line-height: 22px; }
+.md-tok.off { background: var(--black-5); color: var(--black-100); }
+.me-p .hd { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.me-p .hd b { font-size: 16px; line-height: 22px; font-weight: 500; }
+.me-p .sub { margin: 4px 0 16px; font-size: 14px; line-height: 20px; color: var(--black-70); }
+.me-p.mk-off .mc-opt { opacity: .5; pointer-events: none; }
+.mc-opt { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 12px 16px; border: 1px solid var(--black-10); border-radius: 4px; cursor: pointer; }
+.mc-opt + .mc-opt { margin-top: 8px; }
+.mc-opt.is-sel { border-color: var(--green); }
+.mc-opt .r { display: inline-flex; flex-shrink: 0; }
+.mc-opt .r .sc-on { display: none; } .mc-opt.is-sel .r .sc-on { display: block; } .mc-opt.is-sel .r .sc-off { display: none; }
+.mc-opt .t { flex: 1; font-weight: 500; }
+.mc-opt .v { flex-basis: 100%; padding-left: 36px; font-size: 14px; line-height: 20px; color: var(--black-100); font-weight: 500; min-width: 0; }
+/* Test run: original preview beside the output file */
+.pv { border: 1px solid var(--black-10); border-radius: 4px; background: var(--black-5); padding: 16px; min-height: 100%; box-sizing: border-box; }
+.pv-page { background: var(--white); border: 1px solid var(--black-10); border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 20px 24px; font-size: 14px; line-height: 22px; }
+.pv-title { font-size: 16px; line-height: 22px; font-weight: 500; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--black-10); }
+.pv-row { display: flex; gap: 12px; padding: 2px 0; }
+.pv-k { width: 110px; flex-shrink: 0; color: var(--black-60); }
+.pv-v { min-width: 0; overflow-wrap: anywhere; }
+.pv-bar { height: 8px; border-radius: 4px; background: var(--black-10); margin-top: 12px; }
+.pv-bar + .pv-bar { margin-top: 8px; width: 70%; }
+.pv-img { border: 1px dashed var(--black-30); }
+.pv-sheet { border-collapse: collapse; width: 100%; font-size: 14px; line-height: 20px; background: var(--white); }
+.pv-sheet th, .pv-sheet td { border: 1px solid var(--black-10); padding: 2px 8px; text-align: left; font-weight: 400; }
+.pv-sheet th { background: var(--black-5); color: var(--black-60); font-weight: 500; }
+.pv-sheet th.rn { width: 28px; text-align: center; }
+.pv-sheet th, .pv-sheet td, tbody .pv-sheet td { height: auto; white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; vertical-align: top; background: var(--white); }
+.pv-sheet th { background: var(--black-5); }
+.pv-code { background: var(--white); border: 1px solid var(--black-10); border-radius: 2px; padding: 12px 16px; font-family: Menlo, Consolas, monospace; font-size: 13px; line-height: 20px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.hl { background: var(--green-10); box-shadow: inset 0 -2px 0 var(--green); border-radius: 2px; padding: 0 2px; transition: box-shadow .1s; }
+.hl.x { background: var(--red-10); box-shadow: inset 0 -2px 0 var(--red); }
+.out { background: var(--white); border: 1px solid var(--black-10); border-radius: 4px; padding: 12px 16px; font-family: Menlo, Consolas, monospace; font-size: 13px; line-height: 20px; white-space: pre-wrap; overflow-wrap: anywhere; box-sizing: border-box; min-height: 100%; }
+.sb { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px 16px; align-items: stretch; }
+.sb-h { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 8px; font-size: 14px; line-height: 20px; color: var(--black-70); }
+.sb-h b { font-weight: 500; color: var(--black-100); }
+.sb-col { min-width: 0; display: flex; flex-direction: column; }
+.sb-col > .pv, .sb-col > .out { flex: 1; }
+.cov { padding: 0 16px 16px; font-size: 14px; line-height: 20px; color: var(--black-70); }
+.mark { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green); margin-left: 6px; vertical-align: middle; }
+.slide { background: var(--white); border: 1px solid var(--black-10); border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); aspect-ratio: 16 / 9; padding: 16px 20px; box-sizing: border-box; overflow: hidden; }
+.slide .st { font-size: 16px; line-height: 22px; font-weight: 500; margin-bottom: 8px; }
+.slide li { font-size: 14px; line-height: 22px; margin-left: 16px; }
+.gap { color: var(--black-60); background: var(--black-5); text-align: center; font-size: 13px; line-height: 20px; padding: 2px 0; font-family: inherit; border-radius: 2px; margin: 2px 0; }
+.out { tab-size: 12; }
+.sb-col .pv-code, .sb-col .out { max-height: 420px; overflow: auto; }
+.tk.hl { padding: 0 2px; }
+</style>
+</head>
+<body>
+
+<template id="brandLogo"><svg width="72" height="72" viewBox="0 0 94 94" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect width="94" height="94" fill="url(#paint0_radial_veeam_sidebar)"/>
+      <path d="M33.9189 52.8629L25.8252 44.8129L31.8627 38.7754L45.8627 52.7316C46.4752 53.3441 47.5252 53.3441 48.1377 52.7316L62.1377 38.7754L68.1752 44.8129L60.0814 52.9066C58.5939 54.3941 56.5377 55.2691 54.3939 55.2691H39.6064C37.4627 55.2254 35.4502 54.3941 33.9189 52.8629Z" fill="white"/>
+      <defs><radialGradient id="paint0_radial_veeam_sidebar" cx="0" cy="0" r="1" gradientTransform="matrix(-43.9342 42.898 -42.9857 -43.8541 65.4441 24.4112)" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#86F49C"/><stop offset="0.3" stop-color="#4AEB7C"/><stop offset="0.55" stop-color="#1DD867"/><stop offset="0.78" stop-color="#00BC5C"/><stop offset="1" stop-color="#009B50"/>
+      </radialGradient></defs>
+    </svg></template>
+<div class="sidenav" id="rail"></div>
+
+<div class="main">
+  <div class="page-header">
+    <div>
+      <div class="breadcrumbs"><span data-ic="home-filled"></span><span class="sep" data-ic="expansion-chevron-down" style="transform:rotate(-90deg)"></span><span>Sensitive Data Intelligence</span></div>
+      <h1 class="page-title">Universal Data Explorer</h1>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-primary" id="saveView" disabled><span data-ic="save-outlined"></span>Save View</button>
+      <button class="btn btn-secondary"><span data-ic="views-outlined"></span>Saved Views</button>
+      <button class="btn btn-secondary btn-icon" aria-label="Help"><span data-ic="help-circle-outlined"></span></button>
+    </div>
+  </div>
+
+  <div class="page-content">
+    <div class="filter-row" id="filterBar"></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="explorer" id="explorer">
+      <div class="tree-card" id="treeCard"></div>
+      <button class="collapse-btn" id="treeToggle" aria-label="Collapse entity panel"><span data-ic="expansion-chevron-down"></span></button>
+      <div class="content-card" id="gridCard"></div>
+    </div>
+  </div>
+</div>
+
+<!-- tooltip node (data-tooltip) + header-checkbox menu (#dxBulkMenu, built on demand) -->
+<div id="ttip" role="tooltip"></div>
+
+<!-- ═══ SANITIZE WIZARD ═══ -->
+<div class="scrim" id="scrim">
+  <div class="wiz" role="dialog" aria-modal="true" aria-labelledby="wizTitle">
+    <div class="wiz-hd">
+      <div class="wiz-hd-tile" data-ic="sanitizer-outlined"></div>
+      <div class="wiz-hd-main">
+        <div class="wiz-kick"><span>Sanitize job</span><span class="chip" id="wizKick"></span></div>
+        <div class="wiz-title" id="wizTitle">Sanitize</div>
+      </div>
+      <button class="wiz-act" aria-label="Help"><span data-ic="help-circle-outlined"></span></button>
+      <button class="wiz-act" id="wizClose" aria-label="Close"><span data-ic="close-outlined"></span></button>
+    </div>
+    <div class="wiz-body">
+      <aside class="wiz-steps" id="wizSteps"></aside>
+      <main class="wiz-main">
+        <div class="wiz-scroll"><div class="step-pad" id="wizMain"></div></div>
+        <div class="wiz-ft"><div class="wiz-ft-in" id="wizFt"></div></div>
+      </main>
+    </div>
+  </div>
+</div>
+
+<div class="toast toast-success" id="toast" role="status" aria-live="polite">
+  <div class="toast-content">
+    <div class="toast-title" id="toastTitle"></div>
+    <div class="toast-body" id="toastBody" style="display:none"></div>
+  </div>
+  <button class="toast-close" type="button" aria-label="Dismiss" onclick="hideToast()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+</div>
+
+<script src="sdi-explorer-assets/live-icons.js"></script>
+<script src="securiti-icons-data.js?v=20261028b"></script>
+<script>
+/* Unified Icons "sanitizer" (Outlined) — exported verbatim from the design system file (component set 2e8f3f94…), 24px, single path */
+window.__SECURITI_ICONS = window.__SECURITI_ICONS || {};
+/* DS "check" (State=Outlined), read from the DCP file node 9460:84132 — vector sits at 2.5, 4.56 inside the 20px frame */
+window.__SECURITI_ICONS['check-outlined'] = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path transform="translate(2.5 4.5556)" d="M 5.129664301717257 8.512254993209329 L 13.350902205601987 0.29101726472510525 C 13.544913710825282 0.09700575490836841 13.771260459209802 0 14.029942473883521 0 C 14.28862448855724 0 14.51497123694176 0.09700575490836841 14.708982742165055 0.29101726472510525 C 14.902994247388351 0.4850287745418421 14.999999999999998 0.715417442449217 14.999999999999998 0.9821832684472303 C 14.999999999999998 1.2489490944452435 14.902994247388351 1.4793377623526185 14.708982742165055 1.6733492721693553 L 5.808704569998792 10.59787872373925 C 5.614693064775496 10.791890233555986 5.388346316390976 10.888895988464355 5.129664301717257 10.888895988464355 C 4.870982287043539 10.888895988464355 4.644635538659019 10.791890233555986 4.450624033435723 10.59787872373925 L 0.279376578622973 6.4266312626794075 C 0.08536507339967742 6.232619752862671 -0.007598784161164883 6.002231084955296 0.0004850287973888249 5.735465258957283 C 0.008568841755942533 5.468699432959269 0.10961651155258939 5.238310765051895 0.30362801677588497 5.044299255235158 C 0.49763952199918055 4.850287745418421 0.728028184451844 4.753281990510053 0.9947940041338754 4.753281990510053 C 1.2615598238159067 4.753281990510053 1.4919483937566755 4.850287745418421 1.6859598989799711 5.044299255235158 L 5.129664301717257 8.512254993209329 Z"/></svg>';
+window.__SECURITI_ICONS['sanitizer-outlined'] = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5999 8.4C15.2249 8.4 14.9062 8.26875 14.6437 8.00625C14.3812 7.74375 14.2499 7.425 14.2499 7.05C14.2499 6.765 14.3737 6.435 14.6212 6.06C14.8687 5.685 15.0824 5.3925 15.2624 5.1825C15.3524 5.0775 15.4649 5.025 15.5999 5.025C15.7349 5.025 15.8474 5.0775 15.9374 5.1825C16.1174 5.3925 16.3312 5.685 16.5787 6.06C16.8262 6.435 16.9499 6.765 16.9499 7.05C16.9499 7.425 16.8187 7.74375 16.5562 8.00625C16.2937 8.26875 15.9749 8.4 15.5999 8.4ZM17.8499 14.7C17.2199 14.7 16.6874 14.4825 16.2524 14.0475C15.8174 13.6125 15.5999 13.08 15.5999 12.45C15.5999 11.925 15.8062 11.3213 16.2187 10.6388C16.6312 9.95625 17.0024 9.42 17.3324 9.03C17.4674 8.865 17.6399 8.7825 17.8499 8.7825C18.0599 8.7825 18.2324 8.865 18.3674 9.03C18.6974 9.42 19.0687 9.95625 19.4812 10.6388C19.8937 11.3213 20.0999 11.925 20.0999 12.45C20.0999 13.08 19.8824 13.6125 19.4474 14.0475C19.0124 14.4825 18.4799 14.7 17.8499 14.7ZM8.3999 15.6V16.5C8.3999 16.755 8.48615 16.9688 8.65865 17.1413C8.83115 17.3138 9.0449 17.4 9.2999 17.4C9.5549 17.4 9.76865 17.3138 9.94115 17.1413C10.1137 16.9688 10.1999 16.755 10.1999 16.5V15.6H11.0999C11.3549 15.6 11.5687 15.5138 11.7412 15.3413C11.9137 15.1688 11.9999 14.955 11.9999 14.7C11.9999 14.445 11.9137 14.2313 11.7412 14.0588C11.5687 13.8863 11.3549 13.8 11.0999 13.8H10.1999V12.9C10.1999 12.645 10.1137 12.4313 9.94115 12.2588C9.76865 12.0863 9.5549 12 9.2999 12C9.0449 12 8.83115 12.0863 8.65865 12.2588C8.48615 12.4313 8.3999 12.645 8.3999 12.9V13.8H7.4999C7.2449 13.8 7.03115 13.8863 6.85865 14.0588C6.68615 14.2313 6.5999 14.445 6.5999 14.7C6.5999 14.955 6.68615 15.1688 6.85865 15.3413C7.03115 15.5138 7.2449 15.6 7.4999 15.6H8.3999ZM5.6999 19.2H12.8999V12C12.8999 11.01 12.5474 10.1625 11.8424 9.4575C11.1374 8.7525 10.2899 8.4 9.2999 8.4C8.3099 8.4 7.4624 8.7525 6.7574 9.4575C6.0524 10.1625 5.6999 11.01 5.6999 12V19.2ZM5.6999 21C5.2049 21 4.78115 20.8238 4.42865 20.4713C4.07615 20.1188 3.8999 19.695 3.8999 19.2V12C3.8999 10.65 4.3274 9.48 5.1824 8.49C6.0374 7.5 7.1099 6.9 8.3999 6.69V4.8H7.4999C7.2449 4.8 7.03115 4.71375 6.85865 4.54125C6.68615 4.36875 6.5999 4.155 6.5999 3.9C6.5999 3.645 6.68615 3.43125 6.85865 3.25875C7.03115 3.08625 7.2449 3 7.4999 3H11.9999C12.3899 3 12.7687 3.04875 13.1362 3.14625C13.5037 3.24375 13.8524 3.3825 14.1824 3.5625C14.3474 3.6375 14.4749 3.75 14.5649 3.9C14.6549 4.05 14.6999 4.215 14.6999 4.395C14.6999 4.65 14.6099 4.86375 14.4299 5.03625C14.2499 5.20875 14.0324 5.295 13.7774 5.295C13.6574 5.295 13.4924 5.2425 13.2824 5.1375C13.0874 5.0325 12.8849 4.95 12.6749 4.89C12.4649 4.83 12.2399 4.8 11.9999 4.8H10.1999V6.69C11.4899 6.9 12.5624 7.5 13.4174 8.49C14.2724 9.48 14.6999 10.65 14.6999 12V19.2C14.6999 19.695 14.5237 20.1188 14.1712 20.4713C13.8187 20.8238 13.3949 21 12.8999 21H5.6999Z"/></svg>';
+/* ═══ Icons — DS store (securiti-icons-data.js) + glyphs exported verbatim from the live explorer (sdi-explorer-assets/live-icons.js) ═══ */
+function ic(name, size) {
+  var v = window.__SECURITI_ICONS && window.__SECURITI_ICONS[name];
+  if (!v) return '';
+  var s = typeof v === 'string' ? v : '<svg viewBox="' + v.viewBox + '" fill="currentColor">' + v.paths.map(function (d) { return '<path d="' + d + '"/>'; }).join('') + '</svg>';
+  s = s.replace(/ (width|height)="[^"]*"/g, '');
+  return s.replace('<svg', '<svg width="' + (size || 20) + '" height="' + (size || 20) + '"');
+}
+/* The ONE chip builder. o = { type: 'default'|'green'|'red'|'gold', mode: 'light'|'outline', pre, post, attrs } */
+function chip(text, o) {
+  o = o || {};
+  var c = 'chip' + (o.type && o.type !== 'default' ? ' ' + o.type : '') + (o.mode === 'outline' ? ' outline' : '');
+  return '<span class="' + c + '"' + (o.attrs || '') + '>' + (o.pre || '') + text + (o.post || '') + '</span>';
+}
+function deChips(arr) { return arr.slice(0, 2).map(function (x) { return chip(x); }).join('') + (arr.length > 2 ? chip('+' + (arr.length - 2)) : ''); }
+function paintIcons(root) {
+  (root || document).querySelectorAll('[data-ic]').forEach(function (el) {
+    if (el.firstChild) return;
+    el.innerHTML = ic(el.getAttribute('data-ic'), 20);
+  });
+}
+
+/* ═══ Data ═══ */
+var DS = [
+  ['database-1', 'Amazon Aurora for PostgreSQL', 'AWS Cloud', 'us-west-1', 'Cluster', 'structured', 0],
+  ['primary', 'Amazon Athena', 'AWS Cloud', 'us-east-2', 'Workgroup', 'structured', 0],
+  ['primary', 'Amazon Athena', 'AWS Cloud', 'us-east-1', 'Workgroup', 'structured', 0],
+  ['primary', 'Amazon Athena', 'AWS Cloud', 'ca-central-1', 'Workgroup', 'structured', 0],
+  ['appcomposer-c8087xxl4sf.pahs-us-west-1', 'Amazon S3', 'AWS Cloud', 'us-west-1', 'Bucket', 'unstructured', 3120],
+  ['appcomposer-c8087xxl4sf.pahs-us-west-2', 'Amazon S3', 'AWS Cloud', 'us-west-2', 'Bucket', 'unstructured', 2840],
+  ['cf-templates-x61ik8qe5djs-us-east-1', 'Amazon S3', 'AWS Cloud', 'us-east-1', 'Bucket', 'unstructured', 410],
+  ['mivanov-556771055031-admin', 'Amazon S3', 'AWS Cloud', 'us-east-1', 'Bucket', 'unstructured', 12980],
+  ['test-artifacts-mivanov-unique', 'Amazon S3', 'AWS Cloud', 'us-west-2', 'Bucket', 'unstructured', 1760],
+  ['vbsf-ar-1', 'Amazon S3', 'AWS Cloud', 'us-east-1', 'Bucket', 'unstructured', 8420],
+  ['vbsf-poc', 'Amazon S3', 'AWS Cloud', 'us-east-1', 'Bucket', 'unstructured', 5230],
+  ['veeam-9173532b-us-east-2', 'Amazon S3', 'AWS Cloud', 'us-east-2', 'Bucket', 'unstructured', 2210],
+  ['mlistopadov', 'SMB', 'SMB', '–', '–', 'unstructured', 41200],
+  ['Sharepoint Online OnPrem - Julias Microsoft Test', 'Office 365 SharePoint Online', 'Office 365 SharePoint Online', '–', '–', 'unstructured', 18640],
+  ['Microsoft Teams Onprem - Julias Microsoft Test', 'Microsoft Teams', 'Microsoft Teams', '–', '–', 'unstructured', 6320],
+  ['rnd. TEST - confluence', 'Confluence Data Center', 'Confluence Data Center', '–', '–', 'unstructured', 940],
+  ['Maxim Dev Gmail', 'Salesforce', 'Salesforce', '–', '–', 'structured', 0],
+  ['nkobzarev Dynamics', 'Microsoft Dynamics 365 CRM (Suite)', 'Microsoft Dynamics 365 CRM (Suite)', '–', '–', 'structured', 0],
+  ['ven07939', 'ServiceNow', 'ServiceNow', '–', '–', 'structured', 0],
+  ['700 repos ORG', 'GitHub', 'GitHub', '–', '–', 'unstructured', 22800]
+];
+var FILES = [
+  ['Rocky-9.3-x86_64-minimal.iso', 'Archive', '1.6GB', '/srv/nfs/iso/Linux/', 'NFS', []],
+  ['2024.09.01-x86_64.iso', 'Archive', '1.1GB', '/srv/nfs/iso/Linux/', 'NFS', []],
+  ['ubuntu-20.04.1-live-server-amd64.iso', 'Archive', '914.0MB', '/srv/nfs/iso/Linux/', 'NFS', []],
+  ['Q3-payroll-export.csv', 'CSV', '2.4MB', '/finance/payroll/2026/', 'SMB', ['SSN', 'Bank account', 'Full name']],
+  ['employee-onboarding-forms.pdf', 'PDF', '6.8MB', '/hr/onboarding/', 'SMB', ['SSN', 'Passport number', 'Date of birth']],
+  ['customer-support-transcripts.json', 'JSON', '1.3MB', '/support/exports/', 'Amazon S3', ['Email address', 'Phone number', 'Full name']],
+  ['claims-2026-09.xlsx', 'Excel', '3.9MB', '/insurance/claims/', 'SharePoint Online', ['Health record ID', 'SSN', 'Full name']],
+  ['vendor-contracts-scan.pdf', 'PDF', '18.2MB', '/legal/contracts/', 'SharePoint Online', ['Bank account', 'Tax ID']],
+  ['meeting-notes-2026-10-14.docx', 'Word', '412KB', '/teams/ops/notes/', 'Microsoft Teams', ['Email address']],
+  ['crm-contacts-dump.csv', 'CSV', '9.6MB', '/exports/crm/', 'Amazon S3', ['Email address', 'Phone number', 'Full name', 'Address']],
+  ['incident-recording-0412.wav', 'Audio', '31.0MB', '/security/incidents/', 'SMB', ['Phone number', 'Full name']],
+  ['id-card-scans-batch7.png', 'Image', '4.4MB', '/hr/id-scans/', 'SMB', ['Passport number', 'Full name']]
+];
+var TREE = [
+  ['Cloud', [['Hosting', 35, 'data-system-type-outlined']]],
+  ['Data', [['Block Storage', 285], ['Column', '348.4k'], ['Data System', 624, 'data-system-type-outlined'], ['Database', 4], ['Discovery Scan', 13], ['Discovery Scan Jobs', 380], ['Files', '785.5k', 'dc-files'], ['Site', 9], ['Table', '10k'], ['Topic', 0]]],
+  ['Control', [['Finding', '22.6k'], ['Policy', 63], ['Rule', '1.1k']]],
+  ['Management', [['Account', 7], ['Region', 68]]],
+  ['AI', [['AI Agent', 0], ['AI Assistant', 0], ['AI Model', 446]]],
+  ['Access Intelligence', [['User Principal', 0]]],
+  ['Data Classification', [['Content Profile', 54], ['Data Element', 210]]]
+];
+var ENTITY = {
+  'Data System': { icon: 'data-system-type-outlined', desc: 'A Veeam abstraction for systems that hold data. These could be relational databases that hold structured data, NoSQL databases, object stores such as AWS S3, unstructured data stores such as file systems or SaaS file sharing services and streaming data systems such as Kafka.', total: 624, search: 'Search by asset name' },
+  'Files': { icon: 'dc-files', desc: 'A file is a named storage container for storing unstructured or semi-structured information. Files can be organized under folders and sub-folders.', total: 785500, search: 'Search by file name' }
+};
+var DE_EX = {
+  'SSN': ['123-45-6789', '***-**-6789'], 'Bank account': ['GB29 NWBK 6016 1331 9268 19', '•••• •••• •••• 9268 19'],
+  'Full name': ['Maria Alvarez', '[NAME]'], 'Email address': ['maria.alvarez@contoso.com', '[EMAIL]'],
+  'Phone number': ['(415) 555-0132', '(•••) •••-0132'], 'Passport number': ['X1234567', '[PASSPORT]'],
+  'Date of birth': ['1984-03-17', '[DOB]'], 'Health record ID': ['MRN-0048213', '[HEALTH-ID]'],
+  'Tax ID': ['94-1234567', '[TAX-ID]'], 'Address': ['221B Baker Street', '[ADDRESS]']
+};
+var FN = ['Mask', 'Mask, keep last 4', 'Replace with label', 'Redact'];
+
+/* ═══ State ═══ */
+var S = {
+  entity: 'Data System', sort: null, filters: [], q: '', treeQ: '', treeHidden: false,
+  sel: { all: false, ids: {}, cond: null },        // all=true → "all matching", with exclusions in ids[k]===false
+  sanitized: {},                                   // key → job id (source for agents is the sanitized copy)
+  wiz: null
+};
+function rowKey(e, i) { return e + ':' + i; }
+function rows() {
+  var r = (S.entity === 'Files' ? FILES : DS).map(function (x, i) { return { k: rowKey(S.entity, i), d: x, i: i }; });
+  if (S.q) r = r.filter(function (o) { return o.d[0].toLowerCase().indexOf(S.q.toLowerCase()) > -1; });
+  if (S.filters.length && S.filters[0].keys) r = r.filter(function (o) { return S.filters[0].keys.indexOf(o.k) > -1; });
+  return r;
+}
+function eligible(o) {
+  if (S.entity === 'Files') return o.d[5].length > 0;
+  return o.d[5] === 'unstructured' && o.d[6] > 0;
+}
+var TOTAL = { 'Data System': 624, 'Files': 785500 };
+function reason(o) {
+  if (S.entity === 'Files') return 'No data elements found';
+  return o.d[5] === 'structured' ? 'Structured data system — sanitization applies to files' : 'No files discovered';
+}
+function isSel(o) { return S.sel.all ? S.sel.ids[o.k] !== false : !!S.sel.ids[o.k]; }
+function selRows() { return rows().filter(function (o) { return isSel(o) && eligible(o); }); }
+function selCount() {
+  if (S.sel.all) return TOTAL[S.entity] - excl();
+  return Object.keys(S.sel.ids).filter(function (k) { return S.sel.ids[k]; }).length;
+}
+function excl() { return Object.keys(S.sel.ids).filter(function (k) { return S.sel.ids[k] === false; }).length; }
+function clearSel() { S.sel = { all: false, ids: {}, cond: null }; }
+function fmt(n) { return n >= 1000 ? (n / 1000).toFixed(n >= 100000 ? 1 : 1).replace(/\.0$/, '') + 'k' : String(n); }
+
+/* ═══ Page chrome render (live-measured) ═══ */
+var BAR_PATH = {
+  filter: 'M28 44c-.3 0-.62-.08-.9-.22l-8-4c-.68-.34-1.1-1.04-1.1-1.78v-4.68c0-1.58-.62-3.12-1.76-4.34C8.12 20.24 4 13.86 4 10c0-5.56 15.3-6 20-6 4.7 0 20 .44 20 6 0 3.86-4.12 10.24-12.24 18.98C30.64 30.2 30 31.74 30 33.32V42c0 .7-.36 1.34-.94 1.7-.32.2-.68.3-1.06.3zm-6-7.24l4 2v-5.44c0-2.6 1-5.12 2.82-7.06 4.66-5 7.62-8.88 9.32-11.68-4.84 1.28-11.36 1.44-14.14 1.44-2.78 0-9.3-.16-14.14-1.44 1.7 2.8 4.66 6.68 9.32 11.68C21 28.22 22 30.72 22 33.32v3.44zM8.76 10c2.08.88 7.34 2 15.24 2s13.14-1.12 15.24-2C37.16 9.12 31.9 8 24 8S10.86 9.12 8.76 10z',
+  connect: 'M31.111 18.667v8.284l-6.222 6.24v3.253H23.11v-3.253l-6.222-6.258v-8.266H31.11zm0-10.667h-3.556v7.111h-7.11V8h-3.556v7.111h-.018c-1.938-.018-3.538 1.582-3.538 3.52v9.813l6.222 6.223V40h8.89v-5.333l6.222-6.24v-9.76c0-1.956-1.6-3.556-3.556-3.556V8z',
+  scan: 'M23.988 44a1.667 1.667 0 01-1.667-1.668V27.319a3.701 3.701 0 01-.888-5.893 3.7 3.7 0 015.89.888h15.01A1.667 1.667 0 0144 23.982c0 5.31-2.108 10.4-5.861 14.155A20.009 20.009 0 0123.989 44zm1.668-17.983v14.647A16.674 16.674 0 0040.665 25.65H26.023a.467.467 0 00-.367.367zm-6.454 7.123a1.669 1.669 0 00-.333-2.335 8.336 8.336 0 01-1.668-1.668 8.527 8.527 0 018.03-13.553 8.52 8.52 0 015.611 3.327 1.669 1.669 0 002.985-.765 1.669 1.669 0 00-.316-1.237 11.859 11.859 0 00-13.464-3.608 11.855 11.855 0 00-6.82 6.822 11.862 11.862 0 003.607 13.468c.289.216.64.333 1.001.333a1.666 1.666 0 001.367-.784zm.25 8.725a1.667 1.667 0 00-1.017-2.135A16.676 16.676 0 017.74 27.693a16.686 16.686 0 014.463-15.474 16.675 16.675 0 0127.511 6.192 1.67 1.67 0 103.152-1.101A20.019 20.019 0 0028.411 4.49 20.006 20.006 0 009.857 9.868a20.019 20.019 0 007.461 33.014c.184.054.375.082.567.084a1.667 1.667 0 001.567-1.101z',
+  graph: 'M21.838 44h-.24c-6.467-.78-12.153-4.697-15.236-10.453-.52-.979-.16-2.178.821-2.698a2.007 2.007 0 012.703.82 16.363 16.363 0 003.423 4.377l2.803-4.058c2.883-4.276 1.982-10.132-2.062-13.37l-3.684-2.938a15.844 15.844 0 00-2.362 8.354c0 1.1-.9 1.999-2.002 1.999-1.101 0-2.002-.9-2.002-1.999 0-4.557 1.562-8.873 4.264-12.331l.12-.18c.04-.06.08-.1.14-.16a19.992 19.992 0 018.61-6.135 1.998 1.998 0 012.562 1.199 1.993 1.993 0 01-1.202 2.558 15.722 15.722 0 00-5.645 3.537l3.683 2.938c2.683 2.139 4.365 5.097 4.985 8.254a44.05 44.05 0 002.463-5.316l3.804-10.033c-.741-.18-1.482-.3-2.242-.38a1.998 1.998 0 11.38-3.977c1.782.16 3.523.58 5.165 1.2h.06a19.575 19.575 0 014.785 2.618c.88.66 1.081 1.918.42 2.798a2.011 2.011 0 01-2.802.42 16.4 16.4 0 00-2.022-1.28l-3.804 10.033a41.155 41.155 0 01-1.782 4.077c2.082-.5 4.284-.54 6.466-.04l7.528 1.74c.06-.54.08-1.08.08-1.62 0-2.618-.64-5.216-1.882-7.514-.52-.98-.16-2.179.821-2.699a1.99 1.99 0 012.703.82A19.917 19.917 0 0144 23.954c0 1.46-.16 2.898-.48 4.297 0 .06 0 .12-.04.18 0 .06-.04.12-.06.18-1.542 6.315-6.127 11.652-12.353 14.01-1.021.4-2.182-.12-2.582-1.16-.4-1.038.12-2.178 1.16-2.577 4.385-1.66 7.768-5.177 9.35-9.454l-7.507-1.718c-4.045-.92-8.149.68-10.491 4.077l-4.444 6.455a15.998 15.998 0 005.465 1.699c1.101.14 1.882 1.14 1.742 2.218a1.99 1.99 0 01-1.982 1.76l.06.079z'
+};
+var MAT_CHECK = 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z';
+var MAT_MORE_H = 'M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z';
+function svg48(p, s) { return '<svg width="' + (s || 20) + '" height="' + (s || 20) + '" viewBox="0 0 48 48" fill="currentColor"><path d="' + p + '"/></svg>'; }
+function treeSvg(name, size) {
+  var t = TREE_ICON[name]; if (!t) return '';
+  return '<svg width="' + size + '" height="' + size + '" viewBox="' + t.vb + '" fill="' + t.fill + '">' + t.paths.map(function (p) { return '<path d="' + p[0] + '"' + (p[1] ? ' fill-rule="' + p[1] + '" clip-rule="' + p[1] + '"' : '') + '/>'; }).join('') + '</svg>';
+}
+var LOGO = { 'Amazon Aurora for PostgreSQL': 'logo-amazon_aurora_postgres.svg', 'Amazon Athena': 'logo-amazon_athena.svg', 'Amazon S3': 'logo-s3.svg', 'AWS Cloud': 'logo-aws.svg', 'Confluence Data Center': 'logo-confluence_dc_onprem.svg', 'Salesforce': 'logo-salesforce.svg', 'Microsoft Dynamics 365 CRM (Suite)': 'logo-microsoft_dynamics_365_crm_onprem.svg', 'ServiceNow': 'logo-servicenow_sql.svg', 'SMB': 'logo-smb.svg', 'Microsoft Teams': 'logo-microsoft_teams_onprem.svg', 'Office 365 SharePoint Online': 'logo-sharepoint_online.svg', 'GitHub': 'logo-github.svg', 'Google PubSub': 'logo-gcp-pubsub-subscription.svg', 'Google Cloud': 'logo-gcp.svg' };
+function logoCell(t) { var f = LOGO[t] || 'logo-default-asset-type.svg'; return '<span class="cell-flex"><span class="av"><img alt="" src="sdi-explorer-assets/logos/' + f + '"></span><span>' + t + '</span></span>'; }
+
+var TREE = [
+  ['Cloud', [['Hosting', 35]]],
+  ['Data', [['Block Storage', 285], ['Column', '348.4k'], ['Data System', 624], ['Database', 4], ['Discovery Scan', 13], ['Discovery Scan Jobs', 380], ['Files', '785.5k'], ['Site', 9], ['Table', '10k'], ['Topic', 0]]],
+  ['Control', [['Finding', '22.6k'], ['Policy', 63], ['Rule', '1.1k']]],
+  ['Management', [['Account', 7], ['Region', 68]]],
+  ['AI', [['AI Agent', 0], ['AI Assistant', 0], ['AI Model', 446]]],
+  ['Access Intelligence', [['User Principal', 0]]],
+  ['Data Classification', [['Content Profile', 54], ['Data Element', 210]]]
+];
+var ENTITY = {
+  'Data System': { desc: 'A Veeam abstraction for systems that hold data. These could be relational databases that hold structured data, NoSQL databases, object stores such as AWS S3, unstructured data stores such as file systems or SaaS file sharing services and streaming data systems such as Kafka.', search: 'Search by asset name' },
+  'Files': { desc: 'A file is a named storage container for storing unstructured or semi-structured information. Files can be organized under folders and sub-folders.', search: 'Search by file name' }
+};
+S.closed = {};
+function arn(o) {
+  var d = o.d; if (d[2] !== 'AWS Cloud') return '–';
+  if (d[1] === 'Amazon S3') return 'arn:aws:s3:::' + d[0];
+  if (d[1] === 'Amazon Athena') return 'arn:aws:athena:' + d[3] + ':556771055031:workgroup/' + d[0];
+  return 'arn:aws:rds:' + d[3] + ':556771055031:cluster:' + d[0];
+}
+function colDefs() {
+  if (S.entity === 'Files') return [['File Name', 320], ['File Format', 130], ['File Size', 120], ['Resource Path', 320], ['Data System Type', 160], ['Data Elements', 260], ['Sanitized copy', 220]];
+  return [['Asset Name', 320], ['Asset Type', 320], ['Hosting', 320], ['Region', 124], ['Resource Type', 130], ['Asset Exist', 106], ['Data system state', 150], ['Cloud Resource ID', 320], ['Sanitized copy', 220]];
+}
+function cellText(o, ci) {
+  var d = o.d;
+  if (S.entity === 'Files') return [d[0], d[1], d[2], d[3], d[4], d[5].join(', '), ''][ci] || '';
+  return [d[0], d[1], d[2], d[3], d[4], '', '', arn(o), ''][ci] || '';
+}
+rows = function () {
+  var r = (S.entity === 'Files' ? FILES : DS).map(function (x, i) { return { k: rowKey(S.entity, i), d: x, i: i }; });
+  if (S.q) r = r.filter(function (o) { return o.d[0].toLowerCase().indexOf(S.q.toLowerCase()) > -1; });
+  if (S.filters.length && S.filters[0].keys) r = r.filter(function (o) { return S.filters[0].keys.indexOf(o.k) > -1; });
+  if (S.sort) { var c = S.sort.i, dir = S.sort.dir; r = r.slice().sort(function (a, b) { return cellText(a, c).localeCompare(cellText(b, c)) * dir; }); }
+  return r;
+};
+function cell(o, ci) {
+  var d = o.d, job = S.sanitized[o.k];
+  var san = job ? chip('Sanitized', { type: 'green' }) : '<span class="muted">–</span>';
+  if (S.entity === 'Files') {
+    if (ci === 0) return '<span class="cell-flex"><span class="fico">' + ic('graph-entity-file', 20) + '</span><span>' + d[0] + '</span></span>';
+    if (ci === 4) return logoCell(d[4]);
+    if (ci === 5) return d[5].length ? '<span class="chips">' + deChips(d[5]) + '</span>' : '<span class="muted">–</span>';
+    if (ci === 6) return san;
+    return d[ci];
+  }
+  if (ci === 1 || ci === 2) return logoCell(d[ci]);
+  if (ci === 5) return '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block;vertical-align:middle"><path d="' + MAT_CHECK + '"/></svg>';
+  if (ci === 6) return '<span class="muted">–</span>';
+  if (ci === 7) return arn(o);
+  if (ci === 8) return san;
+  return d[ci] === '–' ? '<span class="muted">–</span>' : d[ci];
+}
+
+function renderRail() {
+  var el = document.getElementById('rail'), by = {}; RAIL_SVG.forEach(function (r, i) { by[i] = r; });
+  var s = function (r, sz) { return '<svg viewBox="0 0 48 48" width="' + sz + '" height="' + sz + '" fill="currentColor">' + r.inner + '</svg>'; };
+  var nav = [3, 4, 5, 6, 7, 8, 9].map(function (i) { return '<button class="nav-btn' + (i === 3 ? ' active' : '') + '" type="button" aria-label="' + RAIL_SVG[i].label + '">' + s(RAIL_SVG[i], 24) + '</button>'; }).join('');
+  el.innerHTML = '<div class="sidenav-logo">' + document.getElementById('brandLogo').innerHTML + '</div>' +
+    '<button class="rail-menu" type="button" aria-label="Main Menu">' + s(RAIL_SVG[1], 24) + '</button>' +
+    '<div class="rail-module" aria-label="Sensitive Data Intelligence">' + s(RAIL_SVG[2], 32) + '</div>' +
+    '<div class="rail-stack">' + nav + '<button class="nav-btn" type="button" aria-label="Expand Navigation Sidebar"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="' + MAT_MORE_H + '"/></svg></button></div>' +
+    '<div class="rail-bottom"><button class="rail-ai" type="button" aria-label="Veeam AI">' + ic('ai-sparkle', 24) + '</button><div class="nav-avatar">DL</div></div>';
+}
+function renderFilter() {
+  var el = document.getElementById('filterBar');
+  var h = '<div class="filter-in"><button class="filter-add" aria-label="Add filter">' + ic('add-outlined') + '</button>';
+  if (!S.filters.length) h += '<div class="filter-hint">Filters appear here. Start by adding one.</div>';
+  S.filters.forEach(function (f, i) { h += chip(f.label, { type: 'green', mode: 'outline', post: '<button data-rmf="' + i + '" aria-label="Remove filter">' + ic('close-outlined', 16) + '</button>' }); });
+  el.innerHTML = h + '</div>';
+  document.getElementById('saveView').disabled = !S.filters.length;
+  el.querySelectorAll('[data-rmf]').forEach(function (b) { b.onclick = function () { S.filters.splice(+b.dataset.rmf, 1); clearSel(); renderAll(); }; });
+}
+function renderKpis() {
+  var k = [['Data Systems', '624'], ['Scanned Table Count', '2.6k'], ['Scanned Table Size', '383.5MB'], ['Scanned Documents', '393.5k'], ['Scanned Volume', '3.6GB']];
+  document.getElementById('kpis').innerHTML = k.map(function (x) {
+    return '<div class="kpi"><div class="kpi-in"><div class="kpi-label"><span>' + x[0] + '</span><span class="chev">' + ic('expansion-chevron-down', 20) + '</span></div><div class="kpi-value">' + x[1] + '</div></div></div>';
+  }).join('');
+}
+function renderTree() {
+  var h = '<div class="tree-hd"><button class="btn btn-secondary graph-btn">' + svg48(BAR_PATH.graph) + 'Show Relationship Graph</button>' +
+    '<div class="sfield lead"><span>' + ic('search-outlined') + '</span><input id="treeQ" placeholder="Search" value="' + S.treeQ + '"></div></div><div class="tree-list">';
+  TREE.forEach(function (g) {
+    var items = g[1].filter(function (it) { return !S.treeQ || it[0].toLowerCase().indexOf(S.treeQ.toLowerCase()) > -1; });
+    if (!items.length) return;
+    h += '<div class="tree-group' + (S.closed[g[0]] ? ' closed' : '') + '"><button class="tree-group-h" data-grp="' + g[0] + '"><span class="gchev">' + ic('keyboard-arrow-down-outlined', 20) + '</span>' + g[0] + '</button><div class="tree-items">';
+    items.forEach(function (it) {
+      var on = it[0] === S.entity, t = TREE_ICON[it[0]];
+      h += '<button class="li' + (on ? ' is-active' : '') + '" data-ent="' + it[0] + '"><span class="tile" style="background:' + (t ? t.bg : 'transparent') + '">' + treeSvg(it[0], 16) + '</span><span class="name">' + it[0] + '</span><span class="count">' + it[1] + '</span></button>';
+    });
+    h += '</div></div>';
+  });
+  var c = document.getElementById('treeCard');
+  c.innerHTML = h + '</div>';
+  c.querySelectorAll('[data-grp]').forEach(function (b) { b.onclick = function () { S.closed[b.dataset.grp] = !S.closed[b.dataset.grp]; renderTree(); }; });
+  c.querySelectorAll('[data-ent]').forEach(function (b) {
+    b.onclick = function () { if (!ENTITY[b.dataset.ent]) return; S.entity = b.dataset.ent; S.q = ''; S.sort = null; clearSel(); S.filters = []; renderAll(); };
+  });
+  var q = document.getElementById('treeQ');
+  q.oninput = function () { S.treeQ = q.value; var p = q.selectionStart; renderTree(); var n = document.getElementById('treeQ'); n.focus(); n.setSelectionRange(p, p); };
+}
+function renderGrid() {
+  var E = ENTITY[S.entity], R = rows(), n = selCount(), cd = colDefs();
+  var allOn = R.length && R.every(function (o) { return isSel(o); }), some = R.some(function (o) { return isSel(o); });
+  var ti = TREE_ICON[S.entity];
+  var h = '<div class="entity-hd"><div class="entity-row"><div class="entity-tile" style="background:' + ti.bg + '">' + treeSvg(S.entity, 32) + '</div><div><div class="entity-title">' + S.entity + '</div><div class="entity-desc">' + E.desc + '</div></div></div>' +
+    '<div class="sfield trail"><input id="gridQ" placeholder="' + E.search + '" value="' + S.q + '"><span>' + ic('search-outlined') + '</span></div></div><hr class="line">' +
+    '<div class="mini-kpis">' + (S.entity === 'Files' ? [['File Count', '785.5k']] : [['Data Systems', '624'], ['Scanned Table Count', '2.6k'], ['Scanned Table Size', '383.5MB'], ['Scanned Documents', '393.5k']]).map(function (x) {
+      return '<div class="mkpi"><div class="mkpi-top"><span class="l">' + x[0] + '</span>' + (S.entity === 'Files' ? '' : '<span class="chev">' + ic('expansion-chevron-down', 20) + '</span>') + '</div><div class="mkpi-v">' + x[1] + '</div></div>';
+    }).join('') + '</div><hr class="line">';
+  var ready = n > 0, elig = selRows().length;
+  var sanDis = !ready || (!S.sel.all && elig === 0);
+  var sanTip = !ready ? 'Select items to sanitize' : (elig === 0 ? 'None of the selected items can be sanitized' : '');
+
+  h += '<div class="bulk">' +
+    (ready ? chip((n === 1 ? '1 item selected' : n.toLocaleString() + ' items selected'), { type: 'green', mode: 'outline', post: '<button id="clrSel" aria-label="Clear selection">' + ic('close-outlined', 16) + '</button>' }) : chip('None Selected')) +
+    '<button class="btn btn-flat" id="applyF"' + (ready ? '' : ' disabled') + '>' + svg48(BAR_PATH.filter) + 'Apply Filter</button>' +
+    '<button class="btn btn-flat" disabled>' + svg48(BAR_PATH.connect) + 'Connect Data System</button>' +
+    '<button class="btn btn-flat" disabled>' + svg48(BAR_PATH.scan) + 'Add Discovery Scan</button>' +
+    '<span class="tip"' + (sanTip ? ' data-tooltip="' + sanTip + '"' : '') + '><button class="btn btn-flat" id="sanBtn"' + (sanDis ? ' disabled' : '') + '>' + ic('sanitizer-outlined') + 'Sanitize</button></span></div>';
+  var tw = 48 + 76 + 72 + cd.reduce(function (a, c) { return a + c[1]; }, 0);
+  h += '<div class="table-wrap"><table style="width:' + tw + 'px"><colgroup><col style="width:48px"><col style="width:76px">' + cd.map(function (c) { return '<col style="width:' + c[1] + 'px">'; }).join('') + '<col style="width:72px"></colgroup><thead><tr><th class="gut"></th><th class="cb-col"><div class="cb-head"><input type="checkbox" class="cb" id="hdrCb" aria-label="Select rows"' + (allOn ? ' checked' : '') + '><button class="cb-caret" id="hdrCaret" type="button" aria-label="Selection options" aria-haspopup="menu" data-tooltip="More">' + ic('keyboard-arrow-down-outlined', 20) + '</button></div></th>';
+  cd.forEach(function (c, i) { h += '<th class="sortable' + (S.sort && S.sort.i === i ? ' sorted' : '') + '" data-sort="' + i + '" style="min-width:' + c[1] + 'px">' + c[0] + '<span class="sort">' + ic('arrow-upward-outlined', 16) + '</span></th>'; });
+  h += '<th class="act"></th></tr></thead><tbody>';
+  R.forEach(function (o) {
+    var el = eligible(o), sel = isSel(o);
+    h += '<tr class="' + (sel ? 'is-selected ' : '') + (el ? '' : 'is-ineligible') + '"><td class="gut"><div class="gut-btns"><button class="row-btn" data-inc="' + o.k + '" title="Include Filter Value" aria-label="Include in filter">' + ic('add-outlined', 16) + '</button></div></td><td class="cb-col"><span class="cbw"><input type="checkbox" class="cb" data-k="' + o.k + '" aria-label="Select row"' + (sel ? ' checked' : '') + '></span></td>';
+    cd.forEach(function (c, ci) { h += '<td>' + cell(o, ci) + '</td>'; });
+    h += '<td class="act"><div class="act-in"><button class="row-btn" title="' + ROW_ACT[0].title + '" aria-label="' + ROW_ACT[0].title + '">' + svg48(pathOf(ROW_ACT[0].inner)) + '</button><button class="row-btn" title="' + ROW_ACT[1].title + '" aria-label="' + ROW_ACT[1].title + '">' + svg48(pathOf(ROW_ACT[1].inner)) + '</button></div></td></tr>';
+  });
+  h += '</tbody></table></div><div class="pager"><span>Showing</span><select><option>50</option></select><span>per page</span><span>1 - ' + R.length + ' of ' + (S.entity === 'Files' ? '785,500' : '624') + '</span></div>';
+  var c = document.getElementById('gridCard');
+  var st = c.querySelector('.table-wrap'), sl = st ? st.scrollLeft : 0, sy = st ? st.scrollTop : 0;
+  c.innerHTML = h; paintIcons(c);
+  var tw = c.querySelector('.table-wrap'); tw.scrollLeft = sl; tw.scrollTop = sy;
+  var hc = document.getElementById('hdrCb'); hc.indeterminate = some && !allOn;
+  hc.onchange = function () { if (hc.checked) R.forEach(function (o) { S.sel.ids[o.k] = true; }); else if (S.sel.all) clearSel(); else R.forEach(function (o) { delete S.sel.ids[o.k]; }); renderGrid(); };
+  document.getElementById('hdrCaret').onclick = function (e) { e.stopPropagation(); openSelMenu(this); };
+  if (document.getElementById('dxBulkMenu')) closeSelMenu();
+  c.querySelectorAll('input.cb[data-k]').forEach(function (b) { b.onchange = function () { S.sel.ids[b.dataset.k] = S.sel.all ? (b.checked ? true : false) : b.checked; renderGrid(); }; });
+  c.querySelectorAll('[data-sort]').forEach(function (b) { b.onclick = function () { var i = +b.dataset.sort; S.sort = S.sort && S.sort.i === i ? { i: i, dir: -S.sort.dir } : { i: i, dir: 1 }; renderGrid(); }; });
+  c.querySelectorAll('[data-inc]').forEach(function (b) { b.onclick = function () { var o = rows().filter(function (x) { return x.k === b.dataset.inc; })[0]; S.filters = [{ label: S.entity + ' with properties Name is ' + o.d[0], keys: [o.k] }]; clearSel(); renderAll(); }; });
+  var qi = document.getElementById('gridQ'); qi.oninput = function () { var v = qi.value; S.q = v; renderGrid(); var q = document.getElementById('gridQ'); q.focus(); q.setSelectionRange(v.length, v.length); };
+  var cl = document.getElementById('clrSel'); if (cl) cl.onclick = function () { clearSel(); renderGrid(); };
+  document.getElementById('applyF').onclick = function () {
+    var keys = selRows().map(function (o) { return o.k; }); if (S.sel.all) keys = rows().map(function (o) { return o.k; });
+    S.filters = [{ label: S.entity + ' with properties Entity is one of ' + (S.sel.all ? 'all matching' : n + ' selected'), keys: keys }]; clearSel(); renderAll();
+  };
+  document.getElementById('sanBtn').onclick = openWizard;
+}
+function pathOf(inner) { var m = inner.match(/ d="([^"]+)"/); return m ? m[1] : ''; }
+
+/* header-checkbox menu — same shape as protected-data's D365X bulk menu: it says what it picks (data systems / files), then "across all pages", "on this page", a divider, "Select none". Every row ticks; the wizard's first step says which selected items it will leave out. */
+var _selAnchor = null;
+function closeSelMenu() { var m = document.getElementById('dxBulkMenu'); if (m) m.remove(); _selAnchor = null; document.removeEventListener('click', _selOutside, true); document.removeEventListener('keydown', _selEsc, true); window.removeEventListener('scroll', _selPlace, true); window.removeEventListener('resize', _selPlace); }
+function _selOutside(e) { if (!e.target.closest('#dxBulkMenu') && !e.target.closest('.cb-caret')) closeSelMenu(); }
+function _selEsc(e) { if (e.key === 'Escape') closeSelMenu(); }
+function _selPlace() {
+  var m = document.getElementById('dxBulkMenu'); if (!m || !_selAnchor) return;
+  if (!document.body.contains(_selAnchor)) { closeSelMenu(); return; }
+  var r = _selAnchor.getBoundingClientRect();
+  if (r.bottom < 0 || r.top > window.innerHeight) { closeSelMenu(); return; }
+  var left = Math.min(Math.max(8, r.left), window.innerWidth - m.offsetWidth - 8), below = r.bottom + 4;
+  var top = (below + m.offsetHeight > window.innerHeight - 8 && r.top - 4 - m.offsetHeight > 8) ? r.top - 4 - m.offsetHeight : below;
+  m.style.left = left + 'px'; m.style.top = top + 'px';
+}
+function openSelMenu(btn) {
+  closeSelMenu();
+  var noun = S.entity === 'Files' ? 'files' : 'data systems', nSel = selCount(), pageRows = rows();
+  var item = function (w, label, dis) { return '<button type="button" class="dx-mi" role="menuitem" data-w="' + w + '"' + (dis ? ' disabled' : '') + '><span>' + label + '</span></button>'; };
+  var m = document.createElement('div'); m.id = 'dxBulkMenu'; m.className = 'dx-bm'; m.setAttribute('role', 'menu');
+  m.innerHTML = item('all', 'Select all ' + noun + ' across all pages', false) + item('page', 'Select all ' + noun + ' on this page', !pageRows.length) + '<div class="dx-md"></div>' + item('none', 'Select none', !nSel);
+  document.body.appendChild(m); _selAnchor = btn; _selPlace();
+  m.querySelectorAll('[data-w]').forEach(function (b) {
+    b.onclick = function () {
+      var w = b.dataset.w; closeSelMenu();
+      if (w === 'all') S.sel = { all: true, ids: {}, cond: null };
+      if (w === 'page') pageRows.forEach(function (o) { S.sel.ids[o.k] = true; });
+      if (w === 'none') clearSel();
+      renderGrid();
+    };
+  });
+  window.addEventListener('scroll', _selPlace, true); window.addEventListener('resize', _selPlace);
+  setTimeout(function () { document.addEventListener('click', _selOutside, true); document.addEventListener('keydown', _selEsc, true); }, 0);
+}
+/* data-tooltip: one fixed tooltip for every [data-tooltip] (never title=) */
+(function () {
+  var t = document.getElementById('ttip');
+  document.addEventListener('mouseover', function (e) {
+    var el = e.target.closest && e.target.closest('[data-tooltip]');
+    if (!el) { t.style.display = 'none'; return; }
+    t.textContent = el.getAttribute('data-tooltip'); t.style.display = 'block';
+    var r = el.getBoundingClientRect();
+    t.style.left = Math.max(8, Math.min(r.left, window.innerWidth - t.offsetWidth - 8)) + 'px'; t.style.top = (r.bottom + 4) + 'px';
+  });
+  document.addEventListener('mouseout', function (e) { if (!(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('[data-tooltip]'))) t.style.display = 'none'; });
+})();
+
+function renderAll() { renderFilter(); renderKpis(); renderTree(); renderGrid(); paintIcons(); }
+document.getElementById('treeToggle').onclick = function () { document.getElementById('explorer').classList.toggle('collapsed'); };
+/* ═══ What sanitize means — hovercard on the action, and a "What you'll get" panel beside the steps ═══ */
+var OUTCOME = 'Creates a masked text copy of each file for agents to use. Originals are never changed.';
+function patTile(icn) { return '<span class="sum-ic">' + ic(icn, 20) + '</span>'; }
+/* A — hovercard */
+var _hcT = null;
+function hcEl() {
+  var h = document.getElementById('hc'); if (h) return h;
+  h = document.createElement('div'); h.id = 'hc'; h.className = 'hc'; h.setAttribute('role', 'tooltip');
+  h.innerHTML = '<div class="hc-t">Sanitize</div><div class="hc-d">Creates a masked text copy of each selected file.</div><div class="hc-rows">' +
+    '<div class="hc-row">' + patTile('sanitizer-outlined') + '<div><b>Sensitive values are masked</b><span class="x">Names, IDs, account numbers and other detected data elements.</span></div></div>' +
+    '<div class="hc-row">' + patTile('graph-entity-file') + '<div><b>Agents read the copy</b><span class="x">The masked file replaces the original as the source for agents.</span></div></div>' +
+    '<div class="hc-row">' + patTile('status-complete-outlined') + '<div><b>Originals are never changed</b><span class="x">Nothing is edited, moved or deleted.</span></div></div></div>';
+  h.onmouseenter = function () { clearTimeout(_hcT); }; h.onmouseleave = hideHc;
+  document.body.appendChild(h); paintIcons(h); return h;
+}
+function showHc(btn) {
+  clearTimeout(_hcT);
+  _hcT = setTimeout(function () {
+    var h = hcEl(), r = btn.getBoundingClientRect();
+    h.style.display = 'block';
+    h.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 340 - 8)) + 'px'; h.style.top = (r.bottom + 8) + 'px';
+  }, 250);
+}
+function hideHc() { clearTimeout(_hcT); _hcT = setTimeout(function () { var h = document.getElementById('hc'); if (h) h.style.display = 'none'; }, 120); }
+document.addEventListener('mouseover', function (e) { var b = e.target.closest && e.target.closest('#sanBtn'); if (b && !b.disabled) showHc(b); });
+document.addEventListener('mouseout', function (e) { if (e.target.closest && e.target.closest('#sanBtn')) hideHc(); });
+document.addEventListener('focusin', function (e) { if (e.target.id === 'sanBtn') showHc(e.target); });
+document.addEventListener('focusout', function (e) { if (e.target.id === 'sanBtn') hideHc(); });
+
+/* ═══ Sanitize wizard (shell + step grammar ported from the restore wizard) ═══ */
+var STEPS = [['Select', 'dc-files'], ['Masking', 'compare-arrows-outlined'], ['Output', 'save-outlined'], ['Summary', 'status-complete-outlined']];
+var DESTS = [['Private Cloud Storage', 'Files stay in your environment. Needs one-time setup.'], ['Amazon S3', 'Write to a bucket you choose.'], ['Azure Blob Storage', 'Write to a container you choose.'], ['SMB share', 'Write to a network share.']];
+function wizCounts(W) {
+  /* MOCK. Only the Summary step shows a count: whether images and audio yield text depends on the OCR / speech-to-text choices made on the Masking step */
+  var skipped = Math.round(W.files * (0.08 + (W.ocr ? 0 : 0.06) + (W.stt ? 0 : 0.02))), partial = Math.round(W.files * 0.04);
+  return { skipped: skipped, partial: partial, ok: W.files - skipped - partial };
+}
+/* PLACEHOLDER defaults — the real element → function defaults come from the Gencore sanitizer; every detected element starts ON */
+function defaultFn(x) { return x === 'SSN' || x === 'Bank account' || x === 'Phone number' ? 'Mask, keep last 4' : 'Replace with label'; }
+function seedCond(x) { return { de: x, fn: defaultFn(x), on: true }; }
+function maskIsDefault(W) { return W.conds.length === W.deList.length && W.conds.every(function (c) { return c.on && c.fn === defaultFn(c.de); }); }
+function openWizard() {
+  var sr = selRows(), all = S.sel.all, isF = S.entity === 'Files';
+  var allDE = Object.keys(DE_EX);   // every element the engine can mask — all ON by default
+  var left = {};
+  if (!all) rows().forEach(function (o) { if (isSel(o) && !eligible(o)) { var r = reason(o); left[r] = (left[r] || 0) + 1; } });
+  var files = isF ? (all ? 785500 : sr.length) : (all ? 480000 : sr.reduce(function (a, o) { return a + o.d[6]; }, 0));
+  var els = {};
+  if (isF) sr.forEach(function (o) { o.d[5].forEach(function (x) { els[x] = 1; }); });
+  else ['SSN', 'Bank account', 'Full name', 'Email address', 'Phone number', 'Passport number', 'Tax ID'].forEach(function (x) { els[x] = 1; });
+  var deList = Object.keys(els);
+  var items = all
+    ? [{ k: '__all', name: 'All matching ' + (isF ? 'files' : 'data systems'), type: 'Saved filter', files: files, des: deList.slice(0, 3), all: true }]
+    : sr.map(function (o) { return { k: o.k, name: o.d[0], type: o.d[1], files: isF ? 1 : o.d[6], des: isF ? o.d[5] : deList.slice(0, 3) }; });
+  S.wiz = {
+    step: 0, reached: 0, files: files, all: all, isF: isF, items: items, left: left, selTotal: items.length + Object.keys(left).reduce(function (a, k) { return a + left[k]; }, 0),
+    deList: allDE, customize: false, conds: allDE.map(seedCond),
+    ocr: true, stt: false, destMode: 'source', dest: 'Private Cloud Storage', path: '/sanitized/{data-system}/',
+    testPhase: 'idle', test: null, job: null, sample: 0, advOpen: false, sel: 'Full name'
+  };
+  var n = items.length;
+  document.getElementById('wizTitle').textContent = all ? 'Sanitize all matching ' + (isF ? 'files' : 'data systems') : 'Sanitize ' + n + (isF ? ' file' : ' data system') + (n === 1 ? '' : 's');
+  document.getElementById('wizKick').innerHTML = ic('data-system-type-outlined', 16) + (isF ? 'Files' : 'Data Systems');
+  document.getElementById('scrim').classList.add('open');
+  renderWiz();
+}
+document.getElementById('wizClose').onclick = function () { document.getElementById('scrim').classList.remove('open'); };
+
+function renderWiz() {
+  var W = S.wiz, locked = !!W.job;
+  var hs = '<div class="wiz-steps-label">Sanitize steps</div>';
+  STEPS.forEach(function (s, i) {
+    var act = i === W.step, done = i < W.step || (locked && i < 3), click = !locked && i <= W.reached && !act;
+    hs += '<div class="step-item' + (act ? ' active' : '') + (click ? ' clickable' : '') + '" data-step="' + i + '" aria-current="' + (act ? 'step' : 'false') + '"><span class="step-tile">' + ic(s[1]) + '</span><span>' + s[0] + '</span>' + (done && !act ? '<span class="step-check">' + chip('', { type: 'green', pre: ic('check-outlined', 20) }) + '</span>' : '') + '</div>';
+  });
+  var st = document.getElementById('wizSteps'); st.innerHTML = hs;
+  st.querySelectorAll('.clickable').forEach(function (b) { b.onclick = function () { W.step = +b.dataset.step; renderWiz(); }; });
+  var main = document.getElementById('wizMain'), ft = document.getElementById('wizFt');
+  main.innerHTML = [stepSelect, stepMask, stepOutput, stepSummary][W.step](W);
+  var last = W.step === 3, canNext = true;
+  if (W.step < 3) { W.testPhase = 'idle'; W.test = null; }   // a test reflects the configuration it was run with
+  ft.innerHTML = locked ? '<button class="btn btn-primary btn-lg btn-block" id="wDone">Return to explorer</button>'
+    : (W.step > 0 ? '<button class="btn btn-secondary btn-lg" id="wBack">Back</button>' : '') +
+      (last ? '<button class="btn btn-secondary btn-lg btn-block" id="wTest"' + (W.testPhase === 'running' ? ' disabled' : '') + '>' + (W.testPhase === 'done' ? 'Run test again' : 'Run test') + '</button>' : '') +
+      '<button class="btn btn-primary btn-lg btn-block" id="wNext"' + (canNext ? '' : ' disabled') + '>' + (last ? ic('play-arrow-outlined') + 'Start job' : 'Continue') + '</button>';
+  var bk = document.getElementById('wBack'); if (bk) bk.onclick = function () { W.step--; renderWiz(); };
+  var wd = document.getElementById('wDone'); if (wd) { wd.onclick = function () { document.getElementById('wizClose').click(); clearSel(); renderAll(); }; wireStep(W); paintIcons(document.getElementById('scrim')); return; }
+  var wt = document.getElementById('wTest'); if (wt) wt.onclick = function () { runDryRun(W); };
+  document.getElementById('wNext').onclick = function () { if (last) { startJob(); return; } W.step++; W.reached = Math.max(W.reached, W.step); renderWiz(); document.querySelector('.wiz-scroll').scrollTop = 0; };
+  wireStep(W);
+  paintIcons(document.getElementById('scrim'));
+}
+
+function stepHead(t, d) { return '<div class="step-header"><div class="step-title">' + t + '</div><div class="step-description">' + d + '</div></div>'; }
+var TRASH = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';   /* verbatim from the restore wizard's cart rows */
+function wizGoto(p) { S.wiz.page = Math.max(1, p || 1); renderWiz(); }
+function wizSetSize(n) { S.wiz.size = n; S.wiz.page = 1; renderWiz(); }
+function pgBar(total, page, size, fnPage, fnSize, noun) {   // ported from protected-data _wsPgBar (compact wizard pager)
+  if (total <= 10) return '';   // 10 is the smallest page size: nothing to page, so the bar would only repeat the count
+  var pages = Math.max(1, Math.ceil(total / size)), c = Math.min(Math.max(1, page), pages);
+  var arrow = function (dir, dis) { return '<button class="pgds-arrow" type="button"' + (dis ? ' disabled' : '') + ' onclick="' + fnPage + '(' + (c + (dir === 'prev' ? -1 : 1)) + ')" aria-label="' + (dir === 'prev' ? 'Previous' : 'Next') + ' page"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="' + (dir === 'prev' ? '15 18 9 12 15 6' : '9 18 15 12 9 6') + '"/></svg></button>'; };
+  var nums = [], chips = '', i; for (i = 1; i <= pages; i++) if (pages <= 7 || i === 1 || i === pages || Math.abs(i - c) <= 1) nums.push(i);
+  nums.forEach(function (n, k) { if (k && n - nums[k - 1] > 1) chips += '<span class="pgds-gap">…</span>'; chips += '<button type="button" class="pgds-chip' + (n === c ? ' current' : '') + '" onclick="' + fnPage + '(' + n + ')">' + n.toLocaleString('en-US') + '</button>'; });
+  var gos = '<option value="">Go to Page</option>'; for (i = 1; i <= Math.min(pages, 500); i++) gos += '<option value="' + i + '">' + i + '</option>';
+  var sizes = [10, 25, 50, 100].map(function (n) { return '<option value="' + n + '"' + (n === size ? ' selected' : '') + '>' + n + '</option>'; }).join('');
+  return '<div class="wspg"><div class="pg-bar"><div class="pgds-left"><span class="pgds-txt">Showing</span><select class="pgds-select" aria-label="Rows per page" onchange="' + fnSize + '(+this.value)">' + sizes + '</select><span class="pgds-txt">per page</span></div>' +
+    '<div class="pgds-pages">' + arrow('prev', c <= 1) + '<span class="pgds-chips" style="min-width:' + Math.max(150, 36 * String(pages).length + 116) + 'px">' + chips + '</span>' + arrow('next', c >= pages) + '</div>' +
+    '<div class="pgds-right"><select class="pgds-select pgds-goto" aria-label="Go to page" onchange="if(this.value)' + fnPage + '(+this.value)">' + gos + '</select><span>' + Number(total).toLocaleString('en-US') + ' ' + (total === 1 ? noun : noun + 's') + '</span></div></div></div>';
+}
+/* Why each kind of selected item can't be sanitized */
+var LEFT_WHY = { 'Structured data system — sanitization applies to files': 'hold structured data, and sanitization only applies to files', 'No files discovered': 'have no files discovered', 'No data elements found': 'have no data elements found' };
+function leftAlertHtml(W, keys, n) {
+  var noun = W.isF ? 'files' : 'data systems', one = keys.length === 1;
+  var why = keys.map(function (k) { var w = LEFT_WHY[k] || k.toLowerCase(); return one ? (n === 1 ? 'It ' : (n === 2 ? 'Both ' : 'All ' + n + ' ')) + w + '.' : W.left[k] + ' ' + w + '.'; }).join(' ');
+  if (one && n === 1) why = why.replace(/^It have/, 'It has').replace(/^It hold/, 'It holds');
+  return '<div class="alert info"><span data-ic="info-outlined"></span><div class="alert-t"><strong>' + n + ' of the ' + W.selTotal + ' ' + noun + ' you selected ' + (n === 1 ? 'was' : 'were') + ' left out.</strong> ' + why + '</div></div>';
+}
+function stepSelect(W) {
+  var size = W.size || 10, pages = Math.max(1, Math.ceil(W.items.length / size)), page = Math.min(Math.max(1, W.page || 1), pages), off = (page - 1) * size;
+  W.page = page;
+  var rowsH = W.items.slice(off, off + size).map(function (it, k) {
+    var i = off + k;
+    var lead = it.all ? '' : W.isF ? '<span class="fico">' + ic('graph-entity-file', 20) + '</span>' : '<span class="av"><img alt="" src="sdi-explorer-assets/logos/' + (LOGO[it.type] || 'logo-default-asset-type.svg') + '"></span>';
+    var des = it.des.length ? '<span class="chips">' + deChips(it.des) + '</span>' : '';
+    return '<tr><td class="nm"><div class="nmwrap">' + lead + '<span class="nmtxt" data-tooltip="' + it.name + '">' + it.name + '</span></div></td><td data-tooltip="' + it.type + '">' + it.type + '</td><td class="num">' + it.files.toLocaleString() + '</td><td class="de">' + (des || '<span class="muted">–</span>') + '</td>' +
+      '<td>' + (W.all ? '' : '<button class="ws-remove" type="button" data-rm="' + i + '" data-tooltip="Remove from job" aria-label="Remove ' + it.name + ' from job">' + TRASH + '</button>') + '</td></tr>';
+  }).join('');
+  var leftKeys = Object.keys(W.left || {}), leftN = leftKeys.reduce(function (a, k) { return a + W.left[k]; }, 0);
+  var leftAlert = W.all ? '<div class="alert info"><span data-ic="info-outlined"></span><div class="alert-t">Structured data systems, and files with no data elements, are left out automatically. Sanitization only applies to files.</div></div>'
+    : leftN ? leftAlertHtml(W, leftKeys, leftN) : '';
+  return stepHead('Review sanitize items', OUTCOME + (W.all ? ' The scope is saved as a rule, not a list of rows.' : '')) + leftAlert +
+    '<div class="ws-controls"><div class="l">' + ic('dc-files', 16) + '<span><strong>' + W.files.toLocaleString() + '</strong> files in scope</span></div><div class="r"><span>Files with no extractable text are skipped when the job runs.</span></div></div>' +
+    '<div class="ws-card"><table class="ws-table"><colgroup><col><col style="width:120px"><col style="width:80px"><col style="width:210px"><col style="width:56px"></colgroup><thead><tr><th>Name</th><th>Type</th><th class="num">Files</th><th>Data elements found</th><th></th></tr></thead><tbody>' + rowsH + '</tbody></table>' + pgBar(W.items.length, page, size, 'wizGoto', 'wizSetSize', 'item') + '</div>';
+}
+var SC_RADIO_ON  = '<svg class="sc-on" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 16C13.1067 16 14.05 15.61 14.83 14.83C15.61 14.05 16 13.1067 16 12C16 10.8933 15.61 9.95 14.83 9.17C14.05 8.39 13.1067 8 12 8C10.8933 8 9.95 8.39 9.17 9.17C8.39 9.95 8 10.8933 8 12C8 13.1067 8.39 14.05 9.17 14.83C9.95 15.61 10.8933 16 12 16ZM12 20C10.8933 20 9.85333 19.79 8.88 19.37C7.90667 18.95 7.06 18.38 6.34 17.66C5.62 16.94 5.05 16.0933 4.63 15.12C4.21 14.1467 4 13.1067 4 12C4 10.8933 4.21 9.85333 4.63 8.88C5.05 7.90667 5.62 7.06 6.34 6.34C7.06 5.62 7.90667 5.05 8.88 4.63C9.85333 4.21 10.8933 4 12 4C13.1067 4 14.1467 4.21 15.12 4.63C16.0933 5.05 16.94 5.62 17.66 6.34C18.38 7.06 18.95 7.90667 19.37 8.88C19.79 9.85333 20 10.8933 20 12C20 13.1067 19.79 14.1467 19.37 15.12C18.95 16.0933 18.38 16.94 17.66 17.66C16.94 18.38 16.0933 18.95 15.12 19.37C14.1467 19.79 13.1067 20 12 20ZM12 18.4C13.7867 18.4 15.3 17.78 16.54 16.54C17.78 15.3 18.4 13.7867 18.4 12C18.4 10.2133 17.78 8.7 16.54 7.46C15.3 6.22 13.7867 5.6 12 5.6C10.2133 5.6 8.7 6.22 7.46 7.46C6.22 8.7 5.6 10.2133 5.6 12C5.6 13.7867 6.22 15.3 7.46 16.54C8.7 17.78 10.2133 18.4 12 18.4Z" fill="currentColor"/></svg>';
+var SC_RADIO_OFF = '<svg class="sc-off" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 20C10.8933 20 9.85333 19.79 8.88 19.37C7.90667 18.95 7.06 18.38 6.34 17.66C5.62 16.94 5.05 16.0933 4.63 15.12C4.21 14.1467 4 13.1067 4 12C4 10.8933 4.21 9.85333 4.63 8.88C5.05 7.90667 5.62 7.06 6.34 6.34C7.06 5.62 7.90667 5.05 8.88 4.63C9.85333 4.21 10.8933 4 12 4C13.1067 4 14.1467 4.21 15.12 4.63C16.0933 5.05 16.94 5.62 17.66 6.34C18.38 7.06 18.95 7.90667 19.37 8.88C19.79 9.85333 20 10.8933 20 12C20 13.1067 19.79 14.1467 19.37 15.12C18.95 16.0933 18.38 16.94 17.66 17.66C16.94 18.38 16.0933 18.95 15.12 19.37C14.1467 19.79 13.1067 20 12 20ZM12 18.4C13.7867 18.4 15.3 17.78 16.54 16.54C17.78 15.3 18.4 13.7867 18.4 12C18.4 10.2133 17.78 8.7 16.54 7.46C15.3 6.22 13.7867 5.6 12 5.6C10.2133 5.6 8.7 6.22 7.46 7.46C6.22 8.7 5.6 10.2133 5.6 12C5.6 13.7867 6.22 15.3 7.46 16.54C8.7 17.78 10.2133 18.4 12 18.4Z" fill="currentColor"/></svg>';
+function selCards(items, cur, attr) {
+  return '<div class="sel-grid" role="radiogroup">' + items.map(function (x) {
+    var on = x[0] === cur;
+    return '<div role="radio" tabindex="0" aria-checked="' + on + '" class="sel-card' + (on ? ' is-selected' : '') + '" ' + attr + '="' + x[0] + '"><span class="sc-header"><span>' + x[0] + '</span><span class="sc-radio">' + SC_RADIO_ON + SC_RADIO_OFF + '</span></span>' +
+      '<span class="sc-desc">' + (x[2] ? '<span class="sc-meta">' + x[2] + '</span>' : '') + '<span>' + x[1] + '</span>' + (x[3] ? '<span class="sc-cons">' + x[3] + '</span>' : '') + (x[4] ? '<span class="sc-detail" onclick="event.stopPropagation()">' + x[4] + '</span>' : '') + '</span></div>';
+  }).join('') + '</div>';
+}
+function maskWarnHtml(W) {
+  var off = W.conds.filter(function (c) { return !c.on; }).map(function (c) { return c.de; });
+  if (!off.length) return '';
+  var list = off.length <= 3 ? off.join(off.length === 3 ? ', ' : ' and ').replace(/, ([^,]*)$/, ', and $1') : off.slice(0, 3).join(', ') + ', and ' + (off.length - 3) + ' more';
+  return '<div class="alert warn"><span>' + ic('alert-warning-outlined', 24) + '</span><div class="alert-t">' + list + (off.length === 1 ? ' is' : ' are') + ' turned off and will not be masked in this job.</div></div>';
+}
+function maskExtraction(W) {
+  var open = !!W.advOpen;
+  return '<div class="adv-head"><button type="button" class="adv-chev" id="advToggle" aria-expanded="' + open + '" aria-label="Toggle advanced masking settings"' + (open ? '' : ' style="transform:rotate(-90deg)"') + '><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button><div><div class="adv-title">Advanced masking settings</div><div class="adv-sub">OCR ' + (W.ocr ? 'on' : 'off') + ', speech-to-text ' + (W.stt ? 'on' : 'off') + '</div></div></div>' +
+    (open ? '<div class="adv-body">' +
+      '<div class="crow"><input type="checkbox" class="sw" id="optOcr"' + (W.ocr ? ' checked' : '') + '><div class="t">Read text in images and scans (OCR)<div class="d">Up to 50 megapixels per image and 50 pages per file. Files over the limit finish as partial.</div></div></div>' +
+      '<div class="crow"><input type="checkbox" class="sw" id="optStt"' + (W.stt ? ' checked' : '') + '><div class="t">Transcribe audio (speech-to-text)<div class="d">.wav files only.</div></div></div></div>' : '');
+}
+var MROWS = [['Employee', 'Full name'], ['Email', 'Email address'], ['Phone', 'Phone number'], ['Home address', 'Address'], ['Date of birth', 'Date of birth'], ['SSN', 'SSN'], ['Tax ID', 'Tax ID'], ['Passport', 'Passport number'], ['Bank account', 'Bank account'], ['Health record', 'Health record ID']];
+function condOf(W, de) { return W.conds.filter(function (c) { return c.de === de; })[0]; }
+function maskEditor(W) {
+  var rows = MROWS.filter(function (r) { return condOf(W, r[1]); });
+  if (!condOf(W, W.sel)) W.sel = rows[0][1];
+  var sc = condOf(W, W.sel), si = W.conds.indexOf(sc), bv = (DE_EX[sc.de] || ['value'])[0];
+  var list = rows.map(function (r) {
+    var c = condOf(W, r[1]), v = c.on ? maskValue(c.de, c.fn, DE_EX[c.de][0]) : DE_EX[c.de][0];
+    return '<button type="button" class="me-row' + (c.de === W.sel ? ' is-sel' : '') + '" data-etok="' + c.de + '" aria-pressed="' + (c.de === W.sel) + '"><span class="k">' + r[0] + '</span><span class="vv"><span class="md-tok' + (c.on ? '' : ' off') + '">' + v + '</span><span class="fnl">' + (c.on ? c.fn : 'Not masked') + '</span></span><span class="chv">' + ic('keyboard-arrow-down-outlined', 20) + '</span></button>';
+  }).join('');
+  var opts = FN.map(function (f) { return '<div class="mc-opt' + (f === sc.fn ? ' is-sel' : '') + '" data-eopt="' + f + '"><span class="r">' + SC_RADIO_ON + SC_RADIO_OFF + '</span><span class="t">' + f + '</span><span class="v">' + maskValue(sc.de, f, bv) + '</span></div>'; }).join('');
+  return '<div class="me"><div class="ws-card md-doc">' + list + '</div>' +
+    '<div class="ws-card me-p' + (sc.on ? '' : ' mk-off') + '"><div class="hd"><b>' + sc.de + '</b><input type="checkbox" class="sw" data-con="' + si + '"' + (sc.on ? ' checked' : '') + ' style="pointer-events:auto" aria-label="Mask ' + sc.de + '"></div>' +
+    '<div class="sub">' + (sc.on ? 'Masked in the copy. Example value: ' + bv : 'Left as is in the copy. Turn on to mask it.') + '</div>' + opts + '</div></div>';
+}
+function stepMask(W) {
+  if (!W.customize) {
+    var on = W.conds.filter(function (c) { return c.on; }).length, tot = W.conds.length, all = on === tot;
+    var list = W.conds.map(function (c) { return '<div class="cb-tr' + (c.on ? '' : ' mk-off') + '"><span class="n">' + c.de + '</span><span class="v">' + (c.on ? maskValue(c.de, c.fn, DE_EX[c.de][0]) : 'Not masked') + '</span></div>'; }).join('');
+    return stepHead('Masking', 'Everything the engine detects in these files is masked. Each data element uses its default masking.') +
+      '<div class="ws-card"><div class="mask-sum"><div class="mask-sum-hd"><span class="ok">' + ic('status-complete-outlined', 24) + '</span><div class="t">' + (all ? 'All ' + tot + ' data elements will be masked' : on + ' of ' + tot + ' data elements will be masked') + '<div class="d">' + (all ? 'Nothing to set up. Customize only if an element needs different masking.' : 'Elements that are turned off stay as they are in the copy.') + '</div></div></div>' +
+      '<div class="cb-body"><div class="cb-two">' + list + '</div></div>' +
+      '<div class="mask-sum-ft"><button class="btn btn-secondary" id="custMask">Customize masking</button></div></div></div>' + maskExtraction(W);
+  }
+  return stepHead('Masking', 'Each data element is masked with one function. Select an element to see and change how it is masked.') +
+    '<div class="cb-edit-hd"><div class="t">Customize masking</div><div class="r"><button class="btn btn-secondary" id="useDef">Use defaults</button><button class="btn btn-secondary" id="custDone">Done</button></div></div>' +
+    '<div id="maskWarn">' + maskWarnHtml(W) + '</div>' + maskEditor(W) + maskExtraction(W);
+}
+
+function stepOutput(W) {
+  var other = W.destMode === 'other', pcs = W.dest === 'Private Cloud Storage';
+  return stepHead('Output', 'Every sanitized file is written as <b>redacted-&lt;filename&gt;</b>. The original is never changed.') +
+    '<div class="sect-label" style="margin-top:0">Destination</div>' +
+    selCards([['Same environment', 'Write each sanitized file next to its parent file, in the same data system.', 'Each file\'s own data system', 'Nothing moves. Output is written as <b>redacted-&lt;filename&gt;</b> beside the original.'], ['Different environment', 'Write all sanitized files to another environment you have set up.', null, null, other ? '<select class="input plain" data-dsel aria-label="Destination">' + DESTS.map(function (d) { return '<option' + (d[0] === W.dest ? ' selected' : '') + '>' + d[0] + '</option>'; }).join('') + '</select>' + (pcs ? '<span class="sc-note">Private Cloud Storage is not configured yet. <button class="lnk" type="button">Configure</button></span>' : '') : '']], other ? 'Different environment' : 'Same environment', 'data-dmode') +
+    (other ? '<div class="field sc-reveal" style="margin-top:12px"><label>Path</label><input class="input plain" id="path" value="' + W.path + '"></div>' : '') +
+    '<div class="sect-label">What to expect</div>' + expectCard();
+}
+
+/* What each kind of file gets: one default and one exception, each with an example of the name it produces */
+function expectCard() {
+  var arrow = '<span class="rl-a">' + ic('keyboard-arrow-down-outlined', 20) + '</span>';
+  var tile = function (n) { return '<span class="sum-ic">' + ic(n, 20) + '</span>'; };
+  return '<div class="ws-card rl">' +
+    '<div class="rl-r">' + tile('sanitizer-outlined') + '<div><b>Every file gets a masked text copy</b><span class="x">Text is extracted from the file, then masked. The original is not changed.</span><div class="rl-eg"><span>report.pdf</span>' + arrow + '<span>redacted-report.txt</span></div></div></div>' +
+    '<div class="rl-r">' + tile('graph-entity-file') + '<div><b>CSV, JSON and TXT copies keep their format</b><span class="x">Sensitive values are masked. Only for files up to 5MB. Larger CSV, JSON and TXT files get a text copy like everything else.</span><div class="rl-eg"><span>payroll.csv</span>' + arrow + '<span>redacted-payroll.csv</span></div></div></div></div>';
+}
+
+/* Test run — the restore wizard's parked dry-run shell (optional, footer "Run test", "Simulating…" → "Test complete", nothing written),
+   but the result is what the PRD asks for (Req 5 / AC-5, Req 4): a SUBSET of real files, sanitized with the settings chosen above, each
+   shown before/after with masked counts per data element and the output file it would produce. Sample files and values are mock. */
+/* ═══ Test run: a mixed sample, each file drawn the way its format looks, with a fixed excerpt rule per kind ═══
+   Original: a visual preview with every detected value highlighted. Output: the plain text file the job would write.
+   Excerpts: tables = header + first 10 rows with sensitive values; PDF/Word/PowerPoint = first page or slide with sensitive values;
+   email = the sensitive lines plus two either side; JSON/TXT = first three places with one line of context; image = whole.
+   Sample files and values are mock. */
+var PX_FIRST = ['Maria', 'Daniel', 'Priya', 'Amara', 'Lena', 'Jonas', 'Mei', 'Sam', 'Ayesha', 'Tomas'], PX_LAST = ['Alvarez', 'Okafor', 'Nair', 'Osei', 'Fischer', 'Berg', 'Tanaka', 'Rivera', 'Khan', 'Herrera'];
+function pxP(i) { var f = PX_FIRST[i % 10], l = PX_LAST[(i * 7 + 3) % 10]; return { name: f + ' ' + l, ssn: (100 + (i * 13) % 800) + '-' + (10 + (i * 7) % 90) + '-' + (1000 + (i * 37) % 9000), email: (f + '.' + l).toLowerCase() + '@contoso.com', phone: '(415) 555-' + String(1000 + (i * 29) % 9000), passport: 'X' + (1000000 + (i * 7919) % 9000000), dob: (1960 + i % 40) + '-' + String(1 + i % 12).padStart(2, '0') + '-' + String(1 + (i * 3) % 28).padStart(2, '0'), addr: (10 + (i * 11) % 90) + ' Harbor Road', tax: '94-' + (1000000 + (i * 313) % 9000000), mrn: 'MRN-' + (40000 + (i * 17) % 9000) }; }
+function pxT(de, v) { return { de: de, v: v }; }
+function pxTable(n, kind) {
+  var units = [];
+  for (var i = 0; i < n; i++) { var p = pxP(i), det = kind === 'people' && i % 4 !== 3; units.push({ cells: kind === 'notes' ? [['Quarter close checklist ' + (i + 1)], ['Owner: Finance'], ['Done']] : (det ? [[pxT('Full name', p.name)], [pxT('SSN', p.ssn)], [pxT('Email address', p.email)]] : [['Open position'], ['—'], ['—']]) }); }
+  return { kind: 'table', units: units, head: kind === 'notes' ? ['Item', 'Owner', 'Status'] : ['Employee', 'SSN', 'Email'] };
+}
+function pxPages(n, style, title) {
+  var units = [];
+  for (var pg = 0; pg < n; pg++) {
+    var q = pxP(pg), pool = [['Name', pxT('Full name', q.name)], ['Passport', pxT('Passport number', q.passport)], ['Date of birth', pxT('Date of birth', q.dob)], ['Phone', pxT('Phone number', q.phone)], ['Home', pxT('Address', q.addr)]];
+    var c = (pg % 6 === 5) ? 0 : (pg % 5) + 1, lines = pool.slice(0, c).map(function (x) { return { k: x[0], parts: [x[1]] }; });
+    if (!lines.length) lines.push({ k: '', parts: ['Section ' + (pg + 1) + '. No personal data on this page.'] });
+    units.push({ lines: lines, title: title });
+  }
+  return { kind: 'page', style: style || 'page', units: units };
+}
+function pxSlides(n) {
+  var units = [];
+  for (var sl = 0; sl < n; sl++) { var q = pxP(sl + 3), c = sl % 4, b = [['Lead: ', pxT('Full name', q.name)], ['Contact: ', pxT('Email address', q.email)], ['Phone: ', pxT('Phone number', q.phone)]].slice(0, c).map(function (x) { return { k: '', parts: x }; }); b.push({ k: '', parts: ['Agenda item ' + (sl + 1)] }); units.push({ lines: b, title: 'Team roster, Q' + (sl % 4 + 1) }); }
+  return { kind: 'slide', units: units };
+}
+function pxEmail() {
+  var q = pxP(4), L = [];
+  ['Hi team,', 'Thanks for joining the review on Thursday.', 'A few notes before the next cycle.', 'Please keep the draft agenda handy.'].forEach(function (t) { L.push({ k: '', parts: [t] }); });
+  L.push({ k: 'Employee', parts: [pxT('Full name', q.name)] }, { k: 'Personal email', parts: [pxT('Email address', q.email)] }, { k: 'Phone', parts: [pxT('Phone number', q.phone)] });
+  ['The updated policy goes live next month.', 'Let me know if anything is unclear.', 'Facilities will confirm the room by Monday.', 'Thanks again,', 'Dana'].forEach(function (t) { L.push({ k: '', parts: [t] }); });
+  return { kind: 'page', style: 'email', units: [{ lines: L, title: '' }] };
+}
+function pxLog(n) {
+  var units = [];
+  for (var i = 0; i < n; i++) { var ts = '2026-10-14T09:' + String(Math.floor(i / 60) % 60).padStart(2, '0') + ':' + String(i % 60).padStart(2, '0') + 'Z', q = pxP(i); units.push({ parts: i % 37 === 5 ? ['{"ts":"' + ts + '","level":"warn","msg":"profile updated","user":"', pxT('Full name', q.name), '","email":"', pxT('Email address', q.email), '"}'] : ['{"ts":"' + ts + '","level":"info","msg":"request completed","ms":' + (20 + (i * 17) % 180) + '}'] }); }
+  return { kind: 'log', units: units };
+}
+/* Each run draws four of these, one per kind of file; the next run draws the other four */
+var TEST_POOL = [
+  { name: 'Q3-payroll-export.csv', size: 2.4, fmt: 'CSV', build: function () { return pxTable(240, 'people'); } },
+  { name: 'employee-handbook.pdf', size: 3.9, fmt: 'PDF', build: function () { return pxPages(48, 'page', 'Employee handbook'); } },
+  { name: 'team-rosters.pptx', size: 4.4, fmt: 'PowerPoint', build: function () { return pxSlides(14); } },
+  { name: 'claims-2026-09.xlsx', size: 3.9, fmt: 'Excel', build: function () { return pxTable(220, 'people'); } },
+  { name: 'service-events.json', size: 0.2, fmt: 'JSON', build: function () { return pxLog(400); } },
+  { name: 'meeting-notes-2026-10-14.docx', size: 0.4, fmt: 'Word', build: function () { return pxPages(6, 'page', 'Meeting notes, 14 October'); } },
+  { name: 'records-update.eml', size: 0.02, fmt: 'Email', build: pxEmail },
+  { name: 'id-card-scans-batch7.png', size: 4.4, fmt: 'Image', build: function () { return pxPages(1, 'image', 'ID card'); } }
+];
+var TEXTUAL = { CSV: 1, JSON: 1, TXT: 1 };
+function esc2(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function maskValue(de, fn, val) {
+  var label = (DE_EX[de] && DE_EX[de][1].charAt(0) === '[') ? DE_EX[de][1] : '[' + de.toUpperCase() + ']';
+  if (fn === 'Redact') return '██████';
+  if (fn === 'Replace with label') return label;
+  var chars = val.replace(/[^A-Za-z0-9]/g, '').length, keep = fn === 'Mask, keep last 4' ? 4 : 0, seen = 0;
+  return val.replace(/[A-Za-z0-9]/g, function (ch) { seen++; return seen > chars - keep ? ch : '•'; });
+}
+var PX_ROWS = 10, PX_CAP = 3;
+function pxModel(smp) {
+  if (smp._m) return smp._m;
+  var m = smp._m = smp.build(); m.det = []; m.total = 0; m.counts = {};
+  m.units.forEach(function (u, i) {
+    u.toks = []; var add = function (ps) { ps.forEach(function (x) { if (typeof x !== 'string') u.toks.push(x); }); };
+    if (u.cells) u.cells.forEach(add); else if (u.lines) u.lines.forEach(function (l) { add(l.parts); }); else add(u.parts);
+    if (u.toks.length) m.det.push(i); u.toks.forEach(function (t) { m.counts[t.de] = (m.counts[t.de] || 0) + 1; m.total++; });
+  });
+  return m;
+}
+/* Which units the excerpt shows */
+function pxBase(m) {
+  if (m.kind === 'log') { var keep = {}; m.det.slice(0, PX_CAP).forEach(function (i) { [i - 1, i, i + 1].forEach(function (j) { if (j >= 0 && j < m.units.length) keep[j] = 1; }); }); return Object.keys(keep).map(Number).sort(function (a, b) { return a - b; }); }
+  if (m.kind === 'table') return (m.det.length ? m.det : m.units.map(function (_, i) { return i; })).slice(0, PX_ROWS);
+  return [m.det.length ? m.det[0] : 0];
+}
+function pxTok(W, mode, u, t, tok) {
+  var c = W.conds.filter(function (x) { return x.de === tok.de; })[0], on = !!(c && c.on), id = u + '.' + t;
+  if (mode === 'orig') return '<span class="tk hl' + (on ? '' : ' x') + '" data-tid="' + id + '" data-el="' + tok.de + '">' + esc2(tok.v) + '</span>';
+  return on ? '<span class="tk tk-a" data-tid="' + id + '" data-el="' + tok.de + '">' + esc2(maskValue(tok.de, c.fn, tok.v)) + '</span>' : '<span class="tk tk-x" data-tid="' + id + '" data-el="' + tok.de + '">' + esc2(tok.v) + '</span>';
+}
+function pxParts(W, mode, u, ps, ctr) { return ps.map(function (x) { return typeof x === 'string' ? esc2(x) : pxTok(W, mode, u, ctr.n++, x); }).join(''); }
+function pxEmailWin(un) { var idx = []; un.lines.forEach(function (l, i) { if (l.parts.some(function (x) { return typeof x !== 'string'; })) idx.push(i); }); return [Math.max(0, idx[0] - 2), Math.min(un.lines.length - 1, idx[idx.length - 1] + 2)]; }
+function pxOrig(W, smp) {
+  var m = pxModel(smp), b = pxBase(m), ctr;
+  if (m.kind === 'table') {
+    if (smp.fmt === 'CSV') return '<div class="pv"><div class="pv-code" style="white-space:pre;overflow-x:auto">' + pxCsv(W, m, 'orig') + '</div></div>';
+    var d = [false, false, false]; m.units.forEach(function (u) { u.cells.forEach(function (c, i) { if (c.some(function (x) { return typeof x !== 'string'; })) d[i] = true; }); });
+    return '<div class="pv"><table class="pv-sheet" style="table-layout:fixed"><colgroup><col style="width:34px"><col style="width:27%"><col style="width:27%"><col></colgroup><tbody><tr><th class="rn"></th><th>A</th><th>B</th><th>C</th></tr><tr><th class="rn">#</th>' + m.head.map(function (h, i) { return '<th>' + h + (d[i] ? '<span class="mark"></span>' : '') + '</th>'; }).join('') + '</tr>' +
+      b.map(function (u) { ctr = { n: 0 }; return '<tr><th class="rn">' + (u + 1) + '</th>' + m.units[u].cells.map(function (c) { return '<td>' + pxParts(W, 'orig', u, c, ctr) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>';
+  }
+  if (m.kind === 'log') return '<div class="pv"><div class="pv-code">' + pxLog2(W, m, b, 'orig') + '</div></div>';
+  var u = b[0], un = m.units[u]; ctr = { n: 0 };
+  if (m.kind === 'slide') return '<div class="pv"><div class="slide"><div class="st">' + esc2(un.title) + '</div><ul>' + un.lines.map(function (l) { return '<li>' + pxParts(W, 'orig', u, l.parts, ctr) + '</li>'; }).join('') + '</ul></div></div>';
+  if (m.style === 'email') { var w = pxEmailWin(un); return '<div class="pv"><div class="pv-page"><div class="pv-row"><span class="pv-k">From</span><span class="pv-v">hr@contoso.com</span></div><div class="pv-row"><span class="pv-k">Subject</span><span class="pv-v">Updated records</span></div><div class="pv-title"></div>' + (w[0] > 0 ? '<div class="gap">' + w[0] + ' earlier lines</div>' : '') + un.lines.map(function (l, li) { var h = '<div class="pv-row"><span class="pv-k">' + esc2(l.k) + '</span><span class="pv-v">' + pxParts(W, 'orig', u, l.parts, ctr) + '</span></div>'; return li >= w[0] && li <= w[1] ? h : ''; }).join('') + (w[1] < un.lines.length - 1 ? '<div class="gap">' + (un.lines.length - 1 - w[1]) + ' more lines</div>' : '') + '</div></div>'; }
+  return '<div class="pv"><div class="pv-page' + (m.style === 'image' ? ' pv-img' : '') + '"><div class="pv-title">' + esc2(un.title) + '</div>' + un.lines.map(function (l) { return '<div class="pv-row">' + (l.k ? '<span class="pv-k">' + esc2(l.k) + '</span>' : '') + '<span class="pv-v">' + pxParts(W, 'orig', u, l.parts, ctr) + '</span></div>'; }).join('') + '<div class="pv-bar"></div><div class="pv-bar"></div></div></div>';
+}
+function pxCsv(W, m, mode) {
+  var b = pxBase(m), L = [m.head.join(',')], prev = -1;
+  b.forEach(function (u) { if (prev >= 0 && u - prev > 1) L.push('\u0001' + (u - prev - 1)); var ctr = { n: 0 }; L.push(m.units[u].cells.map(function (c) { return pxParts(W, mode, u, c, ctr); }).join(',')); prev = u; });
+  return L.map(function (l) { return l.charAt(0) === '\u0001' ? '<div class="gap">' + Number(l.slice(1)).toLocaleString() + ' unchanged ' + (Number(l.slice(1)) === 1 ? 'row' : 'rows') + '</div>' : '<div>' + l + '</div>'; }).join('');
+}
+function pxLog2(W, m, b, mode) {
+  var h = '', prev = -2; b.forEach(function (u) { if (prev >= 0 && u - prev > 1) h += '<div class="gap">' + (u - prev - 1).toLocaleString() + ' unchanged lines</div>'; var ctr = { n: 0 }; h += '<div>' + pxParts(W, mode, u, m.units[u].parts, ctr) + '</div>'; prev = u; });
+  return h;
+}
+/* The output is plain text, whatever the original looked like */
+function pxOut(W, smp) {
+  var m = pxModel(smp), b = pxBase(m), L = [], ctr;
+  if (m.kind === 'table' && smp.fmt === 'CSV') return '<div class="out" style="white-space:pre;overflow-x:auto">' + pxCsv(W, m, 'out') + '</div>';
+  if (m.kind === 'log') return '<div class="out">' + pxLog2(W, m, b, 'out') + '</div>';
+  if (m.kind === 'table') { L.push(m.head.join('\t')); b.forEach(function (u) { ctr = { n: 0 }; L.push(m.units[u].cells.map(function (c) { return pxParts(W, 'out', u, c, ctr); }).join('\t')); }); return '<div class="out">' + L.join('\n') + '</div>'; }
+  var u = b[0], un = m.units[u], w = m.style === 'email' ? pxEmailWin(un) : [0, un.lines.length - 1]; ctr = { n: 0 };
+  if (m.style === 'email') { L.push('From: hr@contoso.com', 'Subject: Updated records', ''); if (w[0] > 0) L.push('… ' + w[0] + ' earlier lines'); } else L.push(esc2(un.title));
+  un.lines.forEach(function (l, li) { var t = (l.k ? esc2(l.k) + ': ' : '') + pxParts(W, 'out', u, l.parts, ctr); if (li >= w[0] && li <= w[1]) L.push(t); });
+  if (m.style === 'email' && w[1] < un.lines.length - 1) L.push('… ' + (un.lines.length - 1 - w[1]) + ' more lines');
+  return '<div class="out">' + L.join('\n') + '</div>';
+}
+function pxCaption(smp, m, nMasked) {
+  var b = pxBase(m), tot = m.units.length, tail = ' ' + nMasked.toLocaleString() + (nMasked === 1 ? ' value' : ' values') + ' masked in the whole file.';
+  if (m.kind === 'table') return (b.length >= m.units.length ? 'All ' + tot.toLocaleString() + ' rows shown.' : 'The first ' + b.length + ' of ' + m.det.length.toLocaleString() + ' rows with sensitive values.') + tail;
+  if (m.kind === 'log') return 'Around the first ' + Math.min(PX_CAP, m.det.length) + ' of ' + m.det.length + ' lines with sensitive values.' + tail;
+  if (m.kind === 'slide') return 'Slide ' + (b[0] + 1) + ', the first of ' + m.det.length + ' slides with sensitive values.' + tail;
+  if (m.units.length > 1) return 'Page ' + (b[0] + 1) + ', the first of ' + m.det.length + ' ' + (smp.fmt === 'PDF' ? 'pages' : 'pages') + ' with sensitive values.' + tail;
+  if (m.style === 'email') return 'The sensitive lines and two lines either side.' + tail;
+  return 'The whole file is shown.' + tail;
+}
+function sampleResult(W, smp) {
+  var m = pxModel(smp), counts = {}, left = {};
+  Object.keys(m.counts).forEach(function (de) { var c = W.conds.filter(function (x) { return x.de === de; })[0]; if (c && c.on) counts[de] = m.counts[de]; else left[de] = m.counts[de]; });
+  var keep = smp.size <= 5 && TEXTUAL[smp.fmt];
+  return { counts: counts, left: left, outName: 'redacted-' + smp.name + (keep ? '' : '.txt'), note: keep ? 'Original format kept (up to 5MB)' : (smp.size > 5 ? 'Text file (over 5MB)' : 'Text file (' + smp.fmt + ' is sanitized as text)') };
+}
+/* Bring the test card to the top of the scroll area so the run is visible from the first moment, and again when the result replaces it */
+function anchorTest() {
+  var sc = document.querySelector('.wiz-scroll'), hd = document.querySelector('.dr-hd');
+  if (!sc || !hd) return;
+  var card = hd.closest('.sum-card') || hd;
+  sc.scrollTo({ top: sc.scrollTop + card.getBoundingClientRect().top - sc.getBoundingClientRect().top - 24, behavior: 'smooth' });
+}
+function runDryRun(W) {
+  W.runN = W.runN || 0; W.set = TEST_POOL.slice((W.runN % 2) * 4, (W.runN % 2) * 4 + 4); W.runN++;
+  W.testPhase = 'running'; W.sample = 0; renderWiz(); anchorTest();
+  setTimeout(function () {
+    if (W.testPhase !== 'running' || W.step !== 3) return;   // cancelled by a step change
+    W.testPhase = 'done'; renderWiz(); anchorTest();
+  }, 850);
+}
+function dryRunPanel(W) {
+  if (W.testPhase === 'idle') return '';
+  var run = W.testPhase === 'running', n = (W.set || TEST_POOL).length;
+  var head = '<div class="dr-hd"><span class="dr-ic">' + (run ? '<span class="dr-spin"></span>' : ic('status-complete-outlined', 24)) + '</span><div><div class="t">' + (run ? 'Simulating job…' : 'Test complete') + '</div><div class="d">' + (run ? 'Sanitizing a sample of ' + n + ' files. Nothing is written.' : 'Sanitized a sample of ' + n + ' files with these settings. Nothing was written. Looks right? Start the job.') + '</div></div></div>';
+  if (run) return '<div class="sum-card">' + head + '</div>';
+  var smp = W.set[W.sample], r = sampleResult(W, smp);
+  var chips = Object.keys(r.counts).map(function (k) { return chip(r.counts[k] + ' ' + k + ' masked', { type: 'green', attrs: ' data-el="' + k + '"' }); }).concat(Object.keys(r.left).map(function (k) { return chip(r.left[k] + ' ' + k + ' not masked', { type: 'red', attrs: ' data-el="' + k + '"' }); })).join('');
+  var nMasked = Object.keys(r.counts).reduce(function (a, k) { return a + r.counts[k]; }, 0), nLeft = Object.keys(r.left).reduce(function (a, k) { return a + r.left[k]; }, 0);
+  return '<div class="sum-card">' + head +
+    '<div class="bt" role="tablist" style="grid-template-columns:repeat(' + n + ',1fr)">' + W.set.map(function (x, i) { return '<button type="button" role="tab" aria-selected="' + (i === W.sample) + '" class="bt-tab' + (i === W.sample ? ' is-on' : '') + '" data-sample="' + i + '" data-tooltip="' + x.name + '">' + ic('graph-entity-file', 16) + '<span>' + x.name + '</span></button>'; }).join('') + '</div>' +
+    '<div class="tr-meta"><span class="tr-out">' + r.outName + '</span><span class="tr-note">' + r.note + '</span></div>' +
+    '<div class="tr-counts">' + (chips || '<span class="tr-note">No sensitive values found in this file.</span>') + '</div>' +
+    '<div class="sb" style="padding-bottom:0"><div class="sb-col"><div class="sb-h"><b>Original</b><span>' + (nMasked + nLeft) + ' detected</span></div>' + pxOrig(W, smp) + '</div>' +
+    '<div class="sb-col"><div class="sb-h"><b>Output file</b><span>' + nMasked + ' masked' + (nLeft ? ', ' + nLeft + ' not' : '') + '</span></div>' + pxOut(W, smp) + '</div></div>' +
+    '<div class="cov" style="padding-top:12px">' + pxCaption(smp, pxModel(smp), nMasked) + '</div></div>';
+}
+function sumCard(rows) {
+  return '<div class="sum-card">' + rows.map(function (r) { return '<div class="sum-row"><span class="sum-ic">' + ic(r[2], 20) + '</span><div class="sum-text"><div class="sum-label">' + r[0] + '</div><div class="sum-val">' + r[1] + '</div></div></div>'; }).join('') + '</div>';
+}
+function kvCard(title, rows) {
+  return '<div class="ws-card" style="margin-bottom:16px"><div class="ws-card-hd">' + title + '</div>' + rows.map(function (r) { return '<div class="kv"><div class="k">' + r[0] + '</div><div class="v">' + r[1] + '</div></div>'; }).join('') + '</div>';
+}
+function stepSummary(W) {
+  var on = W.conds.filter(function (c) { return c.on; }), c = wizCounts(W);
+  var started = W.job ? '<div class="alert info"><span style="display:flex;width:24px;height:24px;align-items:center;justify-content:center"><span class="dr-spin"></span></span><div class="alert-t">Sanitize job started. Track it on the Activity page.</div><button class="btn btn-secondary btn-sm" id="viewJob" type="button">View job</button></div>' : '';
+  return stepHead('Summary', W.job ? 'The job runs in the background. You can close this and keep working.' : 'Check the job before it starts. When it finishes, agents read the masked copy instead of the original.') + started +
+    sumCard([['Items', W.all ? 'All matching ' + (W.isF ? 'files' : 'data systems') : W.items.length + (W.isF ? ' files' : ' data systems'), 'dc-files'], ['Files', W.files.toLocaleString() + ' in scope, about ' + c.skipped.toLocaleString() + ' expected to be skipped (no extractable text)', 'graph-entity-file']]) +
+    sumCard([['Data elements', maskIsDefault(W) ? 'All ' + W.deList.length + ' data elements, default masking' : on.map(function (x) { return x.de + ': ' + x.fn; }).join('<br>'), 'compare-arrows-outlined'], ['Extraction', 'OCR ' + (W.ocr ? 'on' : 'off') + ', speech-to-text ' + (W.stt ? 'on' : 'off'), 'search-outlined']]) +
+    sumCard(W.destMode === 'other' ? [['Destination', W.dest, 'save-outlined'], ['Path', W.path, 'save-outlined']] : [['Destination', 'Same environment as each parent file', 'save-outlined']]) +
+    dryRunPanel(W);
+}
+function wireStep(W) {
+  var m = document.getElementById('wizMain');
+  m.querySelectorAll('[data-rm]').forEach(function (b) {
+    b.onclick = function () {
+      W.items.splice(+b.dataset.rm, 1);
+      if (!W.items.length) { document.getElementById('wizClose').click(); return; }
+      W.files = W.items.reduce(function (a, o) { return a + o.files; }, 0);
+      document.getElementById('wizTitle').textContent = 'Sanitize ' + W.items.length + (W.isF ? ' file' : ' data system') + (W.items.length === 1 ? '' : 's');
+      renderWiz();
+    };
+  });
+  m.querySelectorAll('[data-con]').forEach(function (b) { b.onchange = function () { W.conds[+b.dataset.con].on = b.checked; renderWiz(); }; });
+  m.querySelectorAll('[data-etok]').forEach(function (b) { b.onclick = function () { W.sel = b.dataset.etok; renderWiz(); }; });
+  m.querySelectorAll('[data-eopt]').forEach(function (b) { b.onclick = function () { condOf(W, W.sel).fn = b.dataset.eopt; renderWiz(); }; });
+  var cd = document.getElementById('custDone'); if (cd) cd.onclick = function () { W.customize = false; renderWiz(); };
+  var at = document.getElementById('advToggle'); if (at) at.onclick = function () { W.advOpen = !W.advOpen; renderWiz(); };
+  var cm = document.getElementById('custMask'); if (cm) cm.onclick = function () { W.customize = true; renderWiz(); };
+  var ud = document.getElementById('useDef'); if (ud) ud.onclick = function () { W.conds = W.deList.map(seedCond); W.customize = false; renderWiz(); };
+  var set = function (id, key) { var e = document.getElementById(id); if (e) e.onchange = function () { W[key] = e.checked; if (id !== 'optOcr' && id !== 'optStt') renderWiz(); }; };
+  set('optOcr', 'ocr'); set('optStt', 'stt');
+  m.querySelectorAll('[data-dmode]').forEach(function (b) { b.onclick = function () { W.destMode = b.dataset.dmode === 'Different environment' ? 'other' : 'source'; renderWiz(); }; });
+  m.querySelectorAll('[data-dsel]').forEach(function (b) { b.onchange = function () { W.dest = b.value; renderWiz(); }; });
+  m.querySelectorAll('.sel-card').forEach(function (c) { c.onkeydown = function (e) { if (e.target === c && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); c.click(); } }; });
+  var p = document.getElementById('path'); if (p) p.oninput = function () { W.path = p.value; };
+  var hot = function (t) {
+    m.querySelectorAll('.is-hot').forEach(function (x) { x.classList.remove('is-hot'); });
+    if (!t) return;
+    var isTok = t.classList.contains('tk');
+    m.querySelectorAll(isTok ? '.tk[data-tid="' + t.dataset.tid + '"]' : '.tk[data-el="' + t.dataset.el + '"]').forEach(function (x) { x.classList.add('is-hot'); });
+    if (!isTok) t.classList.add('is-hot');
+  };
+  m.onmouseover = function (e) { hot(e.target.closest && e.target.closest('.tk, .tr-counts [data-el]')); };
+  m.onmouseout = function (e) { if (!(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('.tk, .tr-counts [data-el]'))) hot(null); };
+  var vj = document.getElementById('viewJob'); if (vj) vj.onclick = function () { window.location.href = 'activity.html'; };
+  m.querySelectorAll('[data-sample]').forEach(function (b) { b.onclick = function () { W.sample = +b.dataset.sample; renderWiz(); }; });
+}
+
+/* ═══ Job ═══ */
+function startJob() {
+  var W = S.wiz, id = 'SAN-' + (2041 + Math.floor(Math.random() * 40)), items = W.items.slice();
+  W.step = 3; W.job = { id: id };
+  // The wizard doesn't follow progress (that would hold the admin here): like a restore job, the work moves to Activity.
+  // Prototype: the job finishes in the background and the explorer rows pick up the sanitized-copy chip.
+  setTimeout(function () {
+    items.forEach(function (it) { if (it.all) { rows().forEach(function (o) { S.sanitized[o.k] = id; }); } else S.sanitized[it.k] = id; });
+    renderGrid();
+  }, 4000);
+  renderWiz();
+  document.querySelector('.wiz-scroll').scrollTop = 0;   // the started alert is at the top of the Summary
+  showToast('Sanitize job started', { body: 'It runs in the background.', action: { label: 'View job', onClick: function () { window.location.href = 'activity.html'; } } });
+}
+
+/* ═══ Toast (same API as the shared showToast: showToast('Title', { body, action: { label, onClick } })) ═══ */
+function showToast(msg, opts) {
+  var t = document.getElementById('toast'); if (!t) return;
+  opts = opts || {};
+  document.getElementById('toastTitle').textContent = msg || '';
+  var bodyEl = document.getElementById('toastBody');
+  if (opts.body || (opts.action && opts.action.label)) {
+    bodyEl.innerHTML = opts.body || '';
+    if (opts.action && opts.action.label) {
+      var lnk = document.createElement('a'); lnk.href = '#'; lnk.textContent = opts.action.label;
+      if (opts.body) { lnk.style.marginLeft = '8px'; lnk.style.fontWeight = '500'; }
+      lnk.onclick = function (ev) { ev.preventDefault(); if (opts.action.onClick) opts.action.onClick(); };
+      bodyEl.appendChild(lnk);
+    }
+    bodyEl.style.display = '';
+  } else { bodyEl.innerHTML = ''; bodyEl.style.display = 'none'; }
+  t.classList.add('show');
+  var dwell = (opts.body || opts.action) ? 6000 : 3000;
+  if (showToast._hideTimer) clearTimeout(showToast._hideTimer);
+  showToast._hideTimer = setTimeout(function () { t.classList.remove('show'); showToast._hideTimer = null; }, dwell);
+}
+function hideToast() {
+  var t = document.getElementById('toast'); if (t) t.classList.remove('show');
+  if (showToast._hideTimer) { clearTimeout(showToast._hideTimer); showToast._hideTimer = null; }
+}
+
+/* ═══ init ═══ */
+renderRail(); renderAll();
+</script>
+</body>
+</html>

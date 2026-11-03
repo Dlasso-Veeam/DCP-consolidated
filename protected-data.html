@@ -42638,7 +42638,7 @@ function wsRenderAll() {
   if (wsIsForest()) {   // forest recovery job — its own bodies (see "Active Directory forest recovery")
     body.innerHTML = ws.step === 1 ? wsRenderConfigure() : ws.step === 2 ? wsRenderForestDest() : ws.step === 3 ? wsRenderForestConfig() : wsRenderProgress();   // Summary is the standard step; the forest fills its slots
   }
-  else if (ws.step === 1) body.innerHTML = wsRenderConfigure();
+  else if (ws.step === 1) body.innerHTML = (_relB() && ws.relView) ? _relStepBody() : wsRenderConfigure();
   else if (ws.step === 2) body.innerHTML = wsRenderReview('dest');     // Destination
   else if (ws.step === 3) body.innerHTML = wsRenderReview('config');   // Configure
   else if (ws.step === 4) body.innerHTML = wsRenderProgress();         // Summary
@@ -42749,7 +42749,7 @@ var WS_STEP_ICONS = {
 // Step glyphs from the MOCK's List Items (verbatim store entries,
 // 2026-09-04) — was: WS_STEP_ICONS, the onboarding plug/checklist/play/info
 // family (parked above; the user caught the mismatch).
-var WS_STEP_STORE_ICONS = { 1: 'ws-step-select', 2: 'ws-step-options', 3: 'ws-step-configure', 4: 'ws-step-summary' };
+var WS_STEP_STORE_ICONS = { '1.5': 'child-roles-outlined', 1: 'ws-step-select', 2: 'ws-step-options', 3: 'ws-step-configure', 4: 'ws-step-summary' };
 function wsRenderSidebar() {
   // Step rows on the DS List Item grammar (Figma 9303:90373, 2026-09-04):
   // 28px entity tile + label; active = tinted row + inset bar + filled tile;
@@ -42758,12 +42758,12 @@ function wsRenderSidebar() {
   if (!el) return;
   var checkSvg = '<span class="ws-step-check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span>';
   var html = '<div class="ws-steps-label">Restore steps</div>';
-  html += WS_STEPS.map(function(s){
-    var act = s.id === ws.step;
-    var done = s.id < ws.step;
+  html += _relStepsList().map(function(s){
+    var act = _relSideAct(s);
+    var done = _relSideDone(s);
     var canClick = done && !(ws.step === 4 && ws.restoreInitiated);
     var cls = 'ws-step-item' + (act ? ' active' : '') + (canClick ? ' clickable' : '');
-    var onclick = canClick ? ' onclick="wsGotoStep(' + s.id + ')"' : '';
+    var onclick = canClick ? ' onclick="' + _relSideGo(s) + '"' : '';
     var _glyph = (typeof _dsStoreIconSvg === 'function' ? (_dsStoreIconSvg(WS_STEP_STORE_ICONS[s.id], 20) || '') : '');
     return '<div class="' + cls + '" role="listitem" aria-current="' + (act ? 'step' : 'false') + '"' + onclick + '>'
       + '<span class="ws-step-tile">' + _glyph + '</span>'
@@ -42787,6 +42787,7 @@ function wsGotoStep(n) {
   if (n === 2 && (typeof planIsExportOnly === 'function' && planIsExportOnly())) {
     n = ws.step >= 3 ? 1 : 3;
   }
+  if (_relB()) { if (n === 1 && ws.step > 1) ws.relView = !_relForceSelect; else if (n !== 1) ws.relView = false; }   // Back from Restore options lands on the Related records step
   ws.step = n;
   ws.reachedStep = Math.max(ws.reachedStep, n);
   ws.expandedItemId = null;
@@ -42855,8 +42856,10 @@ function wsRenderFooterV2() {
   if (ws.step === 1) {
     // Select → Destination. (Export is no longer a footer action here — per PM
     // review it's a Destination choice in step 2, not a peer action on the cart.)
-    inner.innerHTML = back
-      + '<button class="ws-cta ws-cta-primary" type="button" onclick="wsGotoStep(2)">Continue</button>';
+    var _b1 = (_relB() && ws.relView) ? '<button class="ws-cta ws-cta-secondary" type="button" style="flex:0 0 160px" onclick="wsRelViewGo(false)">Back</button>' : back;
+    var _go = (_relB() && !ws.relView) ? 'wsRelViewGo(true)' : 'wsGotoStep(2)';
+    inner.innerHTML = _b1
+      + (function(){ var k = _relContinue(); return '<button class="ws-cta ws-cta-primary" type="button" onclick="' + _go + '"' + (k.disabled ? ' disabled aria-disabled="true"' : '') + (k.tip ? ' data-tooltip="' + wsEscape(k.tip) + '"' : '') + '>' + k.label + '</button>'; })();
   } else if (ws.step === 2) {
     // Destination → Configure. Export all is an action on the selection that
     // D365 / ADO support; every other workload gets plain Back + Continue.
@@ -43179,13 +43182,19 @@ function wsRenderConfigure() {
   ws.basketPage = _page;
   var _start = (_page - 1) * _size;
   var _pageRows = _visRows.slice(_start, _start + _size).join('');
-  if (_total === 0) {
+  var _d3 = typeof wsIsD365Cart === 'function' && wsIsD365Cart(), _rtOn = _d3 && (REL_OPT === 'C' || ((REL_OPT === 'E' || REL_OPT === 'G' || REL_OPT === 'H') && _d365RelCfg().on)), _rc = _d3 ? _d365RelCfg() : null;
+  var _rtRel = _rtOn && _rc.on && _rc.tab !== 'sel';
+  if (_d3 && (REL_OPT === 'E' || REL_OPT === 'G' || REL_OPT === 'H')) html += _d365RelBlock();   // E: the card leads, so it never moves when the tabs appear under it
+  if (_rtOn) html += _relTabsBar2();
+  if (_rtRel) {
+    html += _d365RelBlock('pane');
+  } else if (_total === 0) {
     html += '<div class="ws-basket-empty">' + (q ? 'No items match "' + wsEscape(q) + '" — try clearing the search.' : 'No items in this restore.') + '</div>';
   } else {
     html += '<div class="ws-sel-cq"><div class="ws-table-wrap"><table class="ws-table">' + _colgroup + _theadHtml + '<tbody>' + _pageRows + '</tbody></table></div></div>';
     html += _wsPgBar(_total, _page, _size, 'wsBasketGotoPage', 'wsBasketSetSize', 'item');
   }
-  if (typeof wsIsD365Cart === 'function' && wsIsD365Cart() && typeof _d365RelBlock === 'function') html += _d365RelBlock();   // related records: a block under the cart, off until the user turns it on
+  if (_d3 && (REL_OPT === 'A' || REL_OPT === 'D' || REL_OPT === 'F')) html += _d365RelBlock();   // A: the app's own selection card, under the cart
   html += '</div>';
   return html;
 }
@@ -46758,26 +46767,27 @@ function wsRenderReview(part) {
 // What "related" means: records directly linked to a selected record. Children point to it (an account's contacts, cases), parents are what it points to.
 // Nothing is added unless the user turns it on; tables are chosen at the table level, any single record can be removed. State lives in ws.config.d365Rel.
 var D365REL_T = [
-  { k: 'pacc', n: 'Accounts (parent)', one: 'Account', rel: 'Parent account', par: true }, { k: 'bu', n: 'Business units (parent)', one: 'Business unit', rel: 'Parent business unit', par: true },
-  { k: 'con', n: 'Contacts', one: 'Contact' }, { k: 'opp', n: 'Opportunities', one: 'Opportunity' }, { k: 'lead', n: 'Leads', one: 'Lead' }, { k: 'cas', n: 'Cases', one: 'Case' },
+  { k: 'pacc', n: 'Accounts (parent)', one: 'Account', rel: 'Parent account', par: true }, { k: 'cacc', n: 'Accounts (child)', one: 'Account', rel: 'Child account' }, { k: 'pcon', n: 'Contacts (parent)', one: 'Contact', rel: 'Primary contact', par: true }, { k: 'bu', n: 'Business units (parent)', one: 'Business unit', rel: 'Parent business unit', par: true },
+  { k: 'con', n: 'Contacts (child)', one: 'Contact' }, { k: 'opp', n: 'Opportunities', one: 'Opportunity' }, { k: 'lead', n: 'Leads', one: 'Lead' }, { k: 'cas', n: 'Cases', one: 'Case' },
   { k: 'quo', n: 'Quotes', one: 'Quote' }, { k: 'ord', n: 'Sales orders', one: 'Sales order' }, { k: 'inv', n: 'Invoices', one: 'Invoice' }, { k: 'ctr', n: 'Contracts', one: 'Contract' },
   { k: 'prd', n: 'Products', one: 'Product' }, { k: 'cmp', n: 'Campaigns', one: 'Campaign' }, { k: 'tsk', n: 'Tasks', one: 'Task' }, { k: 'app', n: 'Appointments', one: 'Appointment' },
   { k: 'cal', n: 'Phone calls', one: 'Phone call' }, { k: 'eml', n: 'Emails', one: 'Email' }, { k: 'not', n: 'Notes', one: 'Note' }, { k: 'cmt', n: 'Competitors', one: 'Competitor' },
   { k: 'tm', n: 'Teams', one: 'Team' }, { k: 'que', n: 'Queue items', one: 'Queue item' }
 ];
-var D365REL_BASE = { pacc: 1, bu: 1, con: 1284, opp: 312, lead: 640, cas: 3906, quo: 218, ord: 305, inv: 842, ctr: 61, prd: 96, cmp: 44, tsk: 1730, app: 2117, cal: 980, eml: 6120, not: 9481, cmt: 12, tm: 5, que: 27, invl: 4200, ordl: 1800, quol: 900, res: 1200, att: 3500, attv: 5200, shp: 700, gpa: 1, gbu: 1, ggp: 1 };
+var D365REL_BASE = { cacc: 120, gcacc: 220, pcon: 1, pacc: 1, bu: 1, con: 1284, opp: 312, lead: 640, cas: 3906, quo: 218, ord: 305, inv: 842, ctr: 61, prd: 96, cmp: 44, tsk: 1730, app: 2117, cal: 980, eml: 6120, not: 9481, cmt: 12, tm: 5, que: 27, invl: 4200, ordl: 1800, quol: 900, res: 1200, att: 3500, attv: 5200, shp: 700, gpa: 1, gbu: 1, ggp: 1 };
 // LEVELS (proto): tables reached THROUGH another related table. lv = how many links from the selection; via = the table it is reached through.
 D365REL_T.push(
   { k: 'invl', n: 'Invoice products', one: 'Invoice product', lv: 2, via: 'inv' }, { k: 'ordl', n: 'Order products', one: 'Order product', lv: 2, via: 'ord' },
   { k: 'quol', n: 'Quote products', one: 'Quote product', lv: 2, via: 'quo' }, { k: 'res', n: 'Case resolutions', one: 'Case resolution', lv: 2, via: 'cas' },
   { k: 'att', n: 'Attachments', one: 'Attachment', lv: 2, via: 'eml' }, { k: 'attv', n: 'Attachment versions', one: 'Attachment version', lv: 3, via: 'att' },
   { k: 'shp', n: 'Shipments', one: 'Shipment', lv: 3, via: 'ordl' },
+  { k: 'gcacc', n: 'Accounts (grandchild)', one: 'Account', rel: 'Grandchild account', lv: 2, via: 'cacc' },
   { k: 'gpa', n: 'Accounts (grandparent)', one: 'Account', rel: 'Grandparent account', par: true, lv: 2, via: 'pacc' },
   { k: 'gbu', n: 'Business units (grandparent)', one: 'Business unit', rel: 'Grandparent business unit', par: true, lv: 2, via: 'bu' },
   { k: 'ggp', n: 'Accounts (great-grandparent)', one: 'Account', rel: 'Great-grandparent account', par: true, lv: 3, via: 'gpa' }
 );
 var D365REL_SETS = {
-  accounts: ['pacc','bu','con','opp','lead','cas','quo','ord','inv','ctr','prd','cmp','tsk','app','cal','eml','not','cmt','tm','que','invl','ordl','quol','res','att','attv','shp','gpa','gbu','ggp'],
+  accounts: ['pacc','cacc','pcon','gcacc','bu','con','opp','lead','cas','quo','ord','inv','ctr','prd','cmp','tsk','app','cal','eml','not','cmt','tm','que','invl','ordl','quol','res','att','attv','shp','gpa','gbu','ggp'],
   contacts: ['pacc','bu','cas','opp','tsk','app','cal','eml','not','que','res','att','attv','gpa','gbu','ggp'],
   _: ['bu','not','tsk','app','eml']
 };
@@ -46785,7 +46795,7 @@ var D365REL_FN = ['Alex', 'Priya', 'Jordan', 'Sam', 'Maria', 'Chen', 'Olu', 'Nin
 var _d365RelCache = {};
 function _d365H(str) { var h = 0; for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0; return Math.abs(h); }
 function _d365RelT(k) { return D365REL_T.filter(function(t){ return t.k === k; })[0]; }
-function _d365RelCfg() { var c = ws.config || (ws.config = {}); return c.d365Rel || (c.d365Rel = { on: false, open: false, tbl: {}, ex: {}, page: 1, q: '', pop: false, tq: '' }); }
+function _d365RelCfg() { var c = ws.config || (ws.config = {}); return c.d365Rel || (c.d365Rel = { on: false, open: false, tbl: {}, ex: {}, xp: {}, page: 1, q: '', pop: false, tq: '' }); }
 // The records the job starts from. They depend only on which records are in the cart, and every accessor below asks for them, so they are worked out once per cart and reused (28 selected records cost ~1.4 ms each time; the block asks dozens of times per render).
 var _d365RelRootsMemo = { sig: null, val: [] };
 function _d365RelRoots() {
@@ -46797,7 +46807,7 @@ function _d365RelRoots() {
   state.restorePlan.forEach(function(_, key){
     if (typeof key !== 'string' || key.indexOf('rec-') !== 0 || typeof _resolveD365Record !== 'function') return;
     var r = _resolveD365Record(key), p = _parseD365RecordId(key);
-    if (r && p) out.push({ key: key, name: r.name, schema: p.schemaKey });
+    if (r && p) out.push({ key: key, name: r.name, schema: p.schemaKey, gone: !!(r.record && r.record._gone) });
   });
   _d365RelRootsMemo = { sig: sig, val: out };
   return out;
@@ -46814,7 +46824,8 @@ function _d365RelTables(roots) {
 function _d365RelName(k, i) {
   if (k === 'pacc') return ['Contoso Group Holdings','Fabrikam Holdings','Litware Group','Adventure Works Holdings','Tailspin Group','Wingtip Holdings'][i % 6];
   if (k === 'bu') return ['EMEA Sales','North America Sales','APAC Sales','Latin America Sales','Public Sector','Partner Channel'][i % 6];
-  if (k === 'con') { var _F = D365REL_FN.length, _L = D365REL_LN.length; return D365REL_FN[i % _F] + ' ' + D365REL_LN[(Math.floor(i / _F) + (i % _F) * 7) % _L]; }
+  if (k === 'cacc' || k === 'gcacc') return [['Contoso Europe','Contoso Asia Pacific','Contoso Retail','Contoso Services','Contoso Logistics','Contoso Labs','Contoso Direct'],['Fabrikam North','Fabrikam South','Fabrikam Online','Fabrikam Wholesale','Fabrikam Partners']][i % 2][Math.floor(i / 2) % (i % 2 ? 5 : 7)] + (i >= 14 ? ' ' + (Math.floor(i / 14) + 1) : '');
+  if (k === 'con' || k === 'pcon') { var _F = D365REL_FN.length, _L = D365REL_LN.length; return D365REL_FN[i % _F] + ' ' + D365REL_LN[(Math.floor(i / _F) + (i % _F) * 7) % _L]; }
   if (k === 'opp') return ['Renewal','Expansion','Pilot','Upsell','Migration'][i % 5] + ' ' + (100 + i);
   if (k === 'cas') return 'Case ' + (10000 + i) + ': ' + ['Login failure','Sync delay','Invoice mismatch','Export error'][i % 4];
   if (k === 'inv') return 'Invoice ' + (2000 + i);
@@ -46884,8 +46895,75 @@ function wsRelRender(focusId) {
 // Switching related records on retrieves them, and that is two jobs: counting every related table (fast, bounded at 1,000 per table and 10,000 overall), then listing the first records of each table (slower).
 // So it loads in two stages. Stage 1: everything is a skeleton. Stage 2: the counts, toolbar and totals are real and only the table rows still load. The timings stand in for a real backend and carry a little jitter so they do not feel scripted.
 var D365REL_COUNT_MS = 1300, D365REL_ROWS_MS = 1500;
+// ═══ Related records: the card leads and tabs switch between the cart and the related records ═══════════════════════════════════
+// Ported from the options study (d365-related-tab-options.html, option E, keyed 'H' in the code): the "Include related records" card sits above the cart; turning it on adds a Related records tab whose
+// tables are collapsed bands that open to their first 10 records and load 10 more. The other options of the study (selection card under the cart, dedicated step, tabs with a lone button, card + list) are not offered here;
+// their branches stay in the code, switched off by this constant, rather than deleted.
+var REL_OPT = 'H';
+// Is the dedicated Related records step part of the wizard right now? Only in B, where it is always there.
+function _relStepOn() { return REL_OPT === 'B' && typeof wsIsD365Cart === 'function' && wsIsD365Cart(); }
+function _relB() { return _relStepOn(); }
+// B: a dedicated Related records step, between Select and Restore options. It is a view inside step 1 (ws.relView), so the wizard's numbered steps (and every hard-coded 2/3/4) stay as they are.
+function wsRelViewGo(on) { ws.relView = !!on; wsRenderAll(); var b = document.getElementById('wsBody'); if (b) b.scrollTop = 0; }
+function _relStepsList() { var a = WS_STEPS.slice(); if (_relB()) a.splice(1, 0, { id: 1.5, label: 'Related records', sub: true }); return a; }
+var _relForceSelect = false;
+function _relSideAct(s) { if (s.sub) return ws.step === 1 && !!ws.relView; if (s.id === 1 && _relB()) return ws.step === 1 && !ws.relView; return s.id === ws.step; }
+function _relSideDone(s) { if (s.sub) return ws.step > 1; if (s.id === 1 && _relB()) return ws.step > 1 || !!ws.relView; return s.id < ws.step; }
+function _relSideGo(s) { if (s.sub) return 'wsRelViewGo(true)'; if (s.id === 1 && _relB()) return '_relForceSelect=true;ws.relView=false;wsGotoStep(1);_relForceSelect=false'; return 'wsGotoStep(' + s.id + ')'; }
+function _relStepBody() {
+  // The step: the standard step header, then the app's own selection card (the one option A puts under the cart) on a step of its own.
+  return '<div class="ws-step-pad"><div class="ws-step-header"><div class="ws-step-title">Related records</div><div class="ws-step-description">Choose whether this job also restores the records connected to your selection, such as an account’s contacts and cases, or its parent account. A parent that already exists at the destination is left untouched.</div></div>' + _d365RelBlock() + '</div>';
+}
+function wsRelTab(t) { var c = _d365RelCfg(); c.tab = t; c.pop = false; c.lvpop = false; wsRenderAll(); }
+var _REL_TIP = 'Adds records directly linked to your selection: children, like an account’s contacts and cases, and parents, like its parent account. Parents that already exist at the destination are left as they are. Nothing is added until you include them.';
+var _REL_DEF = 'Records directly linked to your selection, like an account’s contacts and cases.';
+function _relSw(on) { return on ? _ADV_TOG_ON : _ADV_TOG_OFF; }
+function _relTabsBar2() {
+  var c = _d365RelCfg(), on = !!c.on, tab = on ? (c.tab === 'sel' ? 'sel' : 'rel') : 'sel';
+  var nSel = state.restorePlan.size;
+  var nRel = !on ? '' : (c.loading ? '<span class="rd-skel-bar" style="width:36px;height:12px;display:inline-block;vertical-align:middle"></span>' : '<span class="rt-n">' + _d365RelShow(_d365RelTotal()) + '</span>');
+  var ic = function(n, z){ return (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg(n, z)) || ''; };
+  // One view, so no tab strip: just the way to add the second (same height as the strip, so nothing jumps when it appears).
+  if (!on) return (REL_OPT === 'E' || REL_OPT === 'G' || REL_OPT === 'H') ? '' : (REL_OPT === 'C' ? _relHint() : '') + '<div class="rt-bar rt-bar-lone rt-u"><button type="button" class="ws-btn ws-btn-secondary rt-add" data-tooltip="' + wsEscape(_REL_TIP) + '" data-tooltip-wide onclick="wsRelToggle(true)">' + ic('add-outlined', 16) + 'Include related records</button></div>';
+  var selTab = '<button type="button" role="tab" aria-selected="' + (tab === 'sel') + '" class="act-type-tab rt-tab' + (tab === 'sel' ? ' is-active' : '') + '" onclick="wsRelTab(\'sel\')">Selected records <span class="rt-n">' + nSel + '</span></button>';
+  if (REL_OPT === 'E' || REL_OPT === 'G' || REL_OPT === 'H') {   // E, G and H: the card owns on/off, so the tabs only switch the view and carry no close
+    var relTabE = '<button type="button" role="tab" aria-selected="' + (tab === 'rel') + '" class="act-type-tab rt-tab' + (tab === 'rel' ? ' is-active' : '') + '" onclick="wsRelTab(\'rel\')">Related records ' + nRel + '</button>';
+    return '<div class="rt-bar rt-u"><div class="rt-left"><div class="act-type-tabs rt-tabs" role="tablist">' + selTab + relTabE + '</div></div></div>';
+  }
+  var relTab = '<div role="tab" aria-selected="' + (tab === 'rel') + '" class="act-type-tab rt-tab rt-tab-x' + (tab === 'rel' ? ' is-active' : '') + '"><button type="button" class="rt-tab-main" onclick="wsRelTab(\'rel\')">Related records ' + nRel + '</button><button type="button" class="rt-x" aria-label="Stop including related records" data-tooltip="Stop including related records" onclick="wsRelToggle(false)">' + ic('close-outlined', 16) + '</button></div>';
+  return '<div class="rt-bar rt-u"><div class="rt-left"><div class="act-type-tabs rt-tabs" role="tablist">' + selTab + relTab + '</div></div></div>';
+}
+// C: when the selection holds deleted records, say so where the option is. The need for related records follows from the selection: a deleted parent may have taken its children with it. Vision Alerts (icon, one line of text, optional close) have no action slot, so the action is the Include related records button right under the alert.
+function _relHint() {
+  var c = _d365RelCfg(); if (c.on || c.hintX) return '';
+  var roots = _d365RelRoots(), tot = roots.length, n = roots.filter(function(r){ return r.gone; }).length; if (!n) return '';
+  var ic = function(z, k){ return (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg(k, z)) || ''; };
+  var lead = n === tot ? (tot === 1 ? 'This record was deleted.' : 'All ' + tot + ' records were deleted.') : n + ' of your ' + tot + ' records ' + (n === 1 ? 'was' : 'were') + ' deleted.';
+  return '<div class="vis-alert rt-hint" role="note">' + ic(24, 'info-outlined') + '<div class="vis-alert-txt">' + lead + ' Records linked to a deleted record, like its contacts and cases, may have been deleted with it. Include related records to restore them too.</div><button type="button" class="va-x" aria-label="Dismiss" onclick="wsRelHintX()">' + ic(20, 'close-outlined') + '</button></div>';
+}
+function wsRelHintX() { _d365RelCfg().hintX = true; wsRenderAll(); }
+// The Select step's button states the size of the job it commits: the cart, plus the related records when they are included. While the related count is still being worked out it says so and waits, so it never states a smaller job than the one that would run.
+function _relContinue() {
+  if (typeof wsIsD365Cart !== 'function' || !wsIsD365Cart() || REL_OPT === 'A') return { label: 'Continue' };
+  var c = _d365RelCfg(), n = state.restorePlan.size, rec = function(x){ return x + (x === 1 ? ' record' : ' records'); };
+  if (REL_OPT === 'B' && (!ws.relView || !c.on)) return { label: 'Continue' };   // B: the total belongs to the Related records step, where it is decided
+  if ((REL_OPT === 'C' || REL_OPT === 'D' || REL_OPT === 'E' || REL_OPT === 'F' || REL_OPT === 'G' || REL_OPT === 'H') && !c.on) return { label: 'Continue with ' + rec(n) };   // C, D and E keep everything on Select, so the button states the job
+  if (c.loading) return { label: 'Counting related records…', disabled: true };
+  if (!_d365RelTotal()) return { label: 'Continue with ' + rec(n) };   // every related table is switched off: nothing related is in the job
+  // Named in two parts: the related total is rounded down once a table is capped (9,000+), which would swallow a small cart if it were added in.
+  return { label: 'Continue with ' + rec(n) + ' and ' + _d365RelShow(_d365RelTotal()) + ' related' };
+}
+// RETIRED: the job total used to be a sentence under the tables; it now lives on the button (_relContinue).
+function _relNoteRetired() { return ''; }
+// The job total, stated under whichever tab is showing (it is the same sentence the Related tab carried under its list).
+function _relNote() {
+  var c = _d365RelCfg(); if (!c.on) return '';
+  if (c.loading) return '<div class="rl-note"><span class="rd-skel-bar" style="width:320px;display:inline-block;vertical-align:middle"></span></div>';
+  var nex = Object.keys(c.ex).length;
+  return '<div class="rl-note">This job restores <b>' + _d365RelShow(_d365RelRoots().length + _d365RelTotal()) + ' records</b> from the selected records and their related records.' + (nex ? ' ' + _d365RelFmt(nex) + ' removed.' : '') + '</div>';
+}
 function wsRelToggle(on) {
-  var c = _d365RelCfg(); c.on = on; c.open = on; c.pop = false; c.page = 1; clearTimeout(c._lt); clearTimeout(c._lt2);
+  var c = _d365RelCfg(); c.on = on; c.open = on; c.tab = on ? 'rel' : 'sel'; c.pop = false; c.page = 1; c.xp = {}; c.lm = {}; c.lmBusy = {}; c.tpage = 1; clearTimeout(c._lt); clearTimeout(c._lt2);
   c.loading = !!on; c.rowsLoading = !!on; c.pageLoading = false; clearTimeout(c._lp);
   if (on) {
     var t1 = D365REL_COUNT_MS + Math.round(Math.random() * 500), t2 = t1 + D365REL_ROWS_MS + Math.round(Math.random() * 900);
@@ -46910,8 +46988,20 @@ function _d365RelInCat(t) { var v = _d365RelCfg().cat || 'all'; return v === 'al
 function _d365RelShownTables() { var c = _d365RelCfg(), q = (c.tq || '').trim().toLowerCase(); return _d365RelTables(_d365RelRoots()).filter(function(t){ return _d365RelInCat(t) && (!q || t.n.toLowerCase().indexOf(q) >= 0); }); }
 function wsRelAll(on) { var c = _d365RelCfg(); _d365RelShownTables().forEach(function(t){ c.tbl[t.k] = on; }); c.page = 1; wsRelRender(); }
 function wsRelPop(e) { if (e) e.stopPropagation(); var c = _d365RelCfg(); c.pop = !c.pop; c.lvpop = false; c.tq = ''; wsRelRender(); }
+function wsRelTblReset() { var c = _d365RelCfg(); c.tbl = {}; c.tpage = 1; wsRelRender(); }
+var REL_E_STEP = 10;   // E: a band opens with its first 10 records and loads 10 more per click
+// The next 10 take a moment to arrive, as the rows of a page change do: skeleton rows hold their place under the band, and the button is out of the way until they land.
+function wsRelMore(k) {
+  var c = _d365RelCfg(); c.lm = c.lm || {}; c.lmBusy = c.lmBusy || {}; if (c.lmBusy[k]) return;
+  var tok = {}; c.lmBusy[k] = tok;
+  setTimeout(function(){ if (c.lmBusy && c.lmBusy[k] === tok) { delete c.lmBusy[k]; c.lm[k] = (c.lm[k] || REL_E_STEP) + REL_E_STEP; wsRelRender(); } }, 500 + Math.round(Math.random() * 500));
+  wsRelRender();
+}
+function wsRelBand(k) { var c = _d365RelCfg(); c.xp = c.xp || {}; c.xp[k] = !c.xp[k]; wsRelRender(); }
+function wsRelTPage(p) { _d365RelCfg().tpage = p; wsRelRender(); }
+function wsRelTSize(n) { var c = _d365RelCfg(); c.tsize = n; c.tpage = 1; wsRelRender(); }
 function wsRelTq(v) { _d365RelCfg().tq = v; wsRelRender('wsRelTq'); }
-function wsRelSearch(v) { var c = _d365RelCfg(); c.q = v; c.page = 1; wsRelRender('wsRelQ'); }
+function wsRelSearch(v) { var c = _d365RelCfg(); c.q = v; c.page = 1; c.lm = {}; c.lmBusy = {}; wsRelRender('wsRelQ'); }
 // Each page is fetched on its own (only the rows on screen are requested), so moving to another page, or changing how many rows a page holds, shows the shimmer rows until the new page arrives. A page is 10 to 100 rows, much less than the first load, so it is quicker.
 function _d365RelPageLoad() {
   var c = _d365RelCfg(); clearTimeout(c._lp); c.pageLoading = true;
@@ -46929,15 +47019,20 @@ document.addEventListener('click', function(e){ var c = ws && ws.config && ws.co
 // The block's body while related records are being retrieved: the same toolbar and table, as shimmer bars (the app's skeleton), with the real column headings so nothing shifts when the data arrives.
 function _d365RelSkelRows(n) {
   var bar = function(w){ return '<span class="rd-skel-bar" style="width:' + w + ';display:block"></span>'; }, rows = '', w = ['62%', '48%', '71%', '55%', '66%', '44%', '58%', '69%'];
-  for (var i = 0; i < (n || 8); i++) rows += '<tr class="ws-tr" aria-hidden="true"><td class="ws-td is-primary">' + bar(w[i]) + '</td><td class="ws-td ws-col-type">' + bar('48px') + '</td><td class="ws-td ws-col-target">' + bar('96px') + '</td><td class="ws-td is-actions-col"></td></tr>';
+  for (var i = 0; i < (n || 8); i++) rows += '<tr class="ws-tr" aria-hidden="true"><td class="ws-td is-primary">' + bar(w[i % w.length]) + '</td><td class="ws-td ws-col-type">' + bar('48px') + '</td><td class="ws-td ws-col-target">' + bar('96px') + '</td><td class="ws-td is-actions-col"></td></tr>';
   return rows;
 }
 function _d365RelSkeleton() {
   var bar = function(w, h){ return '<span class="rd-skel-bar" style="width:' + w + ';' + (h ? 'height:' + h + ';' : '') + 'display:block"></span>'; }, rows = _d365RelSkelRows();
+  return '<div class="rl-body" role="status" aria-busy="true" aria-label="Loading related records"><div class="ws-sel-cq"><div class="rt-card"><div class="rl-tools rl-tools-band"><div style="width:176px">' + bar('100%', '36px') + '</div><div style="width:36px">' + bar('100%', '36px') + '</div><div style="flex:1;min-width:0">' + bar('100%', '36px') + '</div></div>'
+    + '<div class="ws-table-wrap"><table class="ws-table"><colgroup><col class="ws-col-name"><col class="ws-col-type" style="width:190px"><col class="ws-col-target" style="width:176px"><col style="width:48px"></colgroup><thead><tr><th class="ws-th">Name</th><th class="ws-th">Type</th><th class="ws-th ws-col-target">Restore point</th><th class="ws-th is-actions-col"></th></tr></thead><tbody>' + rows + '</tbody></table></div></div></div></div>';
+}
+function _d365RelSkeletonA() {
+  var bar = function(w, h){ return '<span class="rd-skel-bar" style="width:' + w + ';' + (h ? 'height:' + h + ';' : '') + 'display:block"></span>'; }, rows = _d365RelSkelRows();
   return '<div class="rl-body" role="status" aria-busy="true" aria-label="Loading related records"><div class="rl-tools"><div style="width:176px">' + bar('100%', '36px') + '</div><div style="width:36px">' + bar('100%', '36px') + '</div><div style="flex:1;min-width:0">' + bar('100%', '36px') + '</div></div>'
     + '<div class="ws-sel-cq"><div class="ws-table-wrap"><table class="ws-table"><colgroup><col class="ws-col-name"><col class="ws-col-type" style="width:190px"><col class="ws-col-target" style="width:176px"><col style="width:48px"></colgroup><thead><tr><th class="ws-th">Name</th><th class="ws-th">Type</th><th class="ws-th ws-col-target">Restore point</th><th class="ws-th is-actions-col"></th></tr></thead><tbody>' + rows + '</tbody></table></div></div></div>';
 }
-function _d365RelBlock() {
+function _d365RelBlock(part) {
   var roots = _d365RelRoots(); if (!roots.length) return '';
   var c = _d365RelCfg(), tabs = _d365RelTables(roots), total = _d365RelTotal(), plus = _d365RelPlus(), nOn = tabs.filter(function(t){ return _d365RelOn(t.k); }).length;
   var mag = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('search-outlined', 20)) || '';
@@ -46952,7 +47047,7 @@ function _d365RelBlock() {
   var _rcIcon = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('child-roles-outlined', 20)) || '';
   var _rcKey = "if (event.key === ' ' || event.key === 'Enter') { event.preventDefault(); wsRelToggle(" + !c.on + "); }";
   var head = '<div class="sc-header" role="checkbox" aria-checked="' + !!c.on + '" tabindex="0" onclick="wsRelToggle(' + !c.on + ')" onkeydown="' + _rcKey + '"><span class="rc-icon">' + _rcIcon + '</span><span class="ws-cfg-choice-title">Include related records</span><span class="rc-cb">' + _d365RelCb(c.on) + '</span></div>'
-    + '<div class="sc-desc"><div class="rl-def">Records directly linked to your selection, like an account’s contacts and cases. <span class="rl-how" data-tooltip="' + wsEscape(tip) + '">How this works</span></div>' + (c.on ? '<div class="rc-line">' + sm + '</div>' : '') + '</div>';
+    + '<div class="sc-desc"><div class="rl-def">Records directly linked to your selection, like an account’s contacts and cases. <span class="rl-how" data-tooltip="' + wsEscape(tip) + '">How this works</span></div>' + (c.on && REL_OPT !== 'E' && REL_OPT !== 'F' && REL_OPT !== 'G' && REL_OPT !== 'H' ? '<div class="rc-line">' + sm + '</div>' : '') + '</div>';   // E: the Related records tab carries the count
   var body = '';
   if (c.on) {
     // the table dropdown (n of y, records per table), left of search
@@ -46968,9 +47063,8 @@ function _d365RelBlock() {
     var chip = '<div class="rl-popwrap"><button type="button" class="filter-chip-pinned" onclick="wsRelPop(event)" aria-haspopup="listbox" aria-expanded="' + !!c.pop + '">Related tables: ' + nOn + ' of ' + tabs.length + ' ' + chev.replace('width="20" height="20"', 'width="16" height="16"') + '</button>' + pop + '</div>';
     // Quiet by default: an icon-only gear. Once levels differ from 1 and 1 it becomes the labelled chip, so a job that reaches further than direct links is never hidden.
     var lvDefault = (cl === 1 && pl === 1), lvIcon = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('child-roles-outlined', 20)) || '';   // DS Unified Icons › Child Roles: a parent with nested children, i.e. levels
-    var lvChip = '<div class="rl-popwrap">' + (lvDefault
-      ? '<button type="button" class="rl-lvbtn" onclick="wsRelLvPop(event)" aria-haspopup="dialog" aria-expanded="' + !!c.lvpop + '" aria-label="Levels: 1 level" data-tooltip="Levels: 1 level">' + lvIcon + '</button>'
-      : '<button type="button" class="filter-chip-pinned" onclick="wsRelLvPop(event)" aria-haspopup="dialog" aria-expanded="' + !!c.lvpop + '">Levels: ' + lvChipLbl + ' ' + chev.replace('width="20" height="20"', 'width="16" height="16"') + '</button>')
+    var lvLbl = 'Levels: ' + _d365RelLvLbl();   // the button keeps one shape at every setting; the Related tables list carries the levels (a "Level 2" header per level)
+    var lvChip = '<div class="rl-popwrap"><button type="button" class="rl-lvbtn" onclick="wsRelLvPop(event)" aria-haspopup="dialog" aria-expanded="' + !!c.lvpop + '" aria-label="' + lvLbl + (lvDefault ? '' : ', changed from the default') + '" data-tooltip="' + lvLbl + '">' + lvIcon + '</button>'
       + (c.lvpop ? '<div class="rl-pop rl-lvpop" onclick="event.stopPropagation()">' + lvBoth + '</div>' : '') + '</div>';
     // the list: one flat sequence of the included tables, paged like the main list, with a section row naming each table
     var qq = c.q.trim().toLowerCase(), flat = [], counts = {};
@@ -46978,23 +47072,88 @@ function _d365RelBlock() {
     tabs.forEach(function(t){ if (!_d365RelOn(t.k)) return; var list, n, cap; if (qq) { var m = _d365RelMatch(t.k, qq); list = m.rows; n = m.n; cap = m.cap; } else { list = _d365RelLive(t.k); var x = _d365RelCnt(t.k); n = x.n; cap = x.cap; } counts[t.k] = { n: n, cap: cap, shown: list.length }; if (list.length < n || cap) trunc = true; list.forEach(function(r){ flat.push(r); }); });
     var size = c.size || 10, pages = Math.max(1, Math.ceil(flat.length / size)); c.page = Math.min(Math.max(1, c.page || 1), pages);
     var start = (c.page - 1) * size, slice = flat.slice(start, start + size), trs = '', last = null, rp = _d365RelRp();
+    var _recIco = (typeof _treeIconSvgFor === 'function') ? _treeIconSvgFor({ type: 'Record' }) : '';   // the cart's own record icon
+    var _recRow = function(r){ return '<tr class="ws-tr"><td class="ws-td is-primary"><div style="display:flex;align-items:center;gap:8px;min-width:0"><span class="ws-basket-row-icon" aria-hidden="true">' + _recIco + '</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + wsEscape(r.name) + '</span></div></td>'
+        + '<td class="ws-td ws-col-type"><span class="res-type" tabindex="0" data-tooltip="' + wsEscape(_d365RelSub(r)) + '" aria-label="' + wsEscape(((_d365RelT(r.t) || {}).par ? 'Parent' : 'Child') + ' record. ' + _d365RelSub(r)) + '">' + ((_d365RelT(r.t) || {}).par ? 'Parent' : 'Child') + ' record</span></td><td class="ws-td ws-col-target"><button type="button" class="ws-rp-chip" onclick="wsRelDrw(\'' + r.id + '\')" aria-haspopup="dialog" data-tooltip="View this record’s metadata at the restore point">' + wsEscape(rp) + '</button></td>'
+        + '<td class="ws-td is-actions-col"><div style="display:flex;align-items:center;justify-content:flex-end;gap:6px"><button class="btn-icon btn-icon-sm ws-basket-row-remove" type="button" data-tooltip="Remove from restore" aria-label="Remove ' + wsEscape(r.name) + ' from restore" onclick="wsRelRm(\'' + r.id + '\')">' + _D365REL_TRASH + '</button></div></td></tr>'; };
     slice.forEach(function(r, i){
       if (r.t !== last) { var t = _d365RelT(r.t), n = counts[r.t], cont = (i === 0 && start > 0 && flat[start - 1].t === r.t); trs += '<tr class="rl-sec"><td colspan="4"><span class="rl-gt">' + t.n + '</span><span class="rl-gc">' + ((n.shown < n.n || n.cap) ? 'Showing ' + _d365RelFmt(n.shown) + ' of ' + _d365RelFmt(n.n) + (n.cap ? '+' : '') + (qq ? (n.n === 1 ? ' match' : ' matches') : '') : _d365RelFmt(n.n) + (qq ? (n.n === 1 ? ' match' : ' matches') : (n.n === 1 ? ' record' : ' records'))) + (cont ? ', continued' : '') + '</span></td></tr>'; last = r.t; }
-      trs += '<tr class="ws-tr"><td class="ws-td is-primary"><div style="min-width:0"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + wsEscape(r.name) + '</div></div></td>'
-        + '<td class="ws-td ws-col-type"><span class="res-type" tabindex="0" data-tooltip="' + wsEscape(_d365RelSub(r)) + '" aria-label="' + wsEscape(((_d365RelT(r.t) || {}).par ? 'Parent' : 'Child') + ' record. ' + _d365RelSub(r)) + '">' + ((_d365RelT(r.t) || {}).par ? 'Parent' : 'Child') + ' record</span></td><td class="ws-td ws-col-target"><button type="button" class="ws-rp-chip" onclick="wsRelDrw(\'' + r.id + '\')" aria-haspopup="dialog" data-tooltip="View this record’s metadata at the restore point">' + wsEscape(rp) + '</button></td>'
-        + '<td class="ws-td is-actions-col"><div style="display:flex;align-items:center;justify-content:flex-end;gap:6px"><button class="btn-icon btn-icon-sm ws-basket-row-remove" type="button" data-tooltip="Remove from restore" aria-label="Remove ' + wsEscape(r.name) + ' from restore" onclick="wsRelRm(\'' + r.id + '\')">' + _D365REL_TRASH + '</button></div></td></tr>';
+      trs += _recRow(r);
     });
-    if (c.rowsLoading) trs = _d365RelSkelRows();   // stage 2: the counts are in, the rows are still on their way
+    var _pgHtml = null;
+    if (REL_OPT === 'H') {   // H: the same list, but every table is a band that starts closed; its records open under it. A search opens the bands that have matches.
+      c.xp = c.xp || {};
+      c.lm = c.lm || {};
+      var _all = {};   // every record of an included table that matches the search; a band shows the first 10 of these and loads 10 more on request
+      tabs.forEach(function(t){ if (_d365RelOn(t.k)) _all[t.k] = _d365RelGen(t.k).filter(function(r){ return !c.ex[r.id] && (!qq || r.name.toLowerCase().indexOf(qq) >= 0); }); });
+      var _bd = tabs.filter(function(t){ return _all[t.k] && (!qq || _all[t.k].length > 0); });
+      var _hs = c.tsize || 10, _hp = Math.max(1, Math.ceil(_bd.length / _hs)); c.tpage = Math.min(Math.max(1, c.tpage || 1), _hp);
+      var _chev = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('keyboard-arrow-down-outlined', 16)) || '';
+      trs = '';
+      _bd.slice((c.tpage - 1) * _hs, c.tpage * _hs).forEach(function(t){
+        var list = _all[t.k], tot = list.length, n = Math.min(tot, D365REL_CAP), cap = tot > D365REL_CAP, open = !!qq || !!c.xp[t.k];
+        var lim = Math.min(c.lm[t.k] || REL_E_STEP, n), shown = list.slice(0, lim);
+        var base = qq ? _d365RelFmt(n) + (cap ? '+' : '') + (n === 1 ? ' match' : ' matches') : _d365RelFmt(n) + (cap ? '+' : '') + (n === 1 ? ' record' : ' records');
+        var lbl = (open && lim < n) ? 'Showing ' + _d365RelFmt(lim) + ' of ' + _d365RelFmt(n) + (cap ? '+' : '') : base;
+        trs += '<tr class="rl-sec"><td colspan="4"><button type="button" class="rl-bandbtn" aria-expanded="' + open + '" onclick="wsRelBand(\'' + t.k + '\')"><span class="rl-bchev" aria-hidden="true">' + _chev + '</span><span class="rl-gt">' + t.n + '</span><span class="rl-gc">' + lbl + '</span></button></td></tr>';
+        if (open) {
+          shown.forEach(function(r){ trs += _recRow(r); });
+          if (lim < n && c.lmBusy && c.lmBusy[t.k]) trs += _d365RelSkelRows(Math.min(REL_E_STEP, n - lim));
+          else if (lim < n) trs += '<tr class="rl-more"><td colspan="4"><button type="button" class="rl-moreb" onclick="wsRelMore(\'' + t.k + '\')">Load ' + Math.min(REL_E_STEP, n - lim) + ' more</button></td></tr>';
+        }
+      });
+      _pgHtml = _wsPgBar(_bd.length, c.tpage, _hs, 'wsRelTPage', 'wsRelTSize', 'table', true);
+    }
+    if (c.rowsLoading && REL_OPT !== 'H') trs = _d365RelSkelRows();   // stage 2: the counts are in, the rows are still on their way
     else if (c.pageLoading) trs = _d365RelSkelRows(Math.max(1, Math.min(slice.length, 25)));   // a page change: the pager already shows the new page, its rows are on their way
     else if (!trs) trs = '<tr><td colspan="4" style="padding:24px;text-align:center;color:var(--black-60)">' + (qq ? 'No related records match “' + wsEscape(c.q) + '”.' : 'No related tables are selected.') + '</td></tr>';
+    if (REL_OPT === 'A') {   // A keeps the app's own related list inside its card; B and C show it as one card of its own
     body = '<div class="rl-body"><div class="rl-tools">' + chip + lvChip + '<div style="flex:1;min-width:0"><input id="wsRelQ" class="ws-field-input" style="width:100%" placeholder="Search related records by name" value="' + wsEscape(c.q) + '" oninput="wsRelSearch(this.value)"></div>' + (Object.keys(c.ex).length ? '<span class="rl-rmd" role="status"><b>' + _d365RelFmt(Object.keys(c.ex).length) + '</b> removed <button type="button" class="rl-lvbtn" onclick="wsRelUndo()" data-tooltip="Reset: bring back the removed records" aria-label="Reset removed records">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('undo-outlined', 20)) || 'Reset') + '</button></span>' : '') + (qq ? '<span class="rl-note" style="margin:0;white-space:nowrap">' + _d365RelFmt(flat.length) + (flat.length === 1 ? ' match' : ' matches') + '</span>' : '') + '</div>'
-      + (trunc && !c.rowsLoading ? '<div class="vis-alert" role="note" style="margin:12px 0">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('info-outlined', 24)) || '') + '<div class="vis-alert-txt">' + (qq ? 'Search looks through every record in each table and shows the first ' + D365REL_PREVIEW + ' matches.' : 'Showing the first ' + D365REL_PREVIEW + ' records of each table.') + ' All related records are restored. To leave a table out, turn it off in Related tables.</div></div>' : '')
-      + '<div class="ws-sel-cq"><div class="ws-table-wrap"><table class="ws-table"><colgroup><col class="ws-col-name"><col class="ws-col-type" style="width:190px"><col class="ws-col-target" style="width:176px"><col style="width:48px"></colgroup><thead><tr><th class="ws-th">Name</th><th class="ws-th">Type</th><th class="ws-th ws-col-target">Restore point</th><th class="ws-th is-actions-col"></th></tr></thead><tbody>' + trs + '</tbody></table></div></div>'
-      + (c.rowsLoading ? '' : _wsPgBar(flat.length, c.page, size, 'wsRelPage', 'wsRelSize', 'record', true))
+          + (trunc && !c.rowsLoading ? '<div class="vis-alert" role="note" style="margin:12px 0">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('info-outlined', 24)) || '') + '<div class="vis-alert-txt">' + (qq ? 'Search looks through every record in each table and shows the first ' + D365REL_PREVIEW + ' matches.' : 'Showing the first ' + D365REL_PREVIEW + ' records of each table.') + ' All related records are restored. To leave a table out, turn it off in Related tables.</div></div>' : '')
+          + '<div class="ws-sel-cq"><div class="ws-table-wrap"><table class="ws-table"><colgroup><col class="ws-col-name"><col class="ws-col-type" style="width:190px"><col class="ws-col-target" style="width:176px"><col style="width:48px"></colgroup><thead><tr><th class="ws-th">Name</th><th class="ws-th">Type</th><th class="ws-th ws-col-target">Restore point</th><th class="ws-th is-actions-col"></th></tr></thead><tbody>' + trs + '</tbody></table></div></div>'
+          + (c.rowsLoading ? '' : _wsPgBar(flat.length, c.page, size, 'wsRelPage', 'wsRelSize', 'record', true))
+          + '</div>';;
+    } else {
+    var _relTools = '<div class="rl-tools rl-tools-band">' + chip + lvChip + '<div style="flex:1;min-width:0"><input id="wsRelQ" class="ws-field-input" style="width:100%" placeholder="Search related records by name" value="' + wsEscape(c.q) + '" oninput="wsRelSearch(this.value)"></div>' + (Object.keys(c.ex).length ? '<span class="rl-rmd" role="status"><b>' + _d365RelFmt(Object.keys(c.ex).length) + '</b> removed <button type="button" class="rl-lvbtn" onclick="wsRelUndo()" data-tooltip="Reset: bring back the removed records" aria-label="Reset removed records">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('undo-outlined', 20)) || 'Reset') + '</button></span>' : '') + (qq ? '<span class="rl-note" style="margin:0;white-space:nowrap">' + _d365RelFmt(flat.length) + (flat.length === 1 ? ' match' : ' matches') + '</span>' : '') + '</div>';
+    var _relAlert = (trunc && !c.rowsLoading && REL_OPT !== 'H' ? '<div class="vis-alert" role="note">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('info-outlined', 24)) || '') + '<div class="vis-alert-txt">' + (qq ? 'Search looks through every record in each table and shows the first ' + D365REL_PREVIEW + ' matches.' : 'Showing the first ' + D365REL_PREVIEW + ' records of each table.') + ' All related records are restored. To leave a table out, turn it off in Related tables.</div></div>' : '');
+    body = '<div class="rl-body">' + '<div class="ws-sel-cq"><div class="rt-card">' + _relTools + _relAlert + '<div class="ws-table-wrap"><table class="ws-table"><colgroup><col class="ws-col-name"><col class="ws-col-type" style="width:190px"><col class="ws-col-target" style="width:176px"><col style="width:48px"></colgroup><thead><tr><th class="ws-th">Name</th><th class="ws-th">Type</th><th class="ws-th ws-col-target">Restore point</th><th class="ws-th is-actions-col"></th></tr></thead><tbody>' + trs + '</tbody></table></div></div></div>'
+      + (_pgHtml !== null ? _pgHtml : (c.rowsLoading ? '' : _wsPgBar(flat.length, c.page, size, 'wsRelPage', 'wsRelSize', 'record', true)))
       + '</div>';
+    }
   }
-  if (loading) body = _d365RelSkeleton();
+  if (loading) body = (REL_OPT === 'A') ? _d365RelSkeletonA() : _d365RelSkeleton();
   var nex = Object.keys(c.ex).length;
+  if (REL_OPT === 'F' || REL_OPT === 'G') {   // G is E's card and tabs with F's table-level list as the Related records tab. F: a slim row for the control; the related tables as one inline list (the Related tables picker, Levels and table search, laid out as a table instead of a popover). Records are not listed in this option.
+    var _row = '<div class="ws-cfg-choice sc rc-card' + (REL_OPT === 'G' ? ' rc-lead' : '') + (c.on ? ' is-selected' : '') + '" role="group" aria-label="Include related records">' + head + '</div>';   // the same selection card as D and E
+    var _gpane = REL_OPT === 'G' && part === 'pane';
+    if (REL_OPT === 'G' && !_gpane) return _row;
+    if (!c.on) return _gpane ? '' : _row;
+    var _lead = _gpane ? '' : _row;
+    var _skel = function(w){ return '<span class="rd-skel-bar" style="width:' + w + ';display:block;height:16px"></span>'; };
+    if (loading) return _lead + '<div class="rt-card rf-card" role="status" aria-busy="true" aria-label="Counting related records"><div class="rf-h">' + _skel('180px') + '</div>' + [0, 1, 2, 3].map(function(){ return '<div class="rf-r">' + _skel('140px') + _skel('64px') + '</div>'; }).join('') + '</div>';
+    var _inc = rows.filter(function(t){ return _d365RelOn(t.k); }), _nRm = tabs.filter(function(t){ return c.tbl[t.k] === false; }).length;
+    var _size = c.tsize || 10, _pages = Math.max(1, Math.ceil(_inc.length / _size)); c.tpage = Math.min(Math.max(1, c.tpage || 1), _pages);
+    var _slice = _inc.slice((c.tpage - 1) * _size, c.tpage * _size), _last = 0, _deep = _d365RelDepth() > 1, _trs = '';
+    var _tico = (typeof _treeIconSvgFor === 'function') ? _treeIconSvgFor({ type: 'Table' }) : '';
+    _slice.forEach(function(t){
+      var lv = t.lv || 1; if (_deep && lv !== _last) { _trs += '<tr class="rl-sec"><td colspan="4"><span class="rl-gt">Level ' + lv + '</span></td></tr>'; _last = lv; }
+      var viaN = t.via ? _d365RelT(t.via).n.replace(/ \(.*\)$/, '') : '';
+      _trs += '<tr class="ws-tr"><td class="ws-td is-primary"><div style="display:flex;align-items:center;gap:8px;min-width:0"><span class="ws-basket-row-icon" aria-hidden="true">' + _tico + '</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + t.n + (t.via ? ' <span class="rl-via">via ' + viaN + '</span>' : '') + '</span></div></td>'
+        + '<td class="ws-td ws-col-type"><span class="res-type">' + (t.par ? 'Related parent' : 'Related child') + '</span></td>'
+        + '<td class="ws-td ws-col-target">' + _d365RelCntLbl(t.k) + ' records</td>'
+        + '<td class="ws-td is-actions-col"><div style="display:flex;align-items:center;justify-content:flex-end;gap:6px"><button type="button" class="btn-icon btn-icon-sm ws-basket-row-remove" data-tooltip="Remove from restore" aria-label="Remove ' + wsEscape(t.n) + ' from restore" onclick="wsRelTbl(\'' + t.k + '\',false)">' + _D365REL_TRASH + '</button></div></td></tr>';
+    });
+    if (!_trs) _trs = '<tr><td colspan="4" style="padding:24px;text-align:center;color:var(--black-60)">' + (c.tq.trim() ? 'No tables match.' : 'No related tables are included.') + '</td></tr>';
+    var _hd = '<div class="rf-h"><span>' + (nOn ? '<b>' + _d365RelShow(total) + ' records</b> in ' + nOn + (nOn === 1 ? ' table' : ' tables') : 'No related tables included') + '</span></div>';
+    var _rmd = _nRm ? '<span class="rl-rmd" role="status"><b>' + _nRm + '</b> removed <button type="button" class="rl-lvbtn" onclick="wsRelTblReset()" data-tooltip="Reset: bring back the removed tables" aria-label="Reset removed tables">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('undo-outlined', 20)) || 'Reset') + '</button></span>' : '';
+    var _tools = '<div class="rl-tools rl-tools-band"><div style="flex:1;min-width:0"><input id="wsRelTq" class="ws-field-input" style="width:100%" placeholder="Search related tables" value="' + wsEscape(c.tq) + '" oninput="wsRelTq(this.value)"></div>' + lvChip + cats + _rmd + '</div>';
+    var _tbl = '<div class="ws-table-wrap"><table class="ws-table"><colgroup><col class="ws-col-name"><col class="ws-col-type" style="width:190px"><col class="ws-col-target" style="width:176px"><col style="width:48px"></colgroup><thead><tr><th class="ws-th">Name</th><th class="ws-th">Type</th><th class="ws-th ws-col-target">Contains</th><th class="ws-th is-actions-col"></th></tr></thead><tbody>' + _trs + '</tbody></table></div>';
+    return _lead + '<div class="rt-card rf-card">' + _hd + _tools + _tbl + '</div>' + _wsPgBar(_inc.length, c.tpage, _size, 'wsRelTPage', 'wsRelTSize', 'table', true);
+  }
+  if (REL_OPT === 'E' || REL_OPT === 'H') return part === 'pane' ? (c.on ? '<div class="rt-pane">' + body + '</div>' : '') : '<div class="ws-cfg-choice sc rc-card rc-lead' + (c.on ? ' is-selected' : '') + '" role="group" aria-label="Include related records">' + head + '</div>';   // E: the card is the one control; the list is the Related records tab's pane
+  if (REL_OPT === 'C') { if (!c.on) return ''; return '<div class="rt-pane">' + body + '</div>'; }   // C shows the list on its own, under tabs
+  // B: the selection card only decides whether the list exists; the list is its own card BELOW it, not inside it.
+  if (REL_OPT === 'B' || REL_OPT === 'D') return '<div class="ws-cfg-choice sc rc-card' + (c.on ? ' is-selected' : '') + '" role="group" aria-label="Include related records">' + head + '</div>' + (c.on ? '<div class="rt-pane rt-pane-below">' + body + '</div>' : '');   // the card only decides whether the list exists; the list is its own full-width card below it (B: on the step, D: on Select)
   return '<div class="ws-cfg-choice sc rc-card' + (c.on ? ' is-selected' : '') + '" role="group" aria-label="Include related records">' + head + (c.on ? '<div class="rc-body">' + body + '</div>' : '') + '</div>' + (loading ? '<div class="rl-note"><span class="rd-skel-bar" style="width:320px;display:inline-block;vertical-align:middle"></span></div>' : c.on ? '<div class="rl-note">This job restores <b>' + _d365RelShow(roots.length + total) + ' records</b> from the selected records and their related records.' + (nex ? ' ' + _d365RelFmt(nex) + ' removed.' : '') + '</div>' : '');
 }
 // ── D365 Override field values: a field and a new fixed value, applied to every restored record that has the field ─────────
@@ -66765,7 +66924,7 @@ window.__devJumpResolve = function(h) {
   }
   function showText(target, txt){
     if (!txt) return;
-    var t = tipEl(); t.textContent = txt; t.classList.add('show');
+    var t = tipEl(); t.textContent = txt; t.style.maxWidth = (target && target.hasAttribute && target.hasAttribute('data-tooltip-wide')) ? '360px' : ''; t.classList.add('show');
     cur = target;
     // SYNCHRONOUS positioning (2026-07-08). The old rAF deferral raced: it
     // measured the bubble while it still sat at its PREVIOUS spot — pinned
@@ -75565,5 +75724,58 @@ window.D365X.recChip = function (key, item) {
   document.head.appendChild(st);
 })();
 </script>
+
+<style id="rel-opt-css">
+.rt-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin: 0 0 16px; }
+.rt-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.act-type-tabs { display: inline-flex; align-items: stretch; gap: 2px; background: var(--black-3); border: 2px solid var(--black-3); border-radius: 4px; flex-shrink: 0; }
+.act-type-tab { appearance: none; border: 1px solid transparent; background: transparent; font-family: inherit; font-size: 14px; font-weight: 450; color: var(--black-60); padding: 4px 12px; border-radius: 4px; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.act-type-tab:hover { color: var(--black-100); }
+.act-type-tab.is-active { background: var(--white); border-color: var(--border); color: var(--black-100); font-weight: 500; }
+.rt-tab .rt-n { font-weight: 500; color: var(--black-60); font-variant-numeric: tabular-nums; } .rt-tab.is-active .rt-n { color: var(--black-100); }
+.rt-tab.is-off { color: var(--black-50); } .rt-ic { display: inline-flex; } .rt-ic svg { display: block; }
+.rt-tab-sw { gap: 8px; padding-right: 6px; } .rt-sw { flex: none; padding: 0; border: 0; background: none; cursor: pointer; display: inline-flex; } .rt-sw svg { width: 32px; height: 20px; display: block; }
+.rt-tab-x { padding: 0 2px 0 0; gap: 0; } .rt-tab-main { appearance: none; border: 0; background: none; font: inherit; color: inherit; padding: 4px 8px 4px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.rt-x { appearance: none; border: 0; background: none; width: 24px; height: 24px; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; } .rt-x:hover { background: var(--black-5); color: var(--black-100); }
+.rt-add { appearance: none; border: 0; background: none; font: inherit; font-size: 14px; font-weight: 500; color: var(--em-green); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 8px; border-radius: 4px; } .rt-add:hover { background: var(--em-green-tint); } .rt-add svg { display: block; }
+.rt-off { border: 1px dashed var(--border); border-radius: 8px; padding: 40px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; background: var(--white); }
+.rt-off-t { font-size: 16px; font-weight: 500; color: var(--black-100); } .rt-off-d { font-size: 14px; color: var(--black-60); max-width: 420px; } .rt-off-h { font-size: 14px; color: var(--black-60); } .rt-off .ws-btn { margin-top: 8px; }
+.rf-card { margin-top: 12px; } .rt-pane .rf-card { margin-top: 0; } .rf-h { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 8px 16px; min-height: 44px; background: var(--black-5); font-size: 16px; line-height: 22px; } .rf-h b { font-weight: 500; }
+.rf-card .rl-tools-band .rl-cats { padding: 0; } .rf-card .ws-table-wrap { border: 0; } .rf-r { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 16px; min-height: 36px; font-size: 16px; line-height: 22px; color: var(--black-100); } .rf-c { font-variant-numeric: tabular-nums; color: var(--black-60); } .rf-more { color: var(--black-60); }
+.rl-bandbtn { display: flex; align-items: center; gap: 8px; width: 100%; margin: 0; padding: 0; border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; } .rl-bchev { flex: none; width: 24px; height: 24px; border-radius: 4px; background: var(--green-s10); color: var(--em-green); display: inline-flex; align-items: center; justify-content: center; transition: transform .15s ease; } .rl-bandbtn[aria-expanded="false"] .rl-bchev { transform: rotate(-90deg); }   /* the Co-owners chevron on the onboarding Basic information step */ .rl-bandbtn:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px #008436; border-radius: 2px; }
+.rl-more td { padding: 0; } .rl-moreb { display: block; width: 100%; height: 44px; margin: 0; padding: 0 16px; border: 0; background: none; font: inherit; font-weight: 500; color: var(--em-green); text-align: center; cursor: pointer; } .rl-moreb:hover { background: var(--em-green-tint); } .rl-moreb:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--em-green); }
+.rl-lvbtn { position: relative; }
+.rt-hint { margin: 0 0 12px; } .rt-hint .va-x { flex: none; width: 24px; height: 24px; margin: 0; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 0; background: none; color: var(--va-ic); cursor: pointer; border-radius: 4px; } .rt-hint .va-x:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px #008436; } .rc-card.rc-lead { margin: 0 0 16px; } .rt-pane .rl-body { padding: 0; border-top: 0; } .rt-pane-below { margin-top: 12px; }
+
+/* The related list is ONE card: the picker, levels and search form its header band; the table sits directly under them; the notice follows below. */
+.rt-card { border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); }
+.rl-body .ws-sel-cq + .wspg .pg-bar { border-top: 0; }   /* the pager sits under the card, which already ends in its own border: a second line above the bar read as a stray rule */
+.rt-card .ws-table-wrap { border: 0; border-radius: 0 0 8px 8px; }
+.rt-card .rl-tools-band { margin: 0; padding: 8px; }
+.rt-card .vis-alert { margin: 0 8px 8px; }   /* the cap notice sits between the toolbar and the table, as in the app's own related list */
+
+/* DS TABS — the Design System library's \"New Components / Tabs\" (Type = Tab), read live from the component: white tab, 2px line on the TOP of the selected tab, centred label + count pill (Updates), no strip baseline.
+   Recoloured to Veeam Vision: the lime #86b62c line/label/pill becomes Green/S80; idle label Black/60, idle pill Black/10 fill with Black/50 text. Scaled to the wizard body (library is 18/22 type on a 46px tab): 14/20 on a 36px tab, 20px pill. */
+.rt-u.rt-bar { gap: 16px; align-items: center; border: 0; margin-bottom: 12px; }
+.rt-u .rt-left { align-items: center; gap: 16px; }
+.rt-u .act-type-tabs { background: none; border: 0; border-radius: 0; gap: 0; padding: 0; align-items: stretch; }
+.rt-u .act-type-tab { position: relative; height: 36px; padding: 0 24px; border: 0; border-radius: 0; background: var(--white); color: var(--black-60); font-weight: 450; gap: 8px; margin: 0; }
+.rt-u .act-type-tab::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: transparent; }
+.rt-u .act-type-tab:hover { color: var(--black-100); background: var(--white); }
+.rt-u .act-type-tab.is-active { background: var(--white); color: var(--em-green); font-weight: 500; box-shadow: none; }
+.rt-u .act-type-tab.is-active::before { background: var(--em-green); }
+.rt-u .rt-tab .rt-n { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 20px; background: var(--black-10); color: var(--black-50); font-size: 14px; font-weight: 500; line-height: 20px; }
+.rt-u .rt-tab.is-active .rt-n { background: var(--em-green); color: var(--white); }
+.rt-u .rt-tab-x { padding: 0 8px 0 0; gap: 0; } .rt-u .rt-tab-main { height: 36px; padding: 0 8px 0 24px; gap: 8px; color: inherit; font-weight: inherit; }
+.rt-u .rt-x { color: inherit; opacity: .8; } .rt-u .rt-x:hover { opacity: 1; background: var(--black-5); }
+.rt-u .act-type-tab:focus-visible, .rt-u .rt-tab-main:focus-visible, .rt-u .rt-x:focus-visible, .rt-u .rt-add:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--white), 0 0 0 4px var(--em-green); }
+.rt-u .rt-add { height: 28px; padding: 0 8px; margin: 0; }
+.rt-u .rt-tab-sw { padding-right: 12px; } .rt-u .rt-tab.is-off { color: var(--black-50); }
+.rt-bar-lone { min-height: 36px; }
+/* The Include control is the app's secondary button (36px, 1px border), not a text link: on its own above the table it has to read as the way in. */
+.rt-add.ws-btn, .rt-u .rt-add.ws-btn { height: 36px; padding: 0 12px 0 8px; margin: 0; border: 1px solid var(--border); background: var(--white); color: var(--black-100); font-weight: 450; gap: 6px; }
+.rt-add.ws-btn:hover { background: var(--black-3); }
+.rt-add.ws-btn svg { color: var(--em-green); }   /* same height as the tab strip (no jump when it appears); text aligned to the table's left edge */
+</style>
 </body>
 </html>
