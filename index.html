@@ -621,23 +621,6 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
 .gp-dd-opt:hover { background: var(--black-3); }
 .gp-dd-opt.is-sel { font-weight: 500; color: var(--green); }
 .gp-dd-opt .gp-dd-sub { color: var(--black-60); font-weight: 450; margin-left: 8px; }
-/* Google sign-in window: production match of Google's own account chooser and consent pages (recreation, as the GitHub popup) */
-.gp-back { position: fixed; inset: 0; z-index: 9500; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(31,34,41,.48); }
-.gp-win { width: 420px; max-width: 100%; background: var(--white); border-radius: 8px; box-shadow: 0 16px 48px rgba(31,34,41,.32); overflow: hidden; }
-.gp-win-bar { display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: var(--black-5); border-bottom: 1px solid var(--border-light); font-size: 14px; color: var(--black-60); }
-.gp-win-url { flex: 1; display: flex; align-items: center; gap: 4px; height: 28px; padding: 0 12px; border-radius: 100px; background: var(--white); border: 1px solid var(--border-light); }
-.gp-win-bar button { border: 0; background: none; color: var(--black-60); cursor: pointer; display: inline-flex; padding: 4px; border-radius: 4px; }
-.gp-win-bar button:focus-visible, .gp-acc:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); }
-.gp-win-body { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
-.gp-win-h { font-size: 24px; line-height: 32px; font-weight: 450; }
-/* Account row: production match of Google's account chooser */
-.gp-acc { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px; border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); text-align: left; font-family: inherit; cursor: pointer; }
-.gp-acc:hover { background: var(--black-3); }
-.gp-av { width: 32px; height: 32px; border-radius: 50%; background: var(--green); color: var(--white); display: inline-flex; align-items: center; justify-content: center; font-weight: 500; flex: none; }
-.gp-acc-n { font-size: 16px; line-height: 22px; }
-.gp-acc-e { font-size: 14px; line-height: 20px; color: var(--black-60); }
-.gp-scope { padding: 12px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 14px; line-height: 20px; }
-.gp-btns { display: flex; justify-content: flex-end; gap: 8px; }
 /* Grant checks card (Google Identity Test Connection): production match of the Figma "Add Instance - Grants & Permissions" frame, DCP Consolidated 20668:60929 — same card, counter and coverage bar as the Feature Permission card below it */
 .gc-card { background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; overflow: hidden; }
 .gc-head { padding: 16px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
@@ -668,7 +651,51 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
 .gc-err { font-size: 14px; line-height: 20px; color: var(--black-100); }
 .gc-fix { margin: 8px 16px 16px 40px; padding: 12px; background: var(--white); border-radius: 4px; font-size: 14px; line-height: 20px; color: var(--black-100); }
 .gc-fix b { display: block; font-weight: 500; }
-.gp-win-note { padding: 8px 24px; background: var(--black-3); border-top: 1px solid var(--border-light); font-size: 14px; line-height: 20px; color: var(--black-60); }
+/* Google's sign-in window shown during Express for Google Identity (_gipPopPaint). A recreation of a third-party page, like the GitHub popup, so it carries Google's own palette and type (the raw hex below is that brand palette, not app styling).
+   An approximation drawn from memory of Google's account chooser and OAuth consent pages, not captured from the real flow. */
+.gg-back { position: fixed; inset: 0; z-index: 9500; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(32,33,36,.5); }
+.gg-win { width: 480px; max-width: 100%; max-height: calc(100vh - 32px); display: flex; flex-direction: column; background: #fff; border-radius: 8px; box-shadow: 0 16px 48px rgba(32,33,36,.4); overflow: hidden; font-family: 'Google Sans', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #202124; }
+.gg-bar { display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: #f1f3f4; border-bottom: 1px solid #dadce0; color: #5f6368; font-size: 14px; }
+.gg-url { flex: 1; display: flex; align-items: center; gap: 4px; height: 28px; padding: 0 12px; border-radius: 14px; background: #fff; border: 1px solid #dadce0; }
+.gg-x { border: 0; background: none; color: #5f6368; cursor: pointer; display: inline-flex; padding: 4px; border-radius: 50%; }
+.gg-x:hover { background: #e8eaed; }
+.gg-page { overflow-y: auto; padding: 24px 24px 0; }
+.gg-card { border: 1px solid #dadce0; border-radius: 8px; padding: 40px 40px 36px; }
+.gg-logo { display: flex; justify-content: center; margin-bottom: 8px; }
+.gg-logo svg { width: 24px; height: 24px; }
+.gg-head { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #dadce0; font-size: 14px; color: #3c4043; }
+.gg-card h1 { margin: 0; font-size: 24px; line-height: 32px; font-weight: 400; text-align: center; color: #202124; }
+.gg-head + h1 { text-align: left; font-size: 22px; line-height: 28px; }
+.gg-to { margin: 8px 0 24px; font-size: 16px; line-height: 24px; text-align: center; color: #202124; }
+.gg-to a, .gg-fine a, .gg-trust a { color: #0b57d0; text-decoration: none; font-weight: 500; }
+.gg-list { margin: 0 -40px; border-top: 1px solid #dadce0; }
+.gg-acc { display: flex; align-items: center; gap: 16px; width: 100%; padding: 12px 40px; border: 0; border-bottom: 1px solid #dadce0; background: #fff; text-align: left; font: inherit; cursor: pointer; }
+.gg-acc:hover { background: #f6f8fc; }
+.gg-acc:focus-visible { outline: 2px solid #0b57d0; outline-offset: -2px; }
+.gg-av { width: 32px; height: 32px; border-radius: 50%; background: #1a73e8; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; flex: none; }
+.gg-av.plain { background: none; color: #5f6368; }
+.gg-nm { display: block; font-size: 14px; line-height: 20px; color: #202124; }
+.gg-em { display: block; font-size: 12px; line-height: 16px; color: #5f6368; }
+.gg-fine { margin: 24px 0 0; font-size: 12px; line-height: 16px; color: #5f6368; }
+.gg-pill { display: inline-flex; align-items: center; gap: 8px; margin: 16px 0 24px; padding: 4px 12px 4px 4px; border: 1px solid #dadce0; border-radius: 16px; font-size: 14px; color: #3c4043; }
+.gg-pill .gg-av { width: 24px; height: 24px; font-size: 12px; }
+.gg-sec { font-size: 14px; line-height: 20px; color: #3c4043; margin-bottom: 12px; }
+.gg-scope { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-top: 1px solid #dadce0; border-bottom: 1px solid #dadce0; font-size: 14px; line-height: 20px; color: #202124; }
+.gg-scope input { margin: 2px 0 0; width: 18px; height: 18px; accent-color: #0b57d0; flex: none; }
+.gg-scope svg { margin-left: auto; flex: none; color: #5f6368; }
+.gg-trust { margin-top: 16px; font-size: 14px; line-height: 20px; color: #3c4043; }
+.gg-trust b { display: block; font-weight: 500; color: #202124; margin-bottom: 4px; }
+.gg-trust p { margin: 0 0 8px; }
+.gg-btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; }
+.gg-btn { height: 40px; padding: 0 24px; border: 0; border-radius: 20px; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }
+.gg-btn.text { background: none; color: #0b57d0; }
+.gg-btn.text:hover { background: #f0f4f9; }
+.gg-btn.fill { background: #0b57d0; color: #fff; }
+.gg-btn.fill:hover { background: #0a4dba; box-shadow: 0 1px 3px rgba(32,33,36,.3); }
+.gg-btn:focus-visible { outline: 2px solid #0b57d0; outline-offset: 2px; }
+.gg-foot { display: flex; align-items: center; justify-content: space-between; padding: 16px 8px 20px; font-size: 12px; color: #5f6368; }
+.gg-foot span { display: inline-flex; align-items: center; gap: 4px; }
+.gg-foot nav { display: flex; gap: 24px; }
 .ws-cfg-choice { position: relative; display: block; width: 100%; background: var(--white); border: 1px solid var(--border-light); border-radius: 4px; text-align: left; min-width: 0; }
 .ws-cfg-choice:hover:not(.is-selected) { border-color: var(--black-30); }
 .ws-cfg-choice.is-selected { border-color: var(--green); }
@@ -14743,8 +14770,8 @@ function resetOAuthFlow() {
 // ── Google Identity: sign-in window + Projects step ─────────────────────
 // Prototype: gip-express-flow.html (2026-11-04). Express opens Google's own window (account, then consent for the cloud-platform
 // scope; no organization or project chooser exists there), then lands on the Projects step, which both auth methods share.
-// Seeded with ONE organization, 56 projects (none selected) and NO quota project, which stays empty until someone picks one.
-var GIP_ORGS = [{ n: 'contoso.com', id: '123456789012' }];   // more than one renders the organization dropdown on the Projects step
+// Seeded with THREE organizations (the multi-org flow is the default; one organization skips the choice), 56 projects (none selected) and NO quota project, which stays empty until someone picks one.
+var GIP_ORGS = [{ n: 'contoso.com', id: '123456789012' }, { n: 'contoso-labs.com', id: '234567890123' }, { n: 'fabrikam-holdings.com', id: '345678901234' }];   // seeded with three so the multi-organization flow is the default (stays on Authentication to choose); with ONE entry Authentication hands straight on to Projects
 var GIP_ADMIN = 'admin@contoso.com';
 var GIP_PROJECTS = [];
 var gipState = { org: 0, mode: 'all', q: '', page: 1, pgSize: 10, quota: '', popup: null, ctx: 'connect', dd: null };
@@ -14790,9 +14817,27 @@ function _gipDdOptions(id) {
   return GIP_PROJECTS.map(function(p){ return { v: p.id, l: p.name, sub: p.id }; });
 }
 function _gipDdRepaint(id) { if (id === 'org') _gipPaintSigned(); else _gipPaintTop(); }
-function gipDdToggle(ev, id) { ev.stopPropagation(); var was = gipState.dd; gipState.dd = (was === id) ? null : id; if (was && was !== id) _gipDdRepaint(was); _gipDdRepaint(id); var q = document.getElementById('gp-dd-q-' + id); if (q) q.focus(); }
+// The panel is placed against the viewport (fixed) so no scroll container or overflow:hidden ancestor can clip it, and it opens upward when there is
+// not enough room above the footer; the options list shrinks to the room that is left.
+function _gipDdPlace() {
+  var panel = document.querySelector('.gp-dd-panel'); if (!panel) return;
+  var trig = panel.parentNode.querySelector('.gp-dd-trig'); if (!trig) return;
+  var r = trig.getBoundingClientRect(), scr = document.querySelector('.screen.active'), ft = scr && scr.querySelector('.wizard-footer');
+  var limit = (ft ? ft.getBoundingClientRect().top : window.innerHeight) - 8, topLimit = 8;
+  var opts = panel.querySelector('.gp-dd-opts'), search = panel.querySelector('.gp-dd-search');
+  panel.style.position = 'fixed'; panel.style.right = 'auto'; panel.style.left = r.left + 'px'; panel.style.width = r.width + 'px'; panel.style.maxHeight = 'none';
+  if (opts) opts.style.maxHeight = '220px';
+  var natural = panel.offsetHeight, below = limit - (r.bottom + 4), above = (r.top - 4) - topLimit, up = natural > below && above > below;
+  var room = Math.max(96, up ? above : below), chrome = natural - (opts ? opts.offsetHeight : 0);
+  if (opts && natural > room) opts.style.maxHeight = Math.max(48, room - chrome) + 'px';
+  panel.style.top = (up ? Math.max(topLimit, r.top - 4 - panel.offsetHeight) : r.bottom + 4) + 'px';
+}
+function gipDdToggle(ev, id) { ev.stopPropagation(); var was = gipState.dd; gipState.dd = (was === id) ? null : id; if (was && was !== id) _gipDdRepaint(was); _gipDdRepaint(id); _gipDdPlace(); var q = document.getElementById('gp-dd-q-' + id); if (q) q.focus(); }
+// A fixed panel would drift from its field, so scrolling the page or resizing the window closes it (scrolling the list itself does not).
+document.addEventListener('scroll', function(ev) { if (!gipState.dd || (ev.target.closest && ev.target.closest('.gp-dd-panel'))) return; var id = gipState.dd; gipState.dd = null; _gipDdRepaint(id); }, true);
+window.addEventListener('resize', function() { if (!gipState.dd) return; var id = gipState.dd; gipState.dd = null; _gipDdRepaint(id); });
 function gipDdKey(ev, id) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); gipDdToggle(ev, id); } }
-function gipDdFilter(id, v) { var el = document.getElementById('gp-dd-opts-' + id); if (el) el.innerHTML = _gipDdOpts(id, _gipDdOptions(id), id === 'org' ? gipState.org : gipState.quota, v); }
+function gipDdFilter(id, v) { var el = document.getElementById('gp-dd-opts-' + id); if (el) el.innerHTML = _gipDdOpts(id, _gipDdOptions(id), id === 'org' ? gipState.org : gipState.quota, v); _gipDdPlace(); }
 function gipDdPick(id, v) { if (id === 'org') gipState.org = +v; else gipState.quota = v; gipState.dd = null; _gipDdRepaint(id); if (id === 'org') _gipPaintTop(); }
 document.addEventListener('click', function(ev) {
   if (!gipState.dd || (ev.target.closest && ev.target.closest('.gp-dd'))) return;
@@ -14810,13 +14855,25 @@ function _gipPopPaint() {
   var host = document.getElementById('gip-popup');
   if (!gipState.popup) { if (host) host.remove(); return; }
   if (!host) { host = document.createElement('div'); host.id = 'gip-popup'; document.body.appendChild(host); }
-  var h = '<div class="gp-back"><div class="gp-win" role="dialog" aria-label="Google sign-in window"><div class="gp-win-bar"><span class="gp-win-url">' + _gipIc('lock-outlined', 16) + 'accounts.google.com</span><button type="button" aria-label="Close window" onclick="_gipPopClose()">' + _gipIc('close-outlined', 20) + '</button></div><div class="gp-win-body">';
+  // Google's own look (the .gg-* rules above). The logo is the Google G already used on the Express button.
+  var G = ((WORKLOADS.gip.expressIcon || '').replace(/width="18"/, 'width="24"').replace(/height="18"/, 'height="24"'));
+  var ic = function(n, z){ return (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg(n, z)) || ''; };
+  var foot = '<div class="gg-foot"><span>English (United States) ' + ic('keyboard-arrow-down-outlined', 16) + '</span><nav><span>Help</span><span>Privacy</span><span>Terms</span></nav></div>';
+  var h = '<div class="gg-back"><div class="gg-win" role="dialog" aria-label="Google sign-in window"><div class="gg-bar"><span class="gg-url">' + ic('lock-outlined', 16) + 'accounts.google.com</span><button type="button" class="gg-x" aria-label="Close window" onclick="_gipPopClose()">' + ic('close-outlined', 20) + '</button></div><div class="gg-page">';
   if (gipState.popup === 'account') {
-    h += '<div class="gp-win-h">Choose an account</div><button type="button" class="gp-acc" onclick="gipState.popup=\'consent\';_gipPopPaint()"><span class="gp-av">A</span><span><div class="gp-acc-n">Alex Admin</div><div class="gp-acc-e">' + GIP_ADMIN + '</div></span></button>';
+    h += '<div class="gg-card"><div class="gg-logo">' + G + '</div><h1>Choose an account</h1><div class="gg-to">to continue to <a href="#" onclick="return false">Veeam Data Cloud</a></div>' +
+      '<div class="gg-list"><button type="button" class="gg-acc" onclick="gipState.popup=\'consent\';_gipPopPaint()"><span class="gg-av">A</span><span><span class="gg-nm">Alex Admin</span><span class="gg-em">' + GIP_ADMIN + '</span></span></button>' +
+      '<button type="button" class="gg-acc" onclick="gipState.popup=\'consent\';_gipPopPaint()"><span class="gg-av plain">' + ic('user-outlined', 24) + '</span><span class="gg-nm">Use another account</span></button></div>' +
+      '<p class="gg-fine">Before using this app, you can review Veeam Data Cloud’s <a href="#" onclick="return false">privacy policy</a> and <a href="#" onclick="return false">terms of service</a>.</p></div>';
   } else {
-    h += '<div class="gp-win-h">Veeam Data Cloud wants access to your Google Account</div><div class="gp-acc" style="cursor:default"><span class="gp-av">A</span><span><div class="gp-acc-n">Alex Admin</div><div class="gp-acc-e">' + GIP_ADMIN + '</div></span></div><div class="gp-scope"><b style="font-weight:500">See, edit, configure and delete your Google Cloud data.</b><br>Veeam uses this once, during setup, and discards it when setup finishes.</div><div class="gp-btns"><button type="button" class="btn btn-outline" onclick="_gipPopClose()">Cancel</button><button type="button" class="btn btn-blue" onclick="_gipPopAllow()">Allow</button></div>';
+    h += '<div class="gg-card"><div class="gg-head">' + G + 'Sign in with Google</div><h1>Veeam Data Cloud wants access to your Google Account</h1>' +
+      '<div class="gg-pill"><span class="gg-av">A</span>' + GIP_ADMIN + ' ' + ic('keyboard-arrow-down-outlined', 16) + '</div>' +
+      '<div class="gg-sec">This will allow Veeam Data Cloud to:</div>' +
+      '<div class="gg-scope"><input type="checkbox" checked disabled aria-label="Allowed"><span>See, edit, configure, and delete your Google Cloud data and see the email address for your Google Account.</span>' + ic('info-outlined', 20) + '</div>' +
+      '<div class="gg-trust"><b>Make sure you trust Veeam Data Cloud</b><p>You may be sharing sensitive info with this site or app. You can always see or remove access in your Google Account.</p><p><a href="#" onclick="return false">Learn how Google helps you share data safely.</a></p><p>See Veeam Data Cloud’s <a href="#" onclick="return false">Privacy Policy</a> and <a href="#" onclick="return false">Terms of Service</a>.</p></div>' +
+      '<div class="gg-btns"><button type="button" class="gg-btn text" onclick="_gipPopClose()">Cancel</button><button type="button" class="gg-btn fill" onclick="_gipPopAllow()">Continue</button></div></div>';
   }
-  host.innerHTML = h + '</div><div class="gp-win-note">This is Google’s window, opened by your browser. It is not part of the Veeam interface.</div></div></div>';
+  host.innerHTML = h + foot + '</div></div></div>';
 }
 function _gipPopClose() {
   var ctx = gipState.ctx; gipState.popup = null; _gipPopPaint();
