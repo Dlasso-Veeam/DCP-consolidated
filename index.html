@@ -554,16 +554,131 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
 .am-card.sel { border: 2px solid var(--green); padding: 15px; }
 .am-card:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); }
 .am-row { display: flex; align-items: center; gap: 8px; }
+.am-row.am-top { align-items: flex-start; }   /* a name that wraps keeps the chip on its first line */
 .am-name { font-size: 16px; font-weight: 500; color: var(--black-100); }
 .am-card.sel .am-name { color: var(--green); }
 .am-chip { font-size: 14px; font-weight: 500; color: var(--green); background: var(--green-soft-160); padding: 2px 8px; border-radius: 2px; letter-spacing: 0; }
 .am-desc { font-size: 14px; line-height: 20px; color: var(--black-60); margin-top: 4px; }
 .am-setup { margin: 24px 16px 16px; display: flex; flex-direction: column; gap: 16px; }
-.am-setup-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.am-setup-head { display: flex; align-items: center; justify-content: flex-start; gap: 8px; }   /* the help button sits right beside the heading, not at the far edge */
 .am-setup-title { font-size: 16px; font-weight: 500; color: var(--black-100); }
 .am-ex { display: flex; flex-direction: column; gap: 16px; }
 .am-ex > * { margin-bottom: 0 !important; }   /* the stack's own gap spaces them; each block still carries the margin it had inside the old card */
 .am-rest { font-size: 14px; line-height: 20px; color: var(--black-60); }
+.am-pair.am-flush, .am-setup.am-flush { margin-left: 0; margin-right: 0; }   /* env step: the form-card already supplies the gutter the auth step gets from its own margin */
+.am-setup.am-flush { margin-bottom: 0; }
+
+/* ── Environment selection (Power Platform): production match of protected-data.html — the header bulk caret (.dx-bulk-caret) + menu (.dx-bm / .dx-mi / .dx-nb / .dx-md),
+   the pager (.pgds-*) and the D365 "Include related records" selection card (.ws-cfg-choice.sc.rc-card), cloned through env-select-options.html option E (2026-11-04) ── */
+.dx-bulk-caret { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; margin-left: 4px; padding: 0; border: 0; border-radius: 4px; background: var(--black-5); color: var(--black-100); cursor: pointer; }
+.dx-bulk-caret:hover { background: var(--black-10); }
+.dx-bulk-caret svg { width: 20px; height: 20px; }
+.dx-bulk-caret:focus-visible, .pgds-arrow:focus-visible, .pgds-chip:focus-visible, .dx-mi:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); }
+.dx-bm { position: absolute; top: calc(100% + 4px); left: 0; z-index: 30; min-width: 280px; max-width: 360px; padding: 4px 0; background: var(--white); border: 1px solid var(--border); border-radius: 4px; box-shadow: 0 8px 24px rgba(31,34,41,.16); font-weight: 450; }
+.dx-mi { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; padding: 8px 16px; border: 0; background: transparent; text-align: left; font-family: inherit; font-size: 16px; line-height: 22px; color: var(--black-100); cursor: pointer; }
+.dx-nb { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 22px; padding: 0 8px; box-sizing: border-box; border-radius: 2px; background: var(--black-5); color: var(--black-60); font-size: 14px; font-weight: 500; line-height: 20px; flex: none; }
+.dx-mi:disabled .dx-nb { opacity: .5; }
+.dx-mi:hover:not(:disabled) { background: var(--black-5); }
+.dx-mi:disabled { color: var(--black-30); cursor: default; }
+.dx-md { height: 1px; margin: 4px 0; background: var(--border-light); }
+.pg-bar { display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 8px 0; background: var(--white); font-size: 14px; color: var(--black-60); }
+.pgds-left, .pgds-pages, .pgds-right { font-size: 14px; }
+.pgds-left { display: flex; align-items: center; gap: 8px; flex-shrink: 0; white-space: nowrap; }
+.pgds-pages { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+.pgds-chips { display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-width: 150px; }
+.pgds-right { display: flex; align-items: center; gap: 16px; flex: 0 0 auto; white-space: nowrap; }
+.pgds-select { height: 28px; padding: 0 30px 0 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--form-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23626469'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 10px center; appearance: none; -webkit-appearance: none; font-family: inherit; font-size: 16px; color: var(--black-100); cursor: pointer; }
+.pgds-goto { color: var(--black-60); min-width: 130px; }
+.pgds-chip { min-width: 24px; height: 24px; padding: 0 6px; border: 1px solid transparent; border-radius: 2px; background: transparent; font-family: inherit; font-size: 14px; font-weight: 450; color: var(--black-100); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.pgds-chip:hover { background: var(--black-5); }
+.pgds-chip.current, .pgds-chip.current:hover { background: var(--green-10); border-color: var(--green-30); color: var(--green); }
+.pgds-arrow { width: 24px; height: 24px; border: 0; padding: 0; background: transparent; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+.pgds-arrow:hover:not(:disabled) { background: var(--black-5); color: var(--black-100); }
+.pgds-arrow:disabled { opacity: 0.35; cursor: default; }
+.pgds-gap { color: var(--black-60); }
+
+/* ── Google Identity Projects step + sign-in window. Production match of protected-data.html / env-select-options.html (table, pager, selection cards reuse the classes above); the connected alert is the Alerts component, Figma DCP Consolidated 4685:6580 ── */
+.gp-ok { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 12px; border: 1px solid var(--green-30); border-radius: 4px; background: var(--green-10); }
+.gp-ok > svg { flex: none; color: var(--green); align-self: flex-start; }
+.gp-ok-t { flex: 1; min-width: 0; font-size: 16px; line-height: 24px; color: var(--black-100); }
+.gp-ok-s { font-size: 14px; line-height: 20px; color: var(--black-60); }
+.gp-ok .btn { display: inline-flex; align-items: center; gap: 8px; flex: none; }
+/* Select field: production match of the shipped form-input / .pgds-select treatment */
+.gp-fld { display: flex; flex-direction: column; gap: 4px; margin-top: 16px; }
+.gp-fld-l { font-size: 14px; font-weight: 500; color: var(--black-100); }
+.gp-fld-h { font-size: 14px; line-height: 20px; color: var(--black-60); }
+.gp-fld-h.warn { color: var(--orange); }
+/* Dropdown: production match of the Region selector on this page (okta-region-wrap): .form-input trigger with a chevron, a bordered panel with an optional search row and hover-highlighted options */
+.gp-dd { position: relative; }
+.gp-dd-trig { cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.gp-dd-trig.is-empty .gp-dd-val { color: var(--black-30); }
+.gp-dd-val { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gp-dd-trig:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); }
+.gp-dd-panel { position: absolute; top: 48px; left: 0; right: 0; z-index: 50; background: var(--white); border: 1px solid var(--border); border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-height: 280px; overflow: hidden; }
+.gp-dd-search { padding: 8px; border-bottom: 1px solid var(--border-light); }
+.gp-dd-opts { max-height: 220px; overflow-y: auto; }
+.gp-dd-opt { padding: 8px 12px; font-size: 14px; cursor: pointer; color: var(--black-100); }
+.gp-dd-opt:hover { background: var(--black-3); }
+.gp-dd-opt.is-sel { font-weight: 500; color: var(--green); }
+.gp-dd-opt .gp-dd-sub { color: var(--black-60); font-weight: 450; margin-left: 8px; }
+/* Google sign-in window: production match of Google's own account chooser and consent pages (recreation, as the GitHub popup) */
+.gp-back { position: fixed; inset: 0; z-index: 9500; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(31,34,41,.48); }
+.gp-win { width: 420px; max-width: 100%; background: var(--white); border-radius: 8px; box-shadow: 0 16px 48px rgba(31,34,41,.32); overflow: hidden; }
+.gp-win-bar { display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: var(--black-5); border-bottom: 1px solid var(--border-light); font-size: 14px; color: var(--black-60); }
+.gp-win-url { flex: 1; display: flex; align-items: center; gap: 4px; height: 28px; padding: 0 12px; border-radius: 100px; background: var(--white); border: 1px solid var(--border-light); }
+.gp-win-bar button { border: 0; background: none; color: var(--black-60); cursor: pointer; display: inline-flex; padding: 4px; border-radius: 4px; }
+.gp-win-bar button:focus-visible, .gp-acc:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); }
+.gp-win-body { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+.gp-win-h { font-size: 24px; line-height: 32px; font-weight: 450; }
+/* Account row: production match of Google's account chooser */
+.gp-acc { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px; border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); text-align: left; font-family: inherit; cursor: pointer; }
+.gp-acc:hover { background: var(--black-3); }
+.gp-av { width: 32px; height: 32px; border-radius: 50%; background: var(--green); color: var(--white); display: inline-flex; align-items: center; justify-content: center; font-weight: 500; flex: none; }
+.gp-acc-n { font-size: 16px; line-height: 22px; }
+.gp-acc-e { font-size: 14px; line-height: 20px; color: var(--black-60); }
+.gp-scope { padding: 12px; border: 1px solid var(--border-light); border-radius: 8px; font-size: 14px; line-height: 20px; }
+.gp-btns { display: flex; justify-content: flex-end; gap: 8px; }
+/* Grant checks card (Google Identity Test Connection): production match of the Figma "Add Instance - Grants & Permissions" frame, DCP Consolidated 20668:60929 — same card, counter and coverage bar as the Feature Permission card below it */
+.gc-card { background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; overflow: hidden; }
+.gc-head { padding: 16px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.gc-title { font-size: 16px; font-weight: 500; line-height: 22px; color: var(--black-100); }
+.gc-sub { font-size: 14px; line-height: 20px; color: var(--black-60); margin-top: 2px; }
+.gc-count { text-align: right; flex: none; }
+.gc-num { font-size: 24px; font-weight: 500; line-height: 32px; color: var(--black-100); letter-spacing: -0.02em; }
+.gc-bar { padding: 0 16px 16px; }
+.gc-barl { display: flex; justify-content: space-between; font-size: 14px; color: var(--black-60); margin-bottom: 4px; }
+.gc-track { display: flex; height: 4px; border-radius: 2px; overflow: hidden; background: var(--black-5); }
+.gc-ok { background: var(--green); transition: width .4s; }
+.gc-bad { background: var(--red); transition: width .4s; }
+.gc-cat { border-top: 1px solid var(--border-light); display: flow-root; }   /* flow-root keeps the last child's bottom margin inside, so the failed tint fills to the edge */
+.gc-cat.failed { background: var(--red-5); }
+.gc-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; }
+.gc-row:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--green); }
+.gc-txt { flex: 1; min-width: 0; }
+.gc-name { font-size: 16px; font-weight: 500; line-height: 22px; color: var(--black-100); }
+.gc-cat.failed .gc-name { color: var(--red); }
+.gc-note { font-size: 14px; line-height: 20px; color: var(--black-60); }
+.gc-cat.failed .gc-note { color: var(--red); }
+.gc-chev { flex: none; display: inline-flex; color: var(--black-60); transition: transform .15s; }
+.gc-chev.closed { transform: rotate(-90deg); }
+.gc-ind { flex: none; display: inline-flex; }
+.gc-kid { display: flex; align-items: center; gap: 12px; padding: 0 16px 0 40px; min-height: 44px; margin-bottom: 4px; }
+.gc-kid .gc-txt { font-size: 16px; line-height: 22px; color: var(--black-100); }
+.gc-proj { font-size: 16px; font-weight: 500; line-height: 22px; color: var(--red); }
+.gc-err { font-size: 14px; line-height: 20px; color: var(--black-100); }
+.gc-fix { margin: 8px 16px 16px 40px; padding: 12px; background: var(--white); border-radius: 4px; font-size: 14px; line-height: 20px; color: var(--black-100); }
+.gc-fix b { display: block; font-weight: 500; }
+.gp-win-note { padding: 8px 24px; background: var(--black-3); border-top: 1px solid var(--border-light); font-size: 14px; line-height: 20px; color: var(--black-60); }
+.ws-cfg-choice { position: relative; display: block; width: 100%; background: var(--white); border: 1px solid var(--border-light); border-radius: 4px; text-align: left; min-width: 0; }
+.ws-cfg-choice:hover:not(.is-selected) { border-color: var(--black-30); }
+.ws-cfg-choice.is-selected { border-color: var(--green); }
+.sc-header { position: relative; display: flex; align-items: center; gap: 8px; min-height: 38px; padding: 8px 44px 8px 12px; background: var(--black-3); border-radius: 3px 3px 0 0; font-size: 16px; font-weight: 450; line-height: 22px; color: var(--black-100); cursor: pointer; }
+.is-selected > .sc-header { background: var(--green-10); color: var(--green); font-weight: 700; line-height: 20px; }
+.rc-card:not(.is-selected) .sc-header:hover { background: var(--black-5); }
+.rc-card .sc-header:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--green); }
+.sc-desc { display: block; padding: 8px 12px; background: var(--white); border-radius: 0 0 3px 3px; font-size: 14px; font-weight: 450; line-height: 20px; color: var(--black-60); }
+.rc-icon { display: inline-flex; flex: none; }
+.rc-cb { position: absolute; top: 8px; right: 12px; width: 20px; height: 20px; margin: 0; pointer-events: none; }
 .onb-note-info .onb-note-glyph { color: var(--black-60); }
 .onb-note-caution { background: var(--orange-10); border: 1px solid var(--orange-30); }
 .onb-note-caution .onb-note-glyph { color: var(--orange); }
@@ -818,7 +933,7 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
 .success-modal.okf { display: none; max-width: 780px; padding: 0; overflow: hidden; border-radius: 8px; }
 #success-overlay.okf-on .success-modal.okf { display: block; }
 .okf-top { position: relative; background: var(--green-10) url('okf-bg.png') right top / cover no-repeat; padding: 32px; min-height: 240px; box-sizing: border-box; overflow: hidden; }
-.okf-top h2 { font-family: 'Circular Pro', sans-serif; font-size: 40px; font-weight: 500; line-height: 52px; letter-spacing: -0.02em; color: var(--black-100); margin: 0 0 24px; max-width: 420px; position: relative; z-index: 1; }
+.okf-top h2 { font-family: 'Circular Pro', sans-serif; font-size: 40px; font-weight: 500; line-height: 52px; letter-spacing: -0.02em; color: var(--black-100); margin: 0 0 24px; max-width: 560px; text-wrap: balance; position: relative; z-index: 1; }   /* was 420px: sized for 'Okta has been successfully set up.'; every longer workload name broke onto three lines (7 of 11) */
 .okf-inst { display: flex; align-items: center; gap: 12px; position: relative; z-index: 1; }
 .okf-inst .tile { width: 48px; height: 48px; border: 1px solid var(--border-light); border-radius: 4px; background: var(--white); display: flex; align-items: center; justify-content: center; color: var(--black-100); }
 .okf-inst .nm { font-size: 16px; font-weight: 500; color: var(--black-100); display: flex; align-items: center; gap: 8px; }
@@ -838,6 +953,9 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
 .ovk-acts { display: flex; gap: 8px; }
 .ovk-btn { height: 36px; padding: 0 12px; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; }
 .ovk-btn.ovk-danger { color: var(--red); border-color: var(--red); }
+#okta-region-wrap.is-error .form-input { border-color: var(--red); }
+#okta-region-err { display: none; margin-top: 4px; font-size: 14px; line-height: 20px; color: var(--red); }
+#okta-region-wrap.is-error + #okta-region-err { display: block; }
 #okta-region-wrap.is-locked .form-input { background: var(--black-5); color: var(--black-60); cursor: not-allowed; pointer-events: none; }
 #okta-region-wrap.is-locked .form-input span { color: var(--black-60) !important; }
 .okta-edit-lock { display: flex; align-items: flex-start; gap: 8px; margin-top: 8px; font-size: 14px; line-height: 20px; color: var(--black-60); }
@@ -1271,6 +1389,10 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
 #screen-test-conn.okv.okv-p2 .okv-head { display: block; }
 #screen-test-conn.okv.okv-p2 #tc-conn-card { border-radius: 8px 8px 0 0 !important; border-bottom: 1px solid var(--border-light) !important; }
 #screen-test-conn.okv.okv-p2 #tc-perm-card { border-top: none !important; border-radius: 0 0 8px 8px !important; }
+/* Google Identity: the Grant checks card sits between the two, so the connectivity and Feature Permission cards stand alone (Figma 20668:60929) */
+#screen-test-conn.okv.okv-p2.gc-on #tc-col { gap: 16px !important; }
+#screen-test-conn.okv.okv-p2.gc-on #tc-conn-card { border-radius: 8px !important; }
+#screen-test-conn.okv.okv-p2.gc-on #tc-perm-card { border-top: 1px solid var(--border-light) !important; border-radius: 8px !important; }
 #screen-test-conn.okv #tc-conn-icon { width: 56px; height: 56px; border: 1px solid var(--border-light); border-radius: 4px; color: var(--black-100); }
 #screen-test-conn.okv #tc-perm-pending { padding: 16px; }
 #screen-test-conn.okv #tc-perm-pending p { font-size: 14px; }
@@ -2180,50 +2302,33 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
                 </div>
 
 
-                <!-- Mode-card group: wrapped in its own flex stack so the
-                     two cards sit 12px apart (matching the auth screen's
-                     Express → Manual spacing). The wrapper isolates the
-                     cards from .form-card's outer gap:20px, which was
-                     stacking on top of any inline margin and pushing
-                     them ~32px apart. -->
-                <div style="display:flex;flex-direction:column;gap:12px">
-                <div id="env-mode-card-all" onclick="selectEnvMode('all')" style="border:2px solid var(--green);border-radius:8px;padding:20px;cursor:pointer;background:var(--white);transition:all 0.15s">
-                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-                    <span style="font-size:16px;font-weight:500;color:var(--black-100)">Include all Production and Sandbox environments</span>
-                    <span style="font-size: 14px;font-weight:500;color:var(--green);background:var(--green-soft-160);padding:2px 8px;border-radius:2px">Recommended</span>
+                <!-- Mode selection (same pattern as the auth step, user 2026-11-04): the two cards only SELECT — name, Recommended chip, one line — and sit side by side;
+                     what the chosen mode means (the all-summary, or the filters + search + table) is page content below them in #env-setup, so no card grows with its content.
+                     Was: two full-width stacked cards, the custom one holding its own filter chips, search and table. Ids the env JS reads are unchanged. -->
+                <div id="env-mode-cards" class="am-pair am-flush" role="radiogroup" aria-label="Environment scope">
+                  <div id="env-mode-card-all" class="am-card sel" role="radio" aria-checked="true" tabindex="0" onclick="selectEnvMode('all')" onkeydown="envModeCardKey(event,'all')">
+                    <div class="am-row am-top"><span class="am-name">Include all Production and Sandbox environments</span><span class="am-chip">Recommended</span></div>
+                    <div class="am-desc">Includes every environment now and any added later.</div>
                   </div>
-                  <div style="font-size:14px;color:var(--black-60);margin-bottom:12px">Every production and sandbox environment is included automatically — both the ones we discovered now and any new ones added later. Trial and developer environments are excluded; switch to <strong style="color:var(--black-100);font-weight:500">Include selected environments</strong> to include them.</div>
-                  <div id="env-all-summary" style="font-size:14px;color:var(--black-60)"></div>
+                  <div id="env-mode-card-custom" class="am-card" role="radio" aria-checked="false" tabindex="0" onclick="selectEnvMode('custom')" onkeydown="envModeCardKey(event,'custom')">
+                    <div class="am-row"><span class="am-name">Include selected environments</span></div>
+                    <div class="am-desc">Back up only the environments you pick.</div>
+                  </div>
                 </div>
 
-                <!-- Mode card B: Include selected environments (collapsed by default). -->
-                <div id="env-mode-card-custom" onclick="selectEnvMode('custom')" style="border:1px solid var(--border-light);border-radius:8px;padding:20px;cursor:pointer;background:var(--white);transition:all 0.15s">
-                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-                    <span style="font-size:16px;font-weight:500;color:var(--black-100)">Include selected environments</span>
+                <!-- Setup for the selected mode. -->
+                <div id="env-setup" class="am-setup am-flush">
+                  <div id="env-setup-title" class="am-setup-title">All environments</div>
+                  <div id="env-all-panel" class="am-ex">
+                    <div class="am-rest">Every production and sandbox environment is included automatically — both the ones we discovered now and any new ones added later. Trial and developer environments are excluded; switch to <strong style="color:var(--black-100);font-weight:500">Include selected environments</strong> to include them.</div>
+                    <div id="env-all-summary" style="font-size:14px;color:var(--black-60)"></div>
                   </div>
-                  <div style="font-size:14px;color:var(--black-60)">Back up only the environments you select. New environments stay out of scope unless <strong style="color:var(--black-100);font-weight:500">Auto-add new environments</strong> is on, in which case future environments matching your filters are added automatically.</div>
-
-                  <!-- Custom body: pinned filter chips + search + table.
-                       Event handlers stop at the body so chip/input
-                       interactions don't re-trigger card selection. -->
-                  <div id="env-custom-body" style="display:none;margin-top:16px;border-top:1px solid var(--border-light);padding-top:16px" onclick="event.stopPropagation()">
-                    <!-- Filter chip row: type chips on the left, the
-                         auto-add behavior toggle pushed to the right.
-                         The eyebrow label was removed — the chip
-                         shapes are self-explanatory and the row reads
-                         tighter without it. -->
-                    <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px">
-                      <div id="env-type-chips" style="display:flex;flex-wrap:wrap;gap:6px"></div>
-                      <div id="env-auto-add-wrap" style="display:inline-flex;align-items:center;gap:8px;flex-shrink:0">
-                        <button type="button" id="env-auto-add-future" class="toggle-switch" onclick="toggleAutoAddFutureFromChip()" role="switch" aria-checked="false" aria-label="Auto-add new environments matching these filters">
-                          <span class="toggle-knob"></span>
-                        </button>
-                        <span id="env-auto-add-label" style="font-size:14px;line-height:1.2;color:var(--black-100);user-select:none;cursor:pointer" onclick="toggleAutoAddFutureFromChip()">Auto-add new environments matching the selected types above</span>
-                        <span class="info-tip" tabindex="0" data-tooltip="When new environments are discovered later, automatically include the ones whose type matches the selected filter chips. Off by default — newly-discovered environments stay out of scope until you return to this screen and add them yourself." aria-label="More info">
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                        </span>
-                      </div>
-                    </div>
+                  <div id="env-custom-body" style="display:none">
+                    <div id="env-custom-intro" class="am-rest" style="margin-bottom:16px">Back up only the environments you select. Use the arrow in the table header to select a whole type or every page.</div>
+                    <!-- Auto-add: the selection card from the D365 "Include related records" block (protected-data.html), one fixed rule — new Production and Sandbox
+                         environments, the same scope as Include all. Replaces the type chips + the global "match the selected types" toggle (2026-11-04); rendered by renderEnvAutoCard.
+                         Hidden for D365, which has no auto-add. -->
+                    <div id="env-auto-card" style="margin-bottom:12px"></div>
 
                     <div style="position:relative;margin-bottom:12px">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--black-60)" stroke-width="2" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -2237,9 +2342,12 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
                          compete with the table for visual weight. -->
                     <div id="env-custom-selection-summary" style="font-size:14px;color:var(--black-60);margin-bottom:8px"></div>
 
-                    <div style="border:1px solid var(--border-light);border-radius:4px;overflow:hidden">
+                    <div id="env-table-box" style="border:1px solid var(--border-light);border-radius:4px;overflow:hidden">
                       <div id="env-table-header" style="display:grid;grid-template-columns:36px 1fr 110px;align-items:center;background:var(--black-3);padding:8px 12px;font-size: 14px;font-weight:500;color:var(--black-60);border-bottom:1px solid var(--border-light)">
-                        <input type="checkbox" id="env-table-master" onchange="toggleEnvAllVisibleRows(this.checked)" style="margin:0">
+                        <div style="display:flex;align-items:center;position:relative;white-space:nowrap">
+                          <input type="checkbox" id="env-table-master" onchange="toggleEnvAllVisibleRows(this.checked)" style="margin:0">
+                          <span id="env-bulk-host" style="display:contents"></span>
+                        </div>
                         <span>Environment</span>
                         <span>Type</span>
                         <!-- 4th column "Status" appears for inline-provisioning
@@ -2248,10 +2356,10 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
                       </div>
                       <div id="env-table-rows" style="max-height:380px;overflow-y:auto"></div>
                     </div>
+                    <div id="env-pager"></div>
 
                   </div>
-                </div>
-                </div><!-- /mode-card group -->
+                </div><!-- /env-setup -->
               </div>
             </div>
           </div>
@@ -2265,6 +2373,82 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
           <div class="wizard-footer">
             <div class="form-footer">
               <button class="btn btn-blue btn-full" id="env-screen-continue-btn" onclick="commitEnvSelection()" style="font-weight:500;height:44px">Grant Access and Test Connection</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== GOOGLE IDENTITY: PROJECTS ==========
+           Restore projects + quota project, reached from both Express and Manual (requiresProjectList). -->
+      <div class="screen" id="screen-gip-projects">
+        <div class="topbar">
+          <div class="page-title-area">
+            <div class="breadcrumbs">
+              <span id="gp-bc" style="display:inline-flex"></span>
+              <span class="bc-sep">&rsaquo;</span><span>Connections</span><span class="bc-sep">&rsaquo;</span>
+            </div>
+            <div class="topbar-row">
+              <div class="page-title">
+                <span class="wl-page-icon"></span>
+                <span class="wl-instance-name">GoogleIdentity-connection-1</span>
+              </div>
+              <div class="topbar-actions">
+                <button class="btn btn-outline" onclick="goTo('catalog')">Cancel</button>
+                <button class="btn-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><text x="12" y="17" text-anchor="middle" font-size="13" font-weight="600" font-family="Arial,sans-serif" fill="currentColor" stroke="none">?</text></svg></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="body-split">
+          <div class="left-sidebar"></div>
+          <div class="main-scroll">
+            <div class="form-area">
+              <div class="form-card">
+                <div class="form-title">Projects</div>
+                <div class="form-subtitle">We discovered <strong style="color:var(--black-100)" id="gp-count">0</strong> projects in <strong style="color:var(--black-100)" id="gp-org">your organization</strong>. Choose the projects Veeam can restore into.</div>
+
+                <div id="gp-conn"></div>
+
+                <!-- Same two cards as the Environments step (selection only); what each means is page content below. -->
+                <div id="gp-mode-cards" class="am-pair am-flush" role="radiogroup" aria-label="Restore projects">
+                  <div id="gp-card-all" class="am-card sel" role="radio" aria-checked="true" tabindex="0" onclick="gipSetMode('all')" onkeydown="gipCardKey(event,'all')">
+                    <div class="am-row am-top"><span class="am-name">Include all projects in the organization</span><span class="am-chip">Recommended</span></div>
+                    <div class="am-desc">Includes every project now and any created later.</div>
+                  </div>
+                  <div id="gp-card-sel" class="am-card" role="radio" aria-checked="false" tabindex="0" onclick="gipSetMode('sel')" onkeydown="gipCardKey(event,'sel')">
+                    <div class="am-row"><span class="am-name">Include selected projects</span></div>
+                    <div class="am-desc">Restore only into the projects you pick.</div>
+                  </div>
+                </div>
+
+                <!-- Quota project: always visible and required, directly under the cards. Prefilled only when Veeam has a verified project; seeded empty here. -->
+                <div id="gp-quota" style="margin-top:16px"></div>
+
+                <div id="gp-setup" class="am-setup am-flush">
+                  <div id="gp-setup-title" class="am-setup-title">All projects</div>
+                  <div id="gp-sel-body" style="display:none">
+                    <div class="am-rest" style="margin-bottom:16px">Restore only into the projects you select. Projects created later stay out of scope until you add them.</div>
+                    <div style="position:relative;margin-bottom:12px">
+                      <span id="gp-search-ic" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--black-60);display:inline-flex"></span>
+                      <input class="form-input" id="gp-search" placeholder="Search by name or project ID" style="padding-left:34px;height:36px" oninput="gipSearch(this.value)">
+                    </div>
+                    <div id="gp-summary" style="font-size:14px;color:var(--black-60);margin-bottom:8px"></div>
+                    <div style="border:1px solid var(--border-light);border-radius:4px;overflow:hidden">
+                      <div id="gp-hdr" style="display:grid;grid-template-columns:36px 1fr 160px;column-gap:16px;align-items:center;background:var(--black-3);padding:8px 12px;font-size:14px;font-weight:500;color:var(--black-60);border-bottom:1px solid var(--border-light)">
+                        <input type="checkbox" id="gp-master" onchange="gipTogglePage(this.checked)" aria-label="Select all projects on this page" style="margin:0">
+                        <span>Project</span><span>Folder</span>
+                      </div>
+                      <div id="gp-rows"></div>
+                    </div>
+                    <div id="gp-pager"></div>
+                  </div>
+                </div><!-- /gp-setup -->
+              </div>
+            </div>
+          </div>
+          <div class="wizard-footer">
+            <div class="form-footer">
+              <button class="btn btn-blue btn-full" id="gp-continue-btn" onclick="commitGipProjects()" style="font-weight:500;height:44px">Test Connection</button>
             </div>
           </div>
         </div>
@@ -2842,6 +3026,7 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
                       <div id="okta-region-options" style="max-height:220px;overflow-y:auto"></div>
                     </div>
                   </div>
+                  <div id="okta-region-err" role="alert">Select a processing region to continue.</div>
                   <div class="oka-help">Inventory, activity and discovery scans run here. Content read for scanning is encrypted in transit and at rest and purged after each scan. Pick the region closest to your tenant or the one your policy requires.</div>
                 </div>
                 <div style="padding:24px 24px 16px">
@@ -2915,10 +3100,10 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
 
                 <!-- Setup for the selected method. One help button here (user 2026-11-03: help lives with the content it explains, not on the selection cards). -->
                 <div id="auth-setup" class="am-setup">
-                  <div class="am-setup-head"><div id="am-setup-title" class="am-setup-title">Express setup</div><button class="btn-icon" style="width:36px;height:36px;border-radius:4px;border:1px solid var(--border)" onclick="toggleHelpDrawer()" aria-label="Help"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><text x="12" y="17" text-anchor="middle" font-size="13" font-weight="600" font-family="Arial,sans-serif" fill="currentColor" stroke="none">?</text></svg></button></div>
+                  <div class="am-setup-head"><div id="am-setup-title" class="am-setup-title">Express authentication</div><button class="btn-icon" style="width:36px;height:36px;border-radius:4px;border:1px solid var(--border)" onclick="toggleHelpDrawer()" aria-label="Help"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><text x="12" y="17" text-anchor="middle" font-size="13" font-weight="600" font-family="Arial,sans-serif" fill="currentColor" stroke="none">?</text></svg></button></div>
                   <div id="express-setup" class="am-ex">
                     <div id="express-desc-rest" class="am-rest" style="display:none"></div>
-                  <div id="express-benefits" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+                  <div id="express-benefits" style="display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:16px">
                     <div id="express-benefit-1-row" style="display:flex;align-items:center;gap:6px;font-size:14px;color:var(--black-60)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg><span id="express-benefit-1">Zero-credential management</span></div>
                     <div id="express-benefit-2-row" style="display:flex;align-items:center;gap:6px;font-size:14px;color:var(--black-60)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg><span id="express-benefit-2">Auto-token refresh</span></div>
                     <div id="express-benefit-3-row" style="display:flex;align-items:center;gap:6px;font-size:14px;color:var(--black-60)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg><span id="express-benefit-3">Minimal permission scopes</span></div>
@@ -2972,6 +3157,9 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
                   </div>
 
                   <!-- Waiting state (hidden) -->
+                  <!-- Google Identity: the signed-in card (Alerts component, Figma 4685:6580) replaces the CTA once Google's window closes; the footer button becomes Continue. -->
+                  <div id="gip-signed" style="display:none"></div>
+
                   <div id="auth-status-waiting" onclick="event.stopPropagation()" style="display:none;background: var(--blue-light);border:1px solid #a4dcf1;border-radius:8px;padding:14px 16px;align-items:center;gap:8px">
                     <svg width="16" height="16" viewBox="0 0 56 56" class="spinner-ring" style="flex-shrink:0"><circle cx="28" cy="28" r="12" fill="none" stroke="#a4dcf1" stroke-width="2.5"/><circle cx="28" cy="28" r="12" fill="none" stroke="#1ca8dd" stroke-width="2.5" stroke-dasharray="25 50" stroke-linecap="round"/></svg>
                     <span id="auth-waiting-text" style="font-size:14px;font-weight:500;color:var(--black-100)">Waiting for GitHub authorization&hellip;</span>
@@ -3380,7 +3568,7 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
                   </div>
                 </div>
 
-                <div style="padding:0 16px 16px;font-size: 14px;color:var(--black-60);text-align:center">You can change the connection method or reauthorize at any time from the connection's Authentication settings.</div>
+                <div style="padding:0 16px 16px;font-size: 14px;color:var(--black-60);text-align:left">You can change the connection method or reauthorize at any time from the connection's Authentication settings.</div>
               </div>
             </div>
           </div>
@@ -3443,6 +3631,9 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
               </div>
+
+              <!-- Google Identity: Grant checks (Figma DCP Consolidated 20668:60929), rendered by _gcPaint -->
+              <div id="tc-gip-grants" style="display:none"></div>
 
               <!-- Permission Status Card (hidden in stage 1) -->
               <div id="tc-perm-pending" style="background:var(--black-3);border:1px solid var(--border-light);border-radius:8px;padding:24px;text-align:center">
@@ -4814,6 +5005,7 @@ function refreshSidebar() {
     'ado-orgs': 'organizations',
     'confluence-sites': 'sites',
     'confluence-spaces': 'spaces',
+    'gip-projects': 'projects',
     'test-conn': 'test',
     'infra-storage': 'infra',
     'scope': 'scope'
@@ -4833,6 +5025,7 @@ var stepMap = {
   'ado-orgs': 'connect',
   'confluence-sites': 'connect',
   'confluence-spaces': 'connect',
+  'gip-projects': 'connect',
   'test-conn': 'connect',
   'permissions': 'connect',
   'infra-storage': 'connect',
@@ -4908,7 +5101,9 @@ function getConnectSubSteps() {
   // front now.
   var subs = [];
   if (w.requiresApplicationStep) subs.push(apps);
-  if (_regionOnAuth()) return [];   // Okta, GitHub: Region sits on the Authentication page; no sub-steps in the rail
+  // Google Identity (2026-11-04): the Okta-style rail keeps one Authentication row, with Projects as its own step after it (Authentication, Projects, then the connection test).
+  var projects = {id:'projects', label:'Projects', icon:envs.icon};
+  if (_regionOnAuth()) return w.requiresProjectList ? [projects] : [];   // Okta, GitHub: Region sits on the Authentication page; no sub-steps in the rail
   subs.push(infra, auth);
   if (effectiveRequiresEnvList()) subs.push(envs);
   if (effectiveRequiresWorkspaceList()) subs.push(workspaces);
@@ -5016,7 +5211,8 @@ function sidebarHTML(activeStep, subStep) {
     // there's no sub-step underneath carrying that highlight instead —
     // Connect's own row stays neutral while one of its sub-steps (or
     // the transient Test Connection state) is what's actually current.
-    var cls = (act && (!subStep || (isOkta && subStep !== 'test'))) ? ' active' : (done ? ' completed' : '');
+    var onProjects = (isOkta && s.id === 'connect' && act && subStep === 'projects');   // Google Identity Projects step: Authentication is behind you
+    var cls = (act && !onProjects && (!subStep || (isOkta && subStep !== 'test'))) ? ' active' : ((done || onProjects) ? ' completed' : '');
     var svgAttr = s.filled ? 'viewBox="0 0 20 20" fill="currentColor"' : 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"';
     var itemClick = done ? ' onclick="goToStep(\''+s.id+'\')"' : '';
 
@@ -5035,15 +5231,10 @@ function sidebarHTML(activeStep, subStep) {
     // error hexagon if anything failed.
     var pastVisibleSubsteps = !!subStep && activeSubIdx === -1 && !(isOkta && subStep !== 'test');
     var connectTestBadge = _tcStatus === 'failed' ? errorSvg : (_tcStatus === 'success' ? checkSvg : progSvg);
-    var badge = done ? checkSvg : ((s.id === 'connect' && act && pastVisibleSubsteps) ? connectTestBadge : '');
+    var badge = (done || onProjects) ? checkSvg : ((s.id === 'connect' && act && pastVisibleSubsteps) ? connectTestBadge : '');
 
     var rowLabel = (isOkta && s.id === 'connect') ? 'Authentication' : s.label;
     h += '<div class="sb-item'+cls+'"'+itemClick+'><div class="ic"><svg '+svgAttr+'>'+s.icon+'</svg></div>'+rowLabel+((isOkta && s.id === 'connect' && act && subStep === 'test') ? progSvg : badge)+'</div>';
-    // Okta: a "Connection Test" row appears under Authentication only while the test runs
-    if (isOkta && s.id === 'connect' && act && subStep === 'test') {
-      h += '<div class="sb-sub active"><div class="ic"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M5.5 6.5h8.1l-1.8-1.8.9-.9 3.2 3.2-3.2 3.2-.9-.9 1.8-1.8H5.5v-1zm9 7H6.4l1.8 1.8-.9.9-3.2-3.2 3.2-3.2.9.9-1.8 1.8h8.1v1z"/></svg></div>Connection Test'+(_tcStatus === 'failed' ? '<span class="sb-badge error"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3.5L2.5 20h19L12 3.5z"/><path d="M12 10v4M12 17h.01" stroke-linecap="round"/></svg></span>' : connectTestBadge)+'</div>';
-    }
-
     if (subSteps && subSteps.length) {
       subSteps.forEach(function(sub, si){
         var subAct = act && subStep === sub.id;
@@ -5054,6 +5245,11 @@ function sidebarHTML(activeStep, subStep) {
         h += '<div class="sb-sub'+subCls+'"'+subClick+'><div class="ic"><svg viewBox="0 0 20 20" fill="currentColor">'+sub.icon+'</svg></div>'+sub.label+subBadge+'</div>';
       });
     }
+    // Okta / Google Identity: a "Connection Test" row appears under Authentication only while the test runs (after Projects, for Google Identity)
+    if (isOkta && s.id === 'connect' && act && subStep === 'test') {
+      h += '<div class="sb-sub active"><div class="ic"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M5.5 6.5h8.1l-1.8-1.8.9-.9 3.2 3.2-3.2 3.2-.9-.9 1.8-1.8H5.5v-1zm9 7H6.4l1.8 1.8-.9.9-3.2-3.2 3.2-3.2.9.9-1.8 1.8h8.1v1z"/></svg></div>Connection Test'+(_tcStatus === 'failed' ? '<span class="sb-badge error"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3.5L2.5 20h19L12 3.5z"/><path d="M12 10v4M12 17h.01" stroke-linecap="round"/></svg></span>' : connectTestBadge)+'</div>';
+    }
+
   });
   if (isOkta) {
     var dim = ' style="opacity:.5;cursor:default;pointer-events:none"';
@@ -5122,6 +5318,7 @@ function goToStep(id) {
     'organizations': 'ado-orgs',
     'sites':         'confluence-sites',
     'spaces':        'confluence-spaces',
+    'projects':      'gip-projects',
     'infra':         'infra-storage',
     'scope':         'scope',
     'protect':       'protect'
@@ -5180,6 +5377,7 @@ function goTo(screen) {
     'ado-orgs': 'organizations',
     'confluence-sites': 'sites',
     'confluence-spaces': 'spaces',
+    'gip-projects': 'projects',
     'infra-storage': 'infra',
     'scope': 'scope'
   };
@@ -5217,6 +5415,9 @@ function goTo(screen) {
   }
   if (screen === 'confluence-spaces' && typeof enterSpacesScreen === 'function') {
     enterSpacesScreen();
+  }
+  if (screen === 'gip-projects' && typeof enterGipProjects === 'function') {
+    enterGipProjects();
   }
 
   // Repaint the scope step on entry — pulls live counts from the current
@@ -6572,6 +6773,7 @@ function enterEnvScreen() {
   if (errEl) errEl.style.display = 'none';
   var search = document.getElementById('env-search-input');
   if (search) search.value = '';
+  envPage = 1; envMenuOpen = false;
   renderEnvScreen();
 }
 
@@ -6581,37 +6783,33 @@ function renderEnvScreen() {
   var customCard = document.getElementById('env-mode-card-custom');
   var customBody = document.getElementById('env-custom-body');
   if (!allCard || !customCard) return;          // not on the env screen
-  // D365 (per the Maxim D365 flow) drops the "Auto-add new environments"
-  // future-scope toggle — the admin selects environments explicitly. Hidden
-  // for D365 only; Power Platform keeps it.
-  var autoAddWrap = document.getElementById('env-auto-add-wrap');
-  if (autoAddWrap) autoAddWrap.style.display = (currentWorkload === 'd365') ? 'none' : 'inline-flex';
+  // D365 (per the Maxim D365 flow) drops "Add new environments automatically"
+  // — the admin selects environments explicitly. The card is hidden for D365
+  // only; Power Platform keeps it (renderEnvAutoCard below).
   // D365 (per the Maxim D365 flow): no "Include all / Include selected" mode
   // cards — the env screen is just the table, with only Production pre-selected
   // (seedD365Environments). Force the table view; the chrome-strip below hides
   // the card wrappers. PP keeps the full mode-card UI.
   var isD365Env = (currentWorkload === 'd365');
   if (isD365Env) envSelectMode = 'custom';
-  if (envSelectMode === 'all') {
-    allCard.style.border = '2px solid var(--green)';
-    customCard.style.border = '1px solid var(--border-light)';
-    customBody.style.display = 'none';
-  } else {
-    allCard.style.border = '1px solid var(--border-light)';
-    customCard.style.border = '2px solid var(--green)';
-    customBody.style.display = 'block';
-  }
-  // Strip the mode-card chrome for D365 (table-only); restore it otherwise.
-  allCard.style.display = isD365Env ? 'none' : '';
-  Array.prototype.forEach.call(customCard.children, function(ch){
-    if (ch.id !== 'env-custom-body') ch.style.display = isD365Env ? 'none' : '';
+  var allOn = (envSelectMode === 'all');
+  [[allCard, allOn], [customCard, !allOn]].forEach(function(p){
+    p[0].classList.toggle('sel', p[1]);
+    p[0].setAttribute('aria-checked', p[1] ? 'true' : 'false');
   });
-  customCard.style.border = isD365Env ? 'none' : customCard.style.border;
-  customCard.style.padding = isD365Env ? '0' : '20px';
-  customCard.style.cursor = isD365Env ? 'default' : 'pointer';
-  customBody.style.borderTop = isD365Env ? 'none' : '1px solid var(--border-light)';
-  customBody.style.marginTop = isD365Env ? '0' : '16px';
-  customBody.style.paddingTop = isD365Env ? '0' : '16px';
+  var allPanel = document.getElementById('env-all-panel');
+  var setupTitle = document.getElementById('env-setup-title');
+  var customIntro = document.getElementById('env-custom-intro');
+  var setupHost = document.getElementById('env-setup');
+  if (allPanel) allPanel.style.display = allOn ? '' : 'none';
+  customBody.style.display = allOn ? 'none' : 'block';
+  if (setupTitle) setupTitle.textContent = allOn ? 'All environments' : 'Selected environments';
+  // D365: table only, no mode cards and no setup heading or intro; restored for Power Platform.
+  var cardsHost = document.getElementById('env-mode-cards');
+  if (cardsHost) cardsHost.style.display = isD365Env ? 'none' : '';
+  if (setupTitle) setupTitle.style.display = isD365Env ? 'none' : '';
+  if (customIntro) customIntro.style.display = isD365Env ? 'none' : '';
+  if (setupHost) setupHost.style.marginTop = isD365Env ? '0' : '';
 
   // "Include all" summary line — describes what the user is about to
   // commit to so it's not opaque ("just trust us").
@@ -6632,7 +6830,7 @@ function renderEnvScreen() {
     allSummary.innerHTML = includedEnvs.length + ' environments — ' + parts.join(', ') + '.';
   }
 
-  renderEnvTypeChips();
+  renderEnvAutoCard();
   renderEnvTable();
   updateEnvScreenCTA();
 }
@@ -6671,6 +6869,8 @@ function chipStateForCount(sel, total) {
   return 'partial';
 }
 
+// Retired 2026-11-04 on the Environments step: the type chips were replaced by the header bulk menu
+// (envBulkHtml) and the auto-add card (renderEnvAutoCard). Kept, inert — #env-type-chips no longer exists.
 function renderEnvTypeChips() {
   var container = document.getElementById('env-type-chips');
   if (!container) return;
@@ -6716,6 +6916,9 @@ function renderEnvTable() {
     return e.name.toLowerCase().indexOf(search) !== -1 ||
            e.url.toLowerCase().indexOf(search) !== -1;
   });
+  // Power Platform: the header carries the bulk menu and the list is paged. D365 keeps its plain table.
+  var bulk = envBulkUi();
+  var shown = bulk ? envPageSlice(visible) : visible;
   // Inline-provisioning workloads (D365) render an extra column on the
   // right showing per-env provisioning state + an action button when
   // user input is needed. Other workloads keep the simpler 3-column
@@ -6730,8 +6933,8 @@ function renderEnvTable() {
   // copy. Once _pipelineStarted flips, the column reveals and the
   // grid shifts to a 4-track layout.
   var showStatusCol = inlineProv && _pipelineStarted;
-  var rowCols = showStatusCol ? '36px minmax(0,1fr) 110px 220px' : '36px 1fr 110px';
-  var html = visible.map(function(e){
+  var rowCols = showStatusCol ? '36px minmax(0,1fr) 110px 220px' : (bulk ? '48px 1fr 110px' : '36px 1fr 110px');
+  var html = shown.map(function(e){
     var typeCls = 'env-pill-' + e.type.toLowerCase();
     // Inline state badge — rendered only when state is non-default.
     // "Enabled" is the common case and adds no information; we'd
@@ -6766,9 +6969,9 @@ function renderEnvTable() {
   // assisted bulk-edit pattern.
   var master = document.getElementById('env-table-master');
   if (master) {
-    var sel = visible.filter(function(e){ return e.selected; }).length;
-    master.checked = visible.length > 0 && sel === visible.length;
-    master.indeterminate = sel > 0 && sel < visible.length;
+    var sel = shown.filter(function(e){ return e.selected; }).length;
+    master.checked = shown.length > 0 && sel === shown.length;
+    master.indeterminate = sel > 0 && sel < shown.length;
   }
 
   // Sync the table header's grid + Status column visibility to the
@@ -6778,6 +6981,107 @@ function renderEnvTable() {
   if (hdr) hdr.style.gridTemplateColumns = rowCols;
   var hdrStatus = document.getElementById('env-table-header-status');
   if (hdrStatus) hdrStatus.style.display = showStatusCol ? 'inline' : 'none';
+
+  // Bulk header + pager (Power Platform). The box stops clipping so the menu can open over the page; rows page instead of scrolling.
+  var box = document.getElementById('env-table-box');
+  if (box) box.style.overflow = bulk ? 'visible' : 'hidden';
+  if (hdr) { hdr.style.columnGap = bulk ? '16px' : ''; hdr.style.borderRadius = bulk ? '3px 3px 0 0' : ''; }
+  rows.style.maxHeight = bulk ? 'none' : '380px';
+  rows.style.overflowY = bulk ? 'visible' : 'auto';
+  var bulkHost = document.getElementById('env-bulk-host');
+  if (bulkHost) bulkHost.innerHTML = bulk ? envBulkHtml(visible, shown) : '';
+  var pager = document.getElementById('env-pager');
+  if (pager) pager.innerHTML = bulk ? envPgBar(visible.length) : '';
+}
+
+// ── Environment selection: bulk menu, pager, auto-add card ────────────
+// The header checkbox takes the rows on the current page; the caret beside it opens the menu (all pages, this page, one type) —
+// the select-all grammar of Protected Data. A search narrows what every item acts on. There is deliberately no "Select none":
+// at least one environment must stay selected to continue.
+var envPage = 1, envPgSize = 10, envMenuOpen = false;
+function envBulkUi() { return currentWorkload !== 'd365'; }
+function envVisibleList() {
+  var q = (envSearchTerm || '').toLowerCase();
+  return ENV_STATE.filter(function(e){ return !q || e.name.toLowerCase().indexOf(q) !== -1 || e.url.toLowerCase().indexOf(q) !== -1; });
+}
+function envPageSlice(list) {
+  var np = Math.max(1, Math.ceil(list.length / envPgSize));
+  envPage = Math.min(Math.max(1, envPage), np);
+  return list.slice((envPage - 1) * envPgSize, envPage * envPgSize);
+}
+function envBulkHtml(visible, shown) {
+  var caret = '<button type="button" class="dx-bulk-caret" aria-label="Selection options" aria-haspopup="menu" aria-expanded="' + envMenuOpen + '" data-tooltip="More" onclick="toggleEnvBulkMenu(event)">' + _dsStoreIconSvg('keyboard-arrow-down-outlined', 20) + '</button>';
+  if (!envMenuOpen) return caret;
+  var item = function(label, count, on, dis) {
+    return '<button type="button" class="dx-mi" role="menuitem"' + (dis ? ' disabled' : '') + ' onclick="' + on + '"><span>' + label + '</span><span class="dx-nb">' + count + '</span></button>';
+  };
+  var allSel = function(list) { return list.every(function(e){ return e.selected; }); };
+  var np = Math.ceil(visible.length / envPgSize);
+  var h = '<div class="dx-bm" role="menu" onclick="event.stopPropagation()">';
+  h += item('Select all environments across all pages', visible.length, "envBulkPick('all')", allSel(visible));
+  if (np > 1) h += item('Select all environments on this page', shown.length, "envBulkPick('page')", allSel(shown));
+  h += '<div class="dx-md"></div>';
+  ENV_TYPE_ORDER.forEach(function(t){
+    var of = visible.filter(function(e){ return e.type === t; });
+    if (of.length) h += item('Select all ' + t + ' environments', of.length, "envBulkPick('type','" + t + "')", allSel(of));
+  });
+  return caret + h + '</div>';
+}
+function toggleEnvBulkMenu(ev) {
+  ev.stopPropagation();
+  envMenuOpen = !envMenuOpen;
+  renderEnvTable();
+}
+function envBulkPick(what, type) {
+  var list = envVisibleList();
+  var target = what === 'page' ? envPageSlice(list) : (what === 'type' ? list.filter(function(e){ return e.type === type; }) : list);
+  target.forEach(function(e){ e.selected = true; });
+  envMenuOpen = false;
+  renderEnvScreen();
+}
+function envGoPage(n) { envPage = n; renderEnvTable(); }
+function envSetPgSize(n) { envPgSize = n; envPage = 1; renderEnvTable(); }
+function envPgBar(total) {
+  if (total <= 10) return '';
+  var pages = Math.max(1, Math.ceil(total / envPgSize)), c = Math.min(Math.max(1, envPage), pages);
+  var arrow = function(dir, dis) {
+    return '<button class="pgds-arrow" type="button"' + (dis ? ' disabled' : '') + ' onclick="envGoPage(' + (c + (dir === 'prev' ? -1 : 1)) + ')" aria-label="' + (dir === 'prev' ? 'Previous' : 'Next') + ' page"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="' + (dir === 'prev' ? '15 18 9 12 15 6' : '9 18 15 12 9 6') + '"/></svg></button>';
+  };
+  var nums = [], chips = '', i;
+  for (i = 1; i <= pages; i++) if (pages <= 7 || i === 1 || i === pages || Math.abs(i - c) <= 1) nums.push(i);
+  nums.forEach(function(n, k){
+    if (k && n - nums[k - 1] > 1) chips += '<span class="pgds-gap">…</span>';
+    chips += '<button type="button" class="pgds-chip' + (n === c ? ' current' : '') + '" onclick="envGoPage(' + n + ')">' + n + '</button>';
+  });
+  var gos = '<option value="">Go to Page</option>';
+  for (i = 1; i <= pages; i++) gos += '<option value="' + i + '">' + i + '</option>';
+  var sizes = [10, 25, 50, 100].map(function(n){ return '<option value="' + n + '"' + (n === envPgSize ? ' selected' : '') + '>' + n + '</option>'; }).join('');
+  return '<div class="pg-bar"><div class="pgds-left"><span>Showing</span><select class="pgds-select" aria-label="Rows per page" onchange="envSetPgSize(+this.value)">' + sizes + '</select><span>per page</span></div>' +
+    '<div class="pgds-pages">' + arrow('prev', c <= 1) + '<span class="pgds-chips">' + chips + '</span>' + arrow('next', c >= pages) + '</div>' +
+    '<div class="pgds-right"><select class="pgds-select pgds-goto" aria-label="Go to page" onchange="if(this.value)envGoPage(+this.value)">' + gos + '</select><span>' + total + ' environments</span></div></div>';
+}
+document.addEventListener('click', function(ev) {
+  if (envMenuOpen && !(ev.target.closest && ev.target.closest('.dx-bm')) && document.getElementById('env-table-rows')) { envMenuOpen = false; renderEnvTable(); }
+});
+document.addEventListener('keydown', function(ev) {
+  if (ev.key === 'Escape' && envMenuOpen && document.getElementById('env-table-rows')) { envMenuOpen = false; renderEnvTable(); }
+});
+// Auto-add: one fixed rule — new Production and Sandbox environments (the Include all scope), independent of which rows are selected,
+// so selecting or clearing rows never changes it. Developer and Trial are never added automatically.
+function renderEnvAutoCard() {
+  var host = document.getElementById('env-auto-card');
+  if (!host) return;
+  if (currentWorkload === 'd365') { host.style.display = 'none'; host.innerHTML = ''; return; }
+  host.style.display = '';
+  var on = !!_envAutoAddFutureForFilters;
+  var key = "if (event.key === ' ' || event.key === 'Enter') { event.preventDefault(); toggleEnvAutoAdd(); }";
+  host.innerHTML = '<div class="ws-cfg-choice sc rc-card' + (on ? ' is-selected' : '') + '" role="group" aria-label="Add new environments automatically">' +
+    '<div class="sc-header" role="checkbox" aria-checked="' + on + '" tabindex="0" onclick="toggleEnvAutoAdd()" onkeydown="' + key + '">' +
+      '<span class="rc-icon">' + _dsStoreIconSvg('discovery-scan-outlined', 20) + '</span>' +
+      '<span class="ws-cfg-choice-title">Add new environments automatically</span>' +
+      '<input type="checkbox" class="rc-cb" tabindex="-1" aria-hidden="true"' + (on ? ' checked' : '') + '>' +
+    '</div>' +
+    '<div class="sc-desc">Production and Sandbox environments added to your tenant later are included.</div></div>';
 }
 
 // ── D365 inline provisioning: per-env state machine ─────────────────
@@ -7048,6 +7352,7 @@ function reverifyEnv(id) {
 
 function onEnvSearchInput(v) {
   envSearchTerm = v;
+  envPage = 1;
   renderEnvTable();
 }
 
@@ -7059,12 +7364,23 @@ function toggleEnvRow(id) {
 }
 
 function toggleEnvAllVisibleRows(checked) {
+  if (envBulkUi()) {
+    // Power Platform: the header checkbox takes the rows on the current page; the menu beside it reaches further.
+    envPageSlice(envVisibleList()).forEach(function(e){ e.selected = !!checked; });
+    envMenuOpen = false;
+    renderEnvScreen();
+    return;
+  }
   var search = (envSearchTerm || '').toLowerCase();
   ENV_STATE.forEach(function(e){
     if (search && e.name.toLowerCase().indexOf(search) === -1 && e.url.toLowerCase().indexOf(search) === -1) return;
     e.selected = !!checked;
   });
   renderEnvScreen();
+}
+
+function envModeCardKey(ev, mode) {
+  if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); selectEnvMode(mode); }
 }
 
 function selectEnvMode(mode) {
@@ -7392,6 +7708,95 @@ function _tcOkvChrome(on, w) {
     var ff = $('tc-perm-bar-fail'); if (ff) ff.style.background = 'var(--orange)';
   }
 }
+// ── Google Identity: Grant checks on the Test Connection step ─────────────
+// Figma DCP Consolidated 20668:60929: four categories of grant checks (Authorization and project, Organization setup, Workspace directory,
+// Restore targets) above the Feature Permission card, with a steps-verified counter and a coverage bar. The first run seeds a Restore targets
+// failure (two projects missing a role) so the failure state and its fix are visible; Retry passes everything, as for the other workloads.
+var _gcState = null, _gcTimers = [];
+function _gcTargets() {
+  _gipSeed();
+  return gipState.mode === 'all' ? GIP_PROJECTS.slice() : GIP_PROJECTS.filter(function(p){ return p.sel; });
+}
+function _gcBuild(isRetry) {
+  var express = (typeof currentAuthMethod === 'undefined' || currentAuthMethod !== 'manual');
+  var org = express ? _gipOrg().id : ((document.getElementById('manual-gip-org-id') || {}).value || _gipOrg().id);
+  var qp = gipState.quota || 'veeam-quota-1';
+  var targets = _gcTargets(), bad = [];
+  if (!isRetry) { [1, 4].forEach(function(i){ if (i < targets.length) bad.push(targets[i].id); }); if (!bad.length && targets.length) bad.push(targets[0].id); }
+  var kid = function(t){ return { t: t, st: 'pending' }; };
+  var cats = [
+    { id: 'auth', name: 'Authorization and project', icon: 'lock-outlined', kids: [kid(express ? 'Google consent covers the cloud-platform scope' : 'Service account key is accepted by Google'), kid('Quota project ' + qp + ' is usable'), kid('Required APIs are enabled on ' + qp)] },
+    { id: 'org', name: 'Organization setup', icon: 'organization-outlined', kids: (express ? [kid('Org policy allow-list patched')] : []).concat([kid('Backup role roles/iam.securityReviewer bound at org ' + org), kid('Restore role roles/iam.securityAdmin bound at org ' + org)]) },
+    { id: 'dir', name: 'Workspace directory', icon: 'users-outlined', kids: [kid('Workspace directory scopes are active')] },
+    { id: 'targets', name: 'Restore targets', icon: 'restore-point-outlined', rollup: true, st: 'pending', targets: targets, bad: bad }
+  ];
+  return { cats: cats, open: {}, userOpen: {}, ok: 0, fail: 0, total: cats.reduce(function(n, c){ return n + (c.rollup ? 1 : c.kids.length); }, 0) };
+}
+function _gcCatState(c) {
+  if (c.rollup) return c.st;
+  var done = c.kids.filter(function(k){ return k.st !== 'pending'; }).length;
+  if (done < c.kids.length) return 'pending';
+  return c.kids.some(function(k){ return k.st === 'fail'; }) ? 'fail' : 'ok';
+}
+function _gcInd(st) {
+  var base = 'width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;';
+  if (st === 'ok') return '<div style="' + base + 'background:var(--green-10);border:1.5px solid var(--green);color:var(--green)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>';
+  if (st === 'fail') return '<div style="' + base + 'background:var(--red-10);border:1.5px solid var(--red);color:var(--red)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>';
+  return '<svg width="44" height="44" viewBox="0 0 40 40" class="spinner-ring"><circle cx="20" cy="20" r="17" fill="none" stroke="var(--black-5)" stroke-width="2"/><circle cx="20" cy="20" r="17" fill="none" stroke="var(--green)" stroke-width="2" stroke-dasharray="25 80" stroke-linecap="round"/></svg>';
+}
+function _gcPaint() {
+  var host = document.getElementById('tc-gip-grants'); if (!host || !_gcState) return;
+  var S = _gcState, okPct = Math.round(S.ok / S.total * 100), badPct = Math.round(S.fail / S.total * 100), esc = escapeHtml;
+  var h = '<div class="gc-card"><div class="gc-head"><div><div class="gc-title">Grant checks</div><div class="gc-sub">Verifying scope coverage across all ' + S.cats.length + ' categories</div></div><div class="gc-count"><div class="gc-num">' + S.ok + '/' + S.total + '</div><div class="gc-sub" style="margin-top:0">Steps verified</div></div></div>' +
+    '<div class="gc-bar"><div class="gc-barl"><span>Grant coverage</span><span' + (S.fail ? ' style="color:var(--red)"' : '') + '>' + okPct + '%</span></div><div class="gc-track"><div class="gc-ok" style="width:' + okPct + '%"></div><div class="gc-bad" style="width:' + badPct + '%"></div></div></div>';
+  S.cats.forEach(function(c) {
+    var st = _gcCatState(c), n = c.rollup ? c.targets.length : c.kids.length, open = S.userOpen[c.id] != null ? S.userOpen[c.id] : (S.open[c.id] || st === 'fail');
+    var note = c.rollup
+      ? (st === 'pending' ? 'Checking ' + n + ' project' + (n === 1 ? '' : 's') : st === 'fail' ? 'Failed: ' + c.bad.length + ' of ' + n + ' projects are missing roles/iam.roleAdmin' : 'All ' + n + ' project' + (n === 1 ? '' : 's') + ' granted roles/iam.roleAdmin')
+      : (st === 'pending' ? 'Checking' : c.kids.filter(function(k){ return k.st === 'ok'; }).length + ' of ' + n + ' passed');
+    h += '<div class="gc-cat' + (st === 'fail' ? ' failed' : '') + '"><div class="gc-row" role="button" tabindex="0" aria-expanded="' + open + '" onclick="gcToggle(\'' + c.id + '\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();gcToggle(\'' + c.id + '\')}"><div class="perm-row-icon">' + (_dsStoreIconSvg(c.icon, 24) || '') + '</div><div class="gc-txt"><div class="gc-name">' + c.name + '</div><div class="gc-note">' + note + '</div></div><span class="gc-chev' + (open ? '' : ' closed') + '">' + (_dsStoreIconSvg('keyboard-arrow-down-outlined', 20) || '') + '</span><span class="gc-ind">' + _gcInd(st) + '</span></div>';
+    if (open) {
+      if (c.rollup) {
+        if (st === 'fail') {
+          c.bad.forEach(function(id){ h += '<div class="gc-kid" style="align-items:flex-start;padding-top:8px;padding-bottom:8px"><div class="gc-txt"><div class="gc-proj">' + esc(id) + '</div><div class="gc-err">PERMISSION_DENIED — service account lacks resourcemanager.projectIamAdmin on ' + esc(id) + '</div></div><span class="gc-ind">' + _gcInd('fail') + '</span></div>'; });
+          h += '<div class="gc-fix"><b>How to fix it</b>Grant the Veeam service account roles/resourcemanager.projectIamAdmin on each restore-target project listed, then retry.</div>';
+        } else if (st === 'ok') h += '<div class="gc-kid"><div class="gc-txt gc-note">Every restore-target project has roles/iam.roleAdmin.</div></div>';
+      } else c.kids.forEach(function(k){ h += '<div class="gc-kid"><div class="gc-txt">' + esc(k.t) + '</div><span class="gc-ind">' + _gcInd(k.st) + '</span></div>'; });
+    }
+    h += '</div>';
+  });
+  host.innerHTML = h + '</div>';
+}
+function gcToggle(id) {
+  if (!_gcState) return;
+  var c = _gcState.cats.filter(function(x){ return x.id === id; })[0], st = _gcCatState(c);
+  var cur = _gcState.userOpen[id] != null ? _gcState.userOpen[id] : (_gcState.open[id] || st === 'fail');
+  _gcState.userOpen[id] = !cur; _gcPaint();
+}
+function _gcReset(on) {
+  _gcTimers.forEach(clearTimeout); _gcTimers = [];
+  var host = document.getElementById('tc-gip-grants'); if (!host) return;
+  host.style.display = 'none'; host.innerHTML = ''; _gcState = null;   // the card appears when connectivity succeeds (_gcRun)
+}
+function _gcLayout(on) { var sc = document.getElementById('screen-test-conn'); if (sc) sc.classList.toggle('gc-on', !!on); }
+// Resolves one step at a time (about 450ms apart); done(anyFailed) fires when the last one lands.
+function _gcRun(isRetry, done) {
+  var host = document.getElementById('tc-gip-grants'); if (host) host.style.display = 'block';
+  _gcState = _gcBuild(isRetry); _gcPaint();
+  var steps = [];
+  _gcState.cats.forEach(function(c){ if (c.rollup) steps.push({ c: c }); else c.kids.forEach(function(k){ steps.push({ c: c, k: k }); }); });
+  steps.forEach(function(x, i) {
+    _gcTimers.push(setTimeout(function() {
+      var screen = document.getElementById('screen-test-conn'); if (!screen || !screen.classList.contains('active') || !_gcState) return;
+      var failed = x.c.rollup ? x.c.bad.length > 0 : false;
+      if (x.c.rollup) x.c.st = failed ? 'fail' : 'ok'; else x.k.st = 'ok';
+      if (failed) _gcState.fail++; else _gcState.ok++;
+      _gcPaint();
+      if (i === steps.length - 1 && done) done(_gcState.fail > 0);
+    }, 500 + i * 450 + (x.c.rollup ? 600 : 0)));
+  });
+}
+
 function runTestConnectionSequence(isRetry) {
   _tcStatus = 'running';
   if (typeof refreshSidebar === 'function') refreshSidebar();
@@ -7409,6 +7814,8 @@ function runTestConnectionSequence(isRetry) {
     spinnerSvg = '<svg width="44" height="44" viewBox="0 0 40 40" class="spinner-ring"><circle cx="20" cy="20" r="17" fill="none" stroke="var(--black-5)" stroke-width="2"/><circle cx="20" cy="20" r="17" fill="none" stroke="var(--green)" stroke-width="2" stroke-dasharray="80 27" stroke-linecap="round"/></svg>';
   }
   _tcOkvChrome(isOkv, w);
+  var hasGrants = !!(w && w.requiresProjectList), grantsDone = !hasGrants;   // Google Identity: the Grant checks card gates the final state
+  _gcReset(hasGrants); _gcLayout(hasGrants);
   // Connected-domain context for the top "Connection test" card (user
   // 2026-09-30: "couldn't we add the context of which domain is currently
   // connected to the card at the top of the testing step" — the card
@@ -7598,6 +8005,7 @@ function runTestConnectionSequence(isRetry) {
     // Show permission card, hide pending
     document.getElementById('tc-perm-pending').style.display = 'none';
     document.getElementById('tc-perm-card').style.display = 'block';
+    if (hasGrants) _gcRun(isRetry, function(bad){ grantsDone = true; if (bad) anyFailed = true; maybeFinalizeFooter(); });
 
     // ── D365 per-environment row resolution ──
     // One check per environment, staggered 700ms apart — all succeed.
@@ -7775,7 +8183,7 @@ function runTestConnectionSequence(isRetry) {
   // index is numerically higher. Counting completions is the robust
   // signal — fires exactly once when completedCount hits totalRows.
   function maybeFinalizeFooter() {
-    if (completedCount < totalRows) return;
+    if (completedCount < totalRows || !grantsDone) return;
     _tcStatus = anyFailed ? 'failed' : 'success';
     if (typeof refreshSidebar === 'function') refreshSidebar();
     // The top "Connection test" card and the "Connection checks" card
@@ -7795,7 +8203,7 @@ function runTestConnectionSequence(isRetry) {
       var scrEl = document.getElementById('screen-test-conn');
       scrEl.classList.remove('okv-running');
       var failFill = document.getElementById('tc-perm-bar-fail'); if (failFill) failFill.style.background = 'var(--red)';
-      var pctEl = document.getElementById('tc-perm-pct'); if (pctEl && anyFailed) pctEl.style.color = 'var(--red)';
+      var pctEl = document.getElementById('tc-perm-pct'); if (pctEl && failedCount > 0) pctEl.style.color = 'var(--red)';   // the feature rows' own failures only; a Grant checks failure is shown on its own card
       var reIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>';
       footer.innerHTML = '<div style="display:flex;gap:8px;width:100%"><button class="btn btn-outline" onclick="goTo(\'auth\')" style="flex:1;justify-content:center;height:44px">' + reIcon + ' Reconfigure</button>'
         + (anyFailed
@@ -10404,11 +10812,9 @@ function commitAdoOrgsSelection() {
 // else, just unchecked initially.
 function envIsTrialOrDev(e) { return e && (e.type === 'Trial' || e.type === 'Developer'); }
 
-// "Auto-add future environments matching these filters" — manual-mode
-// only. When on, captures the active filter-chip state at commit time
-// so any newly-discovered env matching those filters is auto-added on
-// the next discovery cycle. Closes the gap where Manual mode is fully
-// static today (Auto mode auto-adds new envs of any type).
+// "Add new environments automatically" — custom-mode only. When on, new Production and Sandbox environments found on a later
+// discovery cycle are added (the Include all scope). Manual mode is otherwise static: new environments stay out of scope.
+// Flag name kept from the filter-chip version (2026-11-04: chips and the "matching the selected types" rule retired).
 var _envAutoAddFutureForFilters = false;
 function toggleAutoAddFutureFilteredEnvs(on) {
   _envAutoAddFutureForFilters = !!on;
@@ -10470,17 +10876,10 @@ function toggleAutoAddFutureFilteredEnvs(on) {
   });
 })();
 
-// Toggle-switch variant — flips the underlying flag, the .active
-// class on the switch element, and aria-checked for screen readers.
-// Reachable via clicking either the switch itself or the inline
-// "Auto-add new" label that precedes it.
-function toggleAutoAddFutureFromChip() {
+// Flips the auto-add flag and repaints the card (renderEnvAutoCard).
+function toggleEnvAutoAdd() {
   _envAutoAddFutureForFilters = !_envAutoAddFutureForFilters;
-  var sw = document.getElementById('env-auto-add-future');
-  if (sw) {
-    sw.classList.toggle('active', _envAutoAddFutureForFilters);
-    sw.setAttribute('aria-checked', _envAutoAddFutureForFilters ? 'true' : 'false');
-  }
+  renderEnvAutoCard();
 }
 
 function selectWorkspaceMode(mode) {
@@ -10847,6 +11246,7 @@ var WORKLOADS = {
     // Client-ID + OAuth-scopes + a customer GCP service account granted
     // two IAM roles at the org node — modeled directly on the mock's
     // Connect (Manual) screen, not invented.
+    requiresProjectList: true,   // Projects step after Authorize (Express and Manual): which projects Veeam can restore into + the quota project (gip-express-flow.html, 2026-11-04)
     name: 'Google Identity Protection', shortName: 'Google Identity', tag: 'Google Cloud', category: 'Identity & Directory',
     desc: 'Protect identities across Google Workspace, Cloud Identity, and GCP IAM. Backup and restore users, groups, OUs, admin roles, and IAM policies.',
     splashDesc: 'Protect identities across Google Workspace, Cloud Identity, and GCP IAM. Backup and restore users, groups, OUs, admin roles, and IAM policies.',
@@ -10926,7 +11326,7 @@ var WORKLOADS = {
         icon: 'discovery-scan-outlined', subtitle: 'Enumerate organizational units, users, groups, and IAM policies across Workspace and GCP',
         fix: 'Confirm the consenting account is a Super Admin — Discovery Scan requires the admin.directory scopes and cloudresourcemanager.googleapis.com access granted through Domain-Wide Delegation.' }
     ],
-    failCapRowIdx: 2,   // seeds the Restore failure on first run, per the mock; Retry (footer or the row's own button) resolves cleanly
+    // failCapRowIdx: 2,   // RETIRED 2026-11-04: the first-run Restore failure now lives in the Grant checks card (Restore targets), and Feature Permission Status reads 4/4 (Figma DCP Consolidated 20668:60929). Was: seeded the Restore feature row on first run; Retry resolved it.
     expressLabel: 'Authorize with Google',   // 2026-11-03: Express is Google consent (Figma 16591:32682). Was: 'Install from Google Workspace Marketplace'
     // Google colored-button spec (same as gws): the G sits on a white chip
     // on a filled button, never directly on the fill.
@@ -10944,7 +11344,7 @@ var WORKLOADS = {
     // utility icon, hand-drawn since no external-link glyph exists in
     // this file's DS icon store (only 2 icons are defined locally — see
     // securiti-icons-data.js).
-    helpContent: '<h4>Express — Google consent</h4><ol><li>You approve the cloud-platform scope in Google, as a senior <strong>GCP Org Admin</strong></li><li>You pick the <strong>organization</strong> to protect, a <strong>quota project</strong>, and whether <strong>restore</strong> is enabled</li><li>Veeam patches the org policy allow-list, binds the roles, verifies, and discards the token</li></ol><h4>Manual — your own service account</h4><ol><li>Create a <strong>service account</strong> in a Google Cloud project you own</li><li>Download the service account’s <strong>key file</strong> — JSON (recommended) or P12</li><li>In the Admin console, authorize the service account’s client ID for <strong>Domain-Wide Delegation</strong> with the required OAuth scopes (Security → API controls → Domain-wide delegation)</li><li>Grant the service account <code>roles/iam.securityReviewer</code> (backup) and <code>roles/iam.securityAdmin</code> (restore) at your <strong>organization node</strong> in GCP IAM</li><li>Upload the key file, then enter your <strong>Organization ID</strong> and a <strong>Super Admin email</strong> for delegation, and connect</li></ol><p>The two roles above cover most tenants. Required scopes and IAM roles are kept current in the Help Center rather than in this drawer, so they can be updated without a product release.</p><a class="btn btn-outline btn-full" href="https://helpcenter.veeam.com/docs/vdc/gip/gip_manual_iam_roles.html" target="_blank" rel="noopener" style="margin-bottom:16px;text-decoration:none">Required scopes &amp; IAM roles<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a><h4>What happens next?</h4><p>After connecting, Veeam verifies API access for each protected category and discovers your organizational units, users, and IAM policies. Domain-Wide Delegation changes can take up to 24h to propagate.</p>'
+    helpContent: '<h4>Express — Google consent</h4><ol><li>You approve the cloud-platform scope in Google, as a senior <strong>GCP Org Admin</strong></li><li>You choose which <strong>projects</strong> Veeam can restore into, and a <strong>quota project</strong></li><li>Veeam patches the org policy allow-list, binds the roles, verifies, and discards the token</li></ol><h4>Manual — your own service account</h4><ol><li>Create a <strong>service account</strong> in a Google Cloud project you own</li><li>Download the service account’s <strong>key file</strong> — JSON (recommended) or P12</li><li>In the Admin console, authorize the service account’s client ID for <strong>Domain-Wide Delegation</strong> with the required OAuth scopes (Security → API controls → Domain-wide delegation)</li><li>Grant the service account <code>roles/iam.securityReviewer</code> (backup) and <code>roles/iam.securityAdmin</code> (restore) at your <strong>organization node</strong> in GCP IAM</li><li>Upload the key file, then enter your <strong>Organization ID</strong> and a <strong>Super Admin email</strong> for delegation, and connect</li></ol><p>The two roles above cover most tenants. Required scopes and IAM roles are kept current in the Help Center rather than in this drawer, so they can be updated without a product release.</p><a class="btn btn-outline btn-full" href="https://helpcenter.veeam.com/docs/vdc/gip/gip_manual_iam_roles.html" target="_blank" rel="noopener" style="margin-bottom:16px;text-decoration:none">Required scopes &amp; IAM roles<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a><h4>What happens next?</h4><p>After connecting, Veeam verifies API access for each protected category and discovers your organizational units, users, and IAM policies. Domain-Wide Delegation changes can take up to 24h to propagate.</p>'
   },
   github: {
     name: 'GitHub', tag: 'GitHub Cloud', category: 'Source Code & Dev Tools',
@@ -12293,7 +12693,7 @@ function selectWorkload(wl, skipNav) {
   var ppBenefit2 = document.getElementById('express-benefit-2');
   var ppBenefit3 = document.getElementById('express-benefit-3');
   var ppBenefit4Row = document.getElementById('express-benefit-4-row');
-  var exBenGrid = document.getElementById('express-benefits'); if (exBenGrid) exBenGrid.style.gridTemplateColumns = (wl === 'gip') ? '1fr' : '1fr 1fr';   // gip's steps are full sentences: one column reads in order
+  var exBenGrid = document.getElementById('express-benefits'); if (exBenGrid) exBenGrid.style.gridTemplateColumns = '1fr';   // gip's steps are full sentences: one column reads in order
   if (wl === 'pp') {
     if (ppBenefit1) ppBenefit1.textContent = 'No credentials to manage';
     if (ppBenefit2) ppBenefit2.textContent = 'Minimal permission scopes';
@@ -12341,7 +12741,7 @@ function selectWorkload(wl, skipNav) {
     // 2026-11-03: the three Express steps from Figma 16591:32682 (what you do, what Veeam does), replacing the Marketplace-install benefits below.
     // Was: 'Veeam publishes and maintains the Marketplace app — no manual Domain-Wide Delegation setup in the Admin console' / 'Domain-wide install and Super Admin consent grant delegation automatically' / 'Scopes cover Workspace Directory, Group Settings, and Chrome Management by default' / 'No Google credentials stored in Veeam Data Cloud'
     if (ppBenefit1) ppBenefit1.textContent = 'You approve the cloud-platform scope in Google, as a senior GCP Org Admin.';
-    if (ppBenefit2) ppBenefit2.textContent = 'You pick the organization to protect, a quota project, and whether restore is enabled.';
+    if (ppBenefit2) ppBenefit2.textContent = 'You choose which projects Veeam can restore into, and a quota project.';
     if (ppBenefit3) ppBenefit3.textContent = 'Veeam patches the org policy allow-list, binds the roles, verifies, and discards the token.';
     if (ppBenefit4Row) ppBenefit4Row.style.display = 'none';
   } else {
@@ -13162,14 +13562,30 @@ function toggleOktaRegionDropdown() {
 function _oktaRegionChosen() { var s = document.getElementById('okta-region-selected'); return !!(s && s.getAttribute('data-sel')); }
 // Okta: the processing region is an intentional choice — the auth CTA stays disabled until one is picked.
 function _oktaRegionGate() {
-  if (!_regionOnAuth() || _oktaRegionChosen()) return;
+  if (!_regionOnAuth()) return;
+  var chosen = _oktaRegionChosen();
   ['test-conn-btn', 'manual-save-btn'].forEach(function (id) {
     var b = document.getElementById(id);
-    if (b) { b.disabled = true; b.style.cursor = 'not-allowed'; b.style.background = 'var(--green-30)'; }
+    if (!b) return;
+    if (chosen) { b.removeAttribute('aria-disabled'); return; }
+    // Muted but still clickable (2026-11-04): a click before a region is chosen scrolls back to the region and flags it (_oktaRegionError)
+    // instead of doing nothing. Was: disabled = true, which gave no reason.
+    b.disabled = false; b.setAttribute('aria-disabled', 'true'); b.style.cursor = 'pointer'; b.style.background = 'var(--green-30)';
   });
 }
+// A click on the CTA before a region is chosen: back to the top of the page and the region input in an error state.
+function _oktaRegionError() {
+  var wrap = document.getElementById('okta-region-wrap'), head = document.getElementById('okta-auth-head');
+  if (wrap) wrap.classList.add('is-error');
+  var sel = document.getElementById('okta-region-selected');
+  if (sel && sel.parentNode) { sel.parentNode.setAttribute('aria-invalid', 'true'); sel.parentNode.setAttribute('tabindex', '-1'); }
+  var sc = head && head.closest ? head.closest('.main-scroll') : null;
+  if (sc && sc.scrollTo) sc.scrollTo({ top: 0, behavior: 'smooth' }); else if (head && head.scrollIntoView) head.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  var field = sel && sel.parentNode; if (field && field.focus) { try { field.focus({ preventScroll: true }); } catch (e) { field.focus(); } }
+}
 function selectOktaRegion(v) {
-  var s = document.getElementById('okta-region-selected'); if (s) { s.textContent = v; s.setAttribute('data-sel', '1'); s.style.color = 'var(--black-100)'; }
+  var s = document.getElementById('okta-region-selected'); if (s) { s.textContent = v; s.setAttribute('data-sel', '1'); s.style.color = 'var(--black-100)'; if (s.parentNode) s.parentNode.removeAttribute('aria-invalid'); }
+  var rw = document.getElementById('okta-region-wrap'); if (rw) rw.classList.remove('is-error');
   if (typeof refreshAuthAdvanceBtnLabel === 'function') refreshAuthAdvanceBtnLabel();
   if (typeof checkManualFields === 'function') checkManualFields();
   var dd = document.getElementById('okta-region-dropdown'); if (dd) dd.style.display = 'none';
@@ -13191,6 +13607,7 @@ function applyAuthRegionHead() {   // the Region & Data Processing block at the 
   var rs = document.getElementById('okta-region-selected');
   if (rs) { rs.removeAttribute('data-sel'); rs.textContent = 'Select a storage region...'; rs.style.color = 'var(--black-30)'; }
   var sr = document.getElementById('summary-storage-region'); if (sr) sr.textContent = '';
+  var rw0 = document.getElementById('okta-region-wrap'); if (rw0) rw0.classList.remove('is-error');
   _oktaRegionGate();
 }
 function applyOktaAuthPage() {
@@ -13411,6 +13828,7 @@ var _manualFormTemplate = null;
 var _manualConnectDone = false;
 
 function saveManualAuth() {
+  if (_regionOnAuth() && !_oktaRegionChosen()) { _oktaRegionError(); return; }
   // Capture the pristine form markup once, before we replace it.
   if (_manualFormTemplate === null) {
     var _mf = document.getElementById('manual-form-inline');
@@ -13903,7 +14321,7 @@ function _amMark(method) {
     el.setAttribute('aria-checked', pair[1] ? 'true' : 'false');
   });
   var title = document.getElementById('am-setup-title');
-  if (title) title.textContent = ex ? 'Express setup' : 'Manual setup';
+  if (title) title.textContent = ex ? 'Express authentication' : 'Manual authentication';
   var exSetup = document.getElementById('express-setup');
   if (exSetup) exSetup.style.display = ex ? '' : 'none';
 }
@@ -13926,6 +14344,8 @@ function amSplitExpressCopy() {
   }
 }
 function selectAuthMethod(method) {
+  // Google Identity: while signed in, Manual stays selectable (Switch account is not the only way out); choosing it drops the Express sign-in first.
+  if (method === 'manual' && typeof gipState !== 'undefined' && gipState.signedIn) resetOAuthFlow();
   var express = document.getElementById('auth-option-express');
   var manual = document.getElementById('auth-option-manual');
   var manualForm = document.getElementById('manual-form-inline');
@@ -14025,7 +14445,7 @@ function refreshAuthAdvanceBtnLabel() {
   var stillHasGroupsStep = !!w.requiresGroupList && !skipGroupsForManual;
   var stillHasSiteStep = !!w.requiresSitePicker && !skipSiteForManual;
   var stillHasOrgsStep = !!w.requiresOrgList && !skipOrgsForManual;
-  var hasIntermediateStep = !!(w.requiresEnvList || stillHasGroupsStep || stillHasOrgsStep || stillHasSiteStep || w.requiresSpacesList ||
+  var hasIntermediateStep = !!(w.requiresEnvList || w.requiresProjectList || stillHasGroupsStep || stillHasOrgsStep || stillHasSiteStep || w.requiresSpacesList ||
     (w.requiresApplicationStep && (typeof effectiveRequiresWorkspaceList === 'function' && effectiveRequiresWorkspaceList())));
   btn.textContent = hasIntermediateStep ? 'Continue' : 'Test Connection';
 }
@@ -14043,7 +14463,7 @@ function refreshAuthAdvanceBtnLabel() {
 // Once either path has succeeded, the click advances the wizard via
 // advanceFromAuth(), same as always.
 function handleAuthAdvanceClick() {
-  if (_regionOnAuth() && !_oktaRegionChosen()) return;
+  if (_regionOnAuth() && !_oktaRegionChosen()) { _oktaRegionError(); return; }
   var manualFormEl = document.getElementById('manual-form-inline');
   var manualCardOpen = !!manualFormEl && manualFormEl.style.display !== 'none';
   if (manualCardOpen && !_manualConnectDone) {
@@ -14090,6 +14510,7 @@ function advanceFromAuth() {
   // reason). In the Express flow the Site picker's commit handler is
   // what routes onward to Spaces, not the Auth advance.
   var goesToSpaces = !!(w0 && w0.requiresSpacesList) && !goesToSite;
+  var goesToProjects = !!(w0 && w0.requiresProjectList);   // Google Identity: Projects step after Authorize, both methods
   function nextScreen(){
     if (goesToEnvs) return 'environments';
     if (goesToWorkspaces) return 'workspaces';
@@ -14097,6 +14518,7 @@ function advanceFromAuth() {
     if (goesToOrgs) return 'ado-orgs';
     if (goesToSite) return 'confluence-sites';
     if (goesToSpaces) return 'confluence-spaces';
+    if (goesToProjects) return 'gip-projects';
     return 'test-conn';
   }
   var w = WORKLOADS[currentWorkload];
@@ -14142,6 +14564,9 @@ function startOAuthFlow() {
     footerBtn.style.cursor = 'not-allowed';
     footerBtn.style.background = 'var(--green-30)';
   }
+
+  // Google Identity: Google's sign-in window (account, then consent for the cloud-platform scope), recreated in-page.
+  if (typeof currentWorkload !== 'undefined' && currentWorkload === 'gip' && _gipOAuthLaunch('connect')) return;
 
   // GitHub (research-fidelity build 2026-07-07): a REAL separate window
   // opens with a 1:1 recreation of GitHub's OAuth pages (sign-in prefilled →
@@ -14292,6 +14717,8 @@ function _ghOAuthPageHtml() {
 
 function resetOAuthFlow() {
   // Reset back to initial express state
+  var gsr = document.getElementById('gip-signed'); if (gsr) gsr.style.display = 'none';
+  if (typeof gipState !== 'undefined') gipState.signedIn = false;
   document.getElementById('auth-connected').style.display = 'none';
   document.getElementById('auth-status-waiting').style.display = 'none';
   document.getElementById('express-cta').style.display = 'block';
@@ -14312,6 +14739,197 @@ function resetOAuthFlow() {
   // disabled as if nothing had been selected yet.
   if (typeof refreshAuthAdvanceBtnLabel === 'function') refreshAuthAdvanceBtnLabel();
 }
+
+// ── Google Identity: sign-in window + Projects step ─────────────────────
+// Prototype: gip-express-flow.html (2026-11-04). Express opens Google's own window (account, then consent for the cloud-platform
+// scope; no organization or project chooser exists there), then lands on the Projects step, which both auth methods share.
+// Seeded with ONE organization, 56 projects (none selected) and NO quota project, which stays empty until someone picks one.
+var GIP_ORGS = [{ n: 'contoso.com', id: '123456789012' }];   // more than one renders the organization dropdown on the Projects step
+var GIP_ADMIN = 'admin@contoso.com';
+var GIP_PROJECTS = [];
+var gipState = { org: 0, mode: 'all', q: '', page: 1, pgSize: 10, quota: '', popup: null, ctx: 'connect', dd: null };
+function _gipSeed() {
+  if (GIP_PROJECTS.length) return;
+  var core = [['Identity Core', 'identity-core-prod', 'Production'], ['Directory Sync', 'directory-sync-prod', 'Production'], ['Identity Staging', 'identity-staging-7c21', 'Staging'], ['Federation Gateway', 'fed-gateway-prod', 'Production'], ['Workforce Pools', 'workforce-pools-3d90', 'Shared Services'], ['Access Review Lab', 'access-review-lab', 'Sandbox'], ['Analytics Warehouse', 'analytics-wh-prod', 'Production'], ['Partner Portal', 'partner-portal-42e8', 'Engineering']];
+  var teams = ['Finance', 'Legal', 'Support', 'Logistics', 'Procurement', 'Facilities', 'Compliance', 'Research', 'Training', 'Retail', 'Partner', 'Claims'];
+  var folders = ['Production', 'Staging', 'Engineering', 'Shared Services', 'Sandbox'];
+  GIP_PROJECTS = core.map(function(r){ return { id: r[1], name: r[0], folder: r[2], sel: false }; });
+  var hx = function(n){ var t = ''; for (var i = 0; i < 4; i++) { n = (n * 1103515245 + 12345) & 0x7fffffff; t += ((n >> 8) & 15).toString(16); } return t; };
+  for (var k = 0; k < 48; k++) {
+    var team = teams[(k * 5) % teams.length], f = folders[k % folders.length];
+    GIP_PROJECTS.push({ id: team.toLowerCase() + '-' + (f === 'Production' ? 'prod' : f.slice(0, 3).toLowerCase()) + '-' + hx(k * 7919), name: team + ' ' + f + ' ' + String(k + 1).padStart(2, '0'), folder: f, sel: false });
+  }
+}
+function _gipOrg() { return GIP_ORGS[gipState.org] || GIP_ORGS[0]; }
+function _gipIc(n, z) { return (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg(n, z)) || ''; }
+function _gipVisible() {
+  var q = gipState.q.trim().toLowerCase();
+  return GIP_PROJECTS.filter(function(p){ return !q || p.name.toLowerCase().indexOf(q) !== -1 || p.id.toLowerCase().indexOf(q) !== -1; });
+}
+function _gipPage(list) {
+  var np = Math.max(1, Math.ceil(list.length / gipState.pgSize));
+  gipState.page = Math.min(Math.max(1, gipState.page), np);
+  return list.slice((gipState.page - 1) * gipState.pgSize, gipState.page * gipState.pgSize);
+}
+function _gipSelCount() { return GIP_PROJECTS.filter(function(p){ return p.sel; }).length; }
+
+// Dropdown (the Region selector's pattern): trigger + panel + optional search. opts = [{v, l, sub}].
+function _gipDd(id, opts, val, ph, search) {
+  var open = gipState.dd === id, cur = opts.filter(function(o){ return String(o.v) === String(val); })[0];
+  var h = '<div class="gp-dd" id="gp-dd-' + id + '"><div class="form-input gp-dd-trig' + (cur ? '' : ' is-empty') + '" role="combobox" tabindex="0" aria-haspopup="listbox" aria-expanded="' + open + '" onclick="gipDdToggle(event,\'' + id + '\')" onkeydown="gipDdKey(event,\'' + id + '\')"><span class="gp-dd-val">' + (cur ? escapeHtml(cur.l) : ph) + '</span><svg width="10" height="6" viewBox="0 0 10 6" fill="var(--black-60)" aria-hidden="true"><polygon points="0,0 5,6 10,0"/></svg></div>';
+  if (open) h += '<div class="gp-dd-panel" onclick="event.stopPropagation()">' + (search ? '<div class="gp-dd-search"><input class="form-input" id="gp-dd-q-' + id + '" placeholder="Search projects..." style="height:36px;font-size:14px" oninput="gipDdFilter(\'' + id + '\',this.value)"></div>' : '') + '<div class="gp-dd-opts" id="gp-dd-opts-' + id + '" role="listbox">' + _gipDdOpts(id, opts, val, '') + '</div></div>';
+  return h + '</div>';
+}
+function _gipDdOpts(id, opts, val, q) {
+  q = (q || '').toLowerCase();
+  var rows = opts.filter(function(o){ return !q || (o.l + ' ' + (o.sub || '')).toLowerCase().indexOf(q) !== -1; });
+  return rows.length ? rows.map(function(o){ return '<div class="gp-dd-opt' + (String(o.v) === String(val) ? ' is-sel' : '') + '" role="option" data-v="' + escapeHtml(String(o.v)) + '" onclick="gipDdPick(\'' + id + '\',this.getAttribute(\'data-v\'))">' + escapeHtml(o.l) + (o.sub ? '<span class="gp-dd-sub">' + escapeHtml(o.sub) + '</span>' : '') + '</div>'; }).join('') : '<div class="gp-dd-opt" style="color:var(--black-60);cursor:default">No matches.</div>';
+}
+function _gipDdOptions(id) {
+  if (id === 'org') return GIP_ORGS.map(function(g, i){ return { v: i, l: g.n, sub: g.id }; });
+  return GIP_PROJECTS.map(function(p){ return { v: p.id, l: p.name, sub: p.id }; });
+}
+function _gipDdRepaint(id) { if (id === 'org') _gipPaintSigned(); else _gipPaintTop(); }
+function gipDdToggle(ev, id) { ev.stopPropagation(); var was = gipState.dd; gipState.dd = (was === id) ? null : id; if (was && was !== id) _gipDdRepaint(was); _gipDdRepaint(id); var q = document.getElementById('gp-dd-q-' + id); if (q) q.focus(); }
+function gipDdKey(ev, id) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); gipDdToggle(ev, id); } }
+function gipDdFilter(id, v) { var el = document.getElementById('gp-dd-opts-' + id); if (el) el.innerHTML = _gipDdOpts(id, _gipDdOptions(id), id === 'org' ? gipState.org : gipState.quota, v); }
+function gipDdPick(id, v) { if (id === 'org') gipState.org = +v; else gipState.quota = v; gipState.dd = null; _gipDdRepaint(id); if (id === 'org') _gipPaintTop(); }
+document.addEventListener('click', function(ev) {
+  if (!gipState.dd || (ev.target.closest && ev.target.closest('.gp-dd'))) return;
+  var id = gipState.dd; gipState.dd = null; _gipDdRepaint(id);
+});
+
+// Google's sign-in window (in-page). ctx 'connect' continues the wizard; 'switch' only changes the account on the Projects step.
+function _gipOAuthLaunch(ctx) {
+  gipState.ctx = ctx || 'connect';
+  gipState.popup = 'account';
+  _gipPopPaint();
+  return true;
+}
+function _gipPopPaint() {
+  var host = document.getElementById('gip-popup');
+  if (!gipState.popup) { if (host) host.remove(); return; }
+  if (!host) { host = document.createElement('div'); host.id = 'gip-popup'; document.body.appendChild(host); }
+  var h = '<div class="gp-back"><div class="gp-win" role="dialog" aria-label="Google sign-in window"><div class="gp-win-bar"><span class="gp-win-url">' + _gipIc('lock-outlined', 16) + 'accounts.google.com</span><button type="button" aria-label="Close window" onclick="_gipPopClose()">' + _gipIc('close-outlined', 20) + '</button></div><div class="gp-win-body">';
+  if (gipState.popup === 'account') {
+    h += '<div class="gp-win-h">Choose an account</div><button type="button" class="gp-acc" onclick="gipState.popup=\'consent\';_gipPopPaint()"><span class="gp-av">A</span><span><div class="gp-acc-n">Alex Admin</div><div class="gp-acc-e">' + GIP_ADMIN + '</div></span></button>';
+  } else {
+    h += '<div class="gp-win-h">Veeam Data Cloud wants access to your Google Account</div><div class="gp-acc" style="cursor:default"><span class="gp-av">A</span><span><div class="gp-acc-n">Alex Admin</div><div class="gp-acc-e">' + GIP_ADMIN + '</div></span></div><div class="gp-scope"><b style="font-weight:500">See, edit, configure and delete your Google Cloud data.</b><br>Veeam uses this once, during setup, and discards it when setup finishes.</div><div class="gp-btns"><button type="button" class="btn btn-outline" onclick="_gipPopClose()">Cancel</button><button type="button" class="btn btn-blue" onclick="_gipPopAllow()">Allow</button></div>';
+  }
+  host.innerHTML = h + '</div><div class="gp-win-note">This is Google’s window, opened by your browser. It is not part of the Veeam interface.</div></div></div>';
+}
+function _gipPopClose() {
+  var ctx = gipState.ctx; gipState.popup = null; _gipPopPaint();
+  if (ctx === 'connect') resetOAuthFlow();   // backing out of the window = the user cancelled; same as the GitHub popup
+}
+function _gipPopAllow() {
+  var ctx = gipState.ctx; gipState.popup = null; _gipPopPaint();
+  gipState.org = 0;
+  // One organization (the common case, and the seeded default): nothing to choose, so Authentication hands straight on to Projects, as Okta does to its test.
+  // Several organizations: stay on Authentication with the signed-in card and the organization dropdown, then Continue.
+  if (ctx !== 'connect') { _gipPaintSigned(); return; }
+  // The "Waiting for ... authorization" state stays visible for the same 2.5s as Okta's simulation before the page moves on.
+  setTimeout(function(){
+    var wt = document.getElementById('auth-status-waiting'), on = document.getElementById('screen-auth');
+    if (!on || !on.classList.contains('active') || !wt || wt.style.display === 'none') return;   // the admin left or cancelled meanwhile
+    if (GIP_ORGS.length === 1) completeOAuthFlow(); else _gipSignedIn();
+  }, 2500);
+}
+// Express signed in: stay on Authentication and show who is connected (as prototyped in gip-express-flow.html); Continue goes to Projects.
+function _gipSignedIn() {
+  var wt = document.getElementById('auth-status-waiting'); if (wt) wt.style.display = 'none';
+  currentAuthMethod = 'express';
+  gipState.signedIn = true;
+  _gipPaintSigned();
+  var gs = document.getElementById('gip-signed'); if (gs) gs.style.display = 'block';
+  var mc = document.getElementById('auth-option-manual'); if (mc) { mc.style.opacity = '1'; mc.style.pointerEvents = 'auto'; }   // startOAuthFlow dimmed it for the wait; once signed in both cards are live again
+  if (typeof refreshSidebar === 'function') refreshSidebar();
+  var btn = document.getElementById('test-conn-btn');
+  if (btn) { btn.disabled = false; btn.style.cursor = 'pointer'; btn.style.background = 'var(--green)'; btn.removeAttribute('aria-disabled'); }
+  if (typeof refreshAuthAdvanceBtnLabel === 'function') refreshAuthAdvanceBtnLabel();
+}
+function _gipPaintSigned() {
+  var gs = document.getElementById('gip-signed'); if (!gs) return;
+  var o = _gipOrg();
+  var h = '<div class="gp-ok" style="margin-top:0" role="status">' + _gipIc('status-complete-outlined', 24) + '<div class="gp-ok-t">Signed in as ' + GIP_ADMIN + '<div class="gp-ok-s">Organization ' + o.n + (GIP_ORGS.length === 1 ? ', found automatically' : '') + '</div></div><button type="button" class="btn btn-outline" onclick="_gipOAuthLaunch(\'switch\')">' + _gipIc('brand-gws', 16) + 'Switch account</button></div>';
+  if (GIP_ORGS.length > 1) h += '<div class="gp-fld"><span class="gp-fld-l">Organization</span>' + _gipDd('org', _gipDdOptions('org'), gipState.org, 'Select an organization', false) + '<span class="gp-fld-h">This account can see ' + GIP_ORGS.length + ' organizations. Choose the one to protect.</span></div>';
+  gs.innerHTML = h;
+}
+
+// Projects step
+function enterGipProjects() {
+  _gipSeed();
+  gipState.page = 1; gipState.q = '';
+  var s = document.getElementById('gp-search'); if (s) s.value = '';
+  var ic = document.getElementById('gp-search-ic'); if (ic) ic.innerHTML = _gipIc('search-outlined', 16);
+  var bc = document.getElementById('gp-bc'), src = document.querySelector('#screen-environments .breadcrumbs svg'); if (bc && src && !bc.firstChild) bc.appendChild(src.cloneNode(true));   // same home glyph as every other step
+  _gipPaintTop(); _gipPaintTable();
+}
+function gipCardKey(ev, mode) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); gipSetMode(mode); } }
+function gipSetMode(m) { gipState.mode = m; _gipPaintTop(); _gipPaintTable(); }
+function _gipPaintTop() {
+  var N = GIP_PROJECTS.length, o = _gipOrg(), express = (typeof currentAuthMethod === 'undefined' || currentAuthMethod !== 'manual');
+  var orgName = express ? o.n : ((document.getElementById('manual-gip-org-id') || {}).value || o.id);
+  var set = function(id, v){ var e = document.getElementById(id); if (e) e.textContent = v; };
+  set('gp-count', N); set('gp-org', orgName);
+  var conn = document.getElementById('gp-conn'); if (conn) conn.innerHTML = '';   // who is signed in is shown once, on Authentication
+  [['gp-card-all', gipState.mode === 'all'], ['gp-card-sel', gipState.mode === 'sel']].forEach(function(p){
+    var c = document.getElementById(p[0]); if (!c) return;
+    c.classList.toggle('sel', p[1]); c.setAttribute('aria-checked', p[1] ? 'true' : 'false');
+  });
+  var q = document.getElementById('gp-quota');
+  if (q) {
+    q.innerHTML = '<div class="gp-fld" style="margin-top:0"><span class="gp-fld-l">Quota project</span>' + _gipDd('qp', _gipDdOptions('qp'), gipState.quota, 'Select a project', true) +
+      (gipState.quota ? '<span class="gp-fld-h">API calls Veeam makes while connecting count against this project\u2019s quota.</span>' : '<span class="gp-fld-h warn">Choose a quota project to continue. API calls Veeam makes while connecting count against its quota, so pick one where you can grant access and the Google APIs are enabled.</span>') + '</div>';
+  }
+  var title = document.getElementById('gp-setup-title'); if (title) title.textContent = 'Selected projects';
+  // Include all has nothing to configure, so its setup area is not shown (the title and the card already say what it covers).
+  var setupEl = document.getElementById('gp-setup'), selB = document.getElementById('gp-sel-body');
+  if (setupEl) setupEl.style.display = gipState.mode === 'sel' ? '' : 'none';
+  if (selB) selB.style.display = gipState.mode === 'sel' ? 'block' : 'none';
+  _gipFooter();
+}
+function _gipFooter() {
+  var btn = document.getElementById('gp-continue-btn'); if (!btn) return;
+  var ok = !!gipState.quota && (gipState.mode === 'all' || _gipSelCount() > 0);
+  btn.disabled = !ok; btn.style.opacity = ok ? '1' : '0.5'; btn.style.cursor = ok ? 'pointer' : 'not-allowed';
+}
+function gipSearch(v) { gipState.q = v; gipState.page = 1; _gipPaintTable(); }
+function gipToggle(id) { GIP_PROJECTS.forEach(function(p){ if (p.id === id) p.sel = !p.sel; }); _gipPaintTable(); }
+function gipTogglePage(on) { _gipPage(_gipVisible()).forEach(function(p){ p.sel = !!on; }); _gipPaintTable(); }
+function gipGoPage(n) { gipState.page = n; _gipPaintTable(); }
+function gipSetPgSize(n) { gipState.pgSize = n; gipState.page = 1; _gipPaintTable(); }
+function _gipPaintTable() {
+  var rowsEl = document.getElementById('gp-rows'); if (!rowsEl) return;
+  var list = _gipVisible(), rows = _gipPage(list), n = _gipSelCount();
+  rowsEl.innerHTML = rows.length ? rows.map(function(p){
+    return '<div class="env-row" style="grid-template-columns:36px 1fr 160px" onclick="gipToggle(\'' + p.id + '\')"><input type="checkbox"' + (p.sel ? ' checked' : '') + ' onclick="event.stopPropagation();gipToggle(\'' + p.id + '\')" aria-label="Select ' + escapeHtml(p.name) + '" style="margin:0"><div><div class="env-row-name-line"><span class="env-row-name">' + escapeHtml(p.name) + '</span></div><div class="env-row-url">' + escapeHtml(p.id) + '</div></div><span>' + escapeHtml(p.folder) + '</span></div>';
+  }).join('') : '<div style="padding:24px;text-align:center;color:var(--black-60);font-size:14px">No projects match this search.</div>';
+  var master = document.getElementById('gp-master');
+  if (master) { var ps = rows.filter(function(p){ return p.sel; }).length; master.checked = rows.length > 0 && ps === rows.length; master.indeterminate = ps > 0 && ps < rows.length; }
+  var sum = document.getElementById('gp-summary');
+  if (sum) { if (n === 0) { sum.textContent = 'No projects selected — pick at least one to continue.'; sum.style.color = 'var(--orange)'; } else { sum.textContent = n + ' of ' + GIP_PROJECTS.length + ' projects selected'; sum.style.color = 'var(--black-60)'; } }
+  var pager = document.getElementById('gp-pager'); if (pager) pager.innerHTML = _gipPgBar(list.length);
+  _gipFooter();
+}
+function _gipPgBar(total) {
+  if (total <= 10) return '';
+  var pages = Math.max(1, Math.ceil(total / gipState.pgSize)), c = Math.min(Math.max(1, gipState.page), pages), i;
+  var arrow = function(dir, dis) {
+    return '<button class="pgds-arrow" type="button"' + (dis ? ' disabled' : '') + ' onclick="gipGoPage(' + (c + (dir === 'prev' ? -1 : 1)) + ')" aria-label="' + (dir === 'prev' ? 'Previous' : 'Next') + ' page"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="' + (dir === 'prev' ? '15 18 9 12 15 6' : '9 18 15 12 9 6') + '"/></svg></button>';
+  };
+  var nums = [], chips = '';
+  for (i = 1; i <= pages; i++) if (pages <= 7 || i === 1 || i === pages || Math.abs(i - c) <= 1) nums.push(i);
+  nums.forEach(function(n, k){ if (k && n - nums[k - 1] > 1) chips += '<span class="pgds-gap">…</span>'; chips += '<button type="button" class="pgds-chip' + (n === c ? ' current' : '') + '" onclick="gipGoPage(' + n + ')">' + n + '</button>'; });
+  var gos = '<option value="">Go to Page</option>'; for (i = 1; i <= pages; i++) gos += '<option value="' + i + '">' + i + '</option>';
+  var sizes = [10, 25, 50, 100].map(function(n){ return '<option value="' + n + '"' + (n === gipState.pgSize ? ' selected' : '') + '>' + n + '</option>'; }).join('');
+  return '<div class="pg-bar"><div class="pgds-left"><span>Showing</span><select class="pgds-select" aria-label="Rows per page" onchange="gipSetPgSize(+this.value)">' + sizes + '</select><span>per page</span></div><div class="pgds-pages">' + arrow('prev', c <= 1) + '<span class="pgds-chips">' + chips + '</span>' + arrow('next', c >= pages) + '</div><div class="pgds-right"><select class="pgds-select pgds-goto" aria-label="Go to page" onchange="if(this.value)gipGoPage(+this.value)">' + gos + '</select><span>' + total + ' projects</span></div></div>';
+}
+function commitGipProjects() {
+  if (!gipState.quota || (gipState.mode === 'sel' && _gipSelCount() === 0)) return;
+  goTo('test-conn');
+}
+document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape') { if (gipState.popup) _gipPopClose(); else if (gipState.dd) { var id = gipState.dd; gipState.dd = null; _gipDdRepaint(id); } } });
 
 function showManualModal() {
   document.getElementById('manual-modal').classList.add('show');
