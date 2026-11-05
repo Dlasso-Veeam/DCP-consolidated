@@ -8217,6 +8217,100 @@ input[type="checkbox"] { accent-color: var(--em-green); }
 
 </style>
 
+
+<!-- ═══ D365 compare: a changed cell shows the restore-point value; hover or focus opens the Compare to value with its differing words highlighted; the legend is Vision chips ═══ -->
+<style id="d365-peek-css">
+/* Vision Chip, Size=Default (28px: 16/22 label + 2px padding + transparent 1px border), Mode=Light = no stroke, radius 2. Types used here: Gold, Green, Red, Default. */
+.vchip { display: inline-flex; align-items: center; padding: 2px 8px; border: 1px solid transparent; border-radius: 2px; font-size: 16px; font-weight: 500; line-height: 22px; white-space: nowrap; }
+.vchip-gold    { background: var(--gold-chip-bg); color: var(--gold-chip-fg); }
+.vchip-green   { background: var(--soft-green-bg); color: var(--btn-success); }   /* Vision Chip Green Light (S5 / S80), same pair as .rp-chip-val; --green here is the legacy lime */
+.vchip-red     { background: var(--red-10); color: var(--red); }
+.vchip-default { background: var(--black-5); color: var(--black-100); }
+.dx-lg .vchip { gap: 0; }
+
+/* Changed cells: keep the tint + corner marker, show ONE value (the restore point's), reveal Compare to on hover/focus */
+td.rec-pk { cursor: default; }
+td.rec-pk:hover { box-shadow: inset 0 0 0 1px var(--yellow); }
+td.rec-pk.rec-diff-cell-removed:hover { box-shadow: inset 0 0 0 1px var(--red); }
+td.rec-pk:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); }
+.pk-gone { color: var(--black-60); }
+
+/* The peek wears the comparison drawer's surface (.record-drawer: 1px --black-30, radius 4, 0 8px 24px rgba(31,34,41,.25)) */
+.pk-pop { position: fixed; z-index: 9000; display: none; pointer-events: none; width: max-content; min-width: 220px; max-width: 360px; box-sizing: border-box; padding: 12px 16px; background: var(--white); border: 1px solid var(--black-30); border-radius: 4px; box-shadow: 0 8px 24px rgba(31,34,41,.25); font-size: 14px; line-height: 20px; font-weight: 450; color: var(--black-100); }
+.pk-pop.on { display: block; }
+.pk-pop .pk-row { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; }
+.pk-pop .pk-l { color: var(--black-60); white-space: nowrap; }
+.pk-pop .pk-d { font-size: 12px; line-height: 16px; color: var(--black-60); white-space: nowrap; }
+.pk-pop .pk-v { margin-top: 4px; white-space: pre-wrap; overflow-wrap: break-word; max-height: 160px; overflow: hidden; }
+/* what differs from the restore point: the cell's change tint plus a 2px underline (a shape cue, not colour alone) */
+.pk-pop mark { background: var(--yellow-10); color: inherit; font-weight: 500; border-radius: 2px; box-shadow: inset 0 -2px 0 var(--yellow); }
+/* the restore point has something the Compare to value lacks at this spot: a thin marker where it would sit */
+.pk-pop .pk-gap { display: inline-block; width: 2px; height: 16px; margin: 0 2px; vertical-align: text-bottom; background: var(--yellow); border-radius: 1px; }
+</style>
+<script id="d365-peek-js">
+/* ONE chip builder (Vision Chip Default, Light). type: default | gold | red */
+window.vchip = function (text, type) { return '<span class="vchip vchip-' + (type || 'default') + '">' + text + '</span>'; };
+(function () {
+  'use strict';
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function vh(s) { return esc(s).replace(/([_\/])/g, '$1<wbr>'); }   /* a line may break after _ or / so file names wrap at a separator, never mid-word */
+  /* a changed cell: shows its (already rendered) value, carries both values for the peek */
+  window._pkTd = function (cls, shownHtml, col, a, ad, b, bd) {
+    shownHtml = String(shownHtml).replace(/ title="[^"]*"/g, '');   /* the peek replaces the native tooltip the long-text clamp carried */
+    return '<td class="' + cls + ' rec-pk" tabindex="0" data-pk-c="' + esc(col) + '" data-pk-a="' + esc(a) + '" data-pk-ad="' + esc(ad) + '" data-pk-b="' + esc(b) + '" data-pk-bd="' + esc(bd) + '">' + shownHtml + '</td>';
+  };
+  /* word diff between the restore point value (a) and the Compare to value (b) */
+  function ops(a, b) {
+    var A = String(a).split(/\s+/).filter(Boolean), B = String(b).split(/\s+/).filter(Boolean), n = A.length, m = B.length, L = [], i, j, out = [];
+    for (i = 0; i <= n; i++) { L[i] = []; for (j = 0; j <= m; j++) L[i][j] = 0; }
+    for (i = n - 1; i >= 0; i--) for (j = m - 1; j >= 0; j--) L[i][j] = A[i] === B[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+    i = 0; j = 0;
+    while (i < n && j < m) { if (A[i] === B[j]) { out.push({ t: 'eq', s: B[j] }); i++; j++; } else if (L[i + 1][j] >= L[i][j + 1]) { out.push({ t: 'ins', s: A[i++] }); } else { out.push({ t: 'del', s: B[j++] }); } }
+    while (i < n) out.push({ t: 'ins', s: A[i++] }); while (j < m) out.push({ t: 'del', s: B[j++] });
+    return out;
+  }
+  /* the Compare to value with its differing words highlighted; where the restore point has extra words, a thin marker */
+  function cmpHtml(a, b) {
+    var o = ops(a, b), out = [], k = 0;
+    while (k < o.length) {
+      if (o[k].t === 'eq') { out.push(vh(o[k].s)); k++; continue; }
+      var dels = [], ins = 0;
+      while (k < o.length && o[k].t !== 'eq') { if (o[k].t === 'del') dels.push(o[k].s); else ins++; k++; }
+      out.push(dels.length ? '<mark>' + vh(dels.join(' ')) + '</mark>' : '<i class="pk-gap" aria-hidden="true"></i>');
+    }
+    return out.join(' ');
+  }
+  var pop = null, cur = null, timer = null;
+  function ensure() {
+    if (pop) return pop;
+    pop = document.createElement('div'); pop.className = 'pk-pop'; pop.setAttribute('role', 'tooltip'); pop.id = 'pkPop';
+    document.body.appendChild(pop); return pop;
+  }
+  function show(td) {
+    var p = ensure(), d = td.dataset;
+    var gone = td.classList.contains('rec-diff-cell-removed');   /* a deleted record has no restore-point value to differ from: show the value plain */
+    p.innerHTML = '<div class="pk-row"><span class="pk-l">Compare to</span><span class="pk-d">' + esc(d.pkBd) + '</span></div><div class="pk-v">' + (gone ? vh(d.pkB) : cmpHtml(d.pkA, d.pkB)) + '</div>';
+    p.classList.add('on'); cur = td; td.setAttribute('aria-describedby', 'pkPop');
+    /* above the cell by default, below only when there is no room, clamped to the viewport */
+    p.style.left = '0px'; p.style.top = '-9999px';
+    var r = td.getBoundingClientRect(), w = p.offsetWidth, h = p.offsetHeight, pad = 8, gap = 8;
+    var vw = document.documentElement.clientWidth, vh2 = document.documentElement.clientHeight;
+    var cx = r.left + Math.min(r.width, 240) / 2;   /* wide long-text cells: anchor over the left part */
+    var left = Math.max(pad, Math.min(cx - w / 2, vw - w - pad));
+    var top = r.top - h - gap; if (top < pad) top = r.bottom + gap; top = Math.min(top, vh2 - h - pad);
+    p.style.left = Math.round(left) + 'px'; p.style.top = Math.round(top) + 'px';
+  }
+  function hide() { clearTimeout(timer); if (pop) pop.classList.remove('on'); if (cur) cur.removeAttribute('aria-describedby'); cur = null; }
+  function cellOf(e) { return e.target && e.target.closest ? e.target.closest('td.rec-pk') : null; }
+  document.addEventListener('mouseover', function (e) { var td = cellOf(e); if (!td || td === cur) return; clearTimeout(timer); timer = setTimeout(function () { show(td); }, 150); });
+  document.addEventListener('mouseout', function (e) { var td = cellOf(e); if (!td) return; if (e.relatedTarget && td.contains(e.relatedTarget)) return; hide(); });
+  document.addEventListener('focusin', function (e) { var td = cellOf(e); if (td) { clearTimeout(timer); show(td); } });
+  document.addEventListener('focusout', function (e) { if (cellOf(e)) hide(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') hide(); });
+  window.addEventListener('scroll', hide, true);
+  window.addEventListener('resize', hide);
+})();
+</script>
 </head>
 <body>
 
@@ -25079,11 +25173,8 @@ function _childRenderRecords() {
           // Top = anchor/as-of (v, muted) with its date; bottom = the
           // compared-to value (_bef, showcased) with its date. Each value
           // clamps independently for long-text columns.
-          return '<td class="rec-diff-cell-changed rec-ba' + _ltCls + '">'
-            + '<span class="rec-ba-top">' + _clampLT(q ? _hlKind(v, q, 'field') : v, v) + '</span>'
-            + '<span class="rec-ba-date">' + _baAfterDate + '</span>'
-            + '<span class="rec-ba-bottom">' + _clampLT(q ? _hlKind(_bef, q, 'field') : _bef, _bef) + '</span>'
-            + '<span class="rec-ba-date">' + _baBeforeDate + '</span></td>';
+          /* the cell shows the restore-point value only; the Compare to value lives in the hover/focus peek (_pkTd) */
+          return _pkTd('rec-diff-cell-changed' + _ltCls, _clampLT(q ? _hlKind(v, q, 'field') : v, v), c, v, _baAfterDate, _bef, _baBeforeDate);
         }
         return '<td class="rec-diff-cell-changed' + _ltCls + '">' + _clampLT(q ? _hlKind(v, q, 'field') : v, v) + '</td>';
       }
@@ -25418,18 +25509,10 @@ function _childRenderFields() {
     var _fldBef = _isChanged ? _recBeforeVal(resolved.schemaKey, resolved.idx, f.name, f.value) : null;
     if (_fGone) {
       /* a deleted record's fields read like changed ones: today's slot says Deleted, the compared point keeps the value */
-      valueCell = '<td class="rec-diff-cell-removed rec-ba">'
-        + '<span class="rec-ba-top">Deleted</span>'
-        + '<span class="rec-ba-date">' + _baAfterDate + '</span>'
-        + '<span class="rec-ba-bottom">' + _fVal + '</span>'
-        + '<span class="rec-ba-date">' + _baBeforeDate + '</span></td>';
+      valueCell = _pkTd('rec-diff-cell-removed', '<span class="pk-gone">Deleted</span>', f.name, 'Deleted', _baAfterDate, f.value, _baBeforeDate);
     } else if (_isChanged && _fldBef != null) {
       var _fBefHl = q ? _hlText(String(_fldBef), q) : wsEscape(String(_fldBef));
-      valueCell = '<td class="rec-diff-cell-changed rec-ba">'
-        + '<span class="rec-ba-top">' + _fVal + '</span>'
-        + '<span class="rec-ba-date">' + _baAfterDate + '</span>'
-        + '<span class="rec-ba-bottom">' + _fBefHl + '</span>'
-        + '<span class="rec-ba-date">' + _baBeforeDate + '</span></td>';
+      valueCell = _pkTd('rec-diff-cell-changed', _fVal, f.name, f.value, _baAfterDate, _fldBef, _baBeforeDate);
     } else {
       valueCell = '<td class="' + _valueChangedCls.trim() + '">' + _fVal + '</td>';
     }
@@ -74822,7 +74905,7 @@ window.D365X.recChip = function (key, item) {
     if (hd.querySelector('.dx-lg') || !hd.firstElementChild) return;
     var lg = document.createElement('span'); lg.className = 'dx-lg'; lg.style.display = 'none';
     lg.setAttribute('aria-label', 'Row marker key');
-    lg.innerHTML = '<span><i class="dx-ld m"></i>Changed</span><span><i class="dx-ld d"></i>Deleted since</span><span><i class="dx-ld u"></i>Unchanged</span>';
+    lg.innerHTML = window.vchip('Changed', 'gold') + window.vchip('New', 'green') + window.vchip('Deleted since', 'red');
     hd.insertBefore(lg, hd.firstElementChild.nextSibling);
   });
   /* the key sits at the right while the title leaves room for it; once it wraps beneath, it lines up left */
@@ -74848,12 +74931,12 @@ window.D365X.recChip = function (key, item) {
     return origSort.apply(this, arguments);
   };
   var css = document.createElement('style'); css.textContent = [
-    '.dx-lg { display: inline-flex; align-items: center; gap: 4px 16px; flex-wrap: wrap; justify-content: flex-end; flex: 0 1 auto; font-size: 14px; line-height: 20px; color: var(--black-70); }',
+    '.dx-lg { display: inline-flex; align-items: center; gap: 4px 8px; flex-wrap: wrap; justify-content: flex-end; flex: 0 1 auto; font-size: 14px; line-height: 20px; color: var(--black-70); }',
     '.inv-header { flex-wrap: wrap; } .inv-header > div:first-child { flex: 1 1 max-content !important; } .inv-header > .dx-lg { flex: 0 1 auto; margin-left: auto; } .inv-header > .dx-lg.is-wrapped { margin-left: 0; justify-content: flex-start; flex-basis: 100%; }',
     '.dx-lg span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }',
-    '.dx-ld { display: inline-block; width: 8px; height: 8px; border-radius: 50%; } .dx-ld.m { background: var(--yellow); } .dx-ld.d { background: var(--red); } .dx-ld.a { background: var(--green); } .dx-ld.u { background: var(--black-30); }',
-    /* a record created after the compared point has nothing to restore to, so it reads as a plain change, not its own state */
-    'body:has(#wlChromeRow.dx-on) tbody tr.rec-diff-row-added .diff-dot { background: var(--yellow); }'
+    '.dx-ld { display: inline-block; width: 8px; height: 8px; border-radius: 50%; } .dx-ld.m { background: var(--yellow); } .dx-ld.d { background: var(--red); } .dx-ld.a { background: var(--em-green); } .dx-ld.u { background: var(--black-30); }',
+    /* was: a yellow override here folded created records into Changed (nothing to restore to). Created records are their own state now: a Vision-green dot (the generic rule's --green is the legacy lime) and the legend says New. */
+    'body:has(#wlChromeRow.dx-on) tbody tr.rec-diff-row-added .diff-dot { background: var(--em-green); }'
   ].join('\n'); document.head.appendChild(css);
   X.syncChrome();
 })();
