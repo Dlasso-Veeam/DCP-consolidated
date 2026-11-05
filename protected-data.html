@@ -8245,6 +8245,7 @@ td.rec-pk:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); }
 /* what differs from the restore point: the cell's change tint plus a 2px underline (a shape cue, not colour alone) */
 .pk-pop mark { background: var(--yellow-10); color: inherit; font-weight: 500; border-radius: 2px; box-shadow: inset 0 -2px 0 var(--yellow); }
 /* the restore point has something the Compare to value lacks at this spot: a thin marker where it would sit */
+.pk-pop .pk-more { margin-top: 8px; font-size: 12px; line-height: 16px; color: var(--black-60); }
 .pk-pop .pk-gap { display: inline-block; width: 2px; height: 16px; margin: 0 2px; vertical-align: text-bottom; background: var(--yellow); border-radius: 1px; }
 </style>
 <script id="d365-peek-js">
@@ -8269,17 +8270,41 @@ window.vchip = function (text, type) { return '<span class="vchip vchip-' + (typ
     while (i < n) out.push({ t: 'ins', s: A[i++] }); while (j < m) out.push({ t: 'del', s: B[j++] });
     return out;
   }
-  /* the Compare to value with its differing words highlighted; where the restore point has extra words, a thin marker */
-  function cmpHtml(a, b) {
+  /* the Compare to value as a list of items: plain words, a highlighted run (words only the Compare to value has), or a gap (words only the restore point has) */
+  function items(a, b) {
     var o = ops(a, b), out = [], k = 0;
     while (k < o.length) {
-      if (o[k].t === 'eq') { out.push(vh(o[k].s)); k++; continue; }
-      var dels = [], ins = 0;
-      while (k < o.length && o[k].t !== 'eq') { if (o[k].t === 'del') dels.push(o[k].s); else ins++; k++; }
-      out.push(dels.length ? '<mark>' + vh(dels.join(' ')) + '</mark>' : '<i class="pk-gap" aria-hidden="true"></i>');
+      if (o[k].t === 'eq') { out.push({ eq: true, s: o[k].s }); k++; continue; }
+      var dels = [];
+      while (k < o.length && o[k].t !== 'eq') { if (o[k].t === 'del') dels.push(o[k].s); k++; }
+      out.push(dels.length ? { hl: true, s: dels.join(' ') } : { gap: true, s: '' });
     }
-    return out.join(' ');
+    return out;
   }
+  var CAP = 240, LEAD = 48;   /* about six lines at the popover's width; context shown before the first change */
+  function clip(s, max) { if (s.length <= max) return s; var c = s.slice(0, max), sp = c.lastIndexOf(' '); return (sp > max * 0.6 ? c.slice(0, sp) : c) + '…'; }
+  /* The Compare to value with its differing words highlighted. A value longer than CAP shows a window that starts a little before the first change, so what changed is always in view, and says how many further changes fall outside it. */
+  function cmpHtml(a, b) {
+    var it = items(a, b), n = it.length, i, total = 0, first = -1;
+    for (i = 0; i < n; i++) { total += it[i].s.length + 1; if (first < 0 && !it[i].eq) first = i; }
+    var start = 0, end = n, more = 0;
+    if (total > CAP && first >= 0) {
+      start = first; var lead = 0;
+      while (start > 0 && lead < LEAD) { start--; lead += it[start].s.length + 1; }
+      var used = 0; end = start;
+      while (end < n && (end === start || used + it[end].s.length + 1 <= CAP)) { used += it[end].s.length + 1; end++; }
+      for (i = end; i < n; i++) if (!it[i].eq) more++;
+    }
+    var parts = [];
+    if (start > 0) parts.push('…');
+    for (i = start; i < end; i++) {
+      var x = it[i], txt = (start > 0 || end < n) ? clip(x.s, CAP) : x.s;
+      parts.push(x.gap ? '<i class="pk-gap" aria-hidden="true"></i>' : x.hl ? '<mark>' + vh(txt) + '</mark>' : vh(txt));
+    }
+    if (end < n) parts.push('…');
+    return parts.join(' ') + (more ? '</div><div class="pk-more">' + more + (more === 1 ? ' more change' : ' more changes') + ' not shown' : '');
+  }
+  function plainHtml(b) { b = String(b); return b.length > CAP ? vh(clip(b, CAP)) : vh(b); }
   var pop = null, cur = null, timer = null;
   function ensure() {
     if (pop) return pop;
@@ -8289,7 +8314,7 @@ window.vchip = function (text, type) { return '<span class="vchip vchip-' + (typ
   function show(td) {
     var p = ensure(), d = td.dataset;
     var gone = td.classList.contains('rec-diff-cell-removed');   /* a deleted record has no restore-point value to differ from: show the value plain */
-    p.innerHTML = '<div class="pk-row"><span class="pk-l">Compare to</span><span class="pk-d">' + esc(d.pkBd) + '</span></div><div class="pk-v">' + (gone ? vh(d.pkB) : cmpHtml(d.pkA, d.pkB)) + '</div>';
+    p.innerHTML = '<div class="pk-row"><span class="pk-l">Compare to</span><span class="pk-d">' + esc(d.pkBd) + '</span></div><div class="pk-v">' + (gone ? plainHtml(d.pkB) : cmpHtml(d.pkA, d.pkB)) + '</div>';
     p.classList.add('on'); cur = td; td.setAttribute('aria-describedby', 'pkPop');
     /* above the cell by default, below only when there is no room, clamped to the viewport */
     p.style.left = '0px'; p.style.top = '-9999px';
@@ -15689,14 +15714,14 @@ var D365_SCHEMAS = {
     rows: [
       {Name:'Acme Manufacturing Inc.', Industry:'Manufacturing', Revenue:'$12.4M', Owner:'Sarah Chen', Modified:'Mar 22, 2026', Description:'Tier-1 contract manufacturer of industrial automation components and the primary account for the Central region. Currently renegotiating their master supply agreement ahead of a planned plant expansion in Q3.'},
       {Name:'Contoso Global LLC', Industry:'Technology', Revenue:'$45.2M', Owner:'James Park', Modified:'Mar 21, 2026', Description:'Global technology holding company spanning cloud infrastructure and developer tooling. Strategic enterprise account under an active multi-year platform agreement managed by the named-accounts team.'},
-      {Name:'Northwind Traders', Industry:'Retail', Revenue:'$8.7M', Owner:'Maria Gonzalez', Modified:'Mar 18, 2026', Description:'Regional retail distributor operating 40+ storefronts across the Pacific Northwest. Expanding into e-commerce fulfillment, which is driving renewed interest in the inventory and order-management modules.'},
+      {Name:'Northwind Traders', Industry:'Retail', Revenue:'$8.7M', Owner:'Maria Gonzalez', Modified:'Mar 18, 2026', Description:'Regional grocery and household-goods retailer operating 152 stores across the Midwest and Mountain West. The account renewed its multi-year platform agreement in the spring and is now evaluating the analytics add-on for demand forecasting. Procurement is centralised in Chicago, with regional buyers approving category-level purchases up to a defined limit. The integration team runs a weekly sync with our solutions engineers, and the main open risk is the planned migration of their point-of-sale data to a new cloud provider later this year. Executive sponsor is the VP of Supply Chain; day-to-day contact is the Director of Merchandising Systems.'},
       {Name:'Fabrikam Industries', Industry:'Manufacturing', Revenue:'$22.1M', Owner:'Sarah Chen', Modified:'Mar 23, 2026', Description:'Precision parts manufacturer serving aerospace and defense supply chains. Piloting a connected-shop-floor initiative that ties MES production data back into the CRM for the first time.'},
       {Name:'Litware Inc.', Industry:'Technology', Revenue:'$18.9M', Owner:'James Park', Modified:'Mar 22, 2026', Description:'Mid-market software vendor focused on vertical ERP for the construction trades. Signed a multi-year contract last quarter and is now in the onboarding and adoption phase.'},
       {Name:'Proseware Solutions', Industry:'Professional Services', Revenue:'$6.4M', Owner:'Sarah Chen', Modified:'Mar 19, 2026', Description:'Boutique consulting firm specializing in regulatory compliance for financial institutions. Engagements are project-based and seasonal, peaking sharply around fiscal year-end.'},
       {Name:'Humongous Insurance', Industry:'Insurance', Revenue:'$87.4M', Owner:'James Park', Modified:'Mar 24, 2026', Description:'National property and casualty insurer with a large captive agent network. Compliance and data-residency requirements make this one of the most heavily governed accounts in the book.'},
       {Name:'Blue Yonder Airlines', Industry:'Transportation', Revenue:'$156.2M', Owner:'Sarah Chen', Modified:'Mar 23, 2026', Description:'Regional carrier operating short-haul routes out of three hub airports. An open fleet-analytics opportunity is championed by their VP of Operations.'},
       {Name:'Adventure Works Cycles', Industry:'Manufacturing', Revenue:'$34.6M', Owner:'Maria Gonzalez', Modified:'Mar 17, 2026', Description:'Designs and assembles premium bicycles sold through specialty dealers and direct to consumers. Pronounced demand seasonality makes accurate forecasting a recurring conversation.'},
-      {Name:'Tailspin Toys', Industry:'Retail', Revenue:'$9.8M', Owner:'James Park', Modified:'Mar 16, 2026', Description:'Mass-market toy retailer with strong holiday-season volume and a fast-growing online presence. Price sensitivity keeps margins tight and renewals competitive.'},
+      {Name:'Tailspin Toys', Industry:'Retail', Revenue:'$9.8M', Owner:'James Park', Modified:'Mar 16, 2026', Description:'Tailspin Toys designs and distributes mass-market toys through national retail chains and a growing direct-to-consumer storefront. The account is managed by a three-person team covering North America, with seasonal support from the partner programme between September and December. Order volumes peak in the fourth quarter, and the finance team has asked for backup retention to be extended through the end of the fiscal year so that holiday-season orders can be reconstructed if a dispute arises. Their catalogue holds more than four thousand active products, each linked to supplier records, safety certifications and regional packaging requirements that change several times a year. A dedicated data steward reviews product-record changes every Friday and signs off on bulk updates before they reach the storefront. Contacts at the account include the head of merchandising, the director of logistics and two regional account leads, all of whom have been briefed on the restore process and on how to request an out-of-cycle recovery. A cross-border expansion into the European market is planned for next year, which will add a second Dynamics environment and a second set of retention requirements under local data-protection rules. The last quarterly business review flagged integration latency between the warehouse system and the order platform as the main operational concern, with a remediation plan due before the next peak season.'},
       {Name:'Wingtip Toys', Industry:'Retail', Revenue:'$5.2M', Owner:'Sarah Chen', Modified:'Mar 15, 2026', Description:'Specialty toy and hobby retailer serving a loyal niche customer base. Smaller footprint, but a high repeat-purchase rate and unusually strong brand affinity.'},
       {Name:'Wide World Importers', Industry:'Distribution', Revenue:'$67.3M', Owner:'Maria Gonzalez', Modified:'Mar 14, 2026', Description:'Wholesale distributor moving goods across North American and EMEA corridors. Complex logistics needs span warehousing, customs clearance, and multi-currency invoicing.'},
       {Name:'Coho Vineyard', Industry:'Food & Beverage', Revenue:'$3.1M', Owner:'James Park', Modified:'Mar 13, 2026', Description:'Family-owned winery with a direct-to-consumer club and selective wholesale distribution. A very small IT team means they lean heavily on managed onboarding and support.'},
@@ -74093,6 +74118,9 @@ document.addEventListener('DOMContentLoaded', function () {
   EM('accounts', [4, 14, 30], [[6, 'Tier', 'Key Account'], [17, 'Tier', 'Strategic'], [20, 'AccountManager', 'Marcus Bell'], [8, 'BillingCity', 'Seattle, WA']]);
   EM('accounts', [1, 11, 20], [[7, 'Revenue', '$151.0M']]);
   EM('accounts', [1, 15, 10], [[22, 'Owner', 'Dev Patel']]);
+  /* long text, for the Compare to peek: ~620 chars with the edit near the start (Northwind), ~1,600 chars with edits in the middle and at the end (Tailspin) */
+  E('accounts', [3, 10, 0], 2, 'Description', 'Regional grocery and household-goods retailer operating 140 stores across the Midwest. The account renewed its multi-year platform agreement in the spring and is now evaluating the analytics add-on for demand forecasting. Procurement is centralised in Chicago, with regional buyers approving category-level purchases up to a defined limit. The integration team runs a weekly sync with our solutions engineers, and the main open risk is the planned migration of their point-of-sale data to a new cloud provider later this year. Executive sponsor is the VP of Supply Chain; day-to-day contact is the Director of Merchandising Systems.');
+  E('accounts', [2, 14, 30], 9, 'Description', 'Tailspin Toys designs and distributes mass-market toys through national retail chains and a growing direct-to-consumer storefront. The account is managed by a three-person team covering North America, with seasonal support from the partner programme between September and December. Order volumes peak in the fourth quarter, and the finance team has asked for backup retention to be extended through the end of the fiscal year so that holiday-season orders can be reconstructed if a dispute arises. Their catalogue holds more than four thousand active products, each linked to supplier records, safety certifications and regional packaging requirements that change several times a year. A dedicated data steward reviews product-record changes every Monday and signs off on bulk updates before they reach the storefront. Contacts at the account include the head of merchandising, the director of logistics and two regional account leads, all of whom have been briefed on the restore process and on how to request an out-of-cycle recovery. A cross-border expansion into the European market is planned for next year, which will add a second Dynamics environment and a second set of retention requirements under local data-protection rules. The last quarterly business review flagged integration latency between the warehouse system and the order platform as the main operational concern, with a remediation plan due in the first quarter.');
   B('accounts', 19, [9, 11, 0]); B('accounts', 24, [2, 10, 5]);                                              // created since
   G('accounts', [3, 13, 12], { Name: 'Relecloud Services', Industry: 'Technology', Revenue: '$14.8M', Owner: 'James Park', Modified: 'Sep 29, 2026', Description: 'Cloud-migration partner running a two-wave data-centre exit. Wave 2 is in procurement and is the largest open opportunity attached to this account.' });
   G('accounts', [3, 13, 21], { Name: 'Northridge Logistics', Industry: 'Logistics', Revenue: '$23.1M', Owner: 'Maria Gonzalez', Modified: 'Oct 1, 2026', Description: 'Regional freight forwarder consolidating three warehouse systems onto one platform. Renewal due next quarter.' });
