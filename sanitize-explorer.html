@@ -99,8 +99,10 @@ body { background: var(--white); }
 .btn-flat:hover:not(:disabled) { color: var(--black-80); }
 .btn-flat:active:not(:disabled) { background: var(--black-10); }
 .btn-flat:disabled { color: var(--black-30); cursor: default; background: none; }
-.btn-tertiary { background: var(--green-5); border-color: var(--green); color: var(--green); }
+.btn-tertiary { background: var(--green-5); border-color: var(--green-50); color: var(--green); }
 .btn-tertiary:hover { background: var(--green-10); }
+/* Vision Button, Type=Tertiary Size=Small: label Body/B2/Normal (16/22, 450), side padding 4 */
+.btn-tertiary.btn-sm { padding: 0 4px; font-size: 16px; line-height: 22px; font-weight: 450; }
 .btn-sm { height: 28px; padding: 0 8px; }
 .btn-icon { width: 36px; padding: 0; }
 .btn:focus-visible, .cb:focus-visible, .sw:focus-visible, .li:focus-visible, .row-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
@@ -189,6 +191,7 @@ hr.line { border: none; border-top: 1px solid var(--black-10); margin: 0; flex-s
 
 /* bulk action bar (52, pad 8/16, gap 8, 0 1px 0 #edf0f0) */
 .bulk { display: flex; align-items: center; gap: 8px; height: 52px; padding: 8px 16px; background: var(--white); box-shadow: 0 1px 0 #edf0f0; flex-shrink: 0; position: relative; z-index: 4; }
+.bulk-sp { flex: 1; }
 .tip { position: relative; display: inline-flex; }
 
 /* grid: th 14/20 black-70 pad 8 + 1px #f4f6f8 underline; td 16/22 pad 0 8, row 48; no row hairlines */
@@ -250,7 +253,7 @@ tbody tr:hover .gut-btns { display: flex; }
 .toast-close { background: none; border: none; padding: 0; cursor: pointer; flex-shrink: 0; align-self: flex-start; margin-top: 2px; }
 .toast-close svg { width: 16px; height: 16px; display: block; stroke-width: 2.5; }
 .toast.toast-success .toast-close { color: var(--green); }
-#ttip { position: fixed; z-index: 4000; display: none; max-width: 320px; padding: 4px 8px; border-radius: 4px; background: var(--black-100); color: var(--white); font-size: 14px; line-height: 20px; pointer-events: none; }
+#ttip { position: fixed; z-index: 4000; display: none; max-width: 260px; padding: 6px 9px; border-radius: 4px; background: var(--white); color: var(--black-100); border: 1px solid var(--black-10); box-shadow: 0 4px 14px rgba(0, 0, 0, .22); font-size: 14px; line-height: 1.35; font-weight: 450; pointer-events: none; }
 .pager { display: flex; align-items: center; justify-content: flex-end; gap: 16px; height: 52px; padding: 0 16px; color: var(--black-70); font-size: 14px; flex-shrink: 0; background: var(--white); }
 .pager select { height: 28px; border: none; box-shadow: inset 0 0 0 1px var(--black-20); border-radius: 4px; background: var(--form-bg); font: inherit; padding: 0 4px; }
 
@@ -321,13 +324,6 @@ select.input:disabled { color: var(--black-30); cursor: default; }
 .tr-note { color: var(--black-70); font-size: 14px; line-height: 20px; }
 .tr-counts { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 16px 12px; }
 .tr-panes { padding: 0 16px 16px; }
-.mask-sum { padding: 16px; }
-.mask-sum-hd { display: flex; align-items: center; gap: 12px; }
-.mask-sum-hd .ok { color: var(--green); display: flex; flex-shrink: 0; }
-.mask-sum-hd .t { flex: 1; min-width: 0; font-weight: 500; }
-.mask-sum-hd .d { color: var(--black-70); font-size: 14px; line-height: 20px; font-weight: 400; }
-.mask-sum-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-.mask-sum-ft { display: flex; margin-top: 16px; }
 .wiz-ft-note { color: var(--black-70); font-size: 14px; line-height: 20px; }
 .btn-lg { height: 44px; padding: 0 16px; font-size: 18px; }
 .btn-block { flex: 1; }
@@ -439,7 +435,7 @@ select.input.plain { padding: 0 40px 0 12px; }
 .sum-row + .sum-row { border-top: 1px solid var(--black-10); }
 .sum-ic { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 4px; background: var(--black-5); color: var(--black-100); flex-shrink: 0; }
 .sum-text { min-width: 0; }
-.adv-head { display: flex; align-items: center; gap: 12px; padding-top: 16px; margin-top: 24px; border-top: 1px solid var(--black-10); margin-bottom: 16px; }   /* index.html .bi-co-head (Co-owners) */
+.adv-head { display: flex; align-items: center; gap: 12px; margin-top: 24px; margin-bottom: 16px; }   /* index.html .bi-co-head (Co-owners) */
 .adv-chev { width: 24px; height: 24px; border: 0; border-radius: 4px; background: var(--green-10); color: var(--green); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; transition: transform .15s ease; flex-shrink: 0; }
 .adv-chev:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 .adv-title { font-size: 18px; line-height: 22px; font-weight: 500; color: var(--black-100); }
@@ -468,41 +464,9 @@ select.input.plain { padding: 0 40px 0 12px; }
 .rl-eg span:last-child { color: var(--black-100); font-weight: 500; }
 .rl-a { display: inline-flex; color: var(--black-50); transform: rotate(-90deg); }
 /* Masking: read-only card (two-column list) and the customize view (element list + control panel) */
-.cb-body { margin-top: 12px; }
-.cb-two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 32px; }
-.cb-tr { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
-.cb-tr .n { font-weight: 500; white-space: nowrap; }
-.cb-tr .v { font-size: 14px; line-height: 20px; color: var(--black-70); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-.cb-tr.mk-off .n, .cb-tr.mk-off .v { opacity: .5; }
-.cb-edit-hd { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
-.cb-edit-hd .t { font-size: 18px; line-height: 22px; font-weight: 500; }
-.cb-edit-hd .r { display: flex; gap: 8px; }
-.me { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 12px; align-items: stretch; }
-.me > .ws-card { margin: 0 !important; }
-.me > .me-p { padding: 16px; }
-.me .md-doc { padding: 0; display: block; overflow: hidden; }
-.me-row { display: grid; grid-template-columns: 110px minmax(0, 1fr) 20px; gap: 12px; align-items: center; width: 100%; min-height: 52px; padding: 4px 12px; border: 0; border-radius: 0; background: transparent; font: inherit; text-align: left; cursor: pointer; color: inherit; }
-.me-row:hover { background: var(--green-5); }
-.me-row:focus-visible { outline: none; box-shadow: var(--focus-ring); }
-.me-row.is-sel { background: var(--green-5); box-shadow: inset 2px 0 0 var(--green); }
-.me-row .k { color: var(--black-70); font-size: 14px; line-height: 20px; }
-.me-row .vv { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
-.me-row .fnl { font-size: 14px; line-height: 20px; color: var(--black-70); }
-.me-row .chv { display: inline-flex; color: var(--black-50); transform: rotate(-90deg); }
-.me-row.is-sel .chv { color: var(--green); }
+.me { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 0; align-items: stretch; overflow: hidden; }   /* one card: the list drives the panel beside it */
 .md-tok { display: inline-block; padding: 1px 4px; border-radius: 2px; background: var(--green-5); color: var(--green); font-weight: 500; line-height: 22px; }
 .md-tok.off { background: var(--black-5); color: var(--black-100); }
-.me-p .hd { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.me-p .hd b { font-size: 16px; line-height: 22px; font-weight: 500; }
-.me-p .sub { margin: 4px 0 16px; font-size: 14px; line-height: 20px; color: var(--black-70); }
-.me-p.mk-off .mc-opt { opacity: .5; pointer-events: none; }
-.mc-opt { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 12px 16px; border: 1px solid var(--black-10); border-radius: 4px; cursor: pointer; }
-.mc-opt + .mc-opt { margin-top: 8px; }
-.mc-opt.is-sel { border-color: var(--green); }
-.mc-opt .r { display: inline-flex; flex-shrink: 0; }
-.mc-opt .r .sc-on { display: none; } .mc-opt.is-sel .r .sc-on { display: block; } .mc-opt.is-sel .r .sc-off { display: none; }
-.mc-opt .t { flex: 1; font-weight: 500; }
-.mc-opt .v { flex-basis: 100%; padding-left: 36px; font-size: 14px; line-height: 20px; color: var(--black-100); font-weight: 500; min-width: 0; }
 /* Test run: original preview beside the output file */
 .pv { border: 1px solid var(--black-10); border-radius: 4px; background: var(--black-5); padding: 16px; box-sizing: border-box; }
 .pv-page { background: var(--white); border: 1px solid var(--black-10); border-radius: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 20px 24px; font-size: 14px; line-height: 22px; }
@@ -538,7 +502,124 @@ select.input.plain { padding: 0 40px 0 12px; }
 .sb-col .pv-code, .sb-col .out { max-height: 420px; overflow: auto; }
 .sb-col > .pv, .sb-col > .out { min-height: 0; }
 .sb-col > .pv { max-height: 420px; overflow: auto; }
+.sb-col > .out { max-height: 420px; overflow: auto; }
 .tk.hl { padding: 0 2px; }
+
+/* ═══ Masking: recommended, add from catalog; storage location dropdown ═══ */
+.st-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 24px; }
+.st-empty b { font-size: 16px; line-height: 22px; font-weight: 500; }
+.st-empty span { font-size: 14px; line-height: 20px; color: var(--black-70); }
+.st-empty .btn { margin-top: 8px; }
+.hint { margin-top: 4px; font-size: 14px; line-height: 20px; color: var(--black-70); }
+.rg { padding: 0 0 4px; }
+.rg-row { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; padding: 12px 16px; }
+.rg-row:hover { background: var(--green-5); }
+.rg-row .k { display: block; font-size: 16px; line-height: 22px; font-weight: 500; }
+.rg-row .k.one { font-size: 14px; line-height: 20px; }
+.rg-row .c { display: block; font-size: 14px; line-height: 20px; color: var(--black-70); }
+.rg-row .why { margin-top: 4px; font-size: 14px; line-height: 20px; color: var(--black-100); }
+.rg-row .why .lnk { padding: 0; }
+.field .k.ro { display: block; font-size: 16px; line-height: 22px; font-weight: 500; }
+.field .c { display: block; font-size: 14px; line-height: 20px; color: var(--black-70); }
+.field .why { margin-top: 4px; font-size: 14px; line-height: 20px; }
+
+/* ═══ Masking step: the Gencore masking condition layout ═══ */
+.step-pad.wide { max-width: 1080px; } .wiz-ft-in.wide { max-width: 1080px; }
+.mcx .alert { margin-bottom: 12px; }
+.mcx .mc-sq { margin-bottom: 12px; } .mcx .sr { position: relative; } .mcx .sr svg { position: absolute; left: 10px; top: 8px; color: var(--black-50); } .mcx .sr .input { padding-left: 36px; }
+.mcx .gtab { border: 1px solid var(--black-10); border-radius: 8px; overflow: hidden; }
+.mcx .stats { display: grid; grid-template-columns: 1fr 1fr; box-shadow: 0 -1px 0 var(--black-10) inset; }
+.mcx .stats > div { padding: 12px 16px; } .mcx .stats > div + div { box-shadow: 1px 0 0 var(--black-10) inset; }
+.mcx .stats span { display: block; font-size: 14px; line-height: 20px; color: var(--black-70); } .mcx .stats b { display: block; font-size: 24px; line-height: 32px; font-weight: 500; }
+.mcx .twocol { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); max-height: 500px; }
+.mcx .m-B.open .twocol { min-height: 460px; }
+.mcx .lcol { display: flex; flex-direction: column; min-height: 0; }
+.mcx .llist { flex: 1; overflow: auto; min-height: 0; }
+.mcx .lhead, .mcx .lrow { display: grid; grid-template-columns: 36px minmax(0, 1.1fr) minmax(0, .85fr) minmax(0, 1.35fr); gap: 12px; align-items: center; padding: 0 16px; }
+.mcx .lhead { height: 36px; background: var(--black-5); font-size: 14px; line-height: 20px; font-weight: 500; color: var(--black-70); }
+.mcx .lrow { min-height: 56px; padding-top: 6px; padding-bottom: 6px; cursor: pointer; }
+.mcx .lrow:hover { background: var(--green-5); } .mcx .lrow.is-sel { background: var(--green-5); box-shadow: inset 2px 0 0 var(--green); } .mcx .lrow.off .nm, .mcx .lrow.off .lfn { opacity: .55; }
+.mcx .lrow .nm { display: flex; flex-direction: column; min-width: 0; } .mcx .lrow .k { font-weight: 500; } .mcx .lrow .fnl { font-size: 14px; line-height: 20px; color: var(--black-70); }
+.mcx .lrow .lfn { font-size: 14px; line-height: 20px; }
+.mcx .lrow .lpv { min-width: 0; display: flex; } .mcx .lrow .lpv .md-tok { max-width: 100%; white-space: normal; overflow-wrap: anywhere; line-height: 22px; }
+.mcx .cu { margin-left: 8px; font-size: 14px; font-weight: 400; color: var(--black-70); }
+.mcx .rcol { overflow: auto; min-width: 0; box-shadow: 1px 0 0 var(--black-10) inset; } .mcx .cfg { padding: 16px; }
+.mcx .cfg .c, .mcx .dv .c { font-size: 14px; line-height: 20px; color: var(--black-70); }
+.mcx .dv { display: flex; flex-direction: column; margin-bottom: 16px; } .mcx .kl { font-size: 14px; line-height: 20px; color: var(--black-70); } .mcx .dv .dvv { font-size: 16px; line-height: 22px; font-weight: 500; }
+.mcx .iogrid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--black-10); border: 1px solid var(--black-10); border-radius: 4px; overflow: hidden; }
+.mcx .iogrid span { background: var(--white); padding: 8px 12px; min-width: 0; overflow-wrap: anywhere; } .mcx .iogrid.off span:nth-child(2n) { color: var(--black-70); }
+.mcx .acts { display: flex; gap: 8px; margin-top: 16px; }
+.mcx .addrow { margin-top: 12px; } .mcx .addrow .btn { width: 100%; justify-content: center; height: 44px; }
+.mc-empty { padding: 16px; font-size: 14px; line-height: 20px; color: var(--black-70); }
+.scrim2 { position: fixed; inset: 0; background: rgba(31, 34, 41, .32); display: flex; align-items: center; justify-content: center; z-index: 300; padding: 24px; }
+.scrim2 .pick { background: var(--white); border-radius: 8px; box-shadow: 0 4px 24px rgba(31, 34, 41, .24); width: 100%; max-width: 520px; overflow: hidden; }
+.scrim2 .pk-h { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; }
+.scrim2 .tb { padding: 0 16px 8px; } .scrim2 .sr { position: relative; } .scrim2 .sr svg { position: absolute; left: 10px; top: 8px; color: var(--black-50); } .scrim2 .sr .input { padding-left: 36px; }
+.scrim2 .pk-l { max-height: 340px; overflow: auto; } .scrim2 .pk-r { display: flex; align-items: center; gap: 12px; padding: 8px 16px; cursor: pointer; } .scrim2 .pk-r:hover { background: var(--green-5); }
+.scrim2 .pk-r .kn { flex: 1; display: flex; flex-direction: column; min-width: 0; } .scrim2 .pk-r .k { font-weight: 500; } .scrim2 .pk-r .c { font-size: 14px; line-height: 20px; color: var(--black-70); } .scrim2 .cu { margin-left: 8px; font-size: 14px; font-weight: 400; color: var(--black-70); }
+.scrim2 .pk-f { padding: 12px 16px; font-size: 14px; color: var(--black-70); }
+.mcx .btn-destructive, .btn-destructive { color: var(--red); }
+.btn-destructive:hover { background: var(--red-10); color: var(--red); }
+.btn-destructive:active { background: var(--red-10); box-shadow: inset 0 0 0 1px var(--red-30); }
+.btn-block-full { width: 100%; justify-content: center; margin-top: 8px; }
+.scrim2 .pk-b { padding: 0 16px 8px; } .scrim2 .pk-ft { padding: 12px 16px 16px; display: flex; } .scrim2 .pk-ft .btn { width: 100%; justify-content: center; height: 44px; }
+.scrim2 .pk-r input { flex-shrink: 0; }
+.mcx .lhead, .mcx .lrow { grid-template-columns: 36px minmax(0, 1.1fr) minmax(0, .85fr) minmax(0, 1.35fr) 24px; }
+.mcx .lchev { display: inline-flex; color: var(--black-50); transform: rotate(-90deg); } .mcx .lchev.on { color: var(--green); }
+.mcx .m-B .twocol { grid-template-columns: 1fr 0fr; transition: grid-template-columns .22s ease; } .mcx .m-B.open .twocol { grid-template-columns: 1.8fr 1fr; }
+.mcx .m-B .lcol, .mcx .m-B .rcol { min-width: 0; } .mcx .m-B .rcol { overflow: hidden; } .mcx .m-B.open .rcol { overflow: auto; }
+.mcx .cfg-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 16px; }
+.mcx .cfg-t { display: flex; flex-direction: column; min-width: 0; } .mcx .cfg-t b { font-size: 18px; line-height: 24px; font-weight: 500; overflow-wrap: anywhere; } .mcx .cfg-t .c { font-size: 14px; line-height: 20px; color: var(--black-70); }
+.rg-head { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; padding: 8px 16px; background: var(--black-5); border-radius: 8px 8px 0 0; font-size: 14px; line-height: 20px; font-weight: 500; color: var(--black-70); }
+.rg-row .cap, .field .cap { display: block; margin-top: 4px; font-size: 14px; line-height: 20px; color: var(--black-70); }
+.dd { position: relative; }
+.dd-off { display: flex; align-items: center; color: var(--black-50); cursor: default; }
+.dd-trg { text-align: left; cursor: pointer; display: flex; align-items: center; gap: 12px; --dd-chev: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M7 10l5 5 5-5z' fill='%23626469'/></svg>"); background-image: var(--dd-chev); background-repeat: no-repeat; background-position: right 8px center; padding-right: 40px; }
+.input.dd-trg:focus { background-image: var(--dd-chev); background-repeat: no-repeat; background-position: right 8px center; }   /* .input:focus sets the background shorthand, which would drop the chevron */
+.dd-trg[aria-expanded=true] { background-color: var(--green-5); box-shadow: inset 0 0 0 1px var(--green); }
+.dd-trg .n { font-weight: 500; white-space: nowrap; flex-shrink: 0; } .dd-trg .m { color: var(--black-70); font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.dd-menu { position: absolute; z-index: 20; left: 0; right: 0; top: 40px; background: var(--white); border-radius: 4px; box-shadow: 0 4px 24px rgba(31, 34, 41, .16); overflow: hidden; }
+.dd-opt { display: flex; flex-direction: column; min-height: 48px; padding: 4px 12px; justify-content: center; cursor: pointer; }
+.dd-opt:hover { background: var(--green-5); } .dd-opt.is-sel { background: var(--green-5); box-shadow: inset 2px 0 0 var(--green); }
+.dd-opt .n { font-size: 16px; line-height: 22px; font-weight: 500; color: var(--black-100); } .dd-opt .m { font-size: 14px; line-height: 20px; color: var(--black-70); }
+.fid { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding: 12px 16px 0; font-size: 14px; line-height: 20px; }
+.fid .fl, .fid .fx { color: var(--black-70); } .fid b { font-weight: 500; }
+.scrim2 .pk-g { padding: 12px 16px 4px; font-size: 14px; line-height: 20px; font-weight: 500; color: var(--black-70); position: sticky; top: 0; background: var(--white); z-index: 1; }
+.rg-row .nms { margin-top: 4px; color: var(--black-100); overflow-wrap: anywhere; }
+.o-n { max-width: 780px; }
+.rg-head, .rg-row { grid-template-columns: 120px minmax(0, 1fr) 80px 280px 24px; }
+.rg-head .num, .rg-row .num { text-align: right; font-variant-numeric: tabular-nums; }
+.rg-row .num { font-size: 16px; line-height: 22px; }
+.rg-row .sys { min-width: 0; font-size: 14px; line-height: 20px; overflow-wrap: anywhere; } .rg-row .sys .nms { color: var(--black-100); }
+.gband { display: grid; grid-template-columns: 1fr 1.4fr; gap: 16px; align-items: center; padding: 12px 16px; margin-top: 12px; }
+.gband label { display: block; font-size: 16px; line-height: 22px; font-weight: 500; } .gband .c { display: block; font-size: 14px; line-height: 20px; color: var(--black-70); }
+.need-note { margin-top: 8px; font-size: 14px; line-height: 20px; color: var(--black-70); }
+/* Vision "New Components / Alerts" (Warning): padding 12, gap 12, radius 4, 1px border, glyph 24, one 16/22 text style */
+.vis-alert { display: flex; align-items: flex-start; gap: 12px; padding: 12px; border: 1px solid var(--orange-border); border-radius: 4px; background: var(--orange-10); }
+.vis-alert > span:first-child { flex: none; display: flex; color: #f6772c; } .vis-alert-txt { flex: 1; min-width: 0; font-size: 16px; line-height: 22px; font-weight: 450; color: var(--black-100); padding-top: 1px; }
+.need-alert { margin-bottom: 16px; }
+/* Output step: the masking table's slide-in, with the Output columns */
+.mcx .o-B .twocol { grid-template-columns: 1fr 0fr; transition: grid-template-columns .22s ease; max-height: none; }
+.mcx .o-B.open .twocol { grid-template-columns: 1.8fr 1fr; }
+.mcx .o-B .lcol, .mcx .o-B .rcol { min-width: 0; } .mcx .o-B .rcol { overflow: hidden; } .mcx .o-B.open .rcol { overflow: auto; }
+.mcx .otab .lhead, .mcx .otab .lrow { grid-template-columns: minmax(0, .8fr) minmax(0, 1.5fr) minmax(0, 1.2fr) 24px; gap: 12px; }
+.mcx .otab .llist { overflow: visible; }
+.mcx .otab .lrow .sy, .mcx .otab .lrow .lc { display: flex; align-items: baseline; gap: 4px; min-width: 0; font-size: 14px; line-height: 20px; }
+.mcx .otab .lrow .lc { flex-direction: column; align-items: flex-start; gap: 0; } .mcx .otab .lrow .lc .btn { max-width: 100%; }
+.mcx .otab .t1 { display: block; min-width: 0; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mcx .otab .lrow .k.t1 { font-size: 16px; line-height: 22px; font-weight: 500; } .mcx .otab .lrow .k.nonec { color: var(--black-50); }
+.mcx .otab .mo { flex: none; color: var(--black-70); }
+.mcx .otab .lrow.nc { cursor: default; } .mcx .otab .lrow.nc:hover { background: none; } .mcx .otab .lrow .lc .lnk { padding: 0; font-size: 14px; line-height: 20px; }
+.mcx .otab .lrow:focus-visible { outline: none; box-shadow: inset 0 0 0 2px #fff, inset 0 0 0 4px #008436; }
+.mcx .otab .cfg { container-type: inline-size; } .mcx .otab .cfg .field { margin-bottom: 16px; }
+.mcx .otab .cfg .lbl-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+.mcx .otab .cfg .lbl-row label { display: block; font-size: 14px; line-height: 20px; color: var(--black-70); margin: 0; }
+.mcx .otab .cfg .lnk { flex: none; padding: 0; font-size: 14px; line-height: 20px; text-decoration: none; white-space: nowrap; } .mcx .otab .cfg .lnk .short { display: none; }
+@container (max-width: 240px) { .mcx .otab .cfg .lnk .full { display: none; } .mcx .otab .cfg .lnk .short { display: inline; } }
+.mcx .otab .cfg .ro .k { display: block; font-size: 16px; line-height: 22px; font-weight: 500; } .mcx .otab .cfg .ro .c { display: block; font-size: 14px; line-height: 20px; color: var(--black-70); }
+.mcx .otab .cfg .cap { display: block; margin-top: 4px; font-size: 14px; line-height: 20px; color: var(--black-70); } .mcx .otab .cfg .kl { margin-bottom: 4px; }
+.mcx .otab .dsys { border: 1px solid var(--black-10); border-radius: 4px; max-height: 132px; overflow: auto; } .mcx .otab .dsys > div { padding: 6px 12px; font-size: 14px; line-height: 20px; overflow-wrap: anywhere; }
+.mcx .otab .rcol .dd-menu { max-height: 192px; overflow: auto; }
 </style>
 </head>
 <body>
@@ -819,6 +900,7 @@ var DE_EX = {
   'Tax ID': ['94-1234567', '[TAX-ID]'], 'Address': ['221B Baker Street', '[ADDRESS]']
 };
 var FN = ['Mask', 'Mask, keep last 4', 'Replace with label', 'Redact'];
+DE_EX['Driver license number'] = ['D1234567', '[DRIVER-LICENSE]']; DE_EX['IP address'] = ['203.0.113.42', '[IP]']; DE_EX['Employee ID'] = ['EMP-20931', '[EMPLOYEE-ID]']; DE_EX['Project codename'] = ['Project Falcon', '[CODENAME]'];
 
 /* ═══ State ═══ */
 var S = {
@@ -984,7 +1066,7 @@ function renderGrid() {
   var sanDis = !ready || (!S.sel.all && elig === 0);
   var sanTip = !ready ? 'Select items to sanitize' : (elig === 0 ? 'None of the selected items can be sanitized' : '');
 
-  h += '<div class="bulk">' +
+  h += '<div class="bulk"><span class="bulk-sp"></span>' +
     (ready ? chip((n === 1 ? '1 item selected' : n.toLocaleString() + ' items selected'), { type: 'green', mode: 'outline', post: '<button id="clrSel" aria-label="Clear selection">' + ic('close-outlined', 16) + '</button>' }) : chip('None Selected')) +
     '<button class="btn btn-flat" id="applyF"' + (ready ? '' : ' disabled') + '>' + svg48(BAR_PATH.filter) + 'Apply Filter</button>' +
     '<button class="btn btn-flat" disabled>' + svg48(BAR_PATH.connect) + 'Connect Data System</button>' +
@@ -1060,6 +1142,7 @@ function openSelMenu(btn) {
   var t = document.getElementById('ttip');
   document.addEventListener('mouseover', function (e) {
     var el = e.target.closest && e.target.closest('[data-tooltip]');
+    if (el && el.hasAttribute('data-tt-trunc') && el.scrollWidth <= el.clientWidth) el = null;   // truncation tooltips only appear when the text is cut off
     if (!el) { t.style.display = 'none'; return; }
     t.textContent = el.getAttribute('data-tooltip'); t.style.display = 'block';
     var r = el.getBoundingClientRect();
@@ -1101,7 +1184,6 @@ document.addEventListener('focusout', function (e) { if (e.target.id === 'sanBtn
 
 /* ═══ Sanitize wizard (shell + step grammar ported from the restore wizard) ═══ */
 var STEPS = [['Select', 'dc-files'], ['Masking', 'text-redaction-masking-outlined'], ['Output', 'save-outlined'], ['Summary', 'status-complete-outlined']];
-var DESTS = [['Private Cloud Storage', 'Files stay in your environment. Needs one-time setup.'], ['Amazon S3', 'Write to a bucket you choose.'], ['Azure Blob Storage', 'Write to a container you choose.'], ['SMB share', 'Write to a network share.']];
 function wizCounts(W) {
   /* MOCK. Only the Summary step shows a count: whether images and audio yield text depends on the OCR / speech-to-text choices made on the Masking step */
   var skipped = Math.round(W.files * (0.08 + (W.ocr ? 0 : 0.06) + (W.stt ? 0 : 0.02))), partial = Math.round(W.files * 0.04);
@@ -1110,25 +1192,32 @@ function wizCounts(W) {
 /* PLACEHOLDER defaults — the real element → function defaults come from the Gencore sanitizer; every detected element starts ON */
 function defaultFn(x) { return x === 'SSN' || x === 'Bank account' || x === 'Phone number' ? 'Mask, keep last 4' : 'Replace with label'; }
 function seedCond(x) { return { de: x, fn: defaultFn(x), on: true }; }
-function maskIsDefault(W) { return W.conds.length === W.deList.length && W.conds.every(function (c) { return c.on && c.fn === defaultFn(c.de); }); }
+function condName(c) { return c.name || c.de; }
+function maskSummary(W) {
+  var n = W.conds.length, ch = W.conds.filter(function (c) { return !c.on || c.fn !== defaultFn(c.de) || c.added; });
+  var list = ch.slice(0, 4).map(function (c) { return escH(condName(c)) + ': ' + (c.on ? c.fn : 'disabled') + (c.added ? ' (added)' : ''); }); if (ch.length > 4) list.push('and ' + (ch.length - 4) + ' more');
+  return (ch.length ? n + ' masking conditions: ' + (n - ch.length) + ' as recommended, ' + ch.length + ' changed.' : 'Accepted all ' + n + ' recommended masking conditions.') + (list.length ? '<br>' + list.join('<br>') : '');
+}
+function maskBlocked(W) { return !W.deList.length || !W.conds.some(function (c) { return !c.added && c.on; }); }   // nothing found, or every found kind turned off
 function openWizard() {
   var sr = selRows(), all = S.sel.all, isF = S.entity === 'Files';
-  var allDE = Object.keys(DE_EX);   // every element the engine can mask — all ON by default
   var left = {};
   if (!all) rows().forEach(function (o) { if (isSel(o) && !eligible(o)) { var r = reason(o); left[r] = (left[r] || 0) + 1; } });
   var files = isF ? (all ? 785500 : sr.length) : (all ? 480000 : sr.reduce(function (a, o) { return a + o.d[6]; }, 0));
   var els = {};
   if (isF) sr.forEach(function (o) { o.d[5].forEach(function (x) { els[x] = 1; }); });
-  else ['SSN', 'Bank account', 'Full name', 'Email address', 'Phone number', 'Passport number', 'Tax ID'].forEach(function (x) { els[x] = 1; });
-  var deList = Object.keys(els);
-  var items = all
+  else ['SSN', 'Bank account', 'Full name', 'Email address', 'Phone number', 'Passport number', 'Tax ID', 'Date of birth', 'Address'].forEach(function (x) { els[x] = 1; });
+  var order = MROWS.map(function (r) { return r[1]; }), deList = Object.keys(els).sort(function (a, b) { return order.indexOf(a) - order.indexOf(b); });
+  /* MOCK: how many files each found kind appears in. Files = exact; data systems = a share of the files in scope. */
+  var SHARE = { 'Full name': .5, 'Email address': .45, 'Phone number': .3, 'SSN': .22, 'Bank account': .12, 'Passport number': .05, 'Tax ID': .03, 'Date of birth': .1, 'Address': .2 }, cnt = {};
+  deList.forEach(function (x) { cnt[x] = isF ? sr.filter(function (o) { return o.d[5].indexOf(x) > -1; }).length : Math.max(1, Math.round(files * (SHARE[x] || .05))); });  var items = all
     ? [{ k: '__all', name: 'All matching ' + (isF ? 'files' : 'data systems'), type: 'Saved filter', files: files, des: deList.slice(0, 3), all: true }]
-    : sr.map(function (o) { return { k: o.k, name: o.d[0], type: o.d[1], files: isF ? 1 : o.d[6], des: isF ? o.d[5] : deList.slice(0, 3) }; });
+    : sr.map(function (o) { return { k: o.k, name: o.d[0], type: o.d[1], files: isF ? 1 : o.d[6], des: isF ? o.d[5] : deList.slice(0, 3), region: isF ? '' : o.d[3] }; });
   S.wiz = {
     step: 0, reached: 0, files: files, all: all, isF: isF, items: items, left: left, selTotal: items.length + Object.keys(left).reduce(function (a, k) { return a + left[k]; }, 0),
-    deList: allDE, customize: false, conds: allDE.map(seedCond),
-    ocr: true, stt: false, destMode: 'source', dest: 'Private Cloud Storage', path: '/sanitized/{data-system}/',
-    testPhase: 'idle', test: null, job: null, sample: 0, advOpen: false, sel: 'Full name'
+    deList: deList, cnt: cnt, q: '', mpick: false, mpq: '', msel: {}, conds: deList.map(seedCond),
+    ocr: true, stt: false, pick: {}, ddOpen: '', dopen: '', path: '/sanitized/{data-system}/',
+    testPhase: 'idle', test: null, job: null, sample: 0, advOpen: false, sel: ''
   };
   var n = items.length;
   document.getElementById('wizTitle').textContent = all ? 'Sanitize all matching ' + (isF ? 'files' : 'data systems') : 'Sanitize ' + n + (isF ? ' file' : ' data system') + (n === 1 ? '' : 's');
@@ -1136,6 +1225,8 @@ function openWizard() {
   document.getElementById('scrim').classList.add('open');
   renderWiz();
 }
+document.addEventListener('click', function (e) { var W = S.wiz; if (W && W.ddOpen && !e.target.closest('.dd')) { W.ddOpen = ''; if (W.dopen && W.oPart) W.oPart(); else renderWiz(); } });
+document.addEventListener('keydown', function (e) { var W = S.wiz; if (e.key === 'Escape' && W && W.ddOpen) { W.ddOpen = ''; if (W.dopen && W.oPart) W.oPart(); else renderWiz(); return; } if (e.key === 'Escape' && W && W.dopen && W.oPart) { W.dopen = ''; W.oPart(); return; } if ((e.key === 'Enter' || e.key === ' ') && W && e.target.matches && e.target.matches('.lrow[data-orow][role=button]')) { e.preventDefault(); e.target.click(); return; } if (e.key === 'Escape' && W && W.step === 1 && W.sel && !W.mpick && W.mPart) { W.sel = ''; W.mPart(); } });
 document.getElementById('wizClose').onclick = function () { document.getElementById('scrim').classList.remove('open'); };
 
 function renderWiz() {
@@ -1149,7 +1240,8 @@ function renderWiz() {
   st.querySelectorAll('.clickable').forEach(function (b) { b.onclick = function () { W.step = +b.dataset.step; renderWiz(); }; });
   var main = document.getElementById('wizMain'), ft = document.getElementById('wizFt');
   main.innerHTML = [stepSelect, stepMask, stepOutput, stepSummary][W.step](W);
-  var last = W.step === 3, canNext = true;
+  var wideOut = W.step === 2 && regionGroups(W).length > 1; main.classList.toggle('wide', W.step === 1 || wideOut); ft.classList.toggle('wide', W.step === 1 || wideOut);
+  var last = W.step === 3, canNext = !(W.step === 1 && maskBlocked(W)) && !(W.step === 2 && !storeResolved(W));
   if (W.step < 3) { W.testPhase = 'idle'; W.test = null; }   // a test reflects the configuration it was run with
   ft.innerHTML = locked ? '<button class="btn btn-primary btn-lg btn-block" id="wDone">Return to explorer</button>'
     : (W.step > 0 ? '<button class="btn btn-secondary btn-lg" id="wBack">Back</button>' : '') +
@@ -1194,7 +1286,7 @@ function stepSelect(W) {
     var i = off + k;
     var lead = it.all ? '' : W.isF ? '<span class="fico">' + ic('graph-entity-file', 20) + '</span>' : '<span class="av"><img alt="" src="sdi-explorer-assets/logos/' + (LOGO[it.type] || 'logo-default-asset-type.svg') + '"></span>';
     var des = it.des.length ? '<span class="chips">' + deChips(it.des) + '</span>' : '';
-    return '<tr><td class="nm"><div class="nmwrap">' + lead + '<span class="nmtxt" data-tooltip="' + it.name + '">' + it.name + '</span></div></td><td data-tooltip="' + it.type + '">' + it.type + '</td><td class="num">' + it.files.toLocaleString() + '</td><td class="de">' + (des || '<span class="muted">–</span>') + '</td>' +
+    return '<tr><td class="nm"><div class="nmwrap">' + lead + '<span class="nmtxt" data-tooltip="' + it.name + '" data-tt-trunc>' + it.name + '</span></div></td><td>' + it.type + '</td><td class="num">' + it.files.toLocaleString() + '</td><td class="de">' + (des || '<span class="muted">–</span>') + '</td>' +
       '<td>' + (W.all ? '' : '<button class="ws-remove" type="button" data-rm="' + i + '" data-tooltip="Remove from job" aria-label="Remove ' + it.name + ' from job">' + TRASH + '</button>') + '</td></tr>';
   }).join('');
   var leftKeys = Object.keys(W.left || {}), leftN = leftKeys.reduce(function (a, k) { return a + W.left[k]; }, 0);
@@ -1213,12 +1305,6 @@ function selCards(items, cur, attr) {
       '<span class="sc-desc">' + (x[2] ? '<span class="sc-meta">' + x[2] + '</span>' : '') + '<span>' + x[1] + '</span>' + (x[3] ? '<span class="sc-cons">' + x[3] + '</span>' : '') + (x[4] ? '<span class="sc-detail" onclick="event.stopPropagation()">' + x[4] + '</span>' : '') + '</span></div>';
   }).join('') + '</div>';
 }
-function maskWarnHtml(W) {
-  var off = W.conds.filter(function (c) { return !c.on; }).map(function (c) { return c.de; });
-  if (!off.length) return '';
-  var list = off.length <= 3 ? off.join(off.length === 3 ? ', ' : ' and ').replace(/, ([^,]*)$/, ', and $1') : off.slice(0, 3).join(', ') + ', and ' + (off.length - 3) + ' more';
-  return '<div class="alert warn"><span>' + ic('alert-warning-outlined', 24) + '</span><div class="alert-t">' + list + (off.length === 1 ? ' is' : ' are') + ' turned off and will not be masked in this job.</div></div>';
-}
 function maskExtraction(W) {
   var open = !!W.advOpen;
   return '<div class="adv-head"><button type="button" class="adv-chev" id="advToggle" aria-expanded="' + open + '" aria-label="Toggle advanced masking settings"' + (open ? '' : ' style="transform:rotate(-90deg)"') + '><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button><div><div class="adv-title">Advanced masking settings</div><div class="adv-sub">OCR ' + (W.ocr ? 'on' : 'off') + ', speech-to-text ' + (W.stt ? 'on' : 'off') + '</div></div></div>' +
@@ -1226,51 +1312,157 @@ function maskExtraction(W) {
       '<div class="crow"><input type="checkbox" class="sw" id="optOcr"' + (W.ocr ? ' checked' : '') + '><div class="t">Read text in images and scans (OCR)<div class="d">Up to 50 megapixels per image and 50 pages per file. Files over the limit finish as partial.</div></div></div>' +
       '<div class="crow"><input type="checkbox" class="sw" id="optStt"' + (W.stt ? ' checked' : '') + '><div class="t">Transcribe audio (speech-to-text)<div class="d">.wav files only.</div></div></div></div>' : '');
 }
-var MROWS = [['Employee', 'Full name'], ['Email', 'Email address'], ['Phone', 'Phone number'], ['Home address', 'Address'], ['Date of birth', 'Date of birth'], ['SSN', 'SSN'], ['Tax ID', 'Tax ID'], ['Passport', 'Passport number'], ['Bank account', 'Bank account'], ['Health record', 'Health record ID']];
+var MROWS = [['Employee', 'Full name'], ['Email', 'Email address'], ['Phone', 'Phone number'], ['Home address', 'Address'], ['Date of birth', 'Date of birth'], ['SSN', 'SSN'], ['Tax ID', 'Tax ID'], ['Passport', 'Passport number'], ['Bank account', 'Bank account'], ['Health record', 'Health record ID'],
+  ['Driver license', 'Driver license number'], ['IP address', 'IP address'], ['Employee ID', 'Employee ID'], ['Project codename', 'Project codename']];
+var CUSTOM_DE = { 'Employee ID': 1, 'Project codename': 1 };   // custom data elements: generic masking only (PRD)
+var CAT_OF = { 'Full name': 'Identity', 'Date of birth': 'Identity', 'Email address': 'Contact info', 'Phone number': 'Contact info', 'Address': 'Contact info', 'IP address': 'Contact info', 'SSN': 'Government identifiers', 'Tax ID': 'Government identifiers', 'Passport number': 'Government identifiers', 'Driver license number': 'Government identifiers', 'Bank account': 'Financial', 'Health record ID': 'Health and medical', 'Employee ID': 'Custom', 'Project codename': 'Custom' };
+/* The catalog the add picker draws from. Names are the system data element types listed in the Securiti docs (the list there says it is not limited to these),
+   grouped by its categories. The real catalog is larger (the explorer shows 210 data elements for this tenant, system and custom); this is a mock subset of it. */
+var CATALOG = [
+  ['Authentication', ['Access Date', 'API Key', 'API Secret', 'AWS API Key', 'Azure API Key', 'Crypto Currency Key', 'GCP API Key', 'PIN', 'Account password', 'SSH key', 'JWT token']],
+  ['Financial', ['AU BSB Code', 'Credit Card Number', 'CVV', 'IBAN', 'IN RuPay Card Number', 'NZ IRD Number', 'Stock Ticker', 'SWIFT/BIC Number', 'US Mortgage Account Number', 'US Personal Loan Number']],
+  ['Government identifiers', ['AE ID', 'AT ID', 'AT SSN', 'BE INS', 'BR CNS', 'BR RG', 'CA SIN', 'CL CDI', 'CL RUT', 'CN RIC', 'CO CDC', 'CZ PIN', 'DE ID', 'DE SLIKN', 'DE SN', 'DK PIN', 'DNI', 'ES CIF', 'ES NIE', 'ES NIF', 'FR CNI', 'FR NIR', 'FR TIN', 'GR AMKA', 'HK HKIC', 'HRID', 'HU PIN', 'HU TAJ', 'ID NIK', 'IE PPSN', 'IN PAN', 'IT CF', 'JP IN', 'KR RRN', 'LU NIN', 'MT ID', 'MX CURP', 'My Identity Card', 'NL BSN', 'NO PIN', 'OM ID', 'PH SSN Number', 'PL ID', 'PL PESEL', 'PT CDC', 'PY CIC', 'RO CNP', 'SE ID', 'SG NRIC', 'TH ID', 'TW NIN', 'UK Electoral Roll No', 'UK UPN', 'UK UTR', 'US A-Number', 'US DOD ID', 'US EIN', 'US ITIN', 'US PTIN', 'US Tax Payer ID', 'US TSA Precheck Number', 'ZA Smart ID']],
+  ['Health and medical', ['CA Health Insurance ID', 'EU HICN', 'Health Insurance Group ID', 'Health Insurance Plan Member ID', 'Health Insurance Plan Name', 'Medical Allergy', 'Medical Blood Group', 'Medical Diseases and Conditions', 'Medical Eyewear Prescription', 'Medical ICD Codes', 'Medical Immunization', 'Medical Prescription', 'Medical Record Number', 'Medical Vital Sign']],
+  ['Location', ['Country', 'Street Name', 'MAC address', 'Vehicle registration']],
+  ['Identity', ['Gender', 'Age', 'Religion', 'Employer name', 'Job title', 'Salary', 'Student ID', 'Biometric ID', 'Genetic data']],
+  ['Custom', ['Customer reference']]
+];
+CATALOG.forEach(function (g) { g[1].forEach(function (n) { if (!CAT_OF[n]) CAT_OF[n] = g[0]; if (g[0] === 'Custom') CUSTOM_DE[n] = 1; if (!DE_EX[n]) { var h = 0; for (var k = 0; k < n.length; k++) h = (h * 31 + n.charCodeAt(k)) % 100000; DE_EX[n] = [n.replace(/[^A-Za-z]/g, '').slice(0, 2).toUpperCase() + '-' + String(100000 + (h * 7919) % 900000), '[' + n.toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-|-$/g, '') + ']']; } }); });
+/* MOCK: five example inputs per data element, so the examples table shows the current function across realistic values */
+var EXV = { 'Full name': ['Maria Alvarez', 'Daniel Okafor', 'Priya Nair', 'Amara Osei', 'Jonas Berg'], 'Email address': ['maria.alvarez@contoso.com', 'daniel.okafor@fabrikam.com', 'p.nair@northwind.org', 'amara.osei@adatum.io', 'jonas.berg@litware.net'], 'Address': ['221B Baker Street', '14 Elm Avenue', '903 Harbor Road', '7 Mill Lane', '58 Orchard Way'], 'Project codename': ['Project Falcon', 'Project Atlas', 'Project Lumen', 'Project Orion', 'Project Vega'] };
+function exVals(de) {
+  var ex = (DE_EX[de] || [''])[0]; if (EXV[de]) return EXV[de]; if (!/[0-9]/.test(ex)) return [ex];
+  var out = [ex]; for (var k = 1; k < 5; k++) out.push(ex.replace(/[0-9]/g, function (d, i) { return String((+d + k * 3 + (i % 3)) % 10); })); return out;
+}
+function escH(x) { return String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+var GENERIC_FN = ['Mask', 'Replace with label', 'Redact'];   // MOCK: the functions without element-specific rules
 function condOf(W, de) { return W.conds.filter(function (c) { return c.de === de; })[0]; }
-function maskEditor(W) {
-  var rows = MROWS.filter(function (r) { return condOf(W, r[1]); });
-  if (!condOf(W, W.sel)) W.sel = rows[0][1];
-  var sc = condOf(W, W.sel), si = W.conds.indexOf(sc), bv = (DE_EX[sc.de] || ['value'])[0];
-  var list = rows.map(function (r) {
-    var c = condOf(W, r[1]), v = c.on ? maskValue(c.de, c.fn, DE_EX[c.de][0]) : DE_EX[c.de][0];
-    return '<button type="button" class="me-row' + (c.de === W.sel ? ' is-sel' : '') + '" data-etok="' + c.de + '" aria-pressed="' + (c.de === W.sel) + '"><span class="k">' + r[0] + '</span><span class="vv"><span class="md-tok' + (c.on ? '' : ' off') + '">' + v + '</span><span class="fnl">' + (c.on ? c.fn : 'Not masked') + '</span></span><span class="chv">' + ic('keyboard-arrow-down-outlined', 20) + '</span></button>';
+function gateAlertHtml() { return '<div class="alert warn"><span>' + ic('alert-warning-outlined', 24) + '</span><div class="alert-t">Enable at least one masking condition to continue. With none enabled, the files would be copied without masking anything.</div></div>'; }
+function maskRows(W) {
+  var q = (W.q || '').toLowerCase();
+  return W.conds.filter(function (c) { return !q || (condName(c) + ' ' + c.de + ' ' + (CAT_OF[c.de] || '')).toLowerCase().indexOf(q) > -1; }).sort(function (a, b) { return (a.added ? 1 : 0) - (b.added ? 1 : 0) || (W.cnt[b.de] || 0) - (W.cnt[a.de] || 0); });
+}
+function maskList(W) {
+  var rows = maskRows(W); if (!rows.length) return '<div class="mc-empty">No masking conditions match.</div>';
+  return rows.map(function (c) {
+    var ex = DE_EX[c.de][0], tok = c.on ? maskValue(c.de, c.fn, ex) : ex, open = c.de === W.sel;
+    return '<div class="lrow' + (open ? ' is-sel' : '') + (c.on ? '' : ' off') + '" role="button" tabindex="0" aria-expanded="' + open + '" data-lrow="' + escH(c.de) + '"><input type="checkbox" class="sw" data-lon="' + escH(c.de) + '"' + (c.on ? ' checked' : '') + ' aria-label="Enable ' + escH(condName(c)) + '"><span class="nm"><span class="k">' + escH(condName(c)) + (CUSTOM_DE[c.de] ? '<span class="cu">Custom</span>' : '') + '</span><span class="fnl">' + (CAT_OF[c.de] || '') + (c.added ? ', not found in these files' : ', ' + (W.cnt[c.de] || 0).toLocaleString('en-US') + ' files') + '</span></span><span class="lfn">' + c.fn + '</span><span class="lpv"><span class="md-tok' + (c.on ? '' : ' off') + '">' + escH(tok) + '</span></span><span class="lchev' + (open ? ' on' : '') + '">' + ic('keyboard-arrow-down-outlined', 20) + '</span></div>';
   }).join('');
-  var opts = FN.map(function (f) { return '<div class="mc-opt' + (f === sc.fn ? ' is-sel' : '') + '" data-eopt="' + f + '"><span class="r">' + SC_RADIO_ON + SC_RADIO_OFF + '</span><span class="t">' + f + '</span><span class="v">' + maskValue(sc.de, f, bv) + '</span></div>'; }).join('');
-  return '<div class="me"><div class="ws-card md-doc">' + list + '</div>' +
-    '<div class="ws-card me-p' + (sc.on ? '' : ' mk-off') + '"><div class="hd"><b>' + sc.de + '</b><input type="checkbox" class="sw" data-con="' + si + '"' + (sc.on ? ' checked' : '') + ' style="pointer-events:auto" aria-label="Mask ' + sc.de + '"></div>' +
-    '<div class="sub">' + (sc.on ? 'Masked in the copy. Example value: ' + bv : 'Left as is in the copy. Turn on to mask it.') + '</div>' + opts + '</div></div>';
+}
+function maskCfg(W) {
+  var c = condOf(W, W.sel); if (!c) return '';
+  var fns = CUSTOM_DE[c.de] ? GENERIC_FN : FN, vals = exVals(c.de);
+  return '<div class="cfg"><div class="cfg-top"><div class="cfg-t"><b>' + escH(condName(c)) + (CUSTOM_DE[c.de] ? '<span class="cu">Custom</span>' : '') + '</b><span class="c">' + (CAT_OF[c.de] || '') + (c.added ? ', not found in these files' : ', found in ' + (W.cnt[c.de] || 0).toLocaleString('en-US') + ' files') + '</span></div><button class="btn btn-flat btn-icon" type="button" data-cclose="1" aria-label="Close">' + ic('close-outlined', 20) + '</button></div>' +
+    '<div class="field"><label for="mName">Condition name</label><input class="input plain" id="mName" value="' + escH(condName(c)) + '"></div>' +
+    '<div class="field"><label for="mFn">Masking function</label><select class="input plain" id="mFn" style="width:100%">' + fns.map(function (f) { return '<option' + (f === c.fn ? ' selected' : '') + '>' + f + (f === defaultFn(c.de) ? ' (recommended)' : '') + '</option>'; }).join('') + '</select>' + (CUSTOM_DE[c.de] ? '<div class="c" style="margin-top:4px">Custom data element, so only generic functions apply.</div>' : '') + '</div>' +
+    '<div class="kl" style="margin-bottom:4px">Input/output examples</div><div class="iogrid' + (c.on ? '' : ' off') + '">' + vals.map(function (v) { return '<span>' + escH(v) + '</span><span>' + escH(maskValue(c.de, c.fn, v)) + '</span>'; }).join('') + '</div>' +
+    (c.added ? '<button class="btn btn-secondary btn-destructive btn-block-full" type="button" data-rmcond="' + escH(c.de) + '">Delete condition</button>' : '') + '</div>';
+}
+function maskPickGroups(W) {
+  var q = (W.mpq || '').toLowerCase(), seen = {}, out = [];
+  var all = MROWS.map(function (r) { return [r[1], CAT_OF[r[1]] || 'Other']; });
+  CATALOG.forEach(function (g) { g[1].forEach(function (n) { all.push([n, g[0]]); }); });
+  var g = {}; all.forEach(function (x) { if (seen[x[0]] || condOf(W, x[0]) || (q && (x[0] + ' ' + x[1]).toLowerCase().indexOf(q) < 0)) return; seen[x[0]] = 1; (g[x[1]] = g[x[1]] || []).push(x[0]); });
+  Object.keys(g).sort(function (a, b) { return (a === 'Custom') - (b === 'Custom') || a.localeCompare(b); }).forEach(function (c) { out.push([c, g[c].sort()]); });
+  return out;
+}
+function maskPicker(W) {
+  if (!W.mpick) return ''; var sel = Object.keys(W.msel).filter(function (d) { return W.msel[d]; }), gs = maskPickGroups(W);
+  return '<div class="scrim2" id="mPick"><div class="pick"><div class="pk-h"><b>Add a masking condition</b><button class="btn btn-flat btn-icon" type="button" data-pclose="1" aria-label="Close">' + ic('close-outlined', 20) + '</button></div><div class="pk-b"><div class="sr">' + ic('search-outlined', 20) + '<input class="input plain" id="mpq" placeholder="Search data elements" value="' + escH(W.mpq || '') + '"></div></div><div class="pk-l" id="mpl">' + (gs.length ? gs.map(function (g) { return '<div class="pk-g">' + g[0] + '</div>' + g[1].map(function (n) { return '<label class="pk-r"><input type="checkbox" class="cb" data-pcb="' + escH(n) + '"' + (W.msel[n] ? ' checked' : '') + '><span class="kn"><span class="k">' + escH(n) + (CUSTOM_DE[n] ? '<span class="cu">Custom</span>' : '') + '</span><span class="c">Not found in these files</span></span></label>'; }).join(''); }).join('') : '<div class="mc-empty">Nothing matches.</div>') + '</div><div class="pk-ft"><button class="btn btn-primary" type="button" id="mPickAdd"' + (sel.length ? '' : ' disabled') + '>' + (sel.length > 1 ? 'Add ' + sel.length + ' masking conditions' : 'Add masking condition') + '</button></div></div></div>';
 }
 function stepMask(W) {
-  if (!W.customize) {
-    var on = W.conds.filter(function (c) { return c.on; }).length, tot = W.conds.length, all = on === tot;
-    var list = W.conds.map(function (c) { return '<div class="cb-tr' + (c.on ? '' : ' mk-off') + '"><span class="n">' + c.de + '</span><span class="v">' + (c.on ? maskValue(c.de, c.fn, DE_EX[c.de][0]) : 'Not masked') + '</span></div>'; }).join('');
-    return stepHead('Masking', 'Everything the engine detects in these files is masked. Each data element uses its default masking.') +
-      '<div class="ws-card"><div class="mask-sum"><div class="mask-sum-hd"><span class="ok">' + ic('text-redaction-masking-outlined', 24) + '</span><div class="t">' + (all ? 'All ' + tot + ' data elements will be masked' : on + ' of ' + tot + ' data elements will be masked') + '<div class="d">' + (all ? 'Nothing to set up. Customize only if an element needs different masking.' : 'Elements that are turned off stay as they are in the copy.') + '</div></div></div>' +
-      '<div class="cb-body"><div class="cb-two">' + list + '</div></div>' +
-      '<div class="mask-sum-ft"><button class="btn btn-secondary" id="custMask">Customize masking</button></div></div></div>' + maskExtraction(W);
-  }
-  return stepHead('Masking', 'Each data element is masked with one function. Select an element to see and change how it is masked.') +
-    '<div class="cb-edit-hd"><div class="t">Customize masking</div><div class="r"><button class="btn btn-secondary" id="useDef">Use defaults</button><button class="btn btn-secondary" id="custDone">Done</button></div></div>' +
-    '<div id="maskWarn">' + maskWarnHtml(W) + '</div>' + maskEditor(W) + maskExtraction(W);
+  var head = stepHead('Masking', 'Sensitive data is masked in every sanitized file.');
+  if (!W.deList.length) return head + '<div class="ws-card st-empty"><b>No sensitive data was found in the selected files</b><span>There is nothing to mask, so there is nothing to sanitize. Go back and change the selection.</span></div>';
+  var n = W.conds.length, off = W.conds.filter(function (c) { return !c.on; }).length;
+  return head + '<div class="mcx"><div class="alert info"><span data-ic="info-outlined"></span><div class="alert-t">These masking conditions are recommended based on the data elements SDI has identified in the data systems you selected.</div></div>' + (maskBlocked(W) ? gateAlertHtml() : '') +
+    '<div class="mc-sq"><div class="sr">' + ic('search-outlined', 20) + '<input class="input plain" id="mQ" placeholder="Search masking conditions" value="' + escH(W.q || '') + '"></div></div>' +
+    '<div class="gtab m-B' + (W.sel ? ' open' : '') + '" id="mGtab"><div class="stats"><div><span>Conditions</span><b>' + n + '</b></div><div><span>Disabled</span><b>' + off + '</b></div></div><div class="twocol"><div class="lcol"><div class="lhead"><span></span><span>Masking condition</span><span>Masking function</span><span>Preview</span><span></span></div><div class="llist" id="mList">' + maskList(W) + '</div></div><div class="rcol" id="mCfg">' + maskCfg(W) + '</div></div></div>' +
+    '<div class="addrow"><button class="btn btn-secondary" type="button" id="mAdd">' + ic('add-outlined', 20) + 'Add masking condition</button></div>' + maskPicker(W) + '</div>' + maskExtraction(W);
 }
 
+/* MOCK storage locations. In the product these are the locations configured beforehand (Private Cloud Storage or external storage), each in a region.
+   Outputs stay in the region of the source data system, so a selection that spans regions needs a location in each. The mock set is mixed on purpose:
+   us-east-1 and us-west-1 have two each, sources with no region can use any (several options are never preselected: the admin chooses), us-west-2 and us-east-2 have one (read-only), sources with no region take any.
+   Open with #storage=none (nothing configured) or #storage=missing (us-east-2 has none) to see the other states. */
+var SRC_REGION = 'us-east-1';
+var ST = { pcs: ['privacidemo-pcs', 'Private Cloud Storage'], s3a: ['acme-sanitized-outputs', 'Amazon S3'], w1a: ['west1-archive', 'Amazon S3'], w1b: ['west1-backup', 'Azure Blob Storage'], west: ['west-outputs', 'Amazon S3'], e2: ['east2-outputs', 'Amazon S3'] };
+var ST_SCN = ((location.search + location.hash).match(/storage=(\w+)/) || [])[1] || '';
+var BY_REGION = ST_SCN === 'none' ? {} : { 'us-east-1': { opts: ['pcs', 's3a'] }, 'us-west-1': { opts: ['w1a', 'w1b'] }, 'us-west-2': { opts: ['west'] }, 'us-east-2': { opts: ST_SCN === 'missing' ? [] : ['e2'] } };
+function storeOpts(r) { return r === '' ? (ST_SCN === 'none' ? [] : Object.keys(ST)) : (BY_REGION[r] ? BY_REGION[r].opts : []); }
+function regionGroups(W) {
+  var g = {}, nm = {}, add = function (r, n, name) { r = r && r !== '–' ? r : ''; g[r] = (g[r] || 0) + n; if (name) (nm[r] = nm[r] || []).push(name); };
+  if (W.isF) add(SRC_REGION, W.files); else selRows().forEach(function (o) { add(o.d[3], o.d[6], o.d[0]); });
+  return Object.keys(g).sort(function (a, b) { return (a === '' ? 1 : 0) - (b === '' ? 1 : 0) || a.localeCompare(b); }).map(function (r) { return { region: r, files: g[r], names: nm[r] || [] }; });
+}
+/* the data systems behind a region, named: the first few, then a count */
+function regionNames(g) {
+  if (!g.names.length) return '';
+  var shown = g.names.slice(0, 3).map(escH).join(', '), more = g.names.length - 3;
+  return '<span class="nms">' + shown + (more > 0 ? ', and ' + more + ' more' : '') + '</span>';
+}
+function storeChosen(W, r) {
+  var o = storeOpts(r); if (!o.length) return '';
+  if (W.pick[r] && o.indexOf(W.pick[r]) > -1) return W.pick[r];
+  return o.length === 1 ? o[0] : '';   // several options and no platform default to follow: the admin chooses
+}
+function storeResolved(W) { return regionGroups(W).every(function (g) { return storeChosen(W, g.region); }); }
+function storeControl(W, g) {
+  var o = storeOpts(g.region), c = storeChosen(W, g.region), key = g.region || '_none', where = g.region ? 'in ' + g.region : '';
+  if (!o.length) return '<div class="dd-off input plain">None configured</div><div class="why">No storage location is configured' + (g.region ? ' in ' + g.region : '') + '. <button class="lnk" type="button">Configure storage</button></div>';
+  if (o.length === 1) return '<span class="k one">' + ST[o[0]][0] + '</span><span class="c">' + ST[o[0]][1] + '</span><span class="cap">The only storage location ' + (g.region ? 'in ' + g.region : 'available') + '</span>';
+  var open = W.ddOpen === key;
+  return '<div class="dd"><button type="button" class="input plain dd-trg" data-dd="' + key + '" aria-haspopup="listbox" aria-expanded="' + open + '" aria-label="Storage location ' + where + '">' + (c ? '<span class="n">' + ST[c][0] + '</span><span class="m">' + ST[c][1] + '</span>' : '<span class="m">Choose a location</span>') + '</button>' +
+    (open ? '<div class="dd-menu" role="listbox">' + o.map(function (id) { return '<div role="option" tabindex="-1" aria-selected="' + (id === c) + '" class="dd-opt' + (id === c ? ' is-sel' : '') + '" data-st="' + key + '|' + id + '"><span class="n">' + ST[id][0] + '</span><span class="m">' + ST[id][1] + (g.region ? ', region ' + g.region : '') + '</span></div>'; }).join('') + '</div>' : '') + '</div>' +
+    '<span class="cap">' + o.length + ' storage locations ' + (g.region ? 'in ' + g.region : 'available') + '</span>';
+}
+/* Choosing a storage location happens in a panel that slides in beside the table, as the masking conditions do.
+   The table is dense, so the first data system and the location name end in an ellipsis; the full text is in the panel. */
+function outRow(W, g) {
+  var o = storeOpts(g.region), c = storeChosen(W, g.region), key = g.region || '_none', open = W.dopen === key, none = !o.length, label = escH(g.region || 'files with no region');
+  var sys = g.names.length ? '<span class="t1" data-tooltip="' + escH(g.names.join(', ')) + '" data-tt-trunc>' + escH(g.names[0]) + '</span>' + (g.names.length > 1 ? '<span class="mo">+' + (g.names.length - 1) + '</span>' : '') : '';
+  var loc = none ? '<span class="t1 k nonec">None configured</span><button type="button" class="lnk" data-cfgstore="1">Configure storage</button>'
+    : c ? '<span class="t1 k" data-tooltip="' + escH(ST[c][0]) + '" data-tt-trunc>' + escH(ST[c][0]) + '</span><span class="fnl t1">' + ST[c][1] + '</span>'
+    : '<button type="button" class="btn btn-tertiary btn-sm" data-orow="' + key + '" aria-label="Choose a storage location for ' + label + '">Choose a location</button>';
+  return '<div class="lrow' + (open ? ' is-sel' : '') + (none ? ' nc' : '') + '"' + (none ? '' : c ? ' role="button" tabindex="0" aria-expanded="' + open + '" data-orow="' + key + '"' : ' data-orow="' + key + '"') + '><span class="nm"><span class="k">' + (g.region || 'No region set') + '</span><span class="fnl">' + g.files.toLocaleString('en-US') + ' files</span></span><span class="sy">' + sys + '</span><span class="lc">' + loc + '</span><span class="lchev' + (open ? ' on' : '') + '">' + (none ? '' : ic('keyboard-arrow-down-outlined', 20)) + '</span></div>';
+}
+function outRows(W, gs) { return gs.map(function (g) { return outRow(W, g); }).join(''); }
+function outCfg(W, gs) {
+  var g = gs.filter(function (x) { return (x.region || '_none') === W.dopen; })[0]; if (!g) return '';
+  var cnt = g.names.length + (g.names.length === 1 ? ' data system, ' : ' data systems, ') + g.files.toLocaleString('en-US') + ' files';
+  var sc = storeOpts(g.region).length === 1 ? '<div class="ro">' + storeControl(W, g) + '</div>' : storeControl(W, g);
+  return '<div class="cfg"><div class="cfg-top"><div class="cfg-t"><b>' + (g.region || 'No region set') + '</b><span class="c">' + cnt + '</span></div><button class="btn btn-flat btn-icon" type="button" data-oclose="1" aria-label="Close">' + ic('close-outlined', 20) + '</button></div>' +
+    '<div class="field"><div class="lbl-row"><label>Storage location</label><a class="lnk" href="#" target="_blank" rel="noopener" data-cfgstore="1" aria-label="Configure storage"><span class="full">Configure storage</span><span class="short">Configure</span></a></div>' + sc + '</div>' +
+    '<div class="kl">Data systems in this region</div><div class="dsys">' + g.names.map(function (n) { return '<div>' + escH(n) + '</div>'; }).join('') + '</div></div>';
+}
+function outNeed(W, gs) { return gs.filter(function (g) { return !storeChosen(W, g.region); }).length; }
+function outAlert(W, gs) {
+  var need = outNeed(W, gs);
+  return need ? '<div class="vis-alert need-alert"><span>' + ic('alert-warning-outlined', 24) + '</span><div class="vis-alert-txt">' + (need === 1 ? '1 region still needs' : need + ' regions still need') + ' a storage location before you can continue.</div></div>' : '';
+}
+function outNote(W, gs) { return outNeed(W, gs) ? '' : '<div class="need-note">Every region has a storage location.</div>'; }
 function stepOutput(W) {
-  var other = W.destMode === 'other', pcs = W.dest === 'Private Cloud Storage';
-  return stepHead('Output', 'Every sanitized file is written as <b>redacted-&lt;filename&gt;</b>. The original is never changed.') +
-    '<div class="sect-label" style="margin-top:0">Destination</div>' +
-    selCards([['Same environment', 'Write each sanitized file next to its parent file, in the same data system.', 'Each file\'s own data system', 'Nothing moves. Output is written as <b>redacted-&lt;filename&gt;</b> beside the original.'], ['Different environment', 'Write all sanitized files to another environment you have set up.', null, null, other ? '<select class="input plain" data-dsel aria-label="Destination">' + DESTS.map(function (d) { return '<option' + (d[0] === W.dest ? ' selected' : '') + '>' + d[0] + '</option>'; }).join('') + '</select>' + (pcs ? '<span class="sc-note">Private Cloud Storage is not configured yet. <button class="lnk" type="button">Configure</button></span>' : '') : '']], other ? 'Different environment' : 'Same environment', 'data-dmode') +
-    (other ? '<div class="field sc-reveal" style="margin-top:12px"><label>Path</label><input class="input plain" id="path" value="' + W.path + '"></div>' : '') +
-    '<div class="sect-label">What to expect</div>' + expectCard();
+  var gs = regionGroups(W), multi = gs.length > 1 || (gs.length === 1 && !gs[0].region), anyOpts = gs.some(function (g) { return storeOpts(g.region).length; });
+  var h = '<div class="o-n">' + stepHead('Output', multi && anyOpts ? (gs.length > 1 ? 'Choose a storage location for each of the <b>' + gs.length + ' data regions</b> below.' : 'Choose a storage location for these files.') + ' Copies are never written back to the data systems you selected, so the originals are never changed. Each file is named <b>redacted-&lt;filename&gt;</b>.' : 'Every sanitized file is written as <b>redacted-&lt;filename&gt;</b> to your own storage. The original is never changed.') + '</div>';
+  if (gs.every(function (g) { return !storeOpts(g.region).length; })) {
+    h += '<div class="sect-label" style="margin-top:0">Storage location</div><div class="ws-card st-empty"><b>No storage location is configured</b><span>Sanitized files are written to storage you own. Add Private Cloud Storage or an external storage location, then come back to this step.</span><button class="btn btn-secondary" type="button">Configure storage</button></div>';
+  } else if (gs.length === 1 && gs[0].region) {
+    h += '<div class="field" style="margin-top:0"><label>Storage location</label>' + storeControl(W, gs[0]).replace('<span class="k one">', '<span class="k ro">') + '<div class="hint">Must be in the same region as the selected data systems (' + gs[0].region + ') and writable by Veeam.</div></div>';
+  } else {
+    h += '<div id="oAlert">' + outAlert(W, gs) + '</div><div class="mcx"><div class="gtab o-B otab' + (W.dopen ? ' open' : '') + '" id="oG"><div class="twocol"><div class="lcol"><div class="lhead"><span>Data region</span><span>Data systems</span><span>Storage location</span><span></span></div><div class="llist" id="oList">' + outRows(W, gs) + '</div></div><div class="rcol" id="oCfg">' + outCfg(W, gs) + '</div></div></div></div>' +
+      (anyOpts ? '<div class="ws-card gband"><div><label for="path">Path</label><span class="c">The folder inside each storage location where sanitized files are written. The same for every region.</span></div><input class="input plain" id="path" aria-label="Path" value="' + escH(W.path) + '"></div><div id="oNote">' + outNote(W, gs) + '</div>' : '');
+  }
+  if (!multi && (storeResolved(W) || anyOpts)) h += '<div class="o-n"><div class="sect-label">Path</div><input class="input plain" id="path" aria-label="Path" value="' + W.path + '"><div class="hint">The folder inside the storage location where sanitized files are written.</div></div>';
+  return h + '<div' + (gs.length > 1 ? '' : ' class="o-n"') + '><div class="sect-label">What to expect</div>' + expectCard() + '</div>';
 }
 
-/* What each kind of file gets: one default and one exception, each with an example of the name it produces */
+/* What each kind of file gets: the copy that is written, then the preview that is shown. Names follow the PRD's Output Format table. */
 function expectCard() {
   var arrow = '<span class="rl-a">' + ic('keyboard-arrow-down-outlined', 20) + '</span>';
   var tile = function (n) { return '<span class="sum-ic">' + ic(n, 20) + '</span>'; };
   return '<div class="ws-card rl">' +
-    '<div class="rl-r">' + tile('sanitizer-outlined') + '<div><b>Every file gets a masked text copy</b><span class="x">Text is extracted from the file, then masked. The original is not changed.</span><div class="rl-eg"><span>report.pdf</span>' + arrow + '<span>redacted-report.txt</span></div></div></div>' +
-    '<div class="rl-r">' + tile('graph-entity-file') + '<div><b>CSV, JSON and TXT copies keep their format</b><span class="x">Sensitive values are masked. Only for files up to 5MB. Larger CSV, JSON and TXT files get a text copy like everything else.</span><div class="rl-eg"><span>payroll.csv</span>' + arrow + '<span>redacted-payroll.csv</span></div></div></div></div>';
+    '<div class="rl-r">' + tile('sanitizer-outlined') + '<div><b>Every file gets a masked text copy</b><span class="x">Text is extracted from the file, then masked. The original is not changed. The copy keeps the full original name and adds .txt.</span><div class="rl-eg"><span>report.pdf</span>' + arrow + '<span>redacted-report.pdf.txt</span></div></div></div>' +
+    '<div class="rl-r">' + tile('graph-entity-file') + '<div><b>CSV, JSON and TXT copies keep their format</b><span class="x">Sensitive values are masked. Only for files up to 5MB. Larger CSV, JSON and TXT files get a text copy like everything else.</span><div class="rl-eg"><span>payroll.csv</span>' + arrow + '<span>redacted-payroll.csv</span></div></div></div>' +
+    '<div class="rl-r">' + tile('search-outlined') + '<div><b>Previews look like the original for six file types</b><span class="x">PDF, Word, Excel, PowerPoint, images and email up to 5MB show a preview that looks like the original. Every other file, and anything over 5MB, gets a text-based preview.</span></div></div></div>';
 }
 
 /* Test run — the restore wizard's parked dry-run shell (optional, footer "Run test", "Simulating…" → "Test complete", nothing written),
@@ -1319,7 +1511,7 @@ function pxLog(n) {
 /* Each run draws four of these, one per kind of file; the next run draws the other four */
 var TEST_POOL = [
   { name: 'Q3-payroll-export.csv', size: 2.4, fmt: 'CSV', build: function () { return pxTable(240, 'people'); } },
-  { name: 'employee-handbook.pdf', size: 3.9, fmt: 'PDF', build: function () { return pxPages(48, 'page', 'Employee handbook'); } },
+  { name: 'employee-handbook.pdf', size: 18.2, fmt: 'PDF', build: function () { return pxPages(48, 'page', 'Employee handbook'); } },
   { name: 'team-rosters.pptx', size: 4.4, fmt: 'PowerPoint', build: function () { return pxSlides(14); } },
   { name: 'claims-2026-09.xlsx', size: 3.9, fmt: 'Excel', build: function () { return pxTable(220, 'people'); } },
   { name: 'service-events.json', size: 0.2, fmt: 'JSON', build: function () { return pxLog(400); } },
@@ -1355,24 +1547,26 @@ function pxBase(m) {
 }
 function pxTok(W, mode, u, t, tok) {
   var c = W.conds.filter(function (x) { return x.de === tok.de; })[0], on = !!(c && c.on), id = u + '.' + t;
+  if (!c) return esc2(tok.v);   // not a kind found in the selection, so it is not a detection
   if (mode === 'orig') return '<span class="tk hl' + (on ? '' : ' x') + '" data-tid="' + id + '" data-el="' + tok.de + '">' + esc2(tok.v) + '</span>';
   return on ? '<span class="tk tk-a" data-tid="' + id + '" data-el="' + tok.de + '">' + esc2(maskValue(tok.de, c.fn, tok.v)) + '</span>' : '<span class="tk tk-x" data-tid="' + id + '" data-el="' + tok.de + '">' + esc2(tok.v) + '</span>';
 }
 function pxParts(W, mode, u, ps, ctr) { return ps.map(function (x) { return typeof x === 'string' ? esc2(x) : pxTok(W, mode, u, ctr.n++, x); }).join(''); }
 function pxEmailWin(un) { var idx = []; un.lines.forEach(function (l, i) { if (l.parts.some(function (x) { return typeof x !== 'string'; })) idx.push(i); }); return [Math.max(0, idx[0] - 2), Math.min(un.lines.length - 1, idx[idx.length - 1] + 2)]; }
-function pxOrig(W, smp) {
+function pxOrig(W, smp, mode) {
+  mode = mode || 'orig';
   var m = pxModel(smp), b = pxBase(m), ctr;
   if (m.kind === 'table') {
-    if (smp.fmt === 'CSV') return '<div class="pv"><div class="pv-code" style="white-space:pre;overflow-x:auto">' + pxCsv(W, m, 'orig') + '</div></div>';
+    if (smp.fmt === 'CSV') return '<div class="pv"><div class="pv-code" style="white-space:pre;overflow-x:auto">' + pxCsv(W, m, mode) + '</div></div>';
     var d = [false, false, false]; m.units.forEach(function (u) { u.cells.forEach(function (c, i) { if (c.some(function (x) { return typeof x !== 'string'; })) d[i] = true; }); });
     return '<div class="pv"><table class="pv-sheet" style="table-layout:fixed"><colgroup><col style="width:34px"><col style="width:27%"><col style="width:27%"><col></colgroup><tbody><tr><th class="rn"></th><th>A</th><th>B</th><th>C</th></tr><tr><th class="rn">#</th>' + m.head.map(function (h, i) { return '<th>' + h + (d[i] ? '<span class="mark"></span>' : '') + '</th>'; }).join('') + '</tr>' +
-      b.map(function (u) { ctr = { n: 0 }; return '<tr><th class="rn">' + (u + 1) + '</th>' + m.units[u].cells.map(function (c) { return '<td>' + pxParts(W, 'orig', u, c, ctr) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>';
+      b.map(function (u) { ctr = { n: 0 }; return '<tr><th class="rn">' + (u + 1) + '</th>' + m.units[u].cells.map(function (c) { return '<td>' + pxParts(W, mode, u, c, ctr) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>';
   }
-  if (m.kind === 'log') return '<div class="pv"><div class="pv-code">' + pxLog2(W, m, b, 'orig') + '</div></div>';
+  if (m.kind === 'log') return '<div class="pv"><div class="pv-code">' + pxLog2(W, m, b, mode) + '</div></div>';
   var u = b[0], un = m.units[u]; ctr = { n: 0 };
-  if (m.kind === 'slide') return '<div class="pv"><div class="slide"><div class="st">' + esc2(un.title) + '</div><ul>' + un.lines.map(function (l) { return '<li>' + pxParts(W, 'orig', u, l.parts, ctr) + '</li>'; }).join('') + '</ul></div></div>';
-  if (m.style === 'email') { var w = pxEmailWin(un); return '<div class="pv"><div class="pv-page"><div class="pv-row"><span class="pv-k">From</span><span class="pv-v">hr@contoso.com</span></div><div class="pv-row"><span class="pv-k">Subject</span><span class="pv-v">Updated records</span></div><div class="pv-title"></div>' + (w[0] > 0 ? '<div class="gap">' + w[0] + ' earlier lines</div>' : '') + un.lines.map(function (l, li) { var h = '<div class="pv-row"><span class="pv-k">' + esc2(l.k) + '</span><span class="pv-v">' + pxParts(W, 'orig', u, l.parts, ctr) + '</span></div>'; return li >= w[0] && li <= w[1] ? h : ''; }).join('') + (w[1] < un.lines.length - 1 ? '<div class="gap">' + (un.lines.length - 1 - w[1]) + ' more lines</div>' : '') + '</div></div>'; }
-  return '<div class="pv"><div class="pv-page' + (m.style === 'image' ? ' pv-img' : '') + '"><div class="pv-title">' + esc2(un.title) + '</div>' + un.lines.map(function (l) { return '<div class="pv-row">' + (l.k ? '<span class="pv-k">' + esc2(l.k) + '</span>' : '') + '<span class="pv-v">' + pxParts(W, 'orig', u, l.parts, ctr) + '</span></div>'; }).join('') + '<div class="pv-bar"></div><div class="pv-bar"></div></div></div>';
+  if (m.kind === 'slide') return '<div class="pv"><div class="slide"><div class="st">' + esc2(un.title) + '</div><ul>' + un.lines.map(function (l) { return '<li>' + pxParts(W, mode, u, l.parts, ctr) + '</li>'; }).join('') + '</ul></div></div>';
+  if (m.style === 'email') { var w = pxEmailWin(un); return '<div class="pv"><div class="pv-page"><div class="pv-row"><span class="pv-k">From</span><span class="pv-v">hr@contoso.com</span></div><div class="pv-row"><span class="pv-k">Subject</span><span class="pv-v">Updated records</span></div><div class="pv-title"></div>' + (w[0] > 0 ? '<div class="gap">' + w[0] + ' earlier lines</div>' : '') + un.lines.map(function (l, li) { var h = '<div class="pv-row"><span class="pv-k">' + esc2(l.k) + '</span><span class="pv-v">' + pxParts(W, mode, u, l.parts, ctr) + '</span></div>'; return li >= w[0] && li <= w[1] ? h : ''; }).join('') + (w[1] < un.lines.length - 1 ? '<div class="gap">' + (un.lines.length - 1 - w[1]) + ' more lines</div>' : '') + '</div></div>'; }
+  return '<div class="pv"><div class="pv-page' + (m.style === 'image' ? ' pv-img' : '') + '"><div class="pv-title">' + esc2(un.title) + '</div>' + un.lines.map(function (l) { return '<div class="pv-row">' + (l.k ? '<span class="pv-k">' + esc2(l.k) + '</span>' : '') + '<span class="pv-v">' + pxParts(W, mode, u, l.parts, ctr) + '</span></div>'; }).join('') + '<div class="pv-bar"></div><div class="pv-bar"></div></div></div>';
 }
 function pxCsv(W, m, mode) {
   var b = pxBase(m), L = [m.head.join(',')], prev = -1;
@@ -1406,9 +1600,11 @@ function pxCaption(smp, m, nMasked) {
 }
 function sampleResult(W, smp) {
   var m = pxModel(smp), counts = {}, left = {};
-  Object.keys(m.counts).forEach(function (de) { var c = W.conds.filter(function (x) { return x.de === de; })[0]; if (c && c.on) counts[de] = m.counts[de]; else left[de] = m.counts[de]; });
+  Object.keys(m.counts).forEach(function (de) { var c = W.conds.filter(function (x) { return x.de === de; })[0]; if (!c) return; if (c.on) counts[de] = m.counts[de]; else left[de] = m.counts[de]; });
   var keep = smp.size <= 5 && TEXTUAL[smp.fmt];
-  return { counts: counts, left: left, outName: 'redacted-' + smp.name + (keep ? '' : '.txt'), note: keep ? 'Original format kept (up to 5MB)' : (smp.size > 5 ? 'Text file (over 5MB)' : 'Text file (' + smp.fmt + ' is sanitized as text)') };
+  var fid = TEXTUAL[smp.fmt] ? 'text' : smp.size <= 5 ? 'visual' : 'big';
+  var fl = { visual: ['Looks like the original', 'Up to 5MB, PDF, Word, Excel, PowerPoint, images and email get a preview that looks like the original.'], text: ['Text-based', smp.fmt + ' files get a text-based preview.'], big: ['Layout kept, looks different', 'Over 5MB the page layout is kept, but the preview looks different from the original.'] }[fid];
+  return { fid: fid, fidLabel: fl[0], fidWhy: fl[1], counts: counts, left: left, outName: 'redacted-' + smp.name + (keep ? '' : '.txt'), note: keep ? 'Original format kept (up to 5MB)' : (smp.size > 5 ? 'Text file (over 5MB)' : 'Text file (' + smp.fmt + ' is sanitized as text)') };
 }
 /* Bring the test card to the top of the scroll area so the run is visible from the first moment, and again when the result replaces it */
 function anchorTest() {
@@ -1434,12 +1630,18 @@ function dryRunPanel(W) {
   var chips = Object.keys(r.counts).map(function (k) { return chip(r.counts[k] + ' ' + k + ' masked', { type: 'green', attrs: ' data-el="' + k + '"' }); }).concat(Object.keys(r.left).map(function (k) { return chip(r.left[k] + ' ' + k + ' not masked', { type: 'red', attrs: ' data-el="' + k + '"' }); })).join('');
   var nMasked = Object.keys(r.counts).reduce(function (a, k) { return a + r.counts[k]; }, 0), nLeft = Object.keys(r.left).reduce(function (a, k) { return a + r.left[k]; }, 0);
   return '<div class="sum-card">' + head +
-    '<div class="bt" role="tablist" style="grid-template-columns:repeat(' + n + ',1fr)">' + W.set.map(function (x, i) { return '<button type="button" role="tab" aria-selected="' + (i === W.sample) + '" class="bt-tab' + (i === W.sample ? ' is-on' : '') + '" data-sample="' + i + '" data-tooltip="' + x.name + '">' + ic('graph-entity-file', 16) + '<span>' + x.name + '</span></button>'; }).join('') + '</div>' +
-    '<div class="tr-meta"><span class="tr-out">' + r.outName + '</span><span class="tr-note">' + r.note + '</span></div>' +
+    '<div class="bt" role="tablist" style="grid-template-columns:repeat(' + n + ',1fr)">' + W.set.map(function (x, i) { return '<button type="button" role="tab" aria-selected="' + (i === W.sample) + '" class="bt-tab' + (i === W.sample ? ' is-on' : '') + '" data-sample="' + i + '">' + ic('graph-entity-file', 16) + '<span data-tooltip="' + x.name + '" data-tt-trunc>' + x.name + '</span></button>'; }).join('') + '</div>' +
+    '<div class="fid"><span class="fl">Preview</span><b>' + r.fidLabel + '</b><span class="fx">' + r.fidWhy + '</span></div>' +
     '<div class="tr-counts">' + (chips || '<span class="tr-note">No sensitive values found in this file.</span>') + '</div>' +
     '<div class="sb" style="padding-bottom:0"><div class="sb-col"><div class="sb-h"><b>Original</b><span>' + (nMasked + nLeft) + ' detected</span></div>' + pxOrig(W, smp) + '</div>' +
-    '<div class="sb-col"><div class="sb-h"><b>Output file</b><span>' + nMasked + ' masked' + (nLeft ? ', ' + nLeft + ' not' : '') + '</span></div>' + pxOut(W, smp) + '</div></div>' +
-    '<div class="cov" style="padding-top:12px">' + pxCaption(smp, pxModel(smp), nMasked) + '</div></div>';
+    '<div class="sb-col"><div class="sb-h"><b>Sanitized preview' + (r.fid === 'text' ? ', text' : r.fid === 'big' ? ', simplified' : '') + '</b><span>' + nMasked + ' masked' + (nLeft ? ', ' + nLeft + ' not' : '') + '</span></div>' + (r.fid === 'visual' ? pxOrig(W, smp, 'out') : pxOut(W, smp)) + '</div></div>' +
+    '<div class="cov" style="padding-top:12px">' + pxCaption(smp, pxModel(smp), nMasked) + '</div>' +
+    '<div class="adv-head" style="margin:16px 16px ' + (W.outOpen ? '0' : '16px') + '"><button type="button" class="adv-chev" id="outTog" aria-expanded="' + !!W.outOpen + '" aria-label="Toggle the output file"' + (W.outOpen ? '' : ' style="transform:rotate(-90deg)"') + '><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button><div><div class="adv-title" style="font-size:16px">Output file written to storage</div><div class="adv-sub">' + r.outName + ', ' + (r.note.indexOf('kept') > -1 ? 'same format as the original' : 'text only') + '</div></div></div>' +
+    (W.outOpen ? '<div class="sb" style="padding:12px 16px 0"><div class="sb-col" style="grid-column:1/-1">' + pxOut(W, smp) + '</div></div><div class="cov" style="padding:8px 16px 16px">An excerpt of the file, the same one shown above. The full file is written to storage.</div>' : '') + '</div>';
+}
+function storeSummaryRows(W) {
+  var gs = regionGroups(W);
+  return gs.length === 1 && gs[0].region ? [['Storage location', ST[storeChosen(W, gs[0].region)][0], 'save-outlined']] : gs.map(function (g) { return [g.region || 'No region set', ST[storeChosen(W, g.region)][0], 'save-outlined']; });
 }
 function sumCard(rows) {
   return '<div class="sum-card">' + rows.map(function (r) { return '<div class="sum-row"><span class="sum-ic">' + ic(r[2], 20) + '</span><div class="sum-text"><div class="sum-label">' + r[0] + '</div><div class="sum-val">' + r[1] + '</div></div></div>'; }).join('') + '</div>';
@@ -1452,8 +1654,8 @@ function stepSummary(W) {
   var started = W.job ? '<div class="alert info"><span style="display:flex;width:24px;height:24px;align-items:center;justify-content:center"><span class="dr-spin"></span></span><div class="alert-t">Sanitize job started. Track it on the Activity page.</div><button class="btn btn-secondary btn-sm" id="viewJob" type="button">View job</button></div>' : '';
   return stepHead('Summary', W.job ? 'The job runs in the background. You can close this and keep working.' : 'Check the job before it starts. When it finishes, agents read the masked copy instead of the original.') + started +
     sumCard([['Items', W.all ? 'All matching ' + (W.isF ? 'files' : 'data systems') : W.items.length + (W.isF ? ' files' : ' data systems'), 'dc-files'], ['Files', W.files.toLocaleString() + ' in scope, about ' + c.skipped.toLocaleString() + ' expected to be skipped (no extractable text)', 'graph-entity-file']]) +
-    sumCard([['Data elements', maskIsDefault(W) ? 'All ' + W.deList.length + ' data elements, default masking' : on.map(function (x) { return x.de + ': ' + x.fn; }).join('<br>'), 'text-redaction-masking-outlined'], ['Extraction', 'OCR ' + (W.ocr ? 'on' : 'off') + ', speech-to-text ' + (W.stt ? 'on' : 'off'), 'search-outlined']]) +
-    sumCard(W.destMode === 'other' ? [['Destination', W.dest, 'save-outlined'], ['Path', W.path, 'save-outlined']] : [['Destination', 'Same environment as each parent file', 'save-outlined']]) +
+    sumCard([['Masking', maskSummary(W), 'text-redaction-masking-outlined'], ['Extraction', 'OCR ' + (W.ocr ? 'on' : 'off') + ', speech-to-text ' + (W.stt ? 'on' : 'off'), 'search-outlined']]) +
+    sumCard(storeSummaryRows(W).concat([['Path', W.path, 'save-outlined']])) +
     dryRunPanel(W);
 }
 function wireStep(W) {
@@ -1467,19 +1669,56 @@ function wireStep(W) {
       renderWiz();
     };
   });
-  m.querySelectorAll('[data-con]').forEach(function (b) { b.onchange = function () { W.conds[+b.dataset.con].on = b.checked; renderWiz(); }; });
-  m.querySelectorAll('[data-etok]').forEach(function (b) { b.onclick = function () { W.sel = b.dataset.etok; renderWiz(); }; });
-  m.querySelectorAll('[data-eopt]').forEach(function (b) { b.onclick = function () { condOf(W, W.sel).fn = b.dataset.eopt; renderWiz(); }; });
-  var cd = document.getElementById('custDone'); if (cd) cd.onclick = function () { W.customize = false; renderWiz(); };
   var at = document.getElementById('advToggle'); if (at) at.onclick = function () { W.advOpen = !W.advOpen; renderWiz(); };
-  var cm = document.getElementById('custMask'); if (cm) cm.onclick = function () { W.customize = true; renderWiz(); };
-  var ud = document.getElementById('useDef'); if (ud) ud.onclick = function () { W.conds = W.deList.map(seedCond); W.customize = false; renderWiz(); };
+  var ot = document.getElementById('outTog'); if (ot) ot.onclick = function () { W.outOpen = !W.outOpen; renderWiz(); };
   var set = function (id, key) { var e = document.getElementById(id); if (e) e.onchange = function () { W[key] = e.checked; if (id !== 'optOcr' && id !== 'optStt') renderWiz(); }; };
   set('optOcr', 'ocr'); set('optStt', 'stt');
-  m.querySelectorAll('[data-dmode]').forEach(function (b) { b.onclick = function () { W.destMode = b.dataset.dmode === 'Different environment' ? 'other' : 'source'; renderWiz(); }; });
-  m.querySelectorAll('[data-dsel]').forEach(function (b) { b.onchange = function () { W.dest = b.value; renderWiz(); }; });
+  var mPart = function () { var g = document.getElementById('mGtab'), l = document.getElementById('mList'); if (!g || !l) return; var top = l.scrollTop; g.className = 'gtab m-B' + (W.sel ? ' open' : ''); l.innerHTML = maskList(W); l.scrollTop = top; document.getElementById('mCfg').innerHTML = maskCfg(W); paintIcons(g); };
+  W.mPart = mPart;
+  var oPart = function () {
+    var g = document.getElementById('oG'), l = document.getElementById('oList'); if (!g || !l) return;
+    var gs = regionGroups(W), top = l.scrollTop;
+    g.className = 'gtab o-B otab' + (W.dopen ? ' open' : ''); l.innerHTML = outRows(W, gs); l.scrollTop = top;
+    document.getElementById('oCfg').innerHTML = outCfg(W, gs); document.getElementById('oAlert').innerHTML = outAlert(W, gs);
+    var nt = document.getElementById('oNote'); if (nt) nt.innerHTML = outNote(W, gs);
+    var nx = document.getElementById('wNext'); if (nx) nx.disabled = !storeResolved(W);
+    paintIcons(m);
+  };
+  W.oPart = oPart;
+  var keep = function () { var l = document.getElementById('mList'), t = l ? l.scrollTop : 0; renderWiz(); l = document.getElementById('mList'); if (l) l.scrollTop = t; };
+  m.onclick = function (e) {
+    var t = e.target; if (t.closest('.sw')) return;
+    if (t.closest('[data-cfgstore]')) { e.preventDefault(); showToast('Storage settings open in a new tab', { body: 'The settings page is not part of this prototype.' }); return; }
+    var ro = t.closest('[data-orow]'); if (ro) { W.dopen = W.dopen === ro.dataset.orow ? '' : ro.dataset.orow; W.ddOpen = ''; oPart(); return; }
+    if (t.closest('[data-oclose]')) { W.dopen = ''; W.ddOpen = ''; oPart(); return; }
+    var dt = t.closest('[data-dd]'); if (dt) { W.ddOpen = W.ddOpen === dt.dataset.dd ? '' : dt.dataset.dd; if (W.dopen) oPart(); else renderWiz(); return; }
+    var so = t.closest('[data-st]'); if (so) { var pr = so.dataset.st.split('|'); W.pick[pr[0] === '_none' ? '' : pr[0]] = pr[1]; W.ddOpen = ''; if (W.dopen) oPart(); else renderWiz(); return; }
+    var row = t.closest('[data-lrow]'); if (row) { W.sel = W.sel === row.dataset.lrow ? '' : row.dataset.lrow; mPart(); return; }
+    if (t.closest('[data-cclose]')) { W.sel = ''; mPart(); return; }
+    if (t.closest('#mAdd')) { W.mpick = true; W.mpq = ''; W.msel = {}; renderWiz(); var q = document.getElementById('mpq'); if (q) q.focus(); return; }
+    if (t.closest('[data-pclose]')) { W.mpick = false; renderWiz(); return; }
+    if (t.closest('#mPickAdd')) {
+      var des = Object.keys(W.msel).filter(function (d) { return W.msel[d]; });
+      des.forEach(function (d) { W.conds.push({ de: d, fn: defaultFn(d), on: true, added: true }); });
+      W.sel = des[0]; W.mpick = false; W.q = ''; renderWiz();
+      var l = document.getElementById('mList'), sr = document.querySelector('#mList .lrow.is-sel'); if (l) { l.scrollTop = l.scrollHeight; if (sr && sr.offsetTop < l.scrollTop) l.scrollTop = sr.offsetTop; } return;
+    }
+    var rc = t.closest('[data-rmcond]'); if (rc) { W.conds = W.conds.filter(function (c) { return c.de !== rc.dataset.rmcond; }); W.sel = ''; keep(); }
+  };
+  m.onchange = function (e) {
+    var t = e.target;
+    if (t.dataset && t.dataset.lon) { condOf(W, t.dataset.lon).on = t.checked; keep(); return; }
+    if (t.dataset && t.dataset.pcb) { W.msel[t.dataset.pcb] = t.checked; var pl = document.getElementById('mpl'), top = pl ? pl.scrollTop : 0; document.getElementById('mPick').outerHTML = maskPicker(W); document.getElementById('mpl').scrollTop = top; paintIcons(document.getElementById('mPick')); return; }
+    if (t.id === 'mFn') { condOf(W, W.sel).fn = t.value.replace(' (recommended)', ''); keep(); }
+  };
+  m.oninput = function (e) {
+    var t = e.target;
+    if (t.id === 'mQ') { W.q = t.value; document.getElementById('mList').innerHTML = maskList(W); document.getElementById('mCfg').innerHTML = maskCfg(W); }
+    else if (t.id === 'mName') { condOf(W, W.sel).name = t.value; document.getElementById('mList').innerHTML = maskList(W); }
+    else if (t.id === 'mpq') { W.mpq = t.value; var pos = t.selectionStart; document.getElementById('mPick').outerHTML = maskPicker(W); var x = document.getElementById('mpq'); x.focus(); x.setSelectionRange(pos, pos); paintIcons(document.getElementById('mPick')); }
+  };
   m.querySelectorAll('.sel-card').forEach(function (c) { c.onkeydown = function (e) { if (e.target === c && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); c.click(); } }; });
-  var p = document.getElementById('path'); if (p) p.oninput = function () { W.path = p.value; };
+  var p = document.getElementById('path'); if (p) p.oninput = function () { W.path = p.value; document.querySelectorAll('.rg-row .dest .dp').forEach(function (n) { if (n.previousSibling && n.previousSibling.className === 'dn') n.textContent = p.value; }); };
   var hot = function (t) {
     m.querySelectorAll('.is-hot').forEach(function (x) { x.classList.remove('is-hot'); });
     if (!t) return;

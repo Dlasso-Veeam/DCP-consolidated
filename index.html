@@ -560,13 +560,19 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
 .am-chip { font-size: 14px; font-weight: 500; color: var(--green); background: var(--green-soft-160); padding: 2px 8px; border-radius: 2px; letter-spacing: 0; }
 .am-desc { font-size: 14px; line-height: 20px; color: var(--black-60); margin-top: 4px; }
 .am-setup { margin: 24px 16px 16px; display: flex; flex-direction: column; gap: 16px; }
-.am-setup-head { display: flex; align-items: center; justify-content: flex-start; gap: 8px; }   /* the help button sits right beside the heading, not at the far edge */
+.am-setup-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }   /* the help button sits in the band's corner */
 .am-setup-title { font-size: 16px; font-weight: 500; color: var(--black-100); }
 .am-ex { display: flex; flex-direction: column; gap: 16px; }
 .am-ex > * { margin-bottom: 0 !important; }   /* the stack's own gap spaces them; each block still carries the margin it had inside the old card */
 .am-rest { font-size: 14px; line-height: 20px; color: var(--black-60); }
 .am-pair.am-flush, .am-setup.am-flush { margin-left: 0; margin-right: 0; }   /* env step: the form-card already supplies the gutter the auth step gets from its own margin */
 .am-setup.am-flush { margin-bottom: 0; }
+/* Authentication: the setup for the chosen method (Express list or Manual form) sits in one full-width grey band, so both methods share a container (Figma DCP Consolidated 20666:51881). Inputs and drop zones switch to the white alternate fill so they read on the grey. */
+.am-setup.am-band { padding: 24px; background: var(--green-10); border-radius: 4px; }   /* was black-3 grey: the lightest Vision green (S5) ties the band to the selected card above it */
+.am-band .form-input { background: var(--white); }
+.am-band [id$="-drop-zone"] { background: var(--white) !important; }
+.am-band .gp-ok { background: var(--white); }
+.am-band .onb-note { background: var(--white); }   /* info notes nested in the band follow the same rule: white fill, own border */   /* the connected card keeps its green border but fills white so it reads on the green band */
 
 /* ── Environment selection (Power Platform): production match of protected-data.html — the header bulk caret (.dx-bulk-caret) + menu (.dx-bm / .dx-mi / .dx-nb / .dx-md),
    the pager (.pgds-*) and the D365 "Include related records" selection card (.ws-cfg-choice.sc.rc-card), cloned through env-select-options.html option E (2026-11-04) ── */
@@ -696,6 +702,39 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
 .gg-foot { display: flex; align-items: center; justify-content: space-between; padding: 16px 8px 20px; font-size: 12px; color: #5f6368; }
 .gg-foot span { display: inline-flex; align-items: center; gap: 4px; }
 .gg-foot nav { display: flex; gap: 24px; }
+
+/* Provider sign-in window (shared frame, per-provider skin via data-prov). Atlassian = id.atlassian.com sign-in + consent. */
+.pw-back { position: fixed; inset: 0; z-index: 9500; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(9,30,66,.54); }
+.pw-win { --pw-ink: #172b4d; --pw-sub: #5e6c84; --pw-line: #dfe1e6; --pw-accent: #0c66e4; --pw-accent-h: #0055cc; width: 480px; max-width: 100%; max-height: calc(100vh - 32px); display: flex; flex-direction: column; background: var(--white); border-radius: 8px; box-shadow: 0 16px 48px rgba(9,30,66,.4); overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', Ubuntu, 'Droid Sans', 'Helvetica Neue', sans-serif; color: var(--pw-ink); }
+.pw-bar { display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: var(--black-5); border-bottom: 1px solid var(--pw-line); color: var(--pw-sub); font-size: 14px; }
+.pw-url { flex: 1; display: flex; align-items: center; gap: 4px; height: 28px; padding: 0 12px; border-radius: 14px; background: var(--white); border: 1px solid var(--pw-line); }
+.pw-x { border: 0; background: none; color: var(--pw-sub); cursor: pointer; display: inline-flex; padding: 4px; border-radius: 50%; }
+.pw-x:hover { background: var(--black-10); }
+.pw-page { overflow-y: auto; padding: 24px 24px 0; }
+.pw-card { border: 1px solid var(--pw-line); border-radius: 4px; padding: 32px 40px 32px; }
+.pw-mark { width: 40px; height: 40px; border-radius: 4px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+.pw-card h1 { margin: 0; font-size: 20px; line-height: 24px; font-weight: 500; text-align: center; color: var(--pw-ink); }
+.pw-sub { margin: 4px 0 24px; text-align: center; font-size: 14px; line-height: 20px; color: var(--pw-sub); }
+.pw-lbl { display: block; margin-bottom: 4px; font-size: 12px; font-weight: 600; line-height: 16px; color: var(--pw-sub); }
+.pw-in { width: 100%; height: 40px; padding: 0 8px; margin-bottom: 16px; border: 2px solid var(--pw-line); border-radius: 3px; background: var(--black-3); font: inherit; font-size: 14px; color: var(--pw-ink); }
+.pw-user { margin: 16px 0; text-align: center; font-size: 14px; line-height: 20px; color: var(--pw-sub); }
+.pw-user b { font-weight: 500; color: var(--pw-ink); }
+.pw-card a { color: var(--pw-accent); text-decoration: none; }
+.pw-sec { margin-bottom: 8px; font-size: 14px; font-weight: 600; line-height: 20px; color: var(--pw-ink); }
+.pw-perms { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--pw-line); }
+.pw-perms li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--pw-line); font-size: 14px; line-height: 20px; }
+.pw-perms svg { flex: none; color: var(--pw-sub); }
+.pw-fine { margin: 16px 0 0; font-size: 12px; line-height: 16px; color: var(--pw-sub); }
+.pw-fine.ctr { text-align: center; }
+.pw-btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; }
+.pw-btn { height: 40px; padding: 0 16px; border: 0; border-radius: 3px; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }
+.pw-btn.full { width: 100%; }
+.pw-btn.text { background: none; color: var(--pw-ink); }
+.pw-btn.text:hover { background: var(--black-5); }
+.pw-btn.fill { background: var(--pw-accent); color: var(--white); }
+.pw-btn.fill:hover { background: var(--pw-accent-h); }
+.pw-btn:focus-visible { outline: 2px solid var(--pw-accent); outline-offset: 2px; }
+.pw-foot { display: flex; justify-content: center; gap: 24px; padding: 16px 8px 20px; font-size: 12px; color: var(--pw-sub); }
 .ws-cfg-choice { position: relative; display: block; width: 100%; background: var(--white); border: 1px solid var(--border-light); border-radius: 4px; text-align: left; min-width: 0; }
 .ws-cfg-choice:hover:not(.is-selected) { border-color: var(--black-30); }
 .ws-cfg-choice.is-selected { border-color: var(--green); }
@@ -706,6 +745,8 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
 .sc-desc { display: block; padding: 8px 12px; background: var(--white); border-radius: 0 0 3px 3px; font-size: 14px; font-weight: 450; line-height: 20px; color: var(--black-60); }
 .rc-icon { display: inline-flex; flex: none; }
 .rc-cb { position: absolute; top: 8px; right: 12px; width: 20px; height: 20px; margin: 0; pointer-events: none; }
+/* Checkboxes and radios are Vision green everywhere (Selection/Checkbox, Green/S80); same rule the shipped Protected Data layer uses. The Google sign-in window keeps Google's own blue (.gg-scope). */
+input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor: pointer; }
 .onb-note-info .onb-note-glyph { color: var(--black-60); }
 .onb-note-caution { background: var(--orange-10); border: 1px solid var(--orange-30); }
 .onb-note-caution .onb-note-glyph { color: var(--orange); }
@@ -2332,16 +2373,7 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
                 <!-- Mode selection (same pattern as the auth step, user 2026-11-04): the two cards only SELECT — name, Recommended chip, one line — and sit side by side;
                      what the chosen mode means (the all-summary, or the filters + search + table) is page content below them in #env-setup, so no card grows with its content.
                      Was: two full-width stacked cards, the custom one holding its own filter chips, search and table. Ids the env JS reads are unchanged. -->
-                <div id="env-mode-cards" class="am-pair am-flush" role="radiogroup" aria-label="Environment scope">
-                  <div id="env-mode-card-all" class="am-card sel" role="radio" aria-checked="true" tabindex="0" onclick="selectEnvMode('all')" onkeydown="envModeCardKey(event,'all')">
-                    <div class="am-row am-top"><span class="am-name">Include all Production and Sandbox environments</span><span class="am-chip">Recommended</span></div>
-                    <div class="am-desc">Includes every environment now and any added later.</div>
-                  </div>
-                  <div id="env-mode-card-custom" class="am-card" role="radio" aria-checked="false" tabindex="0" onclick="selectEnvMode('custom')" onkeydown="envModeCardKey(event,'custom')">
-                    <div class="am-row"><span class="am-name">Include selected environments</span></div>
-                    <div class="am-desc">Back up only the environments you pick.</div>
-                  </div>
-                </div>
+                <div id="env-mode-cards" class="pchoice-grid am-cards am-flush" role="radiogroup" aria-label="Environment scope"><div id="env-mode-card-all" class="pchoice-card selected" role="radio" aria-checked="true" tabindex="0" onclick="selectEnvMode('all')" onkeydown="envModeCardKey(event,'all')"><div class="pchoice-head"><span class="pchoice-head-icon" id="env-icon-all"></span><span class="pchoice-head-title">Include all</span><span class="pchoice-chip pchoice-chip-green">Recommended</span><span class="pchoice-radio"></span></div><div class="pchoice-body"><div class="pchoice-desc">Every Production and Sandbox environment, now and any added later.</div></div></div><div id="env-mode-card-custom" class="pchoice-card" role="radio" aria-checked="false" tabindex="0" onclick="selectEnvMode('custom')" onkeydown="envModeCardKey(event,'custom')"><div class="pchoice-head"><span class="pchoice-head-icon" id="env-icon-custom"></span><span class="pchoice-head-title">Include selected</span><span class="pchoice-radio"></span></div><div class="pchoice-body"><div class="pchoice-desc">Back up only the environments you pick.</div></div></div></div>
 
                 <!-- Setup for the selected mode. -->
                 <div id="env-setup" class="am-setup am-flush">
@@ -2437,16 +2469,7 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
                 <div id="gp-conn"></div>
 
                 <!-- Same two cards as the Environments step (selection only); what each means is page content below. -->
-                <div id="gp-mode-cards" class="am-pair am-flush" role="radiogroup" aria-label="Restore projects">
-                  <div id="gp-card-all" class="am-card sel" role="radio" aria-checked="true" tabindex="0" onclick="gipSetMode('all')" onkeydown="gipCardKey(event,'all')">
-                    <div class="am-row am-top"><span class="am-name">Include all projects in the organization</span><span class="am-chip">Recommended</span></div>
-                    <div class="am-desc">Includes every project now and any created later.</div>
-                  </div>
-                  <div id="gp-card-sel" class="am-card" role="radio" aria-checked="false" tabindex="0" onclick="gipSetMode('sel')" onkeydown="gipCardKey(event,'sel')">
-                    <div class="am-row"><span class="am-name">Include selected projects</span></div>
-                    <div class="am-desc">Restore only into the projects you pick.</div>
-                  </div>
-                </div>
+                <div id="gp-mode-cards" class="pchoice-grid am-cards am-flush" role="radiogroup" aria-label="Restore projects"><div id="gp-card-all" class="pchoice-card selected" role="radio" aria-checked="true" tabindex="0" onclick="gipSetMode('all')" onkeydown="gipCardKey(event,'all')"><div class="pchoice-head"><span class="pchoice-head-icon" id="gp-icon-all"></span><span class="pchoice-head-title">Include all</span><span class="pchoice-chip pchoice-chip-green">Recommended</span><span class="pchoice-radio"></span></div><div class="pchoice-body"><div class="pchoice-desc">Every project in the organization, now and any created later.</div></div></div><div id="gp-card-sel" class="pchoice-card" role="radio" aria-checked="false" tabindex="0" onclick="gipSetMode('sel')" onkeydown="gipCardKey(event,'sel')"><div class="pchoice-head"><span class="pchoice-head-icon" id="gp-icon-sel"></span><span class="pchoice-head-title">Include selected</span><span class="pchoice-radio"></span></div><div class="pchoice-body"><div class="pchoice-desc">Restore only into the projects you pick.</div></div></div></div>
 
                 <!-- Quota project: always visible and required, directly under the cards. Prefilled only when Veeam has a verified project; seeded empty here. -->
                 <div id="gp-quota" style="margin-top:16px"></div>
@@ -2518,27 +2541,15 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
                 <div class="form-subtitle">We discovered <strong style="color:var(--black-100)" id="wks-discovered-count">0</strong> Power BI workspaces in <strong style="color:var(--black-100)" id="wks-tenant-display">your tenant</strong>. Choose which to back up.</div>
 
                 <!-- Mode-card group: matches the env screen's spacing. -->
-                <div style="display:flex;flex-direction:column;gap:12px">
-                <div id="wks-mode-card-all" onclick="selectWorkspaceMode('all')" style="border:2px solid var(--green);border-radius:8px;padding:20px;cursor:pointer;background:var(--white);transition:all 0.15s">
-                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-                    <span style="font-size:16px;font-weight:500;color:var(--black-100)">Include all workspaces</span>
-                    <span style="font-size: 14px;font-weight:500;color:var(--green);background:var(--green-soft-160);padding:2px 8px;border-radius:2px">Recommended</span>
+                <div id="wks-mode-cards" class="pchoice-grid am-cards am-flush" role="radiogroup" aria-label="Workspaces scope"><div id="wks-mode-card-all" class="pchoice-card selected" role="radio" aria-checked="true" tabindex="0" onclick="selectWorkspaceMode('all')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectWorkspaceMode('all')}"><div class="pchoice-head"><span class="pchoice-head-icon" id="wks-icon-all"></span><span class="pchoice-head-title">Include all</span><span class="pchoice-chip pchoice-chip-green">Recommended</span><span class="pchoice-radio"></span></div><div class="pchoice-body"><div class="pchoice-desc">Every workspace, now and any added later.</div></div></div><div id="wks-mode-card-custom" class="pchoice-card" role="radio" aria-checked="false" tabindex="0" onclick="selectWorkspaceMode('custom')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectWorkspaceMode('custom')}"><div class="pchoice-head"><span class="pchoice-head-icon" id="wks-icon-custom"></span><span class="pchoice-head-title">Include selected</span><span class="pchoice-radio"></span></div><div class="pchoice-body"><div class="pchoice-desc">Back up only the workspaces you pick.</div></div></div></div>
+                <div id="wks-setup" class="am-setup am-flush">
+                  <div id="wks-setup-title" class="am-setup-title">All workspaces</div>
+                  <div id="wks-all-panel" class="am-ex">
+                    <div class="am-rest">Every Power BI workspace we discovered is included. New workspaces added later are picked up automatically.</div>
+                    <div id="wks-all-summary" style="font-size:14px;color:var(--black-60)"></div>
                   </div>
-                  <div style="font-size:14px;color:var(--black-60);margin-bottom:12px">Back up every Power BI workspace we discovered. New workspaces added later will be picked up automatically.</div>
-                  <div id="wks-all-summary" style="font-size:14px;color:var(--black-60)"></div>
-                </div>
-
-                <div id="wks-mode-card-custom" onclick="selectWorkspaceMode('custom')" style="border:1px solid var(--border-light);border-radius:8px;padding:20px;cursor:pointer;background:var(--white);transition:all 0.15s">
-                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-                    <span style="font-size:16px;font-weight:500;color:var(--black-100)">Include selected workspaces</span>
-                  </div>
-                  <div style="font-size:14px;color:var(--black-60)">Back up only the workspaces you select. New workspaces stay out of scope unless <strong style="color:var(--black-100);font-weight:500">Auto-add new workspaces</strong> is on, in which case future workspaces matching your filters are added automatically.</div>
-
-                  <!-- Custom body: filter chips + search + table. Same
-                       structure as env screen. event.stopPropagation on
-                       the body so chip / input clicks don't re-fire
-                       card selection. -->
-                  <div id="wks-custom-body" style="display:none;margin-top:16px;border-top:1px solid var(--border-light);padding-top:16px" onclick="event.stopPropagation()">
+                  <div id="wks-custom-body" style="display:none">
+                    <div class="am-rest" style="margin-bottom:16px">Back up only the workspaces you select. New workspaces stay out of scope unless <strong style="color:var(--black-100);font-weight:500">Auto-add new workspaces</strong> is on, in which case future workspaces matching your filters are added automatically.</div>
                     <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px">
                       <div id="wks-type-chips" style="display:flex;flex-wrap:wrap;gap:6px"></div>
                       <div style="display:inline-flex;align-items:center;gap:8px;flex-shrink:0">
@@ -2568,7 +2579,6 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
                       <div id="wks-table-rows" style="max-height:380px;overflow-y:auto"></div>
                     </div>
                   </div>
-                </div>
                 </div><!-- /mode-card group -->
               </div>
             </div>
@@ -2753,30 +2763,15 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
                 <div class="form-title">Spaces</div>
                 <div class="form-subtitle">We discovered <strong style="color:var(--black-100)" id="csp-discovered-count">0</strong> spaces in <strong style="color:var(--black-100)" id="csp-site-display">your site</strong>. Choose which to back up. Within selected spaces, every page, comment, attachment, and version is included automatically.</div>
 
-                <div style="display:flex;flex-direction:column;gap:12px">
-                  <div id="csp-mode-card-all" onclick="selectSpacesMode('all')" style="border:2px solid var(--green);border-radius:8px;padding:20px;cursor:pointer;background:var(--white);transition:all 0.15s">
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-                      <span style="font-size:16px;font-weight:500;color:var(--black-100)">Include all spaces</span>
-                      <span style="font-size: 14px;font-weight:500;color:var(--green);background:var(--green-soft-160);padding:2px 8px;border-radius:2px">Recommended</span>
-                    </div>
-                    <div style="font-size:14px;color:var(--black-60);margin-bottom:12px">Back up every space we discovered. New spaces created later will be picked up automatically.</div>
+                <div id="csp-mode-cards" class="pchoice-grid am-cards am-flush" role="radiogroup" aria-label="Spaces scope"><div id="csp-mode-card-all" class="pchoice-card selected" role="radio" aria-checked="true" tabindex="0" onclick="selectSpacesMode('all')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectSpacesMode('all')}"><div class="pchoice-head"><span class="pchoice-head-icon" id="csp-icon-all"></span><span class="pchoice-head-title">Include all</span><span class="pchoice-chip pchoice-chip-green">Recommended</span><span class="pchoice-radio"></span></div><div class="pchoice-body"><div class="pchoice-desc">Every space, now and any added later.</div></div></div><div id="csp-mode-card-custom" class="pchoice-card" role="radio" aria-checked="false" tabindex="0" onclick="selectSpacesMode('custom')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectSpacesMode('custom')}"><div class="pchoice-head"><span class="pchoice-head-icon" id="csp-icon-custom"></span><span class="pchoice-head-title">Include selected</span><span class="pchoice-radio"></span></div><div class="pchoice-body"><div class="pchoice-desc">Back up only the spaces you pick.</div></div></div></div>
+                <div id="csp-setup" class="am-setup am-flush">
+                  <div id="csp-setup-title" class="am-setup-title">All spaces</div>
+                  <div id="csp-all-panel" class="am-ex">
+                    <div class="am-rest">Every space we discovered is included. New spaces created later are picked up automatically.</div>
                     <div id="csp-all-summary" style="font-size:14px;color:var(--black-60)"></div>
                   </div>
-
-                  <div id="csp-mode-card-custom" onclick="selectSpacesMode('custom')" style="border:1px solid var(--border-light);border-radius:8px;padding:20px;cursor:pointer;background:var(--white);transition:all 0.15s">
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-                      <span style="font-size:16px;font-weight:500;color:var(--black-100)">Include selected spaces</span>
-                    </div>
-                    <div style="font-size:14px;color:var(--black-60)">Back up only the spaces you select. New spaces stay out of scope unless <strong style="color:var(--black-100);font-weight:500">Auto-add new spaces</strong> is on, in which case future spaces matching your filters are added automatically.</div>
-
-                    <!-- Custom body: category chips (Global / Personal /
-                         Archived) + search + table. Each chip bulk-
-                         selects every space in its category — same
-                         pattern as the Environments screen. Personal
-                         and Archived are categories here, opt-in via
-                         chip or row; nothing about them is a separate
-                         toggle. -->
-                    <div id="csp-custom-body" style="display:none;margin-top:16px;border-top:1px solid var(--border-light);padding-top:16px" onclick="event.stopPropagation()">
+                  <div id="csp-custom-body" style="display:none">
+                    <div class="am-rest" style="margin-bottom:16px">Back up only the spaces you select. New spaces stay out of scope unless <strong style="color:var(--black-100);font-weight:500">Auto-add new spaces</strong> is on, in which case future spaces matching your filters are added automatically.</div>
                       <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px">
                         <div id="csp-type-chips" style="display:flex;flex-wrap:wrap;gap:6px"></div>
                         <div style="display:inline-flex;align-items:center;gap:8px;flex-shrink:0">
@@ -2806,7 +2801,6 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
                         <div id="csp-table-rows" style="max-height:380px;overflow-y:auto"></div>
                       </div>
                     </div>
-                  </div>
                 </div><!-- /mode-card group -->
               </div>
             </div>
@@ -3114,20 +3108,23 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
                 <!-- Method selection (option C of auth-method-options.html, user 2026-11-03): the two cards only SELECT — name, Recommended chip, one line — and sit side by side;
                      the setup for the chosen method is page content below them (#auth-setup), so no card grows with its content. Every id the auth JS reads is unchanged.
                      Was: two full-width stacked cards, each holding its own help button, benefits, notes, CTA caption and (Manual) the credential form. -->
-                <div id="auth-method-cards" class="am-pair" role="radiogroup" aria-label="Authentication method">
-                  <div id="auth-option-express" class="am-card sel" role="radio" aria-checked="true" tabindex="0" onclick="selectAuthMethod('express')" onkeydown="amCardKey(event,'express')">
-                    <div class="am-row"><span id="express-title" class="am-name">Express</span><span class="am-chip">Recommended</span></div>
-                    <div id="express-desc" class="am-desc">Authorize via GitHub — no credential management required</div>
+                <!-- Express / Manual: the same compact selection card as the Protection step (.pchoice-card, Figma 4686:6851): icon + title + radio in the header band, chip and description in the body. Selection only; the setup for the chosen method is the band below. Icons are filled by amPaintIcons. -->
+                <div id="auth-method-cards" class="pchoice-grid am-cards" role="radiogroup" aria-label="Authentication method">
+                  <div id="auth-option-express" class="pchoice-card selected" role="radio" aria-checked="true" tabindex="0" onclick="selectAuthMethod('express')" onkeydown="amCardKey(event,'express')">
+                    <div class="pchoice-head"><span class="pchoice-head-icon" id="express-icon"></span><span id="express-title" class="pchoice-head-title">Express</span><span class="pchoice-chip pchoice-chip-green">Recommended</span><span class="pchoice-radio"></span></div>
+                    <div class="pchoice-body"><div id="express-desc" class="pchoice-desc">Authorize via GitHub — no credential management required</div></div>
                   </div>
-                  <div id="auth-option-manual" class="am-card" role="radio" aria-checked="false" tabindex="0" onclick="selectAuthMethod('manual')" onkeydown="amCardKey(event,'manual')">
-                    <div class="am-row"><span id="manual-title" class="am-name">Manual</span></div>
-                    <div id="manual-desc" class="am-desc">Provide a GitHub App Client ID and Client Secret</div>
+                  <div id="auth-option-manual" class="pchoice-card" role="radio" aria-checked="false" tabindex="0" onclick="selectAuthMethod('manual')" onkeydown="amCardKey(event,'manual')">
+                    <div class="pchoice-head"><span class="pchoice-head-icon" id="manual-icon"></span><span id="manual-title" class="pchoice-head-title">Manual</span><span class="pchoice-radio"></span></div>
+                    <div class="pchoice-body"><div id="manual-desc" class="pchoice-desc">Provide a GitHub App Client ID and Client Secret</div></div>
                   </div>
                 </div>
 
                 <!-- Setup for the selected method. One help button here (user 2026-11-03: help lives with the content it explains, not on the selection cards). -->
-                <div id="auth-setup" class="am-setup">
+                <div id="auth-setup" class="am-setup am-band">
                   <div class="am-setup-head"><div id="am-setup-title" class="am-setup-title">Express authentication</div><button class="btn-icon" style="width:36px;height:36px;border-radius:4px;border:1px solid var(--border)" onclick="toggleHelpDrawer()" aria-label="Help"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><text x="12" y="17" text-anchor="middle" font-size="13" font-weight="600" font-family="Arial,sans-serif" fill="currentColor" stroke="none">?</text></svg></button></div>
+                  <!-- Jira: once Atlassian has returned the sites (Express sign-in or Manual handshake) the setup area is replaced by the connected card and the Site dropdown. -->
+                  <div id="site-signed" style="display:none"></div>
                   <div id="express-setup" class="am-ex">
                     <div id="express-desc-rest" class="am-rest" style="display:none"></div>
                   <div id="express-benefits" style="display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:16px">
@@ -3432,7 +3429,7 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
                            admin confirms the callback URL is configured on their
                            app — a mismatch is the most common 3LO setup failure. -->
                       <label style="display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;cursor:pointer;font-size:14px;color:var(--black-100)">
-                        <input type="checkbox" id="manual-callback-ack" style="margin-top:2px;accent-color:var(--blue)" onclick="event.stopPropagation()" onchange="checkManualFields()">
+                        <input type="checkbox" id="manual-callback-ack" style="margin-top:2px;accent-color:var(--green)" onclick="event.stopPropagation()" onchange="checkManualFields()">
                         <span>I've added this callback URL to my OAuth app's configuration</span>
                       </label>
                     </div>
@@ -3593,9 +3590,9 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
 
                     <button class="btn btn-blue btn-full" id="manual-save-btn" onclick="event.stopPropagation();saveManualAuth()" style="height:44px;font-weight:500;opacity:1;cursor:not-allowed;background:var(--green-30);border-color:var(--green-30)" disabled>Connect</button>
                   </div>
+                  <div style="font-size:14px;line-height:20px;color:var(--black-60);text-align:left">You can change the connection method or reauthorize at any time from the connection's Authentication settings.</div>
                 </div>
 
-                <div style="padding:0 16px 16px;font-size: 14px;color:var(--black-60);text-align:left">You can change the connection method or reauthorize at any time from the connection's Authentication settings.</div>
               </div>
             </div>
           </div>
@@ -4748,6 +4745,13 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
   /* Selection cards (Figma DCP 9460:85130, audited 2026-10-23): 8px gap, 4px radius, 1px border (green when selected, which also tints the header
      Green/S5), a 40px header (icon 20, title 16, radio 24) over a white description with Chip + 14px grey text. Shared by every workload. */
   .pchoice-grid { display: flex; gap: 8px; align-items: stretch; }
+  .pchoice-grid.am-cards { margin: 0 16px; flex-wrap: wrap; }
+  .pchoice-grid.am-cards.am-flush { margin-left: 0; margin-right: 0; }   /* steps whose form-card already supplies the gutter */   /* Authentication: the cards stack when the column is narrow, as the old grid did */
+  .am-cards .pchoice-card { flex: 1 1 240px; }
+  .am-cards .pchoice-head { min-height: 44px; }   /* the Vision chip is 28px, so both headers share one height and the bodies start level */
+  .am-cards .pchoice-head-title { flex: 0 1 auto; }
+  .am-cards .pchoice-radio { margin-left: auto; }
+  .am-cards .pchoice-head .pchoice-chip { background: var(--green-10); color: var(--green); box-shadow: inset 0 0 0 1px var(--green-70); }   /* Vision Chip Green, Mode Outline (Green/S5 fill, Green/S80 text, 1px Green/S70 border) in both states; the inset ring keeps the 28px height */
   .pchoice-card {
     flex: 1 1 0; min-width: 0; display: flex; flex-direction: column;
     background: var(--white); border: 1px solid var(--border-light);
@@ -5130,7 +5134,12 @@ function getConnectSubSteps() {
   if (w.requiresApplicationStep) subs.push(apps);
   // Google Identity (2026-11-04): the Okta-style rail keeps one Authentication row, with Projects as its own step after it (Authentication, Projects, then the connection test).
   var projects = {id:'projects', label:'Projects', icon:envs.icon};
-  if (_regionOnAuth()) return w.requiresProjectList ? [projects] : [];   // Okta, GitHub: Region sits on the Authentication page; no sub-steps in the rail
+  if (_regionOnAuth()) {   // Region sits on the Authentication page; the rail only lists the workload's own picker steps (Okta, GitHub: none)
+    var tail = [];
+    if (w.requiresProjectList) tail.push(projects);
+    if (w.requiresSitePicker && !_siteInline() && !(currentWorkload === 'confluence' && currentAuthMethod === 'manual')) tail.push(sites);
+    return tail;
+  }
   subs.push(infra, auth);
   if (effectiveRequiresEnvList()) subs.push(envs);
   if (effectiveRequiresWorkspaceList()) subs.push(workspaces);
@@ -5223,7 +5232,7 @@ function sidebarHTML(activeStep, subStep) {
   var progSvg = '<span class="sb-badge prog"><svg class="spinner-ring" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="var(--green-30)" stroke-width="2.5"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" stroke-dasharray="20 40" stroke-linecap="round"/></svg></span>';
   var errorSvg = '<span class="sb-badge error">' + _dsStoreIconSvg('status-error-outlined', 14) + '</span>';
 
-  var isOkta = (currentWorkload === 'okta' || currentWorkload === 'gip');   // Okta's sidebar (Authentication, Connection Test row, Statistics / Monitoring) — Google Identity follows it
+  var isOkta = !!OKTA_RAIL_WL[currentWorkload];   // Okta's sidebar (Authentication, Connection Test row, Statistics / Monitoring) — Google Identity follows it
   var h = '<div class="sb-header">Overview</div>';
   h += '<div class="sb-item'+(activeStep==='summary'?' active':'')+'"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01" stroke-linecap="round"/></svg></div>Overview</div>';
   if (isOkta && activeStep === 'summary') {
@@ -5238,7 +5247,7 @@ function sidebarHTML(activeStep, subStep) {
     // there's no sub-step underneath carrying that highlight instead —
     // Connect's own row stays neutral while one of its sub-steps (or
     // the transient Test Connection state) is what's actually current.
-    var onProjects = (isOkta && s.id === 'connect' && act && subStep === 'projects');   // Google Identity Projects step: Authentication is behind you
+    var onProjects = (isOkta && s.id === 'connect' && act && (subStep === 'projects' || subStep === 'sites'));   // Google Identity Projects step: Authentication is behind you
     var cls = (act && !onProjects && (!subStep || (isOkta && subStep !== 'test'))) ? ' active' : ((done || onProjects) ? ' completed' : '');
     var svgAttr = s.filled ? 'viewBox="0 0 20 20" fill="currentColor"' : 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"';
     var itemClick = done ? ' onclick="goToStep(\''+s.id+'\')"' : '';
@@ -6805,6 +6814,7 @@ function enterEnvScreen() {
 }
 
 function renderEnvScreen() {
+  amPaintIcons();
   // Card chrome: which is selected drives border + the customize body.
   var allCard = document.getElementById('env-mode-card-all');
   var customCard = document.getElementById('env-mode-card-custom');
@@ -6821,7 +6831,7 @@ function renderEnvScreen() {
   if (isD365Env) envSelectMode = 'custom';
   var allOn = (envSelectMode === 'all');
   [[allCard, allOn], [customCard, !allOn]].forEach(function(p){
-    p[0].classList.toggle('sel', p[1]);
+    p[0].classList.toggle('selected', p[1]);
     p[0].setAttribute('aria-checked', p[1] ? 'true' : 'false');
   });
   var allPanel = document.getElementById('env-all-panel');
@@ -7702,7 +7712,7 @@ var d365PendingEnvs = [];
 // arg) still simulate the seeded failure so the failure UX is
 // demonstrable on first land.
 // Okta "Verifying access" chrome toggle: restyles the shared test-conn screen (no-op / restore for every other workload).
-var TEST_ICON_PX = { github: 24 };   // glyph size inside the 40px Test-step tile, where it differs from the 40px default
+var TEST_ICON_PX = { github: 24, jira: 28 };   // glyph size inside the 40px Test-step tile, where it differs from the 40px default
 function _tcOkvChrome(on, w) {
   var scr = document.getElementById('screen-test-conn'); if (!scr) return;
   scr.classList.toggle('okv', on); scr.classList.remove('okv-p2'); scr.classList.toggle('okv-running', on); scr.classList.toggle('okv-checking', on);
@@ -8673,7 +8683,7 @@ function _oktaScopeRow(key, title, sub) {
   var checked = !!oktaProtect[key];
   return ''+
     '<label data-okta-scope="' + key + '" style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:8px 0">'+
-      '<input type="checkbox" ' + (checked ? 'checked ' : '') + 'onchange="toggleOktaProtectScope(\'' + key + '\')" style="margin-top:2px;width:16px;height:16px;accent-color:var(--blue);flex-shrink:0">'+
+      '<input type="checkbox" ' + (checked ? 'checked ' : '') + 'onchange="toggleOktaProtectScope(\'' + key + '\')" style="margin-top:2px;width:16px;height:16px;accent-color:var(--green);flex-shrink:0">'+
       '<span style="min-width:0">'+
         '<span style="display:block;font-size:14px;font-weight:500;color:var(--black-100)">' + escapeHtml(title) + '</span>'+
         '<span style="display:block;font-size:14px;color:var(--black-60);line-height:18px">' + escapeHtml(sub) + '</span>'+
@@ -9060,7 +9070,8 @@ function advanceFromProtect() {
 
 // The Okta-style success dialog, worded for the workload that was just connected.
 var OKF_COPY = { github: { tag: 'GitHub Cloud', body: 'Inventory sync has started for your organization. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the connection\u2019s configuration.' },
-  gip: { tag: 'Google Cloud', body: 'Inventory sync has started for your Google identity environment. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the connection\u2019s configuration.' } };
+  gip: { tag: 'Google Cloud', body: 'Inventory sync has started for your Google identity environment. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the connection\u2019s configuration.' },
+  jira: { tag: 'Atlassian Cloud', body: 'Inventory sync has started for your Jira site. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the connection\u2019s configuration.' } };
 var _okfSnap = null;
 function paintSuccessOkf(wl) {
   var h = document.querySelector('#success-okta .okf-top h2'), nm = document.querySelector('#success-okta .okf-inst .nm'), p = document.querySelector('#success-okta .okf-body p'); if (!h || !nm || !p) return;
@@ -9727,7 +9738,8 @@ var NEXT_STEPS_ORDERING = {
 };
 // Okta Overview (Figma 19457:154997): show the Okta layout, hide the shared one, and fill the dynamic bits.
 // ── New-onboarding template (Okta first, GitHub second, Google Identity third): which workloads use it, and the copy each one fills in ──
-var ONB_TEMPLATE_WL = { okta: true, github: true, gip: true };
+var ONB_TEMPLATE_WL = { okta: true, github: true, gip: true, jira: true };
+var OKTA_RAIL_WL = { okta: true, gip: true, jira: true };   // the Okta-style rail (Authentication row, picker steps as their own rows); GitHub keeps the plain rail
 function _onbTemplate(wl) { return !!ONB_TEMPLATE_WL[wl == null ? currentWorkload : wl]; }
 function _regionOnAuth(wl) { return _onbTemplate(wl); }   // Region & Data Processing sits at the top of Authentication, not on its own step
 function _ovkOn() { return _onbTemplate(); }               // the overview uses the Connection Details / Entities / Scans layout
@@ -9785,6 +9797,33 @@ var ONB_COPY = {
     note: 'A Google Workspace Super Admin completes setup once. Users then go directly to the dashboard.',
     bg: ['Users', 'Groups', 'Mailboxes', 'Onedrives'],
     authHelp: 'Inventory, activity and discovery scans run here. Content read for scanning is encrypted in transit and at rest and purged after each scan. Pick the region closest to your organization or the one your policy requires.'
+  },
+  // Jira: the GitHub/Google Identity copy with the product nouns swapped (organization → site, repositories → projects and issues). Requirements come from the workload's own prereqs.
+  jira: {
+    tag: 'New in Project management',
+    title: 'Welcome to Veeam Intelligent ResOps for Jira',
+    lede: '<strong>iResOps for Jira</strong> is the context layer for your Jira Cloud site. See every project, issue, board and sprint, which users and AI agents can change them, and what\u2019s gone stale. Take action: restore a single issue, or undo an agent\u2019s changes.',
+    feats: [
+      ['Project Discovery', 'Every project, issue, board and sprint cataloged, within hours.'],
+      ['Access & AI Agent Intelligence', 'Track every user and AI agent\u2019s access, and every change they make.'],
+      ['Project Lifecycle', 'Inactive projects, stale issues and unused boards cluttering your site.'],
+      ['Issue-Level Diff & Restore', 'See exactly what changed in an issue, and restore just that.'],
+      ['Undo AI', 'Roll back an agent\u2019s changes to issues and projects.'],
+      ['Dependency-Aware Recovery', 'Restore projects, issues and attachments in order, links intact.']
+    ],
+    cfgName: 'Jira',
+    cards: [
+      ['Full inventory', 'Projects, issues, components, versions, boards and sprints on your Jira site'],
+      ['ROT analysis', 'Inactive projects, stale issues and unused boards cluttering your site'],
+      ['AI agent discovery', 'Every agent with Jira access, its owner and what it changes'],
+      ['Point-in-time restore', 'Restore points that go back further than Atlassian\u2019s 30/60-day trash window'],
+      ['Activity analysis', '7-day backfill to surface issue and admin activity from day one'],
+      ['Permission coverage', 'All required API scopes to unlock Entitlements and Posture scanning']
+    ],
+    reqs: function(){ return (WORKLOADS.jira.prereqs || []).slice(); },
+    note: 'A Jira Site Admin or Organization Admin completes setup once. Users then go directly to the dashboard.',
+    bg: ['Projects', 'Issues', 'Boards', 'Sprints'],
+    authHelp: 'Inventory, activity and discovery scans run here. Content read for scanning is encrypted in transit and at rest and purged after each scan. Pick the region closest to your Jira site or the one your policy requires.'
   }
 };
 var _onbSnap = null;
@@ -9835,6 +9874,17 @@ var OVK_COPY = {
       'sla': { title: 'Review backup SLA', desc: 'For large Google Cloud organizations (1000+ projects), review RPO settings and plan for a longer initial discovery.' },
       'create-policy': { desc: 'Configure custom schedules, retention rules, and identity scope beyond the standard daily policy.' },
       'inventory': { desc: 'Browse discovered users, groups, organizational units, admin roles, and IAM policies indexed from this connection.' }
+    }
+  },
+  jira: {
+    name: 'Jira', entities: '22 entities', chips: ['1 Site', '12 Projects', '9 Boards'],
+    scoping: 'Finds the projects and boards that are in scope for this connection.',
+    next: {
+      'dashboard': { desc: 'Monitor backup success, RPO compliance, and project coverage for this connection.' },
+      'notifications': { desc: 'Configure alerts for backup failures, Atlassian token expiry, and connection health events.' },
+      'sla': { title: 'Review backup SLA', desc: 'For sites with many projects and large attachment volumes, review RPO settings and plan for a longer initial discovery.' },
+      'create-policy': { desc: 'Configure custom schedules, retention rules, and project scope beyond the standard daily policy.' },
+      'inventory': { desc: 'Browse discovered projects, issues, components, versions, boards, and sprints indexed from this connection.' }
     }
   }
 };
@@ -10292,15 +10342,13 @@ function renderWorkspaceScreen() {
   var customCard = document.getElementById('wks-mode-card-custom');
   var customBody = document.getElementById('wks-custom-body');
   if (!allCard || !customCard) return;
-  if (wksSelectMode === 'all') {
-    allCard.style.border = '2px solid var(--green)';
-    customCard.style.border = '1px solid var(--border-light)';
-    customBody.style.display = 'none';
-  } else {
-    allCard.style.border = '1px solid var(--border-light)';
-    customCard.style.border = '2px solid var(--green)';
-    customBody.style.display = 'block';
-  }
+  amPaintIcons();
+  var wksAll = (wksSelectMode === 'all');
+  [[allCard, wksAll], [customCard, !wksAll]].forEach(function(p){ p[0].classList.toggle('selected', p[1]); p[0].setAttribute('aria-checked', p[1] ? 'true' : 'false'); });
+  var wksAllPanel = document.getElementById('wks-all-panel'), wksTitle = document.getElementById('wks-setup-title');
+  if (wksAllPanel) wksAllPanel.style.display = wksAll ? '' : 'none';
+  customBody.style.display = wksAll ? 'none' : 'block';
+  if (wksTitle) wksTitle.textContent = wksAll ? 'All workspaces' : 'Selected workspaces';
 
   var allSummary = document.getElementById('wks-all-summary');
   if (allSummary) {
@@ -11000,14 +11048,15 @@ function selectSpacesMode(mode, skipInit) {
   var allCard = document.getElementById('csp-mode-card-all');
   var customCard = document.getElementById('csp-mode-card-custom');
   var customBody = document.getElementById('csp-custom-body');
+  amPaintIcons();
+  [[allCard, mode === 'all'], [customCard, mode !== 'all']].forEach(function(p){ if (!p[0]) return; p[0].classList.toggle('selected', p[1]); p[0].setAttribute('aria-checked', p[1] ? 'true' : 'false'); });
+  var cspAllPanel = document.getElementById('csp-all-panel'), cspTitle = document.getElementById('csp-setup-title');
+  if (cspAllPanel) cspAllPanel.style.display = mode === 'all' ? '' : 'none';
+  if (cspTitle) cspTitle.textContent = mode === 'all' ? 'All spaces' : 'Selected spaces';
   if (mode === 'all') {
-    if (allCard) allCard.style.border = '2px solid var(--green)';
-    if (customCard) customCard.style.border = '1px solid var(--border-light)';
     if (customBody) customBody.style.display = 'none';
     syncSpacesAllSummary();
   } else {
-    if (allCard) allCard.style.border = '1px solid var(--border-light)';
-    if (customCard) customCard.style.border = '2px solid var(--green)';
     if (customBody) customBody.style.display = 'block';
     renderSpacesScreen();
   }
@@ -11371,7 +11420,7 @@ var WORKLOADS = {
     // utility icon, hand-drawn since no external-link glyph exists in
     // this file's DS icon store (only 2 icons are defined locally — see
     // securiti-icons-data.js).
-    helpContent: '<h4>Express — Google consent</h4><ol><li>You approve the cloud-platform scope in Google, as a senior <strong>GCP Org Admin</strong></li><li>You choose which <strong>projects</strong> Veeam can restore into, and a <strong>quota project</strong></li><li>Veeam patches the org policy allow-list, binds the roles, verifies, and discards the token</li></ol><h4>Manual — your own service account</h4><ol><li>Create a <strong>service account</strong> in a Google Cloud project you own</li><li>Download the service account’s <strong>key file</strong> — JSON (recommended) or P12</li><li>In the Admin console, authorize the service account’s client ID for <strong>Domain-Wide Delegation</strong> with the required OAuth scopes (Security → API controls → Domain-wide delegation)</li><li>Grant the service account <code>roles/iam.securityReviewer</code> (backup) and <code>roles/iam.securityAdmin</code> (restore) at your <strong>organization node</strong> in GCP IAM</li><li>Upload the key file, then enter your <strong>Organization ID</strong> and a <strong>Super Admin email</strong> for delegation, and connect</li></ol><p>The two roles above cover most tenants. Required scopes and IAM roles are kept current in the Help Center rather than in this drawer, so they can be updated without a product release.</p><a class="btn btn-outline btn-full" href="https://helpcenter.veeam.com/docs/vdc/gip/gip_manual_iam_roles.html" target="_blank" rel="noopener" style="margin-bottom:16px;text-decoration:none">Required scopes &amp; IAM roles<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a><h4>What happens next?</h4><p>After connecting, Veeam verifies API access for each protected category and discovers your organizational units, users, and IAM policies. Domain-Wide Delegation changes can take up to 24h to propagate.</p>'
+    helpContent: '<h4>Express — Google consent</h4><ol><li>You approve the cloud-platform scope in Google, as a senior <strong>GCP Org Admin</strong></li><li>You pick the <strong>organization</strong> to protect if you have more than one, the <strong>projects</strong> Veeam can restore into, and a <strong>quota project</strong></li><li>Veeam patches the org policy allow-list, binds the roles, verifies, and discards the token</li></ol><h4>Manual — your own service account</h4><ol><li>Create a <strong>service account</strong> in a Google Cloud project you own</li><li>Download the service account’s <strong>key file</strong> — JSON (recommended) or P12</li><li>In the Admin console, authorize the service account’s client ID for <strong>Domain-Wide Delegation</strong> with the required OAuth scopes (Security → API controls → Domain-wide delegation)</li><li>Grant the service account <code>roles/iam.securityReviewer</code> (backup) and <code>roles/iam.securityAdmin</code> (restore) at your <strong>organization node</strong> in GCP IAM</li><li>Upload the key file, then enter your <strong>Organization ID</strong> and a <strong>Super Admin email</strong> for delegation, and connect</li></ol><p>The two roles above cover most tenants. Required scopes and IAM roles are kept current in the Help Center rather than in this drawer, so they can be updated without a product release.</p><a class="btn btn-outline btn-full" href="https://helpcenter.veeam.com/docs/vdc/gip/gip_manual_iam_roles.html" target="_blank" rel="noopener" style="margin-bottom:16px;text-decoration:none">Required scopes &amp; IAM roles<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a><h4>What happens next?</h4><p>After connecting, Veeam verifies API access for each protected category and discovers your organizational units, users, and IAM policies. Domain-Wide Delegation changes can take up to 24h to propagate.</p>'
   },
   github: {
     name: 'GitHub', tag: 'GitHub Cloud', category: 'Source Code & Dev Tools',
@@ -12141,23 +12190,33 @@ var WORKLOADS = {
   }
 };
 
-// GitHub on the new template: Okta's four feature checks (Connector Activation, Backup, Restore, Discovery Scan) with GitHub wording.
-// The six granular GitHub permission rows stay available as permissionCheckRowsDetailed.
-(function(){
-  var gh = WORKLOADS.github, ok = WORKLOADS.okta; if (!gh || !ok) return;
-  gh.permissionCheckRowsDetailed = gh.permissionCheckRows;
-  var copy = [
-    { subtitle: 'Ability to activate and connect to data source',
-      fix: 'Re-authorize the Veeam GitHub App on your organization (Express) or confirm your GitHub App ID, installation and private key are registered and active (Manual). Without an active connection, no backup can run.' },
-    { subtitle: 'Read access to the repositories, organization settings, and CI/CD configuration that back up on schedule',
-      fix: 'Grant contents, metadata, actions, administration, issues and pull requests access so repositories, workflows, branch protection and organization settings can be read on schedule.' },
-    { subtitle: 'Write access to restore repositories, workflows, and organization settings from a backup',
-      fix: 'Set contents, actions, administration, issues and pull requests to Read and write. Read-only access on any of them blocks restore.' },
-    { subtitle: 'Advanced data discovery and scanning capabilities',
-      fix: 'Grant the security events and secret scanning read scopes so repositories can be discovered and scanned. These depend on your GitHub plan.' }
-  ];
-  gh.permissionCheckRows = ok.permissionCheckRows.map(function(r, i){ return Object.assign({}, r, copy[i]); });
-})();
+// Template workloads' Test step: Okta's four feature checks (Connector Activation, Backup, Restore, Discovery Scan) with that workload's own wording.
+// The granular provider rows stay available as permissionCheckRowsDetailed.
+function _onbBaseChecks(wl, copy) {
+  var w = WORKLOADS[wl], ok = WORKLOADS.okta; if (!w || !ok) return;
+  w.permissionCheckRowsDetailed = w.permissionCheckRows;
+  w.permissionCheckRows = ok.permissionCheckRows.map(function(r, i){ return Object.assign({}, r, copy[i]); });
+}
+_onbBaseChecks('github', [
+  { subtitle: 'Ability to activate and connect to data source',
+    fix: 'Re-authorize the Veeam GitHub App on your organization (Express) or confirm your GitHub App ID, installation and private key are registered and active (Manual). Without an active connection, no backup can run.' },
+  { subtitle: 'Read access to the repositories, organization settings, and CI/CD configuration that back up on schedule',
+    fix: 'Grant contents, metadata, actions, administration, issues and pull requests access so repositories, workflows, branch protection and organization settings can be read on schedule.' },
+  { subtitle: 'Write access to restore repositories, workflows, and organization settings from a backup',
+    fix: 'Set contents, actions, administration, issues and pull requests to Read and write. Read-only access on any of them blocks restore.' },
+  { subtitle: 'Advanced data discovery and scanning capabilities',
+    fix: 'Grant the security events and secret scanning read scopes so repositories can be discovered and scanned. These depend on your GitHub plan.' }
+]);
+_onbBaseChecks('jira', [
+  { subtitle: 'Ability to activate and connect to data source',
+    fix: 'Re-authorize the Veeam Forge app on your Jira site as a Site Admin or Organization Admin (Express), or confirm your OAuth app\u2019s Client ID and Client Secret are valid and the app is installed on the site (Manual). Without an active connection, no backup can run.' },
+  { subtitle: 'Read access to the projects, issues, attachments, boards, and sprints that back up on schedule',
+    fix: 'Grant the read scopes for Jira issues, projects, attachments, worklogs, users, and Jira Software boards and sprints on Atlassian\u2019s consent screen (Express) or under Permissions in the developer console (Manual). The classic read:jira-work scope does not cover boards and sprints.' },
+  { subtitle: 'Write access to restore issues, projects, boards, and sprints from a backup',
+    fix: 'Grant the paired write scopes (write:jira-work, manage:jira-project and the Jira Software board and sprint write scopes). Read-only scopes allow backup but not restore.' },
+  { subtitle: 'Advanced data discovery and scanning capabilities',
+    fix: 'Grant offline_access so scheduled scans run without re-consent, together with the user read scopes used to discover who can reach each project.' }
+]);
 
 var certFileSelected = false;
 
@@ -12768,7 +12827,7 @@ function selectWorkload(wl, skipNav) {
     // 2026-11-03: the three Express steps from Figma 16591:32682 (what you do, what Veeam does), replacing the Marketplace-install benefits below.
     // Was: 'Veeam publishes and maintains the Marketplace app — no manual Domain-Wide Delegation setup in the Admin console' / 'Domain-wide install and Super Admin consent grant delegation automatically' / 'Scopes cover Workspace Directory, Group Settings, and Chrome Management by default' / 'No Google credentials stored in Veeam Data Cloud'
     if (ppBenefit1) ppBenefit1.textContent = 'You approve the cloud-platform scope in Google, as a senior GCP Org Admin.';
-    if (ppBenefit2) ppBenefit2.textContent = 'You choose which projects Veeam can restore into, and a quota project.';
+    if (ppBenefit2) ppBenefit2.textContent = 'You pick the organization to protect if you have more than one, the projects Veeam can restore into, and a quota project.';
     if (ppBenefit3) ppBenefit3.textContent = 'Veeam patches the org policy allow-list, binds the roles, verifies, and discards the token.';
     if (ppBenefit4Row) ppBenefit4Row.style.display = 'none';
   } else {
@@ -13886,6 +13945,7 @@ function saveManualAuth() {
   _manualConnectDone = true;
   if (typeof refreshSidebar === 'function') refreshSidebar();
   refreshAuthAdvanceBtnLabel();
+  if (_siteInline()) { _siteSignedIn('manual'); return; }   // Jira: the connected card and the Site dropdown replace the form; the footer then goes on to the test
 
   // Auto-advance (2026-09-30, user: "once I click connect, it needs to go
   // straight to the testing step" — confirmed to apply to Manual too,
@@ -14339,14 +14399,27 @@ function resetManualAuth() {
 }
 
 // Option C: selection state lives on the cards (class + aria), the setup heading names the method, and only the chosen method's setup shows.
+// Header icons for the Express / Manual cards, from the icon store.
+function amPaintIcons() {
+  if (typeof _dsStoreIconSvg !== 'function') return;
+  // Authentication: Express / Manual. Scope steps: Include all / Include selected (Environments, Projects, Workspaces, Spaces).
+  var map = { 'express-icon': 'speed-outlined', 'manual-icon': 'edit-outlined',
+    'env-icon-all': 'apps-outlined', 'env-icon-custom': 'checklist-outlined',
+    'gp-icon-all': 'apps-outlined', 'gp-icon-sel': 'checklist-outlined',
+    'wks-icon-all': 'apps-outlined', 'wks-icon-custom': 'checklist-outlined',
+    'csp-icon-all': 'apps-outlined', 'csp-icon-custom': 'checklist-outlined' };
+  Object.keys(map).forEach(function(id){ var el = document.getElementById(id); if (el && !el.firstChild) el.innerHTML = _dsStoreIconSvg(map[id], 20); });
+}
+window.addEventListener('load', amPaintIcons);
 function _amMark(method) {
   var ex = method === 'express';
   [['auth-option-express', ex], ['auth-option-manual', !ex]].forEach(function(pair) {
     var el = document.getElementById(pair[0]);
     if (!el) return;
-    el.classList.toggle('sel', pair[1]);
+    el.classList.toggle('selected', pair[1]);
     el.setAttribute('aria-checked', pair[1] ? 'true' : 'false');
   });
+  amPaintIcons();
   var title = document.getElementById('am-setup-title');
   if (title) title.textContent = ex ? 'Express authentication' : 'Manual authentication';
   var exSetup = document.getElementById('express-setup');
@@ -14371,6 +14444,9 @@ function amSplitExpressCopy() {
   }
 }
 function selectAuthMethod(method) {
+  // Jira: already signed in through this card: nothing to redo. The other card drops the connection first (Express via resetOAuthFlow below, Manual via resetManualAuth).
+  if (typeof siteState !== 'undefined' && siteState.signedIn && method === siteState.via) return;
+  if (typeof siteState !== 'undefined' && siteState.signedIn) { var _was = siteState.via; _siteReset(); if (_was === 'manual') resetManualAuth(); }
   // Google Identity: while signed in, Manual stays selectable (Switch account is not the only way out); choosing it drops the Express sign-in first.
   if (method === 'manual' && typeof gipState !== 'undefined' && gipState.signedIn) resetOAuthFlow();
   var express = document.getElementById('auth-option-express');
@@ -14470,7 +14546,7 @@ function refreshAuthAdvanceBtnLabel() {
   // picker substep is skipped. Same shape as GitLab and Confluence.
   var skipOrgsForManual = (currentWorkload === 'azure-devops' && currentAuthMethod === 'manual');
   var stillHasGroupsStep = !!w.requiresGroupList && !skipGroupsForManual;
-  var stillHasSiteStep = !!w.requiresSitePicker && !skipSiteForManual;
+  var stillHasSiteStep = !!w.requiresSitePicker && !skipSiteForManual && !_siteInline();
   var stillHasOrgsStep = !!w.requiresOrgList && !skipOrgsForManual;
   var hasIntermediateStep = !!(w.requiresEnvList || w.requiresProjectList || stillHasGroupsStep || stillHasOrgsStep || stillHasSiteStep || w.requiresSpacesList ||
     (w.requiresApplicationStep && (typeof effectiveRequiresWorkspaceList === 'function' && effectiveRequiresWorkspaceList())));
@@ -14531,7 +14607,7 @@ function advanceFromAuth() {
   var skipOrgsForManual = (currentWorkload === 'azure-devops' && currentAuthMethod === 'manual');
   var goesToGroups = !!(w0 && w0.requiresGroupList) && !skipGroupsForManual;
   var goesToOrgs   = !!(w0 && w0.requiresOrgList) && !skipOrgsForManual;
-  var goesToSite   = !!(w0 && w0.requiresSitePicker) && !skipSiteForManual;
+  var goesToSite   = !!(w0 && w0.requiresSitePicker) && !skipSiteForManual && !_siteInline();   // Jira picks its site on Authentication
   // Confluence Spaces picker — only reached when there's no Site picker
   // ahead of it (manual flow, or when the Site picker skips for any
   // reason). In the Express flow the Site picker's commit handler is
@@ -14594,6 +14670,8 @@ function startOAuthFlow() {
 
   // Google Identity: Google's sign-in window (account, then consent for the cloud-platform scope), recreated in-page.
   if (typeof currentWorkload !== 'undefined' && currentWorkload === 'gip' && _gipOAuthLaunch('connect')) return;
+  // Every other provider with a window in PROV_WIN (Atlassian first): the shared in-page sign-in window below.
+  if (typeof currentWorkload !== 'undefined' && _pwLaunch(currentWorkload)) return;
 
   // GitHub (research-fidelity build 2026-07-07): a REAL separate window
   // opens with a 1:1 recreation of GitHub's OAuth pages (sign-in prefilled →
@@ -14625,6 +14703,101 @@ function completeOAuthFlow() {
   currentAuthMethod = 'express';
   if (typeof refreshSidebar === 'function') refreshSidebar();
   advanceFromAuth();
+}
+// ── Provider sign-in window (shared): browser-window frame + a per-provider skin, same idea as Google's window above ──
+// PROV_WIN holds what differs per workload; PW_SKIN draws the two pages (sign in, then consent). Closing or Cancel = the admin backing out.
+var PROV_WIN = {
+  jira: { prov: 'atlassian', domain: 'id.atlassian.com', aria: 'Atlassian sign-in window', app: 'Veeam Data Cloud', user: 'alex.admin@acme.com', site: 'acme.atlassian.net',
+    scopes: ['View Jira issue data', 'Create and edit Jira issues, comments, attachments and worklogs', 'View and manage Jira projects, components and versions', 'View Jira Software boards and sprints', 'View user profiles', 'Maintain access while you are not using the app'] }
+};
+var pwState = { wl: null, step: null };
+function _pwIc(n, z) { return (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg(n, z)) || ''; }
+var PW_SKIN = {
+  atlassian: function(c, w, step) {
+    var mark = '<div class="pw-mark" style="background:' + w.iconBg + '">' + w.icon.replace(/width="28"/, 'width="24"').replace(/height="28"/, 'height="24"') + '</div>';
+    if (step === 'login') {
+      return '<div class="pw-card">' + mark + '<h1>Log in to continue</h1><p class="pw-sub">to continue to ' + c.app + '</p>' +
+        '<label class="pw-lbl" for="pw-email">Email</label><input class="pw-in" id="pw-email" type="email" value="' + c.user + '" readonly>' +
+        '<button type="button" class="pw-btn fill full" onclick="pwState.step=\'consent\';_pwPaint()">Continue</button>' +
+        '<p class="pw-fine ctr"><a href="#" onclick="return false">Can’t log in?</a>   <a href="#" onclick="return false">Create an account</a></p></div>';
+    }
+    return '<div class="pw-card">' + mark + '<h1>' + c.app + ' is requesting access to your Atlassian account</h1>' +
+      '<div class="pw-user">Logged in as <b>' + c.user + '</b> <a href="#" onclick="return false">Not you?</a></div>' +
+      '<div class="pw-sec">This app would like permission to:</div><ul class="pw-perms">' +
+      c.scopes.map(function(s){ return '<li><span>' + s + '</span>' + _pwIc('keyboard-arrow-down-outlined', 20) + '</li>'; }).join('') + '</ul>' +
+      '<p class="pw-fine">By clicking Accept, you allow this app to use your information in accordance with their respective <a href="#" onclick="return false">terms of service</a> and <a href="#" onclick="return false">privacy policy</a>. You can remove this access at any time in <a href="#" onclick="return false">Connected apps</a>.</p>' +
+      '<div class="pw-btns"><button type="button" class="pw-btn text" onclick="_pwClose(false)">Cancel</button><button type="button" class="pw-btn fill" onclick="_pwClose(true)">Accept</button></div></div>';
+  }
+};
+function _pwLaunch(wl, ctx) {
+  if (!PROV_WIN[wl]) return false;
+  pwState.wl = wl; pwState.ctx = ctx || 'connect'; pwState.step = 'login'; _pwPaint();
+  return true;
+}
+function _pwPaint() {
+  var host = document.getElementById('pw-popup');
+  if (!pwState.step) { if (host) host.remove(); return; }
+  if (!host) { host = document.createElement('div'); host.id = 'pw-popup'; document.body.appendChild(host); }
+  var c = PROV_WIN[pwState.wl], w = WORKLOADS[pwState.wl];
+  var foot = '<div class="pw-foot"><span>Privacy Policy</span><span>User Notice</span></div>';
+  host.innerHTML = '<div class="pw-back"><div class="pw-win" data-prov="' + c.prov + '" role="dialog" aria-label="' + c.aria + '"><div class="pw-bar"><span class="pw-url">' + _pwIc('lock-outlined', 16) + c.domain + '</span><button type="button" class="pw-x" aria-label="Close window" onclick="_pwClose(false)">' + _pwIc('close-outlined', 20) + '</button></div><div class="pw-page">' + PW_SKIN[c.prov](c, w, pwState.step) + foot + '</div></div></div>';
+}
+function _pwClose(allow) {
+  var ctx = pwState.ctx; pwState.step = null; _pwPaint();
+  if (ctx === 'switch') { if (allow) _sitePaintSigned(); return; }   // switching account from the connected card: backing out changes nothing
+  if (!allow) { resetOAuthFlow(); return; }
+  // The "Waiting for ... authorization" state stays visible for the same 2.5s as the other simulations before the page moves on.
+  setTimeout(function(){
+    var wt = document.getElementById('auth-status-waiting'), on = document.getElementById('screen-auth');
+    if (!on || !on.classList.contains('active') || !wt || wt.style.display === 'none') return;   // the admin left or cancelled meanwhile
+    if (_siteInline() && _siteList().length > 1) _siteSignedIn('express'); else completeOAuthFlow();   // one site: nothing to choose, go straight on
+  }, 2500);
+}
+
+// ── Jira: the Atlassian site is a dropdown under Authentication, not a step of its own ──
+// One connection backs up one site, so after sign-in (Express) or the handshake (Manual) the setup area becomes the connected card with the Site dropdown beneath it.
+// Same card and dropdown as Google Identity's organization choice; the dropdown helpers (_gipDd*) are shared, keyed 'site'.
+var siteState = { signedIn: false, via: null, picked: '' };
+function _siteInline() { return currentWorkload === 'jira'; }
+function _siteList() { if (!CONFLUENCE_SITES_STATE.length) seedDiscoveredConfluenceSites(); return CONFLUENCE_SITES_STATE; }
+function _siteSignedIn(via) {
+  var wt = document.getElementById('auth-status-waiting'); if (wt) wt.style.display = 'none';
+  currentAuthMethod = via; siteState.signedIn = true; siteState.via = via; siteState.picked = '';
+  _siteList().forEach(function(s){ s.selected = false; });
+  var host = document.getElementById('site-signed'), ex = document.getElementById('express-setup'), mf = document.getElementById('manual-form-inline');
+  if (ex) ex.style.display = 'none'; if (mf) mf.style.display = 'none';
+  ['auth-option-express', 'auth-option-manual'].forEach(function(id){ var c = document.getElementById(id); if (c) { c.style.opacity = '1'; c.style.pointerEvents = 'auto'; } });   // both cards stay live, as on Google Identity
+  _sitePaintSigned(); if (host) host.style.display = 'block';
+  if (typeof refreshSidebar === 'function') refreshSidebar();
+  _siteFooter();
+}
+function _sitePaintSigned() {
+  var host = document.getElementById('site-signed'); if (!host) return;
+  var list = _siteList(), manual = siteState.via === 'manual';
+  var h = '<div class="gp-ok" style="margin-top:0" role="status">' + _gipIc('status-complete-outlined', 24) + '<div class="gp-ok-t">' + (manual ? 'Connected with your Atlassian OAuth app' : 'Signed in as ' + PROV_WIN.jira.user) + '<div class="gp-ok-s">Atlassian returned ' + list.length + ' Atlassian Cloud sites</div></div><button type="button" class="btn btn-outline" onclick="siteChange()">' + (manual ? 'Change credentials' : 'Switch account') + '</button></div>';
+  h += '<div class="gp-fld"><span class="gp-fld-l">Site</span>' + _gipDd('site', _gipDdOptions('site'), siteState.picked, 'Select a site', false) + '<span class="gp-fld-h">This account can see ' + list.length + ' Atlassian Cloud sites. Choose the one to back up; each site is its own connection.</span></div>';
+  host.innerHTML = h;
+}
+function _sitePick(v) {
+  siteState.picked = v; gipState.dd = null;
+  var picked = null; _siteList().forEach(function(s){ s.selected = (s.id === v); if (s.selected) picked = s; });
+  try { confluenceSelectedSite = picked; } catch (e) {}
+  _sitePaintSigned(); _siteFooter();
+}
+function _siteFooter() {
+  var btn = document.getElementById('test-conn-btn'); if (!btn) return;
+  if (typeof refreshAuthAdvanceBtnLabel === 'function') refreshAuthAdvanceBtnLabel();
+  var ok = !!siteState.picked;
+  btn.disabled = !ok; btn.style.cursor = ok ? 'pointer' : 'not-allowed'; btn.style.background = ok ? 'var(--green)' : 'var(--green-30)';
+}
+function siteChange() {
+  if (siteState.via === 'manual') { _siteReset(); resetManualAuth(); selectAuthMethod('manual'); }
+  else _pwLaunch('jira', 'switch');
+}
+function _siteReset() {
+  if (typeof siteState === 'undefined' || !siteState) return;
+  siteState.signedIn = false; siteState.picked = ''; siteState.via = null;
+  var host = document.getElementById('site-signed'); if (host) { host.style.display = 'none'; host.innerHTML = ''; }
 }
 // ── GitHub OAuth popup (1:1 recreation for research fidelity) ─────────────
 var _ghOAuthWin = null, _ghOAuthDone = false, _ghOAuthWatch = null;
@@ -14746,6 +14919,7 @@ function resetOAuthFlow() {
   // Reset back to initial express state
   var gsr = document.getElementById('gip-signed'); if (gsr) gsr.style.display = 'none';
   if (typeof gipState !== 'undefined') gipState.signedIn = false;
+  if (typeof _siteReset === 'function') _siteReset();
   document.getElementById('auth-connected').style.display = 'none';
   document.getElementById('auth-status-waiting').style.display = 'none';
   document.getElementById('express-cta').style.display = 'block';
@@ -14813,10 +14987,11 @@ function _gipDdOpts(id, opts, val, q) {
   return rows.length ? rows.map(function(o){ return '<div class="gp-dd-opt' + (String(o.v) === String(val) ? ' is-sel' : '') + '" role="option" data-v="' + escapeHtml(String(o.v)) + '" onclick="gipDdPick(\'' + id + '\',this.getAttribute(\'data-v\'))">' + escapeHtml(o.l) + (o.sub ? '<span class="gp-dd-sub">' + escapeHtml(o.sub) + '</span>' : '') + '</div>'; }).join('') : '<div class="gp-dd-opt" style="color:var(--black-60);cursor:default">No matches.</div>';
 }
 function _gipDdOptions(id) {
+  if (id === 'site') return _siteList().map(function(s){ return { v: s.id, l: s.name, sub: s.url }; });
   if (id === 'org') return GIP_ORGS.map(function(g, i){ return { v: i, l: g.n, sub: g.id }; });
   return GIP_PROJECTS.map(function(p){ return { v: p.id, l: p.name, sub: p.id }; });
 }
-function _gipDdRepaint(id) { if (id === 'org') _gipPaintSigned(); else _gipPaintTop(); }
+function _gipDdRepaint(id) { if (id === 'site') _sitePaintSigned(); else if (id === 'org') _gipPaintSigned(); else _gipPaintTop(); }
 // The panel is placed against the viewport (fixed) so no scroll container or overflow:hidden ancestor can clip it, and it opens upward when there is
 // not enough room above the footer; the options list shrinks to the room that is left.
 function _gipDdPlace() {
@@ -14838,7 +15013,7 @@ document.addEventListener('scroll', function(ev) { if (!gipState.dd || (ev.targe
 window.addEventListener('resize', function() { if (!gipState.dd) return; var id = gipState.dd; gipState.dd = null; _gipDdRepaint(id); });
 function gipDdKey(ev, id) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); gipDdToggle(ev, id); } }
 function gipDdFilter(id, v) { var el = document.getElementById('gp-dd-opts-' + id); if (el) el.innerHTML = _gipDdOpts(id, _gipDdOptions(id), id === 'org' ? gipState.org : gipState.quota, v); _gipDdPlace(); }
-function gipDdPick(id, v) { if (id === 'org') gipState.org = +v; else gipState.quota = v; gipState.dd = null; _gipDdRepaint(id); if (id === 'org') _gipPaintTop(); }
+function gipDdPick(id, v) { if (id === 'site') { _sitePick(v); return; } if (id === 'org') gipState.org = +v; else gipState.quota = v; gipState.dd = null; _gipDdRepaint(id); if (id === 'org') _gipPaintTop(); }
 document.addEventListener('click', function(ev) {
   if (!gipState.dd || (ev.target.closest && ev.target.closest('.gp-dd'))) return;
   var id = gipState.dd; gipState.dd = null; _gipDdRepaint(id);
@@ -14925,6 +15100,7 @@ function enterGipProjects() {
 function gipCardKey(ev, mode) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); gipSetMode(mode); } }
 function gipSetMode(m) { gipState.mode = m; _gipPaintTop(); _gipPaintTable(); }
 function _gipPaintTop() {
+  amPaintIcons();
   var N = GIP_PROJECTS.length, o = _gipOrg(), express = (typeof currentAuthMethod === 'undefined' || currentAuthMethod !== 'manual');
   var orgName = express ? o.n : ((document.getElementById('manual-gip-org-id') || {}).value || o.id);
   var set = function(id, v){ var e = document.getElementById(id); if (e) e.textContent = v; };
@@ -14932,7 +15108,7 @@ function _gipPaintTop() {
   var conn = document.getElementById('gp-conn'); if (conn) conn.innerHTML = '';   // who is signed in is shown once, on Authentication
   [['gp-card-all', gipState.mode === 'all'], ['gp-card-sel', gipState.mode === 'sel']].forEach(function(p){
     var c = document.getElementById(p[0]); if (!c) return;
-    c.classList.toggle('sel', p[1]); c.setAttribute('aria-checked', p[1] ? 'true' : 'false');
+    c.classList.toggle('selected', p[1]); c.setAttribute('aria-checked', p[1] ? 'true' : 'false');
   });
   var q = document.getElementById('gp-quota');
   if (q) {
@@ -15452,7 +15628,7 @@ window.__devJumpResolve = function(h) {
 <!-- Securiti DS icon runtime — swaps inline SVGs into the Securiti
      glyph set at load time. Data file MUST load first so the runtime
      finds window.__SECURITI_ICONS already populated. -->
-<script src="securiti-icons-data.js?v=20260924a"></script>
+<script src="securiti-icons-data.js?v=20261104b"></script>
 <script src="vdc-notifications.js?v=20261030a"></script>
 <script src="securiti-icons.js"></script>
 <!-- Shared workload picker (2026-09-28) — same one codebase/one component
