@@ -8218,7 +8218,7 @@ input[type="checkbox"] { accent-color: var(--em-green); }
 </style>
 
 
-<!-- ═══ D365 compare: a changed cell shows the restore-point value; hover or focus opens the Compare to value with its differing words highlighted; the legend is Vision chips ═══ -->
+<!-- ═══ D365 compare + long text: a long-text cell that is clipped, or changed, opens in place; a changed short cell gets a panel attached to it. Compare to is variant E with its differing words marked. The legend is Vision chips. ═══ -->
 <style id="d365-peek-css">
 /* Vision Chip, Size=Default (28px: 16/22 label + 2px padding + transparent 1px border), Mode=Light = no stroke, radius 2. Types used here: Gold, Green, Red, Default. */
 .vchip { display: inline-flex; align-items: center; padding: 2px 8px; border: 1px solid transparent; border-radius: 2px; font-size: 16px; font-weight: 500; line-height: 22px; white-space: nowrap; }
@@ -8226,41 +8226,84 @@ input[type="checkbox"] { accent-color: var(--em-green); }
 .vchip-green   { background: var(--soft-green-bg); color: var(--btn-success); }   /* Vision Chip Green Light (S5 / S80), same pair as .rp-chip-val; --green here is the legacy lime */
 .vchip-red     { background: var(--red-10); color: var(--red); }
 .vchip-default { background: var(--black-5); color: var(--black-100); }
+/* Pre Icon: the same 8px dot the table rows carry, in the same colour, so the key reads like the marks it explains */
+.vchip .vd { flex: 0 0 8px; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; }
+.vchip .vd.m { background: var(--yellow); } .vchip .vd.a { background: var(--em-green); } .vchip .vd.d { background: var(--red); }   /* modified / added / removed row dots */
 .dx-lg .vchip { gap: 0; }
 
-/* Changed cells: keep the tint + corner marker, show ONE value (the restore point's), reveal Compare to on hover/focus */
-td.rec-pk { cursor: default; }
+/* Changed cells: keep the tint + corner marker, show ONE value (the restore point's); the peek reveals the rest. Amber stays on the cell while a panel is attached. */
+td.rec-pk, td.pk-clip { cursor: default; }
 td.rec-pk:hover { box-shadow: inset 0 0 0 1px var(--yellow); }
 td.rec-pk.rec-diff-cell-removed:hover { box-shadow: inset 0 0 0 1px var(--red); }
-td.rec-pk:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); }
+td.rec-pk:focus-visible, td.pk-clip:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); }
 .pk-gone { color: var(--black-60); }
+td.rec-pk.pk-open { z-index: 1; }
+td.rec-pk.pk-open.below { box-shadow: inset 1px 0 0 var(--yellow), inset -1px 0 0 var(--yellow), inset 0 1px 0 var(--yellow); }
+td.rec-pk.pk-open.above { box-shadow: inset 1px 0 0 var(--yellow), inset -1px 0 0 var(--yellow), inset 0 -1px 0 var(--yellow); }
+td.rec-pk.rec-diff-cell-removed.pk-open.below { box-shadow: inset 1px 0 0 var(--red), inset -1px 0 0 var(--red), inset 0 1px 0 var(--red); }
+td.rec-pk.rec-diff-cell-removed.pk-open.above { box-shadow: inset 1px 0 0 var(--red), inset -1px 0 0 var(--red), inset 0 -1px 0 var(--red); }
+td.rec-pk.pk-open:focus-visible { box-shadow: var(--vv-focus-ring); }
 
-/* The peek wears the comparison drawer's surface (.record-drawer: 1px --black-30, radius 4, 0 8px 24px rgba(31,34,41,.25)) */
-.pk-pop { position: fixed; z-index: 9000; display: none; pointer-events: none; width: max-content; min-width: 220px; max-width: 360px; box-sizing: border-box; padding: 12px 16px; background: var(--white); border: 1px solid var(--black-30); border-radius: 4px; box-shadow: 0 8px 24px rgba(31,34,41,.25); font-size: 14px; line-height: 20px; font-weight: 450; color: var(--black-100); }
-.pk-pop.on { display: block; }
-.pk-pop .pk-row { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; }
-.pk-pop .pk-l { color: var(--black-60); white-space: nowrap; }
-.pk-pop .pk-d { font-size: 12px; line-height: 16px; color: var(--black-60); white-space: nowrap; }
-.pk-pop .pk-v { margin-top: 4px; white-space: pre-wrap; overflow-wrap: break-word; max-height: 160px; overflow: hidden; }
-/* what differs from the restore point: the cell's change tint plus a 2px underline (a shape cue, not colour alone) */
-.pk-pop mark { background: var(--yellow-10); color: inherit; font-weight: 500; border-radius: 2px; box-shadow: inset 0 -2px 0 var(--yellow); }
-/* the restore point has something the Compare to value lacks at this spot: a thin marker where it would sit */
-.pk-pop .pk-more { margin-top: 8px; font-size: 12px; line-height: 16px; color: var(--black-60); }
-.pk-pop .pk-gap { display: inline-block; width: 2px; height: 16px; margin: 0 2px; vertical-align: text-bottom; background: var(--yellow); border-radius: 1px; }
+/* Attached panel (changed cell whose value is not clipped): flush against the cell, same left edge, at least as wide, the comparison drawer's outline and shadow. */
+.pk-pop { position: fixed; z-index: 9000; display: none; pointer-events: none; width: max-content; box-sizing: border-box; padding: 12px 16px; background: var(--white); border: 1px solid var(--black-30); box-shadow: 0 8px 24px rgba(31,34,41,.25); font-size: 14px; line-height: 20px; font-weight: 450; color: var(--black-100); }
+.pk-pop.on { display: block; pointer-events: auto; }   /* the overlay takes the mouse: with its cell it is ONE hover region, so moving down into it never lands on the cell behind */
+.pk-pop.below { border-radius: 0 0 4px 4px; clip-path: inset(0 -24px -32px -24px); }   /* the shadow falls away from the cell, never onto it */
+.pk-pop.above { border-radius: 4px 4px 0 0; clip-path: inset(-32px -24px 0 -24px); }
+.pk-pop.below.ovr { border-top-right-radius: 4px; } .pk-pop.below.ovl { border-top-left-radius: 4px; }
+.pk-pop.above.ovr { border-bottom-right-radius: 4px; } .pk-pop.above.ovl { border-bottom-left-radius: 4px; }
+.pk-seam { position: absolute; height: 1px; }   /* erases the border along the shared edge, in the cell's own fill, so cell and panel read as one shape */
+.pk-pop.below .pk-seam { top: -1px; } .pk-pop.above .pk-seam { bottom: -1px; }
+
+/* Lifted cell (a clipped long-text cell): sits exactly over the cell and unclamps. A changed cell's Compare to block is the second section of the same shape. */
+.pk-lift { position: fixed; z-index: 9000; display: none; pointer-events: none; box-sizing: border-box; background: var(--white); border-radius: 0 0 4px 4px; box-shadow: 0 8px 24px rgba(31,34,41,.25); clip-path: inset(0 -24px -32px -24px); font-size: 14px; line-height: 20px; font-weight: 450; color: var(--black-100); }
+.pk-lift.on { display: block; pointer-events: auto; }
+.pk-lift .pk-body { border: 1px solid var(--black-30); border-radius: 0 0 4px 4px; box-sizing: border-box; }   /* padding, type and line height are copied from the cell at open time, so the text does not move */
+.pk-lift.pk-chg .pk-body { border-color: var(--yellow); border-bottom: 0; border-radius: 0; background: var(--yellow-10); }
+.pk-lift.pk-chg::before { content: ''; position: absolute; top: 1px; right: 1px; border: 6px solid transparent; border-top-color: var(--yellow); border-right-color: var(--yellow); z-index: 1; }
+.pk-lift .pk-cmp { padding: 12px 15px 11px; border: 1px solid var(--black-30); border-top: 0; border-radius: 0 0 4px 4px; background: var(--white); }
+.pk-lift .pk-ufoot { margin-top: 8px; font-size: 12px; line-height: 16px; }
+/* no room below the cell: the cell's own value stays exactly where it is and the Compare to block moves above it as an attached panel */
+.pk-lift.pk-chg.pk-flip .pk-body { border-top: 0; border-bottom: 1px solid var(--yellow); border-radius: 0 0 4px 4px; }
+td.pk-clip.pk-open.above { box-shadow: inset 1px 0 0 var(--black-30), inset -1px 0 0 var(--black-30), inset 0 -1px 0 var(--black-30); }
+
+/* shared content */
+.pk-cl { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; position: relative; }   /* a line budget: -webkit-line-clamp is set per use */
+.pk-row { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; }
+.pk-l { color: var(--black-60); white-space: nowrap; }
+.pk-d { font-size: 12px; line-height: 16px; color: var(--black-60); white-space: nowrap; }
+.pk-v { margin-top: 4px; font-size: 16px; line-height: 22px; white-space: pre-wrap; overflow-wrap: break-word; }   /* the table's own 16/22, so both values read at one size */
+/* what differs: the cell's change tint plus a 2px underline (a shape cue, not colour alone) */
+.pk-pop mark, .pk-lift mark { background: var(--yellow-10); color: inherit; font-weight: 500; border-radius: 2px; box-shadow: inset 0 -2px 0 var(--yellow); }
+.pk-lift.pk-chg .pk-body mark { background: var(--white); }   /* on the tinted body the marked words lift to white so they still read */
+.pk-gap { display: inline-block; width: 2px; height: 16px; margin: 0 2px; vertical-align: text-bottom; background: var(--yellow); border-radius: 1px; }   /* the other value has words here that this one lacks */
+.pk-more { margin-top: 8px; font-size: 12px; line-height: 16px; color: var(--black-60); display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 4px; }
+/* Vision Link: Green/S80 text, S70 on hover, no underline, no fill, radius 2, 4px side padding (scaled to the 12px footer) */
+.pk-link { font: inherit; font-size: 12px; line-height: 16px; color: var(--em-green); background: none; border: 0; border-radius: 2px; padding: 0 4px; margin-left: -4px; cursor: pointer; }
+.pk-link:hover { color: var(--em-green-accent); }
+.pk-link:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); }
+/* the field the preview panel scrolled to, so the eye lands on it: the same Vision List Item hover (Green/S5) the rows use, then it fades */
+/* comparison panel: single-line rows stay vertically centred, but when a value wraps onto several lines both values start at the same height, otherwise the shorter block is pushed down and the two no longer line up */
+.rd-compare-tbl tr.rd-top td { vertical-align: top; }
+.rw-preview-tbl tr.rd-anchor td { background: var(--em-green-tint); animation: rdAnchor 2.4s ease-out forwards; }
+/* In the comparison panel a changed row's amber is its status, so nothing else may recolour it: hover (the generic row hover is green) and the scroll-anchor mark both leave a changed row amber. Single-snapshot panels have no change tint, so they keep both. */
+.rw-preview-tbl:not(.rd-single-snap) tr.row-diff:hover td, .d365-preview-tbl tr.row-diff:hover td { background: var(--orange-10); }
+.rw-preview-tbl:not(.rd-single-snap) tr.row-diff.rd-anchor td { background: var(--orange-10); animation: none; }
+@keyframes rdAnchor { 0%, 55% { background-color: var(--em-green-tint); } 100% { background-color: transparent; } }
+@media (prefers-reduced-motion: reduce) { .rw-preview-tbl tr.rd-anchor td { animation: none; } }
 </style>
 <script id="d365-peek-js">
-/* ONE chip builder (Vision Chip Default, Light). type: default | gold | red */
-window.vchip = function (text, type) { return '<span class="vchip vchip-' + (type || 'default') + '">' + text + '</span>'; };
+/* ONE chip builder (Vision Chip Default, Light). type: default | gold | green | red. dot (optional): m | a | d, the row-dot colour shown as a Pre Icon */
+window.vchip = function (text, type, dot) { return '<span class="vchip vchip-' + (type || 'default') + '">' + (dot ? '<i class="vd ' + dot + '" aria-hidden="true"></i>' : '') + text + '</span>'; };
 (function () {
   'use strict';
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
   function vh(s) { return esc(s).replace(/([_\/])/g, '$1<wbr>'); }   /* a line may break after _ or / so file names wrap at a separator, never mid-word */
   /* a changed cell: shows its (already rendered) value, carries both values for the peek */
   window._pkTd = function (cls, shownHtml, col, a, ad, b, bd) {
-    shownHtml = String(shownHtml).replace(/ title="[^"]*"/g, '');   /* the peek replaces the native tooltip the long-text clamp carried */
     return '<td class="' + cls + ' rec-pk" tabindex="0" data-pk-c="' + esc(col) + '" data-pk-a="' + esc(a) + '" data-pk-ad="' + esc(ad) + '" data-pk-b="' + esc(b) + '" data-pk-bd="' + esc(bd) + '">' + shownHtml + '</td>';
   };
-  /* word diff between the restore point value (a) and the Compare to value (b) */
+
+  /* ── word diff: a = restore point value, b = Compare to value ── */
   function ops(a, b) {
     var A = String(a).split(/\s+/).filter(Boolean), B = String(b).split(/\s+/).filter(Boolean), n = A.length, m = B.length, L = [], i, j, out = [];
     for (i = 0; i <= n; i++) { L[i] = []; for (j = 0; j <= m; j++) L[i][j] = 0; }
@@ -8270,70 +8313,243 @@ window.vchip = function (text, type) { return '<span class="vchip vchip-' + (typ
     while (i < n) out.push({ t: 'ins', s: A[i++] }); while (j < m) out.push({ t: 'del', s: B[j++] });
     return out;
   }
-  /* the Compare to value as a list of items: plain words, a highlighted run (words only the Compare to value has), or a gap (words only the restore point has) */
-  function items(a, b) {
-    var o = ops(a, b), out = [], k = 0;
+  /* side 'cmp' marks words only the Compare to value has; side 'rp' marks words only the restore point has. Where the other side has extra words, a thin gap marker. */
+  function itemsFor(a, b, side) {
+    var o = ops(a, b), out = [], k = 0, want = side === 'cmp' ? 'del' : 'ins';
     while (k < o.length) {
       if (o[k].t === 'eq') { out.push({ eq: true, s: o[k].s }); k++; continue; }
-      var dels = [];
-      while (k < o.length && o[k].t !== 'eq') { if (o[k].t === 'del') dels.push(o[k].s); k++; }
-      out.push(dels.length ? { hl: true, s: dels.join(' ') } : { gap: true, s: '' });
+      var xs = [];
+      while (k < o.length && o[k].t !== 'eq') { if (o[k].t === want) xs.push(o[k].s); k++; }
+      out.push(xs.length ? { hl: true, s: xs.join(' ') } : { gap: true, s: '' });
     }
     return out;
   }
-  var CAP = 240, LEAD = 48;   /* about six lines at the popover's width; context shown before the first change */
   function clip(s, max) { if (s.length <= max) return s; var c = s.slice(0, max), sp = c.lastIndexOf(' '); return (sp > max * 0.6 ? c.slice(0, sp) : c) + '…'; }
-  /* The Compare to value with its differing words highlighted. A value longer than CAP shows a window that starts a little before the first change, so what changed is always in view, and says how many further changes fall outside it. */
-  function cmpHtml(a, b) {
-    var it = items(a, b), n = it.length, i, total = 0, first = -1;
+  /* a window that starts a little before the first change and holds about `cap` characters; counts the changes that fall outside it */
+  function excerpt(it, cap, lead) {
+    var n = it.length, i, total = 0, first = -1;
     for (i = 0; i < n; i++) { total += it[i].s.length + 1; if (first < 0 && !it[i].eq) first = i; }
     var start = 0, end = n, more = 0;
-    if (total > CAP && first >= 0) {
-      start = first; var lead = 0;
-      while (start > 0 && lead < LEAD) { start--; lead += it[start].s.length + 1; }
+    if (total > cap && first >= 0) {
+      start = first; var ld = 0;
+      while (start > 0 && ld < lead) { start--; ld += it[start].s.length + 1; }
       var used = 0; end = start;
-      while (end < n && (end === start || used + it[end].s.length + 1 <= CAP)) { used += it[end].s.length + 1; end++; }
+      while (end < n && (end === start || used + it[end].s.length + 1 <= cap)) { used += it[end].s.length + 1; end++; }
       for (i = end; i < n; i++) if (!it[i].eq) more++;
     }
     var parts = [];
     if (start > 0) parts.push('…');
     for (i = start; i < end; i++) {
-      var x = it[i], txt = (start > 0 || end < n) ? clip(x.s, CAP) : x.s;
+      var x = it[i], txt = (start > 0 || end < n) ? clip(x.s, cap) : x.s;
       parts.push(x.gap ? '<i class="pk-gap" aria-hidden="true"></i>' : x.hl ? '<mark>' + vh(txt) + '</mark>' : vh(txt));
     }
     if (end < n) parts.push('…');
-    return parts.join(' ') + (more ? '</div><div class="pk-more">' + more + (more === 1 ? ' more change' : ' more changes') + ' not shown' : '');
+    return { html: parts.join(' '), more: more, cut: start > 0 || end < n };
   }
-  function plainHtml(b) { b = String(b); return b.length > CAP ? vh(clip(b, CAP)) : vh(b); }
-  var pop = null, cur = null, timer = null;
+
+  /* ── line budget. A peek is a glance, not a reader: the full values live in the record preview and the comparison panel. Changed values get at most 3 lines each (2 on a short screen), windowed around the first change; unchanged clipped text gets 5 lines (4 on a short screen). ── */
+  var LEAD = 40, CPL = 38;   /* context before the first change; about 38 characters per line at 16px in a 340px cell */
+  function budget() { var vh2 = document.documentElement.clientHeight || window.innerHeight; return { u: vh2 >= 700 ? 5 : 4, c: Math.max(2, Math.min(3, Math.floor(vh2 * 0.1 / 22))) }; }
+  function hiddenMarks(el) { return [].slice.call(el.querySelectorAll('mark, .pk-gap')).filter(function (m) { return m.offsetTop + m.offsetHeight > el.clientHeight + 1; }).length; }
+  function clamped(el) { return el.scrollHeight > el.clientHeight + 1; }
+
+  var pop = null, lift = null, cur = null, openT = null, closeT = null;
   function ensure() {
-    if (pop) return pop;
+    if (pop) return;
     pop = document.createElement('div'); pop.className = 'pk-pop'; pop.setAttribute('role', 'tooltip'); pop.id = 'pkPop';
-    document.body.appendChild(pop); return pop;
+    lift = document.createElement('div'); lift.className = 'pk-lift'; lift.setAttribute('role', 'tooltip'); lift.id = 'pkLift';
+    document.body.appendChild(pop); document.body.appendChild(lift);
+    [pop, lift].forEach(function (el) { el.addEventListener('mousedown', function (e) { e.preventDefault(); }); });   /* clicking the link must not pull focus off the cell, which would close the peek before the click lands */
+  }
+  function isOpen() { return !!((pop && pop.classList.contains('on')) || (lift && lift.classList.contains('on'))); }
+  function inOverlay(n) { return [pop, lift].some(function (el) { return el && el.classList.contains('on') && el.contains(n); }); }
+  /* the footer link opens what the record name opens: the record preview, which in compare mode already compares both points */
+  function canOpen(td) { return !!(td && td.parentNode && td.parentNode.querySelector('.cell-name[onclick]')); }
+  function colOf(td) { var c = td.dataset && td.dataset.pkC, s = td.querySelector && td.querySelector('.rec-cell-clamp'); return c || (s && s.getAttribute('data-col')) || ''; }
+  /* After the panel opens, bring this cell's field into view: find its row by label, open its section if collapsed, scroll it to the top, and mark it for a moment. The panel renders more than once as it opens (a placeholder, then the real content, which in compare mode can take a couple of seconds), and each render resets the scroll. So the watch starts when the panel opens, applies the scroll on every render, and ends about a second after the field first appears, or the moment the user scrolls or presses a key in the panel. */
+  function anchorField(col) {
+    var want = String(col).replace(/\s+/g, ' ').trim().toLowerCase(), dr = document.getElementById('recordDrawer'), moved = false, mo = null, marked = null, firstAt = 0, giveUp = null;
+    if (!dr) return;
+    function bodyEl() { return document.getElementById('rdBody'); }   /* looked up each time: the panel can rebuild its body as it opens */
+    function find() {
+      var body = bodyEl(); if (!body || !dr.classList.contains('open')) return null;
+      return [].slice.call(body.querySelectorAll('tr')).filter(function (tr) { var c0 = tr.children[0]; return c0 && c0.textContent.replace(/\s+/g, ' ').trim().toLowerCase() === want; })[0] || null;
+    }
+    function apply() {
+      if (moved || (firstAt && Date.now() - firstAt > 1000)) return;
+      var row = find(), body = bodyEl(); if (!row || !body) return;
+      if (!firstAt) {   /* the field is on screen for the first time: from here, watch for about a second, and clear the mark after 2.5s */
+        firstAt = Date.now(); clearTimeout(giveUp);
+        setTimeout(stop, 1000);
+        setTimeout(function () { [].slice.call(dr.querySelectorAll('tr.rd-anchor')).forEach(function (x) { x.classList.remove('rd-anchor'); }); }, 2500);
+        setTimeout(apply, 350);
+      }
+      var hdr = row.closest('.rd-rel-sec') && row.closest('.rd-rel-sec').querySelector('.rd-rel-hdr');
+      if (hdr && hdr.getAttribute('aria-expanded') === 'false') hdr.click();   /* the field sits in a collapsed section: open it first */
+      var br = body.getBoundingClientRect(), rr = row.getBoundingClientRect();
+      if (body.scrollHeight > body.clientHeight + 1) body.scrollTop += rr.top - br.top - 16;   /* a panel that fits has nothing to scroll: leave it exactly as it opened */
+      if (body.scrollTop < 40) { var d0 = document.getElementById('recordDrawer'); if (d0) d0.classList.remove('rd-hdr-tucked'); }   /* near the top the header is never tucked */
+      if (marked !== row) { if (marked) marked.classList.remove('rd-anchor'); row.classList.add('rd-anchor'); marked = row; }
+    }
+    function userMoved(e) { if (e.target && e.target.closest && e.target.closest('#rdBody')) { moved = true; stop(); } }
+    function stop() { if (mo) mo.disconnect(); mo = null; ['wheel', 'touchstart', 'mousedown', 'keydown'].forEach(function (t) { dr.removeEventListener(t, userMoved, true); }); }
+    ['wheel', 'touchstart', 'mousedown', 'keydown'].forEach(function (t) { dr.addEventListener(t, userMoved, { capture: true, passive: true }); });
+    mo = new MutationObserver(function () { setTimeout(apply, 0); });   /* a timer, not a frame: it must not depend on the browser painting */
+    mo.observe(dr, { childList: true, subtree: true });
+    apply();
+    giveUp = setTimeout(stop, 8000);   /* the field never appeared (e.g. not in this view): stop watching */
+  }
+  function openPanel(td) { var n = td && td.parentNode && td.parentNode.querySelector('.cell-name[onclick]'), col = td ? colOf(td) : ''; hide(); if (n) { n.click(); if (col) anchorField(col); } }
+
+  /* the Compare to block: label + date, the value in at most L lines, and a footer filled in once it is laid out */
+  function content(a, b, bd, L) {
+    var e = excerpt(itemsFor(a, b, 'cmp'), L * CPL, LEAD);
+    return '<div class="pk-row"><span class="pk-l">Compare to</span><span class="pk-d">' + esc(bd) + '</span></div><div class="pk-v pk-cl" style="-webkit-line-clamp:' + L + '">' + e.html + '</div><div class="pk-more" data-more="' + e.more + '" data-cut="' + (e.cut ? 1 : 0) + '"></div>';
+  }
+  function foot(root) {
+    var f = root.querySelector('.pk-more'); if (!f || !f.hasAttribute('data-more')) return;
+    var v = root.querySelector('.pk-v'), more = (+f.getAttribute('data-more') || 0) + hiddenMarks(v), parts = [];
+    if (more) parts.push('<span>' + more + (more === 1 ? ' more change.' : ' more changes.') + '</span>');
+    if ((more || f.getAttribute('data-cut') === '1' || f.getAttribute('data-force') === '1' || clamped(v)) && canOpen(cur)) parts.push('<button type="button" class="pk-link">View full comparison</button>');   /* data-force: the restore point side (the lifted cell) was cut even if this side was not */
+    if (parts.length) f.innerHTML = parts.join(' '); else f.remove();
+  }
+
+  function seam(cw, w, side, fill) { return '<i class="pk-seam" style="width:' + (cw - 2) + 'px;left:' + (side === 'l' ? 0 : w - cw) + 'px;background:' + fill + '"></i>'; }
+  /* A panel attached to the cell's top or bottom edge. The cell itself never moves: below it when there is room, above it when there is not. */
+  function buildAttached(td, html, forceAbove, force) {
+    var r = td.getBoundingClientRect(), cw = Math.round(r.width), fill = getComputedStyle(td).backgroundColor;
+    var vw = document.documentElement.clientWidth, vh2 = document.documentElement.clientHeight;
+    pop.className = 'pk-pop'; pop.style.minWidth = cw + 'px'; pop.style.maxWidth = Math.max(360, cw) + 'px';
+    pop.innerHTML = html; pop.classList.add('on', 'below'); pop.style.left = '0px'; pop.style.top = '-9999px';
+    if (force) { var fm = pop.querySelector('.pk-more'); if (fm) fm.setAttribute('data-force', '1'); }
+    foot(pop);
+    var w = pop.offsetWidth, h = pop.offsetHeight;
+    var below = forceAbove ? false : !(r.bottom + h > vh2 - 8 && r.top - h >= 8);   /* below first; above only when it does not fit below and does fit above */
+    var left = r.left, side = 'l';
+    if (left + w > vw - 8) { left = r.right - w; side = 'r'; }   /* would run off the screen: align to the cell's right edge and extend left */
+    pop.classList.remove('below'); pop.classList.add(below ? 'below' : 'above');
+    if (w > cw + 1) pop.classList.add(side === 'l' ? 'ovr' : 'ovl');
+    pop.insertAdjacentHTML('beforeend', seam(cw, w, side, fill));
+    pop.style.left = Math.round(left) + 'px'; pop.style.top = Math.round(below ? r.bottom : Math.max(8, r.top - h)) + 'px';
+    td.classList.add('pk-open', below ? 'below' : 'above');
+  }
+  function showAttached(td) {
+    var d = td.dataset, gone = td.classList.contains('rec-diff-cell-removed'), bd = budget();   /* a deleted record has no restore-point value to differ from: show the value plain */
+    buildAttached(td, gone
+      ? '<div class="pk-row"><span class="pk-l">Compare to</span><span class="pk-d">' + esc(d.pkBd) + '</span></div><div class="pk-v pk-cl" style="-webkit-line-clamp:' + bd.c + '">' + vh(clip(String(d.pkB), bd.c * CPL)) + '</div>'
+      : content(d.pkA, d.pkB, d.pkBd, bd.c), false);
+  }
+  /* unchanged clipped text with no room below the cell: the text goes in a panel above it instead */
+  function showTextAbove(td, clampEl) {
+    var bd = budget(), full = clampEl.getAttribute('data-full') || clampEl.textContent;
+    buildAttached(td, '<div class="pk-v pk-cl" style="margin-top:0;-webkit-line-clamp:' + bd.u + '">' + vh(full.slice(0, bd.u * 60)) + '</div>' + (canOpen(td) ? '<div class="pk-more"><button type="button" class="pk-link">View full text</button></div>' : ''), true);
+    var v = pop.querySelector('.pk-v'), m = pop.querySelector('.pk-more'); if (m && !clamped(v)) m.remove();
+    pop.style.top = Math.round(Math.max(8, td.getBoundingClientRect().top - pop.offsetHeight)) + 'px';
+  }
+  /* the inside of a lifted cell: padding, type and line height are the cell's own, so the first lines stay where they were */
+  function bodyCss(td, clampEl) {
+    var cs = getComputedStyle(td), ccs = getComputedStyle(clampEl);
+    function px(v) { return Math.max(0, parseFloat(v) - 1) + 'px'; }   /* the 1px border takes a pixel of the cell's padding */
+    return 'padding:' + px(cs.paddingTop) + ' ' + px(cs.paddingRight) + ' ' + px(cs.paddingBottom) + ' ' + px(cs.paddingLeft) + ';font-size:' + ccs.fontSize + ';line-height:' + ccs.lineHeight + ';white-space:' + ccs.whiteSpace + ';word-break:' + ccs.wordBreak;
+  }
+  /* The lifted cell always starts at the cell's own top edge, so the cell never moves. If what is below does not fit, only the part that does not fit changes sides: a changed cell's Compare to block goes above the cell; unchanged text gets fewer lines, or a panel above when there is room for hardly any more than the cell already shows. */
+  function showLift(td, clampEl, changed) {
+    var d = td.dataset, r = td.getBoundingClientRect(), cw = Math.round(r.width), vh2 = document.documentElement.clientHeight, bd = budget(), css = bodyCss(td, clampEl);
+    var cs = getComputedStyle(td), lh = parseFloat(getComputedStyle(clampEl).lineHeight) || 22, padV = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom), avail = vh2 - 8 - r.top;
+    var full = clampEl.getAttribute('data-full') || clampEl.textContent;
+    var rpCut = false;
+    function body(n) {
+      if (changed) { var e = excerpt(itemsFor(d.pkA, d.pkB, 'rp'), n * CPL, LEAD); rpCut = e.cut; }
+      return changed
+        ? '<div class="pk-body" style="' + css + '"><div class="pk-cl" style="-webkit-line-clamp:' + n + '">' + excerpt(itemsFor(d.pkA, d.pkB, 'rp'), n * CPL, LEAD).html + '</div></div>'
+        : '<div class="pk-body" style="' + css + '"><div class="pk-cl" style="-webkit-line-clamp:' + n + '">' + vh(full.slice(0, n * 60)) + '</div>' + (canOpen(td) ? '<div class="pk-ufoot"><button type="button" class="pk-link">View full text</button></div>' : '') + '</div>';
+    }
+    function cmpBlock() { return '<div class="pk-cmp">' + content(d.pkA, d.pkB, d.pkBd, bd.c) + '</div>'; }
+    function put(html, n, flip) {
+      lift.className = 'pk-lift' + (changed ? ' pk-chg' : '') + (flip ? ' pk-flip' : ''); lift.style.width = cw + 'px'; lift.innerHTML = html;
+      lift.classList.add('on'); lift.style.left = Math.round(r.left) + 'px'; lift.style.top = Math.round(r.top) + 'px';
+      if (changed && !flip) { var bc = lift.querySelector('.pk-body .pk-cl'), fm = lift.querySelector('.pk-more'); if (fm && (rpCut || clamped(bc) || hiddenMarks(bc))) fm.setAttribute('data-force', '1'); foot(lift.querySelector('.pk-cmp')); }
+      else if (!changed) { var u = lift.querySelector('.pk-ufoot'), c = lift.querySelector('.pk-cl'); if (u && !clamped(c)) u.remove(); }   /* nothing cut: nothing to link to */
+    }
+    put(body(changed ? bd.c : bd.u) + (changed ? cmpBlock() : ''), 0, false);
+    if (r.top + lift.offsetHeight <= vh2 - 8) return;   /* it all fits below the cell */
+    if (changed) {
+      var n = Math.max(2, Math.min(bd.c, Math.floor((avail - padV) / lh)));   /* the cell's own value keeps whatever room there is below it, never less than its two lines */
+      put(body(n), n, true);
+      var bcl = lift.querySelector('.pk-body .pk-cl');
+      buildAttached(td, content(d.pkA, d.pkB, d.pkBd, bd.c), true, rpCut || clamped(bcl) || hiddenMarks(bcl) > 0);   /* Compare to, attached to the cell's top edge */
+      return;
+    }
+    var m = Math.floor((avail - padV - (canOpen(td) ? 24 : 0)) / lh);
+    if (m >= 3) { put(body(m), m, false); return; }   /* fewer lines, still more than the cell shows */
+    lift.classList.remove('on'); showTextAbove(td, clampEl);
   }
   function show(td) {
-    var p = ensure(), d = td.dataset;
-    var gone = td.classList.contains('rec-diff-cell-removed');   /* a deleted record has no restore-point value to differ from: show the value plain */
-    p.innerHTML = '<div class="pk-row"><span class="pk-l">Compare to</span><span class="pk-d">' + esc(d.pkBd) + '</span></div><div class="pk-v">' + (gone ? plainHtml(d.pkB) : cmpHtml(d.pkA, d.pkB)) + '</div>';
-    p.classList.add('on'); cur = td; td.setAttribute('aria-describedby', 'pkPop');
-    /* above the cell by default, below only when there is no room, clamped to the viewport */
-    p.style.left = '0px'; p.style.top = '-9999px';
-    var r = td.getBoundingClientRect(), w = p.offsetWidth, h = p.offsetHeight, pad = 8, gap = 8;
-    var vw = document.documentElement.clientWidth, vh2 = document.documentElement.clientHeight;
-    var cx = r.left + Math.min(r.width, 240) / 2;   /* wide long-text cells: anchor over the left part */
-    var left = Math.max(pad, Math.min(cx - w / 2, vw - w - pad));
-    var top = r.top - h - gap; if (top < pad) top = r.bottom + gap; top = Math.min(top, vh2 - h - pad);
-    p.style.left = Math.round(left) + 'px'; p.style.top = Math.round(top) + 'px';
+    closeNow(true); cur = td; ensure();
+    var changed = td.classList.contains('rec-pk'), clampEl = td.querySelector('.rec-cell-clamp'), clipped = !!clampEl && clamped(clampEl);
+    if (!changed && !clipped) return;   /* short and unchanged: nothing to show */
+    td.setAttribute('aria-describedby', clipped ? 'pkLift' : 'pkPop');
+    if (clipped) showLift(td, clampEl, changed); else showAttached(td);
   }
-  function hide() { clearTimeout(timer); if (pop) pop.classList.remove('on'); if (cur) cur.removeAttribute('aria-describedby'); cur = null; }
-  function cellOf(e) { return e.target && e.target.closest ? e.target.closest('td.rec-pk') : null; }
-  document.addEventListener('mouseover', function (e) { var td = cellOf(e); if (!td || td === cur) return; clearTimeout(timer); timer = setTimeout(function () { show(td); }, 150); });
-  document.addEventListener('mouseout', function (e) { var td = cellOf(e); if (!td) return; if (e.relatedTarget && td.contains(e.relatedTarget)) return; hide(); });
-  document.addEventListener('focusin', function (e) { var td = cellOf(e); if (td) { clearTimeout(timer); show(td); } });
-  document.addEventListener('focusout', function (e) { if (cellOf(e)) hide(); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') hide(); });
+  function closeNow(keep) { if (pop) pop.classList.remove('on'); if (lift) lift.classList.remove('on'); if (cur) { cur.classList.remove('pk-open', 'below', 'above'); cur.removeAttribute('aria-describedby'); } if (!keep) cur = null; }   /* closes the peek only; leaves any pending open alone */
+  function hide() { clearTimeout(openT); clearTimeout(closeT); closeNow(); }
+  function cellOf(e) { return e.target && e.target.closest ? e.target.closest('td.rec-pk, td.rec-cell-lt') : null; }
+
+  /* hover bridge: the cell and its overlay are ONE region. Moving from the cell into the overlay keeps it open; leaving both closes it after a short grace, so a slight overshoot does not dismiss it. A pending close never cancels an open, and with a peek already open the next cell swaps in quickly. */
+  function inRegion(n) { return !!n && n.nodeType === 1 && ((cur && cur.contains(n)) || inOverlay(n)); }
+  document.addEventListener('mouseover', function (e) {
+    if (inRegion(e.target)) { clearTimeout(closeT); return; }
+    var td = cellOf(e); if (!td || td === cur) return;
+    clearTimeout(openT); clearTimeout(closeT);
+    openT = setTimeout(function () { show(td); }, isOpen() ? 60 : 150);
+  });
+  document.addEventListener('mouseout', function (e) {
+    var left = cellOf(e) || inOverlay(e.target);
+    if (!left || inRegion(e.relatedTarget)) return;
+    clearTimeout(openT);
+    if (isOpen()) { clearTimeout(closeT); closeT = setTimeout(closeNow, 150); } else hide();
+  });
+  document.addEventListener('focusin', function (e) { var td = cellOf(e); if (td) { clearTimeout(openT); show(td); } });
+  document.addEventListener('focusout', function (e) { if (cellOf(e) && !inRegion(e.relatedTarget)) hide(); });
+  document.addEventListener('click', function (e) { var l = e.target.closest ? e.target.closest('.pk-link') : null; if (l && cur) openPanel(cur); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') hide();
+    if (e.key === 'Enter') { var td = cellOf({ target: document.activeElement }); if (td && canOpen(td) && (td.classList.contains('rec-pk') || td.classList.contains('pk-clip'))) { e.preventDefault(); openPanel(td); } }
+  });
   window.addEventListener('scroll', hide, true);
-  window.addEventListener('resize', hide);
+
+  /* a clipped long-text cell is reachable by keyboard; a cell that fits is not. Re-checked whenever the table is redrawn or resized. */
+  function markClipped() {
+    [].slice.call(document.querySelectorAll('td.rec-cell-lt:not(.rec-pk)')).forEach(function (td) {
+      var s = td.querySelector('.rec-cell-clamp'), c = !!s && clamped(s);
+      if (c) { td.classList.add('pk-clip'); td.tabIndex = 0; } else if (td.classList.contains('pk-clip')) { td.classList.remove('pk-clip'); td.removeAttribute('tabindex'); }
+    });
+  }
+  var mkT = null; function queueMark() { cancelAnimationFrame(mkT); mkT = requestAnimationFrame(markClipped); }
+  window.addEventListener('resize', function () { hide(); queueMark(); });
+  /* a row whose value wraps onto several lines is top-aligned (class rd-top), so the two compared blocks start at the same height */
+  function alignMultiline() {
+    [].slice.call(document.querySelectorAll('#recordDrawer .rd-compare-tbl tr')).forEach(function (tr) {
+      if (tr.cells.length < 3) return;   /* only the two-value layout: label + left + right */
+      var multi = false;
+      for (var i = 1; i < tr.cells.length && !multi; i++) {
+        var c = tr.cells[i], rg = document.createRange(); rg.selectNodeContents(c);
+        multi = rg.getBoundingClientRect().height > (parseFloat(getComputedStyle(c).lineHeight) || 22) * 1.6;
+      }
+      if (tr.classList.contains('rd-top') !== multi) tr.classList.toggle('rd-top', multi);
+    });
+  }
+  function boot() {   /* this script sits in the head, so anything that needs the body waits for it */
+    ensure();
+    var dr = document.getElementById('recordDrawer');
+    if (dr) {
+      new MutationObserver(function () { setTimeout(alignMultiline, 0); }).observe(dr, { childList: true, subtree: true });   /* the panel re-renders as it opens */
+      if (window.ResizeObserver) new ResizeObserver(function () { setTimeout(alignMultiline, 0); }).observe(dr);   /* and re-wraps while it widens */
+    }
+    new MutationObserver(function (muts) { if (muts.some(function (m) { return !(m.target.closest && m.target.closest('.pk-pop, .pk-lift')); })) queueMark(); }).observe(document.body, { childList: true, subtree: true });
+    queueMark();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
 </script>
 </head>
@@ -25163,7 +25379,7 @@ function _childRenderRecords() {
       function _clampLT(innerHtml, rawVal) {
         if (!_isLT) return innerHtml;
         var t = String(rawVal == null ? '' : rawVal).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-        return '<span class="rec-cell-clamp" title="' + t + '">' + innerHtml + '</span>';
+        return '<span class="rec-cell-clamp" data-col="' + String(c).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;') + '" data-full="' + t + '">' + innerHtml + '</span>';   /* was title="…": a native tooltip. The cell peek reads data-full, and data-col names the field to scroll to in the preview */
       }
       if (i === 0) {
         var nameCls = 'name-col' + (diff && changedSet[c] ? ' rec-diff-cell-changed' : '');
@@ -42816,9 +43032,41 @@ function _wsJobTitle(fallback) {
     if (flds.length === n) { var p0 = _parseFieldId(flds[0].slice(6)), rr = p0 && _resolveD365Record('rec-' + p0.schemaKey + '-' + p0.idx); return n + ' columns' + (rr ? ' on ' + rr.name : ''); }
     var parents = {}; keys.forEach(function (k) { var res = typeof k === 'string' ? _resById(k.indexOf(':') > 0 ? k.split(':')[0] : k) : null; if (res) parents[res.parentId || res.id] = true; });
     var pk = Object.keys(parents), par = pk.length === 1 ? _resById(pk[0]) : null;
-    return n + ' items' + (par ? ' in ' + par.name : '');
+    // where = the root the items belong to (org, tenant, site, group, forest, environment), the same one the Select step names; the shared folder only when no root is known
+    var roots = (typeof _wsCartOrgCounts === 'function') ? _wsCartOrgCounts() : [];
+    var place = roots.length ? roots[0].name + (roots.length > 1 ? ' +' + (roots.length - 1) : '') : (par ? par.name : '');
+    return _wsCartNoun(n) + (place ? ' in ' + place : '');
   } catch (e) { return fallback; }
 }
+// "Team Membership" → "team memberships". Words that are acronyms or carry inner capitals (ADO, ACL, OneDrive) keep their case; a type that already ends in s (Teams, Area Paths) is left alone.
+function _wsPluralType(t) {
+  var w = String(t).split(' ');
+  var lc = w.map(function (x) { return /^[A-Z][a-z]+(-[A-Z][a-z]+)*$/.test(x) && !/^(Confluence|Jira|Dependabot|Dataverse|Power|Pages|Actions)$/.test(x) ? x.toLowerCase() : x; });
+  var last = lc[lc.length - 1];
+  if (/^(metadata|coursework|content)$/i.test(last)) return null;   // no plural form: the caller says "items" instead
+  if (!/s$/.test(last) || /ss$/.test(last)) {
+    if (/[^aeiou]y$/.test(last)) last = last.slice(0, -1) + 'ies';
+    else if (/(s|x|ch|sh)$/.test(last)) last += 'es';
+    else last += 's';
+  }
+  lc[lc.length - 1] = last;
+  return lc.join(' ');
+}
+// The one type every cart item shares ("User", "Record"), or null when the cart mixes types.
+function _wsCartSharedType() {
+  var type = null, mixed = false;
+  state.restorePlan.forEach(function (_, k) {
+    if (mixed) return;
+    var t = null;
+    if (typeof k === 'string' && k.indexOf('rec-') === 0) t = 'Record';
+    else { var res = typeof k === 'string' ? _resById(k.indexOf(':') > 0 ? k.split(':')[0] : k) : null; t = res && res.type; }
+    if (!t || (type && type !== t)) { mixed = true; return; }
+    type = t;
+  });
+  return mixed ? null : type;
+}
+// "3 users" when the items share a type, "3 items" when they do not.
+function _wsCartNoun(n) { var t = _wsCartSharedType(), p = t && _wsPluralType(t); return n + ' ' + (p || 'items'); }
 function wsRenderTopbar() {
   // OVERLAY HEADER (Figma 9303:90358, 2026-09-04): restore-point tile +
   // "Restore N items • <Workload>" (Single Line/Title, Avant Garde 24/32,
@@ -43219,7 +43467,8 @@ function wsRenderConfigure() {
         + '<button type="button" class="ws-day-btn" onclick="wsOpenDayPicker(event)" aria-haspopup="true">…</button>'
       + '</div>') */
     + '</div>'
-    + ((typeof wsIsD365Cart === 'function' && wsIsD365Cart() && window.D365X && D365X.scopeLine && D365X.scopeLine()) ? '<span class="dxs-line">' + wsEscape(D365X.scopeLine()) + '</span>' : '')
+    // [parked 2026-11-06, user] the row carries two callouts only: WHEN on the left (Restoring as of), WHAT/WHERE on the right (the source label below). The D365 scope line ("Restoring changed columns only") was a third and was added unasked; D365X.scopeLine and .dxs-line remain.
+    // + ((typeof wsIsD365Cart === 'function' && wsIsD365Cart() && window.D365X && D365X.scopeLine && D365X.scopeLine()) ? '<span class="dxs-line">' + wsEscape(D365X.scopeLine()) + '</span>' : '')
     // Select-step search RETIRED: the cart is a short, user-built list — a
     // search over it added chrome without value. Filter plumbing (ws.tableSearch
     // / wsTableFilter) is left intact so this can be revived by re-adding the
@@ -43236,7 +43485,7 @@ function wsRenderConfigure() {
         var _n = state.restorePlan.size;
         var _inner, _tipAttr = '';
         if (_oc.length === 1) {
-          _inner = (_n === 1 ? 'This item belongs to ' : 'All ' + _n + ' items belong to ') + '<strong>' + wsEscape(_oc[0].name) + '</strong>';
+          _inner = (_n === 1 ? 'This item belongs to ' : 'All ' + _wsCartNoun(_n) + ' belong to ') + '<strong>' + wsEscape(_oc[0].name) + '</strong>';
         } else {
           var _tip = _oc.map(function(o){ return o.name + ' (' + o.count + ' item' + (o.count === 1 ? '' : 's') + ')'; }).join(' · ');
           _tipAttr = ' data-tooltip="' + _tip.replace(/"/g, '&quot;') + '"';
@@ -43405,7 +43654,13 @@ function _wsCartAllUsers() {
 // parent chain to the top. Used by the Select step's org summary + column.
 function _wsResourceOrgName(key) {
   var cur = RESOURCES.find(function(x){ return x.id === key; });
-  if (!cur) return null;
+  // A Dynamics 365 record (rec-…) or column value (field-…~…) is not a resource: it belongs to its table, and the table to an environment, so start the walk at the table.
+  if (!cur && typeof key === 'string' && typeof _resolveD365Record === 'function') {
+    var _rk = key.indexOf('field-') === 0 && key.indexOf('~') > 0 ? key.replace(/^field-/, 'rec-').replace(/~(\d+)~.*$/, '-$1') : key;
+    var _rr = _rk.indexOf('rec-') === 0 ? _resolveD365Record(_rk) : null;
+    cur = _rr && _rr.tableResource;
+  }
+  if (!cur || !cur.parentId) return null;   // a top-level item (a VM, a Ping group, an org itself) has no container above it to belong to
   var safety = 0;
   while (cur && cur.parentId && safety++ < 12) {
     var p = RESOURCES.find(function(x){ return x.id === cur.parentId; });
@@ -60636,6 +60891,8 @@ function _rdWireHdrTuck() {
     // event in the OPPOSITE direction — an un-tuck feedback loop (caught in
     // verification 2026-08-19). Ignore direction for 250ms and resync.
     lockUntil = Date.now() + 250;
+    /* once the lock ends, re-check: if the content shrank and the scroll snapped back to the top while events were being ignored, the header must not stay tucked with nothing to scroll */
+    setTimeout(function () { if (body.scrollTop < 40 && drawer.classList.contains('rd-hdr-tucked')) { drawer.classList.remove('rd-hdr-tucked'); lockUntil = Date.now() + 250; last = body.scrollTop; } }, 270);
   }
   body.addEventListener('scroll', function () {
     var top = body.scrollTop;
@@ -74933,7 +75190,7 @@ window.D365X.recChip = function (key, item) {
     if (hd.querySelector('.dx-lg') || !hd.firstElementChild) return;
     var lg = document.createElement('span'); lg.className = 'dx-lg'; lg.style.display = 'none';
     lg.setAttribute('aria-label', 'Row marker key');
-    lg.innerHTML = window.vchip('Changed', 'gold') + window.vchip('New', 'green') + window.vchip('Deleted since', 'red');
+    lg.innerHTML = window.vchip('Changed', 'gold', 'm') + window.vchip('New', 'green', 'a') + window.vchip('Deleted since', 'red', 'd');
     hd.insertBefore(lg, hd.firstElementChild.nextSibling);
   });
   /* the key sits at the right while the title leaves room for it; once it wraps beneath, it lines up left */
