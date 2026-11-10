@@ -76011,7 +76011,6 @@ window.D365X.recChip = function (key, item) {
     });
   };
   function liveBtn() { var bs = [].slice.call(document.querySelectorAll('.dxs-btn')); return bs.filter(function (b) { return b.offsetParent !== null; })[0] || bs[0] || null; }
-  function groupRight() { var b = liveBtn(); if (!b) return null; var g = b.parentNode.querySelector('.dx-rs') || b.parentNode.querySelector('.tab-right-primary'); return (g || b).getBoundingClientRect().right; }
 
   /* ── menu: the three scopes ─────────────────────────────────────────────────────────────────── */
   var menuEl = null, popEl = null;
@@ -76022,7 +76021,7 @@ window.D365X.recChip = function (key, item) {
                 : item('changed', false, 'Changed columns only', 'Compare two dates to use this', true, 'Backups are compared with each other, so this needs two restore points. Use the Compare button above.'))
       + item('chosen', S.mode === 'chosen', 'Specific columns', 'Pick columns, including files and images');
   }
-  function place(el, w) { var b = liveBtn(); if (!b) return; var r = b.getBoundingClientRect(), right = groupRight() || r.right; el.style.top = (r.bottom + 4) + 'px'; el.style.left = Math.max(8, right - (w || el.offsetWidth)) + 'px'; if (el.classList.contains('dxs-pop')) el.style.maxHeight = Math.max(240, Math.min(480, window.innerHeight - (r.bottom + 4) - 8)) + 'px'; }
+  function place(el, w) { var b = liveBtn(); if (!b) return; var r = b.getBoundingClientRect(), mw = w || el.offsetWidth; el.style.top = (r.bottom + 4) + 'px'; el.style.left = Math.max(8, Math.min(r.left, window.innerWidth - mw - 8)) + 'px';   /* flush with the Restore scope button's left edge; shifts left only as far as needed to stay on screen (was: right-aligned to the whole Restore group, which put it ~300px from its trigger) */ if (el.classList.contains('dxs-pop')) el.style.maxHeight = Math.max(240, Math.min(480, window.innerHeight - (r.bottom + 4) - 8)) + 'px'; }
   function closeMenu() { if (menuEl) { menuEl.remove(); menuEl = null; } S.menu = false; }
   function closePop() { if (popEl) { popEl.remove(); popEl = null; } S.pop = false; }
   function onScopeClick() {
