@@ -123,6 +123,7 @@
   --form-bg: #f8f8f8;     /* Veeam Form BG (Vision 2026-08-14); was: f4f6f8 */
   --layout-bg: #ebeeef;   /* Grey/S5 layout bg (Vision 2026-08-14); was: edf0f0 */
   --red-30: #f58a93;      /* Ignis/S30 — destructive disabled (Vision 2026-08-14) */
+  --red-20: #f9b9be;      /* Ignis/S20 — Tertiary Destructive active fill (read live from Vision Button 231:13077, 2026-11-09) */
   --red-60: #d31223;      /* Ignis/S60 — destructive active/pressed (Vision 2026-08-14) */
   --gold-chip-bg: #fcf8ea;   /* Chart/Soft Gold T180 — Vision Chip Gold light bg */
   --gold-chip-fg: #9d7f17;   /* Base Scales/Gold_S40 — Vision Chip Gold text */
@@ -4580,6 +4581,8 @@ body.ai-hx-transcript .ai-foot { display: none; }
 /* Full-width caption + 2-line reserve: every mode's caption occupies the
    same box regardless of text length, so the step never reflows. */
 .ws-optrow-cap-lock { min-height: 36px; }
+.d365-empty-line { margin-top: 12px; font-size: 14px; line-height: 20px; color: var(--black-60); }
+.d365-empty-line .rl-lnk { display: inline; padding: 0; font: inherit; }
 .ws-toggle-card { width: 100%; box-sizing: border-box; background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; align-items: flex-start; gap: 16px; cursor: pointer; transition: border-color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease; }
 .ws-toggle-card + .ws-toggle-card { margin-top: 12px; }
 .ws-toggle-card:hover { border-color: var(--blue-30); }
@@ -6348,10 +6351,6 @@ td.cb-col input:disabled, th.cb-col input:disabled { pointer-events: none; }
 /* Comparison slot while viewing one point: holds the Compare button. */
 .rd-hc.rd-hc-ghost { background: var(--white); justify-content: center; align-items: center; }
 .rd-hc-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 28px; }
-/* Added = the light green Vision treatment (Green/S10 fill, Tertiary border, Green/S80 label); hover still turns to Remove. */
-.rd-hc .rw-added-toggle { background: var(--green-s10); color: var(--em-green); border: 1px solid var(--green-s60); }
-.rd-hc .rw-added-toggle:hover, .rd-hc .rw-added-toggle:focus-visible { background: var(--red); color: var(--white); border-color: var(--red); }
-.rd-hc .rw-added-toggle.just-added:hover { background: var(--green-s10); color: var(--em-green); border-color: var(--green-s60); }
 .rd-hc-cap { font-size: 14px; line-height: 20px; color: var(--black-60); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* Pinned + simplified on scroll-down: the entity header and summary tuck away (existing); the bar compacts to one row (picker + action, no caption) and stays pinned with search. */
 .record-drawer.rd-hdr-tucked .rd-hc { flex-direction: row; align-items: center; padding-top: 8px; padding-bottom: 8px; }
@@ -6592,6 +6591,7 @@ td.cb-col input:disabled, th.cb-col input:disabled { pointer-events: none; }
 .rd-skel-bar.w-50 { width: 50%; }
 .rd-skel-bar.w-40 { width: 40%; }
 @keyframes rd-skel-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .rd-skel-bar { animation: none; } }
 .rd-body.compare-mode { padding: 0 24px 24px; }
 /* Section divider row rendered as a full-width th-styled band inside the diff
    table so grouping still reads clearly in the tabular layout. */
@@ -7328,9 +7328,14 @@ body.drawer-open { overflow: hidden; }
    picker so the choice of which side to restore from is settled spatially.
    Two states: "Choose this" button (active) or "Restore target" badge
    (committed). Prod columns render neither. */
-.rw-use-side-btn { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; background: var(--blue); color: var(--white); border: none; border-radius: 4px; font-size: 16px; font-weight: 500; font-family: inherit; cursor: pointer; flex-shrink: 0; white-space: nowrap; }
+.rw-use-side-btn { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 12px; background: var(--blue); color: var(--white); border: none; border-radius: 4px; font-size: 16px; font-weight: 500; font-family: inherit; cursor: pointer; flex-shrink: 0; white-space: nowrap; }
 .rw-use-side-btn:hover { background: var(--blue-dark); }
-.rw-use-side-btn svg { width: 12px; height: 12px; }
+.rw-use-side-btn svg { width: 20px; height: 20px; }
+.rw-use-side-btn:active:not(:disabled) { background: var(--green-s90); }
+.rw-lbl-short { display: none; }
+.record-drawer.rd-hdr-tucked .rw-use-side-btn .rw-lbl-full { display: none; }
+.record-drawer.rd-hdr-tucked .rw-use-side-btn .rw-lbl-short { display: inline; }   /* the pinned header keeps the button to "Add" so the restore-point picker beside it can show its full date */
+.rw-use-side-btn:disabled { background: var(--green-s30); color: var(--white); cursor: not-allowed; }   /* Vision Primary Disabled: Green/S30 fill, white text */
 /* The cart-wide consequence of "Select" lives INSIDE the grey header cell, on its
    own line below the [dot][picker][Select] row (not inline — inline was truncating
    the picker dropdown), right-aligned so it sits under the Select button. Only the
@@ -7356,22 +7361,21 @@ body.drawer-open { overflow: hidden; }
 .rw-restore-target-rm:hover { background: var(--blue-30); }
 .rw-restore-target-rm svg { width: 10px; height: 10px; }
 /* C2 added-state toggle (selected 2026-07-29 — cart-added-state-options.html):
-   one control, two live DS Button variants (Size=Small to match
-   .rw-use-side-btn): Type=Success at rest ("Added"), Type=Destructive on
-   hover/focus ("Remove"). .just-added pins the Success state through the
-   post-add hover — the pointer is still ON the button the instant after
-   adding — and clears on mouseleave, so the destructive reveal only happens
+   one control that swaps between two Veeam Vision Button variants, both Size=Small (read live from the Button component, 2026-11-09):
+   Type=Tertiary at rest ("Added": Green/S5 fill, Green/S60 border, Green/S80 text) and Type=Tertiary Destructive on hover/focus ("Remove": Ignis/S10 fill,
+   S40 border, S50 text; Active fill Ignis/S20). Vision has no Success type; the earlier Securiti "Success" look is retired. .just-added pins the resting state
+   through the post-add hover — the pointer is still ON the button the instant after adding — and clears on mouseleave, so the destructive reveal only happens
    on a RETURN visit. */
-.rw-added-toggle { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 28px; padding: 0 12px; background: var(--btn-success); color: var(--white); border: none; border-radius: 4px; font-size: 16px; font-weight: 500; font-family: inherit; cursor: pointer; flex-shrink: 0; white-space: nowrap; }
-.rw-added-toggle svg { width: 12px; height: 12px; }
-.rw-added-toggle .lbl-added { display: inline-flex; align-items: center; gap: 6px; }
-.rw-added-toggle .lbl-remove { display: none; align-items: center; gap: 6px; }
-.rw-added-toggle:hover, .rw-added-toggle:focus-visible { background: var(--red); }
-.rw-added-toggle:active { background: var(--btn-destructive-hover); }
+.rw-added-toggle { display: inline-flex; align-items: center; justify-content: center; gap: 4px; height: 28px; padding: 0 12px; background: var(--em-green-tint); color: var(--em-green); border: 1px solid var(--green-s60); border-radius: 4px; font-size: 16px; font-weight: 450; font-family: inherit; cursor: pointer; flex-shrink: 0; white-space: nowrap; }
+.rw-added-toggle svg { width: 20px; height: 20px; }
+.rw-added-toggle .lbl-added { display: inline-flex; align-items: center; gap: 4px; }
+.rw-added-toggle .lbl-remove { display: none; align-items: center; gap: 4px; }
+.rw-added-toggle:hover, .rw-added-toggle:focus-visible { background: var(--red-10); color: var(--red); border-color: var(--btn-destructive-hover); }
+.rw-added-toggle:active { background: var(--red-20); }
 .rw-added-toggle:hover .lbl-added, .rw-added-toggle:focus-visible .lbl-added { display: none; }
 .rw-added-toggle:hover .lbl-remove, .rw-added-toggle:focus-visible .lbl-remove { display: inline-flex; }
-.rw-added-toggle:focus-visible { outline: 2px solid var(--btn-success-ring); outline-offset: -2px; }
-.rw-added-toggle.just-added:hover { background: var(--btn-success); }
+.rw-added-toggle:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--white), 0 0 0 4px var(--em-green); }
+.rw-added-toggle.just-added:hover { background: var(--em-green-tint); color: var(--em-green); border-color: var(--green-s60); }
 .rw-added-toggle.just-added:hover .lbl-added { display: inline-flex; }
 .rw-added-toggle.just-added:hover .lbl-remove { display: none; }
 /* Force equal widths on the two comparison columns; attribute column stays
@@ -43215,7 +43219,7 @@ function wsRenderFooterV2() {
     var _b1 = (_relB() && ws.relView) ? '<button class="ws-cta ws-cta-secondary" type="button" style="flex:0 0 160px" onclick="wsRelViewGo(false)">Back</button>' : back;
     var _go = (_relB() && !ws.relView) ? 'wsRelViewGo(true)' : 'wsGotoStep(2)';
     inner.innerHTML = _b1
-      + (function(){ var k = _relContinue(); return '<button class="ws-cta ws-cta-primary" type="button" onclick="' + _go + '"' + (k.disabled ? ' disabled aria-disabled="true"' : '') + (k.tip ? ' data-tooltip="' + wsEscape(k.tip) + '"' : '') + '>' + k.label + '</button>'; })();
+      + (function(){ var k = _relContinue(), btn = '<button class="ws-cta ws-cta-primary" type="button" onclick="' + _go + '"' + (k.disabled ? ' disabled aria-disabled="true"' : '') + (k.tip && !k.disabled ? ' data-tooltip="' + wsEscape(k.tip) + '"' : '') + '>' + k.label + '</button>'; return (k.disabled && k.tip) ? '<span class="icon-dtip" style="flex:1;display:flex" data-tooltip="' + wsEscape(k.tip) + '">' + btn + '</span>' : btn; })();
   } else if (ws.step === 2) {
     // Destination → Configure. Export all is an action on the selection that
     // D365 / ADO support; every other workload gets plain Back + Continue.
@@ -47307,6 +47311,11 @@ function _relHint() {
 function wsRelHintX() { _d365RelCfg().hintX = true; wsRenderAll(); }
 // The Select step's button states the size of the job it commits: the cart, plus the related records when they are included. While the related count is still being worked out it says so and waits, so it never states a smaller job than the one that would run.
 function _relContinue() {
+  var k0 = _relContinueBase();
+  if (typeof wsIsD365Cart === 'function' && wsIsD365Cart() && window.D365X && D365X.scopeEmpty && D365X.scopeEmpty()) { k0.disabled = true; k0.tip = D365X.scopeEmptyTip(); }   // nothing would be restored: the scope picks no columns
+  return k0;
+}
+function _relContinueBase() {
   if (typeof wsIsD365Cart !== 'function' || !wsIsD365Cart() || REL_OPT === 'A') return { label: 'Continue' };
   var c = _d365RelCfg(), n = state.restorePlan.size, rec = function(x){ return x + (x === 1 ? ' record' : ' records'); };
   if (REL_OPT === 'B' && (!ws.relView || !c.on)) return { label: 'Continue' };   // B: the total belongs to the Related records step, where it is decided
@@ -47360,7 +47369,19 @@ function wsRelMore(k) {
   setTimeout(function(){ if (c.lmBusy && c.lmBusy[k] === tok) { delete c.lmBusy[k]; c.lm[k] = (c.lm[k] || REL_E_STEP) + REL_E_STEP; wsRelRender(); } }, 500 + Math.round(Math.random() * 500));
   wsRelRender();
 }
-function wsRelBand(k) { var c = _d365RelCfg(); c.xp = c.xp || {}; c.xp[k] = !c.xp[k]; wsRelRender(); }
+// Opening a table that holds a full first page (10 or more records) fetches that page: shimmer rows hold its place for up to 2 seconds. A table with fewer than 10 records opens at once.
+var REL_BAND_MAX_MS = 2000;
+function wsRelBand(k) {
+  var c = _d365RelCfg(); c.xp = c.xp || {}; c.bandBusy = c.bandBusy || {}; c.xp[k] = !c.xp[k]; delete c.bandBusy[k];
+  if (c.xp[k]) {
+    var n = Math.min(_d365RelGen(k).filter(function(r){ return !c.ex[r.id]; }).length, D365REL_CAP);
+    if (n >= REL_E_STEP) {
+      var tok = {}; c.bandBusy[k] = tok;
+      setTimeout(function(){ if (c.bandBusy && c.bandBusy[k] === tok) { delete c.bandBusy[k]; wsRelRender(); } }, 800 + Math.round(Math.random() * (REL_BAND_MAX_MS - 800)));
+    }
+  }
+  wsRelRender();
+}
 function wsRelTPage(p) { _d365RelCfg().tpage = p; wsRelRender(); }
 function wsRelTSize(n) { var c = _d365RelCfg(); c.tsize = n; c.tpage = 1; wsRelRender(); }
 function wsRelTq(v) { _d365RelCfg().tq = v; wsRelRender('wsRelTq'); }
@@ -47387,7 +47408,7 @@ function _d365RelSkelRows(n) {
 }
 function _d365RelSkeleton() {
   var bar = function(w, h){ return '<span class="rd-skel-bar" style="width:' + w + ';' + (h ? 'height:' + h + ';' : '') + 'display:block"></span>'; }, rows = _d365RelSkelRows();
-  return '<div class="rl-body" role="status" aria-busy="true" aria-label="Loading related records"><div class="ws-sel-cq"><div class="rt-card"><div class="rl-tools rl-tools-band"><div style="width:176px">' + bar('100%', '36px') + '</div><div style="width:36px">' + bar('100%', '36px') + '</div><div style="flex:1;min-width:0">' + bar('100%', '36px') + '</div></div>'
+  return '<div class="rl-body" role="status" aria-busy="true" aria-label="Loading related records">' + (REL_OPT === 'H' ? '<div class="rl-bar">' + bar('100%', '36px') + '</div><div class="ws-sel-cq"><div class="rt-card">' : '<div class="ws-sel-cq"><div class="rt-card"><div class="rl-tools rl-tools-band"><div style="width:176px">' + bar('100%', '36px') + '</div><div style="width:36px">' + bar('100%', '36px') + '</div><div style="flex:1;min-width:0">' + bar('100%', '36px') + '</div></div>') + ''
     + '<div class="ws-table-wrap"><table class="ws-table"><colgroup><col class="ws-col-name"><col class="ws-col-type" style="width:190px"><col class="ws-col-target" style="width:176px"><col style="width:48px"></colgroup><thead><tr><th class="ws-th">Name</th><th class="ws-th">Type</th><th class="ws-th ws-col-target">Restore point</th><th class="ws-th is-actions-col"></th></tr></thead><tbody>' + rows + '</tbody></table></div></div></div></div>';
 }
 function _d365RelSkeletonA() {
@@ -47411,7 +47432,7 @@ function _d365RelBlock(part) {
   var _rcKey = "if (event.key === ' ' || event.key === 'Enter') { event.preventDefault(); wsRelToggle(" + !c.on + "); }";
   var head = '<div class="sc-header" role="checkbox" aria-checked="' + !!c.on + '" tabindex="0" onclick="wsRelToggle(' + !c.on + ')" onkeydown="' + _rcKey + '"><span class="rc-icon">' + _rcIcon + '</span><span class="ws-cfg-choice-title">Include related records</span><span class="rc-cb">' + _d365RelCb(c.on) + '</span></div>'
     + '<div class="sc-desc"><div class="rl-def">Records directly linked to your selection, like an account’s contacts and cases. <span class="rl-how" data-tooltip="' + wsEscape(tip) + '">How this works</span></div>' + (c.on && REL_OPT !== 'E' && REL_OPT !== 'F' && REL_OPT !== 'G' && REL_OPT !== 'H' ? '<div class="rc-line">' + sm + '</div>' : '') + '</div>';   // E: the Related records tab carries the count
-  var body = '';
+  var body = '', _ctScope = '', _above = '';
   if (c.on) {
     // the table dropdown (n of y, records per table), left of search
     var q = c.tq.trim().toLowerCase(), cat = c.cat || 'all';
@@ -47455,11 +47476,12 @@ function _d365RelBlock(part) {
       trs = '';
       _bd.slice((c.tpage - 1) * _hs, c.tpage * _hs).forEach(function(t){
         var list = _all[t.k], tot = list.length, n = Math.min(tot, D365REL_CAP), cap = tot > D365REL_CAP, open = !!qq || !!c.xp[t.k];
-        var lim = Math.min(c.lm[t.k] || REL_E_STEP, n), shown = list.slice(0, lim);
+        var lim = Math.min(c.lm[t.k] || REL_E_STEP, n), shown = list.slice(0, lim), busy = open && !qq && !!(c.bandBusy && c.bandBusy[t.k]);   // busy: the first page of this table is on its way
         var base = qq ? _d365RelFmt(n) + (cap ? '+' : '') + (n === 1 ? ' match' : ' matches') : _d365RelFmt(n) + (cap ? '+' : '') + (n === 1 ? ' record' : ' records');
-        var lbl = (open && lim < n) ? 'Showing ' + _d365RelFmt(lim) + ' of ' + _d365RelFmt(n) + (cap ? '+' : '') : base;
-        trs += '<tr class="rl-sec"><td colspan="4"><button type="button" class="rl-bandbtn" aria-expanded="' + open + '" onclick="wsRelBand(\'' + t.k + '\')"><span class="rl-bchev" aria-hidden="true">' + _chev + '</span><span class="rl-gt">' + t.n + '</span><span class="rl-gc">' + lbl + '</span></button></td></tr>';
-        if (open) {
+        var lbl = (open && lim < n && !busy) ? 'Showing ' + _d365RelFmt(lim) + ' of ' + _d365RelFmt(n) + (cap ? '+' : '') : base;
+        trs += '<tr class="rl-sec"><td colspan="4"><button type="button" class="rl-bandbtn" aria-expanded="' + open + '"' + (busy ? ' aria-busy="true"' : '') + ' onclick="wsRelBand(\'' + t.k + '\')"><span class="rl-bchev" aria-hidden="true">' + _chev + '</span><span class="rl-gt">' + t.n + '</span><span class="rl-gc">' + lbl + '</span></button></td></tr>';
+        if (busy) trs += _d365RelSkelRows(Math.min(REL_E_STEP, n));
+        else if (open) {
           shown.forEach(function(r){ trs += _recRow(r); });
           if (lim < n && c.lmBusy && c.lmBusy[t.k]) trs += _d365RelSkelRows(Math.min(REL_E_STEP, n - lim));
           else if (lim < n) trs += '<tr class="rl-more"><td colspan="4"><button type="button" class="rl-moreb" onclick="wsRelMore(\'' + t.k + '\')">Load ' + Math.min(REL_E_STEP, n - lim) + ' more</button></td></tr>';
@@ -47477,9 +47499,20 @@ function _d365RelBlock(part) {
           + (c.rowsLoading ? '' : _wsPgBar(flat.length, c.page, size, 'wsRelPage', 'wsRelSize', 'record', true))
           + '</div>';;
     } else {
-    var _relTools = '<div class="rl-tools rl-tools-band">' + chip + lvChip + '<div style="flex:1;min-width:0"><input id="wsRelQ" class="ws-field-input" style="width:100%" placeholder="Search related records by name" value="' + wsEscape(c.q) + '" oninput="wsRelSearch(this.value)"></div>' + (Object.keys(c.ex).length ? '<span class="rl-rmd" role="status"><b>' + _d365RelFmt(Object.keys(c.ex).length) + '</b> removed <button type="button" class="rl-lvbtn" onclick="wsRelUndo()" data-tooltip="Reset: bring back the removed records" aria-label="Reset removed records">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('undo-outlined', 20)) || 'Reset') + '</button></span>' : '') + (qq ? '<span class="rl-note" style="margin:0;white-space:nowrap">' + _d365RelFmt(flat.length) + (flat.length === 1 ? ' match' : ' matches') + '</span>' : '') + '</div>';
+    var _ctS = '<div style="flex:1;min-width:0"><input id="wsRelQ" class="ws-field-input" style="width:100%" placeholder="Search related records by name" value="' + wsEscape(c.q) + '" oninput="wsRelSearch(this.value)"></div>'; var _ctR = (Object.keys(c.ex).length ? '<span class="rl-rmd" role="status"><b>' + _d365RelFmt(Object.keys(c.ex).length) + '</b> removed <button type="button" class="rl-lvbtn" onclick="wsRelUndo()" data-tooltip="Reset: bring back the removed records" aria-label="Reset removed records">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('undo-outlined', 20)) || 'Reset') + '</button></span>' : ''); var _ctM = (qq ? '<span class="rl-note" style="margin:0;white-space:nowrap">' + _d365RelFmt(flat.length) + (flat.length === 1 ? ' match' : ' matches') + '</span>' : '');
+    var _relTools = '<div class="rl-tools rl-tools-band">' + chip + lvChip + _ctS + _ctR + _ctM + '</div>';   // the parked options keep the controls in the table's header band
+    if (REL_OPT === 'H') {
+      // H (user 2026-11-06, from the controls study d365-related-controls-options.html): the choice of tables lives in the Include card, with its result; search stands alone above the table.
+      // The trigger is the Workload / Restore Point picker's trigger: a quiet label, then the selection in medium weight, then what it produces in grey (no dot between them). Levels is an icon right after it, because it decides which tables the list holds.
+      var _chev16 = chev.replace('width="20" height="20"', 'width="16" height="16"');
+      var _cntTxt = loading ? '<span class="rd-skel-bar" style="width:72px;height:16px;display:inline-block;vertical-align:middle" role="status" aria-label="Counting related records"></span>' : _d365RelShow(total) + ' records';
+      var _trig = '<div class="rl-popwrap"><button type="button" class="rl-trig" onclick="wsRelPop(event)" aria-haspopup="listbox" aria-expanded="' + !!c.pop + '"><span class="rl-trig-pre">Related tables</span><span class="rl-trig-val">' + nOn + ' of ' + tabs.length + '</span><span class="rl-trig-note">' + _cntTxt + '</span><span class="rl-trig-chev">' + _chev16 + '</span></button>' + pop + '</div>';
+      _relTools = '';
+      _above = '<div class="rl-bar">' + _ctS + _ctR + _ctM + '</div>';
+      _ctScope = '<div class="rl-scope"><span class="rl-pair">' + _trig + '<span class="rl-right">' + lvChip + '</span></span></div>';
+    }
     var _relAlert = (trunc && !c.rowsLoading && REL_OPT !== 'H' ? '<div class="vis-alert" role="note">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('info-outlined', 24)) || '') + '<div class="vis-alert-txt">' + (qq ? 'Search looks through every record in each table and shows the first ' + D365REL_PREVIEW + ' matches.' : 'Showing the first ' + D365REL_PREVIEW + ' records of each table.') + ' All related records are restored. To leave a table out, turn it off in Related tables.</div></div>' : '');
-    body = '<div class="rl-body">' + '<div class="ws-sel-cq"><div class="rt-card">' + _relTools + _relAlert + '<div class="ws-table-wrap"><table class="ws-table"><colgroup><col class="ws-col-name"><col class="ws-col-type" style="width:190px"><col class="ws-col-target" style="width:176px"><col style="width:48px"></colgroup><thead><tr><th class="ws-th">Name</th><th class="ws-th">Type</th><th class="ws-th ws-col-target">Restore point</th><th class="ws-th is-actions-col"></th></tr></thead><tbody>' + trs + '</tbody></table></div></div></div>'
+    body = '<div class="rl-body">' + _above + '<div class="ws-sel-cq"><div class="rt-card">' + _relTools + _relAlert + '<div class="ws-table-wrap"><table class="ws-table"><colgroup><col class="ws-col-name"><col class="ws-col-type" style="width:190px"><col class="ws-col-target" style="width:176px"><col style="width:48px"></colgroup><thead><tr><th class="ws-th">Name</th><th class="ws-th">Type</th><th class="ws-th ws-col-target">Restore point</th><th class="ws-th is-actions-col"></th></tr></thead><tbody>' + trs + '</tbody></table></div></div></div>'
       + (_pgHtml !== null ? _pgHtml : (c.rowsLoading ? '' : _wsPgBar(flat.length, c.page, size, 'wsRelPage', 'wsRelSize', 'record', true)))
       + '</div>';
     }
@@ -47513,7 +47546,7 @@ function _d365RelBlock(part) {
     var _tbl = '<div class="ws-table-wrap"><table class="ws-table"><colgroup><col class="ws-col-name"><col class="ws-col-type" style="width:190px"><col class="ws-col-target" style="width:176px"><col style="width:48px"></colgroup><thead><tr><th class="ws-th">Name</th><th class="ws-th">Type</th><th class="ws-th ws-col-target">Contains</th><th class="ws-th is-actions-col"></th></tr></thead><tbody>' + _trs + '</tbody></table></div>';
     return _lead + '<div class="rt-card rf-card">' + _hd + _tools + _tbl + '</div>' + _wsPgBar(_inc.length, c.tpage, _size, 'wsRelTPage', 'wsRelTSize', 'table', true);
   }
-  if (REL_OPT === 'E' || REL_OPT === 'H') return part === 'pane' ? (c.on ? '<div class="rt-pane">' + body + '</div>' : '') : '<div class="ws-cfg-choice sc rc-card rc-lead' + (c.on ? ' is-selected' : '') + '" role="group" aria-label="Include related records">' + head + '</div>';   // E: the card is the one control; the list is the Related records tab's pane
+  if (REL_OPT === 'E' || REL_OPT === 'H') return part === 'pane' ? (c.on ? '<div class="rt-pane">' + body + '</div>' : '') : '<div class="ws-cfg-choice sc rc-card rc-lead' + (c.on ? ' is-selected' : '') + '" role="group" aria-label="Include related records">' + head + (c.on ? _ctScope : '') + '</div>';   // E: the card is the one control; the list is the Related records tab's pane
   if (REL_OPT === 'C') { if (!c.on) return ''; return '<div class="rt-pane">' + body + '</div>'; }   // C shows the list on its own, under tabs
   // B: the selection card only decides whether the list exists; the list is its own card BELOW it, not inside it.
   if (REL_OPT === 'B' || REL_OPT === 'D') return '<div class="ws-cfg-choice sc rc-card' + (c.on ? ' is-selected' : '') + '" role="group" aria-label="Include related records">' + head + '</div>' + (c.on ? '<div class="rt-pane rt-pane-below">' + body + '</div>' : '');   // the card only decides whether the list exists; the list is its own full-width card below it (B: on the step, D: on Select)
@@ -47788,6 +47821,44 @@ function wsRenderDefaultOwnerPicker(cfg) {
 // Toggling the checkbox reveals a dropdown of default users to reassign
 // orphaned records to. Pre-selects the recommended user so the option
 // is complete the moment it's enabled.
+/* Empty values (Advanced settings): what to do with a column that is empty at the restore point but has a value now. Writing it is the default, because Overwrite already means "replace the record with the backed-up version". */
+/* Does anything this job overwrites have a column that is empty at its record's restore point? Only then does the setting matter. A cart item that is not a single record (a table) can't be counted here, so it counts as yes. Deleted-since records are recreated whole: nothing to overwrite. */
+function _d365EmptyApplies() {
+  var X = window.D365X, yes = false; if (!X || !X.maskFor || typeof state === 'undefined' || !state.restorePlan) return false;
+  state.restorePlan.forEach(function (item, key) {
+    if (yes) return;
+    var p = (typeof key === 'string' && key.indexOf('rec-') === 0) ? _parseD365RecordId(key) : null; if (!p) { yes = true; return; }
+    var ts = X.rpTsOf(item), d = X.diff(p.schemaKey, 'p', MOCK_TODAY.getTime(), ts); if (d.ids.removed.indexOf(p.idx) >= 0) return;
+    X.maskFor(key).forEach(function (c) { if (yes || c === '\u0001none' || c === 'Modified') return; var v = X.val(p.schemaKey, 'p', p.idx, c, ts); if (v === '' || v == null) yes = true; });
+  });
+  return yes;
+}
+/* The sentence never depends on the data (it reads the same for 1 column or 5,000); only the scope and the choice pick one of four. It names Overwrite because this is what Overwrite means. */
+function _d365EmptySentence(cfg) {
+  var scoped = !!(window.D365X && D365X.scope && D365X.scope.mode !== 'whole');
+  if (cfg && cfg.d365WriteEmpty === false) return scoped ? 'Overwrite skips columns in scope that are empty at the restore point' : 'Overwrite skips columns empty at the restore point';
+  return scoped ? 'Overwrite replaces every column in scope, even those empty at the restore point' : 'Overwrite replaces every column, including columns empty at the restore point';
+}
+/* The link under the conflict cards: open Advanced settings and bring the row into view */
+function wsD365OpenAdvEmpty() {
+  ws.d365AdvExpanded = true; wsRenderAll();
+  setTimeout(function () {
+    var blk = [].slice.call(document.querySelectorAll('.ws-adv .rl-ablk')).filter(function (b) { return /What Overwrite writes/.test(b.textContent); })[0] || document.querySelector('.ws-adv'); if (!blk) return;
+    var rm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    blk.scrollIntoView({ behavior: rm ? 'auto' : 'smooth', block: 'center' });
+    var b = blk.querySelector('.ws-seg-btn.is-active'); if (b) b.focus({ preventScroll: true });
+  }, 60);
+}
+function wsSetD365WriteEmpty(write) {
+  if (!ws.config) ws.config = {};
+  ws.config.d365WriteEmpty = !!write;
+  wsRenderAll();
+}
+/* An existing record is overwritten in this job (the only case where empty values can matter): the Overwrite choice, or a changed-only scope where Overwrite is the only behaviour. */
+function _d365OverwriteOn(cfg) {
+  var sc = (typeof ws !== 'undefined' && ws.scopeStrategy === 'changed');
+  return (((cfg && cfg.d365ConflictMode) || (sc ? 'override' : 'skip')) === 'override') || sc;
+}
 function wsToggleReplaceOwners(checked) {
   if (!ws.config) ws.config = {};
   ws.config.d365ReplaceOwners = checked;
@@ -48367,6 +48438,7 @@ function wsRenderReviewD365(variant, n, noun, cfg) {
       + '</div>'
       + '<div class="ws-cfg-section-body">'
         + '<div class="ws-cfg-choices" style="grid-template-columns:repeat(' + conflictCols + ',1fr)">' + conflictBody + '</div>'
+        + ((cm === 'override' && _d365EmptyApplies()) ? '<div class="d365-empty-line">' + _d365EmptySentence(cfg) + '. Change in <button type="button" class="rl-lnk" onclick="wsD365OpenAdvEmpty()">Advanced settings</button>.</div>' : '')
         + ((cfg.d365Rel && cfg.d365Rel.on) ? '<div class="vis-alert vis-alert-info" role="note" style="margin-top:12px">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('info-outlined', 24)) || '') + '<div class="vis-alert-txt">' + (cm === 'override' ? 'Related records follow this choice, except parents. A parent record that already exists is left as it is.' : 'Related records follow this choice.') + '</div></div>' : '')
       + '</div>'
     + '</div>'
@@ -48377,9 +48449,11 @@ function wsRenderReviewD365(variant, n, noun, cfg) {
   // Advanced settings (collapsed by default): the two settings that only make sense when restoring into another environment.
   // Collapsed, the header says what is on, so a setting someone changed is never hidden.
   var _advOpen = !!ws.d365AdvExpanded, _ro = !!cfg.d365ReplaceOwners, _ov = _d365OvrList(cfg);
+  var _cross = cfg.d365TargetEnv === 'cross', _canOv = (cm === 'override' && _d365EmptyApplies()), _we = cfg.d365WriteEmpty !== false;
   var _advLines = [];
-  if (_ro) _advLines.push('Missing owners: assigned to ' + (cfg.d365DefaultOwner || 'a default user'));
-  if (_ov.length) _advLines.push('Override column values: ' + _ov.length + (_ov.length === 1 ? ' column' : ' columns'));
+  if (_cross && _ro) _advLines.push('Missing owners: assigned to ' + (cfg.d365DefaultOwner || 'a default user'));
+  if (_cross && _ov.length) _advLines.push('Override column values: ' + _ov.length + (_ov.length === 1 ? ' column' : ' columns'));
+  if (_canOv && !_we) _advLines.push('Overwrite writes: only columns with a value');
   var _ablk = function(title, desc, body){ return '<div class="rl-ablk"><div class="rl-at">' + title + '</div><div class="rl-ad">' + desc + '</div>' + body + '</div>'; };
   var _ownSeg = '<span class="ws-seg">' + [['fail', 'Fail the record'], ['assign', 'Assign to a default user']].map(function(o){
     var on = (o[0] === 'assign') === _ro;
@@ -48388,12 +48462,18 @@ function wsRenderReviewD365(variant, n, noun, cfg) {
   var _ownBody = _ownSeg + (_ro ? wsRenderDefaultOwnerPicker(cfg) + '<div class="rl-ad">Records restored with the default owner are listed in the job results.</div>'
     : '<div class="rl-ad">A record whose owner doesn’t exist at the destination is skipped and listed in the job results.</div>');
   var _ovrBody = _d365OvrInline();
-  var _advHtml = (cfg.d365TargetEnv !== 'cross') ? '' : ('<div class="ws-cfg-section ws-adv">'
+  var _weSeg = '<span class="ws-seg">' + [[true, 'Every column'], [false, 'Only columns with a value']].map(function(o){
+    return '<button type="button" class="ws-seg-btn' + (o[0] === _we ? ' is-active' : '') + '" onclick="wsSetD365WriteEmpty(' + o[0] + ')">' + o[1] + '</button>';
+  }).join('') + '</span>';
+  var _weBody = _weSeg + '<div class="rl-ad">' + (_d365EmptySentence(cfg) + '.' + (_we ? '' : ' They keep the value they have now.'))
+    + ((cfg.d365Rel && cfg.d365Rel.on) ? ' Related records follow this choice, except parents that already exist.' : '') + '</div>';
+  var _advHtml = (!_cross && !_canOv) ? '' : ('<div class="ws-cfg-section ws-adv">'
     + '<button class="ws-adv-hdr" type="button" onclick="wsD365ToggleAdv()" aria-expanded="' + (_advOpen ? 'true' : 'false') + '">' + (_advOpen ? _ADV_EXP_OPEN : _ADV_EXP_CLOSED) + '<span class="ws-adv-title">Advanced settings</span>' + (_advLines.length ? '<span class="ws-cfg-choice-chip" style="margin-left:8px">' + _advLines.length + ' on</span>' : '') + '</button>'
     + (!_advOpen && _advLines.length ? '<div class="rl-asum">' + wsEscape(_advLines.join('. ')) + '</div>' : '')
     + (_advOpen ? '<div>'
-      + _ablk('Missing record owners', 'What to do when a record’s owner doesn’t exist at the destination.', _ownBody)
-      + _ablk('Override column values', 'Set a column to a fixed value on the restored records.', _ovrBody)
+      + (_canOv ? _ablk('What Overwrite writes', 'Which columns Overwrite replaces in a record that already exists.', _weBody) : '')
+      + (_cross ? _ablk('Missing record owners', 'What to do when a record’s owner doesn’t exist at the destination.', _ownBody) : '')
+      + (_cross ? _ablk('Override column values', 'Set a column to a fixed value on the restored records.', _ovrBody) : '')
     + '</div>' : '')
   + '</div>');
   // Restore reason — same optional audit-context field the other
@@ -51993,7 +52073,7 @@ function wsCompareTableHtml(resourceId, item, rps, selRp) {
       // C2 toggle (2026-07-29): Success rest / Destructive hover reveal.
       return _rwAddedToggleHtml('wsRemoveFromRestore(\''+safeId+'\')', 'Added to restore');
     }
-    return '<button class="rw-use-side-btn" onclick="wsAddSideToRestore(\''+safeId+'\',\''+side+'\')" title="Use this restore point">'
+    return '<button class="rw-use-side-btn" onclick="wsAddSideToRestore(\''+safeId+'\',\''+side+'\')" data-tooltip="Use this restore point">'
       + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
       + 'Add to restore'
     + '</button>';
@@ -52121,6 +52201,9 @@ function wsPickCompRp(resourceId, side, rpId) {
 // latch class clears on mouseleave; while latched, clicks are ignored so a
 // double-click can't insta-remove what was just added.
 var _rwAddLatchTs = 0;
+// "Add to restore" / "Add": the condensed (pinned) header swaps to the short label by class, so scrolling never re-renders. Same text twice means nothing to swap.
+function _rwAddLbl(full, short) { return (!short || short === full) ? full : '<span class="rw-lbl-full">' + full + '</span><span class="rw-lbl-short">' + short + '</span>'; }
+function _rwIco(name) { return (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg(name, 20)) || ''; }   // the Button's 20px pre-icon, from the DS icon store
 function _rwStampAddLatch() { _rwAddLatchTs = Date.now(); }
 function _rwAddedToggleHtml(removeCall, addedLabel) {
   var latch = (Date.now() - _rwAddLatchTs) < 1000 ? ' just-added' : '';
@@ -52128,8 +52211,8 @@ function _rwAddedToggleHtml(removeCall, addedLabel) {
     ' onmouseleave="this.classList.remove(\'just-added\')"' +
     ' onclick="if(this.classList.contains(\'just-added\'))return;' + removeCall + '"' +
     ' aria-label="Added to restore \u2014 activate to remove">' +
-    '<span class="lbl-added"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' + addedLabel + '</span>' +
-    '<span class="lbl-remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Remove</span>' +
+    '<span class="lbl-added">' + _rwIco('sd-log-check') + addedLabel + '</span>' +
+    '<span class="lbl-remove">' + _rwIco('close-outlined') + 'Remove</span>' +
   '</button>';
 }
 function wsAddSideToRestore(resourceId, side) {
@@ -59848,13 +59931,13 @@ function rdBuildSideAction(side, sel, resource) {
       // C2 toggle (2026-07-29): Success rest / Destructive hover reveal.
       return _rwAddedToggleHtml('rdRemoveFromRestore()', _afLabels.addedCompact);
     }
-    var _afBtnInner = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add to restore';
+    var _afBtnInner = _rwIco('add-outlined') + _rwAddLbl('Add to restore', 'Add');
     var _afLockArg = rdState.fieldScope ? _rdPlanId() : resource;   // a field is checked as a field, not as the record that holds it
     if (_afLockArg && typeof _categoryLockBlocks === 'function' && _categoryLockBlocks(_afLockArg)) {
       return '<span class="icon-dtip" data-tooltip="' + _categoryLockMsg().replace(/"/g, '&quot;') + '">' +
-        '<button class="rw-use-side-btn" disabled aria-disabled="true" style="pointer-events:none;opacity:.5">' + _afBtnInner + '</button></span>';
+        '<button class="rw-use-side-btn" disabled aria-disabled="true" style="pointer-events:none">' + _afBtnInner + '</button></span>';
     }
-    return '<button class="rw-use-side-btn" onclick="rdAddFromPoint(\'' + side + '\')" data-tooltip="Adds this item to the restore job, restoring from the point shown in this column.">' + _afBtnInner + '</button>';
+    return '<button class="rw-use-side-btn" onclick="rdAddFromPoint(\'' + side + '\')" aria-label="Add to restore" data-tooltip="Adds this item to the restore job, restoring from the point shown in this column.">' + _afBtnInner + '</button>';
   }
   // CART RE-ANCHOR (single-RP cart): with items in the cart and the as-of lens
   // owning the point, EITHER compare column can move the WHOLE cart to its
@@ -59933,8 +60016,8 @@ function rdBuildSideAction(side, sel, resource) {
       return _rwAddedToggleHtml('rdRemoveFromRestore()', labels.addedCompact);
     }
     return '<button class="rw-use-side-btn" onclick="rdAddToRestore(\'' + side + '\')" data-tooltip="Add to your restore">' +
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
-      labels.addCompact +
+      _rwIco('add-outlined') +
+      _rwAddLbl(labels.addCompact, labels.addCompact === 'Select this point' ? 'Select' : '') +
     '</button>';
   }
   if (sel === 'snap') return '';
@@ -59955,12 +60038,12 @@ function rdBuildSideAction(side, sel, resource) {
   }
   // Not in cart: only genuinely restorable rows get the add.
   if (resource && typeof _restoreAvailability === 'function' && _restoreAvailability(resource) !== 'add') return '';
-  var _addBtnInner = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' + labels.addCompact;
+  var _addBtnInner = _rwIco('add-outlined') + _rwAddLbl(labels.addCompact, labels.addCompact === 'Select this point' ? 'Select' : '');
   // Single-category lock: mirror the footer's disabled-button + bubble so the
   // gate stays visible now that the footer Add is retired.
   if (resource && typeof _categoryLockBlocks === 'function' && _categoryLockBlocks(resource)) {
     return '<span class="icon-dtip" data-tooltip="' + _categoryLockMsg().replace(/"/g, '&quot;') + '">' +
-      '<button class="rw-use-side-btn" disabled aria-disabled="true" style="pointer-events:none;opacity:.5">' + _addBtnInner + '</button></span>';
+      '<button class="rw-use-side-btn" disabled aria-disabled="true" style="pointer-events:none">' + _addBtnInner + '</button></span>';
   }
   return '<button class="rw-use-side-btn" onclick="rdAddToRestore(\'' + side + '\')" data-tooltip="Adds this item to the restore, restoring from this point.">' +
     _addBtnInner +
@@ -59982,8 +60065,8 @@ function rdBuildSideAction(side, sel, resource) {
     '</span>';
   }
   return '<button class="rw-use-side-btn" onclick="rdAddToRestore(\'' + side + '\')" data-tooltip="Add to your restore">' +
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
-    labels.addCompact +
+    _rwIco('add-outlined') +
+    _rwAddLbl(labels.addCompact, labels.addCompact === 'Select this point' ? 'Select' : '') +
   '</button>';
 }
 // Returns { left: bool, right: bool } — which side (if any) currently holds
@@ -74840,6 +74923,19 @@ document.addEventListener('DOMContentLoaded', function () {
     rows.splice.apply(rows, [i < 0 ? rows.length : i + 1, 0].concat(add));
     return rows;
   };
+  /* Summary: the conflict row says what the Dynamics 365 choice is (the shared row reads a mode this card never sets, so it always said "Skip conflicts"), and an overwrite that keeps current values says so (writing empty values, the default, is what Overwrite already means) */
+  var _origSumEmpty = window.wsBuildConfigSummary;
+  window.wsBuildConfigSummary = function () {
+    var rows = _origSumEmpty.apply(this, arguments), cfg = ws && ws.config;
+    if (!cfg || !(typeof wsIsD365Cart === 'function' && wsIsD365Cart())) return rows;
+    var i = rows.findIndex(function (r) { return r.label === 'Conflict handling'; }), cr = i >= 0 ? rows[i] : null, ow = _d365OverwriteOn(cfg);
+    if (cr && /^(Skip conflicts|Override existing items|Restore as a copy)/.test(cr.value)) cr.value = ow ? 'Overwrite \u2014 existing records are replaced with the backed-up version' : 'Skip \u2014 existing records are kept and missing records are created';
+    if (ow && _d365EmptyApplies()) {
+      var sc2 = !!(X.scope && X.scope.mode !== 'whole'), keep = cfg.d365WriteEmpty === false;
+      rows.splice(i < 0 ? rows.length : i + 1, 0, { label: 'Overwrite writes', value: keep ? (sc2 ? 'Only columns in scope that have a value at the restore point' : 'Only columns that have a value at the restore point') : (sc2 ? 'Every column in scope, empty ones included' : 'Every column, empty ones included') });
+    }
+    return rows;
+  };
   /* Summary: how related records are treated when a record already exists */
   var _origSum3 = window.wsBuildConfigSummary;
   window.wsBuildConfigSummary = function () {
@@ -75604,7 +75700,7 @@ window.D365X.recChip = function (key, item) {
   X.decorateRestore = function () {
     [].slice.call(document.querySelectorAll('.top-action-bar')).forEach(function (bar) {
       var old = bar.querySelector('.dx-rs'); if (old) old.remove();
-      if (!X.on() || !state.restorePlan.size) return;
+      if (!X.on() || !state.restorePlan.size || X.scopeEmpty()) return;
       var btn = bar.querySelector('.tab-right-primary'); if (!btn || btn.closest('.dx-rs') || btn.disabled || !/^\s*Restore\s*$/.test(btn.textContent)) return;
       if (X.target === 'anchor' && X.jobHasDeleted()) { X.setTarget('compare'); return; }
       var res = jobRes(), rp = res && X.targetRp(res), when = rp ? day(rp.ts) : '', full = rp ? X.short(rp.ts) : '';
@@ -75693,6 +75789,13 @@ window.D365X.recChip = function (key, item) {
     recKeys().forEach(function (k) { var p = _parseD365RecordId(k); if (!p) return; if (d && d.ids.removed.indexOf(p.idx) >= 0) return; out.push(p.idx); });
     return out;
   }
+  /* the records in the job that were deleted since the older point: they restore whole under every scope */
+  function deletedInJob() {
+    var d = diffFor(schemaKey()), n = 0; if (!d) return 0;
+    recKeys().forEach(function (k) { var p = _parseD365RecordId(k); if (p && d.ids.removed.indexOf(p.idx) >= 0) n++; });
+    return n;
+  }
+  function deletedNote() { var n = deletedInJob(); return n ? '<div class="dxs-note"><div class="vis-alert" role="status">' + ico('info-outlined', 24) + '<div class="vis-alert-txt">' + pl(n, 'deleted record restores', 'deleted records restore') + ' whole under any scope</div></div></div>' : ''; }
   function reset() { S.mode = 'whole'; S.cols = {}; S.userMode = false; S.autoSet = false; S.rec = {}; S.pop = false; S.cat = ''; S.q = ''; closeMenu(); closePop(); }
   X.resetScope = reset;
 
@@ -75715,6 +75818,13 @@ window.D365X.recChip = function (key, item) {
       cl.ev.push({ t: ago(6, 15, 0), i: i, f: 'Logo', from: n % 2 ? sl + '.png, ' + (cur - 100) + ' KB' : sl + '_old.png, ' + cur + ' KB', env: 'p' });
     });
     cl.ev.sort(function (a, b) { return b.t - a.t; }); if (X.clearCache) X.clearCache();
+  })();
+
+  /* ── optional columns that some accounts leave blank. Real tables are like this, and the Empty values setting only matters where a column is empty at the restore point. Extended columns only: the table's own columns stay as they are. ── */
+  (function seedBlanks() {
+    var sc = D365_SCHEMAS.accounts; if (!sc || !sc.rows) return;
+    sc.rows.forEach(function (r, i) { if (i % 4 === 0) r.ParentAccount = ''; if (i % 5 === 0) r.Website = ''; if (i % 7 === 0) r.Phone = ''; });
+    if (X.clearCache) X.clearCache();
   })();
 
   /* ── what a record restores ─────────────────────────────────────────────────────────────────── */
@@ -75741,6 +75851,19 @@ window.D365X.recChip = function (key, item) {
     if (!base && !n) return '';
     return (base || 'Restoring whole records') + (n ? ', ' + pl(n, 'record', 'records') + ' customized' : '');
   };
+  /* The scope leaves nothing to restore: every record in the job resolves to no columns (Specific columns with none ticked, or Changed columns only when nothing differs). Restore and Continue stay off until it does. */
+  X.scopeEmpty = function () {
+    var n = 0, empty = true;
+    state.restorePlan.forEach(function (_, k) { n++; var c = (typeof k === 'string' && k.indexOf('rec-') === 0) ? X.colsFor(k) : null; if (!c || c.length) empty = false; });
+    return n > 0 && empty;
+  };
+  X.rowCols = function (key) {   /* what the job-level scope gives a record that is not in the job: null = the whole record; [] = nothing; else the columns (a table row's express Restore ignores per-record overrides) */
+    var p = _parseD365RecordId(key); if (!p) return null; var d = diffFor(p.schemaKey);
+    if (d && d.ids.removed.indexOf(p.idx) >= 0) return null;   /* deleted since: it is restored whole, whatever the scope */
+    return defaultCols(key);
+  };
+  X.rowEmptyTip = function () { return S.mode === 'changed' ? 'No changed columns on this item' : 'Choose at least one column in Restore scope'; };
+  X.scopeEmptyTip = function () { return S.mode === 'changed' ? 'No selected record has changed columns' : 'Choose at least one column to restore'; };
   function defaultCols(key) {
     var p = _parseD365RecordId(key); if (!p) return null; var d = diffFor(p.schemaKey);
     if (S.mode === 'changed') { var e = d && d.modifiedByIdx[p.idx]; return e ? e.changedCols.slice() : []; }
@@ -75797,7 +75920,7 @@ window.D365X.recChip = function (key, item) {
   var origOpenDr = window.openRecordDrawer;
   window.openRecordDrawer = function (id, nameOverride, subOverride, asOfDate, ctx) {
     X.pend = {};
-    if (typeof id === 'string' && id.indexOf('rec-') === 0 && state.wlLabel === 'Dynamics 365' && X.on() && !(ctx && ctx.scopeKey) && listedCols(id).length) { ctx = ctx || {}; X.drawerCtx(id, ctx); }
+    /* [parked 2026-11-09, user] a panel opened from the table never edits the scope; per-record columns are refined in the restore wizard only (wsPreviewBasketItem calls D365X.drawerCtx itself). was: if (... && X.on() && !(ctx && ctx.scopeKey) && listedCols(id).length) { ctx = ctx || {}; X.drawerCtx(id, ctx); } */
     return origOpenDr.call(this, id, nameOverride, subOverride, asOfDate, ctx);
   };
   var origRdBody = window.renderRdBody;
@@ -75851,9 +75974,10 @@ window.D365X.recChip = function (key, item) {
   X.decorateScope = function () {
     [].slice.call(document.querySelectorAll('.top-action-bar')).forEach(function (bar) {
       [].slice.call(bar.querySelectorAll('.dxs-btn, .dxs-dtip')).forEach(function (o) { o.remove(); });
+      [].slice.call(bar.querySelectorAll('.dxs-rdis')).forEach(function (w) { var b0 = w.querySelector('button'); if (b0) { b0.disabled = false; b0.removeAttribute('aria-disabled'); w.parentNode.insertBefore(b0, w); } w.remove(); });
       if (!applies()) return;
       var anchor = bar.querySelector('.dx-rs') || bar.querySelector('.tab-right-primary'); if (!anchor) return;
-      var empty = !state.restorePlan.size, q = scopeParts(), b = document.createElement('button');
+      var empty = false, q = scopeParts(), b = document.createElement('button');   /* [2026-11-09, user] never disabled: the scope is set before anything is selected (was: disabled with "Select records first") */
       b.type = 'button'; b.className = 'dxs-btn'; b.setAttribute('aria-haspopup', 'menu'); b.setAttribute('aria-expanded', String(!!(S.menu || S.pop)));
       if (q.tip) b.setAttribute('data-tooltip', q.tip);
       if (empty) { b.disabled = true; b.setAttribute('aria-disabled', 'true'); }
@@ -75862,6 +75986,10 @@ window.D365X.recChip = function (key, item) {
       // Disabled buttons don't take hover, so (as everywhere else in the app) the tooltip rides on a wrapper: it says why the control is off and what to do.
       if (empty) { var w = document.createElement('span'); w.className = 'icon-dtip dxs-dtip'; w.setAttribute('data-tooltip', 'Select records first. Then choose whether to restore them whole or only specific columns.'); w.appendChild(b); anchor.parentNode.insertBefore(w, anchor); }
       else anchor.parentNode.insertBefore(b, anchor);
+      if (!empty && X.scopeEmpty()) {
+        var rb = bar.querySelector('.tab-right-primary');
+        if (rb && !rb.disabled && /^\s*Restore\s*$/.test(rb.textContent)) { rb.disabled = true; rb.setAttribute('aria-disabled', 'true'); var rw = document.createElement('span'); rw.className = 'icon-dtip dxs-rdis'; rw.setAttribute('data-tooltip', X.scopeEmptyTip()); rb.parentNode.insertBefore(rw, rb); rw.appendChild(rb); }
+      }
     });
   };
   function liveBtn() { var bs = [].slice.call(document.querySelectorAll('.dxs-btn')); return bs.filter(function (b) { return b.offsetParent !== null; })[0] || bs[0] || null; }
@@ -75900,8 +76028,16 @@ window.D365X.recChip = function (key, item) {
   }
 
   /* ── picker: choose columns, with the evidence for each ─────────────────────────────────────── */
+  /* The records the picker's evidence is about: the ones in the job; before anything is selected (the scope is set first), every live record of the table. */
+  function evidenceIdx() {
+    var own = liveIdx(); if (own.length || recKeys().length) return own;
+    var sk = schemaKey(), sc = sk && D365_SCHEMAS[sk]; if (!sc || !sc.rows) return [];
+    var d = diffFor(sk), out = [];
+    for (var i = 0; i < sc.rows.length; i++) { if (d && d.ids.removed.indexOf(i) >= 0) continue; out.push(i); }
+    return out;
+  }
   function ctxFor(c) {
-    var sk = schemaKey(), res = curRes(), idxs = liveIdx(), d = diffFor(sk), env = X.env(), r = { ch: 0, n: idxs.length, l2: '', ev: '', tip: '' };
+    var sk = schemaKey(), res = curRes(), idxs = evidenceIdx(), who = recKeys().length ? 'selected ' : '', d = diffFor(sk), env = X.env(), r = { ch: 0, n: idxs.length, l2: '', ev: '', tip: '' };
     if (!sk || !idxs.length) return r;
     var ch = d ? idxs.filter(function (i) { var e = d.modifiedByIdx[i]; return e && e.changedCols.indexOf(c) >= 0; }) : [];
     r.ch = ch.length;
@@ -75915,10 +76051,10 @@ window.D365X.recChip = function (key, item) {
           what = (nameDiff && sizeDiff ? 'Name and size' : nameDiff ? 'Name' : 'Size') + ' changed';
           if (!nameDiff) r.l2 = pa[1] + ' on ' + day(tsB) + ', ' + pb[1] + ' on ' + day(tsA);
         }
-        r.tip = (what ? what + '. ' : '') + r.l2 + (ch.length > 1 ? ', and ' + pl(ch.length - 1, 'more selected record', 'more selected records') : '');
+        r.tip = (what ? what + '. ' : '') + r.l2 + (ch.length > 1 ? ', and ' + pl(ch.length - 1, 'more ' + who + 'record', 'more ' + who + 'records') : '');
         r.ev = ch.length + ' of ' + idxs.length + ' changed';
         if (typeOf(c) === 'File' || typeOf(c) === 'Image') { var mb = 0; ch.forEach(function (i) { var m = /(\d+(?:\.\d+)?)\s*(KB|MB|GB)/.exec(String(X.val(sk, env, i, c, tsB))); if (m) mb += m[2] === 'KB' ? m[1] / 1000 : m[2] === 'GB' ? m[1] * 1000 : +m[1]; }); if (mb) r.ev += ', ' + (mb < 10 ? Math.round(mb * 10) / 10 : Math.round(mb)) + ' MB'; }
-      } else r.l2 = 'Unchanged in the selected records';
+      } else r.l2 = who ? 'Unchanged in the selected records' : 'Unchanged in this table';
     } else {
       var ts = (res && X.anchorTs(res)) || MOCK_TODAY.getTime(), seen = [];
       idxs.forEach(function (i) { var v = String(X.val(sk, env, i, c, ts)); if (v && seen.indexOf(v) < 0) seen.push(v); });
@@ -75941,7 +76077,7 @@ window.D365X.recChip = function (key, item) {
       return '<label class="dxs-it' + (en ? '' : ' dis') + '"><input type="checkbox" class="dxs-cb" data-col="' + esc(c.k) + '" ' + (on ? 'checked' : '') + (en ? '' : ' disabled') + '><span class="dxs-in"><span class="dxs-l1">' + esc(c.k) + '<span class="dxs-tyg">' + typeOf(c.k) + '</span></span><span class="dxs-l2"' + (cx.tip ? ' data-tooltip="' + esc(cx.tip) + '"' : '') + '>' + esc(cx.l2) + '</span></span><span class="dxs-ev">' + esc(cx.ev) + '</span></label>';
     }).join('') || '<div class="dxs-none">Nothing matches.</div>';
     return '<button type="button" class="dxs-back" id="dxsBack" aria-label="Choose columns. Back to restore scope" data-tooltip="Back to restore scope"><span class="dxs-back-i">' + ico('keyboard-arrow-down-outlined', 20) + '</span>Choose columns</button>'
-      + '<div class="tnwl-search rl-search dxs-search">' + ico('search-outlined', 20) + '<input id="dxsQ" type="text" autocomplete="off" placeholder="Search columns" value="' + esc(S.q) + '"></div>' + chips + '<div class="dxs-rows">' + rows + '</div>'
+      + '<div class="tnwl-search rl-search dxs-search">' + ico('search-outlined', 20) + '<input id="dxsQ" type="text" autocomplete="off" placeholder="Search columns" value="' + esc(S.q) + '"></div>' + chips + deletedNote() + '<div class="dxs-rows">' + rows + '</div>'
       + '<div class="rl-pf dxs-pf"><span class="rl-sp">' + pl(nChosen(), 'column selected', 'columns selected') + '</span>' + (shown.length ? '<button type="button" class="rl-lnk" id="dxsAll">' + (allOn ? 'Deselect ' + shown.length : 'Select all ' + shown.length) + '</button>' : '') + '<button type="button" class="rl-lnk" id="dxsClear">Clear</button></div>';
   }
   function openPop() {
@@ -75994,7 +76130,9 @@ window.D365X.recChip = function (key, item) {
   /* the bar re-renders on every cart change: put the scope back, drop overrides for records that left the job, and start over when the job is empty */
   var origBar = window.renderTopActionBar;
   window.renderTopActionBar = function () {
-    if (!recKeys().length && (S.mode !== 'whole' || S.userMode || Object.keys(S.cols).length || Object.keys(S.rec).length)) reset();
+    /* [2026-11-09, user] the scope belongs to the table, not to the selection: emptying the selection no longer resets it. It ends when you leave Dynamics 365, and "changed" ends with compare (it exists only between two restore points). */
+    if (state.wlLabel !== 'Dynamics 365' && (S.mode !== 'whole' || S.userMode || Object.keys(S.cols).length || Object.keys(S.rec).length)) reset();
+    else if (S.mode === 'changed' && !X.on()) { S.mode = 'whole'; S.userMode = false; S.autoSet = false; }
     commitPend();
     Object.keys(S.rec).forEach(function (k) { if (!state.restorePlan.has(k)) delete S.rec[k]; });
     var r = origBar.apply(this, arguments); try { X.decorateScope(); } catch (e) {} return r;
@@ -76086,6 +76224,7 @@ window.D365X.recChip = function (key, item) {
     '.dxs-cb { width: 16px; height: 16px; accent-color: var(--em-green); margin: 3px 0 0; } .dxs-in { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }',
     '.dxs-it .dxs-l1 { display: flex; align-items: center; } .dxs-it .dxs-l2 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .dxs-it.dis .dxs-l1 { color: var(--black-40); }',
     '.dxs-tyg { display: inline-flex; height: 18px; padding: 0 4px; align-items: center; border-radius: 2px; background: var(--black-5); font-size: 11px; font-weight: 500; color: var(--black-60); margin-left: 8px; }',
+    '.dxs-note { flex: none; padding: 8px 16px 0; }',
     '.dxs-ev { font-size: 14px; line-height: 22px; color: var(--black-60); white-space: nowrap; } .dxs-none { padding: 16px; text-align: center; color: var(--black-60); }',
     '.dxs-pf { flex: none; display: flex; align-items: center; justify-content: flex-start; gap: 16px; padding: 8px 16px; border-top: 1px solid var(--black-10); background: var(--white); } .dxs-pf .rl-sp { order: 3; margin-left: auto; }'
   ].join('\n');
@@ -76110,7 +76249,7 @@ window.D365X.recChip = function (key, item) {
 .rt-off-t { font-size: 16px; font-weight: 500; color: var(--black-100); } .rt-off-d { font-size: 14px; color: var(--black-60); max-width: 420px; } .rt-off-h { font-size: 14px; color: var(--black-60); } .rt-off .ws-btn { margin-top: 8px; }
 .rf-card { margin-top: 12px; } .rt-pane .rf-card { margin-top: 0; } .rf-h { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 8px 16px; min-height: 44px; background: var(--black-5); font-size: 16px; line-height: 22px; } .rf-h b { font-weight: 500; }
 .rf-card .rl-tools-band .rl-cats { padding: 0; } .rf-card .ws-table-wrap { border: 0; } .rf-r { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 16px; min-height: 36px; font-size: 16px; line-height: 22px; color: var(--black-100); } .rf-c { font-variant-numeric: tabular-nums; color: var(--black-60); } .rf-more { color: var(--black-60); }
-.rl-bandbtn { display: flex; align-items: center; gap: 8px; width: 100%; margin: 0; padding: 0; border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; } .rl-bchev { flex: none; width: 24px; height: 24px; border-radius: 4px; background: var(--green-s10); color: var(--em-green); display: inline-flex; align-items: center; justify-content: center; transition: transform .15s ease; } .rl-bandbtn[aria-expanded="false"] .rl-bchev { transform: rotate(-90deg); }   /* the Co-owners chevron on the onboarding Basic information step */ .rl-bandbtn:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px #008436; border-radius: 2px; }
+.rl-bandbtn { display: flex; align-items: center; gap: 8px; width: 100%; margin: 0; padding: 0; border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; } .rl-bchev { flex: none; width: 20px; height: 20px; border-radius: 4px; background: none; color: var(--black-100); display: inline-flex; align-items: center; justify-content: center; transition: transform .15s ease; } .rl-bandbtn[aria-expanded="false"] .rl-bchev { transform: rotate(-90deg); } .rl-bandbtn[aria-expanded="true"] .rl-bchev { background: var(--green-s10); color: var(--em-green); }   /* the library's _Expand Icon: collapsed is a plain dark chevron, only the expanded state takes the accent tint */   /* the Co-owners chevron on the onboarding Basic information step */ .rl-bandbtn:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px #008436; border-radius: 2px; }
 .rl-more td { padding: 0; } .rl-moreb { display: block; width: 100%; height: 44px; margin: 0; padding: 0 16px; border: 0; background: none; font: inherit; font-weight: 500; color: var(--em-green); text-align: center; cursor: pointer; } .rl-moreb:hover { background: var(--em-green-tint); } .rl-moreb:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--em-green); }
 .rl-lvbtn { position: relative; }
 .rt-hint { margin: 0 0 12px; } .rt-hint .va-x { flex: none; width: 24px; height: 24px; margin: 0; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 0; background: none; color: var(--va-ic); cursor: pointer; border-radius: 4px; } .rt-hint .va-x:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px #008436; } .rc-card.rc-lead { margin: 0 0 16px; } .rt-pane .rl-body { padding: 0; border-top: 0; } .rt-pane-below { margin-top: 12px; }
@@ -76118,9 +76257,22 @@ window.D365X.recChip = function (key, item) {
 /* The related list is ONE card: the picker, levels and search form its header band; the table sits directly under them; the notice follows below. */
 .rt-card { border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); }
 .rl-body .ws-sel-cq + .wspg .pg-bar { border-top: 0; }   /* the pager sits under the card, which already ends in its own border: a second line above the bar read as a stray rule */
-.rt-card .ws-table-wrap { border: 0; border-radius: 0 0 8px 8px; }
+.rt-card .ws-table-wrap { border: 0; border-radius: 0 0 7px 7px; } .rt-card > .ws-table-wrap:first-child { border-radius: 7px; }   /* the card's border is 1px, so what sits inside it rounds at 7px; with no band above, the table's top corners must round too or its square white header paints over the card's curved border */
 .rt-card .rl-tools-band { margin: 0; padding: 8px; }
 .rt-card .vis-alert { margin: 0 8px 8px; }   /* the cap notice sits between the toolbar and the table, as in the app's own related list */
+/* Related records controls (H): the search bar, the scope row inside the Include card, and the picker-style trigger below. */
+.rl-bar { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; }
+.rl-scope { display: flex; align-items: center; padding: 12px 16px; border-top: 1px solid var(--border-light); }
+.rl-pair { display: inline-flex; align-items: center; gap: 8px; }
+.rl-right { display: inline-flex; align-items: center; }
+.rl-right .rl-pop { left: auto; right: 0; }
+.rl-scope .rl-lvbtn, .rl-bar .rl-lvbtn { width: 36px; height: 36px; }   /* icon-only Levels beside the 36px trigger, same height */
+/* Figma Workload Picker 9286-65490 (trigger + panel). Cloned from the app's own Workload / Restore Point controls (.wl-chrome-row .tnwl-btn): 36px, 1px border, 4px radius, quiet label, medium value, chevron that flips when open. */
+.rl-trig { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font-family: inherit; font-size: 16px; color: var(--black-100); cursor: pointer; }
+.rl-trig:hover, .rl-trig[aria-expanded="true"] { border-color: var(--black-40); }
+.rl-trig:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--white), 0 0 0 4px var(--em-green); }
+.rl-trig-pre, .rl-trig-note { color: var(--black-60); } .rl-trig-val { font-weight: 500; }
+.rl-trig-chev { display: inline-flex; color: var(--black-60); transition: transform .18s ease; } .rl-trig[aria-expanded="true"] .rl-trig-chev { transform: rotate(180deg); }
 
 /* DS TABS — the Design System library's \"New Components / Tabs\" (Type = Tab), read live from the component: white tab, 2px line on the TOP of the selected tab, centred label + count pill (Updates), no strip baseline.
    Recoloured to Veeam Vision: the lime #86b62c line/label/pill becomes Green/S80; idle label Black/60, idle pill Black/10 fill with Black/50 text. Scaled to the wizard body (library is 18/22 type on a 46px tab): 14/20 on a 36px tab, 20px pill. */
@@ -76145,5 +76297,39 @@ window.D365X.recChip = function (key, item) {
 .rt-add.ws-btn:hover { background: var(--black-3); }
 .rt-add.ws-btn svg { color: var(--em-green); }   /* same height as the tab strip (no jump when it appears); text aligned to the table's left edge */
 </style>
+
+<script id="d365-express-scope-js">
+/* ── Dynamics 365 express restore at the table, anchored on the Restore scope control (2026-11-09, from d365-express-scope-proto.html) ──────────────────
+   1. express restore of a row inherits the JOB-level scope (mode + columns); it never inherits the batch's per-record overrides, and puts them back when the wizard closes
+   2. a row's Restore is disabled, with the reason, when the scope leaves nothing for that row; otherwise its tooltip names the scope */
+(function () {
+  var X = window.D365X, S = X && X.scope; if (!S) return;
+  var oEx = window._v1ExpressRestore, oTd = window._v1ExpressTeardown;
+  window._v1ExpressRestore = function (cb) {
+    if (state.wlLabel !== 'Dynamics 365') return oEx.apply(this, arguments);
+    ws._dxsRec = JSON.parse(JSON.stringify(S.rec)); S.rec = {};   /* the batch's per-record overrides are the batch's: not this job's, and not lost to it */
+    var r = oEx.apply(this, arguments);
+    if (!ws._expressMode && ws._dxsRec) { S.rec = ws._dxsRec; ws._dxsRec = null; }   /* nothing was staged: express aborted */
+    return r;
+  };
+  window._v1ExpressTeardown = function () {
+    var r = oTd.apply(this, arguments);
+    if (ws._dxsRec) { S.rec = ws._dxsRec; ws._dxsRec = null; try { renderTopActionBar(); } catch (e) {} }
+    return r;
+  };
+  var oRow = window._v1RowRestoreIconBtn;
+  window._v1RowRestoreIconBtn = function (opts) {
+    var m = /^addToRestoreRecordRow\('([^']+)'\)/.exec((opts && opts.mainAction) || '');
+    if (!m || state.wlLabel !== 'Dynamics 365' || (opts && opts.disabled)) return oRow.apply(this, arguments);
+    var cols = X.rowCols('rec-' + m[1]);
+    if (cols && !cols.length) return oRow.call(this, Object.assign({}, opts, { disabled: true, tip: X.rowEmptyTip() }));
+    var html = oRow.apply(this, arguments);
+    if (cols) { var t = 'Restore this item: ' + X.scopeSummary(); html = html.replace('data-tooltip="Restore this item"', 'data-tooltip="' + t.replace(/"/g, '&quot;') + '"'); }
+    return html;
+  };
+  var oc = window._clearInvCompareDateImpl;
+  window._clearInvCompareDateImpl = function () { var r = oc.apply(this, arguments); try { renderTopActionBar(); if (document.getElementById('childTable')) childRender(); } catch (e) {} return r; };   /* "changed" ends with compare: repaint the bar and the rows */
+})();
+</script>
 </body>
 </html>
