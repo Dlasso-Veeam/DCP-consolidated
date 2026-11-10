@@ -1600,6 +1600,7 @@ td.rec-cell-lt { max-width: 340px; min-width: 220px; vertical-align: top; }
 .rp-chip { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font-family: inherit; font-size: 16px; color: var(--black-100); cursor: pointer; }
 .rp-chip:hover { border-color: var(--black-40); }
 .rp-chip-label { color: var(--black-60); }
+.rp-chip-ico { flex: none; color: var(--black-60); margin-right: -4px; }   /* calendar pre-icon: quiet like the label; -4px pulls the 8px chip gap to 4px so icon + label read as one unit */
 .wl-chrome-row.dx-on { flex-wrap: wrap; row-gap: 8px; } .wl-chrome-row.dx-on .rp-chip, .wl-chrome-row.dx-on .rp-chip-val { white-space: nowrap; }   /* D365 compare: the two anchors + counters can wrap to a second line in narrow panes instead of breaking inside a chip */
 .rp-chip-val { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 2px; background: var(--soft-green-bg); color: var(--btn-success); font-weight: 500; } /* Vision Chip Green Light (S5/S80); was --green-10/--green */
 
@@ -7835,6 +7836,11 @@ body.ai-open.ai-full #toast { right: 24px; }   /* full screen: nothing beside it
 .rl-head .rl-sm { flex: 1; min-width: 0; font-size: 14px; line-height: 20px; color: var(--black-60); }
 .rl-head .rl-sm b { font-weight: 500; color: var(--black-100); }
 .rl-def { padding: 0 16px 12px 68px; margin-top: -4px; font-size: 14px; line-height: 20px; color: var(--black-60); }
+/* Include related records over the 100-record limit: the card's own content dims, the explainer under it stays at full strength */
+.rc-card.is-disabled { opacity: 1; cursor: default; }
+.rc-card.is-disabled .sc-header, .rc-card.is-disabled .sc-desc { opacity: .5; cursor: not-allowed; }
+.rc-card.is-disabled:not(.is-selected) .sc-header:hover { background: transparent; }
+.rc-limit { padding: 0 16px 16px; }
 .rl-def .rl-how { color: var(--em-green); font-weight: 500; text-decoration: underline; cursor: help; }
 .rl-body { padding: 16px; border-top: 1px solid var(--border-light); }
 .rl-tools { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
@@ -8904,11 +8910,13 @@ window.vchip = function (text, type, dot) { return '<span class="vchip vchip-' +
               <div class="tnwl-panel" id="tnwlPanelHost"></div>
             </div>
       <button type="button" class="rp-chip" id="rpChip" onclick="wlRpOpen(event)" aria-label="Change the restore point you are browsing">
-        <span class="rp-chip-label">Restore Point</span>
+        <svg class="rp-chip-ico" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" data-securiti-icon="calendar-today-outlined" aria-hidden="true"><path d="M5.7 21C5.205 21 4.78125 20.8238 4.42875 20.4713C4.07625 20.1188 3.9 19.695 3.9 19.2V6.6C3.9 6.105 4.07625 5.68125 4.42875 5.32875C4.78125 4.97625 5.205 4.8 5.7 4.8H6.6V3.9C6.6 3.645 6.68625 3.43125 6.85875 3.25875C7.03125 3.08625 7.245 3 7.5 3C7.755 3 7.96875 3.08625 8.14125 3.25875C8.31375 3.43125 8.4 3.645 8.4 3.9V4.8H15.6V3.9C15.6 3.645 15.6863 3.43125 15.8588 3.25875C16.0313 3.08625 16.245 3 16.5 3C16.755 3 16.9688 3.08625 17.1413 3.25875C17.3138 3.43125 17.4 3.645 17.4 3.9V4.8H18.3C18.795 4.8 19.2188 4.97625 19.5713 5.32875C19.9238 5.68125 20.1 6.105 20.1 6.6V19.2C20.1 19.695 19.9238 20.1188 19.5713 20.4713C19.2188 20.8238 18.795 21 18.3 21H5.7ZM5.7 19.2H18.3V10.2H5.7V19.2ZM5.7 8.4H18.3V6.6H5.7V8.4Z" fill="currentColor" fill-rule="nonzero"/></svg><!-- DS store glyph calendar-today-outlined (securiti-icons-data.js) -->
+        <span class="rp-chip-label">Protected</span>
         <span class="rp-chip-val" id="rpChipVal">Latest</span>
       </button>
       <!-- D365 TABLE-COMPARE EXPLORATION: second time anchor. "Compare to" = the restore point the view is compared with (and restored from). Dynamics 365 only. -->
       <button type="button" class="rp-chip" id="d365CmpChip" onclick="openCalPicker(event,'invCmp')" style="display:none" aria-label="Compare this view with an earlier restore point">
+        <svg class="rp-chip-ico" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" data-securiti-icon="calendar-today-outlined" aria-hidden="true"><path d="M5.7 21C5.205 21 4.78125 20.8238 4.42875 20.4713C4.07625 20.1188 3.9 19.695 3.9 19.2V6.6C3.9 6.105 4.07625 5.68125 4.42875 5.32875C4.78125 4.97625 5.205 4.8 5.7 4.8H6.6V3.9C6.6 3.645 6.68625 3.43125 6.85875 3.25875C7.03125 3.08625 7.245 3 7.5 3C7.755 3 7.96875 3.08625 8.14125 3.25875C8.31375 3.43125 8.4 3.645 8.4 3.9V4.8H15.6V3.9C15.6 3.645 15.6863 3.43125 15.8588 3.25875C16.0313 3.08625 16.245 3 16.5 3C16.755 3 16.9688 3.08625 17.1413 3.25875C17.3138 3.43125 17.4 3.645 17.4 3.9V4.8H18.3C18.795 4.8 19.2188 4.97625 19.5713 5.32875C19.9238 5.68125 20.1 6.105 20.1 6.6V19.2C20.1 19.695 19.9238 20.1188 19.5713 20.4713C19.2188 20.8238 18.795 21 18.3 21H5.7ZM5.7 19.2H18.3V10.2H5.7V19.2ZM5.7 8.4H18.3V6.6H5.7V8.4Z" fill="currentColor" fill-rule="nonzero"/></svg>
         <span class="rp-chip-label">Compare to</span>
         <span class="rp-chip-val" id="d365CmpVal">Choose a restore point</span>
       </button>
@@ -47162,7 +47170,12 @@ var D365REL_FN = ['Alex', 'Priya', 'Jordan', 'Sam', 'Maria', 'Chen', 'Olu', 'Nin
 var _d365RelCache = {};
 function _d365H(str) { var h = 0; for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0; return Math.abs(h); }
 function _d365RelT(k) { return D365REL_T.filter(function(t){ return t.k === k; })[0]; }
-function _d365RelCfg() { var c = ws.config || (ws.config = {}); return c.d365Rel || (c.d365Rel = { on: false, open: false, tbl: {}, ex: {}, xp: {}, page: 1, q: '', pop: false, tq: '' }); }
+function _d365RelCfg() {
+  var c = ws.config || (ws.config = {}); c = c.d365Rel || (c.d365Rel = { on: false, open: false, tbl: {}, ex: {}, xp: {}, page: 1, q: '', pop: false, tq: '' });
+  // the cart grew past the limit while the option was on: switch it off so nothing downstream (tabs, summary, restore) still reads it as on
+  if (c.on && _d365RelRoots().length > D365REL_MAX_ROOTS) { c.on = false; c.open = false; c.tab = 'sel'; c.loading = false; c.rowsLoading = false; c.pop = false; clearTimeout(c._lt); clearTimeout(c._lt2); }
+  return c;
+}
 // The records the job starts from. They depend only on which records are in the cart, and every accessor below asks for them, so they are worked out once per cart and reused (28 selected records cost ~1.4 ms each time; the block asks dozens of times per render).
 var _d365RelRootsMemo = { sig: null, val: [] };
 function _d365RelRoots() {
@@ -47220,6 +47233,7 @@ function _d365RelGen(k) {   // what the backend would hold: EVERY related record
 }
 // Scale rules (user 2026-10-27): a count is only taken up to 1,000 per table (exact below it, "1,000+" above), and a table lists a preview of its
 // first 25 records. Everything else is restored by the rule ("include related records"), not by what is on screen.
+var D365REL_MAX_ROOTS = 100;   // Include related records only works for a cart of up to 100 records (user 2026-11-10); above that the option is disabled and explains why
 var D365REL_CAP = 1000, D365REL_PREVIEW = 25;   // was 100: the list shows 10 at a time and search reaches every record, so a longer preview only cost requests (user 2026-10-28)
 function _d365RelRecs(k) { return _d365RelGen(k).slice(0, D365REL_PREVIEW); }
 function _d365RelBound(k) { var n = _d365RelGen(k).length; return { n: Math.min(n, D365REL_CAP), cap: n > D365REL_CAP, all: n }; }
@@ -47335,6 +47349,7 @@ function _relNote() {
   return '<div class="rl-note">This job restores <b>' + _d365RelShow(_d365RelRoots().length + _d365RelTotal()) + ' records</b> from the selected records and their related records.' + (nex ? ' ' + _d365RelFmt(nex) + ' removed.' : '') + '</div>';
 }
 function wsRelToggle(on) {
+  if (on && _d365RelRoots().length > D365REL_MAX_ROOTS) return;   // over the limit: the card is disabled, this guards a stray keyboard or script call
   var c = _d365RelCfg(); c.on = on; c.open = on; c.tab = on ? 'rel' : 'sel'; c.pop = false; c.page = 1; c.xp = {}; c.lm = {}; c.lmBusy = {}; c.tpage = 1; clearTimeout(c._lt); clearTimeout(c._lt2);
   c.loading = !!on; c.rowsLoading = !!on; c.pageLoading = false; clearTimeout(c._lp);
   if (on) {
@@ -47430,8 +47445,11 @@ function _d365RelBlock(part) {
   // The card is the app's selection card (.ws-cfg-choice.sc): icon and title, one checkbox at the right, a description below. Ticking it is what opens the card, so there is nothing else to click to show or hide the list.
   var _rcIcon = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('child-roles-outlined', 20)) || '';
   var _rcKey = "if (event.key === ' ' || event.key === 'Enter') { event.preventDefault(); wsRelToggle(" + !c.on + "); }";
-  var head = '<div class="sc-header" role="checkbox" aria-checked="' + !!c.on + '" tabindex="0" onclick="wsRelToggle(' + !c.on + ')" onkeydown="' + _rcKey + '"><span class="rc-icon">' + _rcIcon + '</span><span class="ws-cfg-choice-title">Include related records</span><span class="rc-cb">' + _d365RelCb(c.on) + '</span></div>'
-    + '<div class="sc-desc"><div class="rl-def">Records directly linked to your selection, like an account’s contacts and cases. <span class="rl-how" data-tooltip="' + wsEscape(tip) + '">How this works</span></div>' + (c.on && REL_OPT !== 'E' && REL_OPT !== 'F' && REL_OPT !== 'G' && REL_OPT !== 'H' ? '<div class="rc-line">' + sm + '</div>' : '') + '</div>';   // E: the Related records tab carries the count
+  var _over = roots.length > D365REL_MAX_ROOTS;
+  var _hdAttrs = _over ? ' aria-disabled="true" tabindex="-1"' : ' tabindex="0" onclick="wsRelToggle(' + !c.on + ')" onkeydown="' + _rcKey + '"';
+  var head = '<div class="sc-header" role="checkbox" aria-checked="' + !!c.on + '"' + _hdAttrs + '><span class="rc-icon">' + _rcIcon + '</span><span class="ws-cfg-choice-title">Include related records</span><span class="rc-cb">' + _d365RelCb(c.on) + '</span></div>'
+    + '<div class="sc-desc"><div class="rl-def">Records directly linked to your selection, like an account’s contacts and cases. <span class="rl-how" data-tooltip="' + wsEscape(tip) + '">How this works</span></div>' + (c.on && REL_OPT !== 'E' && REL_OPT !== 'F' && REL_OPT !== 'G' && REL_OPT !== 'H' ? '<div class="rc-line">' + sm + '</div>' : '') + '</div>'
+    + (_over ? '<div class="rc-limit"><div class="vis-alert" role="status">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('info-outlined', 24)) || '') + '<div class="vis-alert-txt">Related records can be included for up to ' + D365REL_MAX_ROOTS + ' records. You have ' + roots.length + ' selected. Remove ' + (roots.length - D365REL_MAX_ROOTS) + (roots.length - D365REL_MAX_ROOTS === 1 ? ' record' : ' records') + ' to turn this on.</div></div></div>' : '');   // E: the Related records tab carries the count
   var body = '', _ctScope = '', _above = '';
   if (c.on) {
     // the table dropdown (n of y, records per table), left of search
@@ -47520,7 +47538,7 @@ function _d365RelBlock(part) {
   if (loading) body = (REL_OPT === 'A') ? _d365RelSkeletonA() : _d365RelSkeleton();
   var nex = Object.keys(c.ex).length;
   if (REL_OPT === 'F' || REL_OPT === 'G') {   // G is E's card and tabs with F's table-level list as the Related records tab. F: a slim row for the control; the related tables as one inline list (the Related tables picker, Levels and table search, laid out as a table instead of a popover). Records are not listed in this option.
-    var _row = '<div class="ws-cfg-choice sc rc-card' + (REL_OPT === 'G' ? ' rc-lead' : '') + (c.on ? ' is-selected' : '') + '" role="group" aria-label="Include related records">' + head + '</div>';   // the same selection card as D and E
+    var _row = '<div class="ws-cfg-choice sc rc-card' + (REL_OPT === 'G' ? ' rc-lead' : '') + (c.on ? ' is-selected' : '') + (_over ? ' is-disabled' : '') + '" role="group" aria-label="Include related records">' + head + '</div>';   // the same selection card as D and E
     var _gpane = REL_OPT === 'G' && part === 'pane';
     if (REL_OPT === 'G' && !_gpane) return _row;
     if (!c.on) return _gpane ? '' : _row;
@@ -47546,11 +47564,11 @@ function _d365RelBlock(part) {
     var _tbl = '<div class="ws-table-wrap"><table class="ws-table"><colgroup><col class="ws-col-name"><col class="ws-col-type" style="width:190px"><col class="ws-col-target" style="width:176px"><col style="width:48px"></colgroup><thead><tr><th class="ws-th">Name</th><th class="ws-th">Type</th><th class="ws-th ws-col-target">Contains</th><th class="ws-th is-actions-col"></th></tr></thead><tbody>' + _trs + '</tbody></table></div>';
     return _lead + '<div class="rt-card rf-card">' + _hd + _tools + _tbl + '</div>' + _wsPgBar(_inc.length, c.tpage, _size, 'wsRelTPage', 'wsRelTSize', 'table', true);
   }
-  if (REL_OPT === 'E' || REL_OPT === 'H') return part === 'pane' ? (c.on ? '<div class="rt-pane">' + body + '</div>' : '') : '<div class="ws-cfg-choice sc rc-card rc-lead' + (c.on ? ' is-selected' : '') + '" role="group" aria-label="Include related records">' + head + (c.on ? _ctScope : '') + '</div>';   // E: the card is the one control; the list is the Related records tab's pane
+  if (REL_OPT === 'E' || REL_OPT === 'H') return part === 'pane' ? (c.on ? '<div class="rt-pane">' + body + '</div>' : '') : '<div class="ws-cfg-choice sc rc-card rc-lead' + (c.on ? ' is-selected' : '') + (_over ? ' is-disabled' : '') + '" role="group" aria-label="Include related records">' + head + (c.on ? _ctScope : '') + '</div>';   // E: the card is the one control; the list is the Related records tab's pane
   if (REL_OPT === 'C') { if (!c.on) return ''; return '<div class="rt-pane">' + body + '</div>'; }   // C shows the list on its own, under tabs
   // B: the selection card only decides whether the list exists; the list is its own card BELOW it, not inside it.
-  if (REL_OPT === 'B' || REL_OPT === 'D') return '<div class="ws-cfg-choice sc rc-card' + (c.on ? ' is-selected' : '') + '" role="group" aria-label="Include related records">' + head + '</div>' + (c.on ? '<div class="rt-pane rt-pane-below">' + body + '</div>' : '');   // the card only decides whether the list exists; the list is its own full-width card below it (B: on the step, D: on Select)
-  return '<div class="ws-cfg-choice sc rc-card' + (c.on ? ' is-selected' : '') + '" role="group" aria-label="Include related records">' + head + (c.on ? '<div class="rc-body">' + body + '</div>' : '') + '</div>' + (loading ? '<div class="rl-note"><span class="rd-skel-bar" style="width:320px;display:inline-block;vertical-align:middle"></span></div>' : c.on ? '<div class="rl-note">This job restores <b>' + _d365RelShow(roots.length + total) + ' records</b> from the selected records and their related records.' + (nex ? ' ' + _d365RelFmt(nex) + ' removed.' : '') + '</div>' : '');
+  if (REL_OPT === 'B' || REL_OPT === 'D') return '<div class="ws-cfg-choice sc rc-card' + (c.on ? ' is-selected' : '') + (_over ? ' is-disabled' : '') + '" role="group" aria-label="Include related records">' + head + '</div>' + (c.on ? '<div class="rt-pane rt-pane-below">' + body + '</div>' : '');   // the card only decides whether the list exists; the list is its own full-width card below it (B: on the step, D: on Select)
+  return '<div class="ws-cfg-choice sc rc-card' + (c.on ? ' is-selected' : '') + (_over ? ' is-disabled' : '') + '" role="group" aria-label="Include related records">' + head + (c.on ? '<div class="rc-body">' + body + '</div>' : '') + '</div>' + (loading ? '<div class="rl-note"><span class="rd-skel-bar" style="width:320px;display:inline-block;vertical-align:middle"></span></div>' : c.on ? '<div class="rl-note">This job restores <b>' + _d365RelShow(roots.length + total) + ' records</b> from the selected records and their related records.' + (nex ? ' ' + _d365RelFmt(nex) + ' removed.' : '') + '</div>' : '');
 }
 // ── D365 Override field values: a field and a new fixed value, applied to every restored record that has the field ─────────
 function _d365OvrFields() {
