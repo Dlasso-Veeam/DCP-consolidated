@@ -55,7 +55,9 @@
   // set by whatever STARTS the thread (a pending recommendation, an open-ended starter, a staged scenario), never inferred
   // from typed text, and it holds until + starts a new chat. Saved beside the conversation so it follows it across pages.
   var KEY_TOPIC = 'vdc-ai-topic';
+  var topicAnim = null;   // the header's shimmer-then-type in flight: { timers:[...] }; applyTopic stands aside while it runs
   function applyTopic(){
+    if (topicAnim) return;
     var box = document.querySelector('#aiPanel .ai-head-text'); if (!box) return;
     var cur = box.querySelector('.ai-head-title'); if (!cur) return;
     var t = (typeof aiAgent !== 'undefined' && aiAgent._topic) || '', brand = box.querySelector('.ai-head-brand');
@@ -67,10 +69,43 @@
       cur.textContent = 'Veeam Intelligence'; cur.removeAttribute('data-tooltip'); box.classList.remove('has-topic');
     }
   }
+  // THE TITLE IS EARNED, NOT INSTANT (user 2026-11-10: the header jumped to "Retail Division ROT policy recommendation" the moment the prompt
+  // was sent). The system has not understood the request yet, so the title says so: a short shimmer where the text will be, then the new
+  // topic composes itself word by word, the same motion the replies use. Only a topic that CHANGES to something new animates; a
+  // carried or restored thread, a clear (New chat) and reduced motion all apply at once.
+  var TOPIC_SHIMMER_MS = 1400, TOPIC_WORD_MS = 70;
+  function cancelTopicAnim(){ if (topicAnim){ topicAnim.timers.forEach(clearTimeout); topicAnim = null; } }
+  function animateTopic(t){
+    var box = document.querySelector('#aiPanel .ai-head-text'); var cur = box && box.querySelector('.ai-head-title'); if (!cur) return false;
+    if (document.body.classList.contains('ai-nofx') || !document.body.classList.contains('ai-open')) return false;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+    var brand = box.querySelector('.ai-head-brand');
+    if (!brand){ brand = document.createElement('div'); brand.className = 'ai-head-brand'; brand.textContent = 'Veeam Intelligence'; box.insertBefore(brand, cur); }
+    box.classList.add('has-topic'); cur.removeAttribute('data-tooltip');
+    cur.innerHTML = '<span class="vdc-topic-skel" role="status" aria-label="Updating the conversation title"></span>';
+    var anim = topicAnim = { timers: [] };
+    anim.timers.push(setTimeout(function(){
+      if (topicAnim !== anim) return;
+      var words = t.split(/(\s+)/), i = 0;
+      cur.innerHTML = '<span class="ai-head-tx vdc-typing">' + words.map(function(w){
+        if (!w.trim()) return w;
+        return '<span class="vdc-w" style="animation-delay:' + (i++ * TOPIC_WORD_MS) + 'ms">' + esc(w) + '</span>';
+      }).join('') + '</span>';
+      cur.setAttribute('data-tooltip', t);
+      anim.timers.push(setTimeout(function(){ if (topicAnim === anim){ topicAnim = null; applyTopic(); } }, i * TOPIC_WORD_MS + 400));   // settle into the plain markup
+    }, TOPIC_SHIMMER_MS));
+    return true;
+  }
   window.vdcSetPanelTopic = function(t){
     if (typeof aiAgent === 'undefined') return;
+    // The same topic set again while its animation is still running (Policies sets it twice: the notification path, then rotGapFlow) must not
+    // cancel it, or the title snaps to its final text.
+    if (t && t === aiAgent._topic && topicAnim) return;
+    var changed = !!t && t !== aiAgent._topic;
     aiAgent._topic = t || null;
     try { if (t) localStorage.setItem(KEY_TOPIC, t); else localStorage.removeItem(KEY_TOPIC); } catch(e){}
+    cancelTopicAnim();
+    if (changed && animateTopic(t)) return;
     applyTopic();
   };
   // A carried or restored conversation brings its topic back; an empty panel never shows a stale one.
@@ -143,6 +178,7 @@
       if (el.getAttribute('data-decided') === done[0]) return;
       el.setAttribute('data-decided', done[0]);
       el.innerHTML = '<div class="aiac-decide-done ' + done[0] + '" role="status">' + esc(done[1]) + '</div>';
+      var _ch = el.closest && el.closest('.vdc-appr'); if (_ch){ var _c = _ch.querySelector('.vdc-appr-chip'); if (_c) _c.style.display = 'none'; }   // the approval's Awaiting decision chip goes with the decision it announced
     });
   };
   document.addEventListener('click', function(e){
@@ -277,33 +313,23 @@
       // because the user did not ask for it.
       // was: '<p>While you were away I found a retention gap. <strong>4.2 TB (63%)</strong> ... </p>' + glued .ai-gate-btns
       var ev = window.ROT_EVIDENCE || ROT_EV;
-      var m = (typeof window.aiacCardHtml === 'function')
-        ? { role:'card', _voiced:true, open:false, card:{
-            headline:'While you were away I found a retention gap in Retail Division.',
-            headsub:'4.2 TB (63%) of backed-up content in Retail Taxes, Retail Archive and Retail Ops has not changed in 36 months, and no ROT policy covers it. I drafted a policy for those sites.',
-            stripTitle:'Backed-up volume of the three uncovered sites', unit:'TB', strip: ev.strip, vrows: ev.vrows,
-            // The page owns the verb when it can (the ask depends on whether the editor or the list is open there).
-            // OFF-PAGE: BOTH ROUTES (user 2026-10-29: "should i have the options to review OR approve right from the
-            // card?"). The card already carries the whole justification, so making someone travel to act on a
-            // decision they have made is pure friction — but the policy's own settings (retention window, actions,
-            // severity) are NOT in the card, so the fast path has to say it is accepting them as proposed.
-            // The grammar picks the weights, not preference: activating is the agent acting here on your consent, so
-            // it is the green primary; reviewing LEAVES the panel, so it is secondary with the open-in-new glyph.
-            // was: a single green primary 'Review the proposed policy' — a travel verb wearing the act-here style.
-            decision: (typeof window.rotDecision === 'function') ? window.rotDecision() : {
-              ask:'I\u2019ve configured a policy for those three sites. Activate it as proposed, or open it first to adjust anything \u2014 nothing is created until you do.',
+      var _dec = (typeof window.rotDecision === 'function') ? window.rotDecision() : {
+              ask:'Activate it as proposed, or open it first on the Policies page to adjust anything. Nothing is created until you do.',   // names where Review goes (user 2026-11-10); the Policies page's own rotDecision() is already there, so it keeps its wording
+              
               btns: [
                 // Secondary label trimmed twice for fit (user 2026-10-29: "too wordy. can we help these 2 buttons
-                // fit on the same row?"): 'Review the proposed policy' -> 'Review first' -> 'Review'. The object is
-                // named by the headline and the ask above, and the glyph says it travels, so the verb alone carries
-                // it. Shortening the LABEL rather than .ai-gate-btn's padding keeps the DS button geometry intact.
+                // fit on the same row?"): 'Review the proposed policy' -> 'Review first' -> 'Review'. The glyph says it
+                // travels, so the verb alone carries it. Shortening the LABEL keeps the DS button geometry intact.
                 { label:'Activate', onclick:'vdcNotifGo(\'rec-activate\')', attr:'data-rot-cta data-rot-act data-tooltip="Activates the policy exactly as drafted"' },
                 { label:'Review', onclick:'vdcNotifGo(\'rec\')', nav:true },
                 // DISMISS IS ITS OWN VERB (user 2026-10-30): declining the recommendation is a decision, which is not what the
                 // thumbs-down under the reply means (that rates the reply). It asks for a reason, then records the dismissal.
                 { label:'Dismiss', onclick:'vdcRotDismissAsk()', primary:false, attr:'data-dismiss' }
-              ], key:'rot' }
-          } }
+              ], key:'rot' };
+      // was (until 2026-11-10): an answer card — headline, sub, strip + per-site rows, then this decision as its footer. The evidence now
+      // lives behind the first Quick Prompt (see QP_WHY), so the arrival is the decision plus the context it needs.
+      var m = (typeof window.aiacCardHtml === 'function')
+        ? { role:'card', _voiced:true, open:false, card:{ approval: window.vdcRotApproval(_dec) } }
         : { role:'agent', _voiced:true, html:'<p>While you were away I found a retention gap. <strong>4.2 TB (63%)</strong> of backed-up content in Retail Taxes, Retail Archive and Retail Ops has not changed in 36 months, and no ROT policy covers it. I drafted a policy for those sites.</p>'
             + '<div class="ai-gate-btns"><button type="button" class="ai-gate-btn primary" data-rot-cta onclick="vdcNotifGo(\'rec\')">Review the proposed policy</button></div>' };
       // Where the policy page can record a dismissal, thumbs-down carries its reasons and hook; elsewhere the card
@@ -435,7 +461,19 @@
     'Can I stop it once it has started?':
       'Yes. Stop it at any point in the 30-day review window and nothing changes. The flagged content stays backed up and recoverable until that window passes.'
   };
-  var ROT_FOLLOWUPS = Object.keys(QP_ANSWERS);
+  // The evidence question leads: the arrival is the decision, and the chart + per-site breakdown that used to open the card are the answer
+  // to this prompt. Its answer is an answer CARD (headline, strip, rows), no buttons: the decision is already above it.
+  var QP_WHY = 'Why do you recommend this?';
+  var WHY_LEAD = 'I compared each Retail site\u2019s backed-up content with the active ROT policies, and with how long it has been since anything in it changed. Here is what that shows.';
+  var ROT_FOLLOWUPS = [QP_WHY, 'What happens to the 4.2 TB when this runs?', 'Can I change the 36-month threshold?', 'Which sites does this cover?',
+    'Does this change my protected volume?', 'Can I stop it once it has started?'];
+  function whyCard(){
+    var ev = window.ROT_EVIDENCE || ROT_EV;
+    return { role:'card', open:false, card:{
+      headline:'Retail Division has 4.2 TB of untouched content in the daily backup, and no ROT policy covers it.',
+      headsub:'3 of 5 Retail SharePoint sites fall outside every active ROT policy. 63% of their backed-up volume has not changed in 36 months.',
+      stripTitle:'Backed-up volume of the three uncovered sites', unit:'TB', strip: ev.strip, vrows: ev.vrows } };
+  }
   window.vdcRotFollowups = function(){ return ROT_FOLLOWUPS.slice(); };   // so a page that owns the flow can offer the same three
   window.vdcQuickPromptGo = function(btn){
     var q = btn.getAttribute('data-q');
@@ -445,8 +483,8 @@
     var st = STARTERS_BY_ASK[q]; if (st){ window.vdcStarterGo(st.id); return; }
     aiAgent.msgs.push({ role:'user', html:q });
     (aiAgent._qpAsked = aiAgent._qpAsked || {})[q] = 1;
-    var a = QP_ANSWERS[q];
-    if (!a){ if (typeof aiSend === 'function'){ aiSend(q); } return; }
+    var a = QP_ANSWERS[q], isWhy = (q === QP_WHY && typeof window.aiacCardHtml === 'function');
+    if (!a && !isWhy){ if (typeof aiSend === 'function'){ aiSend(q); } return; }
     // THE AGENT ANSWERS IN TIME (user 2026-10-29: "the response just appears immediately"). The question and its
     // answer used to be pushed in the same frame, so a follow-up was the one exchange in the panel with no beat
     // between asking and being answered — everywhere else the agent visibly thinks first. A follow-up is a short
@@ -456,8 +494,27 @@
     aiAgent.thinking = true;
     if (typeof aiSetBusy === 'function') aiSetBusy(true);
     if (typeof aiRender === 'function') aiRender();
+    var gen = window._aiNewChatGen | 0;
     setTimeout(function(){
       aiAgent.thinking = false;
+      if (isWhy){
+        // A CARD IS NEVER THE FIRST THING THE AGENT SAYS (user 2026-11-10: the evidence card arrived with no lead-in). The reply opens
+        // with a sentence of its own, says what the agent looked at (the two steps of the ROT analysis: age of content, coverage by
+        // policy), and the card follows once that sentence has finished composing. Linear: words, then the evidence they introduce.
+        var _lead = '<p>' + esc(WHY_LEAD) + '</p>';
+        aiAgent.msgs.push({ role:'agent', html:_lead, noFb:true });
+        aiAgent._scrollAnchor = 'bottom';
+        if (typeof aiRender === 'function') aiRender();
+        setTimeout(function(){
+          if ((window._aiNewChatGen | 0) !== gen) return;   // New chat abandons the reply
+          aiAgent.msgs.push(whyCard());
+          aiAgent._scrollAnchor = 'bottom';
+          if (typeof aiRender === 'function') aiRender();
+          if (typeof aiSetBusy === 'function') aiSetBusy(false);
+          window.vdcNextQuickPrompts();
+        }, sayMs(_lead) + 250);
+        return;
+      }
       aiAgent.msgs.push({ role:'agent', html:'<p>' + esc(a) + '</p>' });
       aiAgent._scrollAnchor = 'bottom';
       if (typeof aiRender === 'function') aiRender();
@@ -471,12 +528,13 @@
   window.vdcNextQuickPrompts = function(){
     var pool = aiAgent._qpPool || [], asked = aiAgent._qpAsked || {}, started = aiAgent._qpStarted || {};
     var next = pool.filter(function(p){ return !asked[p]; });
-    if (next.length){ paintQP(next.slice(0, 3), pool); return; }
+    if (next.length){ vdcAfterArrival(function(){ paintQP(next.slice(0, 3), pool); }); return; }   // after the answer has finished arriving, like the first set
     next = STARTERS.map(function(o){ return o.ask; }).filter(function(p){ return !started[p]; });
-    if (next.length) paintQP(next.slice(0, 3), next);
+    if (next.length) vdcAfterArrival(function(){ paintQP(next.slice(0, 3), next); });
   };
   // Clearing goes through one function so the DOM and the remembered list cannot disagree.
   window.vdcClearQuickPrompts = function(){
+    try { aiAgent._qpTok = (aiAgent._qpTok | 0) + 1; } catch(e){}   // a prompt paint still waiting on the card's arrival is cancelled too
     try { document.getElementById('aiChips').innerHTML = ''; } catch(e){}
     try { aiAgent._qp = null; } catch(e){}
   };
@@ -492,8 +550,44 @@
   window.vdcRenderQuickPrompts = function(list){
     if (!list || !list.length) return;
     try { aiAgent._qpPool = list.slice(); aiAgent._qpAsked = {}; } catch(e){}
-    paintQP(list.slice(0, 3), list);
+    vdcAfterArrival(function(){ paintQP(list.slice(0, 3), list); });
   };
+  // THE PROMPTS WAIT FOR THE ANSWER (user 2026-11-10: "the quick prompts section appears before the agent has even completed
+  // responding, or at least before the content has animated in"). They used to paint the moment the card was pushed, while the
+  // card was still composing itself for ~1.3s, and the dock's height change also shoved the transcript mid-animation. This runs
+  // fn once the last block that is arriving (an answer card, or an approval riding on a message) has finished its sequence;
+  // with nothing arriving, or motion off, it runs straight away. A New chat or a Clear in between cancels the pending paint.
+  function arrivalLeft(){
+    try {
+      var ms = (aiAgent && aiAgent.msgs) || [], now = Date.now(), left = 0;
+      if (document.body.classList.contains('ai-nofx')) return 0;
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return 0;
+      ms.slice(-2).forEach(function(m){
+        if (!m) return;
+        var parts = [];
+        if (m.role === 'card') parts.push([m, (m.card && m.card.approval) ? GATE_ARRIVAL_MS + sayMs(approvalLeadHtml(m.card.approval)) : AIAC_ARRIVAL_MS]);
+        if (m.gate) parts.push([m.gate, GATE_ARRIVAL_MS + ((!m._noSay && !m._arrival) ? sayMs(m.html) : 0)]);
+        parts.forEach(function(p){
+          var o = p[0]; if (!o || o._arrived) return;
+          left = Math.max(left, o._arriveAt ? p[1] - (now - o._arriveAt) : p[1]);   // not laid out yet: the whole sequence is still ahead
+        });
+      });
+      return left > 0 ? left + 60 : 0;
+    } catch(e){ return 0; }
+  }
+  function vdcAfterArrival(fn){
+    var tok = 0, gen = window._aiNewChatGen | 0;
+    try { tok = aiAgent._qpTok = (aiAgent._qpTok | 0) + 1; } catch(e){}
+    var wait = arrivalLeft();
+    if (!wait) return fn();
+    setTimeout(function(){
+      try { if (aiAgent._qpTok !== tok || (window._aiNewChatGen | 0) !== gen) return; } catch(e){}
+      var more = arrivalLeft();   // a rebuild can land mid-wait; if the sequence is still running, wait out the rest
+      if (more) return setTimeout(function(){ try { if (aiAgent._qpTok !== tok || (window._aiNewChatGen | 0) !== gen) return; } catch(e){} fn(); }, more);
+      fn();
+    }, wait);
+  }
+  window.vdcAfterArrival = vdcAfterArrival;
   // The chips live in the footer, BELOW the scrolling transcript, so painting them shrinks the transcript's viewport
   // and the last lines of the response (the card's own actions) end up behind the footer's top edge (user 2026-10-30:
   // the prompts "are covering the bottom of the response card and blocking the CTAs"). A response is read to its end,
@@ -666,9 +760,76 @@
       return Math.round(words * Math.min(SAY_STEP, 760 / Math.max(1, words)) + SAY_WORD);
     } catch(e){ return 0; }
   }
+  // ── OPENING THE PANEL KEEPS YOUR PLACE IN THE PAGE (user 2026-11-10: "fix the scrollbar jump") ─────────────────────────
+  // With the panel open the page stops scrolling as a DOCUMENT and scrolls inside .app instead (one scrollbar beside the panel), so
+  // the scroll offset belongs to a different element on either side. Nothing carried it across: the page snapped back to the top
+  // when the panel opened, and again on close. This hands the offset over in the same call that flips the layout, before the
+  // browser clamps it. Wrapped here once so the five pages that own an aiOpen/aiClose pair stay identical.
+  function keepScroll(){
+    if (window._vdcScrollKept) return; var o = window.aiOpen, c = window.aiClose;
+    if (typeof o !== 'function' || typeof c !== 'function') return;
+    window._vdcScrollKept = true;
+    var app = function(){ return document.querySelector('.app'); };
+    window.aiOpen = function(){
+      var was = document.body.classList.contains('ai-open'), y = was ? 0 : (document.scrollingElement || document.documentElement).scrollTop;
+      var r = o.apply(this, arguments);
+      if (!was && y){ var a = app(); if (a) a.scrollTop = y; }
+      return r;
+    };
+    window.aiClose = function(){
+      var a = app(), was = document.body.classList.contains('ai-open'), y = (was && a) ? a.scrollTop : 0;
+      var r = c.apply(this, arguments);
+      if (was && y) window.scrollTo(0, y);
+      return r;
+    };
+  }
+  if (document.readyState === 'complete') keepScroll(); else window.addEventListener('load', keepScroll);
+
   window.vdcGateArrival = function(g, m){
     var lead = (m && !m._noSay && !m._arrival) ? sayMs(m.html) : 0;
     return arrival(g, GATE_ARRIVAL_MS, lead);
+  };
+
+  // ── THE ROT RECOMMENDATION IS AN APPROVAL, NOT AN ANSWER CARD (user 2026-11-10) ───────────────────────────────────
+  // The catch-up used to arrive as an answer card: finding, strip and per-site bars, then the ask. The chart is evidence, and
+  // the urgent thing on arrival is the decision, so the arrival now carries the decision and only the context it needs: one
+  // sentence of why, then the policy (what it covers, its rule, what it does) and the buttons. The evidence is the answer to
+  // the first Quick Prompt, "Why do you recommend this?". Prototype: rot-approval-first.html, option A.
+  // The card is DATA ({ approval:{ lead, name, rows, ask, btns, key } }), so a transcript carried to another page re-renders it
+  // there; each page's aiacCardHtml hands the card to this function when it sees `approval`. The verbs stay the page's own
+  // (rotDecision on Policies), exactly as the decision footer they replace.
+  var ROT_APPROVAL = {
+    lead:'I found a retention gap in Retail Division and drafted a policy for it. 4.2 TB (63%) of backed-up content in three sites has not changed in 36 months, and no ROT policy covers it.',
+    name:'Stale SharePoint content — Retail Division',
+    rows:[['Applies to','Retail Taxes, Retail Archive, Retail Ops'],['Rule','SharePoint files not modified in 36 months'],['Then','Flag for review, then exclude from backup after a 30-day review window']]
+  };
+  window.vdcRotApproval = function(decision){
+    var o = JSON.parse(JSON.stringify(ROT_APPROVAL)); decision = decision || {};
+    o.ask = decision.ask || ''; o.btns = decision.btns || []; o.key = decision.key || 'rot';
+    return o;
+  };
+  function approvalLeadHtml(ap){ return ap && ap.lead ? '<p>' + esc(ap.lead) + '</p>' : ''; }
+  window.vdcApprovalCardHtml = function(m, i){
+    var ap = m.card && m.card.approval; if (!ap) return '';
+    var ic = function(n, z){ return (typeof window._dsStoreIconSvg === 'function' && window._dsStoreIconSvg(n, z)) || ''; };
+    var settled = !!m._arrived;   // carried from another page: history, not an arrival
+    var leadHtml = approvalLeadHtml(ap);
+    var say = (leadHtml && !settled && typeof window.vdcSayHtml === 'function') ? window.vdcSayHtml(leadHtml, m) : leadHtml;
+    var arrive = settled ? '' : arrival(m, GATE_ARRIVAL_MS + sayMs(leadHtml), sayMs(leadHtml));
+    var btns = (ap.btns || []).map(function(b){
+      var prim = b.nav ? false : (b.primary !== false);
+      return '<button type="button" class="ai-gate-btn' + (prim ? ' primary' : '') + '"' + (b.attr ? ' ' + b.attr : '') + ' onclick="' + b.onclick + '">' + esc(b.label)
+        + (b.nav ? ic('open-in-new-outlined', 16) : '') + '</button>';
+    }).join('');
+    var rows = (ap.rows || []).map(function(r){ return '<div class="ai-approval-row"><span class="ai-approval-k">' + esc(r[0]) + '</span><span class="ai-approval-v">' + esc(r[1]) + '</span></div>'; }).join('');
+    return (leadHtml ? '<div class="vdc-appr-lead vdc-typing">' + say + '</div>' : '')
+      + '<div class="ai-approval vdc-appr' + arrive + '" data-appr="rot">'
+      + '<div class="vdc-appr-chip">' + window.vdcDecisionChip() + '</div>'
+      + '<div class="vdc-appr-top"><span class="vdc-appr-tile">' + ic('policy-outlined', 20) + '</span><span class="vdc-appr-name">' + esc(ap.name) + '</span></div>'
+      + '<div class="vdc-appr-rows">' + rows + '</div>'
+      + '<div class="vdc-appr-decide"' + (ap.key ? ' data-decide="' + ap.key + '"' : '') + '>'
+      + (ap.ask ? '<div class="vdc-appr-ask">' + ap.ask + '</div>' : '')
+      + '<div class="ai-gate-btns">' + btns + '</div></div></div>';
   };
 
   // THE LIVE LABEL TICKS, IT DOESN'T JUMP. While a flow runs the reasoning bar is collapsed, so its header is the
@@ -1087,6 +1248,26 @@
     + 'body.ai-nofx .ai-qp, body.ai-nofx .ai-qp .ai-chip-qp { animation:none !important; }\n'
     + '.ai-qp-hd { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:500; color:var(--black-60,#626469); margin-bottom:8px; }\n'
     + '.aiac-decide { container-type:inline-size; }\n'
+    /* The ROT approval (see vdcApprovalCardHtml): the panel's own approval card, with the app's Awaiting decision chip above the policy name. */
+    + '.vdc-appr-lead { margin:0 0 12px; font-size:16px; line-height:22px; color:var(--black-100,#1f2229); }\n'
+    + '.vdc-appr-lead p { margin:0; }\n'
+    + '.vdc-appr { margin-top:0; }\n'
+    + '.vdc-appr-chip { margin-bottom:8px; }\n'
+    + '.vdc-appr-top { display:flex; align-items:center; gap:8px; }\n'
+    + '.vdc-appr-tile { flex:none; width:28px; height:28px; border-radius:4px; background:var(--em-green-tint,#f6fbf9); color:var(--em-green,#01804a); display:inline-flex; align-items:center; justify-content:center; }\n'
+    + '.vdc-appr-name { flex:1; min-width:0; font-size:16px; font-weight:500; line-height:22px; color:var(--black-100,#1f2229); }\n'
+    + '.vdc-appr-rows { margin-top:4px; }\n'
+    + '.vdc-appr .ai-approval-row { padding:4px 0; font-size:14px; line-height:20px; }\n'
+    + '.vdc-appr .ai-approval-k { width:92px; }\n'
+    + '.vdc-appr-ask { margin:8px 0 12px; font-size:14px; line-height:20px; color:var(--black-100,#1f2229); }\n'
+    + '.vdc-appr-decide { container-type:inline-size; }\n'
+    + '.vdc-appr-decide .ai-gate-btns { margin-top:0; }\n'
+    + '.vdc-appr-decide .ai-gate-btns [data-dismiss] { margin-left:auto; }\n'
+    + '@container (max-width: 303px) { .vdc-appr-decide .ai-gate-btns [data-dismiss] { margin-left:0; } }\n'
+    + '.vdc-appr.is-arriving .vdc-appr-chip, .vdc-appr.is-arriving .vdc-appr-top, .vdc-appr.is-arriving .vdc-appr-ask { animation:aiTaskRise 240ms cubic-bezier(.2,.7,.3,1) both; }\n'
+    + '.vdc-appr.is-arriving .vdc-appr-chip { animation-delay:calc(var(--lead, 0ms) + 40ms - var(--elapsed)); }\n'
+    + '.vdc-appr.is-arriving .vdc-appr-top { animation-delay:calc(var(--lead, 0ms) + 80ms - var(--elapsed)); }\n'
+    + '.vdc-appr.is-arriving .vdc-appr-ask { animation-delay:calc(var(--lead, 0ms) + 400ms - var(--elapsed)); }\n'
     + '.aiac-decide .ai-gate-btns [data-dismiss] { margin-left:auto; }   /* the decline sits apart from the two actions that move the recommendation forward */\n'
     + '@container (max-width: 303px) { .aiac-decide .ai-gate-btns [data-dismiss] { margin-left:0; } }   /* row wrapped: left-aligned on its own line */\n'
     + '.aiac-decide-done { font-size:14px; line-height:20px; font-weight:500; color:var(--em-green,#01804a); }\n'
@@ -1094,6 +1275,9 @@
     + '.ai-head-brand { font-size:12px; line-height:16px; font-weight:450; color:var(--black-60,#626469); }\n'
     + '.ai-head-text.has-topic .ai-head-title { line-height:22px; }\n'
     + '.ai-head-tx { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }\n'
+    + '@keyframes vdcTopicShimmer { from { background-position:200% 0; } to { background-position:-200% 0; } }\n'
+    + '.vdc-topic-skel { display:block; width:240px; max-width:100%; height:14px; margin:4px 0; border-radius:4px; background:linear-gradient(90deg, var(--black-10,#e9e9ea) 25%, var(--black-5,#f8f8f9) 50%, var(--black-10,#e9e9ea) 75%); background-size:200% 100%; animation:vdcTopicShimmer 1.3s linear infinite; }\n'
+    + '@media (prefers-reduced-motion: reduce) { .vdc-topic-skel { animation:none; } }\n'
     + '.ai-qp-acts { margin-left:auto; display:flex; align-items:center; gap:4px; }\n'
     + '.ai-qp-acts .ai-qp-x { margin-left:0; }\n'
     + '.ai-qp-x { margin-left:auto; border:none; background:none; padding:2px; cursor:pointer; color:var(--black-60,#626469); display:flex; }\n'

@@ -2914,7 +2914,7 @@ body.ai-open #aiWorkingGlow { right: var(--ai-w); }
   #aiWorkingGlow::before, #aiWorkingGlow::after { animation: none; }
   .ai-pill, .ai-pill *, #aiPillGo, #aiPillX { transition: none !important; animation: none !important; }
 }
-.app { transition: padding-right 0.24s ease; }
+.app { width: calc(100% - var(--ai-w)); transition: width 0.24s ease; }   /* the workspace's width follows the panel's, always: it used to be `auto` until the panel opened, and auto -> calc() cannot be interpolated, so the page jumped to its final width at once while the panel took 240ms to slide in (user 2026-11-10) */
 body.ai-open .app { padding-right: var(--ai-w); }
 /* ONE SCROLLBAR, NOT TWO (user 2026-10-29, raised twice). The panel is fixed at right:0, which for a fixed element
    means the viewport's CONTENT edge — so the document's own scrollbar sits immediately to its right and the two
@@ -23425,8 +23425,9 @@ function _jiraTypeFacetActive() {
 // global "+" filter system remains the path to everything else.
 // [parked 2026-10-26] No 'Type' pin in ANY folder (user: the Type filter shouldn't show anywhere; same ruling as the workload pins retired 2026-07-16). The attrs stay reachable through the + add-filter menu.
 var FOLDER_PINNED_FILTERS = {
-  'okta-wd-users':      [{ id: 'oktaDept', label: 'Department', kind: 'list' }],
-  'okta-sb-users':      [{ id: 'oktaDept', label: 'Department', kind: 'list' }],
+  // [parked 2026-11-10] Okta Users: no pinned Department dropdown beside search (user). Department stays reachable through the + add-filter menu. Was: [{ id: 'oktaDept', label: 'Department', kind: 'list' }]
+  'okta-wd-users':      [],
+  'okta-sb-users':      [],
   'okta-wd-groups':     [],
   'okta-sb-groups':     [],
   'okta-wd-grouprules': [{ id: 'oktaStatus', label: 'Status', kind: 'list' }],
@@ -70006,6 +70007,7 @@ function _aiFactResolved(id){
 }
 function aiacCardHtml(m, i){
   var s = m.card;
+  if (s && s.approval && typeof window.vdcApprovalCardHtml === 'function') return window.vdcApprovalCardHtml(m, i);   // approval-first cards (the ROT recommendation) render from the shared module (user 2026-11-10)
   // B7 ARRIVAL, RESUMED NOT REPLAYED (2026-10-29). aiRender rebuilds #aiBody wholesale — on scroll sync, on a gate
   // resolving, on every new message — so an unconditional class would replay the whole sequence each time. The
   // first fix was a one-shot flag set as the markup was built, and it traded one bug for its mirror image: any
@@ -71123,7 +71125,7 @@ function aiNext(){
     // answer with nothing to do next.
     for (var _mi = aiAgent.msgs.length - 1; _mi >= 0; _mi--){
       var _lm = aiAgent.msgs[_mi];
-      if (_lm.role === 'card'){ if (_lm.card && _lm.card.suggest) aiRenderQuickPrompts(_lm.card.suggest); break; }
+      if (_lm.role === 'card'){ if (_lm.card && _lm.card.suggest) { var _sg = _lm.card.suggest; if (typeof window.vdcAfterArrival === 'function') window.vdcAfterArrival(function(){ aiRenderQuickPrompts(_sg); }); else aiRenderQuickPrompts(_sg); } break; }   // the prompts wait for the card to finish arriving (user 2026-11-10)
       if (_lm.role !== 'reasoning') break;   // a reasoning block may trail the card — skip past it, stop at anything else
     }
     return;

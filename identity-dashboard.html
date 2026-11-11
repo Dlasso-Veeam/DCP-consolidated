@@ -657,6 +657,8 @@ table.idd-tbl tr[tabindex]:focus-visible { outline: none; box-shadow: var(--vv-f
 .idd-ibtn.bordered svg { width: 20px; height: 20px; }
 /* Overlay: scrim covers the CONTENT area only (rail stays visible), card inset 24px, radius 12 + 1px outline (restore-wizard recipe) */
 .idd-tscrim { position: fixed; top: 0; right: 0; bottom: 0; left: 72px; background: rgba(31,34,41,0.4); z-index: 1200; display: none; }
+body.ai-open .idd-tscrim { right: var(--ai-w); }   /* the panel shares space with a session or finding overlay, it never sits under it (user 2026-10-27) */
+.idd-thead .idd-ask { flex-shrink: 0; }
 .idd-tscrim.open { display: block; } .idd-tscrim, .idd-tnav, .idd-tmain { overscroll-behavior: contain; } html.idd-lock { overflow: hidden; }   /* an open overlay owns the scroll: the page behind it stays put */
 .idd-tcard { position: absolute; inset: 24px; background: var(--white); box-shadow: inset 0 0 0 1px var(--black-30), 0 8px 24px rgba(31,34,41,0.25); border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; }
 /* work-tab strip (Phase 2: 48px, Black/S5) */
@@ -865,6 +867,8 @@ table.idd-tbl tr[data-incident] { cursor: pointer; }
 .idd-slog-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--border-light); }
 .idd-slog-search { flex: 1; min-width: 120px; height: 36px; border: 1px solid var(--black-20); border-radius: 4px; display: flex; align-items: center; gap: 8px; padding: 0 8px 0 12px; } .idd-slog-search:focus-within { background: var(--em-green-tint); border-color: var(--em-green); } .idd-slog-search svg { width: 16px; height: 16px; color: var(--black-70); flex-shrink: 0; } .idd-slog-search input { flex: 1; min-width: 0; border: none; outline: none; background: transparent; font-family: inherit; font-size: 16px; color: var(--black-100); }
 .idd-slog-sel { height: 36px; display: inline-flex; align-items: center; gap: 8px; padding: 0 8px 0 12px; border: 1px solid var(--black-20); border-radius: 4px; background: var(--white); font-family: inherit; font-size: 16px; color: var(--black-100); cursor: pointer; white-space: nowrap; } .idd-slog-sel:hover { background: var(--em-green-tint); } .idd-slog-sel svg { width: 20px; height: 20px; color: var(--black-70); }
+.idd-lby { flex: none; display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 6px; border-radius: 2px; background: var(--black-5); color: var(--black-80); font-size: 12px; font-weight: 500; line-height: 16px; } .idd-lby svg { width: 14px; height: 14px; }
+.idd-lag { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .idd-slog-rows { padding: 8px 12px 12px; display: flex; flex-direction: column; }
 .idd-lrow { display: flex; align-items: center; gap: 12px; min-height: 40px; }
 .idd-ltile { width: 28px; height: 28px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--green-s10); color: var(--em-green); } .idd-ltile svg { width: 20px; height: 20px; }
@@ -1140,6 +1144,7 @@ body.ai-open #aiWorkingGlow { right: var(--ai-w); }
 
   #aiWorkingGlow::before { animation: none; }
 }
+.app { width: calc(100% - var(--ai-w)); transition: width 0.24s ease; }   /* the workspace's width follows the panel's, always: it used to be `auto` until the panel opened, and auto -> calc() cannot be interpolated, so the page jumped to its final width at once while the panel took 240ms to slide in (user 2026-11-10) */
 body.ai-open .app { padding-right: var(--ai-w); }
 /* --- One scrollbar beside the panel ------------------------------------
    The panel is position:fixed;right:0, so for a fixed element "right:0" is the
@@ -2677,6 +2682,7 @@ function _aiFactResolved(id){
 }
 function aiacCardHtml(m, i){
   var s = m.card;
+  if (s && s.approval && typeof window.vdcApprovalCardHtml === 'function') return window.vdcApprovalCardHtml(m, i);   // approval-first cards (the ROT recommendation) render from the shared module (user 2026-11-10)
   // B7 ARRIVAL, RESUMED NOT REPLAYED (2026-10-29). aiRender rebuilds #aiBody wholesale — on scroll sync, on a gate
   // resolving, on every new message — so an unconditional class would replay the whole sequence each time. The
   // first fix was a one-shot flag set as the markup was built, and it traded one bug for its mirror image: any
@@ -4417,6 +4423,7 @@ function renderThreats_parked() {   // PARKED 2026-10-05: threats are findings �
 
 /* Detail overlay */
 var NODE_ICON = { Actor: 'user-outlined', Technique: 'risk-outlined', Subject: 'objects-outlined', Impact: 'alert-warning-outlined', Workload: 'workload-outlined', Connection: 'integration-widget-outlined', Policy: 'policy-outlined', Sessions: 'history-outlined', Backups: 'backup-outlined', Objects: 'objects-outlined', Finding: 'issues-outlined', Incident: 'sd-folder', Identity: 'user-outlined', 'Restore point': 'restore-point-outlined' };
+NODE_ICON.Agent = 'my-ai-agents-outlined'; NODE_ICON.Approval = 'user-outlined'; NODE_ICON['Veeam User'] = 'user-outlined'; NODE_ICON.System = 'settings-outlined'; NODE_ICON.Session = 'history-outlined';
 function nodeGlyph(k, cx, cy, color) { var n = NODE_ICON[k] || 'objects-outlined', g = (typeof ico === 'function' ? ico(n, 24) : '') || _dsStoreIconSvg(n, 24) || ''; return g.replace('<svg ', '<svg x="' + (cx - 12) + '" y="' + (cy - 12) + '" style="color:' + (color || '#fff') + '" '); }
 function graphSvg(t) {
   var W = 900, nodes = [ { k: 'Actor', v: t.actor, c: 'var(--plum)' }, { k: 'Technique', v: t.tech.split(' · ')[0], c: 'var(--orange)' }, { k: 'Subject', v: t.subject, c: 'var(--dk-blue)' }, { k: 'Impact', v: t.blast, c: 'var(--red)' } ];
@@ -4824,7 +4831,7 @@ function sessionsRecent() {
     var total = err ? 1 : rs ? 2 + Math.floor(rnd() * 38) : ex ? 20 + Math.floor(rnd() * 380) : prot, warns = r.st === 'warn' ? 3 + Math.floor(rnd() * 20) : 0, errs = err ? 1 : 0;
     var fd = function(day, h, m){ var d = new Date(BASE.getTime() - day * 86400000); return MON[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear() + ' ' + t12(h, m); };
     return { id: 'SES-' + (10000 + hash(key) % 90000), w: w, st: r.st, type: t, name: rs ? w.name + ' restore' : ex ? w.name + ' export' : w.name + (r.manual ? ' on-demand backup' : ' scheduled backup'), policy: t === 'Backup' ? w.policy : '—', started: dayLabel(r.day) + ', ' + t12(r.hour, 0), completed: run ? '—' : dayLabel(endDay) + ', ' + t12(Math.floor(em / 60), em % 60), size: size,
-      startFull: fd(r.day, r.hour, 0), endFull: run ? '—' : fd(endDay, Math.floor(em / 60), em % 60), mins: mins, total: total, ok: run ? Math.floor(total * 0.4) : Math.max(0, total - warns - errs), warns: warns, errs: errs, conn: w.scope, initiator: (rs || ex || r.manual) ? (['Darren Lasso', 'Sarah Rivera', 'Mira Khan'][hash(key) % 3]) : 'System', rnd: hash(key) };
+      startFull: fd(r.day, r.hour, 0), endFull: run ? '—' : fd(endDay, Math.floor(em / 60), em % 60), mins: mins, total: total, ok: run ? Math.floor(total * 0.4) : Math.max(0, total - warns - errs), warns: warns, errs: errs, conn: w.scope, initiator: (rs && hash(key) % 4 === 0) ? 'Veeam Intelligence' : (rs || ex || r.manual) ? (['Darren Lasso', 'Sarah Rivera', 'Mira Khan'][hash(key) % 3]) : 'System', rnd: hash(key) };
   });
 }
 /* Session log (mock, derived from the session): the steps a backup or restore goes through; a warning or failure appears at the step where it happened. */
@@ -4857,29 +4864,136 @@ function sessionLog(x) {
   if (x.st === 'run') { L = L.slice(0, Math.max(3, Math.ceil(L.length / 2))); push('running', 'In progress', 0); }   // a running session has only reached its first steps
   return L;
 }
-var SS = { id: null, q: '', f: 'all' }, SESS_ALL = [];
+var SS = { id: null, q: '', f: 'all', tab: 'overview', src: 'all', graph: true }, SESS_ALL = [];
 var LOG_ICON = { running: 'history-outlined', success: 'sd-log-check', warning: 'alert-warning-outlined', error: 'status-error-outlined' };
 function fmtSecs(n) { return n >= 60 ? Math.floor(n / 60) + 'm ' + (n % 60 < 10 ? '0' : '') + (n % 60) + 's' : n ? n + 's' : '–'; }
+/* ══ ONE SESSION-DETAIL STRUCTURE, WHOEVER RAN THE SESSION (user 2026-11-10; the same structure as Activity's session details, prototype agent-session-options.html option A) ══
+   A graph centred on the session, the entity list that goes with it, then the log beside Properties. WHO ran the session is a node: a Veeam User, the System
+   (a schedule) or an Agent, which is approved by a user. An agent is a node when it ACTED as the principal (it ran the session under a grant); one that only
+   proposed something stays provenance. A running session keeps today's layout (no graph yet) but still carries the agent's entries and the Source filter. */
+function sessIsAgent(x) { return x.initiator === 'Veeam Intelligence'; }
+function sessAgentInfo(x) { return { name: x.type === 'Restore' ? 'Recovery agent' : 'Veeam Intelligence agent', cap: x.type + ' ' + x.w.name, tier: 'Approval required before it writes', granted: x.type === 'Restore' ? 'Restore' : 'Read access', denied: x.type === 'Restore' ? 'Export · Manage policies' : 'Restore · Export · Manage policies' }; }
+/* the agent's own steps around the session; the session's own entries (sessionLog) are what it did to objects */
+function sessEntries(x) {
+  var L = sessionLog(x).map(function(e){ e.src = 'system'; return e; });
+  if (!sessIsAgent(x)) return L;
+  var n = x.total + ' object' + (x.total > 1 ? 's' : ''), pre = [
+    'Scoped the restore to ' + n, 'Selected the restore point', 'Preflight: destination reachable, Restore permission granted', 'Asked Darren Lasso for approval', 'Approved by Darren Lasso', 'Started the restore session'
+  ].map(function(m){ return { st: 'success', msg: m, secs: 3, src: 'agent' }; });
+  var post = x.st === 'run' ? [] : [{ st: x.st === 'err' ? 'error' : (x.st === 'warn' ? 'warning' : 'success'), src: 'agent', secs: 4,
+    msg: x.st === 'err' ? 'Checked the result: the session did not complete' : 'Checked the result: ' + fmt(x.ok) + ' of ' + fmt(x.total) + ' objects restored' }];
+  return pre.concat(L, post);
+}
+function sessModel(x) {
+  var bk = x.type === 'Backup', ag = sessIsAgent(x), person = !ag && x.initiator !== 'System', N = [], E = [];
+  var add = function(k, v, c){ N.push({ k: k, v: v, c: c || 1 }); };
+  add('Workload', x.w.name); add('Connection', x.conn); add('Objects', fmt(x.total) + ' objects', x.total);
+  E.push(['Workload', 'Connection'], ['Connection', 'Objects']);
+  if (bk) { add('Policy', x.policy || x.w.policy); E.push(['Policy', 'Objects'], ['Objects', 'Session']); } else { add('Restore point', 'Selected restore point'); E.push(['Objects', 'Restore point'], ['Restore point', 'Session']); }
+  add('Session', x.type + ' session');
+  if (ag) { add('Agent', sessAgentInfo(x).name); add('Approval', 'Darren Lasso'); E.push(['Agent', 'Session'], ['Approval', 'Agent']); }
+  else if (person) { add('Veeam User', x.initiator); E.push(['Veeam User', 'Session']); }
+  else { add('System', 'Scheduler'); E.push(['System', 'Session']); }
+  var rows = {}, wlp = '<td>';
+  rows['Workload'] = { cols: ['Name', 'Detail'], rows: [[x.w.name, 'Workload']] };
+  rows['Connection'] = { cols: ['Name', 'Detail'], rows: [[x.conn, 'Connection']] };
+  rows['Objects'] = { cols: ['Name', 'Detail'], rows: [[fmt(x.total) + ' objects', bk ? Object.keys(OBJ[x.w.id]).filter(function(k){ return OBJ[x.w.id][k][1] > 0; }).join(', ') : 'Selected objects']] };
+  if (bk) rows['Policy'] = { cols: ['Name', 'Detail'], rows: [[x.policy || x.w.policy, 'Resilience policy']] }; else rows['Restore point'] = { cols: ['Name', 'Detail'], rows: [['Selected restore point', x.w.name]] };
+  rows['Session'] = { cols: ['Name', 'Detail'], rows: [[x.name, x.type + ', ' + SESS_STATUS[x.st][1]]] };
+  if (ag) { var a = sessAgentInfo(x); rows['Agent'] = { cols: ['Agent', 'Capability', 'Autonomy', 'Granted', 'Not granted'], rows: [[a.name, a.cap, a.tier, a.granted, a.denied]] }; rows['Approval'] = { cols: ['Approver', 'Decision', 'When'], rows: [['Darren Lasso', 'Approved', x.startFull]] }; }
+  else if (person) rows['Veeam User'] = { cols: ['Name', 'Role'], rows: [[x.initiator, 'Initiator']] };
+  else rows['System'] = { cols: ['Name', 'Detail'], rows: [['Veeam scheduler', 'Policy schedule']] };
+  var types = []; N.forEach(function(nd){ var t = types.filter(function(y){ return y[0] === nd.k; })[0]; if (t) t[1] += nd.c; else types.push([nd.k, nd.c]); });
+  return { nodes: N, edges: E, rows: rows, types: types };
+}
+var SESS_ENT_ICON = { Workload: 'workload-outlined', Connection: 'integration-widget-outlined', Objects: 'objects-outlined', Policy: 'policy-outlined', 'Restore point': 'restore-point-outlined', Session: 'history-outlined', Agent: 'my-ai-agents-outlined', Approval: 'user-outlined', 'Veeam User': 'user-outlined', System: 'settings-outlined' };
+function graphSession(x, M) {
+  var W = 900, N = {}, keys = M.nodes.map(function(n){ N[n.k] = n; return n.k; }), E = M.edges, layer = {}, i;
+  keys.forEach(function(k){ layer[k] = 0; });
+  for (i = 0; i < keys.length; i++) E.forEach(function(e){ if (layer[e[1]] < layer[e[0]] + 1) layer[e[1]] = layer[e[0]] + 1; });
+  var top = layer.Session;   // the session is the right-most node; the initiator branch sits just before it
+  if (N.Agent) { layer.Agent = top - 1; layer.Approval = top - 2; } else { var ini = N['Veeam User'] ? 'Veeam User' : 'System'; layer[ini] = top - 1; }
+  var cols = []; for (var c = 0; c <= top; c++) cols.push(keys.filter(function(k){ return layer[k] === c; }));
+  var H = 290, pos = {}, xAt = function(c){ return 110 + (W - 220) / top * c; };
+  cols.forEach(function(list, c){ list.forEach(function(k, j){ pos[k] = { x: xAt(c), y: k === 'Session' ? H / 2 : (list.length === 1 ? H / 2 : H / (list.length + 1) * (j + 1)) }; }); });
+  var curve = function(a, b, toS){ var xm = (a.x + b.x) / 2; return '<path class="edge" d="M' + (a.x + 22) + ' ' + a.y + ' C' + xm + ' ' + a.y + ',' + xm + ' ' + b.y + ',' + (b.x - (toS ? 34 : 22)) + ' ' + b.y + '"/>'; };
+  var edges = E.map(function(e){ return curve(pos[e[0]], pos[e[1]], e[1] === 'Session'); }).join('');
+  var colr = function(k){ return k === 'Workload' || k === 'Connection' || k === 'Agent' ? 'var(--plum)' : (k === 'Objects' || k === 'Restore point') ? 'var(--orange)' : k === 'Policy' ? 'var(--dk-blue)' : 'var(--black-60)'; };
+  var circle = function(k){ var n = N[k], p = pos[k], v = String(n.v).length > 22 ? String(n.v).slice(0, 21) + '…' : String(n.v);
+    return '<g class="gn" data-sgnode="' + k + '" role="link" tabindex="0" aria-label="Open ' + k + '"><circle cx="' + p.x + '" cy="' + p.y + '" r="22" fill="' + colr(k) + '"/>' + nodeGlyph(k, p.x, p.y) + (k === 'Objects' ? nbadge(p.x + 18, p.y - 19, n.c >= 1000 ? Math.round(n.c / 100) / 10 + 'k' : n.c) : '')
+      + '<text class="k" x="' + p.x + '" y="' + (p.y + 44) + '" text-anchor="middle">' + k + '</text><text x="' + p.x + '" y="' + (p.y + 62) + '" text-anchor="middle">' + esc(v) + '</text></g>'; };
+  var C = pos.Session, stc = x.st === 'err' ? 'var(--red)' : x.st === 'warn' ? 'var(--orange)' : x.st === 'run' ? 'var(--status-blue)' : 'var(--em-green)';
+  var center = '<g class="gn" data-sgnode="Session" role="link" tabindex="0" aria-label="Open Session Details"><circle cx="' + C.x + '" cy="' + C.y + '" r="34" fill="var(--white)" stroke="' + stc + '" stroke-width="3"/>' + nodeGlyph('Session', C.x, C.y, stc)
+    + '<text class="k" x="' + C.x + '" y="' + (C.y + 56) + '" text-anchor="middle">Session</text><text x="' + C.x + '" y="' + (C.y + 74) + '" text-anchor="middle">' + esc(x.type) + ' session</text></g>';
+  return '<svg viewBox="0 0 ' + W + ' ' + (H + 40) + '" role="img" aria-label="Relationship graph for ' + esc(x.name) + '">' + edges + keys.filter(function(k){ return k !== 'Session'; }).map(circle).join('') + center + '</svg>';
+}
+function sessEntityHtml(M, ek) {
+  var d = M.rows[ek]; if (!d) return '';
+  return '<div class="idd-ehead"><span class="idd-ntile">' + ico(SESS_ENT_ICON[ek] || 'objects-outlined') + '</span><span class="ttl">' + esc(ek) + '</span><span class="ct">' + d.rows.length + '</span></div>'
+    + '<div class="idd-entw"><table class="idd-tbl dense" style="min-width:0"><thead><tr>' + d.cols.map(function(c){ return '<th>' + esc(c) + '</th>'; }).join('') + '</tr></thead><tbody>'
+    + d.rows.map(function(r){ return '<tr>' + r.map(function(c){ return '<td>' + esc(c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>';
+}
+/* ASK VEEAM INTELLIGENCE (user 2026-11-11): one visible affordance on every session detail. Opens the panel beside the overlay, names the session as the
+   topic and offers prompts about THIS session; the answers are built from the session's own data. */
+var SESS_ASK = null;
+function askAboutSession() {
+  var x = SESS_ALL.filter(function(y){ return y.id === SS.id; })[0]; if (!x || typeof aiAgent === 'undefined') return;
+  var ag = sessIsAgent(x), L = sessEntries(x), bad = L.filter(function(e){ return e.st === 'error'; }).length, A = {}, P = ['What did this session do?', 'Did anything fail?'];
+  A[P[0]] = x.type + ' of ' + fmt(x.total) + ' object' + (x.total > 1 ? 's' : '') + ' in ' + x.w.name + ', started ' + x.startFull + (ag ? ' by Veeam Intelligence, approved by Darren Lasso.' : (x.initiator === 'System' ? ' on its schedule.' : ' by ' + x.initiator + '.'));
+  A[P[1]] = bad ? bad + ' of ' + L.length + ' log entries failed. The log shows which.' : 'No. None of the ' + L.length + ' log entries is marked failed.';
+  if (ag) { P.push('Why did the agent run this?'); A[P[2]] = 'I scoped the restore, asked Darren Lasso for approval, and started the session once it was approved.'; }
+  SESS_ASK = { title: x.name, prompts: P, answers: A };
+  if (typeof aiOpen === 'function') aiOpen();
+  if (aiAgent._topic === x.name && aiAgent.msgs.length) return;   // already asking about this session: open the panel, don't repeat the opening line
+  if (typeof vdcSetPanelTopic === 'function') vdcSetPanelTopic(x.name);
+  aiAgent._scrollAnchor = 'bottom';
+  if (typeof aiPushAgent === 'function') aiPushAgent('<p>I have “' + esc(x.name) + '” open. Ask me about it, or choose a prompt.</p>');
+  if (typeof vdcRenderQuickPrompts === 'function') vdcRenderQuickPrompts(P);
+}
+(function(){   /* a prompt with an answer built from the session answers in time, like the authored follow-ups; any other prompt takes the shared path */
+  var _qpGo = window.vdcQuickPromptGo;
+  window.vdcQuickPromptGo = function(btn){
+    var q = btn.getAttribute('data-q'), a = SESS_ASK && SESS_ASK.answers && SESS_ASK.answers[q];
+    if (!a || typeof aiAgent === 'undefined' || !_qpGo) return _qpGo && _qpGo.apply(this, arguments);
+    vdcClearQuickPrompts();
+    aiAgent.msgs.push({ role: 'user', html: q }); (aiAgent._qpAsked = aiAgent._qpAsked || {})[q] = 1;
+    aiAgent._scrollAnchor = 'bottom'; aiAgent.thinking = true; if (typeof aiSetBusy === 'function') aiSetBusy(true); aiRender();
+    setTimeout(function(){
+      aiAgent.thinking = false; aiAgent.msgs.push({ role: 'agent', html: '<p>' + esc(a) + '</p>' }); aiAgent._scrollAnchor = 'bottom'; aiRender();
+      if (typeof aiSetBusy === 'function') aiSetBusy(false); vdcNextQuickPrompts();
+    }, 780);
+  };
+})();
 function renderSession() {
   var x = SESS_ALL.filter(function(y){ return y.id === SS.id; })[0]; if (!x) return;
   var bk = x.type === 'Backup';
   document.getElementById('iddSTabs').innerHTML = '<div class="idd-wtabs-l"><div class="idd-wtab on" role="tab" aria-selected="true"><span class="idd-ntile">' + ico('sd-tab-store', 16) + '</span><span class="idd-wtab-n">' + esc(x.name) + '</span><span class="idd-wtab-x" data-sclose="1" role="button" aria-label="Close session">' + ico('close-outlined', 16) + '</span></div></div>'
     + '<div class="idd-wtabs-r"><button type="button" class="idd-ibtn" data-sclose="1" aria-label="Close">' + ico('close-outlined') + '</button></div>';
-  document.getElementById('iddSHead').innerHTML = '<span class="idd-ttile ses">' + ico('sd-session-log', 28) + '</span><div class="idd-thead-main"><div class="idd-tkicker">Session Log</div><div class="idd-ttitle">' + esc(x.name) + '</div></div>' + chip(SESS_STATUS[x.st][0], SESS_STATUS[x.st][1]);
-  var rel = [['workload-outlined', 'Workload', 1], ['integration-widget-outlined', 'Connection', 1], [bk ? 'policy-outlined' : 'restore-point-outlined', bk ? 'Policy' : 'Restore Point', 1]];
-  document.getElementById('iddSNav').innerHTML = '<button type="button" class="idd-tn on" aria-current="page"><span class="idd-ntile">' + ico('sd-session-log') + '</span><span class="lbl">Session Details</span></button>'
-    + '<div class="idd-tn static" aria-disabled="true"><span class="idd-ntile">' + ico('objects-outlined') + '</span><span class="lbl">Objects</span><span class="ct">' + fmt(x.total) + '</span></div><div class="idd-tnav-div"></div>'
-    + rel.map(function(r){ return '<div class="idd-tn static" aria-disabled="true"><span class="idd-ntile">' + ico(r[0]) + '</span><span class="lbl">' + r[1] + '</span><span class="ct">' + r[2] + '</span></div>'; }).join('');
-  var all = sessionLog(x), q = SS.q.trim().toLowerCase(), shown = all.filter(function(e){ return (SS.f === 'all' || e.st === SS.f) && (!q || e.msg.toLowerCase().indexOf(q) >= 0); });
-  var rows = shown.map(function(e, i){ return (i ? '<div class="idd-lconn"></div>' : '') + '<div class="idd-lrow ' + e.st + '"><span class="idd-ltile">' + ico(LOG_ICON[e.st]) + '</span><span class="idd-lmsg">' + esc(e.msg) + '</span><span class="idd-ldur">' + fmtSecs(e.secs) + '</span></div>'; }).join('') || '<div style="padding:12px 0;color:var(--black-70)">No log entries match.</div>';
+  document.getElementById('iddSHead').innerHTML = '<span class="idd-ttile ses">' + ico('sd-session-log', 28) + '</span><div class="idd-thead-main"><div class="idd-tkicker">Session Log</div><div class="idd-ttitle">' + esc(x.name) + '</div></div>' + chip(SESS_STATUS[x.st][0], SESS_STATUS[x.st][1])
+    + '<button type="button" class="plv-btn plv-btn-secondary idd-ask" data-sask="1">' + (typeof vdcAiGlyph === 'function' ? vdcAiGlyph(16) : '') + '<span>Ask Veeam Intelligence</span></button>';
+  var live = x.st === 'run', M = sessModel(x), ag = sessIsAgent(x);
+  if (live) {   // a running session keeps its static list and no graph: the relationship data arrives once it completes
+    var rel = [['workload-outlined', 'Workload', 1], ['integration-widget-outlined', 'Connection', 1], [bk ? 'policy-outlined' : 'restore-point-outlined', bk ? 'Policy' : 'Restore Point', 1]];
+    document.getElementById('iddSNav').innerHTML = '<button type="button" class="idd-tn on" aria-current="page"><span class="idd-ntile">' + ico('sd-session-log') + '</span><span class="lbl">Session Details</span></button>'
+      + '<div class="idd-tn static" aria-disabled="true"><span class="idd-ntile">' + ico('objects-outlined') + '</span><span class="lbl">Objects</span><span class="ct">' + fmt(x.total) + '</span></div><div class="idd-tnav-div"></div>'
+      + rel.map(function(r){ return '<div class="idd-tn static" aria-disabled="true"><span class="idd-ntile">' + ico(r[0]) + '</span><span class="lbl">' + r[1] + '</span><span class="ct">' + r[2] + '</span></div>'; }).join('');
+    SS.tab = 'overview';
+  } else {
+    document.getElementById('iddSNav').innerHTML = '<button type="button" class="idd-tn' + (SS.tab === 'overview' ? ' on' : '') + '" data-stab="overview"' + (SS.tab === 'overview' ? ' aria-current="page"' : '') + '><span class="idd-ntile">' + ico('sd-session-log') + '</span><span class="lbl">Session Details</span></button><div class="idd-tnav-div"></div>'
+      + M.types.map(function(t){ return '<button type="button" class="idd-tn' + (SS.tab === 'ent:' + t[0] ? ' on' : '') + '" data-stab="ent:' + t[0] + '"><span class="idd-ntile">' + ico(SESS_ENT_ICON[t[0]] || 'objects-outlined') + '</span><span class="lbl">' + t[0] + '</span><span class="ct">' + fmt(t[1]) + '</span></button>'; }).join('');
+  }
+  var all = sessEntries(x), q = SS.q.trim().toLowerCase(), shown = all.filter(function(e){ return (SS.f === 'all' || e.st === SS.f) && (SS.src === 'all' || e.src === SS.src) && (!q || e.msg.toLowerCase().indexOf(q) >= 0); });
+  var rows = shown.map(function(e, i){ return (i ? '<div class="idd-lconn"></div>' : '') + '<div class="idd-lrow ' + e.st + '"><span class="idd-ltile">' + ico(LOG_ICON[e.st]) + '</span><span class="idd-lmsg">' + esc(e.msg) + '</span>' + (e.src === 'agent' ? '<span class="idd-lby">' + ico('ai-sparkle', 14) + 'Agent</span>' : '') + '<span class="idd-ldur">' + fmtSecs(e.secs) + '</span></div>'; }).join('') || '<div style="padding:12px 0;color:var(--black-60);font-size:14px">No log entries match.</div>';
   var objTypes = !bk ? 'Selected objects' : Object.keys(OBJ[x.w.id]).filter(function(k){ return OBJ[x.w.id][k][1] > 0; }).join(', ');
   var fl = { all: 'All', success: 'Success', warning: 'Warning', error: 'Error' };
-  var props = pr('Session ID', x.id) + pr('Type', x.type) + pr('Object Types', '<span class="idd-greychip ses">' + esc(objTypes) + '</span>') + pr('Initiator', x.initiator === 'System' ? 'System' : avatar(x.initiator, 24) + esc(x.initiator))
+  var props = pr('Session ID', x.id) + pr('Type', x.type) + pr('Object Types', '<span class="idd-greychip ses">' + esc(objTypes) + '</span>') + pr('Initiator', ag ? '<span class="idd-lag">' + avatar('Veeam Intelligence', 24) + 'Veeam Intelligence <span class="idd-greychip ses">Agent</span></span>' : x.initiator === 'System' ? 'System' : avatar(x.initiator, 24) + esc(x.initiator)) + (ag ? pr('Approved by', 'Darren Lasso') : '')
     + pr('Status', chip(SESS_STATUS[x.st][0], SESS_STATUS[x.st][1])) + pr('Start Time', x.startFull) + pr('End Time', x.endFull) + pr('Duration', x.mins + 'm' + (x.st === 'run' ? ' so far' : '')) + pr('Organization', esc(x.conn)) + pr(bk ? 'Policy' : 'Restore Point', esc(bk ? x.policy : 'Selected restore point'))
     + pr('Total', fmt(x.total)) + pr('Success', '<span class="ws-status-chip ok">' + fmt(x.ok) + '</span>') + pr('Skipped', '0') + pr('Warning', x.warns ? '<span class="ws-status-chip warn">' + x.warns + '</span>' : '0') + pr('Error', x.errs ? '<span class="ws-status-chip err">' + x.errs + '</span>' : '0');
-  document.getElementById('iddSMain').innerHTML = '<div class="idd-cols"><div class="idd-col-l"><div class="idd-sec-h"><h3>Session Details</h3></div><div class="idd-slog"><div class="idd-slog-bar"><div class="idd-slog-search">' + ico('search-outlined', 16) + '<input id="iddSLogQ" placeholder="Search by message" value="' + esc(SS.q) + '" aria-label="Search the session log"></div>'
-    + '<button type="button" class="idd-slog-sel" data-ssf="1" aria-haspopup="menu"><span>Status: ' + fl[SS.f] + '</span>' + ico('keyboard-arrow-down-outlined', 20) + '</button></div><div class="idd-slog-rows">' + rows + '</div></div></div>'
+  var overviewHtml = '<div class="idd-cols"><div class="idd-col-l"><div class="idd-sec-h"><h3>Session Details</h3></div><div class="idd-slog"><div class="idd-slog-bar"><div class="idd-slog-search">' + ico('search-outlined', 16) + '<input id="iddSLogQ" placeholder="Search by message" value="' + esc(SS.q) + '" aria-label="Search the session log"></div>'
+    + '<button type="button" class="idd-slog-sel" data-ssf="1" aria-haspopup="menu"><span>Status: ' + fl[SS.f] + '</span>' + ico('keyboard-arrow-down-outlined', 20) + '</button>' + (ag ? '<button type="button" class="idd-slog-sel" data-ssrc="1" aria-haspopup="menu"><span>Source: ' + ({ all: 'All', system: 'System', agent: 'Agent' })[SS.src] + '</span>' + ico('keyboard-arrow-down-outlined', 20) + '</button>' : '') + '</div><div class="idd-slog-rows">' + rows + '</div></div></div>'
     + '<div class="idd-col-r"><div class="idd-sec-h"><h3>Properties</h3></div>' + props + '</div></div>';
+  var gpane = live ? '' : (SS.graph ? '<div class="idd-gpane" id="iddSGraph"><button type="button" class="plv-btn plv-btn-secondary idd-gbtn" data-sgraph="1">Hide Graph</button><div class="idd-gcanvas">' + graphSession(x, M) + '</div></div>' : '<div class="idd-gbar"><button type="button" class="plv-btn plv-btn-secondary" data-sgraph="1">Show Graph</button></div>');
+  document.getElementById('iddSMain').innerHTML = gpane + ((!live && SS.tab.indexOf('ent:') === 0 && M.rows[SS.tab.slice(4)]) ? sessEntityHtml(M, SS.tab.slice(4)) : overviewHtml);
 }
 /* Incident = a tab in the same work-tab overlay as findings (Threat Center): ONE view model (like findings) so the graph, left-panel sections, entity tables and History all work. Every entity, event and count is aggregated from the member findings. */
 function incEnt(mem) {
@@ -5020,7 +5134,7 @@ function cartPanel(f) {
   var done = cnt('ok') === n, prompt = done && f.status !== 'Resolved - Remediated' ? '<div class="al info"><div class="al-h">' + ico('sd-log-check', 16) + '<b>All ' + n + ' restores succeeded</b></div><p>Move this finding to Resolved - Remediated?</p><div class="al-f"><button type="button" class="plv-btn plv-btn-primary sm" data-resolvefix="' + f.id + '">Resolve finding</button></div></div>' : '';
   return '<div class="pg"><div class="pg-h"><div class="cf"><b>Restore ' + esc(X.person) + '</b><span>' + status + '</span></div><span class="idd-sp"></span>' + cartHead(f) + '</div>' + note + prompt + restoreTable(rows, true) + '</div>';
 }
-function openSession(id) { SS.id = id; SS.q = ''; SS.f = 'all'; renderSession(); var o = document.getElementById('iddSess'); o.classList.add('open'); o.setAttribute('aria-hidden', 'false'); }
+function openSession(id) { SS.id = id; SS.q = ''; SS.f = 'all'; SS.tab = 'overview'; SS.src = 'all'; SS.graph = true; renderSession(); var o = document.getElementById('iddSess'); o.classList.add('open'); o.setAttribute('aria-hidden', 'false'); }
 function closeSession() { var o = document.getElementById('iddSess'); o.classList.remove('open'); o.setAttribute('aria-hidden', 'true'); SS.id = null; if (typeof closeMenu === 'function') closeMenu(); }
 function renderSessions() {
   var all = sessionsRecent(), rows = all.slice(0, SESS_SHOWN); SESS_ALL = all;
@@ -5656,6 +5770,7 @@ function openCustomMenu(btn, items, heading, cls) {
     if (it.topmode) return '<button type="button" class="idd-menu-item two' + (it.current ? ' is-current' : '') + '" role="menuitem" data-wsetpick="' + it.topmode + '"><span>' + it.label + '</span><small>' + it.desc + '</small></button>';
     if (it.status) return '<button type="button" class="idd-menu-item' + (it.current ? ' is-current' : '') + '" role="menuitem" data-setstatus="' + it.status + '">' + ic + it.label + (it.current ? '<span class="cur">Current</span>' : '') + '</button>';
     if (it.ssf) return '<button type="button" class="idd-menu-item' + (it.current ? ' is-current' : '') + '" role="menuitem" data-setssf="' + it.ssf + '">' + it.label + '</button>';
+    if (it.ssrc) return '<button type="button" class="idd-menu-item' + (it.current ? ' is-current' : '') + '" role="menuitem" data-setssrc="' + it.ssrc + '">' + it.label + '</button>';
     if (it.rp != null) return '<button type="button" class="idd-menu-item' + (it.current ? ' is-current' : '') + '" role="menuitem" data-setrp="' + it.rp + '">' + it.label + (it.current ? '<span class="cur">Current</span>' : '') + '</button>';
     if (it.assignee) return '<button type="button" class="idd-menu-item' + (it.current ? ' is-current' : '') + '" role="menuitem" data-setassignee="' + it.assignee + '">' + it.label + '</button>';
     if (it.act) return '<button type="button" class="idd-menu-item" role="menuitem" data-act="' + it.act + '">' + ic + it.label + '</button>';
@@ -5681,6 +5796,12 @@ document.addEventListener('click', function(e){
   var inr = t.closest('[data-incident]'); if (inr) { closeMenu(); openItem('incident', inr.getAttribute('data-incident')); document.getElementById('iddTClose').focus(); return; }
   if (t.closest('[data-sclose]') || t === document.getElementById('iddSess')) { closeSession(); return; }
   var ssf = t.closest('[data-ssf]'); if (ssf) { e.stopPropagation(); closeMenu(); openCustomMenu(ssf, [['all', 'All'], ['success', 'Success'], ['warning', 'Warning'], ['error', 'Error']].map(function(f){ return { label: f[1], ssf: f[0], current: SS.f === f[0] }; }), 'Status', 'wide'); return; }
+  var ssrc = t.closest('[data-ssrc]'); if (ssrc) { e.stopPropagation(); closeMenu(); openCustomMenu(ssrc, [['all', 'All sources'], ['system', 'System'], ['agent', 'Agent']].map(function(f){ return { label: f[1], ssrc: f[0], current: SS.src === f[0] }; }), 'Source', 'wide'); return; }
+  var ssrcSet = t.closest('[data-setssrc]'); if (ssrcSet) { closeMenu(); SS.src = ssrcSet.getAttribute('data-setssrc'); renderSession(); return; }
+  var stab = t.closest('[data-stab]'); if (stab) { SS.tab = stab.getAttribute('data-stab'); renderSession(); return; }
+  var sgn = t.closest('[data-sgnode]'); if (sgn) { var gk = sgn.getAttribute('data-sgnode'); SS.tab = gk === 'Session' ? 'overview' : 'ent:' + gk; renderSession(); return; }
+  var sgr = t.closest('[data-sgraph]'); if (sgr) { SS.graph = !SS.graph; renderSession(); return; }
+  var sask = t.closest('[data-sask]'); if (sask) { askAboutSession(); return; }
   var sset = t.closest('[data-setssf]'); if (sset) { closeMenu(); SS.f = sset.getAttribute('data-setssf'); renderSession(); return; }
   var cmd = t.closest('[data-covmode]'); if (cmd) { COVMODE = cmd.getAttribute('data-covmode'); renderCoverage(); return; }
   var hr = t.closest('[data-wlrow]'); if (hr) { var w0 = WL.filter(function(x){ return x.id === hr.getAttribute('data-wlrow'); })[0], tg = healthTarget(w0, dayHealth(w0, 0)); if (tg) { if (tg.kind === 'findings') openFindingsFor(w0.name); else window.location.href = tg.href; } return; }

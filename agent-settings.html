@@ -1500,7 +1500,7 @@ body.ai-open #aiWorkingGlow { right: var(--ai-w); }
 @media (prefers-reduced-motion: reduce) {
   #aiWorkingGlow::before { animation: none; }
 }
-.app { transition: padding-right 0.24s ease; }
+.app { width: calc(100% - var(--ai-w)); transition: width 0.24s ease; }   /* the workspace's width follows the panel's, always: it used to be `auto` until the panel opened, and auto -> calc() cannot be interpolated, so the page jumped to its final width at once while the panel took 240ms to slide in (user 2026-11-10) */
 body.ai-open .app { padding-right: var(--ai-w); }
 
 /* --- One scrollbar beside the panel ------------------------------------
@@ -3239,6 +3239,7 @@ function _aiFactResolved(id){
 }
 function aiacCardHtml(m, i){
   var s = m.card;
+  if (s && s.approval && typeof window.vdcApprovalCardHtml === 'function') return window.vdcApprovalCardHtml(m, i);   // approval-first cards (the ROT recommendation) render from the shared module (user 2026-11-10)
   // B7 ARRIVAL, RESUMED NOT REPLAYED (2026-10-29). aiRender rebuilds #aiBody wholesale — on scroll sync, on a gate
   // resolving, on every new message — so an unconditional class would replay the whole sequence each time. The
   // first fix was a one-shot flag set as the markup was built, and it traded one bug for its mirror image: any

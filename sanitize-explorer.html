@@ -1728,7 +1728,7 @@ function wireStep(W) {
   };
   m.onmouseover = function (e) { hot(e.target.closest && e.target.closest('.tk, .tr-counts [data-el]')); };
   m.onmouseout = function (e) { if (!(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('.tk, .tr-counts [data-el]'))) hot(null); };
-  var vj = document.getElementById('viewJob'); if (vj) vj.onclick = function () { window.location.href = 'activity.html'; };
+  var vj = document.getElementById('viewJob'); if (vj) vj.onclick = function () { window.location.href = 'activity.html#sanitize' + (W.job && W.job.id ? '/' + W.job.id : ''); };
   m.querySelectorAll('[data-sample]').forEach(function (b) { b.onclick = function () { W.sample = +b.dataset.sample; renderWiz(); }; });
 }
 
@@ -1736,6 +1736,15 @@ function wireStep(W) {
 function startJob() {
   var W = S.wiz, id = 'SAN-' + (2041 + Math.floor(Math.random() * 40)), items = W.items.slice();
   W.step = 3; W.job = { id: id };
+  /* Hand the job to the Activity page (Sanitize jobs view), the same way restore sessions reach it through 'dcc-jobs-bridge'. runForMs matches the
+     4s this prototype takes to show the sanitized-copy chip on the rows below, so both pages agree on when the job finishes. */
+  try {
+    var n = items.length, on = W.conds.filter(function (c) { return c.on; }).length, L = JSON.parse(localStorage.getItem('dcc-sanitize-bridge')) || [];
+    L = L.filter(function (x) { return x.id !== id; });
+    L.unshift({ id: id, kind: W.isF ? 'Files' : 'Data systems', items: W.all ? 'All matching ' + (W.isF ? 'files' : 'data systems') : n + ' ' + (W.isF ? (n === 1 ? 'file' : 'files') : (n === 1 ? 'data system' : 'data systems')),
+      files: W.files, conds: on, condsTotal: W.conds.length, ocr: W.ocr, stt: W.stt, path: W.path, startedTs: Date.now(), runForMs: 4000, initiator: 'Darren Lasso' });
+    localStorage.setItem('dcc-sanitize-bridge', JSON.stringify(L.slice(0, 40)));
+  } catch (e) {}
   // The wizard doesn't follow progress (that would hold the admin here): like a restore job, the work moves to Activity.
   // Prototype: the job finishes in the background and the explorer rows pick up the sanitized-copy chip.
   setTimeout(function () {
@@ -1744,7 +1753,7 @@ function startJob() {
   }, 4000);
   renderWiz();
   document.querySelector('.wiz-scroll').scrollTop = 0;   // the started alert is at the top of the Summary
-  showToast('Sanitize job started', { body: 'It runs in the background.', action: { label: 'View job', onClick: function () { window.location.href = 'activity.html'; } } });
+  showToast('Sanitize job started', { body: 'It runs in the background.', action: { label: 'View job', onClick: function () { window.location.href = 'activity.html#sanitize/' + id; } } });
 }
 
 /* ═══ Toast (same API as the shared showToast: showToast('Title', { body, action: { label, onClick } })) ═══ */

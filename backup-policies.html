@@ -1768,7 +1768,7 @@ body.ai-open #aiWorkingGlow { right: var(--ai-w); }
 @media (prefers-reduced-motion: reduce) {
   #aiWorkingGlow::before { animation: none; }
 }
-.app { transition: padding-right 0.24s ease; }
+.app { width: calc(100% - var(--ai-w)); transition: width 0.24s ease; }   /* the workspace's width follows the panel's, always: it used to be `auto` until the panel opened, and auto -> calc() cannot be interpolated, so the page jumped to its final width at once while the panel took 240ms to slide in (user 2026-11-10) */
 body.ai-open .app { padding-right: var(--ai-w); }
 
 /* --- One scrollbar beside the panel ------------------------------------
@@ -11148,6 +11148,7 @@ function _aiFactResolved(id){
 }
 function aiacCardHtml(m, i){
   var s = m.card;
+  if (s && s.approval && typeof window.vdcApprovalCardHtml === 'function') return window.vdcApprovalCardHtml(m, i);   // approval-first cards (the ROT recommendation) render from the shared module (user 2026-11-10)
   // B7 ARRIVAL, RESUMED NOT REPLAYED (2026-10-29). aiRender rebuilds #aiBody wholesale — on scroll sync, on a gate
   // resolving, on every new message — so an unconditional class would replay the whole sequence each time. The
   // first fix was a one-shot flag set as the markup was built, and it traded one bug for its mirror image: any
@@ -11943,7 +11944,8 @@ body.ai-open .rot-editor { right: var(--ai-w); }   /* the assistant pushes the p
     var t = document.querySelector('.plv-title'); if (t) t.textContent = 'File ROT Policies';
     [].forEach.call(document.querySelectorAll('#wl-list .wl-item'), function(e){ e.classList.toggle('active', e.getAttribute('data-cat') === 'rot'); });
     document.getElementById('rotView').hidden = false; rotRender();
-    if (closePanel && typeof aiClose === 'function') aiClose();
+    // The panel closes only when the user presses its own close button (user 2026-11-10). `closePanel` is kept so old callers still parse, but it no longer collapses anything.
+    // was: if (closePanel && typeof aiClose === 'function') aiClose();
     if (openDetail && st().rec !== 'dismissed') openEditor(false);
     window.scrollTo(0, 0);
   };
@@ -11961,13 +11963,13 @@ body.ai-open .rot-editor { right: var(--ai-w); }   /* the assistant pushes the p
   // recommendation is already in the thread, the honest answer to "ask about it" is to TAKE YOU TO IT, not to say it
   // twice — the same dedupe instinct as the dock collapsing while the gate card is on screen.
   function _rotInThread(){
-    try { return (aiAgent.msgs || []).some(function(m){ return m.role === 'card' && m.card && /retention gap|untouched content/i.test(m.card.headline || ''); }); } catch(e){ return false; }
+    try { return (aiAgent.msgs || []).some(function(m){ return m.role === 'card' && m.card && (m.card.approval || /retention gap|untouched content/i.test(m.card.headline || '')); }); } catch(e){ return false; }
   }
   window.rotAsk = function(){
     if (typeof aiOpen === 'function') aiOpen();
     if (_rotInThread()){
       setTimeout(function(){
-        var cards = document.querySelectorAll('#aiBody .aiac');
+        var cards = document.querySelectorAll('#aiBody .aiac, #aiBody .vdc-appr');
         var el = cards[cards.length - 1]; if (el) el.scrollIntoView({ block:'center', behavior:'smooth' });
       }, 340);
       return;
@@ -12168,7 +12170,7 @@ body.ai-open .rot-editor { right: var(--ai-w); }   /* the assistant pushes the p
     if (inList) return { ask:'I\u2019ve configured a policy for those three sites and it\u2019s waiting in the list. Nothing runs until you activate it.',
       btns: [{ label:'Activate policy', onclick:'rotActivate()', attr:'data-rot-cta data-rot-act' }, { label:'Dismiss', onclick:'rotDismissAsk()', primary:false, attr:'data-dismiss' }], key:'rot' };
     return { ask:'I\u2019ve configured a policy for those three sites. Open it to adjust anything, then activate \u2014 nothing is created until you do.',
-      btns: [{ label:'Review the proposed policy', onclick:'rotShowView(true, true)', attr:'data-rot-cta' }, { label:'Dismiss', onclick:'rotDismissAsk()', primary:false, attr:'data-dismiss' }], key:'rot' };
+      btns: [{ label:'Review the proposed policy', onclick:'rotShowView(false, true)', attr:'data-rot-cta' }, { label:'Dismiss', onclick:'rotDismissAsk()', primary:false, attr:'data-dismiss' }], key:'rot' };
   };
 
   // ── assistant: the same recommendation, as a conversation that ends at the policy form ──
@@ -12195,15 +12197,10 @@ body.ai-open .rot-editor { right: var(--ai-w); }   /* the assistant pushes the p
     setTimeout(function(){
       if (stale()) return;
       aiFinishReasoning(rs);
-      // ONE BLOCK (2026-10-27): claim + evidence + ask, no longer a card followed by a separate glued message.
-      // was: msgs.push({role:'card', ...}) then aiPushAgent('<p>'+msg+'</p><div class="ai-gate-btns" style="margin-top:12px">'+btn+'</div>')
-      aiAgent.msgs.push({ role:'card', open:false, card:{
-        headline:'Retail Division has 4.2 TB of untouched content in the daily backup, and no ROT policy covers it.',
-        headsub:'3 of 5 Retail SharePoint sites fall outside every active ROT policy. 63% of their backed-up volume has not changed in 36 months.',
-        stripTitle:'Backed-up volume of the three uncovered sites', unit:'TB', strip: ROT_EVIDENCE.strip,
-        vrows: ROT_EVIDENCE.vrows,
-        decision: window.rotDecision()
-      } });
+      // APPROVAL FIRST (user 2026-11-10): the arrival is the decision plus one sentence of why; the evidence card is the answer to the
+      // first Quick Prompt. The card is the shared approval block (vdc-notifications.js), carrying this page's own verbs via rotDecision().
+      // was: a card of headline + strip + per-site bars (ROT_EVIDENCE) with window.rotDecision() as its footer (ONE BLOCK, 2026-10-27).
+      aiAgent.msgs.push({ role:'card', open:false, card:{ approval: window.vdcRotApproval(window.rotDecision()) } });
       aiRender();
       aiSetBusy(false);
       // This page owns the ROT flow (vdcNotifSpeak hands off to it and returns), so the follow-up prompts are
