@@ -687,6 +687,7 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
 .gg-pill .gg-av { width: 24px; height: 24px; font-size: 12px; }
 .gg-sec { font-size: 14px; line-height: 20px; color: #3c4043; margin-bottom: 12px; }
 .gg-scope { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-top: 1px solid #dadce0; border-bottom: 1px solid #dadce0; font-size: 14px; line-height: 20px; color: #202124; }
+.gg-scope + .gg-scope { border-top: 0; }
 .gg-scope input { margin: 2px 0 0; width: 18px; height: 18px; accent-color: #0b57d0; flex: none; }
 .gg-scope svg { margin-left: auto; flex: none; color: #5f6368; }
 .gg-trust { margin-top: 16px; font-size: 14px; line-height: 20px; color: #3c4043; }
@@ -706,6 +707,8 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
 /* Provider sign-in window (shared frame, per-provider skin via data-prov). Atlassian = id.atlassian.com sign-in + consent. */
 .pw-back { position: fixed; inset: 0; z-index: 9500; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(9,30,66,.54); }
 .pw-win { --pw-ink: #172b4d; --pw-sub: #5e6c84; --pw-line: #dfe1e6; --pw-accent: #0c66e4; --pw-accent-h: #0055cc; width: 480px; max-width: 100%; max-height: calc(100vh - 32px); display: flex; flex-direction: column; background: var(--white); border-radius: 8px; box-shadow: 0 16px 48px rgba(9,30,66,.4); overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', Ubuntu, 'Droid Sans', 'Helvetica Neue', sans-serif; color: var(--pw-ink); }
+.pw-win[data-prov="gitlab"] { --pw-ink: #28272d; --pw-sub: #626168; --pw-line: #dcdcde; --pw-accent: #1f75cb; --pw-accent-h: #1068bf; }
+.pw-win[data-prov="microsoft"] { --pw-ink: #1b1b1b; --pw-sub: #605e5c; --pw-line: #d1d1d1; --pw-accent: #0067b8; --pw-accent-h: #005da6; }
 .pw-bar { display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: var(--black-5); border-bottom: 1px solid var(--pw-line); color: var(--pw-sub); font-size: 14px; }
 .pw-url { flex: 1; display: flex; align-items: center; gap: 4px; height: 28px; padding: 0 12px; border-radius: 14px; background: var(--white); border: 1px solid var(--pw-line); }
 .pw-x { border: 0; background: none; color: var(--pw-sub); cursor: pointer; display: inline-flex; padding: 4px; border-radius: 50%; }
@@ -2373,13 +2376,13 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
                 <!-- Mode selection (same pattern as the auth step, user 2026-11-04): the two cards only SELECT — name, Recommended chip, one line — and sit side by side;
                      what the chosen mode means (the all-summary, or the filters + search + table) is page content below them in #env-setup, so no card grows with its content.
                      Was: two full-width stacked cards, the custom one holding its own filter chips, search and table. Ids the env JS reads are unchanged. -->
-                <div id="env-mode-cards" class="pchoice-grid am-cards am-flush" role="radiogroup" aria-label="Environment scope"><div id="env-mode-card-all" class="pchoice-card selected" role="radio" aria-checked="true" tabindex="0" onclick="selectEnvMode('all')" onkeydown="envModeCardKey(event,'all')"><div class="pchoice-head"><span class="pchoice-head-icon" id="env-icon-all"></span><span class="pchoice-head-title">Include all</span><span class="pchoice-chip pchoice-chip-green">Recommended</span><span class="pchoice-radio"></span></div><div class="pchoice-body"><div class="pchoice-desc">Every Production and Sandbox environment, now and any added later.</div></div></div><div id="env-mode-card-custom" class="pchoice-card" role="radio" aria-checked="false" tabindex="0" onclick="selectEnvMode('custom')" onkeydown="envModeCardKey(event,'custom')"><div class="pchoice-head"><span class="pchoice-head-icon" id="env-icon-custom"></span><span class="pchoice-head-title">Include selected</span><span class="pchoice-radio"></span></div><div class="pchoice-body"><div class="pchoice-desc">Back up only the environments you pick.</div></div></div></div>
+                <div id="env-mode-cards" class="pchoice-grid am-cards am-flush" role="radiogroup" aria-label="Environment scope"><div id="env-mode-card-all" class="pchoice-card selected" role="radio" aria-checked="true" tabindex="0" onclick="selectEnvMode('all')" onkeydown="envModeCardKey(event,'all')"><div class="pchoice-head"><span class="pchoice-head-icon" id="env-icon-all"></span><span class="pchoice-head-title">Include all</span><span class="pchoice-chip pchoice-chip-green">Recommended</span><span class="pchoice-radio"></span></div><div class="pchoice-body"><div class="pchoice-desc">Every Production, Sandbox and Default environment, now and any added later.</div></div></div><div id="env-mode-card-custom" class="pchoice-card" role="radio" aria-checked="false" tabindex="0" onclick="selectEnvMode('custom')" onkeydown="envModeCardKey(event,'custom')"><div class="pchoice-head"><span class="pchoice-head-icon" id="env-icon-custom"></span><span class="pchoice-head-title">Include selected</span><span class="pchoice-radio"></span></div><div class="pchoice-body"><div class="pchoice-desc">Back up only the environments you pick.</div></div></div></div>
 
                 <!-- Setup for the selected mode. -->
                 <div id="env-setup" class="am-setup am-flush">
                   <div id="env-setup-title" class="am-setup-title">All environments</div>
                   <div id="env-all-panel" class="am-ex">
-                    <div class="am-rest">Every production and sandbox environment is included automatically — both the ones we discovered now and any new ones added later. Trial and developer environments are excluded; switch to <strong style="color:var(--black-100);font-weight:500">Include selected environments</strong> to include them.</div>
+                    <div class="am-rest">Every production, sandbox and default environment is included automatically — both the ones we discovered now and any new ones added later. Trial and developer environments are excluded; switch to <strong style="color:var(--black-100);font-weight:500">Include selected environments</strong> to include them.</div>
                     <div id="env-all-summary" style="font-size:14px;color:var(--black-60)"></div>
                   </div>
                   <div id="env-custom-body" style="display:none">
@@ -2549,19 +2552,9 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
                     <div id="wks-all-summary" style="font-size:14px;color:var(--black-60)"></div>
                   </div>
                   <div id="wks-custom-body" style="display:none">
-                    <div class="am-rest" style="margin-bottom:16px">Back up only the workspaces you select. New workspaces stay out of scope unless <strong style="color:var(--black-100);font-weight:500">Auto-add new workspaces</strong> is on, in which case future workspaces matching your filters are added automatically.</div>
-                    <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px">
-                      <div id="wks-type-chips" style="display:flex;flex-wrap:wrap;gap:6px"></div>
-                      <div style="display:inline-flex;align-items:center;gap:8px;flex-shrink:0">
-                        <button type="button" id="wks-auto-add-future" class="toggle-switch" onclick="toggleAutoAddFutureWorkspacesFromChip()" role="switch" aria-checked="false" aria-label="Auto-add new workspaces matching these filters">
-                          <span class="toggle-knob"></span>
-                        </button>
-                        <span id="wks-auto-add-label" style="font-size:14px;line-height:1.2;color:var(--black-100);user-select:none;cursor:pointer" onclick="toggleAutoAddFutureWorkspacesFromChip()">Auto-add new workspaces in selected categories</span>
-                        <span class="info-tip" tabindex="0" data-tooltip="When new workspaces are discovered later, automatically include the ones whose type matches the selected filter chips. Off by default — newly-discovered workspaces stay out of scope until you return to this screen and add them yourself." aria-label="More info">
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                        </span>
-                      </div>
-                    </div>
+                    <div class="am-rest" style="margin-bottom:16px">Back up only the workspaces you select. Use the arrow in the table header to select a whole type or every page.</div>
+                    <!-- Auto-add: same selection card as the Environments step, one fixed rule (new Group and Capacity workspaces, the Include all scope). Rendered by selAutoCard('wks'). -->
+                    <div id="wks-auto-card" style="margin-bottom:12px"></div>
 
                     <div style="position:relative;margin-bottom:12px">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--black-60)" stroke-width="2" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -2570,14 +2563,18 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
 
                     <div id="wks-custom-selection-summary" style="font-size:14px;color:var(--black-60);margin-bottom:8px"></div>
 
-                    <div style="border:1px solid var(--border-light);border-radius:4px;overflow:hidden">
-                      <div id="wks-table-header" style="display:grid;grid-template-columns:36px 1fr 110px;align-items:center;background:var(--black-3);padding:8px 12px;font-size: 14px;font-weight:500;color:var(--black-60);border-bottom:1px solid var(--border-light)">
-                        <input type="checkbox" id="wks-table-master" onchange="toggleWorkspaceAllVisibleRows(this.checked)" style="margin:0">
-                        <span>Workspace</span>
-                        <span>Type</span>
+                    <div id="wks-table-box" style="border:1px solid var(--border-light);border-radius:4px;overflow:hidden">
+                        <div id="wks-table-header" style="display:grid;grid-template-columns:36px 1fr 110px;align-items:center;background:var(--black-3);padding:8px 12px;font-size: 14px;font-weight:500;color:var(--black-60);border-bottom:1px solid var(--border-light)">
+                          <div style="display:flex;align-items:center;position:relative;white-space:nowrap">
+                            <input type="checkbox" id="wks-table-master" onchange="toggleWorkspaceAllVisibleRows(this.checked)" aria-label="Select the rows on this page" style="margin:0">
+                            <span id="wks-bulk-host" style="display:contents"></span>
+                          </div>
+                          <span>Workspace</span>
+                          <span>Type</span>
+                        </div>
+                        <div id="wks-table-rows" style="max-height:380px;overflow-y:auto"></div>
                       </div>
-                      <div id="wks-table-rows" style="max-height:380px;overflow-y:auto"></div>
-                    </div>
+                      <div id="wks-pager"></div>
                   </div>
                 </div><!-- /mode-card group -->
               </div>
@@ -2771,19 +2768,9 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
                     <div id="csp-all-summary" style="font-size:14px;color:var(--black-60)"></div>
                   </div>
                   <div id="csp-custom-body" style="display:none">
-                    <div class="am-rest" style="margin-bottom:16px">Back up only the spaces you select. New spaces stay out of scope unless <strong style="color:var(--black-100);font-weight:500">Auto-add new spaces</strong> is on, in which case future spaces matching your filters are added automatically.</div>
-                      <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px">
-                        <div id="csp-type-chips" style="display:flex;flex-wrap:wrap;gap:6px"></div>
-                        <div style="display:inline-flex;align-items:center;gap:8px;flex-shrink:0">
-                          <button type="button" id="csp-auto-add-future" class="toggle-switch" onclick="toggleAutoAddFutureSpacesFromChip()" role="switch" aria-checked="false" aria-label="Auto-add new spaces matching these filters">
-                            <span class="toggle-knob"></span>
-                          </button>
-                          <span id="csp-auto-add-label" style="font-size:14px;line-height:1.2;color:var(--black-100);user-select:none;cursor:pointer" onclick="toggleAutoAddFutureSpacesFromChip()">Auto-add new spaces in selected categories</span>
-                          <span class="info-tip" tabindex="0" data-tooltip="When new spaces are discovered later, automatically include the ones whose category matches a fully-selected chip. Off by default — newly-discovered spaces stay out of scope until you return to this screen and add them yourself." aria-label="More info">
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                          </span>
-                        </div>
-                      </div>
+                    <div class="am-rest" style="margin-bottom:16px">Back up only the spaces you select. Use the arrow in the table header to select a whole category or every page.</div>
+                    <!-- Auto-add: same selection card as the Environments step, one fixed rule (new Global spaces), independent of which rows are selected. Rendered by selAutoCard('csp'). -->
+                    <div id="csp-auto-card" style="margin-bottom:12px"></div>
 
                       <div style="position:relative;margin-bottom:12px">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--black-60)" stroke-width="2" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -2792,14 +2779,18 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
 
                       <div id="csp-custom-selection-summary" style="font-size:14px;color:var(--black-60);margin-bottom:8px"></div>
 
-                      <div style="border:1px solid var(--border-light);border-radius:4px;overflow:hidden">
+                      <div id="csp-table-box" style="border:1px solid var(--border-light);border-radius:4px;overflow:hidden">
                         <div id="csp-table-header" style="display:grid;grid-template-columns:36px 1fr 110px;align-items:center;background:var(--black-3);padding:8px 12px;font-size: 14px;font-weight:500;color:var(--black-60);border-bottom:1px solid var(--border-light)">
-                          <input type="checkbox" id="csp-table-master" onchange="toggleSpaceAllVisibleRows(this.checked)" style="margin:0">
+                          <div style="display:flex;align-items:center;position:relative;white-space:nowrap">
+                            <input type="checkbox" id="csp-table-master" onchange="toggleSpaceAllVisibleRows(this.checked)" aria-label="Select the rows on this page" style="margin:0">
+                            <span id="csp-bulk-host" style="display:contents"></span>
+                          </div>
                           <span>Space</span>
-                          <span>Type</span>
+                          <span>Category</span>
                         </div>
                         <div id="csp-table-rows" style="max-height:380px;overflow-y:auto"></div>
                       </div>
+                      <div id="csp-pager"></div>
                     </div>
                 </div><!-- /mode-card group -->
               </div>
@@ -5026,7 +5017,7 @@ function refreshSidebar() {
   if (!active) return;
   var screen = (active.id || '').replace(/^screen-/, '');
   if (!screen) return;
-  var step = stepMap[screen];
+  var step = _railStep(screen);
   if (!step) return;
   var subStepMap = {
     'auth': 'authorize',
@@ -5047,6 +5038,8 @@ function refreshSidebar() {
   });
 }
 
+// On template workloads with an Applications choice, that screen has its own rail step (see sidebarHTML); everywhere else it sits under Connect.
+function _railStep(screen) { return (screen === 'applications' && OKTA_RAIL_WL[currentWorkload]) ? 'applications' : stepMap[screen]; }
 var stepMap = {
   'applications': 'connect',
   'auth': 'connect',
@@ -5138,6 +5131,9 @@ function getConnectSubSteps() {
     var tail = [];
     if (w.requiresProjectList) tail.push(projects);
     if (w.requiresSitePicker && !_siteInline() && !(currentWorkload === 'confluence' && currentAuthMethod === 'manual')) tail.push(sites);
+    if (w.requiresSpacesList) tail.push(spaces);   // Confluence: Spaces stays a step after Authentication
+    if (effectiveRequiresEnvList()) tail.push(envs);   // Power Platform / D365: the multi-select Environments step (Include all / Include selected)
+    if (effectiveRequiresWorkspaceList()) tail.push(workspaces);
     return tail;
   }
   subs.push(infra, auth);
@@ -5190,7 +5186,7 @@ function getConfigSubSteps() {
   // makes the choice an explicit step alongside Infra / Scope. Shield
   // icon matches the Data Backup card on the summary screen and the
   // policy-card iconography elsewhere.
-  var protect = {id:'protect', label:(currentWorkload === 'd365' ? 'Policy' : 'Protection'), icon:'<path d="M10 1.667l-6.667 2.5v5c0 4.167 2.917 7.917 6.667 9.166 3.75-1.25 6.667-5 6.667-9.166v-5L10 1.667zm-1.25 12.5L5.833 11.25l1.05-1.05 1.867 1.867 4.367-4.367 1.05 1.05-5.417 5.417z"/>'};
+  var protect = {id:'protect', label:'Protection', icon:'<path d="M10 1.667l-6.667 2.5v5c0 4.167 2.917 7.917 6.667 9.166 3.75-1.25 6.667-5 6.667-9.166v-5L10 1.667zm-1.25 12.5L5.833 11.25l1.05-1.05 1.867 1.867 4.367-4.367 1.05 1.05-5.417 5.417z"/>'};
   // MS workloads (D365, PP) skip Scope & Fields for v1 — see
   // hideScopeStep flag definition on each workload. Protect always
   // appears as the final Configure substep regardless.
@@ -5222,6 +5218,11 @@ function sidebarHTML(activeStep, subStep) {
     {id:'connect', label:'Connect', filled:true, icon:'<path d="M6.48671 11.3288C6.12126 11.3288 5.80842 11.1987 5.54817 10.9384C5.28793 10.6782 5.15781 10.3653 5.15781 9.99989C5.15781 9.63445 5.28793 9.3216 5.54817 9.06136C5.80842 8.80111 6.12126 8.67099 6.48671 8.67099C6.85216 8.67099 7.16501 8.80111 7.42525 9.06136C7.68549 9.3216 7.81561 9.63445 7.81561 9.99989C7.81561 10.3653 7.68549 10.6782 7.42525 10.9384C7.16501 11.1987 6.85216 11.3288 6.48671 11.3288ZM6.48671 13.9866C5.37929 13.9866 4.43798 13.599 3.66279 12.8238C2.8876 12.0486 2.5 11.1073 2.5 9.99989C2.5 8.89247 2.8876 7.95117 3.66279 7.17597C4.43798 6.40078 5.37929 6.01318 6.48671 6.01318C7.22868 6.01318 7.90144 6.19591 8.50498 6.56136C9.10853 6.9268 9.58749 7.40853 9.94186 8.00654H15.5066C15.5952 8.00654 15.6811 8.02315 15.7641 8.05637C15.8472 8.0896 15.9219 8.13943 15.9884 8.20587L17.3173 9.53478C17.3837 9.60122 17.4308 9.67321 17.4585 9.75072C17.4862 9.82824 17.5 9.9113 17.5 9.99989C17.5 10.0885 17.4862 10.1715 17.4585 10.2491C17.4308 10.3266 17.3837 10.3986 17.3173 10.465L15.2076 12.5746C15.1523 12.63 15.0858 12.6743 15.0083 12.7075C14.9308 12.7408 14.8533 12.7629 14.7757 12.774C14.6982 12.7851 14.6207 12.7795 14.5432 12.7574C14.4657 12.7352 14.3937 12.6965 14.3272 12.6411L13.4635 11.9932L12.5166 12.7075C12.4612 12.7518 12.4003 12.7851 12.3339 12.8072C12.2674 12.8294 12.201 12.8404 12.1346 12.8404C12.0681 12.8404 11.9989 12.8294 11.9269 12.8072C11.8549 12.7851 11.7913 12.7518 11.7359 12.7075L10.7226 11.9932H9.94186C9.58749 12.5913 9.10853 13.073 8.50498 13.4384C7.90144 13.8039 7.22868 13.9866 6.48671 13.9866ZM6.48671 12.6577C7.10687 12.6577 7.65227 12.4694 8.12292 12.0929C8.59358 11.7164 8.90642 11.2402 9.06146 10.6643H11.1379L12.1013 11.3454L13.4635 10.3321L14.6429 11.2457L15.8887 9.99989L15.2243 9.33544H9.06146C8.90642 8.75958 8.59358 8.28339 8.12292 7.90687C7.65227 7.53035 7.10687 7.34209 6.48671 7.34209C5.75581 7.34209 5.13012 7.60233 4.60963 8.12282C4.08915 8.64331 3.8289 9.269 3.8289 9.99989C3.8289 10.7308 4.08915 11.3565 4.60963 11.877C5.13012 12.3975 5.75581 12.6577 6.48671 12.6577Z"/>'},
     {id:'protect', label:'Protect', filled:true, icon:'<path d="M10 1.667l-6.667 2.5v5c0 4.167 2.917 7.917 6.667 9.166 3.75-1.25 6.667-5 6.667-9.166v-5L10 1.667zm-1.25 12.5L5.833 11.25l1.05-1.05 1.867 1.867 4.367-4.367 1.05 1.05-5.417 5.417z"/>'}
   ];
+  // Template workloads with a pre-auth Applications choice (Power Platform): it is its own step between Basic Information and Authentication,
+  // since it decides which prerequisites the next page shows.
+  if (OKTA_RAIL_WL[currentWorkload] && WORKLOADS[currentWorkload] && WORKLOADS[currentWorkload].requiresApplicationStep) {
+    steps.splice(1, 0, {id:'applications', label:'Applications', filled:true, icon:'<rect x="2" y="3" width="3" height="3" rx="0.5"/><rect x="7" y="3.75" width="11" height="1.5" rx="0.5"/><rect x="2" y="9" width="3" height="3" rx="0.5"/><rect x="7" y="9.75" width="11" height="1.5" rx="0.5"/><rect x="2" y="15" width="3" height="3" rx="0.5"/><rect x="7" y="15.75" width="11" height="1.5" rx="0.5"/>'});
+  }
   var order = steps.map(s=>s.id);
   var activeIdx = order.indexOf(activeStep);
   // Reaching Overview means every Settings step is already complete —
@@ -5247,7 +5248,7 @@ function sidebarHTML(activeStep, subStep) {
     // there's no sub-step underneath carrying that highlight instead —
     // Connect's own row stays neutral while one of its sub-steps (or
     // the transient Test Connection state) is what's actually current.
-    var onProjects = (isOkta && s.id === 'connect' && act && (subStep === 'projects' || subStep === 'sites'));   // Google Identity Projects step: Authentication is behind you
+    var onProjects = (isOkta && s.id === 'connect' && act && (subStep === 'projects' || subStep === 'sites' || subStep === 'spaces' || subStep === 'environments' || subStep === 'workspaces'));   // a picker step after Authentication (Projects, Spaces, Environments, Workspaces): Authentication is behind you
     var cls = (act && !onProjects && (!subStep || (isOkta && subStep !== 'test'))) ? ' active' : ((done || onProjects) ? ' completed' : '');
     var svgAttr = s.filled ? 'viewBox="0 0 20 20" fill="currentColor"' : 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"';
     var itemClick = done ? ' onclick="goToStep(\''+s.id+'\')"' : '';
@@ -5344,7 +5345,7 @@ function goToStep(id) {
   var w = (typeof WORKLOADS !== 'undefined' && currentWorkload) ? WORKLOADS[currentWorkload] : null;
   var screenMap = {
     'basicinfo':     'basic-info',
-    'connect':       (w && w.requiresApplicationStep) ? 'applications' : 'auth',
+    'connect':       (w && w.requiresApplicationStep && !OKTA_RAIL_WL[currentWorkload]) ? 'applications' : 'auth',
     'configure':     'infra-storage',
     'applications':  'applications',
     'authorize':     'auth',
@@ -5417,7 +5418,7 @@ function goTo(screen) {
     'infra-storage': 'infra',
     'scope': 'scope'
   };
-  var step = stepMap[screen];
+  var step = _railStep(screen);
   var sub = subStepMap[screen] || null;
   if (step) {
     el.querySelectorAll('.left-sidebar').forEach(function(sb){
@@ -6735,6 +6736,7 @@ function seedPowerPlatformEnvironments() {
   ENV_STATE = [
     { id:'envb93cf6e5', name:'Contoso Production',         url:'https://envb93cf6e5.environment.api.powerplatform.com', region:'EMEA', type:'Production', state:'Enabled', selected:true },
     { id:'enva1b2c3d4', name:'HR Apps Production',         url:'https://enva1b2c3d4.environment.api.powerplatform.com', region:'EMEA', type:'Production', state:'Enabled', selected:true },
+    { id:'envd0f1a2b3', name:'Contoso (default)',          url:'https://envd0f1a2b3.environment.api.powerplatform.com', region:'EMEA', type:'Default',    state:'Enabled', selected:true },   // every tenant has one Default environment
     { id:'envf6951664', name:'Field Operations Sandbox',   url:'https://envf6951664.environment.api.powerplatform.com', region:'EMEA', type:'Sandbox',    state:'Enabled', selected:true },
     { id:'env7b3a92ee', name:'Sales Workflows Sandbox',    url:'https://env7b3a92ee.environment.api.powerplatform.com', region:'NAM',  type:'Sandbox',    state:'Enabled', selected:true },
     { id:'env5c2d11ff', name:'Marketing Hub Sandbox',      url:'https://env5c2d11ff.environment.api.powerplatform.com', region:'NAM',  type:'Sandbox',    state:'Admin Mode', selected:true },
@@ -6762,10 +6764,10 @@ function enterEnvScreen() {
     // D365 (Maxim flow): table-only env screen, custom mode, with only
     // PRODUCTION pre-selected. Other env workloads (PP) keep "Include all"
     // (every env except trial/developer pre-selected).
-    var _isD365Env = (currentWorkload === 'd365');
-    envSelectMode = _isD365Env ? 'custom' : 'all';
+    // Both start on "Include all" (every environment except trial/developer pre-selected); Include selected is the other card.
+    envSelectMode = 'all';
     envSearchTerm = '';
-    ENV_STATE.forEach(function(e){ e.selected = _isD365Env ? (e.type === 'Production') : !envIsTrialOrDev(e); });
+    ENV_STATE.forEach(function(e){ e.selected = !envIsTrialOrDev(e); });
     // For inline-provisioning workloads (D365), envs start with no
     // provisionState — they're in pure selection mode until the user
     // clicks Continue. Verify only runs once the pipeline starts.
@@ -6827,8 +6829,7 @@ function renderEnvScreen() {
   // cards — the env screen is just the table, with only Production pre-selected
   // (seedD365Environments). Force the table view; the chrome-strip below hides
   // the card wrappers. PP keeps the full mode-card UI.
-  var isD365Env = (currentWorkload === 'd365');
-  if (isD365Env) envSelectMode = 'custom';
+  var isD365Env = false;   // D365 now shows the same two cards as Power Platform (the table-only layout is retired)
   var allOn = (envSelectMode === 'all');
   [[allCard, allOn], [customCard, !allOn]].forEach(function(p){
     p[0].classList.toggle('selected', p[1]);
@@ -6839,6 +6840,7 @@ function renderEnvScreen() {
   var customIntro = document.getElementById('env-custom-intro');
   var setupHost = document.getElementById('env-setup');
   if (allPanel) allPanel.style.display = allOn ? '' : 'none';
+  // Power Platform and D365 share one Environments step: the same two cards, the same sentences, the same auto-add card (was: D365 had its own all-panel sentence and card description).
   customBody.style.display = allOn ? 'none' : 'block';
   if (setupTitle) setupTitle.textContent = allOn ? 'All environments' : 'Selected environments';
   // D365: table only, no mode cards and no setup heading or intro; restored for Power Platform.
@@ -7036,7 +7038,7 @@ function renderEnvTable() {
 // the select-all grammar of Protected Data. A search narrows what every item acts on. There is deliberately no "Select none":
 // at least one environment must stay selected to continue.
 var envPage = 1, envPgSize = 10, envMenuOpen = false;
-function envBulkUi() { return currentWorkload !== 'd365'; }
+function envBulkUi() { return true; }   // Power Platform and D365 share the header menu + pager
 function envVisibleList() {
   var q = (envSearchTerm || '').toLowerCase();
   return ENV_STATE.filter(function(e){ return !q || e.name.toLowerCase().indexOf(q) !== -1 || e.url.toLowerCase().indexOf(q) !== -1; });
@@ -7103,12 +7105,11 @@ document.addEventListener('click', function(ev) {
 document.addEventListener('keydown', function(ev) {
   if (ev.key === 'Escape' && envMenuOpen && document.getElementById('env-table-rows')) { envMenuOpen = false; renderEnvTable(); }
 });
-// Auto-add: one fixed rule — new Production and Sandbox environments (the Include all scope), independent of which rows are selected,
+// Auto-add (Power Platform and D365): one fixed rule — new Production, Sandbox and Default environments (the Include all scope), independent of which rows are selected,
 // so selecting or clearing rows never changes it. Developer and Trial are never added automatically.
 function renderEnvAutoCard() {
   var host = document.getElementById('env-auto-card');
   if (!host) return;
-  if (currentWorkload === 'd365') { host.style.display = 'none'; host.innerHTML = ''; return; }
   host.style.display = '';
   var on = !!_envAutoAddFutureForFilters;
   var key = "if (event.key === ' ' || event.key === 'Enter') { event.preventDefault(); toggleEnvAutoAdd(); }";
@@ -7118,7 +7119,7 @@ function renderEnvAutoCard() {
       '<span class="ws-cfg-choice-title">Add new environments automatically</span>' +
       '<input type="checkbox" class="rc-cb" tabindex="-1" aria-hidden="true"' + (on ? ' checked' : '') + '>' +
     '</div>' +
-    '<div class="sc-desc">Production and Sandbox environments added to your tenant later are included.</div></div>';
+    '<div class="sc-desc">Production, Sandbox and Default environments added to your tenant later are included.</div></div>';
 }
 
 // ── D365 inline provisioning: per-env state machine ─────────────────
@@ -7712,7 +7713,7 @@ var d365PendingEnvs = [];
 // arg) still simulate the seeded failure so the failure UX is
 // demonstrable on first land.
 // Okta "Verifying access" chrome toggle: restyles the shared test-conn screen (no-op / restore for every other workload).
-var TEST_ICON_PX = { github: 24, jira: 28 };   // glyph size inside the 40px Test-step tile, where it differs from the 40px default
+var TEST_ICON_PX = { github: 24, jira: 28, confluence: 28, gitlab: 28, 'azure-devops': 28, gws: 28, pp: 28, d365: 28 };   // glyph size inside the 40px Test-step tile, where it differs from the 40px default
 function _tcOkvChrome(on, w) {
   var scr = document.getElementById('screen-test-conn'); if (!scr) return;
   scr.classList.toggle('okv', on); scr.classList.remove('okv-p2'); scr.classList.toggle('okv-running', on); scr.classList.toggle('okv-checking', on);
@@ -7870,9 +7871,9 @@ function runTestConnectionSequence(isRetry) {
   // var(--black-100)"> convention already used for inline dynamic values
   // elsewhere in this file (env-tenant-display, csp-site-display, etc.).
   var tcConnDomainHtml = tcConnDomain ? '<strong style="color:var(--black-100)">' + escapeHtml(tcConnDomain) + '</strong>' : '';
-  var isD365Inline = !!(w && w.inlineProvisioning);
-  var hasPropagation = !isD365Inline && !!(w && w.requiresPostAuthPropagation);
-  var hasEnvRow = !!(w && w.requiresEnvList && !w.inlineProvisioning);
+  var isD365Inline = !!(w && w.inlineProvisioning) && !_onbTemplate();   // template workloads: the per-environment work happens on the Environments step; the test shows the four base checks
+  var hasPropagation = !isD365Inline && !!(w && w.requiresPostAuthPropagation) && !_onbTemplate();   // template workloads show only the four base checks; the wait itself happens on the interstitial
+  var hasEnvRow = !!(w && w.requiresEnvList && !w.inlineProvisioning) && !_onbTemplate();
   var capRowCount = isD365Inline ? 0 : ((w && w.permissionCheckRows) ? w.permissionCheckRows.length : 4);
   var totalRows = isD365Inline
     ? d365SelectedEnvs.length
@@ -9071,7 +9072,13 @@ function advanceFromProtect() {
 // The Okta-style success dialog, worded for the workload that was just connected.
 var OKF_COPY = { github: { tag: 'GitHub Cloud', body: 'Inventory sync has started for your organization. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the connection\u2019s configuration.' },
   gip: { tag: 'Google Cloud', body: 'Inventory sync has started for your Google identity environment. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the connection\u2019s configuration.' },
-  jira: { tag: 'Atlassian Cloud', body: 'Inventory sync has started for your Jira site. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the connection\u2019s configuration.' } };
+  jira: { tag: 'Atlassian Cloud', body: 'Inventory sync has started for your Jira site. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the connection\u2019s configuration.' },
+  confluence: { tag: 'Atlassian Cloud', body: 'Inventory sync has started for your Confluence site. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the connection\u2019s configuration.' },
+  gitlab: { tag: 'GitLab.com', body: 'Inventory sync has started for your GitLab group. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the connection\u2019s configuration.' },
+  'azure-devops': { tag: 'Azure DevOps', body: 'Inventory sync has started for your Azure DevOps organization. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the connection\u2019s configuration.' },
+  gws: { tag: 'Google Cloud', body: 'Inventory sync has started for your Google Workspace domain. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the connection\u2019s configuration.' },
+  pp: { tag: 'Microsoft Cloud', body: 'Inventory sync has started for your Power Platform tenant. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the connection\u2019s configuration.' },
+  d365: { tag: 'Microsoft Cloud', body: 'Inventory sync has started for your Dynamics 365 environments. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the connection\u2019s configuration.' } };
 var _okfSnap = null;
 function paintSuccessOkf(wl) {
   var h = document.querySelector('#success-okta .okf-top h2'), nm = document.querySelector('#success-okta .okf-inst .nm'), p = document.querySelector('#success-okta .okf-body p'); if (!h || !nm || !p) return;
@@ -9738,8 +9745,8 @@ var NEXT_STEPS_ORDERING = {
 };
 // Okta Overview (Figma 19457:154997): show the Okta layout, hide the shared one, and fill the dynamic bits.
 // ── New-onboarding template (Okta first, GitHub second, Google Identity third): which workloads use it, and the copy each one fills in ──
-var ONB_TEMPLATE_WL = { okta: true, github: true, gip: true, jira: true };
-var OKTA_RAIL_WL = { okta: true, gip: true, jira: true };   // the Okta-style rail (Authentication row, picker steps as their own rows); GitHub keeps the plain rail
+var ONB_TEMPLATE_WL = { okta: true, github: true, gip: true, jira: true, confluence: true, gitlab: true, 'azure-devops': true, gws: true, pp: true, d365: true };
+var OKTA_RAIL_WL = { okta: true, gip: true, jira: true, confluence: true, gitlab: true, 'azure-devops': true, gws: true, pp: true, d365: true };   // the Okta-style rail (Authentication row, picker steps as their own rows); GitHub keeps the plain rail
 function _onbTemplate(wl) { return !!ONB_TEMPLATE_WL[wl == null ? currentWorkload : wl]; }
 function _regionOnAuth(wl) { return _onbTemplate(wl); }   // Region & Data Processing sits at the top of Authentication, not on its own step
 function _ovkOn() { return _onbTemplate(); }               // the overview uses the Connection Details / Entities / Scans layout
@@ -9824,6 +9831,166 @@ var ONB_COPY = {
     note: 'A Jira Site Admin or Organization Admin completes setup once. Users then go directly to the dashboard.',
     bg: ['Projects', 'Issues', 'Boards', 'Sprints'],
     authHelp: 'Inventory, activity and discovery scans run here. Content read for scanning is encrypted in transit and at rest and purged after each scan. Pick the region closest to your Jira site or the one your policy requires.'
+  },
+  // Confluence: the Jira copy with the product nouns swapped (projects and issues → spaces and pages). Requirements come from the workload's own prereqs.
+  confluence: {
+    tag: 'New in Knowledge management',
+    title: 'Welcome to Veeam Intelligent ResOps for Confluence',
+    lede: '<strong>iResOps for Confluence</strong> is the context layer for your Confluence Cloud site. See every space, page and attachment, which users and AI agents can change them, and what\u2019s gone stale. Take action: restore a single page, or undo an agent\u2019s changes.',
+    feats: [
+      ['Space Discovery', 'Every space, page, blog post and attachment cataloged, within hours.'],
+      ['Access & AI Agent Intelligence', 'Track every user and AI agent\u2019s access, and every change they make.'],
+      ['Content Lifecycle', 'Inactive spaces, stale pages and orphaned attachments cluttering your site.'],
+      ['Page-Level Diff & Restore', 'See exactly what changed on a page, and restore just that.'],
+      ['Undo AI', 'Roll back an agent\u2019s changes to pages and spaces.'],
+      ['Dependency-Aware Recovery', 'Restore spaces, pages and attachments in order, permissions and links intact.']
+    ],
+    cfgName: 'Confluence',
+    cards: [
+      ['Full inventory', 'Spaces, pages, blog posts, comments, attachments and labels on your Confluence site'],
+      ['ROT analysis', 'Inactive spaces, stale pages and orphaned attachments cluttering your site'],
+      ['AI agent discovery', 'Every agent with Confluence access, its owner and what it changes'],
+      ['Point-in-time restore', 'Restore points that go back further than Atlassian\u2019s 30/60-day trash window'],
+      ['Activity analysis', '7-day backfill to surface page and admin activity from day one'],
+      ['Permission coverage', 'All required API scopes to unlock Entitlements and Posture scanning']
+    ],
+    reqs: function(){ return (WORKLOADS.confluence.prereqs || []).slice(); },
+    note: 'A Confluence Site Admin or Organization Admin completes setup once. Users then go directly to the dashboard.',
+    bg: ['Spaces', 'Pages', 'Attachments', 'Comments'],
+    authHelp: 'Inventory, activity and discovery scans run here. Content read for scanning is encrypted in transit and at rest and purged after each scan. Pick the region closest to your Confluence site or the one your policy requires.'
+  },
+  // GitLab and Azure DevOps: the GitHub copy with the product nouns swapped. Requirements come from each workload's own prereqs.
+  gitlab: {
+    tag: 'New in Dev tools',
+    title: 'Welcome to Veeam Intelligent ResOps for GitLab',
+    lede: '<strong>iResOps for GitLab</strong> is the context layer for your GitLab group hierarchy. See every group, project, merge request and pipeline, which users and AI agents can change them, and what\u2019s gone stale. Take action: restore a single project, or undo an agent\u2019s changes.',
+    feats: [
+      ['Project Discovery', 'Every group, project, merge request and pipeline cataloged within hours.'],
+      ['Access & AI Agent Intelligence', 'Track every user and agent\u2019s access and changes.'],
+      ['Project Lifecycle', 'Stale projects, abandoned branches and unused tokens.'],
+      ['Config-Level Diff & Restore', 'See what changed in a variable or pipeline, restore just that.'],
+      ['Undo AI', 'Roll back an agent\u2019s changes to projects and settings.'],
+      ['Dependency-Aware Recovery', 'Restore groups, projects and settings in order, hierarchy intact.']
+    ],
+    cfgName: 'GitLab',
+    cards: [
+      ['Full inventory', 'Groups, subgroups, projects, merge requests, issues and pipelines in your group'],
+      ['ROT analysis', 'Stale projects, abandoned branches and unused tokens cluttering your group'],
+      ['AI agent discovery', 'Every agent with GitLab access, its owner and what it changes'],
+      ['Point-in-time restore', 'Restore points that go back further than GitLab\u2019s native retention'],
+      ['Activity analysis', '7-day backfill to surface commit and admin behaviour from day one'],
+      ['Permission coverage', 'All required API scopes to unlock Entitlements and Posture scanning']
+    ],
+    reqs: function(){ return (WORKLOADS.gitlab.prereqs || []).slice(); },
+    note: 'A GitLab group Owner completes setup once. Users then go directly to the dashboard.',
+    bg: ['Groups', 'Projects', 'Merge requests', 'Pipelines'],
+    authHelp: 'Inventory, activity and discovery scans run here. Content read for scanning is encrypted in transit and at rest and purged after each scan. Pick the region closest to your group or the one your policy requires.'
+  },
+  'azure-devops': {
+    tag: 'New in Dev tools',
+    title: 'Welcome to Veeam Intelligent ResOps for Azure DevOps',
+    lede: '<strong>iResOps for Azure DevOps</strong> is the context layer for your Azure DevOps organization. See every project, repository, work item and pipeline, which users and AI agents can change them, and what\u2019s gone stale. Take action: restore a single repository, or undo an agent\u2019s changes.',
+    feats: [
+      ['Project Discovery', 'Every project, repository, work item and pipeline cataloged within hours.'],
+      ['Access & AI Agent Intelligence', 'Track every user and agent\u2019s access and changes.'],
+      ['Project Lifecycle', 'Stale repositories, abandoned branches and unused service connections.'],
+      ['Config-Level Diff & Restore', 'See what changed in a pipeline or branch policy, restore just that.'],
+      ['Undo AI', 'Roll back an agent\u2019s changes to repositories and settings.'],
+      ['Dependency-Aware Recovery', 'Restore projects, repositories and pipelines in order, links intact.']
+    ],
+    cfgName: 'Azure DevOps',
+    cards: [
+      ['Full inventory', 'Projects, repositories, work items, pipelines, wikis and variable groups in your organization'],
+      ['ROT analysis', 'Stale repositories, abandoned branches and unused service connections cluttering your organization'],
+      ['AI agent discovery', 'Every agent with Azure DevOps access, its owner and what it changes'],
+      ['Point-in-time restore', 'Restore points that go back further than Azure DevOps\u2019 28-day recycle bin'],
+      ['Activity analysis', '7-day backfill to surface commit and admin behaviour from day one'],
+      ['Permission coverage', 'All required API scopes to unlock Entitlements and Posture scanning']
+    ],
+    reqs: function(){ return (WORKLOADS['azure-devops'].prereqs || []).slice(); },
+    note: 'An Entra Application Administrator and an Azure DevOps Project Collection Administrator complete setup once. Users then go directly to the dashboard.',
+    bg: ['Projects', 'Repositories', 'Work items', 'Pipelines'],
+    authHelp: 'Inventory, activity and discovery scans run here. Content read for scanning is encrypted in transit and at rest and purged after each scan. Pick the region closest to your organization or the one your policy requires.'
+  },
+  // Google Workspace: the Google Identity copy with the product nouns swapped (identity objects → mailboxes, drives, calendars, chat spaces). Requirements come from the workload's own prereqs.
+  gws: {
+    tag: 'New in Productivity',
+    title: 'Welcome to Veeam Intelligent ResOps for Google Workspace',
+    lede: '<strong>iResOps for Google Workspace</strong> is the context layer for your Workspace domain. See every mailbox, drive, calendar and chat space, which users and AI agents can change them, and what\u2019s gone stale. Take action: restore a single message or file, or undo an agent\u2019s changes.',
+    feats: [
+      ['Domain Discovery', 'Every mailbox, drive, calendar and chat space cataloged, within hours.'],
+      ['Access & AI Agent Intelligence', 'Track every user and AI agent\u2019s access, and every change they make.'],
+      ['Content Lifecycle', 'Stale files, orphaned drives and unused mailboxes cluttering your domain.'],
+      ['Item-Level Diff & Restore', 'See exactly what changed in a file or event, and restore just that.'],
+      ['Undo AI', 'Roll back an agent\u2019s changes to mail, files and calendars.'],
+      ['Dependency-Aware Recovery', 'Restore drives, folders and sharing permissions in order, links intact.']
+    ],
+    cfgName: 'Google Workspace',
+    cards: [
+      ['Full inventory', 'Gmail, Drive and Shared Drives, Calendar and Contacts, Chat and Keep across your domain'],
+      ['ROT analysis', 'Stale files, orphaned drives and unused mailboxes cluttering your domain'],
+      ['AI agent discovery', 'Every agent with Workspace access, its owner and what it changes'],
+      ['Point-in-time restore', 'Restore points that go back further than Google\u2019s native trash and restore windows'],
+      ['Activity analysis', '7-day backfill to surface mail, file and admin activity from day one'],
+      ['Permission coverage', 'All required API scopes to unlock Entitlements and Posture scanning']
+    ],
+    reqs: function(){ return (WORKLOADS.gws.prereqs || []).slice(); },
+    note: 'A Google Workspace Super Admin completes setup once. Users then go directly to the dashboard.',
+    bg: ['Mailboxes', 'Drives', 'Calendars', 'Chat spaces'],
+    authHelp: 'Inventory, activity and discovery scans run here. Content read for scanning is encrypted in transit and at rest and purged after each scan. Pick the region closest to your domain or the one your policy requires.'
+  },
+  // Power Platform and Dynamics 365: the GitHub/Jira copy with the product nouns swapped (environments, apps, flows, tables). Requirements come from each workload's own prereqs.
+  pp: {
+    tag: 'New in Business applications',
+    title: 'Welcome to Veeam Intelligent ResOps for Power Platform',
+    lede: '<strong>iResOps for Power Platform</strong> is the context layer for your Power Platform tenant. See every environment, app, flow and Power BI workspace, which users and AI agents can change them, and what\u2019s gone stale. Take action: restore a single app or flow, or undo an agent\u2019s changes.',
+    feats: [
+      ['Environment Discovery', 'Every environment, app, flow and workspace cataloged within hours.'],
+      ['Access & AI Agent Intelligence', 'Track every user and agent\u2019s access and changes.'],
+      ['Solution Lifecycle', 'Unused apps, orphaned flows and stale workspaces.'],
+      ['Component-Level Diff & Restore', 'See what changed in an app or flow, restore just that.'],
+      ['Undo AI', 'Roll back an agent\u2019s changes to apps, flows and settings.'],
+      ['Dependency-Aware Recovery', 'Restore environments, solutions and datasets in order, links intact.']
+    ],
+    cfgName: 'Power Platform',
+    cards: [
+      ['Full inventory', 'Environments, Dataverse tables, apps, flows and Power BI workspaces in your tenant'],
+      ['ROT analysis', 'Unused apps, orphaned flows and stale workspaces cluttering your tenant'],
+      ['AI agent discovery', 'Every agent with Power Platform access, its owner and what it changes'],
+      ['Point-in-time restore', 'Restore points that go back further than Microsoft\u2019s native retention'],
+      ['Activity analysis', '7-day backfill to surface maker and admin behaviour from day one'],
+      ['Permission coverage', 'All required API scopes to unlock Entitlements and Posture scanning']
+    ],
+    reqs: function(){ return (WORKLOADS.pp.prereqs || []).slice(); },
+    note: 'A Power Platform Administrator completes setup once. Users then go directly to the dashboard.',
+    bg: ['Environments', 'Apps', 'Flows', 'Workspaces'],
+    authHelp: 'Inventory, activity and discovery scans run here. Content read for scanning is encrypted in transit and at rest and purged after each scan. Pick the region closest to your tenant or the one your policy requires.'
+  },
+  d365: {
+    tag: 'New in Business applications',
+    title: 'Welcome to Veeam Intelligent ResOps for Dynamics 365',
+    lede: '<strong>iResOps for Dynamics 365</strong> is the context layer for your Dataverse environments. See every environment, table and record set, which users and AI agents can change them, and what\u2019s gone stale. Take action: restore a single record, or undo an agent\u2019s changes.',
+    feats: [
+      ['Environment Discovery', 'Every environment, table and column cataloged within hours.'],
+      ['Access & AI Agent Intelligence', 'Track every user and agent\u2019s access and changes.'],
+      ['Data Lifecycle', 'Stale records, unused tables and abandoned customizations.'],
+      ['Record-Level Diff & Restore', 'See what changed in a record, restore just that.'],
+      ['Undo AI', 'Roll back an agent\u2019s changes to records and settings.'],
+      ['Dependency-Aware Recovery', 'Restore tables, records and related data in order, links intact.']
+    ],
+    cfgName: 'Dynamics 365',
+    cards: [
+      ['Full inventory', 'Environments, tables, columns, records, files and metadata in your Dataverse'],
+      ['ROT analysis', 'Stale records, unused tables and abandoned customizations cluttering your environments'],
+      ['AI agent discovery', 'Every agent with Dataverse access, its owner and what it changes'],
+      ['Point-in-time restore', 'Restore points that go back further than Microsoft\u2019s native retention'],
+      ['Activity analysis', '7-day backfill to surface user and admin behaviour from day one'],
+      ['Permission coverage', 'All required API scopes to unlock Entitlements and Posture scanning']
+    ],
+    reqs: function(){ return (WORKLOADS.d365.prereqs || []).slice(); },
+    note: 'A Dynamics 365 System Administrator completes setup once. Users then go directly to the dashboard.',
+    bg: ['Environments', 'Tables', 'Records', 'Files'],
+    authHelp: 'Inventory, activity and discovery scans run here. Content read for scanning is encrypted in transit and at rest and purged after each scan. Pick the region closest to your tenant or the one your policy requires.'
   }
 };
 var _onbSnap = null;
@@ -9885,6 +10052,72 @@ var OVK_COPY = {
       'sla': { title: 'Review backup SLA', desc: 'For sites with many projects and large attachment volumes, review RPO settings and plan for a longer initial discovery.' },
       'create-policy': { desc: 'Configure custom schedules, retention rules, and project scope beyond the standard daily policy.' },
       'inventory': { desc: 'Browse discovered projects, issues, components, versions, boards, and sprints indexed from this connection.' }
+    }
+  },
+  confluence: {
+    name: 'Confluence', entities: '337 entities', chips: ['1 Site', '24 Spaces', '312 Pages'],
+    scoping: 'Finds the spaces that are in scope for this connection.',
+    next: {
+      'dashboard': { desc: 'Monitor backup success, RPO compliance, and space coverage for this connection.' },
+      'notifications': { desc: 'Configure alerts for backup failures, Atlassian token expiry, and connection health events.' },
+      'sla': { title: 'Review backup SLA', desc: 'For sites with many spaces and large attachment volumes, review RPO settings and plan for a longer initial discovery.' },
+      'create-policy': { desc: 'Configure custom schedules, retention rules, and space scope beyond the standard daily policy.' },
+      'inventory': { desc: 'Browse discovered spaces, pages, blog posts, comments, and attachments indexed from this connection.' }
+    }
+  },
+  gitlab: {
+    name: 'GitLab', entities: '63 entities', chips: ['1 Group', '14 Subgroups', '48 Projects'],
+    scoping: 'Finds the groups and projects that are in scope for this connection.',
+    next: {
+      'dashboard': { desc: 'Monitor backup success, RPO compliance, and project coverage for this connection.' },
+      'notifications': { desc: 'Configure alerts for backup failures, access token expiry, and connection health events.' },
+      'sla': { title: 'Review backup SLA', desc: 'For groups with many projects, review RPO settings and plan around GitLab\u2019s API rate limits.' },
+      'create-policy': { desc: 'Configure custom schedules, retention rules, and project scope beyond the standard daily policy.' },
+      'inventory': { desc: 'Browse discovered groups, projects, merge requests, issues, and pipelines indexed from this connection.' }
+    }
+  },
+  'azure-devops': {
+    name: 'Azure DevOps', entities: '61 entities', chips: ['1 Organization', '18 Projects', '42 Repositories'],
+    scoping: 'Finds the projects and repositories that are in scope for this connection.',
+    next: {
+      'dashboard': { desc: 'Monitor backup success, RPO compliance, and repository coverage for this connection.' },
+      'notifications': { desc: 'Configure alerts for backup failures, service principal changes, and connection health events.' },
+      'sla': { title: 'Review backup SLA', desc: 'For organizations with many projects, review RPO settings and plan around Azure DevOps\u2019 rate limits.' },
+      'create-policy': { desc: 'Configure custom schedules, retention rules, and project scope beyond the standard daily policy.' },
+      'inventory': { desc: 'Browse discovered projects, repositories, work items, and pipelines indexed from this connection.' }
+    }
+  },
+  gws: {
+    name: 'Google Workspace', entities: '279 entities', chips: ['1 Domain', '240 Users', '38 Shared Drives'],
+    scoping: 'Finds the users and shared drives that are in scope for this connection.',
+    next: {
+      'dashboard': { desc: 'Monitor backup success, RPO compliance, and mailbox and drive coverage for this connection.' },
+      'notifications': { desc: 'Configure alerts for backup failures, domain-wide delegation changes, and connection health events.' },
+      'sla': { title: 'Review backup SLA', desc: 'For domains with many users and large drives, review RPO settings and plan for a longer initial discovery.' },
+      'create-policy': { desc: 'Configure custom schedules, retention rules, and user scope beyond the standard daily policy.' },
+      'inventory': { desc: 'Browse discovered mailboxes, drives, calendars, contacts, and chat spaces indexed from this connection.' }
+    }
+  },
+  pp: {
+    name: 'Power Platform', entities: '45 entities', chips: ['6 Environments', '24 Apps', '15 Flows'],
+    scoping: 'Finds the environments and workspaces that are in scope for this connection.',
+    next: {
+      'dashboard': { desc: 'Monitor backup success, RPO compliance, and environment coverage for this connection.' },
+      'notifications': { desc: 'Configure alerts for backup failures, permission changes, and connection health events.' },
+      'sla': { title: 'Review backup SLA', desc: 'For tenants with many environments, review RPO settings and plan for a longer initial discovery.' },
+      'create-policy': { desc: 'Configure custom schedules, retention rules, and environment scope beyond the standard daily policy.' },
+      'inventory': { desc: 'Browse discovered environments, apps, flows, and Power BI workspaces indexed from this connection.' }
+    }
+  },
+  d365: {
+    name: 'Dynamics 365', entities: '38 entities', chips: ['4 Environments', '24 Tables', '10 Files'],
+    scoping: 'Finds the environments that are in scope for this connection.',
+    next: {
+      'dashboard': { desc: 'Monitor backup success, RPO compliance, and environment coverage for this connection.' },
+      'notifications': { desc: 'Configure alerts for backup failures, permission changes, and connection health events.' },
+      'sla': { title: 'Review backup SLA', desc: 'For environments with large tables and file volumes, review RPO settings and plan for a longer initial discovery.' },
+      'create-policy': { desc: 'Configure custom schedules, retention rules, and environment scope beyond the standard daily policy.' },
+      'inventory': { desc: 'Browse discovered environments, tables, columns, and records indexed from this connection.' }
     }
   }
 };
@@ -10228,6 +10461,7 @@ function advanceFromApplications() {
   if (typeof selectWorkload === 'function') selectWorkload(currentWorkload, true);
   // 2026-09-22 reorder: Region & Storage now sits between Applications
   // and Authorize under Connect.
+  if (_regionOnAuth()) { goTo('auth'); return; }   // template: Region & Data Processing is the top of Authentication
   goTo('infra-storage');
 }
 
@@ -10304,14 +10538,7 @@ function workspaceIsPersonal(w) { return w && w.type === 'Personal'; }
 // commit time so newly-discovered workspaces matching those types
 // are auto-added on the next discovery cycle.
 var _wksAutoAddFutureForFilters = false;
-function toggleAutoAddFutureWorkspacesFromChip() {
-  _wksAutoAddFutureForFilters = !_wksAutoAddFutureForFilters;
-  var sw = document.getElementById('wks-auto-add-future');
-  if (sw) {
-    sw.classList.toggle('active', _wksAutoAddFutureForFilters);
-    sw.setAttribute('aria-checked', _wksAutoAddFutureForFilters ? 'true' : 'false');
-  }
-}
+function toggleAutoAddFutureWorkspacesFromChip() { selAutoToggle('wks'); }   // the auto-add card owns the flag now
 
 function enterWorkspaceScreen() {
   if (!WORKSPACE_STATE.length) {
@@ -10372,7 +10599,6 @@ function renderWorkspaceScreen() {
     allSummary.innerHTML = includedWks.length + ' workspaces — ' + parts.join(', ') + '.<span style="display:block;color:var(--black-60);margin-top:4px">' + excludedNote + '</span>';
   }
 
-  renderWorkspaceTypeChips();
   renderWorkspaceTable();
   updateWorkspaceScreenCTA();
 }
@@ -10412,21 +10638,12 @@ function toggleWorkspaceType(type) {
 function renderWorkspaceTable() {
   var rows = document.getElementById('wks-table-rows');
   if (!rows) return;
-  var search = (wksSearchTerm || '').toLowerCase();
-  var visible = WORKSPACE_STATE.filter(function(w){
-    if (!search) return true;
-    return w.name.toLowerCase().indexOf(search) !== -1 ||
-           (w.owner && w.owner.toLowerCase().indexOf(search) !== -1);
-  });
+  var visible = SEL_UI.wks.visible();
+  var shown = selSlice('wks', visible);
   var rowCols = '36px 1fr 110px';
-  var html = visible.map(function(w){
-    // Type pill colour reuses env-pill-* classes — Standard maps to
-    // production, Premium maps to sandbox, Personal maps to default.
-    // Map workspace type → env-pill-* colour bucket (we reuse the
-    // env screen's pill classes for visual parity). Group → green
-    // (steady-state, like Production envs); Capacity → blue
-    // (paid/Premium tier, like Sandbox); Personal → grey (default).
-    var typeMap = { 'Group':'production', 'Capacity':'sandbox', 'Personal':'default' };
+  // Type pill colours reuse the env-pill-* classes: Group → green, Capacity → blue, Personal → grey.
+  var typeMap = { 'Group':'production', 'Capacity':'sandbox', 'Personal':'default' };
+  var html = shown.map(function(w){
     var typeCls = 'env-pill-' + (typeMap[w.type] || 'default');
     return '' +
       '<div class="env-row" style="grid-template-columns:' + rowCols + '" onclick="toggleWorkspaceRow(\'' + w.id + '\')">' +
@@ -10439,20 +10656,14 @@ function renderWorkspaceTable() {
       '</div>';
   }).join('');
   rows.innerHTML = html || '<div style="padding:24px;text-align:center;color:var(--black-60);font-size:14px">No workspaces match this search.</div>';
-
-  var master = document.getElementById('wks-table-master');
-  if (master) {
-    var sel = visible.filter(function(w){ return w.selected; }).length;
-    master.checked = visible.length > 0 && sel === visible.length;
-    master.indeterminate = sel > 0 && sel < visible.length;
-  }
-
   var hdr = document.getElementById('wks-table-header');
   if (hdr) hdr.style.gridTemplateColumns = rowCols;
+  selPaint('wks', visible, shown);
 }
 
 function onWorkspaceSearchInput(v) {
   wksSearchTerm = v;
+  SEL_UI.wks.page = 1;
   renderWorkspaceTable();
 }
 
@@ -10463,14 +10674,7 @@ function toggleWorkspaceRow(id) {
   renderWorkspaceScreen();
 }
 
-function toggleWorkspaceAllVisibleRows(checked) {
-  var search = (wksSearchTerm || '').toLowerCase();
-  WORKSPACE_STATE.forEach(function(w){
-    if (search && w.name.toLowerCase().indexOf(search) === -1 && (!w.owner || w.owner.toLowerCase().indexOf(search) === -1)) return;
-    w.selected = !!checked;
-  });
-  renderWorkspaceScreen();
-}
+function toggleWorkspaceAllVisibleRows(checked) { selMaster('wks', checked); }   // header checkbox = the rows on this page
 
 function updateWorkspaceScreenCTA() {
   var btn = document.getElementById('wks-screen-continue-btn');
@@ -10887,7 +11091,7 @@ function commitAdoOrgsSelection() {
 // else, just unchecked initially.
 function envIsTrialOrDev(e) { return e && (e.type === 'Trial' || e.type === 'Developer'); }
 
-// "Add new environments automatically" — custom-mode only. When on, new Production and Sandbox environments found on a later
+// "Add new environments automatically" — custom-mode only. When on, new Production, Sandbox and Default environments found on a later
 // discovery cycle are added (the Include all scope). Manual mode is otherwise static: new environments stay out of scope.
 // Flag name kept from the filter-chip version (2026-11-04: chips and the "matching the selected types" rule retired).
 var _envAutoAddFutureForFilters = false;
@@ -11072,68 +11276,33 @@ function syncSpacesAllSummary() {
 }
 
 function renderSpacesScreen() {
-  // Category chips — mirrors renderEnvTypeChips exactly. Each chip
-  // shows selected/total within its category and toggles via bulk
-  // select/deselect (toggleSpaceCategory).
-  var chips = document.getElementById('csp-type-chips');
-  if (chips) {
-    var byCat = {};
-    SPACES_STATE.forEach(function(s){
-      var c = _spaceCategory(s);
-      if (!byCat[c]) byCat[c] = [];
-      byCat[c].push(s);
-    });
-    chips.innerHTML = SPACE_CATEGORY_ORDER.filter(function(c){ return byCat[c]; }).map(function(c){
-      var spaces = byCat[c];
-      var sel = spaces.filter(function(s){ return s.selected; }).length;
-      var state = chipStateForCount(sel, spaces.length);
-      var cls = 'env-type-chip';
-      if (state === 'full') cls += ' full';
-      else if (state === 'partial') cls += ' partial';
-      return '<span class="' + cls + '" onclick="toggleSpaceCategory(\'' + c + '\')">' +
-               chipStateIcon(state) + c +
-               '<span class="env-type-chip-count">' + sel + '/' + spaces.length + '</span>' +
-             '</span>';
-    }).join('');
-  }
-  // Table: all spaces always visible (search-filterable). Chips drive
-  // selection, not visibility — same as the env screen.
-  var q = (spacesSearchTerm || '').toLowerCase().trim();
-  var visible = SPACES_STATE.filter(function(s){
-    if (!q) return true;
-    return (s.name + ' ' + s.key).toLowerCase().indexOf(q) >= 0;
-  });
-  // Selection summary
+  // Rows: all spaces stay visible (search-filterable) and page; selection comes from the row checkboxes, the header checkbox (this page) and the header menu.
+  var visible = SEL_UI.csp.visible();
+  var shown = selSlice('csp', visible);
   var picked = SPACES_STATE.filter(function(s){ return s.selected; }).length;
   var sumEl = document.getElementById('csp-custom-selection-summary');
   if (sumEl) sumEl.textContent = picked + ' selected · ' + visible.length + ' shown of ' + SPACES_STATE.length + ' total';
-  // Master checkbox state
-  var master = document.getElementById('csp-table-master');
-  if (master) {
-    var allVisibleChecked = visible.length > 0 && visible.every(function(s){ return s.selected; });
-    var anyChecked = visible.some(function(s){ return s.selected; });
-    master.checked = allVisibleChecked;
-    master.indeterminate = !allVisibleChecked && anyChecked;
-  }
-  // Rows
   var rows = document.getElementById('csp-table-rows');
   if (rows) {
-    if (visible.length === 0) {
-      rows.innerHTML = '<div style="padding:18px 12px;font-size:14px;color:var(--black-60);text-align:center">No spaces match your search.</div>';
-    } else {
-      rows.innerHTML = visible.map(function(s){
-        return '<div style="display:grid;grid-template-columns:36px 1fr 110px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--border-light);font-size:14px">' +
-          '<input type="checkbox" data-space-id="' + s.id + '"' + (s.selected ? ' checked' : '') + ' onchange="toggleSpaceRow(\'' + s.id + '\',this.checked)" style="margin:0">' +
-          '<div><div style="font-weight:500;color:var(--black-100)">' + s.name + '</div><div style="font-size: 14px;color:var(--black-60);font-family:monospace;margin-top:2px">' + s.key + ' · ' + s.pages + ' pages</div></div>' +
-          '<span style="font-size: 14px;color:var(--black-60)">' + _spaceCategory(s) + '</span>' +
+    var catCls = { 'Global': 'production', 'Personal': 'sandbox', 'Archived': 'default' };
+    rows.innerHTML = visible.length === 0
+      ? '<div style="padding:24px;text-align:center;color:var(--black-60);font-size:14px">No spaces match your search.</div>'
+      : shown.map(function(s){
+        var c = _spaceCategory(s);
+        return '<div class="env-row" style="grid-template-columns:36px 1fr 110px" onclick="toggleSpaceRow(\'' + s.id + '\',!' + !!s.selected + ')">' +
+          '<input type="checkbox" data-space-id="' + s.id + '"' + (s.selected ? ' checked' : '') + ' onclick="event.stopPropagation();toggleSpaceRow(\'' + s.id + '\',this.checked)" style="margin:0">' +
+          '<div><div class="env-row-name-line"><span class="env-row-name">' + escapeHtml(s.name) + '</span></div><div class="env-row-url">' + escapeHtml(s.key) + ' · ' + s.pages + ' pages</div></div>' +
+          '<span><span class="env-row-type-pill env-pill-' + (catCls[c] || 'default') + '">' + c + '</span></span>' +
         '</div>';
       }).join('');
-    }
   }
+  var hdr = document.getElementById('csp-table-header'); if (hdr) hdr.style.gridTemplateColumns = '36px 1fr 110px';
+  selPaint('csp', visible, shown);
 }
 
 function onSpacesSearchInput(v) {
   spacesSearchTerm = v || '';
+  SEL_UI.csp.page = 1;
   renderSpacesScreen();
 }
 // Bulk-toggle all spaces in a category — exact analog of toggleEnvType.
@@ -11145,26 +11314,13 @@ function toggleSpaceCategory(category) {
   spaces.forEach(function(s){ s.selected = newVal; });
   renderSpacesScreen();
 }
-function toggleAutoAddFutureSpacesFromChip() {
-  var t = document.getElementById('csp-auto-add-future');
-  if (!t) return;
-  var on = t.getAttribute('aria-checked') !== 'true';
-  t.classList.toggle('active', on);
-  t.setAttribute('aria-checked', on ? 'true' : 'false');
-}
+function toggleAutoAddFutureSpacesFromChip() { selAutoToggle('csp'); }   // was a DOM-only switch; the auto-add card owns the flag now
 function toggleSpaceRow(id, checked) {
   var s = SPACES_STATE.find(function(x){ return x.id === id; });
   if (s) s.selected = !!checked;
   renderSpacesScreen();
 }
-function toggleSpaceAllVisibleRows(checked) {
-  var q = (spacesSearchTerm || '').toLowerCase().trim();
-  SPACES_STATE.forEach(function(s){
-    if (q && (s.name + ' ' + s.key).toLowerCase().indexOf(q) < 0) return;
-    s.selected = !!checked;
-  });
-  renderSpacesScreen();
-}
+function toggleSpaceAllVisibleRows(checked) { selMaster('csp', checked); }   // header checkbox = the rows on this page
 function commitSpacesSelection() {
   if (spacesSelectMode === 'custom') {
     var picked = SPACES_STATE.filter(function(s){ return s.selected; });
@@ -11172,6 +11328,127 @@ function commitSpacesSelection() {
   }
   goTo('test-conn');
 }
+
+
+// ── Spaces and Workspaces selection: bulk menu, pager, auto-add card ──────
+// Same grammar as the Environments step (Power Platform): the header checkbox takes the rows on the current page, the caret beside it opens a menu
+// (all pages, this page, one category/type), one auto-add card with one fixed rule sits above the search. A search narrows what every item acts on.
+// There is deliberately no "Select none": at least one item must stay selected to continue. Keyed by screen prefix ('csp' = Confluence spaces, 'wks' = Power BI workspaces).
+var SEL_UI = {
+  csp: { noun: 'spaces', one: 'space',
+    order: function(){ return SPACE_CATEGORY_ORDER; }, typeOf: _spaceCategory,
+    all: function(){ return SPACES_STATE; },
+    visible: function(){ var q = (spacesSearchTerm || '').toLowerCase().trim(); return SPACES_STATE.filter(function(s){ return !q || (s.name + ' ' + s.key).toLowerCase().indexOf(q) >= 0; }); },
+    render: function(){ renderSpacesScreen(); },
+    autoOn: function(){ return !!_spacesAutoAddFuture; }, autoSet: function(v){ _spacesAutoAddFuture = !!v; },
+    autoTitle: 'Add new spaces automatically', autoDesc: 'Global spaces added to your site later are included.',
+    page: 1, size: 10, menu: false },
+  wks: { noun: 'workspaces', one: 'workspace',
+    order: function(){ return WKS_TYPE_ORDER; }, typeOf: function(w){ return w.type; },
+    all: function(){ return WORKSPACE_STATE; },
+    visible: function(){ var q = (wksSearchTerm || '').toLowerCase(); return WORKSPACE_STATE.filter(function(w){ return !q || w.name.toLowerCase().indexOf(q) !== -1 || (w.owner && w.owner.toLowerCase().indexOf(q) !== -1); }); },
+    render: function(){ renderWorkspaceScreen(); },
+    autoOn: function(){ return !!_wksAutoAddFutureForFilters; }, autoSet: function(v){ _wksAutoAddFutureForFilters = !!v; },
+    autoTitle: 'Add new workspaces automatically', autoDesc: 'Group and Capacity workspaces added to your tenant later are included.',
+    page: 1, size: 10, menu: false }
+};
+var _spacesAutoAddFuture = false;
+function selSlice(k, list) {
+  var u = SEL_UI[k], np = Math.max(1, Math.ceil(list.length / u.size));
+  u.page = Math.min(Math.max(1, u.page), np);
+  return list.slice((u.page - 1) * u.size, u.page * u.size);
+}
+function selBulkHtml(k, visible, shown) {
+  var u = SEL_UI[k];
+  var caret = '<button type="button" class="dx-bulk-caret" aria-label="Selection options" aria-haspopup="menu" aria-expanded="' + u.menu + '" data-tooltip="More" onclick="selBulkToggle(\'' + k + '\',event)">' + _dsStoreIconSvg('keyboard-arrow-down-outlined', 20) + '</button>';
+  if (!u.menu) return caret;
+  var item = function(label, count, on, dis) {
+    return '<button type="button" class="dx-mi" role="menuitem"' + (dis ? ' disabled' : '') + ' onclick="' + on + '"><span>' + label + '</span><span class="dx-nb">' + count + '</span></button>';
+  };
+  var allSel = function(list) { return list.every(function(x){ return x.selected; }); };
+  var np = Math.ceil(visible.length / u.size);
+  var h = '<div class="dx-bm" role="menu" onclick="event.stopPropagation()">';
+  h += item('Select all ' + u.noun + ' across all pages', visible.length, "selBulkPick('" + k + "','all')", allSel(visible));
+  if (np > 1) h += item('Select all ' + u.noun + ' on this page', shown.length, "selBulkPick('" + k + "','page')", allSel(shown));
+  h += '<div class="dx-md"></div>';
+  u.order().forEach(function(t){
+    var of = visible.filter(function(x){ return u.typeOf(x) === t; });
+    if (of.length) h += item('Select all ' + t + ' ' + u.noun, of.length, "selBulkPick('" + k + "','type','" + t + "')", allSel(of));
+  });
+  return caret + h + '</div>';
+}
+function selBulkToggle(k, ev) { ev.stopPropagation(); SEL_UI[k].menu = !SEL_UI[k].menu; SEL_UI[k].render(); }
+function selBulkPick(k, what, type) {
+  var u = SEL_UI[k], list = u.visible();
+  var target = what === 'page' ? selSlice(k, list) : (what === 'type' ? list.filter(function(x){ return u.typeOf(x) === type; }) : list);
+  target.forEach(function(x){ x.selected = true; });
+  u.menu = false; u.render();
+}
+function selMaster(k, checked) {
+  var u = SEL_UI[k];
+  selSlice(k, u.visible()).forEach(function(x){ x.selected = !!checked; });
+  u.menu = false; u.render();
+}
+function selGoPage(k, n) { SEL_UI[k].page = n; SEL_UI[k].render(); }
+function selSetSize(k, n) { SEL_UI[k].size = n; SEL_UI[k].page = 1; SEL_UI[k].render(); }
+function selPgBar(k, total) {
+  var u = SEL_UI[k];
+  if (total <= 10) return '';
+  var pages = Math.max(1, Math.ceil(total / u.size)), c = Math.min(Math.max(1, u.page), pages);
+  var arrow = function(dir, dis) {
+    return '<button class="pgds-arrow" type="button"' + (dis ? ' disabled' : '') + ' onclick="selGoPage(\'' + k + '\',' + (c + (dir === 'prev' ? -1 : 1)) + ')" aria-label="' + (dir === 'prev' ? 'Previous' : 'Next') + ' page"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="' + (dir === 'prev' ? 'm15 6-6 6 6 6' : 'm9 6 6 6-6 6') + '"/></svg></button>';
+  };
+  var nums = [], chips = '', i;
+  for (i = 1; i <= pages; i++) if (pages <= 7 || i === 1 || i === pages || Math.abs(i - c) <= 1) nums.push(i);
+  nums.forEach(function(n, j){
+    if (j && n - nums[j - 1] > 1) chips += '<span class="pgds-gap">…</span>';
+    chips += '<button type="button" class="pgds-chip' + (n === c ? ' current' : '') + '" onclick="selGoPage(\'' + k + '\',' + n + ')">' + n + '</button>';
+  });
+  var gos = '<option value="">Go to Page</option>';
+  for (i = 1; i <= pages; i++) gos += '<option value="' + i + '">' + i + '</option>';
+  var sizes = [10, 25, 50, 100].map(function(n){ return '<option value="' + n + '"' + (n === u.size ? ' selected' : '') + '>' + n + '</option>'; }).join('');
+  return '<div class="pg-bar"><div class="pgds-left"><span>Showing</span><select class="pgds-select" aria-label="Rows per page" onchange="selSetSize(\'' + k + '\',+this.value)">' + sizes + '</select><span>per page</span></div>' +
+    '<div class="pgds-pages">' + arrow('prev', c <= 1) + '<span class="pgds-chips">' + chips + '</span>' + arrow('next', c >= pages) + '</div>' +
+    '<div class="pgds-right"><select class="pgds-select pgds-goto" aria-label="Go to page" onchange="if(this.value)selGoPage(\'' + k + '\',+this.value)"' + '>' + gos + '</select><span>' + total + ' ' + u.noun + '</span></div></div>';
+}
+function selAutoCard(k) {
+  var u = SEL_UI[k], host = document.getElementById(k + '-auto-card'); if (!host) return;
+  var on = u.autoOn();
+  var key = "if (event.key === ' ' || event.key === 'Enter') { event.preventDefault(); selAutoToggle('" + k + "'); }";
+  host.innerHTML = '<div class="ws-cfg-choice sc rc-card' + (on ? ' is-selected' : '') + '" role="group" aria-label="' + u.autoTitle + '">' +
+    '<div class="sc-header" role="checkbox" aria-checked="' + on + '" tabindex="0" onclick="selAutoToggle(\'' + k + '\')" onkeydown="' + key + '">' +
+      '<span class="rc-icon">' + _dsStoreIconSvg('discovery-scan-outlined', 20) + '</span>' +
+      '<span class="ws-cfg-choice-title">' + u.autoTitle + '</span>' +
+      '<input type="checkbox" class="rc-cb" tabindex="-1" aria-hidden="true"' + (on ? ' checked' : '') + '>' +
+    '</div>' +
+    '<div class="sc-desc">' + u.autoDesc + '</div></div>';
+}
+function selAutoToggle(k) { var u = SEL_UI[k]; u.autoSet(!u.autoOn()); selAutoCard(k); }
+// Paints the pieces around the rows after each table render: header grid, bulk menu, pager, master checkbox (page rows), auto-add card.
+function selPaint(k, visible, shown) {
+  var box = document.getElementById(k + '-table-box'), hdr = document.getElementById(k + '-table-header'), rows = document.getElementById(k + '-table-rows');
+  if (box) box.style.overflow = 'visible';
+  if (hdr) { hdr.style.columnGap = '16px'; hdr.style.borderRadius = '3px 3px 0 0'; }
+  if (rows) { rows.style.maxHeight = 'none'; rows.style.overflowY = 'visible'; }
+  var host = document.getElementById(k + '-bulk-host'); if (host) host.innerHTML = selBulkHtml(k, visible, shown);
+  var pager = document.getElementById(k + '-pager'); if (pager) pager.innerHTML = selPgBar(k, visible.length);
+  var master = document.getElementById(k + '-table-master');
+  if (master) {
+    var n = shown.filter(function(x){ return x.selected; }).length;
+    master.checked = shown.length > 0 && n === shown.length;
+    master.indeterminate = n > 0 && n < shown.length;
+  }
+  selAutoCard(k);
+}
+document.addEventListener('click', function(ev) {
+  ['csp', 'wks'].forEach(function(k){
+    if (SEL_UI[k].menu && !(ev.target.closest && ev.target.closest('.dx-bm')) && document.getElementById(k + '-table-rows')) { SEL_UI[k].menu = false; SEL_UI[k].render(); }
+  });
+});
+document.addEventListener('keydown', function(ev) {
+  if (ev.key !== 'Escape') return;
+  ['csp', 'wks'].forEach(function(k){ if (SEL_UI[k].menu && document.getElementById(k + '-table-rows')) { SEL_UI[k].menu = false; SEL_UI[k].render(); } });
+});
 
 var WORKLOADS = {
   okta: {
@@ -11612,7 +11889,7 @@ var WORKLOADS = {
     // Power BI is in scope. Pattern is data-driven so other workloads
     // (M365, ADO+TestPlans, etc.) can opt in by setting the same flag
     // and providing their own applicationOptions array.
-    requiresApplicationStep: true,
+    requiresApplicationStep: false,   // was: true — Power Platform and D365 share one flow; Power BI is out of scope (workspaces step already suppressed), so there is nothing to choose. applicationOptions below stays, unreferenced.
     applicationOptions: [
       {
         // Microsoft's deployment-scope unit for everything except Power BI:
@@ -11640,7 +11917,7 @@ var WORKLOADS = {
         // the only place the user gets a chance to understand the
         // commitment before they click into the next substep.
         desc: 'Workspaces, datasets, reports, and dashboards.',
-        defaultSelected: true,
+        defaultSelected: false,   // was: true — Power BI is out of scope with the Applications step removed
         // White tile so the brand-mark gradients (gold/orange bars)
         // render against neutral. Power BI brand guidance shows the
         // logo on white in product surfaces; a coloured tile would
@@ -12216,6 +12493,70 @@ _onbBaseChecks('jira', [
     fix: 'Grant the paired write scopes (write:jira-work, manage:jira-project and the Jira Software board and sprint write scopes). Read-only scopes allow backup but not restore.' },
   { subtitle: 'Advanced data discovery and scanning capabilities',
     fix: 'Grant offline_access so scheduled scans run without re-consent, together with the user read scopes used to discover who can reach each project.' }
+]);
+
+_onbBaseChecks('confluence', [
+  { subtitle: 'Ability to activate and connect to data source',
+    fix: 'Re-authorize the Veeam app on your Confluence site as a Site Admin or Organization Admin (Express), or confirm your OAuth app\u2019s Client ID and Client Secret are valid and the app is installed on the site (Manual). Without an active connection, no backup can run.' },
+  { subtitle: 'Read access to the spaces, pages, blog posts, comments, and attachments that back up on schedule',
+    fix: 'Grant the granular read scopes for pages, blog posts, folders, comments, attachments, labels, spaces and space permissions on Atlassian\u2019s consent screen (Express) or under Permissions in the developer console (Manual). Atlassian drops any scope your OAuth app has not declared.' },
+  { subtitle: 'Write access to restore spaces, pages, attachments, comments, and permissions from a backup',
+    fix: 'Grant the paired write scopes for pages, blog posts, folders, attachments and comments. Read-only scopes allow backup but not restore.' },
+  { subtitle: 'Advanced data discovery and scanning capabilities',
+    fix: 'Grant offline_access so scheduled scans run without re-consent, together with read:user:confluence used to discover who can reach each space.' }
+]);
+
+_onbBaseChecks('gitlab', [
+  { subtitle: 'Ability to activate and connect to data source',
+    fix: 'Re-authorize the Veeam OAuth application as a group Owner (Express), or confirm your OAuth application\u2019s Client ID and Client Secret are valid (Manual). Veeam then provisions the Group Access Token; without it, no backup can run.' },
+  { subtitle: 'Read access to the groups, projects, merge requests, issues, and pipelines that back up on schedule',
+    fix: 'Confirm the Group Access Token has the api scope and the Maintainer role on the top-level group, so groups, projects, merge requests, issues, pipelines and variables can be read on schedule.' },
+  { subtitle: 'Write access to restore groups, projects, merge requests, and pipeline settings from a backup',
+    fix: 'Set the token\u2019s role to Maintainer or higher with the api scope. A lower role allows backup but blocks restore.' },
+  { subtitle: 'Advanced data discovery and scanning capabilities',
+    fix: 'Confirm the token covers every subgroup and project under the top-level group, and that audit events are available on your GitLab Premium or Ultimate plan, so discovery scans can run.' }
+]);
+_onbBaseChecks('azure-devops', [
+  { subtitle: 'Ability to activate and connect to data source',
+    fix: 'Re-authorize with an Entra Application Administrator and an Azure DevOps Project Collection Administrator (Express), or confirm your app registration\u2019s Client ID, Tenant ID and credential are valid (Manual). Without an active connection, no backup can run.' },
+  { subtitle: 'Read access to the projects, repositories, work items, pipelines, and wikis that back up on schedule',
+    fix: 'In Organization Settings \u2192 Users, confirm the service principal is a member with Basic access. Stakeholder access is read-only and cannot read repositories.' },
+  { subtitle: 'Write access to restore repositories, work items, pipelines, and branch policies from a backup',
+    fix: 'Confirm the service principal has Basic access and can create and edit repositories and pipelines in each project. Read-only access allows backup but not restore.' },
+  { subtitle: 'Advanced data discovery and scanning capabilities',
+    fix: 'Confirm the service principal can read audit logs and organization settings so discovery scans can run. Audit logs require the organization to be connected to Microsoft Entra ID.' }
+]);
+
+_onbBaseChecks('gws', [
+  { subtitle: 'Ability to activate and connect to data source',
+    fix: 'Re-run the Marketplace install as a Super Admin (Express), or confirm your service account key is valid and authorized for domain-wide delegation (Manual). Without an active connection, no backup can run.' },
+  { subtitle: 'Read access to the mailboxes, drives, calendars, contacts, and chat spaces that back up on schedule',
+    fix: 'In the Admin console, confirm the domain-wide delegation entry includes the Gmail, Drive, Calendar, Contacts, Chat and Keep read scopes so every service can be read on schedule.' },
+  { subtitle: 'Write access to restore mail, files, events, and contacts from a backup',
+    fix: 'Add the paired modify scopes (gmail.modify, drive, calendar, contacts) to the domain-wide delegation entry. Read-only scopes allow backup but not restore.' },
+  { subtitle: 'Advanced data discovery and scanning capabilities',
+    fix: 'Grant the Admin SDK directory read scopes so users, groups and organizational units can be discovered and scanned.' }
+]);
+
+_onbBaseChecks('pp', [
+  { subtitle: 'Ability to activate and connect to data source',
+    fix: 'Re-authorize with a Power Platform Administrator or Global Administrator (Express), or confirm your app registration\u2019s Client ID, Tenant ID and credential are valid (Manual). Without an active connection, no backup can run.' },
+  { subtitle: 'Read access to the environments, apps, flows, and Power BI workspaces that back up on schedule',
+    fix: 'Confirm the service principal has the System Administrator role in each protected environment, and that Power BI admin APIs are enabled for service principals if workspaces are in scope.' },
+  { subtitle: 'Write access to restore apps, flows, tables, and workspaces from a backup',
+    fix: 'Confirm the System Administrator role in each protected environment. Read-only access allows backup but not restore.' },
+  { subtitle: 'Advanced data discovery and scanning capabilities',
+    fix: 'Grant the tenant-level read permissions used to discover who can reach each environment and app, so discovery scans can run.' }
+]);
+_onbBaseChecks('d365', [
+  { subtitle: 'Ability to activate and connect to data source',
+    fix: 'Re-authorize with the Veeam application (Express), or confirm your app registration\u2019s Client ID, Tenant ID and credential are valid (Manual). Without an active connection, no backup can run.' },
+  { subtitle: 'Read access to the tables, columns, records, and files that back up on schedule',
+    fix: 'Confirm the application user has the System Administrator role in each selected environment so Dataverse tables, records and files can be read on schedule.' },
+  { subtitle: 'Write access to restore tables, columns, and records from a backup',
+    fix: 'Confirm the System Administrator role in each selected environment. Read-only access allows backup but not restore.' },
+  { subtitle: 'Advanced data discovery and scanning capabilities',
+    fix: 'Confirm the application user can read metadata and security roles in each environment so discovery scans can run.' }
 ]);
 
 var certFileSelected = false;
@@ -12906,9 +13247,9 @@ function selectWorkload(wl, skipNav) {
   // a *Test Connection* concern. Inline-provisioning workloads (D365)
   // resolve per-env access on the Environments step itself, so this row
   // is redundant — hide it. PP keeps the legacy aggregate row.
-  var showEnvRow = !!w.requiresEnvList && !w.inlineProvisioning;
+  var showEnvRow = !!w.requiresEnvList && !w.inlineProvisioning && !_onbTemplate();
   if (permRowEnv) permRowEnv.style.display = showEnvRow ? 'flex' : 'none';
-  if (permRowProp) permRowProp.style.display = w.requiresPostAuthPropagation ? 'flex' : 'none';
+  if (permRowProp) permRowProp.style.display = (w.requiresPostAuthPropagation && !_onbTemplate()) ? 'flex' : 'none';
   // Propagation row's expand-for-detail content. Shared across MS
   // workloads (D365, PP, ADO) — same Entra OAuth2 client-credentials
   // flow + ~30-60s SP propagation window. Hide the chevron when the
@@ -14545,9 +14886,9 @@ function refreshAuthAdvanceBtnLabel() {
   // pasted into the manual form already identifies the target, so the
   // picker substep is skipped. Same shape as GitLab and Confluence.
   var skipOrgsForManual = (currentWorkload === 'azure-devops' && currentAuthMethod === 'manual');
-  var stillHasGroupsStep = !!w.requiresGroupList && !skipGroupsForManual;
+  var stillHasGroupsStep = !!w.requiresGroupList && !skipGroupsForManual && !_siteInline();
   var stillHasSiteStep = !!w.requiresSitePicker && !skipSiteForManual && !_siteInline();
-  var stillHasOrgsStep = !!w.requiresOrgList && !skipOrgsForManual;
+  var stillHasOrgsStep = !!w.requiresOrgList && !skipOrgsForManual && !_siteInline();
   var hasIntermediateStep = !!(w.requiresEnvList || w.requiresProjectList || stillHasGroupsStep || stillHasOrgsStep || stillHasSiteStep || w.requiresSpacesList ||
     (w.requiresApplicationStep && (typeof effectiveRequiresWorkspaceList === 'function' && effectiveRequiresWorkspaceList())));
   btn.textContent = hasIntermediateStep ? 'Continue' : 'Test Connection';
@@ -14605,8 +14946,8 @@ function advanceFromAuth() {
   // ADO Manual: skip the org picker — the Organization URL field in
   // the manual form is the source of truth (PRD §4.3).
   var skipOrgsForManual = (currentWorkload === 'azure-devops' && currentAuthMethod === 'manual');
-  var goesToGroups = !!(w0 && w0.requiresGroupList) && !skipGroupsForManual;
-  var goesToOrgs   = !!(w0 && w0.requiresOrgList) && !skipOrgsForManual;
+  var goesToGroups = !!(w0 && w0.requiresGroupList) && !skipGroupsForManual && !_siteInline();   // GitLab Express picks its group on Authentication
+  var goesToOrgs   = !!(w0 && w0.requiresOrgList) && !skipOrgsForManual && !_siteInline();       // Azure DevOps Express picks its organization on Authentication
   var goesToSite   = !!(w0 && w0.requiresSitePicker) && !skipSiteForManual && !_siteInline();   // Jira picks its site on Authentication
   // Confluence Spaces picker — only reached when there's no Site picker
   // ahead of it (manual flow, or when the Site picker skips for any
@@ -14669,7 +15010,7 @@ function startOAuthFlow() {
   }
 
   // Google Identity: Google's sign-in window (account, then consent for the cloud-platform scope), recreated in-page.
-  if (typeof currentWorkload !== 'undefined' && currentWorkload === 'gip' && _gipOAuthLaunch('connect')) return;
+  if (typeof currentWorkload !== 'undefined' && (currentWorkload === 'gip' || currentWorkload === 'gws') && _gipOAuthLaunch('connect')) return;
   // Every other provider with a window in PROV_WIN (Atlassian first): the shared in-page sign-in window below.
   if (typeof currentWorkload !== 'undefined' && _pwLaunch(currentWorkload)) return;
 
@@ -14708,7 +15049,17 @@ function completeOAuthFlow() {
 // PROV_WIN holds what differs per workload; PW_SKIN draws the two pages (sign in, then consent). Closing or Cancel = the admin backing out.
 var PROV_WIN = {
   jira: { prov: 'atlassian', domain: 'id.atlassian.com', aria: 'Atlassian sign-in window', app: 'Veeam Data Cloud', user: 'alex.admin@acme.com', site: 'acme.atlassian.net',
-    scopes: ['View Jira issue data', 'Create and edit Jira issues, comments, attachments and worklogs', 'View and manage Jira projects, components and versions', 'View Jira Software boards and sprints', 'View user profiles', 'Maintain access while you are not using the app'] }
+    scopes: ['View Jira issue data', 'Create and edit Jira issues, comments, attachments and worklogs', 'View and manage Jira projects, components and versions', 'View Jira Software boards and sprints', 'View user profiles', 'Maintain access while you are not using the app'] },
+  confluence: { prov: 'atlassian', domain: 'id.atlassian.com', aria: 'Atlassian sign-in window', app: 'Veeam Data Cloud', user: 'alex.admin@acme.com', site: 'acme.atlassian.net',
+    scopes: ['View Confluence pages, blog posts, comments and attachments', 'Create and edit Confluence pages, blog posts, comments and attachments', 'View Confluence spaces and their permissions', 'View user profiles', 'Maintain access while you are not using the app'] },
+  gitlab: { prov: 'gitlab', domain: 'gitlab.com', aria: 'GitLab sign-in window', app: 'Veeam Data Cloud', user: 'alex.admin@acme.com',
+    scopes: ['Access the authenticated user\u2019s API, including groups, projects, merge requests and pipelines (api)', 'Read the authenticated user\u2019s personal information (read_user)'] },
+  'azure-devops': { prov: 'microsoft', domain: 'login.microsoftonline.com', aria: 'Microsoft sign-in window', app: 'Veeam Data Cloud', user: 'alex.admin@acme.com',
+    scopes: ['Sign you in and read your profile', 'Maintain access to data you have given it access to', 'Access Azure DevOps on your behalf (user_impersonation)', 'Consent on behalf of your organization'] },
+  pp: { prov: 'microsoft', domain: 'login.microsoftonline.com', aria: 'Microsoft sign-in window', app: 'Veeam Data Cloud', user: 'alex.admin@acme.com',
+    scopes: ['Sign you in and read your profile', 'Maintain access to data you have given it access to', 'Access the Power Platform admin and Power BI APIs on your behalf', 'Consent on behalf of your organization'] },
+  d365: { prov: 'microsoft', domain: 'login.microsoftonline.com', aria: 'Microsoft sign-in window', app: 'Veeam Data Cloud', user: 'alex.admin@acme.com',
+    scopes: ['Sign you in and read your profile', 'Maintain access to data you have given it access to', 'Access Dynamics 365 and Dataverse on your behalf (user_impersonation)', 'Consent on behalf of your organization'] }
 };
 var pwState = { wl: null, step: null };
 function _pwIc(n, z) { return (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg(n, z)) || ''; }
@@ -14726,6 +15077,39 @@ var PW_SKIN = {
       '<div class="pw-sec">This app would like permission to:</div><ul class="pw-perms">' +
       c.scopes.map(function(s){ return '<li><span>' + s + '</span>' + _pwIc('keyboard-arrow-down-outlined', 20) + '</li>'; }).join('') + '</ul>' +
       '<p class="pw-fine">By clicking Accept, you allow this app to use your information in accordance with their respective <a href="#" onclick="return false">terms of service</a> and <a href="#" onclick="return false">privacy policy</a>. You can remove this access at any time in <a href="#" onclick="return false">Connected apps</a>.</p>' +
+      '<div class="pw-btns"><button type="button" class="pw-btn text" onclick="_pwClose(false)">Cancel</button><button type="button" class="pw-btn fill" onclick="_pwClose(true)">Accept</button></div></div>';
+  },
+  // GitLab.com: username + password page, then "Authorize ... to use your account?" with the scope list and Deny / Authorize.
+  gitlab: function(c, w, step) {
+    var mark = '<div class="pw-mark" style="background:' + w.iconBg + '">' + w.icon.replace(/width="28"/, 'width="24"').replace(/height="28"/, 'height="24"') + '</div>';
+    if (step === 'login') {
+      return '<div class="pw-card">' + mark + '<h1>Sign in to GitLab</h1><p class="pw-sub">to continue to ' + c.app + '</p>' +
+        '<label class="pw-lbl" for="pw-email">Username or primary email</label><input class="pw-in" id="pw-email" type="text" value="' + c.user + '" readonly>' +
+        '<label class="pw-lbl" for="pw-pass">Password</label><input class="pw-in" id="pw-pass" type="password" value="password" readonly>' +
+        '<button type="button" class="pw-btn fill full" onclick="pwState.step=\'consent\';_pwPaint()">Sign in</button>' +
+        '<p class="pw-fine ctr"><a href="#" onclick="return false">Forgot your password?</a></p></div>';
+    }
+    return '<div class="pw-card">' + mark + '<h1>Authorize ' + c.app + ' to use your account?</h1>' +
+      '<div class="pw-user">Signed in as <b>' + c.user + '</b> <a href="#" onclick="return false">Not you?</a></div>' +
+      '<div class="pw-sec">This application will be able to:</div><ul class="pw-perms">' +
+      c.scopes.map(function(t){ return '<li><span>' + t + '</span></li>'; }).join('') + '</ul>' +
+      '<p class="pw-fine">An application called ' + c.app + ' is requesting access to your GitLab account. Make sure you trust it before you authorize. You can revoke access at any time in your <a href="#" onclick="return false">Applications</a> settings.</p>' +
+      '<div class="pw-btns"><button type="button" class="pw-btn text" onclick="_pwClose(false)">Deny</button><button type="button" class="pw-btn fill" onclick="_pwClose(true)">Authorize</button></div></div>';
+  },
+  // Microsoft Entra: account page, then "Permissions requested" with the tenant-wide consent line and Cancel / Accept.
+  microsoft: function(c, w, step) {
+    var mark = '<div class="pw-mark" style="background:none;width:auto;height:24px;justify-content:flex-start"><svg width="108" height="24" viewBox="0 0 108 24" aria-label="Microsoft"><rect x="0" y="1" width="10" height="10" fill="#f25022"/><rect x="12" y="1" width="10" height="10" fill="#7fba00"/><rect x="0" y="13" width="10" height="10" fill="#00a4ef"/><rect x="12" y="13" width="10" height="10" fill="#ffb900"/><text x="30" y="18" font-size="16" fill="#5e5e5e" font-family="Segoe UI,Arial,sans-serif">Microsoft</text></svg></div>';
+    if (step === 'login') {
+      return '<div class="pw-card" style="text-align:left">' + mark + '<h1 style="text-align:left">Sign in</h1><p class="pw-sub" style="text-align:left">to continue to ' + c.app + '</p>' +
+        '<input class="pw-in" id="pw-email" type="email" value="' + c.user + '" readonly aria-label="Email">' +
+        '<p class="pw-fine" style="margin:0 0 24px">No account? <a href="#" onclick="return false">Create one!</a></p>' +
+        '<div class="pw-btns" style="margin-top:0"><button type="button" class="pw-btn fill" onclick="pwState.step=\'consent\';_pwPaint()">Next</button></div></div>';
+    }
+    return '<div class="pw-card" style="text-align:left">' + mark + '<div class="pw-user" style="text-align:left;margin:0 0 16px">' + c.user + '</div><h1 style="text-align:left">Permissions requested</h1>' +
+      '<p class="pw-sub" style="text-align:left;margin-bottom:16px"><b style="color:var(--pw-ink)">' + c.app + '</b><br>Review for your organization</p>' +
+      '<div class="pw-sec">This application is requesting permission to:</div><ul class="pw-perms">' +
+      c.scopes.map(function(t){ return '<li><span>' + t + '</span></li>'; }).join('') + '</ul>' +
+      '<p class="pw-fine">Accepting these permissions means that you allow this app to use your data as specified in their terms of service and privacy statement. You can change these permissions at <a href="#" onclick="return false">myapps.microsoft.com</a>.</p>' +
       '<div class="pw-btns"><button type="button" class="pw-btn text" onclick="_pwClose(false)">Cancel</button><button type="button" class="pw-btn fill" onclick="_pwClose(true)">Accept</button></div></div>';
   }
 };
@@ -14758,12 +15142,37 @@ function _pwClose(allow) {
 // One connection backs up one site, so after sign-in (Express) or the handshake (Manual) the setup area becomes the connected card with the Site dropdown beneath it.
 // Same card and dropdown as Google Identity's organization choice; the dropdown helpers (_gipDd*) are shared, keyed 'site'.
 var siteState = { signedIn: false, via: null, picked: '' };
-function _siteInline() { return currentWorkload === 'jira'; }
-function _siteList() { if (!CONFLUENCE_SITES_STATE.length) seedDiscoveredConfluenceSites(); return CONFLUENCE_SITES_STATE; }
+// GitLab (group) and Azure DevOps (organization) use the same card + dropdown, driven by _pickCfg. On those and Confluence, Manual keeps its URL field, which already names the target, so only Express picks inline.
+function _siteInline() { var wl = currentWorkload; return wl === 'jira' || ((wl === 'confluence' || wl === 'gitlab' || wl === 'azure-devops') && currentAuthMethod !== 'manual'); }
+function _pickCfg() {
+  var wl = currentWorkload;
+  if (wl === 'gitlab') return {
+    fld: 'Group', ph: 'Select a group', manualTxt: 'Connected with your GitLab OAuth app',
+    list: function(){ if (!GITLAB_GROUPS_STATE.length) seedDiscoveredGitlabGroups(); return GITLAB_GROUPS_STATE; },
+    opt: function(g){ return { v: g.id, l: g.name, sub: 'gitlab.com/' + g.path }; },
+    set: function(g){ _siteList().forEach(function(x){ x.selected = !!g && x.id === g.id; }); },
+    returned: function(n){ return 'GitLab returned ' + n + ' top-level groups'; },
+    help: function(n){ return 'This account can reach ' + n + ' top-level groups. Choose the one to back up; every subgroup and project under it is included. Each group is its own connection.'; } };
+  if (wl === 'azure-devops') return {
+    fld: 'Organization', ph: 'Select an organization', manualTxt: 'Connected with your Entra application',
+    list: function(){ if (!ADO_ORGS_STATE.length) seedDiscoveredAdoOrgs(); return ADO_ORGS_STATE; },
+    opt: function(o){ return { v: o.id, l: o.name, sub: o.url }; },
+    set: function(o){ adoSelectedOrgId = o ? o.id : null; },
+    returned: function(n){ return 'Azure DevOps returned ' + n + ' organizations'; },
+    help: function(n){ return 'This account can reach ' + n + ' Azure DevOps organizations. Choose the one to back up; one connection covers every project in it. Each organization is its own connection.'; } };
+  return {
+    fld: 'Site', ph: 'Select a site', manualTxt: 'Connected with your Atlassian OAuth app',
+    list: function(){ if (!CONFLUENCE_SITES_STATE.length) seedDiscoveredConfluenceSites(); return CONFLUENCE_SITES_STATE; },
+    opt: function(x){ return { v: x.id, l: x.name, sub: x.url }; },
+    set: function(x){ _siteList().forEach(function(y){ y.selected = !!x && y.id === x.id; }); try { confluenceSelectedSite = x || null; } catch (e) {} },
+    returned: function(n){ return 'Atlassian returned ' + n + ' Atlassian Cloud sites'; },
+    help: function(n){ return 'This account can see ' + n + ' Atlassian Cloud sites. Choose the one to back up; each site is its own connection.'; } };
+}
+function _siteList() { return _pickCfg().list(); }
 function _siteSignedIn(via) {
   var wt = document.getElementById('auth-status-waiting'); if (wt) wt.style.display = 'none';
   currentAuthMethod = via; siteState.signedIn = true; siteState.via = via; siteState.picked = '';
-  _siteList().forEach(function(s){ s.selected = false; });
+  _pickCfg().set(null);
   var host = document.getElementById('site-signed'), ex = document.getElementById('express-setup'), mf = document.getElementById('manual-form-inline');
   if (ex) ex.style.display = 'none'; if (mf) mf.style.display = 'none';
   ['auth-option-express', 'auth-option-manual'].forEach(function(id){ var c = document.getElementById(id); if (c) { c.style.opacity = '1'; c.style.pointerEvents = 'auto'; } });   // both cards stay live, as on Google Identity
@@ -14773,15 +15182,15 @@ function _siteSignedIn(via) {
 }
 function _sitePaintSigned() {
   var host = document.getElementById('site-signed'); if (!host) return;
-  var list = _siteList(), manual = siteState.via === 'manual';
-  var h = '<div class="gp-ok" style="margin-top:0" role="status">' + _gipIc('status-complete-outlined', 24) + '<div class="gp-ok-t">' + (manual ? 'Connected with your Atlassian OAuth app' : 'Signed in as ' + PROV_WIN.jira.user) + '<div class="gp-ok-s">Atlassian returned ' + list.length + ' Atlassian Cloud sites</div></div><button type="button" class="btn btn-outline" onclick="siteChange()">' + (manual ? 'Change credentials' : 'Switch account') + '</button></div>';
-  h += '<div class="gp-fld"><span class="gp-fld-l">Site</span>' + _gipDd('site', _gipDdOptions('site'), siteState.picked, 'Select a site', false) + '<span class="gp-fld-h">This account can see ' + list.length + ' Atlassian Cloud sites. Choose the one to back up; each site is its own connection.</span></div>';
+  var cfg = _pickCfg(), list = cfg.list(), manual = siteState.via === 'manual';
+  var h = '<div class="gp-ok" style="margin-top:0" role="status">' + _gipIc('status-complete-outlined', 24) + '<div class="gp-ok-t">' + (manual ? cfg.manualTxt : 'Signed in as ' + PROV_WIN[currentWorkload].user) + '<div class="gp-ok-s">' + cfg.returned(list.length) + '</div></div><button type="button" class="btn btn-outline" onclick="siteChange()">' + (manual ? 'Change credentials' : 'Switch account') + '</button></div>';
+  h += '<div class="gp-fld"><span class="gp-fld-l">' + cfg.fld + '</span>' + _gipDd('site', _gipDdOptions('site'), siteState.picked, cfg.ph, false) + '<span class="gp-fld-h">' + cfg.help(list.length) + '</span></div>';
   host.innerHTML = h;
 }
 function _sitePick(v) {
   siteState.picked = v; gipState.dd = null;
-  var picked = null; _siteList().forEach(function(s){ s.selected = (s.id === v); if (s.selected) picked = s; });
-  try { confluenceSelectedSite = picked; } catch (e) {}
+  var picked = null; _siteList().forEach(function(s){ if (s.id === v) picked = s; });
+  _pickCfg().set(picked);
   _sitePaintSigned(); _siteFooter();
 }
 function _siteFooter() {
@@ -14792,7 +15201,7 @@ function _siteFooter() {
 }
 function siteChange() {
   if (siteState.via === 'manual') { _siteReset(); resetManualAuth(); selectAuthMethod('manual'); }
-  else _pwLaunch('jira', 'switch');
+  else _pwLaunch(currentWorkload, 'switch');
 }
 function _siteReset() {
   if (typeof siteState === 'undefined' || !siteState) return;
@@ -14987,7 +15396,7 @@ function _gipDdOpts(id, opts, val, q) {
   return rows.length ? rows.map(function(o){ return '<div class="gp-dd-opt' + (String(o.v) === String(val) ? ' is-sel' : '') + '" role="option" data-v="' + escapeHtml(String(o.v)) + '" onclick="gipDdPick(\'' + id + '\',this.getAttribute(\'data-v\'))">' + escapeHtml(o.l) + (o.sub ? '<span class="gp-dd-sub">' + escapeHtml(o.sub) + '</span>' : '') + '</div>'; }).join('') : '<div class="gp-dd-opt" style="color:var(--black-60);cursor:default">No matches.</div>';
 }
 function _gipDdOptions(id) {
-  if (id === 'site') return _siteList().map(function(s){ return { v: s.id, l: s.name, sub: s.url }; });
+  if (id === 'site') { var _pc = _pickCfg(); return _pc.list().map(_pc.opt); }
   if (id === 'org') return GIP_ORGS.map(function(g, i){ return { v: i, l: g.n, sub: g.id }; });
   return GIP_PROJECTS.map(function(p){ return { v: p.id, l: p.name, sub: p.id }; });
 }
@@ -15044,11 +15453,27 @@ function _gipPopPaint() {
     h += '<div class="gg-card"><div class="gg-head">' + G + 'Sign in with Google</div><h1>Veeam Data Cloud wants access to your Google Account</h1>' +
       '<div class="gg-pill"><span class="gg-av">A</span>' + GIP_ADMIN + ' ' + ic('keyboard-arrow-down-outlined', 16) + '</div>' +
       '<div class="gg-sec">This will allow Veeam Data Cloud to:</div>' +
-      '<div class="gg-scope"><input type="checkbox" checked disabled aria-label="Allowed"><span>See, edit, configure, and delete your Google Cloud data and see the email address for your Google Account.</span>' + ic('info-outlined', 20) + '</div>' +
+      _ggScopesHtml(ic) +
       '<div class="gg-trust"><b>Make sure you trust Veeam Data Cloud</b><p>You may be sharing sensitive info with this site or app. You can always see or remove access in your Google Account.</p><p><a href="#" onclick="return false">Learn how Google helps you share data safely.</a></p><p>See Veeam Data Cloud’s <a href="#" onclick="return false">Privacy Policy</a> and <a href="#" onclick="return false">Terms of Service</a>.</p></div>' +
       '<div class="gg-btns"><button type="button" class="gg-btn text" onclick="_gipPopClose()">Cancel</button><button type="button" class="gg-btn fill" onclick="_gipPopAllow()">Continue</button></div></div>';
   }
   host.innerHTML = h + foot + '</div></div></div>';
+}
+// The scope rows on Google's consent page: Google Identity asks for the cloud-platform scope; Workspace asks for the services it backs up under domain-wide delegation.
+function _ggScopes() {
+  if (currentWorkload === 'gws') return [
+    'Read, compose, send, and permanently delete all your email from Gmail.',
+    'See, edit, create, and delete all of your Google Drive files, including Shared Drives.',
+    'See, edit, share, and permanently delete all the calendars you can access using Google Calendar.',
+    'See, edit, download, and permanently delete your contacts.',
+    'See, edit, create, and delete Google Chat spaces and messages, and Google Keep notes.',
+    'See and download the users, groups, and organizational units in your domain.',
+    'Act on behalf of every user in your domain (domain-wide delegation).'
+  ];
+  return ['See, edit, configure, and delete your Google Cloud data and see the email address for your Google Account.'];
+}
+function _ggScopesHtml(ic) {
+  return _ggScopes().map(function(t){ return '<div class="gg-scope"><input type="checkbox" checked disabled aria-label="Allowed"><span>' + t + '</span>' + ic('info-outlined', 20) + '</div>'; }).join('');
 }
 function _gipPopClose() {
   var ctx = gipState.ctx; gipState.popup = null; _gipPopPaint();
@@ -15064,7 +15489,7 @@ function _gipPopAllow() {
   setTimeout(function(){
     var wt = document.getElementById('auth-status-waiting'), on = document.getElementById('screen-auth');
     if (!on || !on.classList.contains('active') || !wt || wt.style.display === 'none') return;   // the admin left or cancelled meanwhile
-    if (GIP_ORGS.length === 1) completeOAuthFlow(); else _gipSignedIn();
+    if (currentWorkload === 'gws' || GIP_ORGS.length === 1) completeOAuthFlow(); else _gipSignedIn();   // Workspace has no organization to choose
   }, 2500);
 }
 // Express signed in: stay on Authentication and show who is connected (as prototyped in gip-express-flow.html); Continue goes to Projects.
@@ -16098,7 +16523,7 @@ var VN_ITEMS = [
   // Data Resilience REMOVED from Apps 2026-07-14 — it's core navigation now.
   var VN_APPS = [
     // All apps disabled for now (user 2026-07-15) — ambient platform chrome.
-    { id: 'app-di',      label: 'Sensitive Data Intelligence', disabled: true },
+    { id: 'app-di',      label: 'Sensitive Data Intelligence', href: 'sensitive-data-intelligence.html' },   // wired 2026-11-11 (user: open it from any page in the main series); was: disabled: true
     { id: 'app-stream',  label: 'Data Remediation', disabled: true },
     { id: 'app-assess',  label: 'Compliance', disabled: true },
     { id: 'aiagents',    label: 'Agent Activity', disabled: true },

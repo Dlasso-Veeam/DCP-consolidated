@@ -74311,7 +74311,7 @@ var VN_ITEMS = [
   // Data Resilience REMOVED from Apps 2026-07-14 — it's core navigation now.
   var VN_APPS = [
     // All apps disabled for now (user 2026-07-15) — ambient platform chrome.
-    { id: 'app-di',      label: 'Sensitive Data Intelligence', disabled: true },
+    { id: 'app-di',      label: 'Sensitive Data Intelligence', href: 'sensitive-data-intelligence.html' },   // wired 2026-11-11 (user: open it from any page in the main series); was: disabled: true
     { id: 'app-stream',  label: 'Data Remediation', disabled: true },
     { id: 'app-assess',  label: 'Compliance', disabled: true },
     { id: 'aiagents',    label: 'Agent Activity', disabled: true },
@@ -75410,6 +75410,19 @@ window.D365X.recChip = function (key, item) {
     else if (what === 'changed') X.changedTables().forEach(function (r) { if (!isInPlan(r.id)) addTableWithChangedRecords(r.id); });
     childRender(); if (typeof updatePlanDock === 'function') updatePlanDock(); if (typeof renderTopActionBar === 'function') renderTopActionBar();
   };
+  /* what the list in front of you is made of: one shared row type gives its plural (User → users); a mixed list says items */
+  X.listNoun = function () {
+    try {
+      var rows = [];
+      if (state.invMode === 'drill' && typeof childState !== 'undefined' && childState.parentId) rows = RESOURCES.filter(function (r) { return r.parentId === childState.parentId && r.status !== 'unprotected'; });
+      else if (typeof _invRestorableRowsForCurrentView === 'function') rows = _invRestorableRowsForCurrentView() || [];
+      var types = {}; rows.forEach(function (r) { if (r && r.type) types[r.type] = 1; });
+      var k = Object.keys(types);
+      if (k.length !== 1) return 'items';
+      var w = String(k[0]).toLowerCase();
+      return /[^aeiou]y$/.test(w) ? w.slice(0, -1) + 'ies' : /(s|x|ch|sh)$/.test(w) ? w + 'es' : w + 's';
+    } catch (e) { return 'items'; }
+  };
   /* the table the caret belongs to: the inventory list or the drill list, in any workload */
   function target() {
     if (typeof state === 'undefined') return null;
@@ -75439,7 +75452,7 @@ window.D365X.recChip = function (key, item) {
     var jobLocked = !!(T.cb && T.cb.dataset && T.cb.dataset.dxLocked);   // every row is outside the job's category, so only clearing makes sense
     /* a count rides as a number badge at the right: grey for all changes, then the legend's own colours for modified, deleted and created */
     var item = function (w, label, arg, dis, count, tone) { if (jobLocked && w !== 'none') dis = true; return '<button type="button" class="dx-mi"' + (dis ? ' disabled' : '') + ' onclick="D365X.bulk(\'' + w + '\'' + (arg != null ? ',\'' + String(arg).replace(/\'/g, "\\'") + '\'' : '') + ')"><span>' + esc(label) + '</span>' + (count != null ? '<span class="dx-nb ' + (tone || '') + '">' + count + '</span>' : '') + '</button>'; };
-    var nn = c && c.lv === 'tables' ? 'tables' : c && c.lv === 'fields' ? 'columns' : 'records';   // the menu says what it picks: records, tables, or (inside a record) columns
+    var nn = c && c.lv === 'tables' ? 'tables' : c && c.lv === 'fields' ? 'columns' : c ? 'records' : X.listNoun();   // the menu says what it picks: records, tables, or (inside a record) columns on Dynamics; every other workload names what is in its own list (users, groups, repositories)
     var h = item('all', 'Select all ' + nn + ' across all pages') + item('page', 'Select all ' + nn + ' on this page');
     if (cmp) {
       h += '<div class="dx-md"></div>' + item('changed', 'Select all ' + nn + ' with changes', null, !c.changed, c.changed);
