@@ -27,6 +27,8 @@
   'use strict';
 
   var CSS = [
+    /* ONE overlay width on every page (user 2026-11-11: Protected Data's 360px is the standard; Activity, the dashboards and the Agent Hub had 280px). The hosts keep their own positioning. */
+    '.act-wl-picker .act-wl-panel { width:360px; min-width:360px; box-sizing:border-box; }   /* Protected Data and Policies already size their panels at min-width 360 */',
     '.wlp-search { display:flex; align-items:center; gap:8px; height:44px; padding:4px 12px; border-bottom:1px solid var(--border-light,#e9e9ea); color:var(--black-60,#626469); }',
     '.wlp-search svg { flex-shrink:0; }',
     '.wlp-search input { flex:1; min-width:0; height:100%; border:none; outline:none; background:transparent; font-family:inherit; font-size:16px; color:var(--black-100,#1f2229); }',
@@ -130,7 +132,9 @@
     var st = panelEl._wlpState || (panelEl._wlpState = { q: '', cat: 'All', manage: false });
     // member-inset scope: only while category rows actually render (flag on,
     // not in manage mode) — keeps every other page's picker full-bleed
-    panelEl.classList.toggle('wlp-has-cats', !!cfg.categoryRows && !st.manage);
+    // cfg.categoryDefault (Activity): the "All <category>" rows stay in Set default mode as radios, because a category scope can be the default too
+    var catsOn = !!cfg.categoryRows && (!st.manage || !!cfg.categoryDefault);
+    panelEl.classList.toggle('wlp-has-cats', catsOn);
     // Preserve the list's scroll across re-renders (user 2026-08-19: Set
     // default / pick re-renders reanchored the list to the top, hiding the
     // row the action just applied to — which read as the button not working).
@@ -177,25 +181,29 @@
       var agg = !!(cfg.aggregateCats && cfg.aggregateCats.indexOf(cat) >= 0);
       var dis = agg ? false : enabled.length === 0;
       var on = !!(cfg.activeCat && cfg.activeCat() === cat);
+      var _cid = 'cat:' + cat;
+      if (st.manage) on = ((st.manageSel != null ? st.manageSel : defWl) === _cid);   // Set default: the staged choice, shown as a radio like every other row
+      var _lead = st.manage ? '<input type="radio" class="wlp-def-radio" name="wlp-default" ' + (on ? 'checked ' : '') + 'tabindex="-1" aria-hidden="true">' : '';
+      var _tail = (!st.manage && defWl === _cid ? '<span class="wlp-home" ' + tipAttr + '="Default workload" aria-label="Default workload">' + homeGlyph() + '</span>' : '') + (on && !st.manage ? '<span class="wlp-check" aria-hidden="true">' + CHECK + '</span>' : '');
       // Anatomy = the SAME row grammar as every workload row (user 2026-09-04:
       // Medium weight + bare text + trailing badge read as a HEADER, not a
       // clickable row): standard 28px tile carrying the member COUNT (honest
       // — "N workloads inside"), Book label, hierarchy from the member
       // indent alone. was: no tile · Medium name · trailing count badge.
-      return '<button type="button" role="menuitemradio" aria-checked="' + on + '"'
-        + ' class="wlp-item wlp-cat-all' + (on ? ' is-active' : '') + (dis ? ' is-disabled' : '') + '"'
+      return '<button type="button" role="' + (st.manage ? 'radio' : 'menuitemradio') + '" aria-checked="' + on + '"'
+        + ' class="wlp-item wlp-cat-all' + (on && !st.manage ? ' is-active' : '') + (dis ? ' is-disabled' : '') + '"'
         + ' data-cat-all="' + cat + '" data-cat-members="' + (agg ? members : enabled).map(function (x) { return x.id; }).join(',') + '"'
         + (dis ? ' aria-disabled="true" ' + tipAttr + '="Not connected in this prototype"' : '')
-        + '><span class="wlp-item-icon' + (agg ? '' : ' wlp-cat-tile') + '">' + (agg && cfg.categoryGlyph ? (cfg.categoryGlyph(cat) || members.length) : members.length) + '</span>'
+        + '>' + _lead + '<span class="wlp-item-icon' + (agg ? '' : ' wlp-cat-tile') + '">' + (agg && cfg.categoryGlyph ? (cfg.categoryGlyph(cat) || members.length) : members.length) + '</span>'
         + '<span class="wlp-item-name">All ' + (_shortCat[cat] || cat) + '</span>'
-        + (on ? '<span class="wlp-check" aria-hidden="true">' + CHECK + '</span>' : '') + '</button>';
+        + _tail + '</button>';
     }
     var lastCat = null, listHtml = '';
     visible.forEach(function (en) {
-      var _aggCat = !!(cfg.categoryRows && !st.manage && cfg.aggregateCats && cfg.aggregateCats.indexOf(en.cat) >= 0);
+      var _aggCat = !!(catsOn && cfg.aggregateCats && cfg.aggregateCats.indexOf(en.cat) >= 0);
       if (en.cat !== lastCat) {
-        if (lastCat !== null && cfg.categoryRows && !st.manage) listHtml += '<div class="wlp-group-div"></div>';
-        listHtml += (cfg.categoryRows && !st.manage) ? _catAllRow(en.cat) : '<div class="wlp-group-hdr">' + en.cat + '</div>';
+        if (lastCat !== null && catsOn) listHtml += '<div class="wlp-group-div"></div>';
+        listHtml += catsOn ? _catAllRow(en.cat) : '<div class="wlp-group-hdr">' + en.cat + '</div>';
         lastCat = en.cat;
       }
       if (_aggCat) return;   // aggregate category: the All row IS the group
@@ -247,6 +255,13 @@
         // category "All <cat>" rows (never rendered in manage mode)
         var catAll = b.getAttribute('data-cat-all');
         if (catAll) {
+          if (st.manage) {   // Set default: stage it, commit on Done (same gesture as a workload row)
+            st.manageSel = 'cat:' + catAll;
+            st.manageSelName = 'All ' + (_shortCat[catAll] || catAll);
+            st.manageCat = { cat: catAll, ids: (b.getAttribute('data-cat-members') || '').split(',').filter(Boolean) };
+            renderPanel(panelEl, cfg);
+            return;
+          }
           if (cfg.onPickCategory) cfg.onPickCategory(catAll, (b.getAttribute('data-cat-members') || '').split(',').filter(Boolean));
           renderPanel(panelEl, cfg);
           return;
@@ -278,13 +293,15 @@
       }
       // DONE: commit the staged choice — store the default AND select it as
       // the current workload (the original gesture; radio clicks never commit).
-      var sel = st.manageSel, selName = st.manageSelName;
+      var sel = st.manageSel, selName = st.manageSelName, selCat = st.manageCat;
       st.manage = false;
       st.manageSel = null;
       st.manageSelName = null;
+      st.manageCat = null;
       if (sel && sel !== defWl) {
         (cfg.setDefault || setDefaultWl)(sel);
-        cfg.onPick(sel, selName);
+        if (selCat && cfg.onPickCategory) cfg.onPickCategory(selCat.cat, selCat.ids);   // a category default scopes the page to the whole group
+        else cfg.onPick(sel, selName);
       }
       renderPanel(panelEl, cfg);
     });
@@ -365,7 +382,7 @@
   function _pageKey() {
     try { return (location.pathname.split('/').pop() || 'page'); } catch (e) { return 'page'; }
   }
-  function _validId(v) { return v && WORKLOADS.some(function (w) { return w.id === v && !w.disabled; }); }
+  function _validId(v) { return v && (String(v).indexOf('cat:') === 0 || WORKLOADS.some(function (w) { return w.id === v && !w.disabled; })); }   // 'cat:<category>' = a category scope as the default (only pages with cfg.categoryDefault ever write one)
   function getDefaultWl() {
     try {
       var k = 'vdc-default-wl:' + _pageKey();

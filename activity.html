@@ -726,6 +726,16 @@ a.vn-fly-link:hover { color: var(--blue); }
 .table-wrap.has-h-scroll-right #actTable thead th:last-child::before,
 .table-wrap.has-h-scroll-right #agentsTable tbody td:last-child::before,
 .table-wrap.has-h-scroll-right #agentsTable thead th:last-child::before { opacity: 1; }
+/* Audit log: same pins as Sessions and Agent sessions — Action (the link) left, the details button right (user 2026-11-11). No checkbox column, so the name column pins at 0. */
+#auditTable thead th.name-col, #auditTable tbody td.name-col { position: sticky; left: 0; background: var(--white); z-index: 3; overflow: visible; width: 240px; min-width: 240px; max-width: 240px; box-sizing: border-box; }
+#auditTable thead th.name-col { z-index: 31; }
+#auditTable thead th:last-child, #auditTable tbody td:last-child { position: sticky; right: 0; background: var(--white); z-index: 4; overflow: visible; }
+#auditTable tbody td.name-col .cell-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#auditTable tbody td.name-col::after, #auditTable thead th.name-col::after { content: ''; position: absolute; top: 0; right: -8px; bottom: 0; width: 8px; background: linear-gradient(to right, rgba(0,0,0,0.10), rgba(0,0,0,0)); pointer-events: none; opacity: 0; transition: opacity 0.18s ease; }
+#auditTable tbody td:last-child::before, #auditTable thead th:last-child::before { content: ''; position: absolute; top: 0; left: -8px; bottom: 0; width: 8px; background: linear-gradient(to left, rgba(0,0,0,0.10), rgba(0,0,0,0)); pointer-events: none; opacity: 0; transition: opacity 0.18s ease; }
+.table-wrap.has-h-scroll-left #auditTable tbody td.name-col::after, .table-wrap.has-h-scroll-left #auditTable thead th.name-col::after { opacity: 1; }
+.table-wrap.has-h-scroll-right #auditTable tbody td:last-child::before, .table-wrap.has-h-scroll-right #auditTable thead th:last-child::before { opacity: 1; }
+#auditTable tbody tr:hover td.name-col, #auditTable tbody tr:hover td:last-child { background: var(--blue-light); }
 /* Hover sync so the pinned cells don't break the row's hover colour. */
 #actTable tbody tr:hover td.cb-col,
 #actTable tbody tr:hover td.name-col,
@@ -1440,7 +1450,7 @@ body.ai-open.ai-full #toast { right: 24px; }
 .act-wl-btn { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; background: var(--white); border: 1px solid var(--border); border-radius: 4px; font-family: inherit; font-size: 16px; color: var(--black-100); cursor: pointer; }
 .act-wl-btn .awb-chip { display: inline-flex; align-items: center; height: 28px; padding: 0 8px; border-radius: 2px; background: var(--black-3); font-weight: 500; }
 .act-wl-btn .awb-chev { display: inline-flex; color: var(--black-60); }
-.act-wl-panel { display: none; position: absolute; top: calc(100% + 4px); left: 0; z-index: 900; width: 280px; border: 1px solid var(--border-light); border-radius: 4px; background: var(--white); box-shadow: 0 8px 24px rgba(31,34,41,0.16); overflow: hidden; }
+.act-wl-panel { display: none; position: absolute; top: calc(100% + 4px); left: 0; z-index: 900; width: 360px; /* was 280 — Protected Data's overlay width is the standard (user 2026-11-11) */ border: 1px solid var(--border-light); border-radius: 4px; background: var(--white); box-shadow: 0 8px 24px rgba(31,34,41,0.16); overflow: hidden; }
 .act-wl-picker.is-open .act-wl-panel { display: block; }
 .act-wl-search { display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px; border-bottom: 1px solid var(--border-light); color: var(--black-60); }
 .act-wl-search svg { flex-shrink: 0; }
@@ -2137,13 +2147,14 @@ body.ai-full #aiWorkingGlow { display: none; }
 .sd-pop-f .v { color: var(--black-100); min-width: 0; }
 .sd-pop-b { display: flex; gap: 8px; justify-content: flex-end; padding-top: 8px; }
 .sd-hd-meta { display: flex; align-items: center; gap: 8px; }
-.sd-hd-acts { margin-left: auto; display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+.sd-hd-acts { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .sd-hd-upd { font-size: 16px; color: var(--black-60); white-space: nowrap; }
 .ag-pbtn { display: inline-flex; align-items: center; height: 36px; padding: 0 16px; border: 1px solid var(--em-green); border-radius: 4px; background: var(--em-green); color: var(--white); font: inherit; font-size: 16px; font-weight: 500; cursor: pointer; white-space: nowrap; }
 .ag-pbtn:hover { filter: brightness(0.94); }
 .ag-menu-wrap { position: relative; }
 .ag-abtn { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font: inherit; font-size: 16px; font-weight: 500; color: var(--black-100); cursor: pointer; }
 .ag-abtn:hover { background: var(--black-5); }
+.ag-abtn.ag-ic { width: 36px; padding: 0; justify-content: center; }   /* option A (user 2026-11-12): Ask and the overflow are icon-only squares so the header leads with the decision */
 .ag-menu { display: none; position: absolute; right: 0; top: 40px; z-index: 30; min-width: 220px; padding: 4px 0; background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; box-shadow: 0 4px 16px rgba(31,34,41,0.16); }
 .ag-menu.open { display: block; }
 .ag-menu button { display: block; width: 100%; height: 36px; padding: 0 16px; border: 0; background: none; text-align: left; font: inherit; font-size: 16px; color: var(--black-100); cursor: pointer; }
@@ -2192,6 +2203,9 @@ body.ai-full #aiWorkingGlow { display: none; }
 </style>
 </head>
 <body>
+<script>/* A conversation-led handoff lands with the panel ALREADY OPEN (user 2026-11-12: the panel collapsed while navigating and only reopened after the page loaded). Same open state aiOpen sets, applied before first paint. */
+try { var _eh = sessionStorage.getItem('vdc-ai-handoff'), _ep = (location.pathname.split('/').pop() || '').replace(/\.html$/, ''); if (_eh && _eh.replace(/\.html$/, '') === _ep) { document.body.classList.add('ai-open', 'ai-nofx'); var _ew = parseInt(localStorage.getItem('vdc-ai-panel-w'), 10); if (_ew > 0) document.body.style.setProperty('--ai-w', _ew + 'px'); } } catch (e) {}
+</script>
 
 
 <!-- Password gate -->
@@ -2223,7 +2237,7 @@ body.ai-full #aiWorkingGlow { display: none; }
      main password-gate IIFE (far below) finishes loading and runs its check. -->
 <script src="securiti-icons-data.js?v=20260910a"></script>
 <script src="vdc-notifications.js?v=20261030a"></script>
-<script src="workload-picker.js?v=20260908b"></script>
+<script src="workload-picker.js?v=20261111"></script>
 <script src="agent-sessions.js?v=20261029a"></script>
 <script>
 (function(){
@@ -3110,6 +3124,14 @@ body.ai-full #aiWorkingGlow { display: none; }
         </div>
         <div class="body-row" id="actSanitizeBody" style="display:none">
           <div class="inv-panel">
+            <!-- Entity header: one per view (user 2026-11-11 — every Activity table opens the same way: tile, title, one-line description) -->
+            <div class="ag-entity">
+              <div class="ag-entity-tile" data-ic="sanitizer-outlined"></div>
+              <div style="min-width:0">
+                <div class="ag-entity-title">Sanitize jobs</div>
+                <div class="ag-entity-desc">Jobs that mask sensitive data in backups so it can be restored safely. Start one from the Sanitize explorer.</div>
+              </div>
+            </div>
             <div class="inv-search">
               <div style="display:flex;align-items:center;gap:8px">
                 <div class="inv-search-inner" style="flex:1;min-width:200px">
@@ -3152,6 +3174,14 @@ body.ai-full #aiWorkingGlow { display: none; }
               <div style="display:flex;align-items:center;gap:12px;min-width:0;flex:1">
                 <div class="res-icon-tile" style="background:var(--blue-light);color:var(--blue)"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M15.6 22C12.07 22 9.2 19.13 9.2 15.6C9.2 12.07 12.07 9.2 15.6 9.2C19.13 9.2 22 12.07 22 15.6C22 19.13 19.13 22 15.6 22ZM15.6 11.2C13.17 11.2 11.2 13.17 11.2 15.6C11.2 18.03 13.17 20 15.6 20C18.03 20 20 18.03 20 15.6C20 13.17 18.03 11.2 15.6 11.2ZM17.7 17.8C17.58 17.8 17.46 17.78 17.35 17.74L14.95 16.84C14.56 16.69 14.3 16.32 14.3 15.9V13.2C14.3 12.65 14.75 12.2 15.3 12.2C15.85 12.2 16.3 12.65 16.3 13.2V15.21L18.05 15.87C18.57 16.06 18.83 16.64 18.64 17.16C18.49 17.56 18.11 17.81 17.7 17.81V17.8ZM6 12H3C2.45 12 2 11.55 2 11C2 10.45 2.45 10 3 10H6C6.55 10 7 10.45 7 11C7 11.55 6.55 12 6 12ZM10.16 8H3C2.45 8 2 7.55 2 7C2 6.45 2.45 6 3 6H10.16C10.71 6 11.16 6.45 11.16 7C11.16 7.55 10.71 8 10.16 8ZM13 4H3C2.45 4 2 3.55 2 3C2 2.45 2.45 2 3 2H13C13.55 2 14 2.45 14 3C14 3.55 13.55 4 13 4Z"/></svg></div>
                 <div style="min-width:0"><div class="inv-title" id="auditTableTitle">Audit log</div><div class="inv-subtitle" id="auditTableSub">0 events</div></div>
+              </div>
+            </div>
+            <!-- Entity header: one per view (user 2026-11-11 — every Activity table opens the same way: tile, title, one-line description) -->
+            <div class="ag-entity">
+              <div class="ag-entity-tile" data-ic="sd-findings"></div>
+              <div style="min-width:0">
+                <div class="ag-entity-title">Audit log</div>
+                <div class="ag-entity-desc">Who did what in your organization: sign-ins, access to backup data, exports and restores, and changes to protection settings.</div>
               </div>
             </div>
             <div class="inv-search">
@@ -3223,7 +3253,7 @@ body.ai-full #aiWorkingGlow { display: none; }
                  still writes agentsTableTitle/Sub every render. -->
             <!-- Entity header (borrowed from the Data System catalog screen): tile + title + one-line description -->
             <div class="ag-entity">
-              <div class="ag-entity-tile" id="agEntityTile"></div>
+              <div class="ag-entity-tile" id="agEntityTile" data-ic="my-ai-agents-outlined"></div>
               <div style="min-width:0">
                 <div class="ag-entity-title">Agent sessions</div>
                 <div class="ag-entity-desc">Work Veeam Intelligence has taken on. Each session is a purpose-built agent spawned for one task and granted only what that task needs.</div>
@@ -3238,7 +3268,8 @@ body.ai-full #aiWorkingGlow { display: none; }
                 </div>
               </div>
             </div>
-            <div class="ag-kpis" id="agKpis"></div>
+            <!-- KPI bar REMOVED from Agent sessions (user 2026-11-11). Hidden, not deleted: renderAgentsTable still fills it. -->
+            <div class="ag-kpis" id="agKpis" style="display:none"></div>
             <div class="abb" id="agentsBulkBar"></div>
             <div class="table-wrap">
               <table id="agentsTable">
@@ -3291,6 +3322,14 @@ body.ai-full #aiWorkingGlow { display: none; }
                      name, so the header reads correctly across all job-type tabs. -->
                 <div class="res-icon-tile" style="background:var(--blue-light);color:var(--blue)"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M16.2 22C13 22 10.4 19.3974 10.4 16.1942C10.4 12.991 13 10.3884 16.2 10.3884C19.4 10.3884 22 12.991 22 16.1942C22 19.3974 19.4 22 16.2 22ZM16.2 12.4004C14.1 12.4004 12.4 14.1021 12.4 16.2042C12.4 18.3063 14.1 20.008 16.2 20.008C18.3 20.008 20 18.3063 20 16.2042C20 14.1021 18.29 12.4004 16.2 12.4004ZM17.46 18.1161C17.33 18.1161 17.2 18.0861 17.07 18.036L15.55 17.3854C15.18 17.2252 14.94 16.8649 14.94 16.4645V14.3824C14.94 13.8318 15.39 13.3814 15.94 13.3814C16.49 13.3814 16.94 13.8318 16.94 14.3824V15.8038L17.86 16.1942C18.37 16.4144 18.6 16.995 18.39 17.5055C18.23 17.8859 17.86 18.1161 17.47 18.1161H17.46ZM7.94 18.016H5.47C3.56 18.016 2 16.4545 2 14.5425V5.47347C2 3.56156 3.56 2 5.47 2H14.53C16.44 2 18 3.56156 18 5.47347V7.12513C18 7.67568 17.55 8.12613 17 8.12613C16.45 8.12613 16 7.67568 16 7.12513V5.47347C16 4.66266 15.34 4.002 14.53 4.002H5.47C4.66 4.002 4 4.66266 4 5.47347V14.5425C4 15.3534 4.66 16.014 5.47 16.014H7.94C8.49 16.014 8.94 16.4645 8.94 17.015C8.94 17.5656 8.49 18.016 7.94 18.016ZM6.46 12.8509C6.25 12.8509 6.03 12.7808 5.85 12.6406C5.41 12.3003 5.33 11.6697 5.67 11.2392L7.99 8.22623C8.26 7.86587 8.74 7.74575 9.16 7.90591L11.25 8.74675L13.06 7.22523C13.48 6.86486 14.11 6.92493 14.47 7.34535C14.83 7.76577 14.77 8.3964 14.35 8.75676L12.08 10.6687C11.8 10.9089 11.4 10.969 11.06 10.8288L9.12 10.048L7.26 12.4605C7.06 12.7207 6.77 12.8509 6.47 12.8509H6.46Z"/></svg></div>
                 <div style="min-width:0"><div class="inv-title" id="actTableTitle">All Sessions</div><div class="inv-subtitle" id="actTableSub">0 jobs</div></div>
+              </div>
+            </div>
+            <!-- Entity header: one per view (user 2026-11-11 — every Activity table opens the same way: tile, title, one-line description) -->
+            <div class="ag-entity">
+              <div class="ag-entity-tile" data-ic="sd-session-log"></div>
+              <div style="min-width:0">
+                <div class="ag-entity-title">Resilience sessions</div>
+                <div class="ag-entity-desc">Backup, restore and export sessions across your connected workloads, with their status and the objects they covered.</div>
               </div>
             </div>
             <div class="inv-search">
@@ -7133,13 +7172,10 @@ var FILTER_CONFIG = {
     // legacy Action-group taxonomy RETIRED. Pinned = Category (enum) +
     // Integration + Workload; enums + user + severity via the '+' picker.
     attrs: [
-      { id: 'category',     label: 'Category',      pinnedOnly: true },
-      { id: 'integration',  label: 'Integration',   pinnedOnly: true },
-      { id: 'workload',     label: 'Workload',      pinnedOnly: true },
-      { id: 'activityType', label: 'Activity type' },
-      { id: 'objectType',   label: 'Object type' },
-      { id: 'user',         label: 'User' },
-      { id: 'severity',     label: 'Severity' }
+      { id: 'category',     label: 'Action group' },
+      { id: 'activityType', label: 'Action' },
+      { id: 'user',         label: 'Actor' },
+      { id: 'workload',     label: 'Workload', pinnedOnly: true }
     ],
     stateKey: 'auditFilters',
     barId: 'filterBar-audit',
@@ -7148,12 +7184,9 @@ var FILTER_CONFIG = {
       var out = {};
       _auditAllEvents().forEach(function(e){
         var v = attr === 'category' ? e.cat
-          : attr === 'integration'  ? e.integration
           : attr === 'workload'     ? e.wl
-          : attr === 'activityType' ? e.activity
-          : attr === 'objectType'   ? e.object
-          : attr === 'user'         ? e.user
-          : e.severity;
+          : attr === 'activityType' ? e.action
+          : e.user;
         if (v) out[v] = (out[v] || 0) + 1;
       });
       return out;
@@ -10492,6 +10525,8 @@ function _actWlPickerCfg() {
     // CATEGORY SCOPE (pattern A, 2026-09-02 — Activity only): the picker's
     // "All <category>" rows scope the page to every workload in the group.
     categoryRows: true,
+    // The "All SaaS" / "All Datacenter" rows are also offered when choosing the default (user 2026-11-11); a category default is stored as 'cat:<category>'.
+    categoryDefault: true,
     // Datacenter is AGGREGATE-ONLY on Activity (user 2026-09-04): the All
     // row is the single pickable unit, member rows are suppressed, and the
     // tile carries the server-stack glyph instead of a member count.
@@ -10514,6 +10549,7 @@ function _actWlPickerCfg() {
 // Default = stored REGISTRY id, else the first enabled canonical workload.
 function _actWlDefault() {   // returns a REGISTRY id from the SHARED store
   var stored = (window.WorkloadPickerDS ? WorkloadPickerDS.getDefaultWl() : null);
+  if (stored && String(stored).indexOf('cat:') === 0) return stored;   // a category scope ("All SaaS") chosen as the default
   if (stored && _ACT_WL_JOBWL[stored]) return stored;
   var first = (window.WorkloadPickerDS ? WorkloadPickerDS.WORKLOADS : []).filter(function(w){ return !w.disabled; })[0];
   return first ? first.id : null;
@@ -10524,6 +10560,17 @@ function actWlEnsureSelection() {
   if (state._actWlCat) return;   // category scope IS a selection (multi-value ⇒ _actWlCurrent() null)
   if (_actWlCurrent()) return;
   var defId = _actWlDefault();
+  if (defId && String(defId).indexOf('cat:') === 0) {   // the default is a category scope: apply it the way the picker's All row does (state only — this runs before first paint)
+    var _cat = defId.slice(4);
+    var _jw = WorkloadPickerDS.WORKLOADS.filter(function(w){ return w.cat === _cat && (_cat === 'Datacenter' || !w.disabled); }).map(function(w){ return _ACT_WL_JOBWL[w.id]; }).filter(Boolean);
+    if (!_jw.length) return;
+    state._actWlCat = _cat;
+    state.actFilters = (state.actFilters || []).filter(function(x){ return x.attr !== 'workload'; });
+    state.actFilters.push({ attr: 'workload', values: _jw });
+    var _chip = document.getElementById('actWlCur'); if (_chip) _chip.textContent = 'All ' + ({ 'SaaS platforms': 'SaaS' }[_cat] || _cat);
+    var _ci = document.getElementById('actWlCurIcon'); if (_ci) { _ci.innerHTML = ''; _ci.style.display = 'none'; }
+    return;
+  }
   var jobWl = defId && _ACT_WL_JOBWL[defId];
   if (!jobWl) return;
   state.actFilters = (state.actFilters || []).filter(function(x){ return x.attr !== 'workload'; });
@@ -10799,20 +10846,93 @@ function _auditFromRot() {
   }
   return out;
 }
+
+/* ══ VDC AUDIT LOG DATASET (user 2026-11-11) ══
+   The audit log is NOT the session list: it records who did what in the organization, in four action groups —
+   Access Management (sign-ins, roles), Data Access (browsing backup data), Data Management (export, restore, consent) and
+   Protection Management (policies, integrations, agent grants). Columns follow the VDC log: Timestamp, Actor, Action Group,
+   Action, Target, Organization. Seeded and deterministic; actors are fictional. The old session-derived events
+   (_auditDerivedFromJobs) and the earlier spec seed (AUDIT_EVENTS) stay defined but are no longer listed here.
+   Actions and targets are modelled on the VDC reference screens (User Login, Backup Data Browsed / Exported / Restored,
+   AI Consent Withdrawn); the Protection Management actions are inferred, not taken from a reference. */
+var AUDIT_ORG = 'Contoso Corp';
+var _vdcAuditCache = null;
+function _vdcAuditSeed() {
+  if (_vdcAuditCache) return _vdcAuditCache;
+  var out = [], n = 0, seedv = 20261111;
+  function rnd() { seedv = (seedv * 1664525 + 1013904223) % 4294967296; return seedv / 4294967296; }
+  function pick(a) { return a[Math.floor(rnd() * a.length)]; }
+  var ACT = ['sarah.chen@acme.com', 'james.park@acme.com', 'alex.kim@acme.com', 'maria.gonzalez@acme.com', 'priya.nair@acme.com', 'd.lasso@veeam.com'];
+  function VE(group, action, target, wl, x) {
+    x = x || {}; n++;
+    var id = 'va' + (n < 10 ? '0' : '') + n;
+    var user = x.user || pick(ACT);
+    var e = AE(id, 0, 0, 0, user, action, 'backup_data', group, action + ' — ' + target, AUDIT_ORG, wl || '—', x);
+    // spread over the last 29 days, newest first-ish; today's events sit before "now"
+    var mins = x.mins != null ? x.mins : Math.floor(rnd() * 29 * 1440) + 20;
+    e.ts = new Date(Date.now() - mins * 60000);
+    e.group = group; e.action = action; e.target = target; e.org = AUDIT_ORG;
+    out.push(e); return e;
+  }
+  function times(k, f) { for (var i = 0; i < k; i++) f(i); }
+  // ── Access Management ──
+  times(15, function(){ VE('Access Management', 'User Login', AUDIT_ORG, '—', { details: { login_method: pick(['sso', 'password']), mfa_used: true } }); });
+  times(4,  function(){ VE('Access Management', 'User Logout', AUDIT_ORG, '—', { details: { logout_type: 'manual' } }); });
+  times(3,  function(){ VE('Access Management', 'Login Failed', AUDIT_ORG, '—', { severity: 'LOW', user: 'nina.rossi@acme.com', details: { failure_reason: 'invalid_credentials' } }); });
+  times(2,  function(){ VE('Access Management', 'MFA Method Changed', AUDIT_ORG, '—', { changed: [['mfa_method', 'SMS', 'Authenticator app']] }); });
+  VE('Access Management', 'Role Assigned', 'james.park@acme.com', '—', { user: 'alex.kim@acme.com', changed: [['role', 'User', 'Operator']], mins: 6 * 1440 + 130 });
+  VE('Access Management', 'Role Assigned', 'priya.nair@acme.com', '—', { user: 'alex.kim@acme.com', changed: [['role', 'User', 'Operator']], mins: 11 * 1440 + 400 });
+  VE('Access Management', 'Role Revoked', 'temp-contractor@acme.com', '—', { user: 'alex.kim@acme.com', severity: 'LOW', changed: [['role', 'Module Owner', 'User']], mins: 17 * 1440 + 55 });
+  VE('Access Management', 'Session Revoked', 'temp-contractor@acme.com', '—', { user: 'alex.kim@acme.com', severity: 'MEDIUM', mins: 17 * 1440 + 50 });
+  // ── Data Access ──
+  var BR = [['Finance-Admins', 'Entra ID'], ['PIM Test Group', 'Entra ID'], ['Retail Taxes', 'Microsoft 365'], ['Retail Archive', 'Microsoft 365'], ['Maria Gonzalez (mailbox)', 'Microsoft 365'], ['payments-service', 'GitHub'], ['Shared drive — HR', 'Google Workspace'], ['Account', 'Dynamics 365']];
+  times(14, function(){ var t = pick(BR); VE('Data Access', 'Backup Data Browsed', t[0], t[1]); });
+  times(4,  function(){ var t = pick(BR); VE('Data Access', 'Backup Data Searched', pick(['contract renewal', 'payroll', 'invoice 2026', 'Mark Aldridge']), t[1]); });
+  times(3,  function(){ var t = pick(BR); VE('Data Access', 'Backup Item Downloaded', t[0], t[1]); });
+  // ── Data Management ──
+  var WL = ['Entra ID', 'Microsoft 365', 'Google Workspace', 'GitHub', 'Dynamics 365'];
+  times(8,  function(){ var w = pick(WL); VE('Data Management', 'Backup Data Exported', w, w, { details: { export_format: pick(['CSV', 'PST', 'ZIP']) } }); });
+  times(7,  function(){ var w = pick(WL); VE('Data Management', 'Backup Data Restored', w, w, { details: { restore_target: 'Original location' } }); });
+  times(2,  function(){ VE('Data Management', 'Backup Data Sanitized', 'Retail Archive', 'Microsoft 365', { details: { masking: 'Redact' } }); });
+  times(2,  function(){ VE('Data Management', 'AI Consent Withdrawn', 'Anonymized ML Training Data Collection', '—', { user: 'priya.nair@acme.com' }); });
+  VE('Data Management', 'AI Consent Granted', 'Anonymized ML Training Data Collection', '—', { user: 'alex.kim@acme.com', mins: 24 * 1440 });
+  // ── Protection Management ──
+  VE('Protection Management', 'Backup Policy Created', 'Default Retention Policy — 3 Years', 'Microsoft 365', { user: 'alex.kim@acme.com', mins: 21 * 1440 + 90 });
+  VE('Protection Management', 'Backup Policy Created', 'Hourly — Finance mailboxes', 'Microsoft 365', { user: 'maria.gonzalez@acme.com', mins: 13 * 1440 + 300 });
+  times(4,  function(){ VE('Protection Management', 'Backup Policy Updated', pick(['Default Retention Policy — 7 Years', 'Hourly — Finance mailboxes', 'Nightly — GitHub organizations']), pick(['Microsoft 365', 'GitHub']), { changed: [['schedule', 'Daily', 'Every 12 hours']] }); });
+  VE('Protection Management', 'Backup Policy Disabled', 'Nightly — Jira', 'Jira', { user: 'maria.gonzalez@acme.com', severity: 'LOW', mins: 7 * 1440 + 20 });
+  VE('Protection Management', 'Backup Policy Enabled', 'Nightly — Jira', 'Jira', { user: 'maria.gonzalez@acme.com', mins: 7 * 1440 - 60 });
+  VE('Protection Management', 'Backup Policy Deleted', 'Legacy — Bitbucket', 'Bitbucket', { user: 'alex.kim@acme.com', severity: 'MEDIUM', mins: 15 * 1440 + 40 });
+  times(2,  function(){ VE('Protection Management', 'Retention Changed', pick(['Default Retention Policy — 3 Years', 'Default Retention Policy — 1 Year']), 'Microsoft 365', { changed: [['retention', '1 year', '3 years']] }); });
+  VE('Protection Management', 'Integration Added', 'Dynamics 365 — contoso', 'Dynamics 365', { user: 'alex.kim@acme.com', mins: 26 * 1440 + 200 });
+  VE('Protection Management', 'Agent Skill Level Changed', 'Manage policies', '—', { user: 'd.lasso@veeam.com', changed: [['level', 'Off', 'Recommend']], details: { setting: 'Agent Settings › Manage policies' }, mins: 10 * 1440 + 15 });
+  _vdcAuditCache = out; return out;
+}
+// The ROT recommendation events (agent trail) belong to Protection Management in this taxonomy.
+var _VDC_ROT_MAP = { agent_recommendation_raised: 'Policy Recommendation Raised', backup_policy_created: 'Backup Policy Created', agent_recommendation_dismissed: 'Policy Recommendation Dismissed' };
+function _vdcFill(e) {
+  if (e.group) return e;
+  var a = _VDC_ROT_MAP[e.activity] || e.activity;
+  e.group = 'Protection Management'; e.action = a; e.cat = e.group; e.org = AUDIT_ORG;
+  var m = /“([^”]+)”/.exec(e.msg || ''); e.target = m ? m[1] : 'Stale SharePoint content — Retail Division';
+  e.activity = a; return e;
+}
 function _auditAllEvents() {
-  return AUDIT_EVENTS.concat(_auditDerivedFromJobs()).concat(_auditFromRot());
+  // was: AUDIT_EVENTS.concat(_auditDerivedFromJobs()).concat(_auditFromRot()) — session events and the earlier spec seed are not what the audit log records
+  return _vdcAuditSeed().concat(_auditFromRot().map(_vdcFill));
 }
 // Spec columns, ADAPTED (user 2026-07-17): the spec's combined
 // Activity/Object badge cell is TBD with the platform team, so we separate
 // them for now — Activity promoted to the primary column (clickable, our
 // name-column grammar), Object as its own column. Time keeps default sort.
 var AUDIT_COLUMNS = [
-  { key: 'activity', label: 'Activity' },
-  { key: 'object',   label: 'Object' },
-  { key: 'user',     label: 'User' },
-  { key: 'msg',      label: 'Message' },
-  { key: 'ts',       label: 'Time' }
-];
+  { key: 'action', label: 'Action' },   // the pinned, clickable first column (opens the details), as the name column is on every other table
+  { key: 'ts',     label: 'Timestamp' },
+  { key: 'user',   label: 'Actor' },
+  { key: 'group',  label: 'Action group' },
+  { key: 'target', label: 'Target' },
+  { key: 'org',    label: 'Organization' }
+];   // was: Activity · Object · User · Message · Time (the session-style columns)
 var _AUDIT_PINNED = [ /* was: category + integration pins — retired 2026-08-18 (user: no pinned filters on the filter row; both live in the "+" picker). workload PARKED 2026-08-05 — chrome-row Workload picker owns it */ ];
 function _auditRenderPinned() {
   var host = document.getElementById('auditPinnedHost');
@@ -10848,18 +10968,15 @@ function renderAuditThead() {
   var html = '<tr>';
   AUDIT_COLUMNS.forEach(function(col){
     var active = state.auditSort.key === col.key;
-    var cls = 'sort-th' + (active ? ' sort-active' : '');
+    var cls = 'sort-th' + (active ? ' sort-active' : '') + (col.key === 'action' ? ' name-col' : '');
     var arrow = sortArrowSvg(active ? state.auditSort.dir : 'asc');
     html += '<th class="' + cls + '" onclick="setAuditSort(\'' + col.key + '\')">' + col.label + arrow + '</th>';
   });
   html += colToggleHeaderCell('audit', false) + '</tr>';
   thead.innerHTML = html;
 }
-function renderAuditTable() {
-  var tbody = document.getElementById('auditTbody');
-  if (!tbody) return;
-  var esc = function(v){ return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
-  renderAuditThead();
+// The rows the Audit log lists under the CURRENT scope; the table pages through it and the left rail counts it.
+function _auditListRows() {
   var b = _actRangeBounds();
   var q = (document.getElementById('auditSearch') ? document.getElementById('auditSearch').value : '').trim().toLowerCase();
   var rows = _auditAllEvents().filter(function(e){
@@ -10868,18 +10985,18 @@ function renderAuditTable() {
     // Chrome-row Workload picker scopes audit as well (user 2026-08-05 — it
     // REPLACES the pinned chip, so it must actually filter here; OUTSIDE the
     // loop so it applies even with no audit filters active).
-    if (typeof _actWlCurrent === 'function') { var _cw = _actWlCurrent(); if (_cw && e.wl !== _cw) return false; }
+    if (typeof _actWlCurrent === 'function') { var _cw = _actWlCurrent(); if (_cw && e.wl !== '\u2014' && e.wl !== _cw) return false; }   // organization-level events (sign-ins, roles) carry no workload and stay in scope
     for (var i = 0; i < (state.auditFilters || []).length; i++) {
       var f = state.auditFilters[i];
       if (f.attr === 'category'     && f.values.indexOf(e.cat)         < 0) return false;
       if (f.attr === 'integration'  && f.values.indexOf(e.integration) < 0) return false;
       if (f.attr === 'workload'     && f.values.indexOf(e.wl)          < 0) return false; // legacy entries still honored
-      if (f.attr === 'activityType' && f.values.indexOf(e.activity)    < 0) return false;
+      if (f.attr === 'activityType' && f.values.indexOf(e.action)      < 0) return false;
       if (f.attr === 'objectType'   && f.values.indexOf(e.object)      < 0) return false;
       if (f.attr === 'user'         && f.values.indexOf(e.user)        < 0) return false;
       if (f.attr === 'severity'     && f.values.indexOf(e.severity)    < 0) return false;
     }
-    if (q && [e.user, e.activity, e.object, e.cat, e.msg, e.integration, e.wl].join(' ').toLowerCase().indexOf(q) < 0) return false;
+    if (q && [e.user, e.group, e.action, e.target, e.org, e.wl].join(' ').toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
   rows.sort(function(a, z){
@@ -10888,6 +11005,14 @@ function renderAuditTable() {
     var av = sv(a), zv = sv(z);
     return av < zv ? -d : av > zv ? d : 0;
   });
+  return rows;
+}
+function renderAuditTable() {
+  var tbody = document.getElementById('auditTbody');
+  if (!tbody) return;
+  var esc = function(v){ return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+  renderAuditThead();
+  var rows = _auditListRows();
   var per = state.auditPageSize || 10;
   var pages = Math.max(1, Math.ceil(rows.length / per));
   if (state.auditPage > pages) state.auditPage = pages;
@@ -10902,14 +11027,15 @@ function renderAuditTable() {
     var detailBtn = '<button class="btn-icon btn-icon-sm act-row-detail" data-tooltip="View event details" aria-label="View event details" onclick="event.stopPropagation();openAuditDrawer(\'' + e.id + '\')">'
       + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg></button>';
     return '<tr style="cursor:pointer" onclick="openAuditDrawer(\'' + e.id + '\')">'
-      + '<td><div class="cell-name" style="color:var(--blue)">' + esc(e.activity) + '</div></td>'
-      + '<td style="color:var(--black-60)">' + esc(e.object) + '</td>'
-      + '<td>' + esc(e.user) + '</td>'
-      + '<td style="max-width:380px"><span style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(e.msg) + '</span></td>'
+      + '<td class="name-col"><div class="cell-name" style="color:var(--blue)" onclick="event.stopPropagation();openAuditDrawer(\'' + e.id + '\')">' + esc(e.action) + '</div></td>'
       + '<td style="white-space:nowrap">' + esc(_actFmtFull(e.ts)) + '</td>'
+      + '<td>' + esc(e.user) + '</td>'
+      + '<td>' + esc(e.group) + '</td>'
+      + '<td style="max-width:300px"><span style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(e.target) + '</span></td>'
+      + '<td>' + esc(e.org) + '</td>'
       + '<td><div class="row-actions">' + detailBtn + '</div></td>'
     + '</tr>';
-  }).join('') || '<tr><td colspan="6"><div class="inv-empty-state" style="padding:32px;text-align:center;color:var(--black-60)">No audit events match.</div></td></tr>';
+  }).join('') || '<tr><td colspan="7"><div class="inv-empty-state" style="padding:32px;text-align:center;color:var(--black-60)">No audit events match.</div></td></tr>';
   var sub = document.getElementById('auditTableSub');
   if (sub) sub.textContent = rows.length + ' event' + (rows.length === 1 ? '' : 's');
   var lbl = document.getElementById('auditRangeLabel');
@@ -11120,7 +11246,8 @@ function _rotTask(){
   return { id:'rot1', title:'Create ROT policy \u2014 Stale SharePoint content (Retail Division)', agent:'Veeam Intelligence', status:status, kind:'Review', wl:'Microsoft 365',
     trigger:'Proactive \u00b7 Veeam Intelligence', source:'Recommendation \u2014 Policies \u203a File ROT',
     when: status === 'awaiting' ? 'Awaiting decision since this morning' : (status === 'done' ? 'Approved by Darren Lasso' : 'Dismissed'),
-    started: s.ts ? new Date(s.ts) : new Date(Date.now() - 2 * 36e5),
+    // The recommendation was RAISED at 8:41 this morning (the audit event and the notification say the same), and a decision comes after it. was: started = the decision time once decided, so the proposal and the approval carried the same timestamp and the log could not order them.
+    started: (function(){ var d = new Date(); d.setHours(8, 41, 0, 0); return new Date(Math.min(d.getTime(), (s.ts || Date.now()) - 60000)); })(),
     href:'backup-policies.html#rot-review', cta:'Review', rs:s };
 }
 function _agentTaskRows(){
@@ -11388,11 +11515,8 @@ function renderAgentsThead(){
   html += colToggleHeaderCell('agents', false) + '</tr>';
   thead.innerHTML = html;
 }
-function renderAgentsTable(){
-  var tbody = document.getElementById('agentsTbody');
-  if (!tbody) return;
-  var esc = function(v){ return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
-  renderAgentsThead();
+// The rows Agent sessions lists under the CURRENT scope (workload, status lens, range, filters, search). The table pages through this and the left rail counts it, so the two can never disagree (user 2026-11-11: the rail said 244, the table another number).
+function _agentsListRows(){
   var b = _actRangeBounds();
   var q = (document.getElementById('agentsSearch') ? document.getElementById('agentsSearch').value : '').trim().toLowerCase();
   // SESSION-STATE lens (user 2026-09-10) — same pivot as the Jobs table:
@@ -11400,8 +11524,6 @@ function renderAgentsTable(){
   // flight, no time window — it's "now"); Completed = the record (finished
   // runs + this session's finished tasks, windowed by the shared range).
   var _stSel = _agStatusSel();
-  var _rc = document.getElementById('actRangeChip');
-  if (_rc && state.actView === 'agents') _rc.style.display = (_stSel === 'all' || _AG_TERMINAL[_stSel]) ? '' : 'none';   // the time range only applies to finished work
   var _TASK_ACTIVE = { scheduled:1, queued:1, running:1, awaiting:1, waiting:1 };
   var pool = _agentTaskRows().concat(AGENT_RUNS).filter(_agWlOk).filter(function(r){ return _stSel === 'all' || _agStatus(r) === _stSel; });
   var rows = pool.filter(function(r){
@@ -11428,6 +11550,18 @@ function renderAgentsTable(){
     var av = sv(a), zv = sv(z);
     return av < zv ? -d : av > zv ? d : 0;
   });
+  return rows;
+}
+function renderAgentsTable(){
+  var tbody = document.getElementById('agentsTbody');
+  if (!tbody) return;
+  var esc = function(v){ return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+  renderAgentsThead();
+  var _stSel = _agStatusSel();
+  var _rc = document.getElementById('actRangeChip');
+  if (_rc && state.actView === 'agents') _rc.style.display = (_stSel === 'all' || _AG_TERMINAL[_stSel]) ? '' : 'none';   // the time range only applies to finished work
+  var rows = _agentsListRows();
+  var pool = _agentTaskRows().concat(AGENT_RUNS).filter(_agWlOk).filter(function(r){ return _stSel === 'all' || _agStatus(r) === _stSel; });   // for pruning the selection below
   var per = state.agentsPageSize || 10;
   var pages = Math.max(1, Math.ceil(rows.length / per));
   if (state.agentsPage > pages) state.agentsPage = pages;
@@ -11833,22 +11967,22 @@ function openAuditDrawer(eventId) {
   // Spec expanded view (DCC layout): Session ID, Activity badge, Message,
   // Changed Values, IP Address, User Agent, Additional Info — rendered in
   // the DRAWER, our established detail surface.
-  var title = String(e.activity).replace(/_/g, ' ');
+  var title = String(e.action || e.activity).replace(/_/g, ' ');
   title = title.charAt(0).toUpperCase() + title.slice(1);
   document.getElementById('jobDrawerTitle').textContent = title;
-  document.getElementById('jobDrawerSub').textContent = e.cat + ' \u00b7 ' + e.id;
+  document.getElementById('jobDrawerSub').textContent = (e.group || e.cat) + ' \u00b7 ' + e.id;
   // Activity + Object split (user 2026-07-17, matching the table): the
   // spec's expanded view names an "Activity badge" only — object rides
   // its own row.
-  var actBadge = '<span class="badge b-count" style="font-size:13px;padding:1px 8px">' + esc(e.activity) + '</span>';
-  var rows = _jobDrawerRow('Activity', actBadge)
-    + _jobDrawerRow('Object', esc(e.object))
-    + _jobDrawerRow('Message', esc(e.msg))
-    + _jobDrawerRow('Time', esc(_actFmtFull(e.ts)))
-    + _jobDrawerRow('User', esc(e.user) + (e.imp ? ' <span style="color:var(--black-60);font-size:12px">(performed by system on behalf of user)</span>' : ''))
+  var actBadge = '<span class="badge b-count" style="font-size:13px;padding:1px 8px">' + esc(e.action || e.activity) + '</span>';
+  var rows = _jobDrawerRow('Action', actBadge)
+    + _jobDrawerRow('Action group', esc(e.group || e.cat))
+    + _jobDrawerRow('Target', esc(e.target || e.object))
+    + _jobDrawerRow('Timestamp', esc(_actFmtFull(e.ts)))
+    + _jobDrawerRow('Actor', esc(e.user) + (e.imp ? ' <span style="color:var(--black-60);font-size:12px">(performed by system on behalf of user)</span>' : ''))
     + (e.session ? _jobDrawerRow('Session ID', '<span style="font-family:ui-monospace,Menlo,monospace;font-size:13px">' + esc(e.session) + '</span>') : '')
     + _jobDrawerRow('Severity', esc(e.severity))
-    + (e.integration !== '\u2014' ? _jobDrawerRowStacked('Integration', esc(e.integration), _jobGuid('int:' + e.integration)) : '')
+    + _jobDrawerRow('Organization', esc(e.org || e.integration))
     + (e.wl !== '\u2014' ? _jobDrawerRow('Workload', esc(e.wl)) : '')
     + _jobDrawerRow('IP address', esc(e.ip))
     + _jobDrawerRow('User agent', esc(e.ua))
@@ -11902,6 +12036,7 @@ function setActView(v) {
     var el = document.getElementById(p[0]); if (el) el.classList.toggle('is-view-active', view === p[1]);
   });
   var show = function(id, on){ var el = document.getElementById(id); if (el) el.style.display = on ? '' : 'none'; };
+  [].forEach.call(document.querySelectorAll('.ag-entity-tile[data-ic]'), function(t){ if (!t.firstChild && typeof _sdIc === 'function') t.innerHTML = _sdIc(t.getAttribute('data-ic'), 28); });   // one entity header per view
   if (typeof _actSessSync === 'function') _actSessSync();
   show('filterBar-act', view === 'jobs');
   show('actJobsBody', view === 'jobs');
@@ -12112,7 +12247,9 @@ function _actApplyAgentsDeepLink(hash) {
   try { params = new URLSearchParams(hash.slice(q + 1)); } catch (e) { return false; }
   var L = (window.VDC_SESSIONS && VDC_SESSIONS.DECISION_LABEL) || {};
   var filters = [];
-  var dec = params.get('decision'); if (dec) filters.push({ attr: 'decision', values: dec.split(',').map(function(k){ return L[k] || k; }) });
+  // The Status control already says it (user 2026-11-11: a second "Decision: Awaiting decision" chip under the pinned Status was redundant), so a decision the status expresses on its own is not repeated as a chip. waiting = Awaiting decision, denied = Dismissed. Other decisions (auto, approved) have no status of their own, so they keep their chip.
+  var _stP = params.get('status'), _implied = _stP === 'pending' ? 'waiting' : (_stP === 'dismissed' ? 'denied' : null);
+  var dec = params.get('decision'); if (dec) { var _dk = dec.split(',').filter(function(k){ return k !== _implied; }); if (_dk.length) filters.push({ attr: 'decision', values: _dk.map(function(k){ return L[k] || k; }) }); }
   var sk = params.get('skill');     if (sk)  filters.push({ attr: 'skill', values: sk.split(',').map(function(id){ var x = window.VDC_SESSIONS && VDC_SESSIONS.skillById(id); return x ? x.name : id; }) });
   state.agentsFilters = filters; state.agentsPage = 1; state.agentsSel = new Set();
   var se = document.getElementById('agentsSearch'); if (se) se.value = '';
@@ -12609,24 +12746,10 @@ function changeActPage(delta) {
   state.actPage = (state.actPage || 1) + delta;
   renderActTable();
 }
-function renderActTable() {
-  actWlEnsureSelection();   // no All option — default workload applies on first paint
-  // Time Range is a HISTORICAL control (user 2026-08-19): visible only on the
-  // Completed lens. Active = point-in-time "running now" — no window applies.
-  var _sessActiveLens = _actSessState() === 'active';
-  if (state.actView !== 'audit') {   // audit owns the range chip (always visible there); Agent Sessions owns it by Status (renderAgentsTable)
-    var _rc = document.getElementById('actRangeChip');
-    if (_rc && state.actView !== 'agents') _rc.style.display = _sessActiveLens ? 'none' : '';
-    var _pn = document.getElementById('actPlaneNote');
-    if (_pn) _pn.textContent = (typeof _actPlaneNoteText === 'function' ? _actPlaneNoteText() : '');
-  }
-  var q = (document.getElementById('actSearch').value || '').toLowerCase();
+// The Sessions rows under the CURRENT scope (window, session state, filters, search): the table pages through `filtered`, the left rail counts it.
+function _actJobsListRows() {
+  var q = (document.getElementById('actSearch') ? document.getElementById('actSearch').value : '').toLowerCase();
   var all = _actAllJobs();
-  renderActThead();
-  _actRenderPinnedJobType();
-
-  // Active window bounds — preset or custom two-click range (canonical
-  // picker). Jobs outside [start, end] are out of scope entirely.
   var _b = _actRangeBounds();
   var cutoffTs = _b.startTs, endTs = _b.endTs;
 
@@ -12652,14 +12775,6 @@ function renderActTable() {
     }
     return true;
   });
-  // was: _actRenderTypeTabs(globalSet); _actRenderTypeDrop(globalSet);
-  // Job-type tabs + their <1200px dropdown RETIRED 2026-08-19 (user ruling:
-  // it looks and functions exactly like a pinned filter, so it IS one —
-  // lineage doesn't exempt it). Type stays reachable via the "+" picker;
-  // state.actTypeTab stays null so the scoped set passes everything through.
-  var _tabsHost = document.getElementById('actTypeTabs'); if (_tabsHost) _tabsHost.innerHTML = '';
-  var _dropHost = document.getElementById('actTypeDrop'); if (_dropHost) _dropHost.innerHTML = '';
-  state.actTypeTab = null;
   var scoped = state.actTypeTab
     ? globalSet.filter(function(j){ return j.type === state.actTypeTab; })
     : globalSet;
@@ -12684,6 +12799,36 @@ function renderActTable() {
     }
     return true;
   });
+  return { scoped: scoped, filtered: filtered, globalSet: globalSet };
+}
+function renderActTable() {
+  actWlEnsureSelection();   // no All option — default workload applies on first paint
+  // Time Range is a HISTORICAL control (user 2026-08-19): visible only on the
+  // Completed lens. Active = point-in-time "running now" — no window applies.
+  var _sessActiveLens = _actSessState() === 'active';
+  if (state.actView !== 'audit') {   // audit owns the range chip (always visible there); Agent Sessions owns it by Status (renderAgentsTable)
+    var _rc = document.getElementById('actRangeChip');
+    if (_rc && state.actView !== 'agents') _rc.style.display = _sessActiveLens ? 'none' : '';
+    var _pn = document.getElementById('actPlaneNote');
+    if (_pn) _pn.textContent = (typeof _actPlaneNoteText === 'function' ? _actPlaneNoteText() : '');
+  }
+  var q = (document.getElementById('actSearch').value || '').toLowerCase();
+  var all = _actAllJobs();
+  renderActThead();
+  _actRenderPinnedJobType();
+
+  // Active window bounds — preset or custom two-click range (canonical
+  // picker). Jobs outside [start, end] are out of scope entirely.
+  var _b = _actRangeBounds();
+  var _JR = _actJobsListRows(), globalSet = _JR.globalSet, scoped = _JR.scoped, filtered = _JR.filtered;   // one source for the table and the rail count
+  // was: _actRenderTypeTabs(globalSet); _actRenderTypeDrop(globalSet);
+  // Job-type tabs + their <1200px dropdown RETIRED 2026-08-19 (user ruling:
+  // it looks and functions exactly like a pinned filter, so it IS one —
+  // lineage doesn't exempt it). Type stays reachable via the "+" picker;
+  // state.actTypeTab stays null so the scoped set passes everything through.
+  var _tabsHost = document.getElementById('actTypeTabs'); if (_tabsHost) _tabsHost.innerHTML = '';
+  var _dropHost = document.getElementById('actTypeDrop'); if (_dropHost) _dropHost.innerHTML = '';
+  state.actTypeTab = null;
   // Header follows the active lens (designer 2026-07-10: a static "All Jobs"
   // over a filtered table lied). Title = the active type tab; the subtitle
   // flags any FURTHER narrowing (search / status / workload / tenant).
@@ -14804,6 +14949,7 @@ function aiPushAgent(html, gate){
 function aiGateClick(i){
   var m = aiAgent.activeGate; if(!m || !m.gate || m.gate.resolved) return;
   var btn = m.gate.buttons[i]; if(!btn) return;
+  if (btn.nav) { if (typeof btn.fn === 'function') btn.fn(); return; }   // a travel verb is not a decision: the approval stays open
   m.gate.resolved = true; m.gate.choice = btn.choice || btn.label;
   aiAgent.activeGate = null; aiRender();
   if(typeof btn.fn === 'function') btn.fn();
@@ -15449,11 +15595,13 @@ else aiComposerIcons();
     var rows = c.rows.map(function(r){ return [r[0], r[1]]; });
     aiPushAgent(c.summary, resolved ? null : { q:'', approval:{ rows:rows }, buttons:[
       { label:'Deny', choice:'Denied', fn:function(){ decide(t.id, 'cancelled'); aiPushAgent('<p>' + c.denied + '</p>'); } },
+      // SHOW ME on a held restore (user 2026-11-12): takes you to Protected Data where the restore is staged; the panel and the thread travel with you, hence the open-in-new mark
+      ].concat((JOBS[t.id] && JOBS[t.id].type === 'Restore') ? [{ label:'Show me', nav:true, fn:function(){ aiacGo('nav', t.href || ('protected-data.html#agentgate/' + t.id)); } }] : []).concat([
       { label:c.primary, primary:true, choice:'Approved', fn:function(){
         var job = startSession(t.id); decide(t.id, 'done', job);
         var pill = job ? '<div class="ov-sugg" style="margin-top:12px"><button type="button" class="ov-pill" onclick="agOpenSession(\'' + job.id + '\')">' + (typeof _sdIc === 'function' ? _sdIc('sd-session-log', 16) : '') + '<span class="lbl"><span class="t">View the ' + job.type.toLowerCase() + ' session</span><span class="ctx">' + E(job.job) + ' \u00b7 In progress \u00b7 Resilience Sessions</span></span></button></div>' : '';
         aiPushAgent('<p>' + c.approved + '</p>' + (job ? '<p>I started the ' + job.type.toLowerCase() + ' session <b>' + E(job.job) + '</b>. It\u2019s running now \u2014 you can follow it in Resilience Sessions, and it lists this approval as the agent task that started it.</p>' : '') + pill);
-      } } ] });
+      } } ]) });
     if (resolved) aiPushAgent('<p>This request has already been answered \u2014 its status is in Agent Sessions.</p>');
   };
 })();
@@ -15549,7 +15697,7 @@ function _agBuildRows(spec, ctx){
   var wl = spec.wl, R = {}, link = function(id, label){ return { html: '<a class="ag-link" onclick="agOpenSession(\'' + id + '\')">' + label + '</a>' }; };
   R['Workload'] = { cols:['Name', 'Connections', 'Health'], rows:[[wl, '1 connection', 'Healthy']] };
   R['Connection'] = { cols:['Name', 'Workload', 'Status'], rows:[[AG_CONN[wl] || wl, wl, 'Healthy']] };
-  R['Objects'] = _agObjRows({ wl:wl, objNoun:spec.objNoun, objN:spec.objN, rot:!!spec.proposed }, ctx.objState);
+  R['Objects'] = _agObjRows({ wl:wl, objNoun:spec.objNoun, objN:spec.objN, rot:!!spec.proposed, names:spec.names, objType:spec.objType }, ctx.objState);
   R['Policy'] = spec.policyN > 1
     ? { cols:['Name', 'Type', 'Covers these sites'], rows: AG_ROT_POLICIES.map(function(n){ return [n, 'File ROT', 'No']; }), total:spec.policyN }
     : { cols:['Name', 'Type', 'Status'], rows:[[AG_POLICY[wl] || 'Default Policy', 'Resilience', 'Active']] };
@@ -15609,7 +15757,10 @@ function _agEntFromRun(r){
   var n = /(\d[\d,]*)\s+(?:records|mailboxes|sites|repositories|items|accounts)/i.exec(r.capability); var objN = n ? parseInt(n[1].replace(/,/g, ''), 10) : (r.kind === 'Restore' ? 1 + h % 4 : 8 + h % 40);
   var who = /(?:Approved|On demand|Scheduled)\s+·\s+(.+)$/.exec(r.trigger || ''), gated = (r.kind === 'Restore' || r.kind === 'Backup' || /Manage policies/.test(r.granted || ''));
   var pt = null; if (r.kind === 'Restore'){ var d0 = new Date(r.started.getTime() - 86400000); pt = d0.toLocaleDateString('en-US', { month:'short', day:'numeric' }) + ', 3:15 AM'; }
-  var spec = { hubType:'run', hubVal:r.agent, wl:wl, objN:objN, objNoun:AG_NOUN[wl] || 'items', policyN:0, point:pt, failed:(r.kind === 'Backup' ? 'Backup session' : null),
+  // a hub restore request names real items (agent-sessions.js RESTORE_SCOPE — the same ones Protected Data's walk-through finds, from the latest restore point)
+  var _sc = (r.hub && r.skill === 'Restore data' && window.VDC_SESSIONS && VDC_SESSIONS.restoreScope) ? VDC_SESSIONS.restoreScope(r.wlId) : null;
+  if (_sc){ objN = _sc.n; pt = new Date().toLocaleDateString('en-US', { month:'short', day:'numeric' }) + ', 3:15 AM'; }
+  var spec = { hubType:'run', hubVal:r.agent, wl:wl, objN:objN, objNoun:_sc ? _sc.noun : (AG_NOUN[wl] || 'items'), names:_sc ? _sc.names : null, objType:_sc ? _sc.type : null, policyN:0, point:pt, failed:(r.kind === 'Backup' ? 'Backup session' : null),
     approver: gated ? (who ? who[1] : 'Darren Lasso') : null, session: ses ? { id:ses.id, type:ses.type, job:ses.job } : null };
   spec.rows = _agBuildRows(spec, { objState: r.kind === 'Restore' ? 'Restored' : (r.kind === 'Backup' ? 'Retried' : 'Read'), failedWhen: fmt(r.started), sessionWhen: ses ? fmt(ses.started) : null, title: r.capability,
     started: fmt(r.started), decision: 'Approved', decisionWhen: fmt(r.started) });
@@ -15663,8 +15814,8 @@ var AG_SAMPLE = {
   'flows': ['expense-approval', 'retail-intake', 'it-onboarding'], 'projects': ['payments', 'platform', 'mobile'], 'issues': ['SECOPS-101', 'SECOPS-204'], 'pages': ['Legal hub', 'Policies'], 'users': ['j.rivera', 'm.chen'], 'VMs': ['sql-prod-02', 'app-web-01', 'file-srv-03']
 };
 function _agObjRows(spec, state){
-  var noun = spec.objNoun, names = AG_SAMPLE[noun] || ['Item'], total = spec.objN, show = Math.min(total, 10), rows = [];
-  var typ = noun.replace(/s$/, '').replace(/^./, function(c){ return c.toUpperCase(); });
+  var noun = spec.objNoun, names = spec.names || AG_SAMPLE[noun] || ['Item'], total = spec.objN, show = Math.min(total, 10), rows = [];
+  var typ = spec.objType || noun.replace(/s$/, '').replace(/^./, function(c){ return c.toUpperCase(); });   // spec.names / objType: a request that names its items (shared restore scope)
   for (var i = 0; i < show; i++){
     var nm = names[i % names.length] + (total > names.length && i >= names.length ? ' ' + (i + 1) : '');
     if (spec.rot) rows.push([nm, typ, ['2.6 TB', '1.9 TB', '2.2 TB'][i % 3] + ' backed up', ['1.9 TB', '1.7 TB', '0.6 TB'][i % 3] + ' untouched 36+ months']);
@@ -16070,7 +16221,9 @@ function left(S){
 }
 
 /* ── the header: Ask + (the decision pair, only while a decision is open) + Actions. Same slots whatever the kind. ── */
-function askBtn(){ return '<button type="button" class="ag-abtn agu-ask" onclick="AGU.ask()">' + (typeof vdcAiGlyph === 'function' ? vdcAiGlyph(16) : (_sdIc('ai-sparkle', 16) || '')) + '<span>Ask Veeam Intelligence</span></button>'; }
+var KEBAB20 = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>';
+// was: a text button, "Ask Veeam Intelligence" (user 2026-11-12, session header option A: icon only, the full name in its tooltip and in the overflow menu)
+function askBtn(){ return '<button type="button" class="ag-abtn ag-ic agu-ask" data-tooltip="Ask Veeam Intelligence" aria-label="Ask Veeam Intelligence" onclick="AGU.ask()">' + (typeof vdcAiGlyph === 'function' ? vdcAiGlyph(20) : (_sdIc('ai-sparkle', 20) || '')) + '</button>'; }
 function header(S){
   var run = (S.kind === 'run'), decide = '';
   if (S.pending){
@@ -16080,6 +16233,7 @@ function header(S){
   } else if (S.rec && S.outcome === 'done') decide = '<button type="button" class="ag-pbtn" onclick="window.location.href=\'backup-policies.html#rot\'">Open policy</button>';
   else if (S.sessionId) decide = '<button type="button" class="ag-pbtn" onclick="agOpenSession(\'' + esc(S.sessionId) + '\')">Open session</button>';
   var items = [];
+  if (S.pending) items.push(['Ask Veeam Intelligence', 'AGU.ask()']);   // the icon is also here, spelled out, while a decision is open
   if (S.rec && S.pending) items.push(['Review the draft in Policies', "window.location.href='" + S.goHref + "'"]);
   if (S.rec && S.outcome === 'done') items.push(['Open File ROT policies', "window.location.href='backup-policies.html#rot'"]);
   if (!EMBED) items.push(['View in the audit trail', "window.location.href='activity.html#audit'"]);
@@ -16087,8 +16241,8 @@ function header(S){
   return '<span class="sd-hd-tile">' + _sdIc('sd-session-log', 28) + '</span>'
     + '<div class="sd-hd-main"><div class="sd-hd-meta"><span class="sd-hd-eyebrow">Agent session</span>' + S.pill + '</div><div class="sd-hd-title">' + esc(S.title) + '</div></div>'
     + '<div class="sd-hd-acts">' + askBtn() + decide
-    + '<span class="ag-menu-wrap"><button type="button" class="ag-abtn" aria-haspopup="true" onclick="agTaskMenu(event)"><span>Actions</span>' + CHEV16 + '</button>'
-    + '<div class="ag-menu" id="agTaskMenu" role="menu">' + items.map(function(x){ return '<button type="button" role="menuitem" onclick="' + esc(x[1]) + '">' + esc(x[0]) + '</button>'; }).join('') + '</div></span></div>';
+    + '<span class="ag-menu-wrap"><button type="button" class="ag-abtn ag-ic" aria-haspopup="true" aria-label="More actions" data-tooltip="More actions" onclick="agTaskMenu(event)">' + KEBAB20 + '</button>'
+    + '<div class="ag-menu" id="agTaskMenu" role="menu">' + items.map(function(x){ return '<button type="button" role="menuitem" onclick="' + esc(x[1]) + '">' + esc(x[0]) + '</button>'; }).join('') + '</div></span></div>';   // was: an "Actions ▾" text button
 }
 function render(S){
   AGU.S = S; AGU.q = ''; AGU.st = 'All'; AGU.ctx = ctxFor(S);
@@ -16216,10 +16370,10 @@ AGU.decorateSession = function(j){
 /* ══ ACTIVITY LEFT RAIL + SANITIZE JOBS (user 2026-11-11) ══ */
 (function(){ if (window.__SECURITI_ICONS && !window.__SECURITI_ICONS['sanitizer-outlined']) window.__SECURITI_ICONS['sanitizer-outlined'] = { viewBox: '0 0 24 24', paths: ['M15.5999 8.4C15.2249 8.4 14.9062 8.26875 14.6437 8.00625C14.3812 7.74375 14.2499 7.425 14.2499 7.05C14.2499 6.765 14.3737 6.435 14.6212 6.06C14.8687 5.685 15.0824 5.3925 15.2624 5.1825C15.3524 5.0775 15.4649 5.025 15.5999 5.025C15.7349 5.025 15.8474 5.0775 15.9374 5.1825C16.1174 5.3925 16.3312 5.685 16.5787 6.06C16.8262 6.435 16.9499 6.765 16.9499 7.05C16.9499 7.425 16.8187 7.74375 16.5562 8.00625C16.2937 8.26875 15.9749 8.4 15.5999 8.4ZM17.8499 14.7C17.2199 14.7 16.6874 14.4825 16.2524 14.0475C15.8174 13.6125 15.5999 13.08 15.5999 12.45C15.5999 11.925 15.8062 11.3213 16.2187 10.6388C16.6312 9.95625 17.0024 9.42 17.3324 9.03C17.4674 8.865 17.6399 8.7825 17.8499 8.7825C18.0599 8.7825 18.2324 8.865 18.3674 9.03C18.6974 9.42 19.0687 9.95625 19.4812 10.6388C19.8937 11.3213 20.0999 11.925 20.0999 12.45C20.0999 13.08 19.8824 13.6125 19.4474 14.0475C19.0124 14.4825 18.4799 14.7 17.8499 14.7ZM8.3999 15.6V16.5C8.3999 16.755 8.48615 16.9688 8.65865 17.1413C8.83115 17.3138 9.0449 17.4 9.2999 17.4C9.5549 17.4 9.76865 17.3138 9.94115 17.1413C10.1137 16.9688 10.1999 16.755 10.1999 16.5V15.6H11.0999C11.3549 15.6 11.5687 15.5138 11.7412 15.3413C11.9137 15.1688 11.9999 14.955 11.9999 14.7C11.9999 14.445 11.9137 14.2313 11.7412 14.0588C11.5687 13.8863 11.3549 13.8 11.0999 13.8H10.1999V12.9C10.1999 12.645 10.1137 12.4313 9.94115 12.2588C9.76865 12.0863 9.5549 12 9.2999 12C9.0449 12 8.83115 12.0863 8.65865 12.2588C8.48615 12.4313 8.3999 12.645 8.3999 12.9V13.8H7.4999C7.2449 13.8 7.03115 13.8863 6.85865 14.0588C6.68615 14.2313 6.5999 14.445 6.5999 14.7C6.5999 14.955 6.68615 15.1688 6.85865 15.3413C7.03115 15.5138 7.2449 15.6 7.4999 15.6H8.3999ZM5.6999 19.2H12.8999V12C12.8999 11.01 12.5474 10.1625 11.8424 9.4575C11.1374 8.7525 10.2899 8.4 9.2999 8.4C8.3099 8.4 7.4624 8.7525 6.7574 9.4575C6.0524 10.1625 5.6999 11.01 5.6999 12V19.2ZM5.6999 21C5.2049 21 4.78115 20.8238 4.42865 20.4713C4.07615 20.1188 3.8999 19.695 3.8999 19.2V12C3.8999 10.65 4.3274 9.48 5.1824 8.49C6.0374 7.5 7.1099 6.9 8.3999 6.69V4.8H7.4999C7.2449 4.8 7.03115 4.71375 6.85865 4.54125C6.68615 4.36875 6.5999 4.155 6.5999 3.9C6.5999 3.645 6.68615 3.43125 6.85865 3.25875C7.03115 3.08625 7.2449 3 7.4999 3H11.9999C12.3899 3 12.7687 3.04875 13.1362 3.14625C13.5037 3.24375 13.8524 3.3825 14.1824 3.5625C14.3474 3.6375 14.4749 3.75 14.5649 3.9C14.6549 4.05 14.6999 4.215 14.6999 4.395C14.6999 4.65 14.6099 4.86375 14.4299 5.03625C14.2499 5.20875 14.0324 5.295 13.7774 5.295C13.6574 5.295 13.4924 5.2425 13.2824 5.1375C13.0874 5.0325 12.8849 4.95 12.6749 4.89C12.4649 4.83 12.2399 4.8 11.9999 4.8H10.1999V6.69C11.4899 6.9 12.5624 7.5 13.4174 8.49C14.2724 9.48 14.6999 10.65 14.6999 12V19.2C14.6999 19.695 14.5237 20.1188 14.1712 20.4713C13.8187 20.8238 13.3949 21 12.8999 21H5.6999Z'] }; })();   // the DS glyph the Sanitize explorer registers
 var _ARL = [
-  { id: 'jobs',     label: 'Resilience sessions', icon: 'sd-session-log',        count: function(){ return _actAllJobs().length; } },
-  { id: 'audit',    label: 'Audit log',           icon: 'sd-findings',           count: function(){ return _auditAllEvents().length; } },
-  { id: 'agents',   label: 'Agent sessions',      icon: 'my-ai-agents-outlined', count: function(){ return _agentTaskRows().length + AGENT_RUNS.length; } },
-  { id: 'sanitize', label: 'Sanitize jobs',       icon: 'sanitizer-outlined',    count: function(){ return _sanJobs().length; } }
+  { id: 'jobs',     label: 'Resilience sessions', icon: 'sd-session-log',        count: function(){ return _actJobsListRows().filtered.length; } },
+  { id: 'audit',    label: 'Audit log',           icon: 'sd-findings',           count: function(){ return _auditListRows().length; } },
+  { id: 'agents',   label: 'Agent sessions',      icon: 'my-ai-agents-outlined', count: function(){ return _agentsListRows().length; } },   /* was: every task + run, unscoped — it did not match the table */
+  { id: 'sanitize', label: 'Sanitize jobs',       icon: 'sanitizer-outlined',    count: function(){ return _sanListRows().length; } }
 ];
 var _arlQ = '';
 function _arlRender() {
@@ -16269,9 +16423,8 @@ function _sanJobs() {
   _SAN_SEED.forEach(function(j){ if (seen[j.id]) return; out.push(Object.assign({}, j, { started: new Date(j.startedTs), duration: j.dur })); });
   return out.sort(function(a, z){ return z.startedTs - a.startedTs; });
 }
-function renderSanitizeTable() {
-  var host = document.getElementById('sanTbody'); if (!host) return;
-  var esc = function(v){ return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+// The Sanitize jobs under the CURRENT scope (range, filters, search); the table and the rail count share it.
+function _sanListRows() {
   var q = (document.getElementById('sanSearch') ? document.getElementById('sanSearch').value : '').trim().toLowerCase();
   var b = (typeof _actRangeBounds === 'function') ? _actRangeBounds() : null;
   var rows = _sanJobs().filter(function(j){
@@ -16283,6 +16436,12 @@ function renderSanitizeTable() {
     if (q && [j.id, j.items, j.kind, j.by].join(' ').toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
+  return rows;
+}
+function renderSanitizeTable() {
+  var host = document.getElementById('sanTbody'); if (!host) return;
+  var esc = function(v){ return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+  var rows = _sanListRows();
   var size = state.sanitizePgSize || 10, pages = Math.max(1, Math.ceil(rows.length / size));
   state.sanitizePage = Math.min(Math.max(1, state.sanitizePage || 1), pages);
   var pageRows = rows.slice((state.sanitizePage - 1) * size, state.sanitizePage * size);
@@ -16310,6 +16469,7 @@ window.addEventListener('storage', function(e){ if (e.key === 'dcc-sanitize-brid
 /* a job started in the explorer is "In progress" for its first seconds: refresh once it finishes */
 setInterval(function(){ if (state.actView === 'sanitize' && _sanJobs().some(function(j){ return j.status === 'started'; })) renderSanitizeTable(); }, 1000);
 _arlRender();
+;['renderActTable', 'renderAgentsTable', 'renderAuditTable', 'renderSanitizeTable'].forEach(function(n){ var o = window[n]; if (typeof o === 'function') window[n] = function(){ var r = o.apply(this, arguments); try { _arlRender(); } catch (e) {} return r; }; });   // the rail's counts follow the table's filters
 </script>
 <style id="ai-canon">
 /* Protected Data's conversation components (user 2026-10-27), copied so every page renders them identically */
@@ -16680,7 +16840,7 @@ function aiRender(){
       var ap = m.gate.approval;
       var apApproveIc = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
       var apBtns = m.gate.resolved ? '' : '<div class="ai-gate-btns">' + m.gate.buttons.map(function(b, j){
-        return '<button type="button" class="ai-gate-btn' + (b.primary ? ' primary' : '') + '" onclick="aiGateClick(' + j + ')">' + (b.primary ? apApproveIc : '') + '<span class="ai-gate-btn-label">' + _aiEsc(b.label) + '</span></button>';
+        return '<button type="button" class="ai-gate-btn' + (b.primary && !b.nav ? ' primary' : '') + '" onclick="aiGateClick(' + j + ')">' + (b.primary && !b.nav ? apApproveIc : '') + (b.nav ? ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('play-circle-outlined', 20)) || '').replace('<svg ', '<svg class="ai-gate-btn-play-ic" ') : '') + '<span class="ai-gate-btn-label">' + _aiEsc(b.label) + '</span>' + (b.nav ? ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('open-in-new-outlined', 16)) || '') : '') + '</button>';   /* nav:true = this verb LEAVES the page (user 2026-11-12): secondary weight + the open-in-new mark, and it never resolves the approval */
       }).join('') + '</div>';
       var apRows = [['Action', ap.action], ['Scope', ap.scope], ['Evidence', ap.evidence], ['Reversal', ap.reversal]].filter(function(r){ return r[1]; })
         .map(function(r){ return '<div class="ai-approval-row"><span class="ai-approval-k">'+r[0]+'</span><span class="ai-approval-v">'+r[1]+'</span></div>'; }).join('');

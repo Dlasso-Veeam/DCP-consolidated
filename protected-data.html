@@ -8564,6 +8564,9 @@ window.vchip = function (text, type, dot) { return '<span class="vchip vchip-' +
 </script>
 </head>
 <body>
+<script>/* A conversation-led handoff lands with the panel ALREADY OPEN (user 2026-11-12: the panel collapsed while navigating and only reopened after the page loaded). Same open state aiOpen sets, applied before first paint. */
+try { var _eh = sessionStorage.getItem('vdc-ai-handoff'), _ep = (location.pathname.split('/').pop() || '').replace(/\.html$/, ''); if (_eh && _eh.replace(/\.html$/, '') === _ep) { document.body.classList.add('ai-open', 'ai-nofx'); var _ew = parseInt(localStorage.getItem('vdc-ai-panel-w'), 10); if (_ew > 0) document.body.style.setProperty('--ai-w', _ew + 'px'); } } catch (e) {}
+</script>
 
 <!-- Password gate -->
 <div id="passwordGate" style="position:fixed;inset:0;z-index:9999;background:var(--layout-bg);display:flex;align-items:center;justify-content:center;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;">
@@ -66795,6 +66798,18 @@ function refreshAllTableScrollShadows() {
 })();
 
 
+// "Show me" from the agent panel on another page: protected-data.html#wl=<workload-id> opens that workload's inventory (user 2026-11-12).
+(function(){
+  var q = new URLSearchParams((window.location.hash || '').replace(/^#/, '')), wlId = q.get('wl');
+  if (!wlId) return;
+  window.addEventListener('load', function(){ setTimeout(function(){
+    try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch (e) {}
+    var label = (typeof WL_MAP !== 'undefined') ? WL_MAP[wlId] : null;
+    if (!label || typeof enterWorkloadCatalog !== 'function') { if (typeof showToast === 'function') showToast('This workload is not in Protected Data in the prototype yet'); return; }
+    enterWorkloadCatalog(wlId, label);
+  }, 500); });
+})();
+
 // Deep link from the Identity Resilience dashboard to the list a group of items lives in:  protected-data.html#view=<workload-id>&parent=<folder id>
 (function(){
   var q = new URLSearchParams((window.location.hash || '').replace(/^#/, '')), wlId = q.get('view'), parent = q.get('parent');
@@ -67364,7 +67379,8 @@ window.__devJumpResolve = function(h) {
      finds window.__SECURITI_ICONS already populated. -->
 <script src="securiti-icons-data.js?v=20261028b"></script>
 <script src="vdc-notifications.js?v=20261030a"></script>
-<script src="workload-picker.js?v=20261007"></script>
+<script src="workload-picker.js?v=20261111"></script>
+<script src="agent-sessions.js?v=20261029a"></script>   <!-- the shared agent session store: a carried approval from the Agent Hub decides through it -->
 <script src="securiti-icons.js"></script>
 
 <!-- Re-render the tree-nav when crossing the compact (≤1024px) breakpoint, so
@@ -67577,6 +67593,8 @@ var AI_SCENARIOS = [
   { id:'ms365Offboard', act:true,   /* acts on the workspace — the task exists from launch (2026-09-16) */      wl:'ms365', menu:'Recover a departed user',         prompt:"Mark Aldridge left the company — recover his mailbox so his manager can take it over" },
   { id:'ms365SiteRollback', act:true,   /* acts on the workspace — the task exists from launch (2026-09-16) */  wl:'ms365', menu:'Roll back a SharePoint folder',   prompt:'The Taxes folder on the Retail Division site was mangled yesterday — roll it back' },
   // Active Directory (2026-10-23): a single domain controller restored as a machine, the same wizard the row's Restore button opens.
+  // A restore request from the Agent Hub, shown (user 2026-11-12): the hub's "Show me" lands here and the agent does the work in front of you. The workload comes from the request (aiAgent._hubReq); some workloads map onto the scenario that already exists for them (_HUB_RESTORE_MAP).
+  { id:'hubRestore', act:true, wl:'any', menu:'Restore data request', prompt:'Show me the restore request' },
   { id:'adDcRestore', act:true, wl:'active-directory', menu:'Restore a domain controller', prompt:'DC-02 in corp.meridian.local has a corrupted AD database — restore it' },
   { id:'ms365MassDelete', act:true,   /* acts on the workspace — the task exists from launch (2026-09-16) */    wl:'ms365', menu:'Investigate OneDrive deletions',  prompt:'There was unusual deletion activity across OneDrive this morning — investigate' },
   // Estate Q&A (PRD "Backup Admin Agent — M365 Scenarios": Featured tier +
@@ -68712,6 +68730,7 @@ function _aiPlainText(s){ var d = document.createElement('div'); d.innerHTML = S
 function aiRender(){
   var body=document.getElementById('aiBody'); if(!body) return;
   var html = aiAgent.msgs.map(function(m, i){
+    if (m._hubHide) return '';   // the Agent Hub's Show me stages its run silently (see _hubStageSilently): nothing it says appears until it is ready
     // EMBEDDED SCRUBBER (2026-09-24): this message is a state anchor only —
     // its content renders inline inside the approval card instead (apScrub).
     if(m._embedScrub) return '';
@@ -68909,14 +68928,22 @@ function aiRender(){
       // Now the gate is the ONLY Show-me, so it renders whenever the run
       // isn't already being watched, full stop.
       var apShowMe = _aiWatchBtnHtml(apShowMeIc);   // one button: Watch, Watching…, Watch again
-      var apBtns = m.gate.resolved ? '' :
         // ICON-ONLY AT NARROW WIDTHS (2026-09-24, user: "when [the panel] is
         // resized down to 450 or under, lets update the approve button to a
         // icon-only glyph") — label lives in its own span so the @container
         // rule below can hide just the text and leave the checkmark + a
         // hover tooltip carrying the word. Scoped to the PRIMARY button only
         // (Deny/secondary choices keep their label at any width).
-        '<div class="ai-gate-btns' + (apEmbedded ? ' has-scrub' : '') + (apEmbedded && _aiMorphState(aiAgent._live) ? ' is-morph"' + _aiMorphVars(_aiMorphState(aiAgent._live)) : '"') + '>'+m.gate.buttons.map(function(b,i){ return '<button type="button" class="ai-gate-btn'+(b.primary?' primary':'')+'" onclick="aiGateClick('+i+')"'+(b.primary?' data-tooltip="'+_aiEsc(b.label)+'"':'')+'>'+(b.primary?apApproveIc:'')+'<span class="ai-gate-btn-label">'+_aiEsc(b.label)+'</span></button>'; }).join('')+apShowMe+'</div>';
+      var _apBtnHtml = function(b, i){ return '<button type="button" class="ai-gate-btn'+(b.primary?' primary':'')+'" onclick="aiGateClick('+i+')"'+(b.primary?' data-tooltip="'+_aiEsc(b.label)+'"':'')+'>'+(b.primary?apApproveIc:'')+'<span class="ai-gate-btn-label">'+_aiEsc(b.label)+'</span></button>'; };
+      // THE CARD KEEPS ALL ITS BUTTONS (user 2026-11-12): a request carried over from the Agent Hub shows Approve · Show me · Decline in that order, before, during and after the walk-through.
+      // Only the Show me slot changes — to "Showing…" while the agent works (_hubStaging covers the instant before the replay starts).
+      var _showSlot = m.gate._hubStaging ? ' <span class="ai-showing" role="status" aria-live="polite"><span class="disc-spinner"></span>Showing\u2026</span>' : (m.gate.carry ? '' : apShowMe);   /* a carried approval with no run behind it has no Show me */
+      var apBtns = m.gate.resolved ? '' :
+        '<div class="ai-gate-btns' + (apEmbedded ? ' has-scrub' : '') + (apEmbedded && _aiMorphState(aiAgent._live) ? ' is-morph"' + _aiMorphVars(_aiMorphState(aiAgent._live)) : '"') + '>'
+        + (m.gate._hubOrder
+            ? m.gate.buttons.map(function(b,i){ return b.primary ? _apBtnHtml(b,i) : ''; }).join('') + _showSlot + m.gate.buttons.map(function(b,i){ return b.primary ? '' : _apBtnHtml(b,i); }).join('')
+            : m.gate.buttons.map(_apBtnHtml).join('') + _showSlot)
+        + '</div>';
       var apRows = [['Action', ap.action], ['Scope', ap.scope], ['Evidence', ap.evidence], ['Reversal', ap.reversal]]
         .filter(function(r){ return r[1]; })
         .map(function(r){ return '<div class="ai-approval-row"><span class="ai-approval-k">'+r[0]+'</span><span class="ai-approval-v">'+r[1]+'</span></div>'; }).join('');
@@ -69075,7 +69102,21 @@ function _aiPersistTranscript(){
     var raw = JSON.parse(localStorage.getItem('vdc-ai-transcript'));
     if (!raw || !Array.isArray(raw.msgs) || !raw.msgs.length) return;
     raw.msgs.forEach(function(r){
-      if (r.gate && !r.gate.resolved){
+      if (r.gate && !r.gate.resolved && r.gate.carry && r.gate.carry.kind === 'session' && sessionStorage.getItem('vdc-ai-flow') === 'hubRestore'){
+        // SHOW ME (user 2026-11-12): it is the SAME card. It arrives still showing the progress the hub started ("Showing…"), the run is staged silently behind it, and when that is
+        // ready the card gets its real buttons — no second round of reasoning, no second approval card.
+        r.gate.resolved = false; r.gate.superseded = false; r.gate._hubStaging = true; r.gate._hubOrder = true; window.__hubCarriedMsg = r;
+        r.gate.buttons = [ { label: 'Approve', primary: true, choice: 'Approved', fn: function(){ _hubApproveRequest(r.gate.carry); } }, _hubDeclineButton(r.gate.carry) ];   // all three buttons stay: Approve · Show me (Showing…) · Decline
+      } else if (r.gate && !r.gate.resolved && r.gate.carry && r.gate.carry.kind === 'session' && window.VDC_SESSIONS){
+        // CARRIED APPROVAL (user 2026-11-12): an approval from the Agent Hub decides through the shared session store, so it needs nothing from the
+        // page it left — it stays live here instead of reading "Interrupted". Rebuilt as the same two verbs; "Show me" is gone because you are there.
+        var _cr = r.gate.carry, _done = function(msg){ if (typeof aiPushAgent === 'function') aiPushAgent('<p>' + msg + '</p>'); };
+        r.gate.buttons = [
+          { label: 'Approve', primary: true, choice: 'Approved', fn: function(){ VDC_SESSIONS.resolve(_cr.id); if (typeof showToast === 'function') showToast('Approved \u2014 ' + _cr.skill + ' on ' + _cr.wlName); _done('Approved. The request is out of the Agent Hub\u2019s awaiting list and Activity lists it as approved.'); } },
+          { label: 'Decline', primary: false, choice: 'Declined', fn: function(){ VDC_SESSIONS.decline(_cr.id); if (typeof showToast === 'function') showToast('Declined \u2014 ' + _cr.skill + ' on ' + _cr.wlName); _done('Declined. Nothing runs, and the request is recorded as denied.'); } }
+        ];
+        r.gate.resolved = false; r.gate.superseded = false; window.__carriedGate = r;
+      } else if (r.gate && !r.gate.resolved){
         r.gate.resolved = true; r.gate.superseded = true;
         r.gate.choice = 'Interrupted \u2014 the page was left mid-run';
       }
@@ -69097,8 +69138,15 @@ function _aiPersistTranscript(){
       requestAnimationFrame(function(){ requestAnimationFrame(function(){ document.body.classList.remove('ai-nofx'); }); });
     } catch(e){}
   }
-      _aiNoFx(); if (typeof aiOpen === 'function') aiOpen(); if (typeof aiRender === 'function') aiRender();
+      _aiNoFx(); if (typeof aiOpen === 'function') aiOpen();
+      if (window.__carriedGate){ aiAgent.activeGate = window.__carriedGate; }   // the carried approval is the open decision on this page
+      if (typeof aiRender === 'function') aiRender();
       if (window.vdcRestoreQuickPrompts) vdcRestoreQuickPrompts();   // the prompts belong to the carried answer
+      // SHOW ME ARRIVES SOMEWHERE (user 2026-11-12: it landed here and then nothing happened). The agent says what you are looking at and that the decision is still open.
+      if (window.__carriedGate && typeof aiPushAgent === 'function'){
+        var _cg = window.__carriedGate.gate.carry;
+        setTimeout(function(){ aiPushAgent('<p>This is <strong>' + (_cg.wlName || 'the workload') + '</strong> in Protected Data \u2014 the backups this request would draw on. The approval above is still open: nothing runs until you decide, here or back in the Agent Hub.</p>'); }, 900);
+      }
     });
   }
   // A flow APPROVED on the other page (its tile button) runs here, where
@@ -69111,11 +69159,22 @@ function _aiPersistTranscript(){
       sessionStorage.removeItem('vdc-ai-flow');
       document.addEventListener('DOMContentLoaded', function(){
         setTimeout(function(){
+          if (_fl === 'hubRestore'){
+            // THE AGENT HUB'S SHOW ME (user 2026-11-12): exactly what Show me is on a restore here (the Mark Aldridge recovery is the canonical case). The agent
+            // does the work in the BACKGROUND up to the approval — open the workload, find the items, fill the cart, set up the restore — and then the approval
+            // card's own Show me is pressed for you: the work is REPLAYED on screen, step by step, from the pre-run frame (aiShowStart). Nothing is written until you approve.
+            var _rq = {}; try { _rq = JSON.parse(sessionStorage.getItem('vdc-ai-flow-ctx')) || {}; sessionStorage.removeItem('vdc-ai-flow-ctx'); } catch(e){}
+            aiAgent._hubReq = _rq;
+            var _sc = _hubScenarioFor(_rq.wl);
+            if (typeof aiOpen === 'function') aiOpen();
+            _hubStageSilently(_sc, _rq);
+            return;
+          }
           // agent scenarios are ms365-scoped today — restore that context
           if (typeof state !== 'undefined' && state.wl !== 'ms365' && typeof selectWl === 'function') selectWl('Microsoft 365','ms365');
           if (typeof aiOpen === 'function') aiOpen();
           if (typeof aiacGo === 'function') aiacGo('flow', _fl);
-        }, 250);
+        }, 60);
       });
     }
   } catch(e){}
@@ -72332,6 +72391,7 @@ function aiBuildSteps(){
   if (sc === 'ms365Offboard')      return aiStepsMs365Offboard();
   if (sc === 'ms365SiteRollback')  return aiStepsMs365SiteRollback();
   if (sc === 'adDcRestore')    return aiStepsAdDcRestore();
+  if (sc === 'hubRestore')     return aiStepsHubRestore();
   if (sc === 'ms365MassDelete')    return aiStepsMs365MassDelete();
   if (sc === 'ms365Overnight')     return aiStepsMs365Overnight();
   if (sc === 'ms365Coverage')      return aiStepsMs365Coverage();
@@ -72822,6 +72882,137 @@ function aiStepsAdDcRestore(){
     },
     configSay: function(){ return "On <strong>Configure</strong> DC-02's settings are read only at its original location \u2014 nothing to change. I left the reason and ticket blank." + aiAction('Configure \u00b7 read only \u00b7 no changes'); }
   }));
+}
+// ── HUB RESTORE REQUEST, SHOWN (user 2026-11-12) ──
+// Agent Hub › a held "Restore data" request › Show me. Same pattern as every restore scenario here: the agent opens the workload, finds the
+// items, puts them in the cart, then sets up the restore and stops at the approval. Workloads that already have a scenario use it.
+var _HUB_RESTORE_MAP = { 'active-directory': 'adDcRestore', 'd365': 'manufacturing', 'ms365': 'ms365SiteRollback' };
+function _hubScenarioFor(wlId){ var sc = (window.VDC_SESSIONS && VDC_SESSIONS.restoreScope) ? VDC_SESSIONS.restoreScope(wlId) : null; return (sc && sc.scenario) || _HUB_RESTORE_MAP[wlId] || 'hubRestore'; }
+// The items the request NAMES (the same definition the hub card and Activity's session detail read), looked up in this page's seed.
+function _hubScopedCandidates(wlId){
+  var sc = (window.VDC_SESSIONS && VDC_SESSIONS.restoreScope) ? VDC_SESSIONS.restoreScope(wlId) : null; if (!sc) return null;
+  var rows = sc.ids.map(function(id){ return RESOURCES.find(function(r){ return r.id === id; }); }).filter(Boolean); if (!rows.length) return null;
+  var parent = sc.parent ? (RESOURCES.find(function(r){ return r.id === sc.parent; }) || null) : null;
+  return { parent: parent, rows: rows, scope: sc };
+}
+function _hubFindCandidates(label){
+  var rows = _invRestorableRows();
+  if (rows.length) return { parent: null, rows: rows.slice(0, 3) };
+  // no restorable row at the top level: walk down (breadth first) to the first container that holds restorable items, and open it
+  var queue = RESOURCES.filter(function(r){ return r.wl === label && resourcePassesFilters(r); }).slice(0, 12), seen = {}, guard = 0;
+  while (queue.length && guard++ < 80){
+    var c = queue.shift(); if (seen[c.id]) continue; seen[c.id] = 1;
+    var all = RESOURCES.filter(function(k){ return k.parentId === c.id; }); if (!all.length) continue;
+    var kids = all.filter(function(k){ return k.status !== 'unprotected' && k.policy && k.policy !== '\u2014' && _isBulkSelectable(k); });
+    if (kids.length) return { parent: c, rows: kids.slice(0, 3) };
+    all.slice().sort(function(x, y){ return (/settings|config|security|directory/i.test(x.name) ? 1 : 0) - (/settings|config|security|directory/i.test(y.name) ? 1 : 0); }).slice(0, 8).forEach(function(k){ queue.push(k); });   // content before configuration
+  }
+  return null;
+}
+// THE AGENT HUB'S SHOW ME, STAGED BEHIND THE CARD (user 2026-11-12). The card the user clicked travels with them and stays THE card. The run that stands behind a normal approval
+// (find the items, fill the cart, set up the restore) is done here with nothing it says appearing — no second reasoning block, no plan message, no second approval — and at the
+// moment it reaches its approval, that approval's buttons go onto the carried card and its own Show me is pressed. The staging runs on a short clock: it is preparation, not performance.
+function _hubApproveRequest(cr){
+  if (!cr) return; try { VDC_SESSIONS.resolve(cr.id); } catch(e){}
+  if (typeof showToast === 'function') showToast('Approved \u2014 ' + (cr.skill || 'Restore data') + ' on ' + (cr.wlName || 'the workload'));
+  if (typeof aiPushAgent === 'function') aiPushAgent('<p>Approved. The request is out of the Agent Hub\u2019s awaiting list and Activity lists it as approved.</p>');
+}
+function _hubDeclineButton(rq){
+  return { label: 'Decline', primary: false, choice: 'Declined', fn: function(){
+    try { VDC_SESSIONS.decline(rq.id); } catch(e){}
+    if (aiAgent.showing === true && typeof aiShowStop === 'function') aiShowStop(true);
+    aiAgent.steps = []; aiAgent.idx = 0; if (typeof aiSetBusy === 'function') aiSetBusy(false);
+    if (typeof showToast === 'function') showToast('Declined \u2014 ' + (rq.skill || 'Restore data') + ' on ' + (rq.wlName || 'the workload'));
+    if (typeof aiPushAgent === 'function') aiPushAgent('<p>Declined. Nothing runs, and the request is recorded as denied.</p>');
+  } };
+}
+function _hubStageSilently(sc, rq){
+  var carried = window.__hubCarriedMsg || null, origPush = aiAgent.msgs.push, origTM = window._aiTaskManifest, origST = window.setTimeout, done = false;
+  aiAgent.msgs.push = function(){ for (var i = 0; i < arguments.length; i++){ var a = arguments[i]; if (a && typeof a === 'object') a._hubHide = true; } return origPush.apply(this, arguments); };
+  window._aiTaskManifest = function(){};   // the dock task would be a second place to read the same request
+  window.setTimeout = function(fn, ms){ var rest = [].slice.call(arguments, 2); return origST.apply(window, [fn, (ms >= 20 ? Math.round(ms * 0.02) : ms)].concat(rest)); };
+  function unwrap(){ aiAgent.msgs.push = origPush; window._aiTaskManifest = origTM; window.setTimeout = origST; }
+  aiAgent._sayBlock = null; aiAgent._traceBlock = null;
+  if (!aiAgent._recAccepted) aiAgent._recAccepted = {};
+  aiAgent._recAccepted[sc] = 'working';
+  aiPickScenario(sc, { preapproved: true, silent: true });   // backgrounded, like every approved flow
+  var tries = 0, poll = setInterval(function(){
+    var g = aiAgent.activeGate;
+    if (!done && g && g.gate && g.gate.approval && !g.gate.resolved){
+      done = true; clearInterval(poll); unwrap();
+      var gate = g.gate; gate._wl = null;   // the replay moves the workspace to the request's workload; the approval was staged from wherever the user stood
+      if (carried){
+        var keep = carried.gate && carried.gate.approval;                 // the card keeps the rows the user already read
+        if (keep) gate.approval = Object.assign({}, gate.approval, keep);
+        carried.gate = gate;   // the scenario's own gate: its buttons, and the native Show me / Showing… slot (a gate with `carry` has none)
+        gate.buttons = gate.buttons.concat([_hubDeclineButton(rq)]); gate._hubOrder = true;   // Approve · Show me · Decline, the order the hub card has
+        aiAgent.activeGate = carried;
+      }
+      aiAgent.msgs = aiAgent.msgs.filter(function(m){ return !m._hubHide || (!carried && m === g); });
+      aiAgent._traceBlock = null;
+      aiRender();
+      origST(function(){ if (typeof aiShowStart === 'function') aiShowStart(); }, 100);
+    } else if (!done && ++tries > 1500){   // never leave the card spinning: let whatever the run produced show
+      done = true; clearInterval(poll); unwrap();
+      aiAgent.msgs.forEach(function(m){ delete m._hubHide; }); if (carried && carried.gate) carried.gate._hubStaging = false; aiRender();
+    }
+  }, 40);
+}
+function aiStepsHubRestore(){
+  var rq = aiAgent._hubReq || {}, wlId = rq.wl || state.wl, label = (typeof WL_MAP !== 'undefined' && WL_MAP[wlId]) || rq.wlName || 'this workload';
+  var cand = null, noun = 'items';
+  var pre = _hubScopedCandidates(wlId);   // the request's own items are known up front, so the plan and the approval can name them
+  var preNoun = pre ? (pre.rows.length + ' ' + (pre.rows.length === 1 ? pre.scope.noun.replace(/ies$/, 'y').replace(/s$/, '') : pre.scope.noun)) : '3 items';
+  var preOf = pre ? pre.rows.map(function(r){ return _aiEsc(r.name); }).join(', ') : label + ' restore request';
+  return [
+    { trace: [
+        { kind:'route', label:'Interpreting request — a held restore on ' + label, ms:400, chip:'1 request',
+          detail:[['skill','Restore data · asks first'],['workload',label]], result:'Find what the request covers, stage it, and stop at your approval' },
+        { kind:'agent', label:'Spawning a recovery agent', ms:300, spawn:{ task:'Stage the restore the request asks for', granted:'Restore data · asks first', denied:'Export · Manage policies' } },
+        { kind:'tool',  label:'inventory.open — ' + label, ms:600, detail:[['workload',label]], result:'The backed-up ' + label + ' estate' }
+      ],
+      run: function(){
+        if (typeof state !== 'undefined' && state.wl !== wlId && typeof selectWl === 'function'){ selectWl(label, wlId); aiAgent._navigated = true; } else aiAgent._navigated = false;
+        if (typeof state !== 'undefined' && state.invMode === 'drill' && typeof setInvMode === 'function') setInvMode('list');
+        cand = _hubScopedCandidates(wlId) || _hubFindCandidates(label); aiAgent._hubCand = cand;   // the request's own items (agent-sessions.js RESTORE_SCOPE) when it names them
+        if (cand && cand.parent && typeof openChildrenDrill === 'function') openChildrenDrill(cand.parent.id);
+      },
+      say: function(){
+        if (!cand) return "<p>I opened <strong>" + label + "</strong>, but I couldn’t find restorable items in the backed-up estate, so I can’t stage this request.</p>";
+        var names = cand.rows.map(function(r){ return '<strong>' + _aiEsc(r.name) + '</strong>'; }), nav = aiAgent._navigated ? 'I switched you to <strong>' + label + '</strong>, and ' : 'I ';
+        var where = cand.parent ? 'opened <strong>' + _aiEsc(cand.parent.name) + '</strong>' : 'looked at the top level';
+        return "<p>" + nav + where + ". The request is to restore <strong>" + label + "</strong> data, so I found what can be restored there: " + names.join(', ') + ".</p>";
+      },
+      gate: { watchOnly: true,
+        decided: function(){ return "Taking those and nothing else."; },
+        q: function(){ return cand ? "Add " + (cand.rows.length === 1 ? 'it' : 'them') + " to the restore cart?" : "Nothing to add."; },
+        buttons: [ { label:'Add to the cart', primary:true, choice:'Approved', fn: aiNext } ] } },
+    { trace: [
+        { kind:'tool', label:'rows.select — restorable items · add to restore job', ms:300, detail:[['via','row checkbox']], result:'Restore cart staged' }
+      ],
+      run: function(){
+        if (!cand) return;
+        var found = cand.rows.length;
+        cand.rows.forEach(function(r){
+          if (cand.parent && typeof drill !== 'undefined' && drill.setRow) drill.setRow('child', r.id, true);
+          else if (typeof addToPlan === 'function') addToPlan(r.id, { isPinned:false, source:'bulk' });
+        });
+        if (typeof updatePlanDock === 'function') updatePlanDock();
+        // the cart has its own rules (one workload, one category, sometimes one site): keep what it actually took
+        var kept = cand.rows.filter(function(r){ return typeof isInPlan === 'function' ? isInPlan(r.id) : true; });
+        cand.skipped = found - kept.length; cand.rows = kept;
+        noun = kept.length + ' item' + (kept.length === 1 ? '' : 's');
+        if (!pre){ aiAgent._tailNoun = noun; aiAgent._tailOf = kept.map(function(r){ return r.name; }).join(', '); }   // no named scope: say what the cart really holds
+      },
+      say: function(){
+        if (!cand) return '';
+        var k = cand.rows.length, nm = cand.rows.map(function(r){ return '<strong>' + _aiEsc(r.name) + '</strong>'; }).join(', ');
+        return "<p>" + nm + (k === 1 ? " is" : " are") + " in your restore cart, set to the latest restore point." + (cand.skipped ? " The cart takes these one at a time, so I started with the first." : "") + "</p>";
+      },
+      gate: { scope: 'cart', watchOnly: true,
+        decided: "Setting up the restore now — the job carries exactly what’s in the cart.", q: "Ready to set up the restore?",
+        buttons: [ { label:'Set up the restore', primary:true, choice:'Approved', fn: aiNext } ] } }
+  ].concat(aiWizardTailSteps(preNoun, { of: preOf }));   // the noun is a count string; the tail re-counts from the live cart
 }
 function aiStepsMs365Offboard(){
   var mbx = (typeof RESOURCES !== 'undefined') ? RESOURCES.find(function(r){ return r.id === 'ms365-mbx-gone'; }) : null;
@@ -73992,6 +74183,7 @@ function aiWizardTailSteps(noun, opts){
 // on completion). was: a spinner line + a 600ms poll of wsOverallJobState
 // that posted a "Restore complete" card only when the simulated job ended.
 function aiOnRestoreStarted(n, rcOpts){
+  if (aiAgent._hubReq && aiAgent._hubReq.id && window.VDC_SESSIONS && !aiAgent._hubReq._done){ aiAgent._hubReq._done = true; try { VDC_SESSIONS.resolve(aiAgent._hubReq.id); } catch(e){} if (typeof showToast === 'function') showToast('Approved \u2014 ' + (aiAgent._hubReq.skill || 'Restore data') + ' on ' + (aiAgent._hubReq.wlName || 'the workload')); }   // the Agent Hub request this walk-through came from is answered by the same approval
   aiAgent._released = true; if (typeof aiGlow === 'function') aiGlow(false);   // approved: the walk-through pill has nothing left to say
   if(aiAgent.restoreNarrated) return; aiAgent.restoreNarrated = true;
   // consumable marker for the job-bridge publisher: this dispatch is the

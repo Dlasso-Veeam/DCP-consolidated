@@ -639,9 +639,13 @@ a.vn-fly-title:hover { color: var(--blue); }
 .alert-green svg  { color: var(--green); }
 
 /* Tooltip — styled bubble, never native title= */
-[data-tooltip] { position: relative; }
-[data-tooltip]:hover::after { content: attr(data-tooltip); position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: var(--black-100); color: var(--white); font-size: 12px; font-weight: 400; line-height: 16px; padding: 8px 12px; border-radius: 4px; white-space: nowrap; max-width: 320px; z-index: 2000; pointer-events: none; }
-[data-tooltip]:hover::before { content: ''; position: absolute; bottom: calc(100% + 2px); left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: var(--black-100); z-index: 2000; pointer-events: none; }
+/* Tooltip — the delegated floating bubble (identity dashboard / Protected Data), not a pseudo-element: a pseudo-element tooltip lives inside its scroll container, so on the right-most button of a table it was clipped and grew a scrollbar (user 2026-11-12). */
+/* was: [data-tooltip] { position: relative; } + :hover::after / ::before bubbles (kept below, disabled) */
+/* [data-tooltip] { position: relative; } */
+/* [data-tooltip]:hover::after { content: attr(data-tooltip); position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: var(--black-100); color: var(--white); font-size: 12px; font-weight: 400; line-height: 16px; padding: 8px 12px; border-radius: 4px; white-space: nowrap; max-width: 320px; z-index: 2000; pointer-events: none; } */
+/* [data-tooltip]:hover::before { content: ''; position: absolute; bottom: calc(100% + 2px); left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: var(--black-100); z-index: 2000; pointer-events: none; } */
+.app-tooltip { position: fixed; z-index: 10000; pointer-events: none; background: var(--white); color: var(--black-100); border: 1px solid var(--border-light); font-size: 14px; line-height: 1.35; font-weight: 450; padding: 6px 9px; border-radius: 4px; box-shadow: 0 4px 14px rgba(0,0,0,0.22); max-width: 260px; opacity: 0; transition: opacity 0.12s ease; }
+.app-tooltip.show { opacity: 1; }
 
 /* Dialog (548px, heading 18/500) */
 .dlg-backdrop { position: fixed; inset: 0; background: rgba(31,34,41,0.45); z-index: 1500; display: none; align-items: center; justify-content: center; }
@@ -846,6 +850,23 @@ table.dg.hb-tbl tbody tr:hover { background: var(--em-green-tint); }
 table.dg.hb-tbl tr.is-link { cursor: pointer; }
 table.dg.hb-tbl td.hb-tc-a { text-align: right; overflow: visible; }
 table.dg.hb-tbl td.hb-tc-a .plv-btn + .plv-btn { margin-left: 8px; }
+/* Row action = the identity dashboard's findings detail button (user 2026-11-11): icon only, green tint, pinned to the right edge with the depth shadow that paints only while content is hidden behind it. */
+.hb-ibtn { width: 32px; height: 32px; padding: 4px; border: 1px solid var(--em-green-tint); border-radius: 4px; background: var(--em-green-tint); color: var(--em-green); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+.hb-ibtn:hover { background: color-mix(in srgb, var(--em-green) 10%, white); border-color: color-mix(in srgb, var(--em-green) 10%, white); }
+.hb-ibtn:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); }
+.hb-ibtn svg { width: 16px; height: 16px; display: block; }
+table.dg.hb-tbl.pin-r thead th:last-child, table.dg.hb-tbl.pin-r tbody td:last-child { position: sticky; right: 0; z-index: 4; overflow: visible; background: var(--white); padding-left: 8px; padding-right: 8px; }
+table.dg.hb-tbl.pin-r thead th:last-child { z-index: 5; }
+table.dg.hb-tbl.pin-r thead th:last-child::before, table.dg.hb-tbl.pin-r tbody td:last-child::before { content: ''; position: absolute; top: 0; left: -8px; bottom: 0; width: 8px; background: linear-gradient(to left, rgba(0,0,0,0.10), rgba(0,0,0,0)); pointer-events: none; opacity: 0; transition: opacity 0.18s ease; }
+.dg-scroll.has-h-scroll-right table.dg.hb-tbl.pin-r thead th:last-child::before, .dg-scroll.has-h-scroll-right table.dg.hb-tbl.pin-r tbody td:last-child::before { opacity: 1; }
+table.dg.hb-tbl.pin-r tbody tr:hover td:last-child { background: var(--em-green-tint); }
+/* Table footer = the findings table's: link at the right of the spacer, then the count (identity dashboard .idd-tfoot) */
+.hb-tfoot { display: flex; align-items: center; gap: 16px; padding: 8px 12px; border-top: 1px solid var(--border-light); min-height: 48px; }
+.hb-tfoot .hb-sp { flex: 1; }
+.hb-tfoot .cnt { font-size: 16px; color: var(--black-70); }
+.hb-tfoot .link { color: var(--em-green); cursor: pointer; font-weight: 450; text-decoration: none; background: none; border: none; padding: 0; font-family: inherit; font-size: 16px; line-height: 22px; }
+.hb-tfoot .link:hover { text-decoration: underline; }
+.hb-tfoot .link:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); border-radius: 2px; }
 .hb-tc-1 { font-weight: 500; }
 table.dg.hb-tbl tr.is-link:hover .hb-tc-1 { color: var(--em-green); }
 .hb-tc-wl { display: flex; align-items: center; gap: 8px; min-width: 0; }
@@ -901,7 +922,7 @@ table.dg.hb-tbl tr.is-link:hover .hb-tc-1 { color: var(--em-green); }
 .act-wl-btn:hover { border-color: var(--black-60); }
 .act-wl-btn .awb-chip { display: inline-flex; align-items: center; height: 28px; padding: 0 8px; border-radius: 2px; background: var(--black-5); font-weight: 500; }
 .act-wl-btn .awb-chev { display: inline-flex; color: var(--black-60); }
-.act-wl-panel { display: none; position: absolute; top: calc(100% + 4px); left: 0; z-index: 900; width: 280px; border: 1px solid var(--border-light); border-radius: 4px; background: var(--white); box-shadow: 0 8px 24px rgba(31,34,41,0.16); overflow: hidden; }
+.act-wl-panel { display: none; position: absolute; top: calc(100% + 4px); left: 0; z-index: 900; width: 360px; /* was 280 — Protected Data's overlay width is the standard (user 2026-11-11) */ border: 1px solid var(--border-light); border-radius: 4px; background: var(--white); box-shadow: 0 8px 24px rgba(31,34,41,0.16); overflow: hidden; }
 .act-wl-picker.is-open .act-wl-panel { display: block; }
 .act-wl-ic { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; flex-shrink: 0; }
 .act-wl-ic svg { width: 16px; height: 16px; display: block; }
@@ -944,7 +965,7 @@ table.dg.hb-tbl tr.is-link:hover .hb-tc-1 { color: var(--em-green); }
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/css/jsvectormap.min.css">
 <!-- Shared components, not copies: the DS icon store and the one workload picker every page uses. -->
 <script src="../securiti-icons-data.js?v=20261029"></script>
-<script src="../workload-picker.js?v=20261029"></script>
+<script src="../workload-picker.js?v=20261111"></script>
 <script>window.VDC_BASE = '../';   /* this page lives one folder below the prototypes it links to */</script>
 <script src="../dashboards-panel.js?v=20261029c"></script>
 <script src="../agent-sessions.js?v=20261029a"></script>
@@ -3373,8 +3394,7 @@ function renderHub(){
     +   '<div class="hb-id-sub">Watching · ' + liveSkills + ' of ' + HUB_SKILLS.length + ' skills used in this period · no skill is set to act without asking</div>'
     + '</div>'
     + '<div class="hb-id-facts">'
-    +   '<div class="hb-fact"><div class="hb-fact-v">' + HUB_SKILLS.length + '</div><div class="hb-fact-l">Skills granted</div></div>'
-    +   '<div class="hb-fact"><div class="hb-fact-v">' + reach + '</div><div class="hb-fact-l">Skill × workload grants</div></div>'
+    /* removed (user 2026-11-12): 'Skills granted' and 'Skill × workload grants' counted what a skill could apply to, not what was switched on, so they said nothing real. was: two .hb-fact tiles here. */
     +   '<button class="plv-btn plv-btn-secondary" onclick="hubOpenSettings()">Agent Settings' + hubExtIc() + '</button>'
     + '</div></div>';
 
@@ -3485,10 +3505,10 @@ function renderHub(){
     return '<tr><td><span class="hb-tc-1">' + esc(sk.name) + '</span></td><td>' + wlCell(w) + '</td><td>' + esc(sk.access) + '</td><td>' + hubAge(x.age) + '</td>'
       // ONE ACTION: Review. Skill, workload, access and wait time are not enough to approve a write action, so the row has no
       // Approve of its own: Review opens the request's full session detail over this page, and the decision is made there.
-      + '<td class="hb-tc-a"><button type="button" class="plv-btn plv-btn-secondary" onclick="hubReviewSession(' + i + ')">Review</button></td></tr>';
+      + '<td class="hb-tc-a"><button type="button" class="hb-ibtn" data-tooltip="Review this request" aria-label="Review ' + esc(sk.name) + ' on ' + esc(w.name) + '" onclick="hubReviewSession(' + i + ')">' + (_dsStoreIconSvg('metadata-explorer-outlined', 16) || '') + '</button></td></tr>';   // was: a "Review" text button
   }
-  function hubTbl(cols, head, rows){
-    return '<div class="dg-scroll"><table class="dg hb-tbl"><colgroup>' + cols.map(function(c){ return '<col style="width:' + c + '">'; }).join('') + '</colgroup>'
+  function hubTbl(cols, head, rows, pin){
+    return '<div class="dg-scroll"><table class="dg hb-tbl' + (pin ? ' pin-r' : '') + '"><colgroup>' + cols.map(function(c){ return '<col style="width:' + c + '">'; }).join('') + '</colgroup>'
       + '<thead><tr>' + head.map(function(h){ return '<th>' + h + '</th>'; }).join('') + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
   }
   HUB_PENDING = pend;
@@ -3511,13 +3531,11 @@ function renderHub(){
     + (apprRecent
         ? (recent.length
             ? hubTbl(['18%', '22%', '22%', '16%', '22%'], ['Skill', 'Workload', 'Access', 'Started', 'Decision'], recent.map(recentRow).join(''))
-              + '<div class="hb-ap-foot"><button type="button" class="plv-btn plv-btn-secondary" onclick="location.href = hubActivityLink({ decision: HUB_ALL })">See every session in Activity' + hubExtIc() + '</button></div>'
+              + '<div class="hb-tfoot"><span class="hb-sp"></span><button type="button" class="link" onclick="location.href = hubActivityLink({ decision: HUB_ALL })">View all in Activity</button><span class="cnt">1 - ' + recent.length + ' of ' + S.length + '</span></div>'
             : '<div class="hb-kpi-sub">No sessions in this period.</div>')
         : (pend.length
-            ? '<div class="w-sub">' + pend.length + (pend.length === 1 ? ' request is awaiting your decision' : ' requests are awaiting your decision')
-              + (med ? ' \u00b7 median wait ' + hubDur(med) : '') + '</div>'
-              + hubTbl(['20%', '22%', '20%', '14%', '24%'], ['Skill', 'Workload', 'Access', 'Waiting', ''], pend.map(apprRow).join(''))
-              + '<div class="hb-ap-foot"><button type="button" class="plv-btn plv-btn-secondary" onclick="location.href = hubActivityLink({ decision: \'approved,denied,waiting\' })">See every decision in Activity' + hubExtIc() + '</button></div>'
+            ? /* was: a summary line above the table ("N requests are awaiting your decision · median wait …") — removed (user 2026-11-12): the title and the rows already say it, and median wait belongs in a KPI, not here */ hubTbl(['22%', '26%', '24%', '16%', '56px'], ['Skill', 'Workload', 'Access', 'Waiting', ''], pend.map(apprRow).join(''), true)
+              + '<div class="hb-tfoot"><span class="hb-sp"></span><button type="button" class="link" onclick="location.href = hubActivityLink({ decision: \'approved,denied,waiting\' })">View all in Activity</button><span class="cnt">1 - ' + pend.length + ' of ' + pend.length + '</span></div>'
             : '<div class="hb-kpi-sub">Nothing is awaiting your decision.</div>'))
     + '</div></div>';
 
@@ -3525,6 +3543,7 @@ function renderHub(){
 
   host.innerHTML = idStrip + '<div class="dash">' + kpis + apprW + gaugeW + donutW + tmapW + successW + trendW + '</div>';
   hubDrawTrend();   /* needs the laid-out width, so it runs after the markup is in */
+  [].forEach.call(host.querySelectorAll('.dg-scroll'), function(w){ var f = function(){ w.classList.toggle('has-h-scroll-right', w.scrollWidth - w.clientWidth - w.scrollLeft > 1); }; w.addEventListener('scroll', f); f(); });   /* the pinned column's shadow shows only while something is hidden behind it */
   hubWatchTrend();
 }
 
@@ -3694,10 +3713,21 @@ function hubApprInfo(i, ctx){
         reversal: irreversible ? 'None \u2014 an exported file cannot be recalled' : 'Reversible from Activity'
       },
       buttons: [
-        { label: 'Approve', primary: true, choice: 'Approved', fn: function(){ hubApprResolve(x); } },
+        { label: 'Approve', primary: true, choice: 'Approved', fn: function(){ hubApprResolve(x); } }
+      ].concat(sk.id === 'restore' ? [
+        // SHOW ME (user 2026-11-12): a restore is easier to judge where the data lives, so the card offers to take you to it — Protected Data on this workload,
+        // with the conversation carried along. It leaves the page, so it wears the open-in-new mark and does not decide anything.
+        { label: 'Show me', nav: true, fn: function(){
+          // the agent does the work in Protected Data in front of you (find the items, fill the cart, set up the restore); the conversation travels with it
+          try { sessionStorage.setItem('vdc-ai-flow-ctx', JSON.stringify({ id: x.id, wl: x.wl, wlName: w.name, skill: sk.name })); } catch(e){}
+          try { if (typeof window.vdcPersistTranscript === 'function') window.vdcPersistTranscript(); } catch(e){}
+          aiacGo('flow', 'hubRestore'); } }
+      ] : []).concat([
         { label: 'Decline', primary: false, choice: 'Declined', fn: function(){ hubApprDecline(x); } }
-      ]
+      ])
     });
+    // CARRIED APPROVAL: the request lives in the shared session store, so the same Approve / Decline stay live on the page "Show me" travels to (the page rebuilds the buttons from this)
+    if (aiAgent.activeGate && aiAgent.activeGate.gate) aiAgent.activeGate.gate.carry = { kind: 'session', id: x.id, wl: x.wl, wlName: w.name, skill: sk.name };
     aiSetBusy(false);
   }, 350 + steps.length * 700 + 400);
 }
@@ -5551,6 +5581,7 @@ function aiPushAgent(html, gate){
 function aiGateClick(i){
   var m = aiAgent.activeGate; if(!m || !m.gate || m.gate.resolved) return;
   var btn = m.gate.buttons[i]; if(!btn) return;
+  if (btn.nav) { if (typeof btn.fn === 'function') btn.fn(); return; }   // a travel verb is not a decision: the approval stays open
   m.gate.resolved = true; m.gate.choice = btn.choice || btn.label; m.gate.decidedAt = new Date().toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
   aiAgent.activeGate = null; aiRender();
   if(typeof btn.fn === 'function') btn.fn();
@@ -5768,7 +5799,8 @@ function aiacCardHtml(m, i){
   }
   return html + '</div>';
 }
-window.addEventListener('focus', function(){ if (document.body.classList.contains('ai-open') && typeof aiRender === 'function' && !aiAgent.busy) aiRender(); });
+var _ptrDownAt = 0; document.addEventListener('pointerdown', function(){ _ptrDownAt = Date.now(); }, true);   // a click that brings focus back from the session detail iframe must not be followed by a rebuild (user 2026-11-12: Show me / Approve needed two clicks)
+window.addEventListener('focus', function(){ if (Date.now() - _ptrDownAt < 600) return; if (document.body.classList.contains('ai-open') && typeof aiRender === 'function' && !aiAgent.busy) aiRender(); });
 window.addEventListener('storage', function(e){ if (e.key === 'vdc-facts' && typeof aiRender === 'function' && !aiAgent.busy) aiRender(); });
 function aiacToggleInsight(i){ var m = aiAgent.msgs[i]; if(!m || m.role !== 'card') return; m.insightOpen = !m.insightOpen; aiRender(); }
 function aiacToggleActs(i){ var m = aiAgent.msgs[i]; if(!m || m.role !== 'card') return; m.actsOpen = !m.actsOpen; aiRender(); }
@@ -6034,7 +6066,7 @@ function aiRender(){
       var ap = m.gate.approval;
       var apApproveIc = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
       var apBtns = m.gate.resolved ? '' : '<div class="ai-gate-btns">' + m.gate.buttons.map(function(b, j){
-        return '<button type="button" class="ai-gate-btn' + (b.primary ? ' primary' : '') + '" onclick="aiGateClick(' + j + ')">' + (b.primary ? apApproveIc : '') + '<span class="ai-gate-btn-label">' + _aiEsc(b.label) + '</span></button>';
+        return '<button type="button" class="ai-gate-btn' + (b.primary && !b.nav ? ' primary' : '') + '" onclick="aiGateClick(' + j + ')">' + (b.primary && !b.nav ? apApproveIc : '') + (b.nav ? ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('play-circle-outlined', 20)) || '').replace('<svg ', '<svg class="ai-gate-btn-play-ic" ') : '') + '<span class="ai-gate-btn-label">' + _aiEsc(b.label) + '</span>' + (b.nav ? ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('open-in-new-outlined', 16)) || '') : '') + '</button>';   /* nav:true = this verb LEAVES the page (user 2026-11-12): secondary weight + the open-in-new mark, and it never resolves the approval */
       }).join('') + '</div>';
       var apRows = [['Action', ap.action], ['Scope', ap.scope], ['Evidence', ap.evidence], ['Reversal', ap.reversal]].filter(function(r){ return r[1]; })
         .map(function(r){ return '<div class="ai-approval-row"><span class="ai-approval-k">'+r[0]+'</span><span class="ai-approval-v">'+r[1]+'</span></div>'; }).join('');
@@ -6569,6 +6601,29 @@ function aiFbRow(i){
   };
   window.hideDevJump = function() { bar.classList.add('hidden');    localStorage.setItem('devjumpState','hidden'); syncDevjumpHeight(); };
   window.showDevJump = function() { bar.classList.remove('hidden'); bar.classList.remove('collapsed'); localStorage.setItem('devjumpState','open'); syncDevjumpHeight(); };
+})();
+</script>
+<script>
+// Delegated [data-tooltip] bubble — cloned from identity-dashboard.html (2026-11-12): fixed-position, appended to <body>, so it can never be clipped by a scroll container.
+(function(){
+  var tip = null, cur = null;
+  function tipEl(){ if (!tip){ tip = document.createElement('div'); tip.className = 'app-tooltip'; tip.setAttribute('role','tooltip'); document.body.appendChild(tip); } return tip; }
+  function show(target){
+    var txt = target.getAttribute('data-tooltip'); if (!txt) return;
+    var t = tipEl(); t.textContent = txt; cur = target;
+    t.style.left = '0px'; t.style.top = '-9999px'; t.classList.add('show');
+    var r = target.getBoundingClientRect(), tw = t.offsetWidth, th = t.offsetHeight, pad = 8, gap = 8;
+    var vw = document.documentElement.clientWidth, vh = document.documentElement.clientHeight;
+    var left = Math.max(pad, Math.min(r.left + r.width / 2 - tw / 2, vw - tw - pad));
+    var top = r.top - th - gap; if (top < pad) top = r.bottom + gap; if (top + th > vh - pad) top = Math.max(pad, r.top - th - gap);
+    t.style.left = Math.round(left) + 'px'; t.style.top = Math.round(top) + 'px';
+  }
+  function hide(){ if (tip) tip.classList.remove('show'); cur = null; }
+  document.addEventListener('mouseover', function(e){ var tgt = e.target.closest && e.target.closest('[data-tooltip]'); if (tgt && tgt !== cur) show(tgt); else if (!tgt && cur) hide(); });
+  document.addEventListener('mouseout', function(e){ if (!(e.target.closest && e.target.closest('[data-tooltip]'))) return; var to = e.relatedTarget; if (!to || !to.closest || !to.closest('[data-tooltip]')) hide(); });
+  document.addEventListener('focusin', function(e){ var tgt = e.target.closest && e.target.closest('[data-tooltip]'); if (tgt) show(tgt); });
+  document.addEventListener('focusout', hide);
+  window.addEventListener('scroll', hide, true);
 })();
 </script>
 </body>

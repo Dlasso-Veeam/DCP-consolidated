@@ -86,6 +86,27 @@
   var BASE = clock();
 
   var _base = null;
+  /* WHAT A HELD RESTORE REQUEST ASKS FOR, per workload (user 2026-11-12: "Show me" must land on the same items the request names).
+     One definition read by the hub's approval text, Activity's session detail and Protected Data's walk-through, so a request names
+     objects that exist in Protected Data's seed and the agent finds exactly those. `ids` are Protected Data resource ids and `parent`
+     the folder that holds them (null = they sit at the top level of the workload); `scenario` runs an existing walk-through instead.
+     A workload without an entry keeps the generic, unscoped request. */
+  var RESTORE_SCOPE = {
+    'confluence': { n: 2, noun: 'pages', type: 'Page', parent: 'conf-s1', parentName: 'Engineering space', ids: ['conf-pg1', 'conf-pg4'],
+      names: ['Onboarding \u2014 New Engineers', 'CI/CD Pipeline Overview'], title: 'Restore 2 pages in the Engineering space' },
+    'github': { n: 3, noun: 'repositories', type: 'Repo', parent: 'gh-repos-1', parentName: 'Repositories', ids: ['r1', 'r2', 'r5'],
+      names: ['frontend-app', 'backend-api', 'auth-service'], title: 'Restore 3 repositories' },
+    'gitlab': { n: 2, noun: 'projects', type: 'Project', parent: 'gl-grp-acme-projects', parentName: 'Projects', ids: ['gl-prj-design-system', 'gl-prj-company-handbook'],
+      names: ['design-system', 'company-handbook'], title: 'Restore 2 projects' },
+    'gws': { n: 3, noun: 'users', type: 'User', parent: 'gws-sec-users', parentName: 'Users', ids: ['gws-user-sarah', 'gws-user-marcus', 'gws-user-priya'],
+      names: ['sarah.chen@acme.com', 'marcus.wong@acme.com', 'priya.patel@acme.com'], title: 'Restore 3 users' },
+    'jira': { n: 1, noun: 'site', type: 'Jira Site', parent: null, parentName: null, ids: ['jira-site-acme'],
+      names: ['acme.atlassian.net'], title: 'Restore the acme.atlassian.net site' },
+    'active-directory': { n: 1, noun: 'domain controller', type: 'Domain Controller', parent: null, parentName: null, ids: ['ad-dc-02'],
+      names: ['DC-02'], title: 'Restore domain controller DC-02', scenario: 'adDcRestore' }
+  };
+  function restoreScope(wlId) { return RESTORE_SCOPE[wlId] || null; }
+
   function build() {
     var r = rnd(99), now = BASE, out = [];
     SKILLS.forEach(function (sk) {
@@ -150,7 +171,7 @@
       var st = s.decided === 'waiting' ? 'pending' : s.decided === 'denied' ? 'dismissed' : (s.outcome === 'failed' ? 'failed' : 'success');
       return { id: 'hs-' + s.id, hub: true, sessionId: s.id,
         agent: KIND_AGENT[sk.type] || 'Analysis agent', parent: 'Veeam Intelligence',
-        capability: sk.title(name), kind: sk.type, wl: name, trigger: trigger(s),
+        capability: (sk.id === 'restore' && RESTORE_SCOPE[s.wl]) ? RESTORE_SCOPE[s.wl].title : sk.title(name), kind: sk.type, wl: name, wlId: s.wl, trigger: trigger(s),
         started: new Date(s.started), dur: s.decided === 'waiting' || s.decided === 'denied' ? '–' : s.dur,
         outcome: st === 'failed' ? 'Error' : st === 'success' ? 'Success' : st === 'pending' ? 'Awaiting decision' : 'Dismissed',
         granted: sk.grant, skill: sk.name, decision: DECISION_LABEL[s.decided], _st: st };
@@ -159,5 +180,5 @@
 
   window.VDC_SESSIONS = { BASE: BASE, SKILLS: SKILLS, WINDOW: WINDOW, DAY: DAY, DECISION_LABEL: DECISION_LABEL, DECISION_KEYS: DECISION_KEYS,
     sessions: sessions, activityRows: activityRows, skillWls: skillWls, skillById: skillById, actWl: actWl, wlName: wlName,
-    liveWls: liveWls, resolve: resolve, decline: decline, reset: reset };
+    liveWls: liveWls, resolve: resolve, decline: decline, reset: reset, restoreScope: restoreScope };
 })();

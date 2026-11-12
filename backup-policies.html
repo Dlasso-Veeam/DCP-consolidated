@@ -2013,6 +2013,9 @@ body.ai-full #aiWorkingGlow { display: none; }
 </style>
 </head>
 <body>
+<script>/* A conversation-led handoff lands with the panel ALREADY OPEN (user 2026-11-12: the panel collapsed while navigating and only reopened after the page loaded). Same open state aiOpen sets, applied before first paint. */
+try { var _eh = sessionStorage.getItem('vdc-ai-handoff'), _ep = (location.pathname.split('/').pop() || '').replace(/\.html$/, ''); if (_eh && _eh.replace(/\.html$/, '') === _ep) { document.body.classList.add('ai-open', 'ai-nofx'); var _ew = parseInt(localStorage.getItem('vdc-ai-panel-w'), 10); if (_ew > 0) document.body.style.setProperty('--ai-w', _ew + 'px'); } } catch (e) {}
+</script>
 
 
 <!-- ── DEV JUMP BAR ── Quick-nav shortcut across the prototype. Dev-only. -->
@@ -3485,7 +3488,7 @@ body.ai-full #aiWorkingGlow { display: none; }
 
 <script src="securiti-icons-data.js?v=20261001a"></script>
 <script src="vdc-notifications.js?v=20261030a"></script>
-<script src="workload-picker.js?v=20260908b"></script>
+<script src="workload-picker.js?v=20261111"></script>
 <script>
 // ── DS ICON STORE HELPERS (cloned from protected-data.html) ───────────────────
 function _dsStoreIconSvg(name, size) {
@@ -12168,9 +12171,12 @@ body.ai-open .rot-editor { right: var(--ai-w); }   /* the assistant pushes the p
     if (inEd) return { ask: editing ? 'I\u2019ve configured this policy for those three sites \u2014 you\u2019re editing it now. Nothing is created until you create it.' : 'I\u2019ve configured this policy for those three sites \u2014 what\u2019s open now is exactly that. Nothing is created until you activate it.',
       btns: [{ label: editing ? 'Update and activate policy' : 'Activate policy', onclick:'rotAgentSave()', attr:'data-rot-cta data-rot-act' }, { label:'Dismiss', onclick:'rotDismissAsk()', primary:false, attr:'data-dismiss' }], key:'rot' };
     if (inList) return { ask:'I\u2019ve configured a policy for those three sites and it\u2019s waiting in the list. Nothing runs until you activate it.',
-      btns: [{ label:'Activate policy', onclick:'rotActivate()', attr:'data-rot-cta data-rot-act' }, { label:'Dismiss', onclick:'rotDismissAsk()', primary:false, attr:'data-dismiss' }], key:'rot' };
+      // Review is always offered when the policy is not already open (user 2026-11-11: the card on the Policies page dropped it once the proposed row was visible). Same button, same verb and same handler as on every other page: it opens the policy detail.
+      btns: [{ label:'Activate policy', onclick:'rotActivate()', attr:'data-rot-cta data-rot-act' }, { label:'Review', onclick:'rotShowView(false, true)', nav:true }, { label:'Dismiss', onclick:'rotDismissAsk()', primary:false, attr:'data-dismiss' }], key:'rot' };
     return { ask:'I\u2019ve configured a policy for those three sites. Open it to adjust anything, then activate \u2014 nothing is created until you do.',
-      btns: [{ label:'Review the proposed policy', onclick:'rotShowView(false, true)', attr:'data-rot-cta' }, { label:'Dismiss', onclick:'rotDismissAsk()', primary:false, attr:'data-dismiss' }], key:'rot' };
+      // Activate, Review and Dismiss in every state but the open editor (user 2026-11-11: this card lost Activate when the list was not showing). Activate goes through vdcNotifGo, which brings the policy up first, exactly as on the other pages.
+      // was: [{ label:'Review the proposed policy', onclick:'rotShowView(false, true)', attr:'data-rot-cta' }, { label:'Dismiss', ... }]
+      btns: [{ label:'Activate policy', onclick:'vdcNotifGo(\'rec-activate\')', attr:'data-rot-cta data-rot-act' }, { label:'Review', onclick:'rotShowView(false, true)', nav:true }, { label:'Dismiss', onclick:'rotDismissAsk()', primary:false, attr:'data-dismiss' }], key:'rot' };
   };
 
   // ── assistant: the same recommendation, as a conversation that ends at the policy form ──

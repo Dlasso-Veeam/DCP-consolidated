@@ -511,7 +511,7 @@
           aiAgent._scrollAnchor = 'bottom';
           if (typeof aiRender === 'function') aiRender();
           if (typeof aiSetBusy === 'function') aiSetBusy(false);
-          window.vdcNextQuickPrompts();
+          vdcAfterArrival(function(){ window.vdcDecisionStrip(function(){ window.vdcNextQuickPrompts(); }); });
         }, sayMs(_lead) + 250);
         return;
       }
@@ -522,8 +522,31 @@
       // QUICK PROMPTS ARE A REGULAR PART OF THE CONVERSATION, NOT A ONE-OFF (user 2026-10-30: after a follow-up was
       // answered "no further guidance"). Each answer leaves the next unasked prompts of the same set under the
       // composer; once the set is spent, the starters take over so there is always a way forward.
-      window.vdcNextQuickPrompts();
+      if (ROT_FOLLOWUPS.indexOf(q) >= 0) vdcAfterArrival(function(){ window.vdcDecisionStrip(function(){ window.vdcNextQuickPrompts(); }); });
+      else window.vdcNextQuickPrompts();
     }, 780);
+  };
+  // THE DECISION COMES BACK AFTER THE EVIDENCE (user 2026-11-11: asking "Why do you recommend this?" should not leave the approval
+  // a scroll away). Appended to the transcript as part of the agent's reply, only when (a) the recommendation is still open, (b) its
+  // approval card is in the thread, and (c) that card's buttons are not on screen right now. One live strip at a time: a new one
+  // replaces the last. It is a normal message — it scrolls with the thread and is sealed by vdcSyncDecisions like the card.
+  window.vdcDecisionStrip = function(done){
+    var fin = function(){ if (typeof done === 'function') done(); };
+    try {
+      if (jget(KEY_ROT, {}).rec) return fin();
+      var ms = aiAgent.msgs || [], card = null;
+      ms.forEach(function(m){ if (m && m.role === 'card' && m.card && m.card.approval && !m.card.approval.strip && m.card.approval.key === 'rot') card = m; });
+      if (!card) return fin();
+      var cards = document.querySelectorAll('#aiBody .vdc-appr[data-appr="rot"]:not(.vdc-appr-strip)'), last = cards[cards.length - 1], body = document.getElementById('aiBody');
+      var bt = last && last.querySelector('.ai-gate-btns');
+      if (bt && body){ var r = bt.getBoundingClientRect(), br = body.getBoundingClientRect(); if (r.top >= br.top && r.bottom <= br.bottom) return fin(); }   // the buttons are in view: repeating them would be a duplicate
+      var dec = (typeof window.rotDecision === 'function') ? window.rotDecision() : { btns: card.card.approval.btns };   // the Policies page words its verbs by what is open
+      aiAgent.msgs = ms.filter(function(m){ return !(m && m._decisionStrip); });
+      aiAgent.msgs.push({ role:'card', open:false, noFb:true, _decisionStrip:true, card:{ approval:{ strip:true, key:'rot', ask:'Still waiting on you. Nothing is created until you activate it.', btns:dec.btns || [] } } });
+      aiAgent._scrollAnchor = 'bottom';
+      if (typeof aiRender === 'function') aiRender();
+    } catch(e){}
+    fin();
   };
   window.vdcNextQuickPrompts = function(){
     var pool = aiAgent._qpPool || [], asked = aiAgent._qpAsked || {}, started = aiAgent._qpStarted || {};
@@ -630,7 +653,7 @@
             var rec = { role: m.role, html: m.html };
             if (m.gate){
               rec.gate = { q: m.gate.q, resolved: !!m.gate.resolved, choice: m.gate.choice, decidedAt: m.gate.decidedAt,
-                superseded: !!m.gate.superseded, _trail: m.gate._trail || null, _trailOpen: false, buttons: [],
+                superseded: !!m.gate.superseded, _trail: m.gate._trail || null, _trailOpen: false, buttons: [], carry: m.gate.carry || null,
                 approval: m.gate.approval ? { action: m.gate.approval.action, scope: m.gate.approval.scope,
                   evidence: m.gate.approval.evidence, reversal: m.gate.approval.reversal } : null };
             }
@@ -821,6 +844,13 @@
       return '<button type="button" class="ai-gate-btn' + (prim ? ' primary' : '') + '"' + (b.attr ? ' ' + b.attr : '') + ' onclick="' + b.onclick + '">' + esc(b.label)
         + (b.nav ? ic('open-in-new-outlined', 16) : '') + '</button>';
     }).join('');
+    if (ap.strip){   // THE DECISION STRIP (user 2026-11-11): the same approval, reduced to its ask and its verbs, for the foot of a follow-up answer. Same data-decide key, so the one sync seals it with the card above.
+      var arriveS = settled ? '' : arrival(m, GATE_ARRIVAL_MS);
+      return '<div class="ai-approval vdc-appr vdc-appr-strip' + arriveS + '" data-appr="rot">'
+        + '<div class="vdc-appr-decide"' + (ap.key ? ' data-decide="' + ap.key + '"' : '') + '>'
+        + (ap.ask ? '<div class="vdc-appr-ask">' + ap.ask + '</div>' : '')
+        + '<div class="ai-gate-btns">' + btns + '</div></div></div>';
+    }
     var rows = (ap.rows || []).map(function(r){ return '<div class="ai-approval-row"><span class="ai-approval-k">' + esc(r[0]) + '</span><span class="ai-approval-v">' + esc(r[1]) + '</span></div>'; }).join('');
     return (leadHtml ? '<div class="vdc-appr-lead vdc-typing">' + say + '</div>' : '')
       + '<div class="ai-approval vdc-appr' + arrive + '" data-appr="rot">'
@@ -1259,16 +1289,17 @@
     + '.vdc-appr-rows { margin-top:4px; }\n'
     + '.vdc-appr .ai-approval-row { padding:4px 0; font-size:14px; line-height:20px; }\n'
     + '.vdc-appr .ai-approval-k { width:92px; }\n'
+    + '.vdc-appr-strip .vdc-appr-ask { margin-top:0; }\n'
     + '.vdc-appr-ask { margin:8px 0 12px; font-size:14px; line-height:20px; color:var(--black-100,#1f2229); }\n'
     + '.vdc-appr-decide { container-type:inline-size; }\n'
     + '.vdc-appr-decide .ai-gate-btns { margin-top:0; }\n'
-    + '.vdc-appr-decide .ai-gate-btns [data-dismiss] { margin-left:auto; }\n'
+    + '.vdc-appr-decide .ai-gate-btns:has(> :nth-child(3)) [data-dismiss] { margin-left:auto; }\n'
     + '@container (max-width: 303px) { .vdc-appr-decide .ai-gate-btns [data-dismiss] { margin-left:0; } }\n'
     + '.vdc-appr.is-arriving .vdc-appr-chip, .vdc-appr.is-arriving .vdc-appr-top, .vdc-appr.is-arriving .vdc-appr-ask { animation:aiTaskRise 240ms cubic-bezier(.2,.7,.3,1) both; }\n'
     + '.vdc-appr.is-arriving .vdc-appr-chip { animation-delay:calc(var(--lead, 0ms) + 40ms - var(--elapsed)); }\n'
     + '.vdc-appr.is-arriving .vdc-appr-top { animation-delay:calc(var(--lead, 0ms) + 80ms - var(--elapsed)); }\n'
     + '.vdc-appr.is-arriving .vdc-appr-ask { animation-delay:calc(var(--lead, 0ms) + 400ms - var(--elapsed)); }\n'
-    + '.aiac-decide .ai-gate-btns [data-dismiss] { margin-left:auto; }   /* the decline sits apart from the two actions that move the recommendation forward */\n'
+    + '.aiac-decide .ai-gate-btns:has(> :nth-child(3)) [data-dismiss] { margin-left:auto; }   /* the decline sits apart from the two actions that move the recommendation forward */\n'
     + '@container (max-width: 303px) { .aiac-decide .ai-gate-btns [data-dismiss] { margin-left:0; } }   /* row wrapped: left-aligned on its own line */\n'
     + '.aiac-decide-done { font-size:14px; line-height:20px; font-weight:500; color:var(--em-green,#01804a); }\n'
     + '.aiac-decide-done.dismissed { color:var(--black-60,#626469); }\n'
