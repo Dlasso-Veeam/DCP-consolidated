@@ -2380,9 +2380,9 @@ try { var _eh = sessionStorage.getItem('vdc-ai-handoff'), _ep = (location.pathna
     </div>
   </div>
 </aside>
-<script src="securiti-icons-data.js?v=20261001a"></script>
+<script src="securiti-icons-data.js?v=20261112b"></script>
 <script src="vdc-notifications.js?v=20261030a"></script>
-<script src="workload-picker.js?v=20261111"></script>
+<script src="workload-picker.js?v=20261112b"></script>
 <script src="dashboards-panel.js?v=20261029c"></script>
 <script>DashboardsPanel.mount({ host: document.getElementById('dshSide'), current: 'identity' });</script>
 <script id="ai-shell">
@@ -3899,7 +3899,7 @@ var ICON_KEBAB = '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path 
 
 /* ── Model ─────────────────────────────────────────────────────────── */
 var WL = [
-  { id: 'entra',  name: 'Entra ID',         scope: 'meridianfg.com',        mono: 'iam-identity-provider-outlined', policy: 'Directory objects', pols: '2 active',            slots: [2, 8, 14, 20], rpoH: 6,  perDayChanges: 96, flagToday: 4,
+  { id: 'entra',  name: 'Entra ID',         scope: 'meridianfg.com',        mono: 'logo-entra-id', policy: 'Directory objects', pols: '2 active',            slots: [2, 8, 14, 20], rpoH: 6,  perDayChanges: 96, flagToday: 4,
     ev: [[1, 0], [6, 2], [14, 4]] },
   { id: 'ad',     name: 'Active Directory', scope: 'corp.meridian.local',   mono: 'dc-computers',                   policy: 'Forest protection', pols: '1 active',            slots: [2],            rpoH: 24, perDayChanges: 74, flagToday: 3,
     ev: [[0, 0], [0, 0], [1, 0]] },
@@ -5701,7 +5701,7 @@ window.addEventListener('hashchange', function(){ setView(location.hash === '#fi
 
 /* ── Render + wiring ── */
 /* ── Workload picker: the SHARED panel (workload-picker.js), scoped to the identity workloads + one "All identity workloads" row (default) ── */
-var IDD_WL_ENT = [{ id: 'ad', name: 'Active Directory', monoKey: 'dc-computers' }, { id: 'entra', name: 'Entra ID', monoKey: 'iam-identity-provider-outlined' }, { id: 'google', name: 'Google Identity', colorKey: 'wl-logo-gip' }, { id: 'okta', name: 'Okta', colorKey: 'wl-logo-okta-wic' }];
+var IDD_WL_ENT = [{ id: 'ad', name: 'Active Directory', monoKey: 'dc-computers' }, { id: 'entra', name: 'Entra ID', monoKey: 'logo-entra-id' }, { id: 'google', name: 'Google Identity', colorKey: 'wl-logo-gip' }, { id: 'okta', name: 'Okta', colorKey: 'wl-logo-okta-wic' }];
 var IDD_ALL = 'identity workloads';
 function iddWlChip() {
   var cur = IDD_WL_ENT.filter(function(e){ return e.id === WSCOPE; })[0], ic = document.getElementById('iddWlIcon'), lbl = document.getElementById('iddWlCur');

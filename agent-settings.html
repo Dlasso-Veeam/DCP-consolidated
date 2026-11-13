@@ -2396,9 +2396,11 @@ body.ai-nofx .ss-md-scrim, body.ai-nofx .ss-md { transition: none !important; }
 .ss-wpb-items .ss-ck { height: 36px; }
 .ss-ck { display: flex; align-items: center; gap: 8px; font-size: 16px; cursor: pointer; }
 .ss-ck input { width: 16px; height: 16px; margin: 0; accent-color: var(--em-green); }
-.ss-seg { flex-shrink: 0; display: inline-flex; gap: 2px; padding: 2px; border-radius: 4px; background: var(--black-5); }
-.ss-seg button { white-space: nowrap; height: 32px; padding: 0 12px; border: 1px solid transparent; border-radius: 4px; background: none; font: inherit; font-size: 16px; cursor: pointer; color: var(--black-60); }
-.ss-seg button.on { background: var(--white); border-color: var(--border); color: var(--black-100); font-weight: 500; }
+.ss-seg { flex-shrink: 0; display: inline-flex; align-items: stretch; gap: 2px; background: var(--black-3); border: 2px solid var(--black-3); border-radius: 4px; }
+.ss-seg button { padding: 8px 12px; min-height: 36px; box-sizing: border-box; font-family: inherit; font-size: 16px; line-height: 22px; font-weight: 450; color: var(--black-60); background: transparent; border: 1px solid transparent; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+.ss-seg button:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); }
+.ss-seg button:hover:not(.on):not(:disabled) { background: var(--black-3); }
+.ss-seg button.on { background: var(--white); border-color: var(--border); color: var(--em-green, var(--green)); font-weight: 500; }
 .ss-seg button:disabled { opacity: 0.5; cursor: not-allowed; }
 .ss-tabs { display: flex; margin: 0; border-bottom: 1px solid var(--border-light); background: var(--white); }
 .ss-tabs button { flex: 1 1 0; height: 44px; padding: 0 16px; border: 0; border-top: 2px solid transparent; border-right: 1px solid var(--border-light); border-radius: 0; background: none; font: inherit; font-size: 16px; color: var(--black-100); cursor: pointer; }
@@ -2937,7 +2939,7 @@ td.as-td-actions { position: relative; }
     </div>
   </div>
 </aside>
-<script src="securiti-icons-data.js?v=20261028b"></script>
+<script src="securiti-icons-data.js?v=20261112b"></script>
 <script src="vdc-notifications.js?v=20261030a"></script>
 <script id="ai-shell">
 // Page shims so the copied shell code stays verbatim and diffable (Activity's helpers → this page's own).
@@ -4036,9 +4038,10 @@ function hydrateDefaultPolicyForm(wl) {
       // record exist in the product (an id, visible to other admins, in exports and the audit trail), and is it live.
       // Each tier now names its own footprint instead of describing how finished the writing is.
       // was: 'Spots a gap and drafts a policy for you to review. You create it.'
-      { id:'recommend', chip:'Recommend',       kind:'prepare', label:'Recommend', sub:'Proposes a policy where you would create it. No policy record exists until you create it.', does:['Compare content age, duplication and policy coverage across sites','Work out the policy it would propose — its scope, criteria, effect, evidence and reversal','Show it as a proposal on the Policies page and in the conversation — nothing is created'] },
-      { id:'create',    chip:'Ask to activate', kind:'ask',     label:'Create it, switched off', sub:'Creates the policy in your list, switched off. It does nothing until you turn it on.', does:['Everything in Recommend','Create a real policy record, switched off, and edit scope rules as new versions','Ask before turning it on'] },
-      { id:'activate',  chip:'Automatic',       kind:'auto', confirm:true, stops:['Ask before turning it on'], label:'Create and activate', sub:'Creates the policy in your list and turns it on. Policies that exclude or delete data still ask.', does:['Everything in Create','Activate policies without asking, citing this standing grant in the audit trail'] } ] },
+      { id:'recommend', chip:'Recommend',       kind:'prepare', label:'Recommend', sub:'Drafts a policy for you to review. The draft waits in your Policies list, switched off, until you activate it.', does:['Compare content age, duplication and policy coverage across sites','Work out the policy it would propose — its scope, criteria, effect, evidence and reversal','Put the draft in your Policies list, switched off, and in the conversation — you open it, edit it and activate it','Ask before turning it on'] },
+      // was (removed 2026-11-12, user: 'do we need 3 full tiers on this skill?' — a draft you open to review IS a created, switched-off policy, so Recommend and this were one tier; the real choice is who turns it on):
+      // { id:'create',    chip:'Ask to activate', kind:'ask',     label:'Create it, switched off', sub:'Creates the policy in your list, switched off. It does nothing until you turn it on.', does:['Everything in Recommend','Create a real policy record, switched off, and edit scope rules as new versions','Ask before turning it on'] },
+      { id:'activate',  chip:'Automatic',       kind:'auto', confirm:true, stops:['Ask before turning it on'], label:'Create and activate', sub:'Creates the policy in your list and turns it on. Policies that exclude or delete data still ask.', does:['Everything in Recommend','Activate policies without asking, citing this standing grant in the audit trail'] } ] },
     { id:'jobs', name:'Backup jobs', sub:'Recommend, retry or re-run failed backup sessions.', access:'Write \u00b7 runs jobs', scope:'Backup jobs and sessions', runs:0, def:'ask', levels:[
       { id:'prepare', chip:'Recommend',   kind:'prepare', label:'Recommend', sub:'Spots failed sessions and suggests which to retry. You run them.', does:['Group failed sessions by cause and workload','Suggest which sessions to retry or re-run'] },
       { id:'ask',     chip:'Ask first',   kind:'ask',     label:'Ask before running', sub:'Retries or re-runs a session after you approve it.', does:['Everything in Recommend','Retry or re-run failed sessions after your approval'] },
@@ -4128,6 +4131,7 @@ function hydrateDefaultPolicyForm(wl) {
       if ('on' in v) o.on = !!v.on;
       if (c.levels){
         var lv = lvlOf(c, v.level);
+        if (!lv && c.id === 'policies' && v.level === 'create') lv = lvlOf(c, 'recommend');   // the removed middle tier: a stored 'create' is now Recommend
         if (!lv && v.tier) lv = c.levels.filter(function(l){ return l.kind === (v.tier === 'auto' ? 'auto' : 'ask'); })[0] || null;
         if (lv) o.level = lv.id;
       }
@@ -4330,7 +4334,7 @@ function hydrateDefaultPolicyForm(wl) {
     monitor:{ report:'Agent reports on its own', recommend:'Agent reports and recommends \u00b7 you decide' },
     jobs:{ prepare:'Agent suggests \u00b7 you run it', ask:'Agent runs \u00b7 you approve each one', auto:'Agent retries transient faults \u00b7 you review Activity' },
     findings:{ read:'Agent explains \u00b7 you act', ask:'Agent triages \u00b7 you approve each one', auto:'Agent triages low severity \u00b7 you review the history' },
-    policies:{ recommend:'Agent proposes · nothing is created', create:'Agent creates it off · you turn it on', activate:'Agent creates and turns it on · you review the audit trail' },
+    policies:{ recommend:'Agent drafts it, switched off · you activate it', activate:'Agent creates and turns it on · you review the audit trail' },   // was also: create:'Agent creates it off · you turn it on'
     integrations:{ guide:'Agent guides · you set up', prefill:'Agent prefills · you submit' }
   };
   var SC_ON = '<svg class="sc-on" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 16C13.1067 16 14.05 15.61 14.83 14.83C15.61 14.05 16 13.1067 16 12C16 10.8933 15.61 9.95 14.83 9.17C14.05 8.39 13.1067 8 12 8C10.8933 8 9.95 8.39 9.17 9.17C8.39 9.95 8 10.8933 8 12C8 13.1067 8.39 14.05 9.17 14.83C9.95 15.61 10.8933 16 12 16ZM12 20C10.8933 20 9.85333 19.79 8.88 19.37C7.90667 18.95 7.06 18.38 6.34 17.66C5.62 16.94 5.05 16.0933 4.63 15.12C4.21 14.1467 4 13.1067 4 12C4 10.8933 4.21 9.85333 4.63 8.88C5.05 7.90667 5.62 7.06 6.34 6.34C7.06 5.62 7.90667 5.05 8.88 4.63C9.85333 4.21 10.8933 4 12 4C13.1067 4 14.1467 4.21 15.12 4.63C16.0933 5.05 16.94 5.62 17.66 6.34C18.38 7.06 18.95 7.90667 19.37 8.88C19.79 9.85333 20 10.8933 20 12C20 13.1067 19.79 14.1467 19.37 15.12C18.95 16.0933 18.38 16.94 17.66 17.66C16.94 18.38 16.0933 18.95 15.12 19.37C14.1467 19.79 13.1067 20 12 20ZM12 18.4C13.7867 18.4 15.3 17.78 16.54 16.54C17.78 15.3 18.4 13.7867 18.4 12C18.4 10.2133 17.78 8.7 16.54 7.46C15.3 6.22 13.7867 5.6 12 5.6C10.2133 5.6 8.7 6.22 7.46 7.46C6.22 8.7 5.6 10.2133 5.6 12C5.6 13.7867 6.22 15.3 7.46 16.54C8.7 17.78 10.2133 18.4 12 18.4Z" fill="currentColor"/></svg>';

@@ -550,6 +550,15 @@ a.vn-fly-link:hover { color: var(--green-70); } /* was blue */
    chosen method is page content below them, so nothing grows with its content. Selected = Vision green border (2px, padding takes up the
    1px so the text does not shift) + green name; unselected = the 1px light border the stacked cards already used. */
 .am-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin: 0 16px; }   /* side by side when the column is wide enough for two, stacked when it is not (the wizard column is narrow in a small window) */
+/* Vision Button Tabs (segmented) — the DS component, same spec as activity.html's .act-type-tabs (verified live 2026-07-10, usage node 27067:170767):
+   grey Black/S5 track with a 2px self-coloured ring + 2px gaps, r4; resting tabs transparent, Black/S60 Book 450; the ACTIVE tab is a raised white card
+   with a 1px Black/S20 border and a 500 Black/S100 label. .vbt-full stretches the group and shares the width equally. */
+.vbt-group { display: inline-flex; align-items: stretch; gap: 2px; background: var(--black-3); border: 2px solid var(--black-3); border-radius: 4px; }
+.vbt-group.vbt-full { display: flex; width: 100%; }
+.vbt-tab { appearance: none; flex: 1 1 0; display: inline-flex; align-items: center; justify-content: center; padding: 8px 12px; min-height: 36px; box-sizing: border-box; font-family: inherit; font-size: 16px; line-height: 22px; font-weight: 450; color: var(--black-60); background: transparent; border: 1px solid transparent; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+.vbt-tab:hover:not(.is-active) { background: var(--black-3); }
+.vbt-tab:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); }
+.vbt-tab.is-active { background: var(--white); border-color: var(--border); color: var(--em-green, var(--green)); font-weight: 500; }
 .am-card { border: 1px solid var(--border-light); border-radius: 8px; padding: 16px; cursor: pointer; background: var(--white); transition: border-color 0.15s; }
 .am-card.sel { border: 2px solid var(--green); padding: 15px; }
 .am-card:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); }
@@ -1817,7 +1826,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
               <span>Data Command Center</span>
             </div>
             <div class="topbar-row">
-              <div class="page-title">Add Connection</div>
+              <div class="page-title">Add Integration</div>
               <div class="topbar-actions">
                 <button class="btn btn-outline">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
@@ -1885,7 +1894,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
               </div>
               <div class="cat-card" onclick="selectWorkload('gitlab')">
                 <div class="cat-card-top">
-                  <span class="cat-iconbox"><div class="cat-icon" style="background:#FC6D26"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 21.35l7.18-5.12a.49.49 0 00.18-.42L17.89 2.61a.25.25 0 00-.48 0L15.79 9.5H8.21L6.59 2.61a.25.25 0 00-.48 0L4.64 15.81a.49.49 0 00.18.42z"/></svg></div></span>
+                  <span class="cat-iconbox"><div class="cat-icon" style="background:#FC6D26"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 21.35l7.18-5.12a.49.49 0 00.18-.42L17.89 2.61a.25.25 0 00-.48 0L15.79 9.5H8.21L6.59 2.61a.25.25 0 00-.48 0L4.64 15.81a.49.49 0 00.18.42z"/></svg></div></span>
                   <span class="cat-card-name">GitLab</span>
                 </div>
                 <div class="cat-card-desc">Back up GitLab groups, projects, merge requests, issues, CI/CD configuration, and audit logs.</div>
@@ -1924,7 +1933,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
               </div>
               <div class="cat-card">
                 <div class="cat-card-top">
-                  <span class="cat-iconbox"><div class="cat-icon" style="background:#0061FF"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><rect x="5" y="3" width="14" height="18" rx="2"/><line x1="9" y1="7" x2="15" y2="7" stroke="white" stroke-width="1.5"/><line x1="9" y1="11" x2="15" y2="11" stroke="white" stroke-width="1.5"/></svg></div></span>
+                  <span class="cat-iconbox"><div class="cat-icon" style="background:#0061FF"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><rect x="5" y="3" width="14" height="18" rx="2"/><line x1="9" y1="7" x2="15" y2="7" stroke="white" stroke-width="1.5"/><line x1="9" y1="11" x2="15" y2="11" stroke="white" stroke-width="1.5"/></svg></div></span>
                   <span class="cat-card-name">Box</span>
                 </div>
                 <div class="cat-card-desc">Back up cloud files, documents, and folder structures with Box.</div>
@@ -1949,7 +1958,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
             <div class="cat-grid">
               <div class="cat-card" onclick="selectWorkload('pp')">
                 <div class="cat-card-top">
-                  <span class="cat-iconbox"><div class="cat-icon" style="background:#0a2540"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 19"><style type="text/css">.st0{fill:#FFFFFF;filter:url(#Adobe_OpacityMaskFilter);}.st1{mask:url(#mask0_524_15785_00000157278166757378377780000015220603436856830396_);}.st2{fill:url(#SVGID_1_);}.st3{fill:url(#SVGID_00000158714616684661661410000014526746546123167642_);}.st4{fill:url(#SVGID_00000002371003867478512760000011024119486672247176_);}.st5{fill-opacity:0.24;}.st6{fill-opacity:0.32;}.st7{fill:url(#SVGID_00000121269142472131142040000018144151241904442553_);}.st8{opacity:0.7;fill:url(#SVGID_00000035489417531337516490000014809947321285521286_);enable-background:new    ;}</style><defs><filter id="Adobe_OpacityMaskFilter" filterUnits="userSpaceOnUse" x="2.1" y="1.1" width="15.5" height="16.2"><feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/></filter></defs><mask maskUnits="userSpaceOnUse" x="2.1" y="1.1" width="15.5" height="16.2" id="mask0_524_15785_00000157278166757378377780000015220603436856830396_"><path class="st0" d="M7.9,1.1h7c2,0,3.2,2,2.4,3.8l0.1-0.3L15,9.5c0,0,0,0,0,0l-0.4,0.8L15,9.6c-0.4,0.9-1.4,1.5-2.4,1.5H8.4l-3,6c-0.2,0.5-0.9,0.5-1.1,0l-2.1-4.2c-0.2-0.4-0.2-0.8,0-1.1l2.3-4.6c0.2-0.4,0.7-0.7,1.1-0.7h8.8C14,6,13.3,5.7,12.6,5.7H6.2c-0.5,0-0.8-0.5-0.6-0.9l1.7-3.3C7.5,1.2,7.7,1.1,7.9,1.1z"/></mask><g class="st1"><linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="4.9354" y1="9.4639" x2="6.7063" y2="2.7347" gradientTransform="matrix(1 0 0 -1 0 20)"><stop offset="0" style="stop-color:#159455"/><stop offset="1" style="stop-color:#3FBDA9"/></linearGradient><path class="st2" d="M3.3,11h5.1l-3,6c-0.2,0.5-0.9,0.5-1.1,0l-2.1-4.2C1.8,12,2.4,11,3.3,11z"/><linearGradient id="SVGID_00000177482085251300230860000003997474521748523938_" gradientUnits="userSpaceOnUse" x1="5.9391" y1="18.3394" x2="16.2129" y2="13.7717" gradientTransform="matrix(1 0 0 -1 0 20)"><stop offset="0" style="stop-color:#23A794"/><stop offset="0.5684" style="stop-color:#007A84"/><stop offset="1" style="stop-color:#005158"/></linearGradient><path style="fill:url(#SVGID_00000177482085251300230860000003997474521748523938_);" d="M7.9,1.1h7c2,0,3.3,2.1,2.4,3.8L15,9.5c0,0,0,0,0,0l-0.4,0.8L15,9.5c0.8-1.8-0.4-3.8-2.4-3.8H6.2c-0.5,0-0.8-0.5-0.6-0.9l1.7-3.3C7.5,1.2,7.7,1.1,7.9,1.1z"/><linearGradient id="SVGID_00000091715884692297204420000011908570014893718677_" gradientUnits="userSpaceOnUse" x1="13.1727" y1="11.6202" x2="11.3134" y2="16.49" gradientTransform="matrix(1 0 0 -1 0 20)"><stop offset="0" style="stop-color:#004A8B"/><stop offset="0.4056" style="stop-color:#105DA8;stop-opacity:0.5002"/><stop offset="1" style="stop-color:#2170C6;stop-opacity:0"/></linearGradient><path style="fill:url(#SVGID_00000091715884692297204420000011908570014893718677_);" d="M7.9,1.1h7c2,0,3.3,2.1,2.4,3.8L15,9.5c0,0,0,0,0,0L14.8,10L15,9.5c0.9-1.8-0.4-3.8-2.4-3.8H6.2c-0.5,0-0.8-0.5-0.6-0.9l1.7-3.3C7.5,1.2,7.7,1.1,7.9,1.1z"/><g><path class="st5" d="M12.6,11.1H3.3c-0.5,0-0.9,0.3-1.1,0.7l2.3-4.6c0.2-0.4,0.7-0.7,1.1-0.7h9.3c1,0,1.9-0.6,2.4-1.5l0.2-0.3L15,9.6C14.5,10.5,13.6,11.1,12.6,11.1z"/></g><g><path class="st6" d="M12.6,11.4H3.3c-0.5,0-0.9,0.3-1.1,0.7l2.3-4.6C4.7,7,5.2,6.8,5.6,6.8h9.3c1,0,1.9-0.6,2.4-1.5L17.4,5L15,9.9C14.5,10.8,13.6,11.4,12.6,11.4z"/></g><linearGradient id="SVGID_00000029746480936040750840000000429303484663293837_" gradientUnits="userSpaceOnUse" x1="5.1362" y1="14.1387" x2="14.433" y2="9.5345" gradientTransform="matrix(1 0 0 -1 0 20)"><stop offset="0" style="stop-color:#7FD9A2"/><stop offset="0.1961" style="stop-color:#47BF79"/><stop offset="0.7139" style="stop-color:#009280"/><stop offset="1" style="stop-color:#007A84"/></linearGradient><path style="fill:url(#SVGID_00000029746480936040750840000000429303484663293837_);" d="M12.6,11H3.3c-0.5,0-0.9,0.3-1.1,0.7l2.3-4.6c0.2-0.4,0.7-0.7,1.1-0.7h9.3c1,0,1.9-0.6,2.4-1.5l0.2-0.3L15,9.6C14.5,10.5,13.6,11,12.6,11z"/><linearGradient id="SVGID_00000021809929754008343390000012737265104294235267_" gradientUnits="userSpaceOnUse" x1="5.0676" y1="13.9756" x2="7.1926" y2="12.9131" gradientTransform="matrix(1 0 0 -1 0 20)"><stop offset="0" style="stop-color:#A8E47C;stop-opacity:0.86"/><stop offset="0.3675" style="stop-color:#87D152;stop-opacity:0.2"/><stop offset="1" style="stop-color:#58BE5A;stop-opacity:0"/></linearGradient><path style="opacity:0.7;fill:url(#SVGID_00000021809929754008343390000012737265104294235267_);enable-background:new    ;" d="M12.6,11H3.4c-0.5,0-0.9,0.3-1.1,0.7l2.3-4.6c0.2-0.4,0.7-0.7,1.1-0.7H15c1,0,1.9-0.5,2.3-1.4L15,9.6C14.5,10.5,13.6,11,12.6,11z"/></g></svg></div></span>
+                  <span class="cat-iconbox"><div class="cat-icon" style="background:#0a2540"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 20 19"><style type="text/css">.st0{fill:#FFFFFF;filter:url(#Adobe_OpacityMaskFilter);}.st1{mask:url(#mask0_524_15785_00000157278166757378377780000015220603436856830396_);}.st2{fill:url(#SVGID_1_);}.st3{fill:url(#SVGID_00000158714616684661661410000014526746546123167642_);}.st4{fill:url(#SVGID_00000002371003867478512760000011024119486672247176_);}.st5{fill-opacity:0.24;}.st6{fill-opacity:0.32;}.st7{fill:url(#SVGID_00000121269142472131142040000018144151241904442553_);}.st8{opacity:0.7;fill:url(#SVGID_00000035489417531337516490000014809947321285521286_);enable-background:new    ;}</style><defs><filter id="Adobe_OpacityMaskFilter" filterUnits="userSpaceOnUse" x="2.1" y="1.1" width="15.5" height="16.2"><feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/></filter></defs><mask maskUnits="userSpaceOnUse" x="2.1" y="1.1" width="15.5" height="16.2" id="mask0_524_15785_00000157278166757378377780000015220603436856830396_"><path class="st0" d="M7.9,1.1h7c2,0,3.2,2,2.4,3.8l0.1-0.3L15,9.5c0,0,0,0,0,0l-0.4,0.8L15,9.6c-0.4,0.9-1.4,1.5-2.4,1.5H8.4l-3,6c-0.2,0.5-0.9,0.5-1.1,0l-2.1-4.2c-0.2-0.4-0.2-0.8,0-1.1l2.3-4.6c0.2-0.4,0.7-0.7,1.1-0.7h8.8C14,6,13.3,5.7,12.6,5.7H6.2c-0.5,0-0.8-0.5-0.6-0.9l1.7-3.3C7.5,1.2,7.7,1.1,7.9,1.1z"/></mask><g class="st1"><linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="4.9354" y1="9.4639" x2="6.7063" y2="2.7347" gradientTransform="matrix(1 0 0 -1 0 20)"><stop offset="0" style="stop-color:#159455"/><stop offset="1" style="stop-color:#3FBDA9"/></linearGradient><path class="st2" d="M3.3,11h5.1l-3,6c-0.2,0.5-0.9,0.5-1.1,0l-2.1-4.2C1.8,12,2.4,11,3.3,11z"/><linearGradient id="SVGID_00000177482085251300230860000003997474521748523938_" gradientUnits="userSpaceOnUse" x1="5.9391" y1="18.3394" x2="16.2129" y2="13.7717" gradientTransform="matrix(1 0 0 -1 0 20)"><stop offset="0" style="stop-color:#23A794"/><stop offset="0.5684" style="stop-color:#007A84"/><stop offset="1" style="stop-color:#005158"/></linearGradient><path style="fill:url(#SVGID_00000177482085251300230860000003997474521748523938_);" d="M7.9,1.1h7c2,0,3.3,2.1,2.4,3.8L15,9.5c0,0,0,0,0,0l-0.4,0.8L15,9.5c0.8-1.8-0.4-3.8-2.4-3.8H6.2c-0.5,0-0.8-0.5-0.6-0.9l1.7-3.3C7.5,1.2,7.7,1.1,7.9,1.1z"/><linearGradient id="SVGID_00000091715884692297204420000011908570014893718677_" gradientUnits="userSpaceOnUse" x1="13.1727" y1="11.6202" x2="11.3134" y2="16.49" gradientTransform="matrix(1 0 0 -1 0 20)"><stop offset="0" style="stop-color:#004A8B"/><stop offset="0.4056" style="stop-color:#105DA8;stop-opacity:0.5002"/><stop offset="1" style="stop-color:#2170C6;stop-opacity:0"/></linearGradient><path style="fill:url(#SVGID_00000091715884692297204420000011908570014893718677_);" d="M7.9,1.1h7c2,0,3.3,2.1,2.4,3.8L15,9.5c0,0,0,0,0,0L14.8,10L15,9.5c0.9-1.8-0.4-3.8-2.4-3.8H6.2c-0.5,0-0.8-0.5-0.6-0.9l1.7-3.3C7.5,1.2,7.7,1.1,7.9,1.1z"/><g><path class="st5" d="M12.6,11.1H3.3c-0.5,0-0.9,0.3-1.1,0.7l2.3-4.6c0.2-0.4,0.7-0.7,1.1-0.7h9.3c1,0,1.9-0.6,2.4-1.5l0.2-0.3L15,9.6C14.5,10.5,13.6,11.1,12.6,11.1z"/></g><g><path class="st6" d="M12.6,11.4H3.3c-0.5,0-0.9,0.3-1.1,0.7l2.3-4.6C4.7,7,5.2,6.8,5.6,6.8h9.3c1,0,1.9-0.6,2.4-1.5L17.4,5L15,9.9C14.5,10.8,13.6,11.4,12.6,11.4z"/></g><linearGradient id="SVGID_00000029746480936040750840000000429303484663293837_" gradientUnits="userSpaceOnUse" x1="5.1362" y1="14.1387" x2="14.433" y2="9.5345" gradientTransform="matrix(1 0 0 -1 0 20)"><stop offset="0" style="stop-color:#7FD9A2"/><stop offset="0.1961" style="stop-color:#47BF79"/><stop offset="0.7139" style="stop-color:#009280"/><stop offset="1" style="stop-color:#007A84"/></linearGradient><path style="fill:url(#SVGID_00000029746480936040750840000000429303484663293837_);" d="M12.6,11H3.3c-0.5,0-0.9,0.3-1.1,0.7l2.3-4.6c0.2-0.4,0.7-0.7,1.1-0.7h9.3c1,0,1.9-0.6,2.4-1.5l0.2-0.3L15,9.6C14.5,10.5,13.6,11,12.6,11z"/><linearGradient id="SVGID_00000021809929754008343390000012737265104294235267_" gradientUnits="userSpaceOnUse" x1="5.0676" y1="13.9756" x2="7.1926" y2="12.9131" gradientTransform="matrix(1 0 0 -1 0 20)"><stop offset="0" style="stop-color:#A8E47C;stop-opacity:0.86"/><stop offset="0.3675" style="stop-color:#87D152;stop-opacity:0.2"/><stop offset="1" style="stop-color:#58BE5A;stop-opacity:0"/></linearGradient><path style="opacity:0.7;fill:url(#SVGID_00000021809929754008343390000012737265104294235267_);enable-background:new    ;" d="M12.6,11H3.4c-0.5,0-0.9,0.3-1.1,0.7l2.3-4.6c0.2-0.4,0.7-0.7,1.1-0.7H15c1,0,1.9-0.5,2.3-1.4L15,9.6C14.5,10.5,13.6,11,12.6,11z"/></g></svg></div></span>
                   <span class="cat-card-name">Microsoft Power Platform</span>
                 </div>
                 <div class="cat-card-desc">Back up Power BI, Power Apps, Power Automate, and Power Pages.</div>
@@ -1963,7 +1972,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
               </div>
               <div class="cat-card">
                 <div class="cat-card-top">
-                  <span class="cat-iconbox"><div class="cat-icon" style="background:#00A1E0"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8z"/></svg></div></span>
+                  <span class="cat-iconbox"><div class="cat-icon" style="background:#00A1E0"><svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8z"/></svg></div></span>
                   <span class="cat-card-name">Salesforce</span>
                 </div>
                 <div class="cat-card-desc">Back up Salesforce CRM records, configurations, and metadata.</div>
@@ -1990,14 +1999,14 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
               </div>
               <div class="cat-card" onclick="selectWorkload('gip')">
                 <div class="cat-card-top">
-                  <span class="cat-iconbox"><div class="cat-icon" style="background:#ffffff"><svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" fill-opacity="0.12" d="M12 2 20 5 20 11C20 16.5 16.5 20.7 12 22 7.5 20.7 4 16.5 4 11L4 5Z"/><path fill="none" stroke="#4285F4" stroke-width="1.6" d="M12 2 20 5 20 11C20 16.5 16.5 20.7 12 22 7.5 20.7 4 16.5 4 11L4 5Z"/><circle cx="12" cy="10.3" r="2.3" fill="#5f6368"/><path fill="#5f6368" d="M12 13.2c-2.1 0-3.8 1.25-3.8 2.8v.9h7.6v-.9c0-1.55-1.7-2.8-3.8-2.8z"/></svg></div></span>
+                  <span class="cat-iconbox"><div class="cat-icon" style="background:#fff;border:1px solid var(--border)"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#4285F4" fill-opacity="0.12" d="M12 2 20 5 20 11C20 16.5 16.5 20.7 12 22 7.5 20.7 4 16.5 4 11L4 5Z"/><path fill="none" stroke="#4285F4" stroke-width="1.6" d="M12 2 20 5 20 11C20 16.5 16.5 20.7 12 22 7.5 20.7 4 16.5 4 11L4 5Z"/><circle cx="12" cy="10.3" r="2.3" fill="#5f6368"/><path fill="#5f6368" d="M12 13.2c-2.1 0-3.8 1.25-3.8 2.8v.9h7.6v-.9c0-1.55-1.7-2.8-3.8-2.8z"/></svg></div></span>
                   <span class="cat-card-name">Google Identity Protection</span>
                 </div>
                 <div class="cat-card-desc">Protect identities across Google Workspace, Cloud Identity, and GCP IAM.</div>
               </div>
-              <div class="cat-card">
+              <div class="cat-card" onclick="selectWorkload('entra')">
                 <div class="cat-card-top">
-                  <span class="cat-iconbox"><div class="cat-icon" style="background:#0078D4"><svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 4a3 3 0 110 6 3 3 0 010-6zm0 14c-2.67 0-5.02-1.36-6.4-3.42C7.6 14.8 12 14 12 14s4.4.8 6.4 2.58C17.02 18.64 14.67 20 12 20z"/></svg></div></span>
+                  <span class="cat-iconbox"><div class="cat-icon" style="background:#fff;border:1px solid var(--border)"><svg width="25" height="25" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M31.9992 9.2316H30.8692C32.2592 12.1725 32.4592 15.7436 32.4592 16.6139V30.6482C32.4592 31.9586 31.7592 33.169 30.6392 33.8492C26.3792 36.4 16.7592 42.2318 14.3792 43.6723C14.0192 43.8923 13.6192 44.0024 13.1992 44.0024H37.7092C38.9692 44.0024 39.9992 42.9821 39.9992 41.7217V17.2341C39.9992 12.8127 36.4192 9.2316 31.9992 9.2316Z" fill="#0076D2"/><path d="M30.8702 9.23164C29.8002 6.97094 28.0202 5.08035 25.0802 5.08035C23.7602 5.08035 22.4802 5.51049 21.2802 6.23071C21.5102 6.62083 21.7302 7.04096 21.9402 7.54112C22.1702 8.09129 22.3202 8.65146 22.4502 9.23164C22.6402 10.1219 22.7402 11.0422 22.7702 11.9525C22.8402 14.7233 22.8002 18.3245 22.7502 20.9153C22.7102 23.0259 21.5702 24.9565 19.7602 26.0268L10.2302 31.6986L10.1602 39.8311V42.3819C10.1602 43.2622 10.8802 43.9824 11.7602 43.9824H13.2102C13.6302 43.9824 14.0302 43.8724 14.3902 43.6523C16.7602 42.2119 26.3802 36.3701 30.6502 33.8293C31.7802 33.1591 32.4702 31.9487 32.4702 30.6283V16.5939C32.4702 15.7237 32.2702 12.1525 30.8802 9.21163L30.8702 9.23164Z" fill="url(#encarda)"/><path d="M22.7595 11.9624C22.7395 11.0422 22.6395 10.1319 22.4395 9.2416C22.3095 8.66142 22.1595 8.10124 21.9295 7.55107C21.7195 7.05092 21.4995 6.63079 21.2695 6.24067C17.0995 -0.821521 9.87948 10.502 8.50948 17.074C7.82948 20.9452 7.97948 27.7573 8.10948 31.0484C8.13948 31.9086 9.07948 32.3988 9.80948 31.9586L10.1395 31.7586L10.2095 31.7186L19.7395 26.0468C21.5495 24.9665 22.6895 23.0359 22.7295 20.9352C22.7795 18.3344 22.8195 14.7333 22.7495 11.9724L22.7595 11.9624Z" fill="url(#encardb)"/><defs><linearGradient id="encarda" x1="32.2802" y1="6.59082" x2="12.1197" y2="52.1903" gradientUnits="userSpaceOnUse"><stop stop-color="#37ACD9"/><stop offset="1" stop-color="#0094E5"/></linearGradient><linearGradient id="encardb" x1="6.23948" y1="5.34039" x2="30.3302" y2="43.6255" gradientUnits="userSpaceOnUse"><stop stop-color="#9DF0FE"/><stop offset="1" stop-color="#40D9FA"/></linearGradient></defs></svg></div></span>
                   <span class="cat-card-name">Microsoft Entra ID</span>
                 </div>
                 <div class="cat-card-desc">Back up Entra ID users, groups, app registrations, and conditional access policies.</div>
@@ -2221,7 +2230,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
           <div class="page-title-area">
             <div class="breadcrumbs">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-              <span class="bc-sep">&rsaquo;</span><span>Connections</span><span class="bc-sep">&rsaquo;</span>
+              <span class="bc-sep">&rsaquo;</span><span>Integrations</span><span class="bc-sep">&rsaquo;</span>
             </div>
             <div class="topbar-row">
               <div class="page-title">
@@ -2241,7 +2250,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
             <div style="max-width:780px;width:100%;padding:32px;display:flex;flex-direction:column;gap:16px">
               <div>
                 <div style="font-size:18px;font-weight:500;color:var(--black-100);margin-bottom:4px">Applications</div>
-                <div style="font-size:14px;color:var(--black-60)">Select the applications to include in this connection. We'll only request the permissions needed for what you select.</div>
+                <div style="font-size:14px;color:var(--black-60)">Select the applications to include in this integration. We'll only request the permissions needed for what you select.</div>
               </div>
               <!-- 2-up card grid; populated by renderApplicationsStep -->
               <div id="applicationsCardGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px"></div>
@@ -2261,7 +2270,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
           <div class="page-title-area">
             <div class="breadcrumbs">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-              <span class="bc-sep">&rsaquo;</span><span>Connections</span><span class="bc-sep">&rsaquo;</span>
+              <span class="bc-sep">&rsaquo;</span><span>Integrations</span><span class="bc-sep">&rsaquo;</span>
             </div>
             <div class="topbar-row">
               <div class="page-title">
@@ -2282,9 +2291,9 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
               <!-- Basic Information (combined with ownership) -->
               <div class="form-card">
                 <div class="form-title">Basic Information</div>
-                <div class="form-subtitle" id="bi-subtitle">Enter a name and assign owners for this connection. You can update these details at any time.</div>
+                <div class="form-subtitle" id="bi-subtitle">Enter a name and assign owners for this integration. You can update these details at any time.</div>
                 <div class="form-field">
-                  <label class="form-label"><span id="bi-name-label">Connection name</span><span class="req">*</span></label>
+                  <label class="form-label"><span id="bi-name-label">Integration name</span><span class="req">*</span></label>
                   <input class="form-input focused" id="instance-name-input" value="Github-connection-1" />
                 </div>
                 <div class="form-field">
@@ -2335,7 +2344,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
           <div class="page-title-area">
             <div class="breadcrumbs">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-              <span class="bc-sep">&rsaquo;</span><span>Connections</span><span class="bc-sep">&rsaquo;</span>
+              <span class="bc-sep">&rsaquo;</span><span>Integrations</span><span class="bc-sep">&rsaquo;</span>
             </div>
             <div class="topbar-row">
               <div class="page-title">
@@ -2447,7 +2456,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
           <div class="page-title-area">
             <div class="breadcrumbs">
               <span id="gp-bc" style="display:inline-flex"></span>
-              <span class="bc-sep">&rsaquo;</span><span>Connections</span><span class="bc-sep">&rsaquo;</span>
+              <span class="bc-sep">&rsaquo;</span><span>Integrations</span><span class="bc-sep">&rsaquo;</span>
             </div>
             <div class="topbar-row">
               <div class="page-title">
@@ -2521,7 +2530,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
           <div class="page-title-area">
             <div class="breadcrumbs">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-              <span class="bc-sep">&rsaquo;</span><span>Connections</span><span class="bc-sep">&rsaquo;</span>
+              <span class="bc-sep">&rsaquo;</span><span>Integrations</span><span class="bc-sep">&rsaquo;</span>
             </div>
             <div class="topbar-row">
               <div class="page-title">
@@ -2601,7 +2610,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
           <div class="page-title-area">
             <div class="breadcrumbs">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-              <span class="bc-sep">&rsaquo;</span><span>Connections</span><span class="bc-sep">&rsaquo;</span>
+              <span class="bc-sep">&rsaquo;</span><span>Integrations</span><span class="bc-sep">&rsaquo;</span>
             </div>
             <div class="topbar-row">
               <div class="page-title">
@@ -2621,7 +2630,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
             <div class="form-area">
               <div class="form-card">
                 <div class="form-title">Group</div>
-                <div class="form-subtitle">We discovered <strong style="color:var(--black-100)" id="glg-discovered-count">0</strong> top-level groups your token can access in <strong style="color:var(--black-100)" id="glg-tenant-display">your tenant</strong>. Pick the one to back up — every subgroup and project within it is included. Express connections support a single top-level group; to back up another group, create a separate connection.</div>
+                <div class="form-subtitle">We discovered <strong style="color:var(--black-100)" id="glg-discovered-count">0</strong> top-level groups your token can access in <strong style="color:var(--black-100)" id="glg-tenant-display">your tenant</strong>. Pick the one to back up — every subgroup and project within it is included. Express integrations support a single top-level group; to back up another group, create a separate integration.</div>
 
                 <div style="margin-top:8px">
                   <!-- Single-select picker — no visibility filter chips.
@@ -2673,7 +2682,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
           <div class="page-title-area">
             <div class="breadcrumbs">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-              <span class="bc-sep">&rsaquo;</span><span>Connections</span><span class="bc-sep">&rsaquo;</span>
+              <span class="bc-sep">&rsaquo;</span><span>Integrations</span><span class="bc-sep">&rsaquo;</span>
             </div>
             <div class="topbar-row">
               <div class="page-title">
@@ -2693,7 +2702,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
             <div class="form-area">
               <div class="form-card">
                 <div class="form-title">Site</div>
-                <div class="form-subtitle" id="cfs-subtitle">Atlassian returned <strong style="color:var(--black-100)" id="cfs-discovered-count">0</strong> Atlassian Cloud site(s) you can access. Pick the one to back up — every space, page, and attachment within it is included. Each Confluence site is a separate authorization; to back up another site, create a separate connection.</div>
+                <div class="form-subtitle" id="cfs-subtitle">Atlassian returned <strong style="color:var(--black-100)" id="cfs-discovered-count">0</strong> Atlassian Cloud site(s) you can access. Pick the one to back up — every space, page, and attachment within it is included. Each Confluence site is a separate authorization; to back up another site, create a separate integration.</div>
 
                 <div style="margin-top:8px">
                   <div style="position:relative;margin-bottom:12px">
@@ -2738,7 +2747,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
           <div class="page-title-area">
             <div class="breadcrumbs">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-              <span class="bc-sep">&rsaquo;</span><span>Connections</span><span class="bc-sep">&rsaquo;</span>
+              <span class="bc-sep">&rsaquo;</span><span>Integrations</span><span class="bc-sep">&rsaquo;</span>
             </div>
             <div class="topbar-row">
               <div class="page-title">
@@ -2814,7 +2823,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
           <div class="page-title-area">
             <div class="breadcrumbs">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-              <span class="bc-sep">&rsaquo;</span><span>Connections</span><span class="bc-sep">&rsaquo;</span>
+              <span class="bc-sep">&rsaquo;</span><span>Integrations</span><span class="bc-sep">&rsaquo;</span>
             </div>
             <div class="topbar-row">
               <div class="page-title">
@@ -2834,7 +2843,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
             <div class="form-area">
               <div class="form-card">
                 <div class="form-title">Select organization</div>
-                <div class="form-subtitle">We discovered <strong style="color:var(--black-100)" id="ado-discovered-count">0</strong> Azure DevOps organizations your service principal can access. Pick the organization to connect — one connection covers all projects within it. Need to back up another organization? Run onboarding again after this completes.</div>
+                <div class="form-subtitle">We discovered <strong style="color:var(--black-100)" id="ado-discovered-count">0</strong> Azure DevOps organizations your service principal can access. Pick the organization to connect — one integration covers all projects within it. Need to back up another organization? Run onboarding again after this completes.</div>
 
                 <!-- Wrapper so the search + summary + table become ONE
                      direct child of .form-card. Without this, the
@@ -2876,7 +2885,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
           <div class="page-title-area">
             <div class="breadcrumbs">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-              <span class="bc-sep">&rsaquo;</span><span>Connections</span><span class="bc-sep">&rsaquo;</span>
+              <span class="bc-sep">&rsaquo;</span><span>Integrations</span><span class="bc-sep">&rsaquo;</span>
             </div>
             <div class="topbar-row">
               <div class="page-title">
@@ -2896,10 +2905,10 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
             <div class="form-area">
               <div class="form-card">
                 <div class="form-title">Region & Storage</div>
-                <div class="form-subtitle">Choose the region where Veeam processes data and stores your backups for this connection.</div>
+                <div class="form-subtitle">Choose the region where Veeam processes data and stores your backups for this integration.</div>
                 <!-- Storage Region -->
                 <div id="infra-saas" class="form-field">
-                  <label class="form-label">Storage Region<span class="req">*</span> <span class="info-tip" tabindex="0" data-tooltip="All backup data is processed and stored in this region. This setting cannot be changed after the connection is created." aria-label="More info"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bcbdbf" stroke-width="2" style="vertical-align:-2px"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01" stroke-linecap="round"/></svg></span></label>
+                  <label class="form-label">Storage Region<span class="req">*</span> <span class="info-tip" tabindex="0" data-tooltip="All backup data is processed and stored in this region. This setting cannot be changed after the integration is created." aria-label="More info"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bcbdbf" stroke-width="2" style="vertical-align:-2px"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01" stroke-linecap="round"/></svg></span></label>
                   <div style="position:relative" id="storage-dropdown-wrap-2">
                     <div class="form-input" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="toggleStorageDropdown2()">
                       <span id="storage-selected-2" style="color:var(--black-30)">Select a storage region...</span>
@@ -2959,7 +2968,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
           <div class="page-title-area">
             <div class="breadcrumbs">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-              <span class="bc-sep">&rsaquo;</span><span>Connections</span><span class="bc-sep">&rsaquo;</span>
+              <span class="bc-sep">&rsaquo;</span><span>Integrations</span><span class="bc-sep">&rsaquo;</span>
             </div>
             <div class="topbar-row">
               <div class="page-title">
@@ -2997,7 +3006,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
           <div class="page-title-area">
             <div class="breadcrumbs">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-              <span class="bc-sep">&rsaquo;</span><span>Connections</span><span class="bc-sep">&rsaquo;</span>
+              <span class="bc-sep">&rsaquo;</span><span>Integrations</span><span class="bc-sep">&rsaquo;</span>
             </div>
             <div class="topbar-row">
               <div class="page-title">
@@ -3059,7 +3068,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
                     <div style="flex:1">
                       <div style="font-size:14px;font-weight:700;color:var(--black-100);margin-bottom:4px">Re-consent required</div>
-                      <div style="font-size:14px;color:var(--black-100);line-height:20px">Your inventory flagged this connection as needing a new authorization. Re-run the auth flow below — Veeam will pick up the updated scopes and resume normal sync.</div>
+                      <div style="font-size:14px;color:var(--black-100);line-height:20px">Your inventory flagged this integration as needing a new authorization. Re-run the auth flow below — Veeam will pick up the updated scopes and resume normal sync.</div>
                     </div>
                   </div>
                 </div>
@@ -3220,7 +3229,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
                       <svg class="onb-note-glyph" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
                       <div style="flex:1">
                         <div class="onb-note-title">Entra ID admin required</div>
-                        <div style="font-size:14px;color:var(--black-100);line-height:20px">An Entra ID <strong>Application Administrator</strong> (or Global Admin) must create the app registration and provide these credentials. The Entra admin doesn't need to be the same person setting up this connection.</div>
+                        <div style="font-size:14px;color:var(--black-100);line-height:20px">An Entra ID <strong>Application Administrator</strong> (or Global Admin) must create the app registration and provide these credentials. The Entra admin doesn't need to be the same person setting up this integration.</div>
                       </div>
                     </div>
 
@@ -3272,9 +3281,9 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
                     <!-- Credential Type Toggle (only for cert-supporting workloads) -->
                     <div id="cred-type-toggle" style="display:none;margin-bottom:16px;flex-direction:column">
                       <div style="font-size:14px;font-weight:500;color:var(--black-100);margin-bottom:8px">Credential Type</div>
-                      <div style="display:flex;border:1px solid var(--border);border-radius:4px;overflow:hidden">
-                        <button id="cred-btn-cert" onclick="switchCredType('cert')" style="flex:1;height:36px;border:none;background:var(--black-3);font-size:14px;font-weight:500;color:var(--black-100);cursor:pointer;font-family:inherit">Certificate (recommended for production)</button>
-                        <button id="cred-btn-secret" onclick="switchCredType('secret')" style="flex:1;height:36px;border:none;border-left:1px solid var(--border);background:var(--white);font-size:14px;color:var(--black-60);cursor:pointer;font-family:inherit">Client Secret (dev / test only)</button>
+                      <div class="vbt-group vbt-full" role="tablist" aria-label="Credential type">
+                        <button type="button" role="tab" aria-selected="true" id="cred-btn-cert" class="vbt-tab is-active" onclick="switchCredType('cert')">Certificate (recommended for production)</button>
+                        <button type="button" role="tab" aria-selected="false" id="cred-btn-secret" class="vbt-tab" onclick="switchCredType('secret')">Client Secret (dev / test only)</button>
                       </div>
                     </div>
 
@@ -3581,7 +3590,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
 
                     <button class="btn btn-blue btn-full" id="manual-save-btn" onclick="event.stopPropagation();saveManualAuth()" style="height:44px;font-weight:500;opacity:1;cursor:not-allowed;background:var(--green-30);border-color:var(--green-30)" disabled>Connect</button>
                   </div>
-                  <div style="font-size:14px;line-height:20px;color:var(--black-60);text-align:left">You can change the connection method or reauthorize at any time from the connection's Authentication settings.</div>
+                  <div style="font-size:14px;line-height:20px;color:var(--black-60);text-align:left">You can change the integration method or reauthorize at any time from the integration's Authentication settings.</div>
                 </div>
 
               </div>
@@ -3597,7 +3606,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
           <div class="page-title-area">
             <div class="breadcrumbs">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-              <span class="bc-sep">&rsaquo;</span><span>Connections</span><span class="bc-sep">&rsaquo;</span>
+              <span class="bc-sep">&rsaquo;</span><span>Integrations</span><span class="bc-sep">&rsaquo;</span>
             </div>
             <div class="topbar-row">
               <div class="page-title">
@@ -3659,8 +3668,8 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
                 <div style="padding:16px;border-bottom:1px solid var(--border-light)">
                   <div style="display:flex;justify-content:space-between;align-items:flex-start">
                     <div>
-                      <div id="tc-perm-title" style="font-size:16px;font-weight:500;color:var(--black-100)">Connection checks</div>
-                      <div id="tc-perm-sub" style="font-size:14px;color:var(--black-60);margin-top:2px">Verify the connection has the access it needs</div>
+                      <div id="tc-perm-title" style="font-size:16px;font-weight:500;color:var(--black-100)">Integration checks</div>
+                      <div id="tc-perm-sub" style="font-size:14px;color:var(--black-60);margin-top:2px">Verify the integration has the access it needs</div>
                     </div>
                     <div id="tc-perm-counter-wrap" style="text-align:right">
                       <div id="tc-perm-counter" class="perm-count" style="font-family:'Circular Pro',sans-serif;font-size:24px;font-weight:500;color:var(--black-100);letter-spacing:-0.02em">0/4</div>
@@ -3750,7 +3759,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
                   <div class="perm-row-icon"><svg viewBox="0 0 20.005 20" fill="currentColor" data-securiti-icon="integration-widget-outlined"><path d="M 9 17 C 8.45 17 8 16.55 8 16 L 8 13.56 C 7.06 13.56 6.5 13.53 5.96 13.26 C 5.44 12.99 5.02 12.58 4.75 12.05 C 4.45 11.46 4.45 10.84 4.45 9.72 L 4.45 8.12 C 4.45 7.57 4.9 7.12 5.45 7.12 L 6.23 7.12 L 6.23 5.45 C 6.23 4.9 6.68 4.45 7.23 4.45 C 7.78 4.45 8.23 4.9 8.23 5.45 L 8.23 7.12 L 9.79 7.12 L 9.79 5.45 C 9.79 4.9 10.24 4.45 10.79 4.45 C 11.34 4.45 11.79 4.9 11.79 5.45 L 11.79 7.12 L 12.57 7.12 C 13.12 7.12 13.57 7.57 13.57 8.12 L 13.57 9.72 C 13.57 10.84 13.57 11.46 13.27 12.05 C 13.01 12.57 12.58 13 12.06 13.26 C 11.52 13.54 10.96 13.56 10.02 13.56 L 10.02 16 C 10.02 16.55 9.57 17 9.02 17 L 9 17 Z M 6.44 9.11 L 6.44 9.71 C 6.44 10.41 6.44 10.96 6.52 11.13 C 6.59 11.28 6.71 11.39 6.86 11.47 C 7.03 11.56 7.58 11.56 8.28 11.56 L 9.7 11.56 C 10.43 11.56 10.95 11.56 11.12 11.48 C 11.27 11.41 11.39 11.29 11.46 11.14 C 11.55 10.97 11.55 10.42 11.55 9.72 L 11.55 9.12 L 6.44 9.12 L 6.44 9.11 Z M 4.2 16.4 C 3.99 16.4 3.78 16.33 3.6 16.2 C 1.31 14.48 0 11.86 0 9 C 0 4.04 4.04 0 9 0 C 13.35 0 17.07 3.1 17.85 7.37 C 17.95 7.91 17.59 8.43 17.05 8.53 C 16.5 8.63 15.98 8.27 15.89 7.73 C 15.28 4.41 12.39 2 9.01 2 C 5.15 2 2.01 5.14 2.01 9 C 2.01 11.22 3.03 13.26 4.81 14.6 C 5.25 14.93 5.34 15.56 5.01 16 C 4.81 16.26 4.51 16.4 4.21 16.4 L 4.2 16.4 Z M 15.89 11.75 C 15.51 12.13 15.51 12.75 15.89 13.14 L 17.11 14.36 C 17.49 14.74 18.11 14.74 18.5 14.36 L 19.72 13.14 C 20.1 12.76 20.1 12.14 19.72 11.75 L 18.5 10.53 C 18.12 10.15 17.5 10.15 17.11 10.53 L 15.89 11.75 Z M 16 18.94 C 16 19.53 16.48 20 17.06 20 L 18.93 20 C 19.52 20 19.99 19.52 19.99 18.94 L 19.99 17.07 C 19.99 16.48 19.51 16.01 18.93 16.01 L 17.06 16.01 C 16.47 16.01 16 16.49 16 17.07 L 16 18.94 Z M 10.6 18 C 10.6 19.1 11.5 20 12.6 20 C 13.7 20 14.6 19.1 14.6 18 C 14.6 16.9 13.7 16 12.6 16 C 11.5 16 10.6 16.9 10.6 18 Z"/></svg></div>
                   <div class="perm-row-text" style="flex:1">
                     <h4 style="display:flex;align-items:center;gap:6px">
-                      Environment Connection
+                      Environment Integration
                       <svg id="tc-env-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--black-60);transition:transform 0.18s ease"><polyline points="6 9 12 15 18 9"/></svg>
                     </h4>
                     <p id="tc-perm-row-env-desc">Validating connection to selected environments</p>
@@ -3778,7 +3787,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
           <div class="page-title-area">
             <div class="breadcrumbs">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-              <span class="bc-sep">&rsaquo;</span><span>Connections</span><span class="bc-sep">&rsaquo;</span>
+              <span class="bc-sep">&rsaquo;</span><span>Integrations</span><span class="bc-sep">&rsaquo;</span>
             </div>
             <div class="topbar-row">
               <div class="page-title">
@@ -3827,8 +3836,8 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
                 <div style="padding:16px;border-bottom:1px solid var(--border-light)">
                   <div style="display:flex;justify-content:space-between;align-items:flex-start">
                     <div>
-                      <div style="font-size:16px;font-weight:500;color:var(--black-100)">Connection checks</div>
-                      <div style="font-size:14px;color:var(--black-60);margin-top:2px">Verify the connection has the access it needs</div>
+                      <div style="font-size:16px;font-weight:500;color:var(--black-100)">Integration checks</div>
+                      <div style="font-size:14px;color:var(--black-60);margin-top:2px">Verify the integration has the access it needs</div>
                     </div>
                     <div style="text-align:right">
                       <div style="font-family:'Circular Pro',sans-serif;font-size:24px;font-weight:500;color:var(--black-100);letter-spacing:-0.02em">4/4</div>
@@ -3888,7 +3897,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
           <div class="page-title-area">
             <div class="breadcrumbs">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-              <span class="bc-sep">&rsaquo;</span><span>Connections</span><span class="bc-sep">&rsaquo;</span>
+              <span class="bc-sep">&rsaquo;</span><span>Integrations</span><span class="bc-sep">&rsaquo;</span>
             </div>
             <div class="topbar-row">
               <div class="page-title">
@@ -3908,7 +3917,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
             <div class="form-area">
               <div class="form-card">
                 <div class="form-title" id="protect-form-title">Protection</div>
-                <div class="form-subtitle" id="protect-form-subtitle">Choose how Veeam protects the items discovered in this connection. You can skip this and define a policy later.</div>
+                <div class="form-subtitle" id="protect-form-subtitle">Choose how Veeam protects the items discovered in this integration. You can skip this and define a policy later.</div>
 
                 <div class="protect-host">
                   <!-- Single policy toggle card (Figma node 5026:16472). Replaces
@@ -3952,14 +3961,14 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
                   <div style="display:flex;align-items:flex-start;gap:8px">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                     <div id="protect-info-banner-body" style="flex:1;font-size:14px;color:var(--black-100);line-height:20px">
-                      This policy will apply to all <strong id="protect-resource-noun">environments and workspaces</strong> in this connection. The first backup starts automatically after the initial discovery scan completes.
+                      This policy will apply to all <strong id="protect-resource-noun">environments and workspaces</strong> in this integration. The first backup starts automatically after the initial discovery scan completes.
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <div class="wizard-footer"><div class="form-footer"><button class="btn btn-full" id="protect-continue-btn" onclick="advanceFromProtect()" style="background:var(--green-30);color:var(--white);cursor:not-allowed;font-size:18px;font-weight:500;height:44px;border-radius:4px;border:none" disabled>Create connection</button><!-- was: btn-blue, enabled from entry — now gated until a protection choice card is selected (mirrors infra-continue-btn) --></div></div>
+          <div class="wizard-footer"><div class="form-footer"><button class="btn btn-full" id="protect-continue-btn" onclick="advanceFromProtect()" style="background:var(--green-30);color:var(--white);cursor:not-allowed;font-size:18px;font-weight:500;height:44px;border-radius:4px;border:none" disabled>Create integration</button><!-- was: btn-blue, enabled from entry — now gated until a protection choice card is selected (mirrors infra-continue-btn) --></div></div>
         </div>
       </div>
 
@@ -3969,7 +3978,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
           <div class="page-title-area">
             <div class="breadcrumbs" id="ov-bc">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-              <span class="bc-sep">&rsaquo;</span><span>Connections</span><span class="bc-sep">&rsaquo;</span>
+              <span class="bc-sep">&rsaquo;</span><span>Integrations</span><span class="bc-sep">&rsaquo;</span>
             </div>
             <div class="topbar-row">
               <div class="page-title">
@@ -3989,7 +3998,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
             <!-- Okta Overview (Figma 19457:154997) — populated by paintOktaOverview() -->
             <div id="ov-okta" class="ovk" style="display:none">
               <section class="ovk-card">
-                <div class="ovk-hd"><h3>Connection Details</h3>
+                <div class="ovk-hd"><h3>Integration Details</h3>
                   <div class="ovk-acts">
                     <button class="btn btn-outline ovk-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 12l3-3M8 15h8"/></svg>Statistics</button>
                     <button class="btn btn-outline ovk-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h10M4 11h7M4 16h5"/><circle cx="17" cy="16" r="4"/><path d="M17 14v2l1 1"/></svg>Activity Log</button>
@@ -4010,7 +4019,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
               <section class="ovk-card">
                 <div class="ovk-hd" style="flex-direction:column;align-items:flex-start;gap:0"><h3>Scans by Application</h3><div class="s" style="font-size:14px;color:var(--black-60)">Updated 2 mins ago</div></div>
                 <div class="ovk-grid ovk-g5">
-                  <div class="ovk-th">Application</div><div class="ovk-th">Scoping Inventory <i class="ovk-i" data-tooltip="Finds the identity objects that are in scope for this connection.">i</i></div><div class="ovk-th">Data Inventory <i class="ovk-i" data-tooltip="Indexes the in-scope objects so they can be browsed and protected.">i</i></div><div class="ovk-th">Activity Analysis <i class="ovk-i" data-tooltip="Analyzes recent changes made by people and AI agents.">i</i></div><div class="ovk-th">Discovery Scans <i class="ovk-i" data-tooltip="Scans objects for sensitive data.">i</i></div>
+                  <div class="ovk-th">Application</div><div class="ovk-th">Scoping Inventory <i class="ovk-i" data-tooltip="Finds the identity objects that are in scope for this integration.">i</i></div><div class="ovk-th">Data Inventory <i class="ovk-i" data-tooltip="Indexes the in-scope objects so they can be browsed and protected.">i</i></div><div class="ovk-th">Activity Analysis <i class="ovk-i" data-tooltip="Analyzes recent changes made by people and AI agents.">i</i></div><div class="ovk-th">Discovery Scans <i class="ovk-i" data-tooltip="Scans objects for sensitive data.">i</i></div>
                   <div class="ovk-td"><span class="ovk-logo ovk-logo-s" id="ovk-logo2"></span><span class="t">Okta</span></div>
                   <div class="ovk-td"><span class="ovk-st"><svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="var(--green)"/><polyline points="7.5 12.5 10.5 15.5 16.5 9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Completed</span></div>
                   <div class="ovk-td"><span class="ovk-st"><svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="var(--green)"/><polyline points="7.5 12.5 10.5 15.5 16.5 9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Completed</span></div>
@@ -4040,10 +4049,10 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
                   <div style="position:relative">
                     <button class="btn-icon" style="width:36px;height:36px;border-radius:4px;border:1px solid var(--border)" onclick="toggleConnKebab(event)"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
                     <div id="conn-kebab-menu" style="display:none;position:absolute;right:0;top:40px;background:var(--white);border:1px solid var(--border-light);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.1);z-index:50;min-width:200px;overflow:hidden">
-                      <div style="padding:8px 16px;font-size:14px;color:var(--black-100);cursor:pointer" onmouseover="this.style.background='var(--black-3)'" onmouseout="this.style.background=''">Rename Connection</div>
+                      <div style="padding:8px 16px;font-size:14px;color:var(--black-100);cursor:pointer" onmouseover="this.style.background='var(--black-3)'" onmouseout="this.style.background=''">Rename Integration</div>
                       <div style="padding:8px 16px;font-size:14px;color:var(--black-100);cursor:pointer" onmouseover="this.style.background='var(--black-3)'" onmouseout="this.style.background=''">Transfer Ownership</div>
                       <div style="height:1px;background:var(--border-light);margin:4px 0"></div>
-                      <div style="padding:8px 16px;font-size:14px;color:var(--red);cursor:pointer" onmouseover="this.style.background='#fdf6f5'" onmouseout="this.style.background=''" onclick="closeConnKebab();showDeleteModal()">Delete Connection</div>
+                      <div style="padding:8px 16px;font-size:14px;color:var(--red);cursor:pointer" onmouseover="this.style.background='#fdf6f5'" onmouseout="this.style.background=''" onclick="closeConnKebab();showDeleteModal()">Delete Integration</div>
                     </div>
                   </div>
                 </div>
@@ -4175,7 +4184,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
                 <div style="padding:20px 0;border-bottom:1px solid var(--border-light);display:flex;align-items:flex-start;gap:12px">
                   <svg width="24" height="24" viewBox="0 0 40 40" class="spinner-ring" style="flex-shrink:0;margin-top:2px"><circle cx="20" cy="20" r="10" fill="none" stroke="#e9e9ea" stroke-width="2"/><circle cx="20" cy="20" r="10" fill="none" stroke="#1ca8dd" stroke-width="2" stroke-dasharray="20 40" stroke-linecap="round"/></svg>
                   <div style="flex:1">
-                    <div style="display:flex;align-items:center;gap:6px"><span id="summary-discovery-label" style="font-size:16px;font-weight:500">Data Discovery Sync</span><span class="info-tip" tabindex="0" data-tooltip="Identifies the items in this connection that are eligible for backup. Runs continuously to pick up new or changed items." aria-label="More info"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bcbdbf" stroke-width="2"><circle cx="12" cy="12" r="10"/><text x="12" y="17" text-anchor="middle" font-size="13" font-weight="600" font-family="Arial,sans-serif" fill="#bcbdbf" stroke="none">?</text></svg></span></div>
+                    <div style="display:flex;align-items:center;gap:6px"><span id="summary-discovery-label" style="font-size:16px;font-weight:500">Data Discovery Sync</span><span class="info-tip" tabindex="0" data-tooltip="Identifies the items in this integration that are eligible for backup. Runs continuously to pick up new or changed items." aria-label="More info"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bcbdbf" stroke-width="2"><circle cx="12" cy="12" r="10"/><text x="12" y="17" text-anchor="middle" font-size="13" font-weight="600" font-family="Arial,sans-serif" fill="#bcbdbf" stroke="none">?</text></svg></span></div>
                     <div style="font-size:14px;color:var(--black-60);margin-top:4px">Running for: 1m 55s</div>
                     <div id="summary-discovery-count" style="font-size:14px;color:var(--black-60);margin-top:4px"><strong style="font-weight:500;color:var(--black-100)">12</strong> resources indexed so far...</div>
                   </div>
@@ -4243,7 +4252,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
           <div class="page-title-area">
             <div class="breadcrumbs">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-              <span class="bc-sep">&rsaquo;</span><span>Connections</span><span class="bc-sep">&rsaquo;</span>
+              <span class="bc-sep">&rsaquo;</span><span>Integrations</span><span class="bc-sep">&rsaquo;</span>
             </div>
             <div class="topbar-row">
               <div class="page-title">
@@ -4336,7 +4345,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
           <div class="page-title-area">
             <div class="breadcrumbs">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-              <span class="bc-sep">&rsaquo;</span><span>Connections</span><span class="bc-sep">&rsaquo;</span>
+              <span class="bc-sep">&rsaquo;</span><span>Integrations</span><span class="bc-sep">&rsaquo;</span>
             </div>
             <div class="topbar-row">
               <div class="page-title">
@@ -4444,7 +4453,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
     <!-- Help Drawer (inline, pushes content) -->
     <div class="help-drawer" id="help-drawer">
       <div class="help-drawer-header">
-        <h3>Connection Help</h3>
+        <h3>Integration Help</h3>
         <button class="btn-icon" style="width:32px;height:32px" onclick="toggleHelpDrawer()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       </div>
       <div class="help-drawer-body" id="help-drawer-content">
@@ -4512,7 +4521,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
 <div id="delete-modal-overlay" style="position:fixed;inset:0;background:rgba(31,34,41,0.4);z-index:400;display:none;align-items:center;justify-content:center">
   <div style="background:var(--white);border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,0.2);max-width:480px;width:100%;overflow:hidden">
     <div style="padding:20px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-light)">
-      <div style="font-size:16px;font-weight:500;color:var(--black-100)">Delete Connection</div>
+      <div style="font-size:16px;font-weight:500;color:var(--black-100)">Delete Integration</div>
       <button style="background:none;border:none;cursor:pointer;color:var(--black-60);padding:4px" onclick="hideDeleteModal()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     </div>
     <div style="padding:24px">
@@ -4520,7 +4529,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d75645" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
         <div>
           <div style="font-size:14px;font-weight:700;color:var(--black-100)">This action cannot be undone</div>
-          <div style="font-size: 14px;color:var(--black-100);line-height:18px;margin-top:4px">Deleting this connection will permanently remove all associated backup data after a 30-day retention period. During retention, no new backups will run and restore operations will not be available.</div>
+          <div style="font-size: 14px;color:var(--black-100);line-height:18px;margin-top:4px">Deleting this integration will permanently remove all associated backup data after a 30-day retention period. During retention, no new backups will run and restore operations will not be available.</div>
         </div>
       </div>
       <div style="font-size:14px;color:var(--black-60);line-height:20px;margin-bottom:16px">
@@ -4533,7 +4542,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
     </div>
     <div style="padding:0 24px 24px;display:flex;justify-content:flex-end;gap:8px">
       <button class="btn btn-outline" onclick="hideDeleteModal()" style="height:44px;padding:0 16px;font-size:14px">Cancel</button>
-      <button class="btn" id="delete-confirm-btn" style="height:44px;padding:0 16px;font-size:14px;font-weight:500;background:#d75645;color:white;border:none;border-radius:4px;opacity:0.5;cursor:not-allowed" disabled>Delete Connection</button>
+      <button class="btn" id="delete-confirm-btn" style="height:44px;padding:0 16px;font-size:14px;font-weight:500;background:#d75645;color:white;border:none;border-radius:4px;opacity:0.5;cursor:not-allowed" disabled>Delete Integration</button>
     </div>
   </div>
 </div>
@@ -4600,13 +4609,13 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
              sitting), without forcing them to navigate breadcrumbs.
            • The × in the corner = land at the top of the summary
              (default close behavior). -->
-    <div style="font-family:'Circular Pro',sans-serif;font-size:24px;font-weight:500;color:var(--black-100);line-height:1.25;letter-spacing:-0.02em;margin-bottom:8px">Connection created successfully</div>
-    <div id="success-modal-body" style="font-size:14px;color:var(--black-60);line-height:21px;margin-bottom:24px">Your connection is live. Discovery has started — you'll see resources appear on the summary screen as they're indexed.</div>
+    <div style="font-family:'Circular Pro',sans-serif;font-size:24px;font-weight:500;color:var(--black-100);line-height:1.25;letter-spacing:-0.02em;margin-bottom:8px">Integration created successfully</div>
+    <div id="success-modal-body" style="font-size:14px;color:var(--black-60);line-height:21px;margin-bottom:24px">Your integration is live. Discovery has started — you'll see resources appear on the summary screen as they're indexed.</div>
 
     <div style="display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-top:16px">
       <button class="btn btn-text" onclick="addAnotherConnectionFromSuccess()" style="display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 4px;font-size:14px;font-weight:500;color:var(--green);background:transparent;border:none;cursor:pointer">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Add another connection
+        Add another integration
       </button>
       <button class="btn btn-blue" onclick="viewNextStepsFromSuccess()" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;padding:0 14px;font-size:14px;font-weight:500;min-width:180px">
         View next steps
@@ -5317,7 +5326,7 @@ function _bridgePublishJob(job) {
 }
 // Activity-page workload labels differ from onboarding shortNames — map the
 // known ones so bridged rows group with the seeded jobs' Workload values.
-var _BRIDGE_WL_LABEL = { okta: 'Okta WIC', github: 'GitHub', gitlab: 'GitLab', d365: 'Dynamics 365', ado: 'Azure DevOps', azuredevops: 'Azure DevOps', confluence: 'Confluence', jira: 'Jira', gws: 'Google Workspace', powerplatform: 'Power Platform' };
+var _BRIDGE_WL_LABEL = { okta: 'Okta WIC', github: 'GitHub', gitlab: 'GitLab', d365: 'Dynamics 365', ado: 'Azure DevOps', azuredevops: 'Azure DevOps', confluence: 'Confluence', jira: 'Jira', gws: 'Google Workspace', powerplatform: 'Power Platform', entra: 'Entra ID' };
 function _bridgePublishOnboardingJobs() {
   var w = (typeof WORKLOADS !== 'undefined' && currentWorkload) ? WORKLOADS[currentWorkload] : null;
   if (!w) return;
@@ -5724,7 +5733,7 @@ function renderScopeStep() {
     +       '<div class="scope-mode-card-title">Ingest all object types and fields'
     +         '<span class="scope-mode-recommended">Recommended</span>'
     +       '</div>'
-    +       '<div class="scope-mode-card-desc">Pull every object type and field discovered in this connection into the data plane. You\u2019ll choose what to back up and how often in the next step.</div>'
+    +       '<div class="scope-mode-card-desc">Pull every object type and field discovered in this integration into the data plane. You\u2019ll choose what to back up and how often in the next step.</div>'
     +       '<div class="scope-mode-card-pills">' + cardAPills + '</div>'
     +     '</div>'
     +   '</div>'
@@ -7299,7 +7308,7 @@ function copyEnvManualSteps(id) {
              '1. Open Power Platform Admin Center > Environments > ' + e.name + ' > Settings > Users + permissions > Application users\n' +
              '2. Click "+ New app user" and add the Veeam Backup Service application\n' +
              '3. Assign the "System Administrator" security role\n' +
-             '4. Return to the connection wizard and click Re-verify';
+             '4. Return to the integration wizard and click Re-verify';
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).catch(function(){});
   }
@@ -7572,7 +7581,7 @@ function paintActiveCardProvStatus(stats) {
     host.innerHTML = '' +
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;display:inline-block;vertical-align:-2px;margin-right:6px;color:#cc5b14"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>' +
       '<strong style="color:var(--black-100);font-weight:500">Provisioning couldn\'t complete for ' + unresolved + ' of ' + total + ' environment' + (total === 1 ? '' : 's') + '.</strong> ' +
-      '<span style="color:var(--black-60)">They\'ll be flagged on the connection summary so a System Administrator can finish setup.</span>';
+      '<span style="color:var(--black-60)">They\'ll be flagged on the integration summary so a System Administrator can finish setup.</span>';
     host.style.color = '';
   }
 }
@@ -7687,7 +7696,7 @@ function finalizeEnvCommit() {
     var n = connected.length;
     showToast(
       n + ' environment' + (n === 1 ? '' : 's') + ' provisioned successfully',
-      'Dataverse environments are ready. Proceeding to connection checks.'
+      'Dataverse environments are ready. Proceeding to integration checks.'
     );
   }
   if (typeof goTo === 'function') goTo('test-conn');
@@ -7713,7 +7722,7 @@ var d365PendingEnvs = [];
 // arg) still simulate the seeded failure so the failure UX is
 // demonstrable on first land.
 // Okta "Verifying access" chrome toggle: restyles the shared test-conn screen (no-op / restore for every other workload).
-var TEST_ICON_PX = { github: 24, jira: 28, confluence: 28, gitlab: 28, 'azure-devops': 28, gws: 28, pp: 28, d365: 28 };   // glyph size inside the 40px Test-step tile, where it differs from the 40px default
+var TEST_ICON_PX = { github: 24, jira: 28, confluence: 28, gitlab: 28, 'azure-devops': 28, gws: 28, pp: 28, d365: 28, entra: 28 };   // glyph size inside the 40px Test-step tile, where it differs from the 40px default
 function _tcOkvChrome(on, w) {
   var scr = document.getElementById('screen-test-conn'); if (!scr) return;
   scr.classList.toggle('okv', on); scr.classList.remove('okv-p2'); scr.classList.toggle('okv-running', on); scr.classList.toggle('okv-checking', on);
@@ -7739,8 +7748,8 @@ function _tcOkvChrome(on, w) {
     ck.style.width = ck.style.height = '40px';
     $('tc-conn-title').textContent = 'Connection test';
     $('tc-perm-pending-text').textContent = 'Connection checks will run once connectivity is established.';
-    $('tc-perm-title').textContent = 'Connection checks';
-    $('tc-perm-sub').textContent = 'Verify the connection has the access it needs';
+    $('tc-perm-title').textContent = 'Integration checks';
+    $('tc-perm-sub').textContent = 'Verify the integration has the access it needs';
     $('tc-perm-countlbl').textContent = 'Checks passed';
     $('tc-perm-barlbl').textContent = 'Checks passed';
     var ff = $('tc-perm-bar-fail'); if (ff) ff.style.background = 'var(--orange)';
@@ -7963,7 +7972,7 @@ function runTestConnectionSequence(isRetry) {
     // Default ("Environment Connection") still applies to D365.
     var envTitleEl = document.querySelector('#tc-perm-row-env .perm-row-text h4');
     if (envTitleEl) {
-      var envTitleText = w.envRowTitle || 'Environment Connection';
+      var envTitleText = w.envRowTitle || 'Environment Integration';
       var firstTextNode = envTitleEl.firstChild;
       if (firstTextNode && firstTextNode.nodeType === 3) firstTextNode.nodeValue = envTitleText;
       else envTitleEl.insertBefore(document.createTextNode(envTitleText), envTitleEl.firstChild);
@@ -8463,7 +8472,7 @@ function paintEnvExpanded(envs) {
   // environment from backup scope. You can add it back later from the
   // connection settings."). Surfaced on every workload because the
   // affordance + meaning is identical.
-  var removeTooltip = 'Excludes this environment from backup scope. You can add it back later from the connection settings.';
+  var removeTooltip = 'Excludes this environment from backup scope. You can add it back later from the integration settings.';
   panel.innerHTML = envs.map(function(env, i){
     var status = _envCheckResults[i] || 'connected';
     var pill, action = '';
@@ -8830,7 +8839,7 @@ function _parkedRenderProtectStep_toggleEra() {
     if (toggleCard) toggleCard.style.display = 'none';
     if (cardsHost) cardsHost.style.display = '';
     if (ttl) ttl.textContent = 'Protection';
-    if (sub) sub.textContent = 'Choose how Veeam protects the items discovered in this connection. You can skip this and define a policy later.';
+    if (sub) sub.textContent = 'Choose how Veeam protects the items discovered in this integration. You can skip this and define a policy later.';
     if (bannerBody) bannerBody.textContent = 'Protection starts automatically after the initial discovery scan completes.';
     oktaProtect = { on: true, tenantCfg: true, systemLog: true };
     renderOktaProtectCard();
@@ -8841,8 +8850,8 @@ function _parkedRenderProtectStep_toggleEra() {
   if (toggleCard) toggleCard.style.display = '';
   if (cardsHost) cardsHost.style.display = 'none';
   if (ttl) ttl.textContent = 'Protection';
-  if (sub) sub.textContent = 'Choose how Veeam protects the items discovered in this connection. You can skip this and define a policy later.';
-  if (bannerBody) bannerBody.innerHTML = 'This policy will apply to all <strong id="protect-resource-noun">' + escapeHtml(getWorkloadResourceNoun()) + '</strong> in this connection. The first backup starts automatically after the initial discovery scan completes.';
+  if (sub) sub.textContent = 'Choose how Veeam protects the items discovered in this integration. You can skip this and define a policy later.';
+  if (bannerBody) bannerBody.innerHTML = 'This policy will apply to all <strong id="protect-resource-noun">' + escapeHtml(getWorkloadResourceNoun()) + '</strong> in this integration. The first backup starts automatically after the initial discovery scan completes.';
   if (banner) banner.style.display = '';
   // Default to "later" each entry — admins explicitly opt in to a
   // default policy if they want one; we don't auto-stage protection.
@@ -9015,14 +9024,14 @@ function renderProtectStep() {
   if (toggleCard) toggleCard.style.display = 'none'; // parked single-toggle card stays hidden
   if (cardsHost) { cardsHost.style.display = 'none'; cardsHost.innerHTML = ''; }
   if (ttl) ttl.textContent = 'Protection'; // was: D365 read 'Backup policy'
-  if (sub) sub.textContent = 'Choose how Veeam protects the items discovered in this connection. You can skip this and define a policy later.'; // was: D365 had per-env opt-in copy
+  if (sub) sub.textContent = 'Choose how Veeam protects the items discovered in this integration. You can skip this and define a policy later.'; // was: D365 had per-env opt-in copy
   if (bannerBody) {
     if (currentWorkload === 'd365') {
       bannerBody.textContent = 'The first backup starts automatically after the initial discovery scan completes.';
     } else if (currentWorkload === 'okta') {
       bannerBody.textContent = 'Protection starts automatically after the initial discovery scan completes.';
     } else {
-      bannerBody.innerHTML = 'This policy will apply to all <strong id="protect-resource-noun">' + escapeHtml(getWorkloadResourceNoun()) + '</strong> in this connection. The first backup starts automatically after the initial discovery scan completes.';
+      bannerBody.innerHTML = 'This policy will apply to all <strong id="protect-resource-noun">' + escapeHtml(getWorkloadResourceNoun()) + '</strong> in this integration. The first backup starts automatically after the initial discovery scan completes.';
     }
   }
   if (banner) banner.style.display = 'none'; // hidden until a choice is made
@@ -9070,15 +9079,16 @@ function advanceFromProtect() {
 }
 
 // The Okta-style success dialog, worded for the workload that was just connected.
-var OKF_COPY = { github: { tag: 'GitHub Cloud', body: 'Inventory sync has started for your organization. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the connection\u2019s configuration.' },
-  gip: { tag: 'Google Cloud', body: 'Inventory sync has started for your Google identity environment. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the connection\u2019s configuration.' },
-  jira: { tag: 'Atlassian Cloud', body: 'Inventory sync has started for your Jira site. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the connection\u2019s configuration.' },
-  confluence: { tag: 'Atlassian Cloud', body: 'Inventory sync has started for your Confluence site. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the connection\u2019s configuration.' },
-  gitlab: { tag: 'GitLab.com', body: 'Inventory sync has started for your GitLab group. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the connection\u2019s configuration.' },
-  'azure-devops': { tag: 'Azure DevOps', body: 'Inventory sync has started for your Azure DevOps organization. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the connection\u2019s configuration.' },
-  gws: { tag: 'Google Cloud', body: 'Inventory sync has started for your Google Workspace domain. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the connection\u2019s configuration.' },
-  pp: { tag: 'Microsoft Cloud', body: 'Inventory sync has started for your Power Platform tenant. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the connection\u2019s configuration.' },
-  d365: { tag: 'Microsoft Cloud', body: 'Inventory sync has started for your Dynamics 365 environments. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the connection\u2019s configuration.' } };
+var OKF_COPY = { github: { tag: 'GitHub Cloud', body: 'Inventory sync has started for your organization. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the integration\u2019s configuration.' },
+  gip: { tag: 'Google Cloud', body: 'Inventory sync has started for your Google identity environment. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the integration\u2019s configuration.' },
+  jira: { tag: 'Atlassian Cloud', body: 'Inventory sync has started for your Jira site. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the integration\u2019s configuration.' },
+  confluence: { tag: 'Atlassian Cloud', body: 'Inventory sync has started for your Confluence site. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the integration\u2019s configuration.' },
+  gitlab: { tag: 'GitLab.com', body: 'Inventory sync has started for your GitLab group. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the integration\u2019s configuration.' },
+  'azure-devops': { tag: 'Azure DevOps', body: 'Inventory sync has started for your Azure DevOps organization. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the integration\u2019s configuration.' },
+  gws: { tag: 'Google Cloud', body: 'Inventory sync has started for your Google Workspace domain. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the integration\u2019s configuration.' },
+  pp: { tag: 'Microsoft Cloud', body: 'Inventory sync has started for your Power Platform tenant. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the integration\u2019s configuration.' },
+  d365: { tag: 'Microsoft Cloud', body: 'Inventory sync has started for your Dynamics 365 environments. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the integration\u2019s configuration.' },
+  entra: { tag: 'Microsoft Cloud', body: 'Inventory sync has started for your Entra ID tenant. Activity analysis will start when inventory sync completes. You can monitor progress in Connector Overview or adjust the integration\u2019s configuration.' } };
 var _okfSnap = null;
 function paintSuccessOkf(wl) {
   var h = document.querySelector('#success-okta .okf-top h2'), nm = document.querySelector('#success-okta .okf-inst .nm'), p = document.querySelector('#success-okta .okf-body p'); if (!h || !nm || !p) return;
@@ -9092,7 +9102,7 @@ function createConnection() {
   if (oktaEditMode) {   // editing an existing connection: save and return to its overview, no success celebration
     _oktaEditEnd(); goTo('overview');
     var _tb = document.querySelector('#toast .toast-body'), _prev = _tb ? _tb.innerHTML : '';
-    if (_tb) _tb.textContent = ((WORKLOADS[currentWorkload] || {}).name || 'Connection') + ' connection updated.';
+    if (_tb) _tb.textContent = ((WORKLOADS[currentWorkload] || {}).name || 'Connection') + ' integration updated.';
     showToast(); setTimeout(function(){ if (_tb) _tb.innerHTML = _prev; }, 5400);
     return;
   }
@@ -9632,19 +9642,19 @@ function syncSummaryWorkloadCopy() {
   // Success-modal body uses the same identity-vs-resources wording.
   var modalBody = document.getElementById('success-modal-body');
   if (modalBody) modalBody.textContent = isOkta
-    ? 'Your connection is live. Identity discovery has started — you’ll see ' + idName + ' objects appear on the summary screen as they’re indexed.'
-    : 'Your connection is live. Discovery has started — you’ll see resources appear on the summary screen as they’re indexed.';
+    ? 'Your integration is live. Identity discovery has started — you’ll see ' + idName + ' objects appear on the summary screen as they’re indexed.'
+    : 'Your integration is live. Discovery has started — you’ll see resources appear on the summary screen as they’re indexed.';
 }
 
 // Okta WIC identity-specific copy for the "Recommended Next Steps" list
 // (spec §6.6). Only the wording changes — the ordering still follows the
 // policy-state logic in NEXT_STEPS_ORDERING. Keyed by NEXT_STEPS id.
 var OKTA_NEXT_STEP_COPY = {
-  'dashboard':     { desc: 'Monitor backup success, RPO compliance, and identity stream coverage for this connection.' },
-  'notifications': { desc: 'Configure alerts for backup failures, OAuth token expiry, and connection health events.' },
+  'dashboard':     { desc: 'Monitor backup success, RPO compliance, and identity stream coverage for this integration.' },
+  'notifications': { desc: 'Configure alerts for backup failures, OAuth token expiry, and integration health events.' },
   'sla':           { title: 'Review backup SLA', desc: 'For tenants above ~250,000 users, review RPO settings and consider requesting an Okta rate-limit increase via Support (15-day lead).' },
   'create-policy': { desc: 'Configure custom schedules, retention rules, and stream scope beyond the standard daily policy.' },
-  'inventory':     { desc: 'Browse discovered users, groups, authentication policies, applications, and other identity objects indexed from this connection.' }
+  'inventory':     { desc: 'Browse discovered users, groups, authentication policies, applications, and other identity objects indexed from this integration.' }
 };
 // A dict of every step we might recommend. `renderRecommendedNextSteps()`
 // picks + orders the relevant ones based on whether the user applied a
@@ -9671,7 +9681,7 @@ var NEXT_STEPS = {
   },
   'inventory': {
     title: 'View Your Inventory',
-    desc:  'Browse discovered environments, workspaces, apps, flows, reports, and Dataverse tables from this connection.',
+    desc:  'Browse discovered environments, workspaces, apps, flows, reports, and Dataverse tables from this integration.',
     iconBg: '#fef1ea',
     iconColor: 'var(--orange)',
     icon: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>',
@@ -9688,7 +9698,7 @@ var NEXT_STEPS = {
   // screen's own "ResOps Data Systems" entity header already uses.
   'protected-data': {
     title: 'View your Protected Data',
-    desc:  'See everything backed up from this connection and how it maps to your protection policies.',
+    desc:  'See everything backed up from this integration and how it maps to your protection policies.',
     iconBg: 'var(--green-10)',
     iconColor: 'var(--green)',
     icon: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/>',
@@ -9704,14 +9714,14 @@ var NEXT_STEPS = {
   },
   'notifications': {
     title: 'Set Up Notifications',
-    desc:  'Configure alerts for backup failures, policy violations, and connection health events.',
+    desc:  'Configure alerts for backup failures, policy violations, and integration health events.',
     iconBg: '#f3fafd',
     iconColor: 'var(--blue)',
     icon: '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',
     onClick: ''
   },
   'customize-policy': {
-    title: 'Create a custom policy for this connection',
+    title: 'Create a custom policy for this integration',
     desc:  'Default protection covers everything. Add a higher-priority policy to give specific resources a different SLA.',
     iconBg: 'var(--green-10)',
     iconColor: 'var(--green)',
@@ -9745,8 +9755,8 @@ var NEXT_STEPS_ORDERING = {
 };
 // Okta Overview (Figma 19457:154997): show the Okta layout, hide the shared one, and fill the dynamic bits.
 // ── New-onboarding template (Okta first, GitHub second, Google Identity third): which workloads use it, and the copy each one fills in ──
-var ONB_TEMPLATE_WL = { okta: true, github: true, gip: true, jira: true, confluence: true, gitlab: true, 'azure-devops': true, gws: true, pp: true, d365: true };
-var OKTA_RAIL_WL = { okta: true, gip: true, jira: true, confluence: true, gitlab: true, 'azure-devops': true, gws: true, pp: true, d365: true };   // the Okta-style rail (Authentication row, picker steps as their own rows); GitHub keeps the plain rail
+var ONB_TEMPLATE_WL = { okta: true, github: true, gip: true, jira: true, confluence: true, gitlab: true, 'azure-devops': true, gws: true, pp: true, d365: true, entra: true };
+var OKTA_RAIL_WL = { okta: true, gip: true, jira: true, confluence: true, gitlab: true, 'azure-devops': true, gws: true, pp: true, d365: true, entra: true };   // the Okta-style rail (Authentication row, picker steps as their own rows); GitHub keeps the plain rail
 function _onbTemplate(wl) { return !!ONB_TEMPLATE_WL[wl == null ? currentWorkload : wl]; }
 function _regionOnAuth(wl) { return _onbTemplate(wl); }   // Region & Data Processing sits at the top of Authentication, not on its own step
 function _ovkOn() { return _onbTemplate(); }               // the overview uses the Connection Details / Entities / Scans layout
@@ -9939,6 +9949,32 @@ var ONB_COPY = {
     bg: ['Mailboxes', 'Drives', 'Calendars', 'Chat spaces'],
     authHelp: 'Inventory, activity and discovery scans run here. Content read for scanning is encrypted in transit and at rest and purged after each scan. Pick the region closest to your domain or the one your policy requires.'
   },
+  entra: {
+    tag: 'New in Identity protection',
+    title: 'Welcome to Veeam Intelligent ResOps for Microsoft Entra ID',
+    lede: '<strong>iResOps for Microsoft Entra ID</strong> is the context layer for your Entra ID tenant. See every user, group, app registration and conditional access policy, which users and AI agents can change them, and what\u2019s gone stale. Take action: restore a single policy, or undo an agent\u2019s changes.',
+    feats: [
+      ['Identity Discovery', 'Every user, group, app registration and policy cataloged, within hours.'],
+      ['Access & AI Agent Intelligence', 'Track every user and AI agent\u2019s access, and every change they make.'],
+      ['Identity Lifecycle', 'Inactive users, empty groups and unused app registrations cluttering your tenant.'],
+      ['Object-Level Diff & Restore', 'See exactly what changed in a user, group or policy, and restore just that.'],
+      ['Undo AI', 'Roll back an agent\u2019s changes to groups, apps and policies.'],
+      ['Dependency-Aware Recovery', 'Restore groups, memberships and role assignments in order, links intact.']
+    ],
+    cfgName: 'Microsoft Entra ID',
+    cards: [
+      ['Full inventory', 'Users, groups, administrative units, roles, applications, conditional access and Intune policies, contacts and devices in your tenant'],
+      ['ROT analysis', 'Inactive users, empty groups and unused app registrations cluttering your tenant'],
+      ['AI agent discovery', 'Every agent with Entra ID access, its owner and what it changes'],
+      ['Point-in-time restore', 'Restore points that go back further than Microsoft\u2019s native recycle bin'],
+      ['Activity analysis', '7-day backfill to surface sign-in and admin behaviour from day one'],
+      ['Permission coverage', 'All required API scopes to unlock Entitlements and Posture scanning']
+    ],
+    reqs: function(){ return (WORKLOADS.entra.prereqs || []).slice(); },
+    note: 'An Entra ID Global Administrator completes setup once. Users then go directly to the dashboard.',
+    bg: ['Users', 'Groups', 'Apps', 'Policies'],
+    authHelp: 'Inventory, activity and discovery scans run here. Content read for scanning is encrypted in transit and at rest and purged after each scan. Pick the region closest to your tenant or the one your policy requires.'
+  },
   // Power Platform and Dynamics 365: the GitHub/Jira copy with the product nouns swapped (environments, apps, flows, tables). Requirements come from each workload's own prereqs.
   pp: {
     tag: 'New in Business applications',
@@ -10022,102 +10058,113 @@ function paintOnbCopy(wl) {
 var OVK_COPY = {
   github: {
     name: 'GitHub', entities: '38 entities', chips: ['1 Organization', '16 Repositories', '21 Members'],
-    scoping: 'Finds the organizations and repositories that are in scope for this connection.',
+    scoping: 'Finds the organizations and repositories that are in scope for this integration.',
     next: {
-      'dashboard': { desc: 'Monitor backup success, RPO compliance, and repository coverage for this connection.' },
-      'notifications': { desc: 'Configure alerts for backup failures, GitHub App permission changes, and connection health events.' },
+      'dashboard': { desc: 'Monitor backup success, RPO compliance, and repository coverage for this integration.' },
+      'notifications': { desc: 'Configure alerts for backup failures, GitHub App permission changes, and integration health events.' },
       'sla': { title: 'Review backup SLA', desc: 'For organizations with many repositories, review RPO settings and plan around GitHub’s API rate limits.' },
       'create-policy': { desc: 'Configure custom schedules, retention rules, and repository scope beyond the standard daily policy.' },
-      'inventory': { desc: 'Browse discovered organizations, repositories, branches, issues, pull requests, and workflows indexed from this connection.' }
+      'inventory': { desc: 'Browse discovered organizations, repositories, branches, issues, pull requests, and workflows indexed from this integration.' }
     }
   },
   // Google Identity: the Okta overview's text with the Okta-specific parts swapped. The counts are placeholder data (sum of the chips).
   gip: {
     name: 'Google Identity', entities: '112 entities', chips: ['96 Users', '12 Groups', '4 Organizational units'],
-    scoping: 'Finds the identity objects that are in scope for this connection.',
+    scoping: 'Finds the identity objects that are in scope for this integration.',
     next: {
-      'dashboard': { desc: 'Monitor backup success, RPO compliance, and identity coverage for this connection.' },
-      'notifications': { desc: 'Configure alerts for backup failures, service account key expiry, and connection health events.' },
+      'dashboard': { desc: 'Monitor backup success, RPO compliance, and identity coverage for this integration.' },
+      'notifications': { desc: 'Configure alerts for backup failures, service account key expiry, and integration health events.' },
       'sla': { title: 'Review backup SLA', desc: 'For large Google Cloud organizations (1000+ projects), review RPO settings and plan for a longer initial discovery.' },
       'create-policy': { desc: 'Configure custom schedules, retention rules, and identity scope beyond the standard daily policy.' },
-      'inventory': { desc: 'Browse discovered users, groups, organizational units, admin roles, and IAM policies indexed from this connection.' }
+      'inventory': { desc: 'Browse discovered users, groups, organizational units, admin roles, and IAM policies indexed from this integration.' }
     }
   },
   jira: {
     name: 'Jira', entities: '22 entities', chips: ['1 Site', '12 Projects', '9 Boards'],
-    scoping: 'Finds the projects and boards that are in scope for this connection.',
+    scoping: 'Finds the projects and boards that are in scope for this integration.',
     next: {
-      'dashboard': { desc: 'Monitor backup success, RPO compliance, and project coverage for this connection.' },
-      'notifications': { desc: 'Configure alerts for backup failures, Atlassian token expiry, and connection health events.' },
+      'dashboard': { desc: 'Monitor backup success, RPO compliance, and project coverage for this integration.' },
+      'notifications': { desc: 'Configure alerts for backup failures, Atlassian token expiry, and integration health events.' },
       'sla': { title: 'Review backup SLA', desc: 'For sites with many projects and large attachment volumes, review RPO settings and plan for a longer initial discovery.' },
       'create-policy': { desc: 'Configure custom schedules, retention rules, and project scope beyond the standard daily policy.' },
-      'inventory': { desc: 'Browse discovered projects, issues, components, versions, boards, and sprints indexed from this connection.' }
+      'inventory': { desc: 'Browse discovered projects, issues, components, versions, boards, and sprints indexed from this integration.' }
     }
   },
   confluence: {
     name: 'Confluence', entities: '337 entities', chips: ['1 Site', '24 Spaces', '312 Pages'],
-    scoping: 'Finds the spaces that are in scope for this connection.',
+    scoping: 'Finds the spaces that are in scope for this integration.',
     next: {
-      'dashboard': { desc: 'Monitor backup success, RPO compliance, and space coverage for this connection.' },
-      'notifications': { desc: 'Configure alerts for backup failures, Atlassian token expiry, and connection health events.' },
+      'dashboard': { desc: 'Monitor backup success, RPO compliance, and space coverage for this integration.' },
+      'notifications': { desc: 'Configure alerts for backup failures, Atlassian token expiry, and integration health events.' },
       'sla': { title: 'Review backup SLA', desc: 'For sites with many spaces and large attachment volumes, review RPO settings and plan for a longer initial discovery.' },
       'create-policy': { desc: 'Configure custom schedules, retention rules, and space scope beyond the standard daily policy.' },
-      'inventory': { desc: 'Browse discovered spaces, pages, blog posts, comments, and attachments indexed from this connection.' }
+      'inventory': { desc: 'Browse discovered spaces, pages, blog posts, comments, and attachments indexed from this integration.' }
     }
   },
   gitlab: {
     name: 'GitLab', entities: '63 entities', chips: ['1 Group', '14 Subgroups', '48 Projects'],
-    scoping: 'Finds the groups and projects that are in scope for this connection.',
+    scoping: 'Finds the groups and projects that are in scope for this integration.',
     next: {
-      'dashboard': { desc: 'Monitor backup success, RPO compliance, and project coverage for this connection.' },
-      'notifications': { desc: 'Configure alerts for backup failures, access token expiry, and connection health events.' },
+      'dashboard': { desc: 'Monitor backup success, RPO compliance, and project coverage for this integration.' },
+      'notifications': { desc: 'Configure alerts for backup failures, access token expiry, and integration health events.' },
       'sla': { title: 'Review backup SLA', desc: 'For groups with many projects, review RPO settings and plan around GitLab\u2019s API rate limits.' },
       'create-policy': { desc: 'Configure custom schedules, retention rules, and project scope beyond the standard daily policy.' },
-      'inventory': { desc: 'Browse discovered groups, projects, merge requests, issues, and pipelines indexed from this connection.' }
+      'inventory': { desc: 'Browse discovered groups, projects, merge requests, issues, and pipelines indexed from this integration.' }
     }
   },
   'azure-devops': {
     name: 'Azure DevOps', entities: '61 entities', chips: ['1 Organization', '18 Projects', '42 Repositories'],
-    scoping: 'Finds the projects and repositories that are in scope for this connection.',
+    scoping: 'Finds the projects and repositories that are in scope for this integration.',
     next: {
-      'dashboard': { desc: 'Monitor backup success, RPO compliance, and repository coverage for this connection.' },
-      'notifications': { desc: 'Configure alerts for backup failures, service principal changes, and connection health events.' },
+      'dashboard': { desc: 'Monitor backup success, RPO compliance, and repository coverage for this integration.' },
+      'notifications': { desc: 'Configure alerts for backup failures, service principal changes, and integration health events.' },
       'sla': { title: 'Review backup SLA', desc: 'For organizations with many projects, review RPO settings and plan around Azure DevOps\u2019 rate limits.' },
       'create-policy': { desc: 'Configure custom schedules, retention rules, and project scope beyond the standard daily policy.' },
-      'inventory': { desc: 'Browse discovered projects, repositories, work items, and pipelines indexed from this connection.' }
+      'inventory': { desc: 'Browse discovered projects, repositories, work items, and pipelines indexed from this integration.' }
     }
   },
   gws: {
     name: 'Google Workspace', entities: '279 entities', chips: ['1 Domain', '240 Users', '38 Shared Drives'],
-    scoping: 'Finds the users and shared drives that are in scope for this connection.',
+    scoping: 'Finds the users and shared drives that are in scope for this integration.',
     next: {
-      'dashboard': { desc: 'Monitor backup success, RPO compliance, and mailbox and drive coverage for this connection.' },
-      'notifications': { desc: 'Configure alerts for backup failures, domain-wide delegation changes, and connection health events.' },
+      'dashboard': { desc: 'Monitor backup success, RPO compliance, and mailbox and drive coverage for this integration.' },
+      'notifications': { desc: 'Configure alerts for backup failures, domain-wide delegation changes, and integration health events.' },
       'sla': { title: 'Review backup SLA', desc: 'For domains with many users and large drives, review RPO settings and plan for a longer initial discovery.' },
       'create-policy': { desc: 'Configure custom schedules, retention rules, and user scope beyond the standard daily policy.' },
-      'inventory': { desc: 'Browse discovered mailboxes, drives, calendars, contacts, and chat spaces indexed from this connection.' }
+      'inventory': { desc: 'Browse discovered mailboxes, drives, calendars, contacts, and chat spaces indexed from this integration.' }
     }
   },
   pp: {
     name: 'Power Platform', entities: '45 entities', chips: ['6 Environments', '24 Apps', '15 Flows'],
-    scoping: 'Finds the environments and workspaces that are in scope for this connection.',
+    scoping: 'Finds the environments and workspaces that are in scope for this integration.',
     next: {
-      'dashboard': { desc: 'Monitor backup success, RPO compliance, and environment coverage for this connection.' },
-      'notifications': { desc: 'Configure alerts for backup failures, permission changes, and connection health events.' },
+      'dashboard': { desc: 'Monitor backup success, RPO compliance, and environment coverage for this integration.' },
+      'notifications': { desc: 'Configure alerts for backup failures, permission changes, and integration health events.' },
       'sla': { title: 'Review backup SLA', desc: 'For tenants with many environments, review RPO settings and plan for a longer initial discovery.' },
       'create-policy': { desc: 'Configure custom schedules, retention rules, and environment scope beyond the standard daily policy.' },
-      'inventory': { desc: 'Browse discovered environments, apps, flows, and Power BI workspaces indexed from this connection.' }
+      'inventory': { desc: 'Browse discovered environments, apps, flows, and Power BI workspaces indexed from this integration.' }
+    }
+  },
+  entra: {
+    name: 'Entra ID', entities: '4,640 entities', chips: ['3,820 Users', '412 Groups', '103 Applications'],
+    scoping: 'Finds the identity objects that are in scope for this integration.',
+    next: {
+      'dashboard': { desc: 'Monitor backup success, RPO compliance, and identity coverage for this integration.' },
+      'notifications': { desc: 'Configure alerts for backup failures, certificate or secret expiry, and integration health events.' },
+      'sla': { title: 'Review backup SLA', desc: 'For tenants with many users and groups, review RPO settings and plan for a longer initial discovery.' },
+      'create-policy': { desc: 'Configure custom schedules, retention rules, and identity scope beyond the standard daily policy.' },
+      'inventory': { desc: 'Browse discovered users, groups, app registrations, and conditional access policies indexed from this integration.' }
     }
   },
   d365: {
     name: 'Dynamics 365', entities: '38 entities', chips: ['4 Environments', '24 Tables', '10 Files'],
-    scoping: 'Finds the environments that are in scope for this connection.',
+    scoping: 'Finds the environments that are in scope for this integration.',
     next: {
-      'dashboard': { desc: 'Monitor backup success, RPO compliance, and environment coverage for this connection.' },
-      'notifications': { desc: 'Configure alerts for backup failures, permission changes, and connection health events.' },
+      'dashboard': { desc: 'Monitor backup success, RPO compliance, and environment coverage for this integration.' },
+      'notifications': { desc: 'Configure alerts for backup failures, permission changes, and integration health events.' },
       'sla': { title: 'Review backup SLA', desc: 'For environments with large tables and file volumes, review RPO settings and plan for a longer initial discovery.' },
       'create-policy': { desc: 'Configure custom schedules, retention rules, and environment scope beyond the standard daily policy.' },
-      'inventory': { desc: 'Browse discovered environments, tables, columns, and records indexed from this connection.' }
+      'inventory': { desc: 'Browse discovered environments, tables, columns, and records indexed from this integration.' }
     }
   }
 };
@@ -10144,7 +10191,7 @@ function _oktaEditPaint(screen) {
   var note = function(id, host, text){
     if (!host || document.getElementById(id)) return;
     var n = document.createElement('div'); n.id = id; n.className = 'onb-note onb-note-info'; n.style.cssText = 'margin:0 0 16px';
-    n.innerHTML = '<div style="display:flex;align-items:flex-start;gap:8px;font-size:14px;line-height:20px"><div><b style="font-weight:500">Editing the ' + ((WORKLOADS[currentWorkload] || {}).name || 'connection') + ' connection.</b> ' + text + '</div></div>';
+    n.innerHTML = '<div style="display:flex;align-items:flex-start;gap:8px;font-size:14px;line-height:20px"><div><b style="font-weight:500">Editing the ' + ((WORKLOADS[currentWorkload] || {}).name || 'connection') + ' integration.</b> ' + text + '</div></div>';
     host.insertBefore(n, host.firstChild);
   };
   if (screen === 'auth') {
@@ -10152,12 +10199,12 @@ function _oktaEditPaint(screen) {
     if (rs && !rs.getAttribute('data-sel')) { rs.textContent = (document.getElementById('summary-storage-region') || {}).textContent || OKTA_EDIT_REGION; rs.setAttribute('data-sel', '1'); }
     if (wrap) {
       wrap.classList.add('is-locked');
-      if (!document.getElementById('okta-region-lock')) { var l = document.createElement('div'); l.id = 'okta-region-lock'; l.className = 'okta-edit-lock'; l.innerHTML = lockSvg + '<span>The processing region is set when a connection is created and can\u2019t be changed.</span>'; wrap.parentNode.insertBefore(l, wrap.nextSibling); }
+      if (!document.getElementById('okta-region-lock')) { var l = document.createElement('div'); l.id = 'okta-region-lock'; l.className = 'okta-edit-lock'; l.innerHTML = lockSvg + '<span>The processing region is set when an integration is created and can\u2019t be changed.</span>'; wrap.parentNode.insertBefore(l, wrap.nextSibling); }
     }
     note('okta-edit-note', document.getElementById('okta-auth-head'), 'Re-authorize if your credentials changed. You can also review protection afterwards.');
   }
   if (screen === 'protect') {
-    note('okta-edit-note-protect', document.querySelector('#screen-protect .form-area'), 'Change how this connection is protected, then save.');
+    note('okta-edit-note-protect', document.querySelector('#screen-protect .form-area'), 'Change how this integration is protected, then save.');
     var b = document.getElementById('protect-continue-btn'); if (b && !b.getAttribute('data-was')) { b.setAttribute('data-was', b.textContent); b.textContent = 'Save changes'; }
   }
 }
@@ -10358,8 +10405,8 @@ function enterBasicInfoScreen() {
 // Okta (Figma 19436:139734): "Instance Name", Co-owners becomes an optional, collapsible section, owner shown as the signed-in admin.
 function applyOktaBasicInfo(on) {
   var set = function (id, txt) { var e = document.getElementById(id); if (e) e.textContent = txt; };
-  set('bi-subtitle', on ? 'Create an instance, and then continue to set up the integration.' : 'Enter a name and assign owners for this connection. You can update these details at any time.');
-  set('bi-name-label', on ? 'Instance Name' : 'Connection name');
+  set('bi-subtitle', on ? 'Create an instance, and then continue to set up the integration.' : 'Enter a name and assign owners for this integration. You can update these details at any time.');
+  set('bi-name-label', on ? 'Instance Name' : 'Integration name');
   set('bi-owner-opt', on ? 'Jonathan Cash' : 'Alex Morgan');
   var av = document.getElementById('bi-owner-av'); if (av) av.textContent = on ? 'JC' : 'AM';
   var head = document.getElementById('bi-coowner-head'); if (head) head.style.display = on ? 'flex' : 'none';
@@ -10879,7 +10926,7 @@ function enterConfluenceSitesScreen() {
   var subtitleEl = document.getElementById('cfs-subtitle');
   var hdrLabel = document.getElementById('cfs-count-col-label');
   if (currentWorkload === 'jira') {
-    if (subtitleEl) subtitleEl.innerHTML = 'Atlassian returned <strong style="color:var(--black-100)" id="cfs-discovered-count">' + CONFLUENCE_SITES_STATE.length + '</strong> Atlassian Cloud site(s) you can access. Pick the one to back up — every project, board, issue, and attachment within it is included. Each Jira site is a separate authorization; to back up another site, create a separate connection.';
+    if (subtitleEl) subtitleEl.innerHTML = 'Atlassian returned <strong style="color:var(--black-100)" id="cfs-discovered-count">' + CONFLUENCE_SITES_STATE.length + '</strong> Atlassian Cloud site(s) you can access. Pick the one to back up — every project, board, issue, and attachment within it is included. Each Jira site is a separate authorization; to back up another site, create a separate integration.';
     if (hdrLabel) hdrLabel.textContent = 'Projects';
     // Note: the md's §3.4 "Connection Display Name" is intentionally NOT added
     // here — this prototype collects the connection name up front in the Basic
@@ -11499,12 +11546,12 @@ var WORKLOADS = {
     // the System Log is export-only (no restore), matching the GitHub audit
     // row. (Spec prose says "27 scopes" but enumerates 26 — flagged to PM;
     // we list the 26 it actually names rather than invent a 27th.)
-    // Figma 19440:142225 — four feature-level checks (Connector Activation / Backup / Restore / Discovery Scan) over the 26 granular Okta scopes.
+    // Figma 19440:142225 — four feature-level checks (Integration Activation / Backup / Restore / Discovery Scan) over the 26 granular Okta scopes.
     // iconSvg = exact Figma export (currentColor); a seeded Restore failure is opt-in via window.oktaSeedFail = true (see runTestConnectionSequence).
     permissionCheckRows: [
-      { id: 0, title: 'Connector Activation',
+      { id: 0, title: 'Integration Activation',
         iconSvg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.74 13.62L8.805 11.685C8.64 11.52 8.43 11.4375 8.175 11.4375C7.92 11.4375 7.71 11.52 7.545 11.685C7.38 11.85 7.2975 12.06 7.2975 12.315C7.2975 12.57 7.38 12.78 7.545 12.945L10.11 15.51C10.29 15.69 10.5 15.78 10.74 15.78C10.98 15.78 11.19 15.69 11.37 15.51L16.455 10.425C16.62 10.26 16.7025 10.05 16.7025 9.795C16.7025 9.54 16.62 9.33 16.455 9.165C16.29 9 16.08 8.9175 15.825 8.9175C15.57 8.9175 15.36 9 15.195 9.165L10.74 13.62ZM12 21C10.755 21 9.585 20.7638 8.49 20.2913C7.395 19.8188 6.4425 19.1775 5.6325 18.3675C4.8225 17.5575 4.18125 16.605 3.70875 15.51C3.23625 14.415 3 13.245 3 12C3 10.755 3.23625 9.585 3.70875 8.49C4.18125 7.395 4.8225 6.4425 5.6325 5.6325C6.4425 4.8225 7.395 4.18125 8.49 3.70875C9.585 3.23625 10.755 3 12 3C13.245 3 14.415 3.23625 15.51 3.70875C16.605 4.18125 17.5575 4.8225 18.3675 5.6325C19.1775 6.4425 19.8188 7.395 20.2913 8.49C20.7638 9.585 21 10.755 21 12C21 13.245 20.7638 14.415 20.2913 15.51C19.8188 16.605 19.1775 17.5575 18.3675 18.3675C17.5575 19.1775 16.605 19.8188 15.51 20.2913C14.415 20.7638 13.245 21 12 21ZM12 19.2C14.01 19.2 15.7125 18.5025 17.1075 17.1075C18.5025 15.7125 19.2 14.01 19.2 12C19.2 9.99 18.5025 8.2875 17.1075 6.8925C15.7125 5.4975 14.01 4.8 12 4.8C9.99 4.8 8.2875 5.4975 6.8925 6.8925C5.4975 8.2875 4.8 9.99 4.8 12C4.8 14.01 5.4975 15.7125 6.8925 17.1075C8.2875 18.5025 9.99 19.2 12 19.2Z"/></svg>', subtitle: 'Ability to activate and connect to data source',
-        fix: 'Re-authorize Veeam on the Okta consent screen (Express) or confirm your service app’s Client ID, Okta domain, and public key are registered and active (Manual). Without an active connection, no stream can run.' },
+        fix: 'Re-authorize Veeam on the Okta consent screen (Express) or confirm your service app’s Client ID, Okta domain, and public key are registered and active (Manual). Without an active integration, no stream can run.' },
       { id: 1, title: 'Backup',
         iconSvg: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.1818 12.695L10.4455 13.4109C10.2955 13.5609 10.108 13.6359 9.88295 13.6359C9.65795 13.6359 9.46364 13.5541 9.3 13.3905C9.15 13.2405 9.075 13.0496 9.075 12.8177C9.075 12.5859 9.15 12.395 9.3 12.245L11.4273 10.1177C11.5909 9.9541 11.7818 9.87228 12 9.87228C12.2182 9.87228 12.4091 9.9541 12.5727 10.1177L14.7 12.245C14.85 12.395 14.9284 12.5825 14.9352 12.8075C14.942 13.0325 14.8636 13.2268 14.7 13.3905C14.55 13.5405 14.3625 13.6189 14.1375 13.6257C13.9125 13.6325 13.7182 13.5609 13.5545 13.4109L12.8182 12.695V16.9086H17.3182C17.8909 16.9086 18.375 16.7109 18.7705 16.3155C19.1659 15.92 19.3636 15.4359 19.3636 14.8632C19.3636 14.2905 19.1659 13.8064 18.7705 13.4109C18.375 13.0155 17.8909 12.8177 17.3182 12.8177H16.0909V11.1814C16.0909 10.0496 15.692 9.08478 14.8943 8.28706C14.0966 7.48933 13.1318 7.09047 12 7.09047C10.8682 7.09047 9.90341 7.48933 9.10568 8.28706C8.30795 9.08478 7.90909 10.0496 7.90909 11.1814H7.5C6.70909 11.1814 6.03409 11.4609 5.475 12.02C4.91591 12.5791 4.63636 13.2541 4.63636 14.045C4.63636 14.8359 4.91591 15.5109 5.475 16.07C6.03409 16.6291 6.70909 16.9086 7.5 16.9086H8.72727C8.95909 16.9086 9.15341 16.9871 9.31023 17.1439C9.46705 17.3007 9.54545 17.495 9.54545 17.7268C9.54545 17.9586 9.46705 18.153 9.31023 18.3098C9.15341 18.4666 8.95909 18.545 8.72727 18.545H7.5C6.25909 18.545 5.19886 18.1155 4.31932 17.2564C3.43977 16.3973 3 15.3473 3 14.1064C3 13.0427 3.32045 12.095 3.96136 11.2632C4.60227 10.4314 5.44091 9.89956 6.47727 9.66774C6.81818 8.41319 7.5 7.39728 8.52273 6.62001C9.54545 5.84274 10.7045 5.4541 12 5.4541C13.5955 5.4541 14.9489 6.00978 16.0602 7.12115C17.1716 8.23251 17.7273 9.58592 17.7273 11.1814C18.6682 11.2905 19.4489 11.6961 20.0693 12.3984C20.6898 13.1007 21 13.9223 21 14.8632C21 15.8859 20.642 16.7552 19.9261 17.4711C19.2102 18.1871 18.3409 18.545 17.3182 18.545H12.8182C12.3682 18.545 11.983 18.3848 11.6625 18.0643C11.342 17.7439 11.1818 17.3586 11.1818 16.9086V12.695Z"/></svg>', subtitle: 'Read access to the directory, groups, and IAM policies that back up on schedule',
         fix: 'Grant the okta.users.*, okta.groups.*, okta.policies.*, okta.apps.*, okta.idps.* and okta.roles.* scopes so users, groups, policies, applications, identity providers and admin roles can be read on schedule.' },
@@ -11522,7 +11569,7 @@ var WORKLOADS = {
     connectedSubtitle: '26/26 scopes granted',
     changeLabel: 'Re-authorize',
     defaultRegion: 'US East (N. Virginia) — us-east-1',
-    helpContent: '<h4>Express Authorization</h4><p>Express uses OAuth admin consent. Veeam provisions and manages the Okta Service App, so there is no app registration on your side. Sign in with a Super Admin account, approve the requested scopes, and OAuth refresh tokens rotate automatically — no token or secret to manage.</p><h4>Manual — your own OAuth 2.0 service app</h4><p>Both paths are OAuth 2.0; choose Manual when the app must be customer-owned (headless or regulated environments, or per-scope control). Manual uses the Client Credentials flow with <code>private_key_jwt</code> — there is <strong>no API token and no client secret</strong>.</p><ol><li>In Okta Admin Console, create an <strong>API Services</strong> app (Applications → Create App Integration → API Services)</li><li>Choose a <strong>key algorithm</strong> (RSA 2048 or ECDSA P-256). Veeam generates the keypair and keeps the private key encrypted — it is shown only once</li><li>Copy the <strong>public JWK</strong> Veeam displays and add it to your app under General → Public Keys → Add</li><li>Grant the <strong>26 OAuth scopes</strong> on the app’s Okta API Scopes tab</li><li>Enter the app’s <strong>Client ID</strong> and your <strong>Okta domain</strong> (for example acme.okta.com), then connect</li></ol><p>Access tokens are short-lived and auto-refreshed; the only persistent secret is Veeam’s private key. Veeam can rotate the key with zero downtime (Okta supports multiple public keys per app).</p><h4>Required scopes (26)</h4><p>On your service app’s <strong>Okta API Scopes</strong> tab, grant each scope below <strong>before testing</strong> — the connection test verifies all 26 and lists any that are missing. Removing a scope reduces backup coverage for that group.</p><div id="okta-help-scopes"></div><h4>What happens next?</h4><p>After authorizing, Veeam tests the connection and verifies OAuth scope coverage for all backup streams.</p>'
+    helpContent: '<h4>Express Authorization</h4><p>Express uses OAuth admin consent. Veeam provisions and manages the Okta Service App, so there is no app registration on your side. Sign in with a Super Admin account, approve the requested scopes, and OAuth refresh tokens rotate automatically — no token or secret to manage.</p><h4>Manual — your own OAuth 2.0 service app</h4><p>Both paths are OAuth 2.0; choose Manual when the app must be customer-owned (headless or regulated environments, or per-scope control). Manual uses the Client Credentials flow with <code>private_key_jwt</code> — there is <strong>no API token and no client secret</strong>.</p><ol><li>In Okta Admin Console, create an <strong>API Services</strong> app (Applications → Create App Integration → API Services)</li><li>Choose a <strong>key algorithm</strong> (RSA 2048 or ECDSA P-256). Veeam generates the keypair and keeps the private key encrypted — it is shown only once</li><li>Copy the <strong>public JWK</strong> Veeam displays and add it to your app under General → Public Keys → Add</li><li>Grant the <strong>26 OAuth scopes</strong> on the app’s Okta API Scopes tab</li><li>Enter the app’s <strong>Client ID</strong> and your <strong>Okta domain</strong> (for example acme.okta.com), then connect</li></ol><p>Access tokens are short-lived and auto-refreshed; the only persistent secret is Veeam’s private key. Veeam can rotate the key with zero downtime (Okta supports multiple public keys per app).</p><h4>Required scopes (26)</h4><p>On your service app’s <strong>Okta API Scopes</strong> tab, grant each scope below <strong>before testing</strong> — the integration test verifies all 26 and lists any that are missing. Removing a scope reduces backup coverage for that group.</p><div id="okta-help-scopes"></div><h4>What happens next?</h4><p>After authorizing, Veeam tests the integration and verifies OAuth scope coverage for all backup streams.</p>'
   },
   ad: {
     // Active Directory. Credential-based and manual-only: a directory has no OAuth consent screen, so there is no express
@@ -11587,7 +11634,7 @@ var WORKLOADS = {
     connectedSubtitle: '1 domain, 6 domain controllers',
     changeLabel: 'Update credentials',
     defaultRegion: 'US East (N. Virginia) \u2014 us-east-1',
-    helpContent: '<h4>Connect your forest</h4><p>Enter the forest root domain, any domain controller in the forest, and a Domain Admin account. Veeam signs in to that domain controller and reads the forest topology: the domains, their domain controllers and the FSMO role holders.</p><h4>The account</h4><p>Forest recovery signs in to each domain controller it restores, so the account must be a Domain Admin. Only a user name and password are supported. You can enter a different account per domain controller when you recover.</p><h4>Recovery servers</h4><p>The vCenter and Hyper-V servers a forest can be restored to come from the backup servers connected to Data Command Center, not from this connection.</p>'
+    helpContent: '<h4>Connect your forest</h4><p>Enter the forest root domain, any domain controller in the forest, and a Domain Admin account. Veeam signs in to that domain controller and reads the forest topology: the domains, their domain controllers and the FSMO role holders.</p><h4>The account</h4><p>Forest recovery signs in to each domain controller it restores, so the account must be a Domain Admin. Only a user name and password are supported. You can enter a different account per domain controller when you recover.</p><h4>Recovery servers</h4><p>The vCenter and Hyper-V servers a forest can be restored to come from the backup servers connected to Data Command Center, not from this integration.</p>'
   },
   gip: {
     // Google Identity Protection — DISTINCT from Google Workspace (gws):
@@ -11637,7 +11684,7 @@ var WORKLOADS = {
     // Testing-step rows (2026-09-30 redesign, Figma node 16174:93181,
     // "Google Identity Protection — Connect (Permissions Failed)"):
     // replaced the previous 5 API-scope-category rows with the mock's 4
-    // lifecycle-stage rows — Connector Activation, Backup, Restore,
+    // lifecycle-stage rows — Integration Activation, Backup, Restore,
     // Discovery Scan — in the mock's own order. Any single row failing
     // fails the WHOLE test (existing anyFailed/maybeFinalizeFooter
     // behavior — Continue is blocked, only Reconfigure/Retry are offered;
@@ -11653,7 +11700,7 @@ var WORKLOADS = {
     // Figma node, no match existed before); restore-point-outlined and
     // discovery-scan-outlined already matched the mock's glyphs verbatim.
     permissionCheckRows: [
-      { id: 0, title: 'Connector Activation',
+      { id: 0, title: 'Integration Activation',
         icon: 'power-outlined', subtitle: 'Authenticate the service account and confirm Domain-Wide Delegation is active',
         fix: 'Confirm the Veeam service account’s Client ID is authorized for Domain-Wide Delegation in the Admin console (Security → API controls → Domain-wide delegation), then reconnect.' },
       { id: 1, title: 'Backup',
@@ -11846,7 +11893,7 @@ var WORKLOADS = {
     connectedSubtitle: '7 Dataverse environments',
     changeLabel: 'Change tenant',
     defaultRegion: 'EU West (Ireland) — eu-west-1',
-    helpContent: '<h4>Express Authorization</h4><p>Express uses Veeam\'s pre-built multitenant Entra ID application — no app registration on your side. You sign in with Microsoft, and Veeam manages the app registration and certificate lifecycle.</p><p>If you already know the specific Dataverse environment URL you want to back up, Express still applies — sign in, then narrow the discovered list to that single environment via <strong>Customize</strong> on the next screen. There\'s no separate "direct URL" path; Express + Customize covers it.</p><h4>Per-environment provisioning</h4><p>Even after Express auth succeeds, the Veeam backup principal can\'t read a Dataverse environment until it\'s installed as an <strong>Application User</strong> inside that environment. Provisioning runs automatically when the connection is created — a Dynamics 365 System Administrator account is required for each target environment, and any environments where provisioning fails will be flagged on the connection summary so the right admin can complete setup. <a href="#" onclick="event.preventDefault();return false;" style="color:var(--green);text-decoration:underline">Learn more: Adding the Veeam Application to your environment</a>.</p><h4>Manual Authorization</h4><p>Use Manual when your organization restricts third-party multitenant apps. You\'ll create your own Entra ID app registration (the backup service principal) and provide the Tenant ID, Client ID, and a credential. After auth, you pick environments from the same discovered list Express uses — your custom app has the same Global Discovery permissions as the Veeam multitenant app.</p><p><strong>Required roles for Manual:</strong> Entra ID <strong>Application Administrator</strong> (or Global Admin) to create the app registration <strong>and</strong> Dynamics 365 System Administrator in each environment you want to back up. These can be different people.</p><h4>Certificate vs Client Secret</h4><p><strong>Certificate (recommended for production)</strong> — required for production deployments. The private key stays in your infrastructure and never expires unexpectedly the way a secret can.</p><p><strong>Client Secret (dev / test only)</strong> — simpler to set up but capped at a 2-year lifetime by Entra ID policy, with rotation gaps that can break unattended backup jobs. Not permitted for production connections.</p><h4>Environment Discovery</h4><p>After auth completes — Express or Manual — Veeam enumerates all Dynamics 365 environments your tenant hosts via the Microsoft Global Discovery Service. Production, sandbox, and trial environments all appear; pick the ones you want to back up.</p><h4>Sovereign Clouds</h4><p>This release supports Microsoft Commercial cloud only. GCC, GCC High, DoD, and China (21Vianet) variants are not yet supported.</p>'
+    helpContent: '<h4>Express Authorization</h4><p>Express uses Veeam\'s pre-built multitenant Entra ID application — no app registration on your side. You sign in with Microsoft, and Veeam manages the app registration and certificate lifecycle.</p><p>If you already know the specific Dataverse environment URL you want to back up, Express still applies — sign in, then narrow the discovered list to that single environment via <strong>Customize</strong> on the next screen. There\'s no separate "direct URL" path; Express + Customize covers it.</p><h4>Per-environment provisioning</h4><p>Even after Express auth succeeds, the Veeam backup principal can\'t read a Dataverse environment until it\'s installed as an <strong>Application User</strong> inside that environment. Provisioning runs automatically when the integration is created — a Dynamics 365 System Administrator account is required for each target environment, and any environments where provisioning fails will be flagged on the integration summary so the right admin can complete setup. <a href="#" onclick="event.preventDefault();return false;" style="color:var(--green);text-decoration:underline">Learn more: Adding the Veeam Application to your environment</a>.</p><h4>Manual Authorization</h4><p>Use Manual when your organization restricts third-party multitenant apps. You\'ll create your own Entra ID app registration (the backup service principal) and provide the Tenant ID, Client ID, and a credential. After auth, you pick environments from the same discovered list Express uses — your custom app has the same Global Discovery permissions as the Veeam multitenant app.</p><p><strong>Required roles for Manual:</strong> Entra ID <strong>Application Administrator</strong> (or Global Admin) to create the app registration <strong>and</strong> Dynamics 365 System Administrator in each environment you want to back up. These can be different people.</p><h4>Certificate vs Client Secret</h4><p><strong>Certificate (recommended for production)</strong> — required for production deployments. The private key stays in your infrastructure and never expires unexpectedly the way a secret can.</p><p><strong>Client Secret (dev / test only)</strong> — simpler to set up but capped at a 2-year lifetime by Entra ID policy, with rotation gaps that can break unattended backup jobs. Not permitted for production integrations.</p><h4>Environment Discovery</h4><p>After auth completes — Express or Manual — Veeam enumerates all Dynamics 365 environments your tenant hosts via the Microsoft Global Discovery Service. Production, sandbox, and trial environments all appear; pick the ones you want to back up.</p><h4>Sovereign Clouds</h4><p>This release supports Microsoft Commercial cloud only. GCC, GCC High, DoD, and China (21Vianet) variants are not yet supported.</p>'
   },
   pp: {
     name: 'Microsoft Power Platform', tag: 'Microsoft Cloud', category: 'Business Applications',
@@ -11957,7 +12004,7 @@ var WORKLOADS = {
     envRowSuppressInlineFailureDetail: true,
     // Tooltip copy for the per-env Failed badge — surfaces cause + fix
     // on hover. Used when envRowSuppressInlineFailureDetail is set.
-    envRowFailureBadgeTooltip: 'Cause: The connecting account needs the Power Platform System Administrator role in this environment.\nFix: Grant the role and click Retry, or remove this environment from the connection.',
+    envRowFailureBadgeTooltip: 'Cause: The connecting account needs the Power Platform System Administrator role in this environment.\nFix: Grant the role and click Retry, or remove this environment from the integration.',
     // Per-row API verification + remediation. PP straddles Power
     // Platform admin APIs and Power BI admin APIs; rows cover both
     // surfaces plus the Dataverse data plane in selected envs.
@@ -11987,6 +12034,59 @@ var WORKLOADS = {
     changeLabel: 'Change org',
     defaultRegion: 'EU West (Ireland) — eu-west-1',
     helpContent: '<h4>Express Authorization</h4><p>Express provisions a multi-tenant Entra ID app registration and manages the full certificate lifecycle automatically. No Azure Portal work is required.</p><p>After you sign in, Veeam installs the application user in the environments you select on the next step. Power BI is authorized once at the tenant level — it has no per-environment install. No manual setup is required for either.</p><h4>Required API Permissions</h4><p>The following Power Platform API scopes are required for backup and discovery:</p><ul><li><strong>service.powerapps.com/.default</strong> — Canvas Apps, Model-Driven Apps</li><li><strong>api.flow.microsoft.com</strong> — Cloud Flows and Power Automate</li><li><strong>analysis.windows.net/powerbi/api/.default</strong> — Power BI datasets and reports</li><li><strong>{org}.crm.dynamics.com/.default</strong> — Dataverse tables, records, and security roles</li></ul><h4>Manual Authorization</h4><p>Create an Entra ID app registration in your Azure Portal, assign the required API scopes, then provide either a certificate (recommended) or client secret.</p><p><strong>Certificate (recommended)</strong> — you own the keypair: generate a certificate, upload the public certificate (.cer) to the Entra app registration, and upload the .pfx bundle (cert + private key) here. Veeam stores the .pfx encrypted at rest using the passphrase you provide. Eliminates secret-expiry risk.</p><p><strong>Client Secret</strong> — simpler to set up, but secrets expire (Entra ID enforces a 2-year maximum). Veeam will alert you at 30 and 7 days before expiry.</p><h4>Power BI: Enable service principal access (required)</h4><p>Before authorizing, a Power BI Administrator must enable service principal access in the Power BI Admin Portal. Without this, Power BI backup discovery will fail — even with correct Azure AD permissions.</p><ol><li>Open the <strong>Power BI Admin Portal</strong> &rarr; <strong>Tenant Settings</strong> &rarr; <strong>Developer Settings</strong>.</li><li>Enable <strong>"Allow service principals to use read-only Power BI admin APIs"</strong>.</li><li>Add the Veeam service principal to the security group whitelisted in this setting.</li></ol><p><strong>For backup-only:</strong> the read-only variant above is sufficient. <strong>For restore:</strong> enable the full <em>"Allow service principals to use Power BI APIs"</em> setting instead.</p><h4>Environment Discovery</h4><p>After connecting, Veeam will automatically discover all Power Platform environments in your tenant — including Production, Sandbox, Developer, and Trial environments. Each environment is an isolated container with its own Dataverse database, apps, and flows.</p><h4>What\'s Protected</h4><p>Veeam provides granular backup and restore for all Power Platform components:</p><ul><li><strong>Dataverse</strong> — record-level point-in-time restore for tables, relationships, and security roles</li><li><strong>Canvas Apps</strong> — version-level backup; restore prior published versions</li><li><strong>Model-Driven Apps</strong> — form, view, and chart configuration backup</li><li><strong>Cloud Flows</strong> — flow definition versioning; restore specific versions</li><li><strong>Power Pages</strong> — website configuration and content backup</li><li><strong>Power BI</strong> — dataset and report backup (import-mode fully exportable; DirectQuery metadata only)</li></ul><p>This goes beyond Microsoft\'s native environment-level restore, which offers only 7-day retention with no item-level granularity.</p>'
+  },
+  entra: {
+    // Microsoft Entra ID. NO PRD: composed from the existing flows \u2014 Microsoft sign-in, tenant ID and certificate-or-secret
+    // Manual path from d365/pp; identity framing (Identity & Directory, tenant-wide scope, no picker) from okta/gip. Entra is
+    // tenant-wide, so there is no environment, site or project to choose: Authentication goes straight to Test.
+    name: 'Microsoft Entra ID', shortName: 'Entra ID', tag: 'Microsoft Cloud', category: 'Identity & Directory',
+    desc: 'Back up Entra ID users, groups, app registrations, and conditional access policies.',
+    splashDesc: 'Recover individual identity objects and policies to a point-in-time \u2014 beyond what Entra ID natively retains.',
+    prereqsInHelp: true,
+    protected: ['Users','Groups','Administrative units','Roles','Applications','Conditional Access policies','Intune policies','Organization contacts','Devices','Entra ID logs'],   // the VDC Entra ID object categories
+    prereqs: [
+      'Entra ID Global Administrator or Privileged Role Administrator to grant admin consent for the tenant',
+      'Entra ID P1 or P2 licensing to protect Conditional Access policies',
+      'Manual app registration path only: Entra ID Application Administrator role to create the app registration'
+    ],
+    splashHero: {
+      title: 'Identity-Aware Backup<br>&amp; Recovery',
+      desc: 'Point-in-time, dependency-aware restore for users, groups, app registrations, and conditional access policies in your Entra ID tenant.',
+      bullets: ['Granular, object-level restore','Dependency-aware recovery','Backups on your policy schedule','Immutable, offsite copies']
+    },
+    icon: '<svg width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M31.9992 9.2316H30.8692C32.2592 12.1725 32.4592 15.7436 32.4592 16.6139V30.6482C32.4592 31.9586 31.7592 33.169 30.6392 33.8492C26.3792 36.4 16.7592 42.2318 14.3792 43.6723C14.0192 43.8923 13.6192 44.0024 13.1992 44.0024H37.7092C38.9692 44.0024 39.9992 42.9821 39.9992 41.7217V17.2341C39.9992 12.8127 36.4192 9.2316 31.9992 9.2316Z" fill="#0076D2"/><path d="M30.8702 9.23164C29.8002 6.97094 28.0202 5.08035 25.0802 5.08035C23.7602 5.08035 22.4802 5.51049 21.2802 6.23071C21.5102 6.62083 21.7302 7.04096 21.9402 7.54112C22.1702 8.09129 22.3202 8.65146 22.4502 9.23164C22.6402 10.1219 22.7402 11.0422 22.7702 11.9525C22.8402 14.7233 22.8002 18.3245 22.7502 20.9153C22.7102 23.0259 21.5702 24.9565 19.7602 26.0268L10.2302 31.6986L10.1602 39.8311V42.3819C10.1602 43.2622 10.8802 43.9824 11.7602 43.9824H13.2102C13.6302 43.9824 14.0302 43.8724 14.3902 43.6523C16.7602 42.2119 26.3802 36.3701 30.6502 33.8293C31.7802 33.1591 32.4702 31.9487 32.4702 30.6283V16.5939C32.4702 15.7237 32.2702 12.1525 30.8802 9.21163L30.8702 9.23164Z" fill="url(#enwla)"/><path d="M22.7595 11.9624C22.7395 11.0422 22.6395 10.1319 22.4395 9.2416C22.3095 8.66142 22.1595 8.10124 21.9295 7.55107C21.7195 7.05092 21.4995 6.63079 21.2695 6.24067C17.0995 -0.821521 9.87948 10.502 8.50948 17.074C7.82948 20.9452 7.97948 27.7573 8.10948 31.0484C8.13948 31.9086 9.07948 32.3988 9.80948 31.9586L10.1395 31.7586L10.2095 31.7186L19.7395 26.0468C21.5495 24.9665 22.6895 23.0359 22.7295 20.9352C22.7795 18.3344 22.8195 14.7333 22.7495 11.9724L22.7595 11.9624Z" fill="url(#enwlb)"/><defs><linearGradient id="enwla" x1="32.2802" y1="6.59082" x2="12.1197" y2="52.1903" gradientUnits="userSpaceOnUse"><stop stop-color="#37ACD9"/><stop offset="1" stop-color="#0094E5"/></linearGradient><linearGradient id="enwlb" x1="6.23948" y1="5.34039" x2="30.3302" y2="43.6255" gradientUnits="userSpaceOnUse"><stop stop-color="#9DF0FE"/><stop offset="1" stop-color="#40D9FA"/></linearGradient></defs></svg>',
+    iconBg: '#ffffff',
+    manualCertSupport: true,
+    manualCertUsesPfx: true,
+    requiresTenantId: true,            // Manual form reveals the Tenant ID input (same as d365/pp)
+    requiresPostAuthPropagation: true, // Microsoft workloads share the same Entra service-principal propagation window
+    hideScopeStep: true,               // tenant-wide: no Scope & Fields narrowing
+    permissionCheckRows: [
+      { id: 0, title: 'Directory read access',
+        icon: 'organization-outlined', subtitle: 'Microsoft Graph returns your tenant\u2019s users and groups',
+        detail: 'GET https://graph.microsoft.com/v1.0/users?$top=1 and /groups?$top=1 \u2192 200 OK',
+        fix: 'Grant admin consent for User.Read.All, Group.Read.All and Directory.Read.All so users and groups can be read on schedule.' },
+      { id: 1, title: 'Application and policy read access',
+        icon: 'objects-outlined', subtitle: 'App registrations and Conditional Access policies are readable',
+        detail: 'GET /applications?$top=1 and /identity/conditionalAccess/policies \u2192 200 OK',
+        fix: 'Grant Application.Read.All and Policy.Read.All. Conditional Access policies also need Entra ID P1 or P2 in the tenant.' },
+      { id: 2, title: 'Directory write access',
+        icon: 'management-outlined', subtitle: 'Objects can be restored to the tenant',
+        detail: 'Verifies the write permissions required to recreate users, groups, applications and policies',
+        fix: 'Grant the paired write permissions (User.ReadWrite.All, Group.ReadWrite.All, Application.ReadWrite.All, Policy.ReadWrite.ConditionalAccess). Read-only access allows backup but not restore.' },
+      { id: 3, title: 'Sign-in and audit log access',
+        icon: 'reporting-outlined', subtitle: 'Sign-in and directory audit history is readable',
+        detail: 'GET /auditLogs/directoryAudits?$top=1 \u2192 200 OK',
+        fix: 'Grant AuditLog.Read.All so activity analysis can backfill sign-in and admin changes. Sign-in logs need Entra ID P1 or P2.' }
+    ],
+    expressLabel: 'Sign in with Microsoft',
+    expressIcon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M11.4 24H0V12.6h11.4zM24 24H12.6V12.6H24zM11.4 11.4H0V0h11.4zM24 11.4H12.6V0H24z"/></svg>',
+    defaultInstanceName: 'EntraID-connection-1',
+    connectedTitle: 'Connected to \u201ccontoso.onmicrosoft.com\u201d',
+    connectedSubtitle: 'Access: entire Entra ID tenant',
+    changeLabel: 'Change tenant',
+    defaultRegion: 'EU West (Ireland) \u2014 eu-west-1',
+    helpContent: '<h4>Express Authorization</h4><p>Express uses Veeam\'s pre-built multitenant Entra ID application \u2014 no app registration on your side. You sign in with Microsoft, grant admin consent for your tenant, and Veeam manages the app registration and certificate lifecycle.</p><h4>Manual Authorization</h4><p>Use Manual when your organization restricts third-party multitenant apps. You\'ll create your own Entra ID app registration, grant it the required Microsoft Graph permissions, and provide the Tenant ID, Client ID, and a certificate or client secret.</p>'
   },
   gws: {
     // Google Workspace. Source: PRD "Workload Integration Schema — Google
@@ -12166,7 +12266,7 @@ var WORKLOADS = {
     connectedSubtitle: 'All subgroups and projects accessible',
     changeLabel: 'Change group',
     defaultRegion: 'US East (N. Virginia) — us-east-1',
-    helpContent: '<h4>Express Connection</h4><p>One-click OAuth 2.0 Authorization Code flow with PKCE. You sign in with your GitLab account, grant consent on the OAuth page, and the platform automatically provisions a dedicated Group Access Token for backup operations. The token uses a bot user that is not tied to any individual, so backups continue even if team members change.</p><p>Requires <strong>Group Owner</strong> on the target top-level group. The OAuth scope <code>api</code> grants full read and write access — required for backup and restore.</p><h4>Why Group Access Token?</h4><p>OAuth tokens expire after 2 hours and are tied to the authorizing user. A Group Access Token (Maintainer access, 365-day lifetime) decouples backups from any one person and rotates automatically before expiry.</p><h4>Manual Connection — Create the Group Access Token yourself</h4><p>Use this when your security policy requires you to provision the token rather than letting the OAuth flow create it. You create the GAT in GitLab and paste the value into the wizard.</p><ol><li>Go to your top-level group on GitLab.com</li><li>Open <strong>Settings → Access Tokens → Add new token</strong></li><li>Name: <code>Veeam Data Cloud Backup</code> (or any name)</li><li>Role: <strong>Maintainer</strong></li><li>Scope: select <code>api</code></li><li>Click <strong>Create group access token</strong> and copy the value — it\'s shown only once</li><li>Return to the wizard and paste the token along with your group URL (for example <code>https://gitlab.com/your-group</code>)</li></ol><p>You must have <strong>Owner</strong> role on the group to create a Group Access Token — Maintainer is not sufficient for token creation, only for the token\'s runtime access level.</p><h4>GitLab.com Tier Note</h4><p>Group Access Tokens require <strong>Premium or Ultimate</strong> on GitLab.com — they\'re not available on the Free plan. Veeam Data Cloud does not support GitLab Free.</p><h4>Scope</h4><p>One connection can cover one or more top-level group hierarchies: all subgroups (up to 20 levels) and all projects within each selected group. There is no per-project selector — pick groups and back up everything within them.</p>'
+    helpContent: '<h4>Express Integration</h4><p>One-click OAuth 2.0 Authorization Code flow with PKCE. You sign in with your GitLab account, grant consent on the OAuth page, and the platform automatically provisions a dedicated Group Access Token for backup operations. The token uses a bot user that is not tied to any individual, so backups continue even if team members change.</p><p>Requires <strong>Group Owner</strong> on the target top-level group. The OAuth scope <code>api</code> grants full read and write access — required for backup and restore.</p><h4>Why Group Access Token?</h4><p>OAuth tokens expire after 2 hours and are tied to the authorizing user. A Group Access Token (Maintainer access, 365-day lifetime) decouples backups from any one person and rotates automatically before expiry.</p><h4>Manual Integration — Create the Group Access Token yourself</h4><p>Use this when your security policy requires you to provision the token rather than letting the OAuth flow create it. You create the GAT in GitLab and paste the value into the wizard.</p><ol><li>Go to your top-level group on GitLab.com</li><li>Open <strong>Settings → Access Tokens → Add new token</strong></li><li>Name: <code>Veeam Data Cloud Backup</code> (or any name)</li><li>Role: <strong>Maintainer</strong></li><li>Scope: select <code>api</code></li><li>Click <strong>Create group access token</strong> and copy the value — it\'s shown only once</li><li>Return to the wizard and paste the token along with your group URL (for example <code>https://gitlab.com/your-group</code>)</li></ol><p>You must have <strong>Owner</strong> role on the group to create a Group Access Token — Maintainer is not sufficient for token creation, only for the token\'s runtime access level.</p><h4>GitLab.com Tier Note</h4><p>Group Access Tokens require <strong>Premium or Ultimate</strong> on GitLab.com — they\'re not available on the Free plan. Veeam Data Cloud does not support GitLab Free.</p><h4>Scope</h4><p>One integration can cover one or more top-level group hierarchies: all subgroups (up to 20 levels) and all projects within each selected group. There is no per-project selector — pick groups and back up everything within them.</p>'
   },
   'azure-devops': {
     // Azure DevOps. Auth model is two-stage and unique among DevOps workloads:
@@ -12224,10 +12324,10 @@ var WORKLOADS = {
                                        // access" via requiresPostAuthPropagation).
                                        // Each row carries verification detail + fix
                                        // instructions for the expand-for-detail UX.
-      { id: 0, title: 'Organization connection',
+      { id: 0, title: 'Organization integration',
         icon: 'organization-outlined', subtitle: 'Service principal is a member of your Azure DevOps organization',
         detail: 'GET https://dev.azure.com/{org}/_apis/projects?api-version=7.1 → 200 OK',
-        fix: 'In your Azure DevOps organization, go to Organization Settings → Users → Add users. Search for the application by name or Client ID, set access level to Basic, and click Add. Then click Verify connection.' },
+        fix: 'In your Azure DevOps organization, go to Organization Settings → Users → Add users. Search for the application by name or Client ID, set access level to Basic, and click Add. Then click Verify integration.' },
       { id: 1, title: 'Repository access',
         icon: 'repositories-outlined',       subtitle: 'Service principal can read repositories in your projects',
         detail: 'GET https://dev.azure.com/{org}/{first_project}/_apis/git/repositories?api-version=7.1 → 200 OK',
@@ -12241,7 +12341,7 @@ var WORKLOADS = {
     connectedSubtitle: 'Service principal added with Basic access',
     changeLabel: 'Change org',
     defaultRegion: 'US East (N. Virginia) — us-east-1',
-    helpContent: '<h4>Express Connection</h4><p>One-click OAuth flow. You sign in with Microsoft, grant tenant-wide consent, and Veeam adds its Service Principal to your Azure DevOps organization automatically. Requires both Entra ID Application Administrator (or Global Admin) and Project Collection Administrator in the target organization.</p><p>If you do not have the Project Collection Administrator role, the OAuth step will still succeed but the Service Principal will need to be added manually in Organization Settings → Users.</p><h4>Manual — Client Secret</h4><p>Create an Entra ID app registration in your Azure portal, generate a client secret, and add the Service Principal to your Azure DevOps organization with Basic access level. Two admin roles required (can be different people).</p><h4>Manual — Certificate</h4><p>Recommended for production. Upload the <strong>.pfx</strong> file containing both the public certificate and private key, plus the passphrase if the PFX was exported with one. The matching public certificate (.cer) must be extracted and uploaded to your Entra app registration separately under <em>Certificates &amp; secrets → Certificates</em>.</p><h4>Permission Model</h4><p>Azure DevOps does not use Entra ID Application permissions for runtime access control. Permissions are governed entirely by ADO\'s native model: access level (Basic minimum), organization-level groups, project-level groups, and security namespaces.</p><h4>Propagation</h4><p>After a Service Principal is added to an Azure DevOps organization, there is typically a 30 to 60 second propagation delay before ADO APIs accept SP-authenticated calls. Veeam absorbs this automatically with retries.</p>'
+    helpContent: '<h4>Express Integration</h4><p>One-click OAuth flow. You sign in with Microsoft, grant tenant-wide consent, and Veeam adds its Service Principal to your Azure DevOps organization automatically. Requires both Entra ID Application Administrator (or Global Admin) and Project Collection Administrator in the target organization.</p><p>If you do not have the Project Collection Administrator role, the OAuth step will still succeed but the Service Principal will need to be added manually in Organization Settings → Users.</p><h4>Manual — Client Secret</h4><p>Create an Entra ID app registration in your Azure portal, generate a client secret, and add the Service Principal to your Azure DevOps organization with Basic access level. Two admin roles required (can be different people).</p><h4>Manual — Certificate</h4><p>Recommended for production. Upload the <strong>.pfx</strong> file containing both the public certificate and private key, plus the passphrase if the PFX was exported with one. The matching public certificate (.cer) must be extracted and uploaded to your Entra app registration separately under <em>Certificates &amp; secrets → Certificates</em>.</p><h4>Permission Model</h4><p>Azure DevOps does not use Entra ID Application permissions for runtime access control. Permissions are governed entirely by ADO\'s native model: access level (Basic minimum), organization-level groups, project-level groups, and security namespaces.</p><h4>Propagation</h4><p>After a Service Principal is added to an Azure DevOps organization, there is typically a 30 to 60 second propagation delay before ADO APIs accept SP-authenticated calls. Veeam absorbs this automatically with retries.</p>'
   },
   confluence: {
     // Confluence Cloud (Atlassian). Auth model is OAuth 2.0 Authorization
@@ -12322,11 +12422,11 @@ var WORKLOADS = {
       { id: 0, title: 'Content read access', subtitle: 'Pages, blog posts, folders, comments, attachments, versions, and labels',
         icon: 'discovery-scan-outlined',
         detail: 'Verifies granular scopes: read:page:confluence, read:blogpost:confluence, read:folder:confluence, read:comment:confluence, read:attachment:confluence, readonly:content.attachment:confluence, read:label:confluence. Probe: GET https://api.atlassian.com/ex/confluence/{cloudId}/wiki/api/v2/pages?limit=1 → 200 OK. These drive all backup traversal.',
-        fix: 'Re-authorize the connection and grant all requested content-read scopes on the Atlassian consent screen. For Manual connections, also confirm every scope is declared on your OAuth app\'s Permissions tab at developer.atlassian.com — Atlassian silently drops undeclared scopes from the consent URL.' },
+        fix: 'Re-authorize the integration and grant all requested content-read scopes on the Atlassian consent screen. For Manual integrations, also confirm every scope is declared on your OAuth app\'s Permissions tab at developer.atlassian.com — Atlassian silently drops undeclared scopes from the consent URL.' },
       { id: 1, title: 'Space enumeration', subtitle: 'Discovers every space on the site, including archived',
         icon: 'organization-outlined',
         detail: 'Verifies granular scopes: read:space:confluence, read:space-details:confluence, read:space.property:confluence. Probe: GET https://api.atlassian.com/ex/confluence/{cloudId}/wiki/api/v2/spaces?limit=1 → 200 OK. Without these, backup scope traversal cannot start.',
-        fix: 'Re-authorize the connection and grant the space-read scopes on the Atlassian consent screen. These are Delegated scopes under the authorizing admin\'s context.' },
+        fix: 'Re-authorize the integration and grant the space-read scopes on the Atlassian consent screen. These are Delegated scopes under the authorizing admin\'s context.' },
       { id: 2, title: 'Permissions & restrictions', subtitle: 'Space permission grants and per-page restrictions — the trust fabric',
         icon: 'security-outlined',
         detail: 'Verifies granular scopes: read:space.permission:confluence and read:content.restriction:confluence. Space permissions probe via v2; page restrictions use the v1 endpoint GET /wiki/rest/api/content/{id}/restriction (v2 has no restrictions group yet). Without these, restored content could surface under default permissions.',
@@ -12352,7 +12452,7 @@ var WORKLOADS = {
     connectedSubtitle: 'Site Admin · 24 spaces',
     changeLabel: 'Change site',
     defaultRegion: 'US East (N. Virginia) — us-east-1',
-    helpContent: '<h4>Express Connection</h4><p>One-click OAuth 2.0 (3LO) Authorization Code flow. You sign in to Atlassian, grant consent on the Atlassian consent screen, and DCC stores the access + refresh token pair. After consent, DCC calls <code>/oauth/token/accessible-resources</code> to enumerate the Atlassian Cloud sites you can access; if more than one site is returned, you pick the target site on the next step.</p><p>Each Atlassian Cloud site is a separate authorization — to back up two sites, complete the wizard twice.</p><h4>Required role</h4><p><strong>Organization Admin or Site Admin</strong> on the target Atlassian Cloud site. User-scoped API tokens and personal access tokens are <strong>not accepted</strong> on any path — they are not enterprise-deployable. A newly-assigned Site Admin role can take 10–30 seconds to propagate.</p><h4>Granular scopes (Phase 1)</h4><p>DCC requests <strong>granular Confluence scopes</strong> exclusively — classic scopes like <code>read:confluence-content.all</code> over-grant and are not Atlassian\'s forward path. The set, paired read/write per object type:</p><ul><li><strong>Spaces:</strong> <code>read/write:space</code>, <code>read:space-details</code>, <code>read/write:space.property</code>, <code>read/write:space.permission</code>, <code>read/write:space.setting</code></li><li><strong>Content:</strong> <code>read/write:page</code>, <code>read/write:blogpost</code>, <code>read/write:folder</code>, <code>read/write:attachment</code> (+ <code>readonly:content.attachment</code> for binary download), <code>read/write:comment</code>, <code>read/write:label</code></li><li><strong>Fidelity:</strong> <code>read/write:content.restriction</code>, <code>read/write:content.property</code>, <code>read/write:template</code></li><li><strong>Platform:</strong> <code>read:me</code>, <code>read:user:confluence</code>, <code>search:confluence</code>, <code>offline_access</code></li></ul><p><code>delete:*:confluence</code> scopes are requested up front solely for opt-in restore-over-existing flows — gated by UX, never used by default. <code>manage:confluence-configuration</code>, group management, whiteboards, and databases scopes are <strong>not requested</strong> in Phase 1.</p><h4>Manual Connection — your own OAuth 2.0 (3LO) app</h4><p>Use Manual when your security policy requires the credential to live in an app registration you own. API tokens are not accepted.</p><ol><li>In your Atlassian Developer Console (<a href="#" onclick="event.preventDefault();return false;" style="color:var(--green);text-decoration:underline">developer.atlassian.com</a>) create an <strong>OAuth 2.0 (3LO)</strong> app</li><li>On the app\'s <strong>Permissions</strong> tab, add every granular scope listed above — Atlassian silently drops scopes that are in the consent URL but not declared on the app</li><li>On <strong>Authorization</strong>, set the callback URL shown in the wizard (exact match required)</li><li>Copy the <strong>Client ID</strong> and <strong>Client Secret</strong> from Settings into the wizard, confirm the callback checkbox, then click <strong>Authorize with Atlassian</strong> to run consent against your own app</li></ol><p>Tokens: access tokens expire after 1 hour; refresh tokens rotate on every use with a 90-day inactivity TTL. DCC runs a keep-alive probe at least every 30 days and flags the connection "Requires re-authorization" if it ever fails.</p><h4>Out of scope (Phase 1)</h4><p>Confluence Whiteboards and Databases have no round-trip restore API today. They will appear in the post-connection inventory as <em>"Discovered but not protected (Phase 2)"</em> so coverage is never overstated.</p>'
+    helpContent: '<h4>Express Integration</h4><p>One-click OAuth 2.0 (3LO) Authorization Code flow. You sign in to Atlassian, grant consent on the Atlassian consent screen, and DCC stores the access + refresh token pair. After consent, DCC calls <code>/oauth/token/accessible-resources</code> to enumerate the Atlassian Cloud sites you can access; if more than one site is returned, you pick the target site on the next step.</p><p>Each Atlassian Cloud site is a separate authorization — to back up two sites, complete the wizard twice.</p><h4>Required role</h4><p><strong>Organization Admin or Site Admin</strong> on the target Atlassian Cloud site. User-scoped API tokens and personal access tokens are <strong>not accepted</strong> on any path — they are not enterprise-deployable. A newly-assigned Site Admin role can take 10–30 seconds to propagate.</p><h4>Granular scopes (Phase 1)</h4><p>DCC requests <strong>granular Confluence scopes</strong> exclusively — classic scopes like <code>read:confluence-content.all</code> over-grant and are not Atlassian\'s forward path. The set, paired read/write per object type:</p><ul><li><strong>Spaces:</strong> <code>read/write:space</code>, <code>read:space-details</code>, <code>read/write:space.property</code>, <code>read/write:space.permission</code>, <code>read/write:space.setting</code></li><li><strong>Content:</strong> <code>read/write:page</code>, <code>read/write:blogpost</code>, <code>read/write:folder</code>, <code>read/write:attachment</code> (+ <code>readonly:content.attachment</code> for binary download), <code>read/write:comment</code>, <code>read/write:label</code></li><li><strong>Fidelity:</strong> <code>read/write:content.restriction</code>, <code>read/write:content.property</code>, <code>read/write:template</code></li><li><strong>Platform:</strong> <code>read:me</code>, <code>read:user:confluence</code>, <code>search:confluence</code>, <code>offline_access</code></li></ul><p><code>delete:*:confluence</code> scopes are requested up front solely for opt-in restore-over-existing flows — gated by UX, never used by default. <code>manage:confluence-configuration</code>, group management, whiteboards, and databases scopes are <strong>not requested</strong> in Phase 1.</p><h4>Manual Integration — your own OAuth 2.0 (3LO) app</h4><p>Use Manual when your security policy requires the credential to live in an app registration you own. API tokens are not accepted.</p><ol><li>In your Atlassian Developer Console (<a href="#" onclick="event.preventDefault();return false;" style="color:var(--green);text-decoration:underline">developer.atlassian.com</a>) create an <strong>OAuth 2.0 (3LO)</strong> app</li><li>On the app\'s <strong>Permissions</strong> tab, add every granular scope listed above — Atlassian silently drops scopes that are in the consent URL but not declared on the app</li><li>On <strong>Authorization</strong>, set the callback URL shown in the wizard (exact match required)</li><li>Copy the <strong>Client ID</strong> and <strong>Client Secret</strong> from Settings into the wizard, confirm the callback checkbox, then click <strong>Authorize with Atlassian</strong> to run consent against your own app</li></ol><p>Tokens: access tokens expire after 1 hour; refresh tokens rotate on every use with a 90-day inactivity TTL. DCC runs a keep-alive probe at least every 30 days and flags the integration "Requires re-authorization" if it ever fails.</p><h4>Out of scope (Phase 1)</h4><p>Confluence Whiteboards and Databases have no round-trip restore API today. They will appear in the post-connection inventory as <em>"Discovered but not protected (Phase 2)"</em> so coverage is never overstated.</p>'
   },
   jira: {
     // Atlassian Jira Cloud. DCC scope is Jira Cloud only (Data Center /
@@ -12432,7 +12532,7 @@ var WORKLOADS = {
       { id: 0, title: 'Issue & content read access', subtitle: 'Issues, standard + custom fields, comments, changelog, links, labels, watchers',
         icon: 'issues-outlined',
         detail: 'Verifies OAuth scopes: read:jira-work, read:issue:jira, read:comment:jira, read:issue-link:jira, read:label:jira, read:issue.watcher:jira. GET https://api.atlassian.com/ex/jira/{cloudId}/rest/api/3/search?maxResults=1 → 200 OK. This is the primary read surface driving all backup traversal.',
-        fix: 'Re-authorize the connection signed in as a Site Admin or Organization Admin and grant all requested scopes on the Atlassian consent screen. For the Manual path, add the read scopes under developer.atlassian.com → your app → Permissions → Jira API, then reconnect.' },
+        fix: 'Re-authorize the integration signed in as a Site Admin or Organization Admin and grant all requested scopes on the Atlassian consent screen. For the Manual path, add the read scopes under developer.atlassian.com → your app → Permissions → Jira API, then reconnect.' },
       { id: 1, title: 'Projects, components & versions', subtitle: 'Enumerate projects and read project-level components and versions',
         icon: 'projects-outlined',
         detail: 'Verifies OAuth scopes: read:project:jira, read:project.component:jira, read:project-version:jira. GET /rest/api/3/project/search → 200 OK with a non-empty list. Without this, backup scope traversal cannot discover which projects exist.',
@@ -12453,7 +12553,7 @@ var WORKLOADS = {
       { id: 5, title: 'Refresh token (offline access)', subtitle: 'Long-lived refresh token for unattended scheduled backups — not blocking',
         icon: 'secret-manager-outlined',
         softWarn: true,
-        detail: 'Verifies OAuth scope: offline_access. Required so scheduled daily backup jobs mint new access tokens without re-consent. Atlassian access tokens expire in 1 hour; the rotating refresh token expires after 90 days of inactivity. The connection succeeds without this scope, but unattended backups start failing after the first hour.',
+        detail: 'Verifies OAuth scope: offline_access. Required so scheduled daily backup jobs mint new access tokens without re-consent. Atlassian access tokens expire in 1 hour; the rotating refresh token expires after 90 days of inactivity. The integration succeeds without this scope, but unattended backups start failing after the first hour.',
         fix: 'Re-authorize and ensure offline_access is granted. If the consent screen does not list it, the DCC platform team adds it to the OAuth app declaration / Forge manifest. Daily backup cadence keeps the refresh token well inside the 90-day window in normal operation.' }
     ],
     expressLabel: 'Authorize with Atlassian',
@@ -12463,11 +12563,11 @@ var WORKLOADS = {
     connectedSubtitle: 'Site Admin · 12 projects',
     changeLabel: 'Change site',
     defaultRegion: 'US East (N. Virginia) — us-east-1',
-    helpContent: '<h4>Express Connection — Forge app</h4><p>Veeam DCC connects to your Jira Cloud site through Veeam’s published Forge app on the Atlassian Marketplace. Sign in with a Site Admin or Organization Admin account, review the requested scopes on Atlassian’s consent screen, and approve the install. No client ID or secret to manage — Atlassian handles the OAuth handshake and the install is bound to your Atlassian organisation. If your organisation enforces an Approved-apps policy under Atlassian Guard / Connected Apps settings, allow-list the Veeam DCC Forge app before starting.</p><p>After consent, DCC calls <code>/oauth/token/accessible-resources</code> to enumerate the Atlassian Cloud sites you can access; if more than one site is returned, you pick the target site (cloudId) on the next step. One DCC connection maps 1:1 to one site — to back up two sites, complete the wizard twice.</p><h4>App access policies (Atlassian Guard)</h4><p>If your organisation enforces an <strong>Approved-apps policy</strong> under Atlassian Guard / Connected Apps, allow-list the Veeam DCC Forge app first, or the install/consent is blocked even for admins.</p><h4>Required role</h4><p><strong>Site Admin or Organization Admin</strong> on the target Atlassian Cloud site. Atlassian’s Trusted User and Product Admin roles are not sufficient to install or authorize a third-party app.</p><h4>Manual Connection — OAuth 2.0 (3LO)</h4><p>Use Manual when your security policy requires you to provision the credential yourself. Create an <strong>OAuth 2.0 (3LO) integration</strong> in the Atlassian Developer Console, point its callback URL at the DCC endpoint, add the Phase 1 scopes under both the Jira API and Jira Software API, and paste the Client ID and Client Secret into the wizard.</p><ol><li>Open <a href="#" onclick="event.preventDefault();return false;" style="color:var(--green);text-decoration:underline">developer.atlassian.com</a> → <strong>My Apps → Create → OAuth 2.0 integration</strong></li><li>Under <strong>Authorization</strong>, set the Callback URL to the DCC callback shown in the wizard</li><li>Under <strong>Permissions</strong>, add the Jira API scopes (<code>read:jira-work</code>, <code>write:jira-work</code>, and the granular read/write pairs) <em>and</em> the Jira Software API scopes (<code>read:board-scope:jira-software</code>, <code>read:sprint:jira-software</code>, and pairs)</li><li>Copy the Client ID and Client Secret from <strong>Settings</strong> and paste them into the DCC wizard, then click Connect to complete the redirect and pick your site</li></ol><h4>Required OAuth scopes</h4><p>In the Developer Console, open your app → <strong>Permissions</strong> and add each scope under the matching API. Read scopes power backup; their paired write scopes power restore.</p><p><strong>Jira API (platform)</strong></p><ul><li><strong>Backup (read):</strong> <code>read:jira-work</code>, <code>read:project:jira</code>, <code>read:project.component:jira</code>, <code>read:project-version:jira</code>, <code>read:issue:jira</code>, <code>read:issue-link:jira</code>, <code>read:comment:jira</code>, <code>read:attachment:jira</code>, <code>read:issue-worklog:jira</code>, <code>read:label:jira</code>, <code>read:issue.watcher:jira</code>, <code>read:jira-user</code>, <code>read:user:jira</code></li><li><strong>Restore (write):</strong> <code>write:jira-work</code>, <code>manage:jira-project</code>, <code>write:project:jira</code>, <code>write:project.component:jira</code>, <code>write:project-version:jira</code>, <code>write:issue:jira</code>, <code>write:issue-link:jira</code>, <code>write:comment:jira</code>, <code>write:attachment:jira</code>, <code>write:issue-worklog:jira</code>, <code>write:issue.watcher:jira</code></li></ul><p><strong>Jira Software API (Agile — Boards &amp; Sprints)</strong></p><ul><li><strong>Backup (read):</strong> <code>read:board-scope:jira-software</code>, <code>read:board-scope.admin:jira-software</code>, <code>read:sprint:jira-software</code>, <code>read:epic:jira-software</code>, <code>read:issue:jira-software</code></li><li><strong>Restore (write):</strong> <code>write:board-scope:jira-software</code>, <code>write:board-scope.admin:jira-software</code>, <code>write:sprint:jira-software</code>, <code>write:issue:jira-software</code></li></ul><p><strong>OAuth:</strong> <code>offline_access</code> — issues a refresh token so scheduled daily backups run without re-consent.</p><h4>Jira Software scopes are mandatory for Boards &amp; Sprints</h4><p>Jira Software does <strong>not</strong> support classic scopes. The <code>read:jira-work</code> envelope covers the Jira platform but <em>not</em> the Agile REST API (<code>/rest/agile/1.0</code>). If you build a Manual app with classic scopes only, every Agile call returns 401 “scope does not match” and Boards / Sprints silently drop out of the backup. Add the granular <code>*:jira-software</code> scopes explicitly.</p><h4>Disallowed credentials</h4><p>Atlassian API tokens, Personal Access Tokens (PATs), individual end-user (non-admin) OAuth grants, and bare username/password are <strong>not</strong> accepted for this workload.</p><h4>Trash-window caveat</h4><p>Atlassian retains deleted items in trash for 60 days (Standard / Premium) or 30 days (Free). Anything purged from trash before your first DCC backup cannot be recovered from Jira’s side.</p><h4>Out of scope (Phase 1)</h4><p>Workflow schemes, screen schemes, automation rules, and custom-field contexts are deferred to a future release — the public REST surface does not yet expose an idempotent round-trip restore identifier for them.</p>'
+    helpContent: '<h4>Express Integration — Forge app</h4><p>Veeam DCC connects to your Jira Cloud site through Veeam’s published Forge app on the Atlassian Marketplace. Sign in with a Site Admin or Organization Admin account, review the requested scopes on Atlassian’s consent screen, and approve the install. No client ID or secret to manage — Atlassian handles the OAuth handshake and the install is bound to your Atlassian organisation. If your organisation enforces an Approved-apps policy under Atlassian Guard / Connected Apps settings, allow-list the Veeam DCC Forge app before starting.</p><p>After consent, DCC calls <code>/oauth/token/accessible-resources</code> to enumerate the Atlassian Cloud sites you can access; if more than one site is returned, you pick the target site (cloudId) on the next step. One DCC integration maps 1:1 to one site — to back up two sites, complete the wizard twice.</p><h4>App access policies (Atlassian Guard)</h4><p>If your organisation enforces an <strong>Approved-apps policy</strong> under Atlassian Guard / Connected Apps, allow-list the Veeam DCC Forge app first, or the install/consent is blocked even for admins.</p><h4>Required role</h4><p><strong>Site Admin or Organization Admin</strong> on the target Atlassian Cloud site. Atlassian’s Trusted User and Product Admin roles are not sufficient to install or authorize a third-party app.</p><h4>Manual Integration — OAuth 2.0 (3LO)</h4><p>Use Manual when your security policy requires you to provision the credential yourself. Create an <strong>OAuth 2.0 (3LO) integration</strong> in the Atlassian Developer Console, point its callback URL at the DCC endpoint, add the Phase 1 scopes under both the Jira API and Jira Software API, and paste the Client ID and Client Secret into the wizard.</p><ol><li>Open <a href="#" onclick="event.preventDefault();return false;" style="color:var(--green);text-decoration:underline">developer.atlassian.com</a> → <strong>My Apps → Create → OAuth 2.0 integration</strong></li><li>Under <strong>Authorization</strong>, set the Callback URL to the DCC callback shown in the wizard</li><li>Under <strong>Permissions</strong>, add the Jira API scopes (<code>read:jira-work</code>, <code>write:jira-work</code>, and the granular read/write pairs) <em>and</em> the Jira Software API scopes (<code>read:board-scope:jira-software</code>, <code>read:sprint:jira-software</code>, and pairs)</li><li>Copy the Client ID and Client Secret from <strong>Settings</strong> and paste them into the DCC wizard, then click Connect to complete the redirect and pick your site</li></ol><h4>Required OAuth scopes</h4><p>In the Developer Console, open your app → <strong>Permissions</strong> and add each scope under the matching API. Read scopes power backup; their paired write scopes power restore.</p><p><strong>Jira API (platform)</strong></p><ul><li><strong>Backup (read):</strong> <code>read:jira-work</code>, <code>read:project:jira</code>, <code>read:project.component:jira</code>, <code>read:project-version:jira</code>, <code>read:issue:jira</code>, <code>read:issue-link:jira</code>, <code>read:comment:jira</code>, <code>read:attachment:jira</code>, <code>read:issue-worklog:jira</code>, <code>read:label:jira</code>, <code>read:issue.watcher:jira</code>, <code>read:jira-user</code>, <code>read:user:jira</code></li><li><strong>Restore (write):</strong> <code>write:jira-work</code>, <code>manage:jira-project</code>, <code>write:project:jira</code>, <code>write:project.component:jira</code>, <code>write:project-version:jira</code>, <code>write:issue:jira</code>, <code>write:issue-link:jira</code>, <code>write:comment:jira</code>, <code>write:attachment:jira</code>, <code>write:issue-worklog:jira</code>, <code>write:issue.watcher:jira</code></li></ul><p><strong>Jira Software API (Agile — Boards &amp; Sprints)</strong></p><ul><li><strong>Backup (read):</strong> <code>read:board-scope:jira-software</code>, <code>read:board-scope.admin:jira-software</code>, <code>read:sprint:jira-software</code>, <code>read:epic:jira-software</code>, <code>read:issue:jira-software</code></li><li><strong>Restore (write):</strong> <code>write:board-scope:jira-software</code>, <code>write:board-scope.admin:jira-software</code>, <code>write:sprint:jira-software</code>, <code>write:issue:jira-software</code></li></ul><p><strong>OAuth:</strong> <code>offline_access</code> — issues a refresh token so scheduled daily backups run without re-consent.</p><h4>Jira Software scopes are mandatory for Boards &amp; Sprints</h4><p>Jira Software does <strong>not</strong> support classic scopes. The <code>read:jira-work</code> envelope covers the Jira platform but <em>not</em> the Agile REST API (<code>/rest/agile/1.0</code>). If you build a Manual app with classic scopes only, every Agile call returns 401 “scope does not match” and Boards / Sprints silently drop out of the backup. Add the granular <code>*:jira-software</code> scopes explicitly.</p><h4>Disallowed credentials</h4><p>Atlassian API tokens, Personal Access Tokens (PATs), individual end-user (non-admin) OAuth grants, and bare username/password are <strong>not</strong> accepted for this workload.</p><h4>Trash-window caveat</h4><p>Atlassian retains deleted items in trash for 60 days (Standard / Premium) or 30 days (Free). Anything purged from trash before your first DCC backup cannot be recovered from Jira’s side.</p><h4>Out of scope (Phase 1)</h4><p>Workflow schemes, screen schemes, automation rules, and custom-field contexts are deferred to a future release — the public REST surface does not yet expose an idempotent round-trip restore identifier for them.</p>'
   }
 };
 
-// Template workloads' Test step: Okta's four feature checks (Connector Activation, Backup, Restore, Discovery Scan) with that workload's own wording.
+// Template workloads' Test step: Okta's four feature checks (Integration Activation, Backup, Restore, Discovery Scan) with that workload's own wording.
 // The granular provider rows stay available as permissionCheckRowsDetailed.
 function _onbBaseChecks(wl, copy) {
   var w = WORKLOADS[wl], ok = WORKLOADS.okta; if (!w || !ok) return;
@@ -12476,7 +12576,7 @@ function _onbBaseChecks(wl, copy) {
 }
 _onbBaseChecks('github', [
   { subtitle: 'Ability to activate and connect to data source',
-    fix: 'Re-authorize the Veeam GitHub App on your organization (Express) or confirm your GitHub App ID, installation and private key are registered and active (Manual). Without an active connection, no backup can run.' },
+    fix: 'Re-authorize the Veeam GitHub App on your organization (Express) or confirm your GitHub App ID, installation and private key are registered and active (Manual). Without an active integration, no backup can run.' },
   { subtitle: 'Read access to the repositories, organization settings, and CI/CD configuration that back up on schedule',
     fix: 'Grant contents, metadata, actions, administration, issues and pull requests access so repositories, workflows, branch protection and organization settings can be read on schedule.' },
   { subtitle: 'Write access to restore repositories, workflows, and organization settings from a backup',
@@ -12486,7 +12586,7 @@ _onbBaseChecks('github', [
 ]);
 _onbBaseChecks('jira', [
   { subtitle: 'Ability to activate and connect to data source',
-    fix: 'Re-authorize the Veeam Forge app on your Jira site as a Site Admin or Organization Admin (Express), or confirm your OAuth app\u2019s Client ID and Client Secret are valid and the app is installed on the site (Manual). Without an active connection, no backup can run.' },
+    fix: 'Re-authorize the Veeam Forge app on your Jira site as a Site Admin or Organization Admin (Express), or confirm your OAuth app\u2019s Client ID and Client Secret are valid and the app is installed on the site (Manual). Without an active integration, no backup can run.' },
   { subtitle: 'Read access to the projects, issues, attachments, boards, and sprints that back up on schedule',
     fix: 'Grant the read scopes for Jira issues, projects, attachments, worklogs, users, and Jira Software boards and sprints on Atlassian\u2019s consent screen (Express) or under Permissions in the developer console (Manual). The classic read:jira-work scope does not cover boards and sprints.' },
   { subtitle: 'Write access to restore issues, projects, boards, and sprints from a backup',
@@ -12497,7 +12597,7 @@ _onbBaseChecks('jira', [
 
 _onbBaseChecks('confluence', [
   { subtitle: 'Ability to activate and connect to data source',
-    fix: 'Re-authorize the Veeam app on your Confluence site as a Site Admin or Organization Admin (Express), or confirm your OAuth app\u2019s Client ID and Client Secret are valid and the app is installed on the site (Manual). Without an active connection, no backup can run.' },
+    fix: 'Re-authorize the Veeam app on your Confluence site as a Site Admin or Organization Admin (Express), or confirm your OAuth app\u2019s Client ID and Client Secret are valid and the app is installed on the site (Manual). Without an active integration, no backup can run.' },
   { subtitle: 'Read access to the spaces, pages, blog posts, comments, and attachments that back up on schedule',
     fix: 'Grant the granular read scopes for pages, blog posts, folders, comments, attachments, labels, spaces and space permissions on Atlassian\u2019s consent screen (Express) or under Permissions in the developer console (Manual). Atlassian drops any scope your OAuth app has not declared.' },
   { subtitle: 'Write access to restore spaces, pages, attachments, comments, and permissions from a backup',
@@ -12518,7 +12618,7 @@ _onbBaseChecks('gitlab', [
 ]);
 _onbBaseChecks('azure-devops', [
   { subtitle: 'Ability to activate and connect to data source',
-    fix: 'Re-authorize with an Entra Application Administrator and an Azure DevOps Project Collection Administrator (Express), or confirm your app registration\u2019s Client ID, Tenant ID and credential are valid (Manual). Without an active connection, no backup can run.' },
+    fix: 'Re-authorize with an Entra Application Administrator and an Azure DevOps Project Collection Administrator (Express), or confirm your app registration\u2019s Client ID, Tenant ID and credential are valid (Manual). Without an active integration, no backup can run.' },
   { subtitle: 'Read access to the projects, repositories, work items, pipelines, and wikis that back up on schedule',
     fix: 'In Organization Settings \u2192 Users, confirm the service principal is a member with Basic access. Stakeholder access is read-only and cannot read repositories.' },
   { subtitle: 'Write access to restore repositories, work items, pipelines, and branch policies from a backup',
@@ -12529,7 +12629,7 @@ _onbBaseChecks('azure-devops', [
 
 _onbBaseChecks('gws', [
   { subtitle: 'Ability to activate and connect to data source',
-    fix: 'Re-run the Marketplace install as a Super Admin (Express), or confirm your service account key is valid and authorized for domain-wide delegation (Manual). Without an active connection, no backup can run.' },
+    fix: 'Re-run the Marketplace install as a Super Admin (Express), or confirm your service account key is valid and authorized for domain-wide delegation (Manual). Without an active integration, no backup can run.' },
   { subtitle: 'Read access to the mailboxes, drives, calendars, contacts, and chat spaces that back up on schedule',
     fix: 'In the Admin console, confirm the domain-wide delegation entry includes the Gmail, Drive, Calendar, Contacts, Chat and Keep read scopes so every service can be read on schedule.' },
   { subtitle: 'Write access to restore mail, files, events, and contacts from a backup',
@@ -12540,7 +12640,7 @@ _onbBaseChecks('gws', [
 
 _onbBaseChecks('pp', [
   { subtitle: 'Ability to activate and connect to data source',
-    fix: 'Re-authorize with a Power Platform Administrator or Global Administrator (Express), or confirm your app registration\u2019s Client ID, Tenant ID and credential are valid (Manual). Without an active connection, no backup can run.' },
+    fix: 'Re-authorize with a Power Platform Administrator or Global Administrator (Express), or confirm your app registration\u2019s Client ID, Tenant ID and credential are valid (Manual). Without an active integration, no backup can run.' },
   { subtitle: 'Read access to the environments, apps, flows, and Power BI workspaces that back up on schedule',
     fix: 'Confirm the service principal has the System Administrator role in each protected environment, and that Power BI admin APIs are enabled for service principals if workspaces are in scope.' },
   { subtitle: 'Write access to restore apps, flows, tables, and workspaces from a backup',
@@ -12548,9 +12648,19 @@ _onbBaseChecks('pp', [
   { subtitle: 'Advanced data discovery and scanning capabilities',
     fix: 'Grant the tenant-level read permissions used to discover who can reach each environment and app, so discovery scans can run.' }
 ]);
+_onbBaseChecks('entra', [
+  { subtitle: 'Ability to activate and connect to data source',
+    fix: 'Re-authorize with a Global Administrator or Privileged Role Administrator (Express), or confirm your app registration\u2019s Client ID, Tenant ID and credential are valid (Manual). Without an active integration, no backup can run.' },
+  { subtitle: 'Read access to the users, groups, app registrations, and policies that back up on schedule',
+    fix: 'Grant admin consent for the Microsoft Graph read permissions (User.Read.All, Group.Read.All, Application.Read.All, Policy.Read.All) so directory objects can be read on schedule.' },
+  { subtitle: 'Write access to restore users, groups, applications, and policies from a backup',
+    fix: 'Grant the paired Graph write permissions. Read-only access allows backup but not restore.' },
+  { subtitle: 'Advanced data discovery and scanning capabilities',
+    fix: 'Grant AuditLog.Read.All and the directory role read permissions used to discover who holds privileged roles and how they sign in, so discovery scans can run.' }
+]);
 _onbBaseChecks('d365', [
   { subtitle: 'Ability to activate and connect to data source',
-    fix: 'Re-authorize with the Veeam application (Express), or confirm your app registration\u2019s Client ID, Tenant ID and credential are valid (Manual). Without an active connection, no backup can run.' },
+    fix: 'Re-authorize with the Veeam application (Express), or confirm your app registration\u2019s Client ID, Tenant ID and credential are valid (Manual). Without an active integration, no backup can run.' },
   { subtitle: 'Read access to the tables, columns, records, and files that back up on schedule',
     fix: 'Confirm the application user has the System Administrator role in each selected environment so Dataverse tables, records and files can be read on schedule.' },
   { subtitle: 'Write access to restore tables, columns, and records from a backup',
@@ -12592,6 +12702,8 @@ function applyPfxWorkloadCopy(w) {
   }
 }
 
+// Credential-type Button Tabs: the active tab is the raised white card; aria-selected follows.
+function _credTabState(on, off) { on.classList.add('is-active'); off.classList.remove('is-active'); on.setAttribute('aria-selected', 'true'); off.setAttribute('aria-selected', 'false'); }
 function switchCredType(type) {
   var certBtn = document.getElementById('cred-btn-cert');
   var secretBtn = document.getElementById('cred-btn-secret');
@@ -12602,24 +12714,14 @@ function switchCredType(type) {
   var w = WORKLOADS[currentWorkload];
   var usesPfx = !!(w && w.manualCertUsesPfx);
   if (type === 'cert') {
-    certBtn.style.background = 'var(--black-3)';
-    certBtn.style.color = 'var(--black-100)';
-    certBtn.style.fontWeight = '500';
-    secretBtn.style.background = 'var(--white)';
-    secretBtn.style.color = 'var(--black-60)';
-    secretBtn.style.fontWeight = '400';
+    _credTabState(certBtn, secretBtn);
     if (certSection) certSection.style.display = usesPfx ? 'none' : 'block';
     if (certPfxSection) certPfxSection.style.display = usesPfx ? 'block' : 'none';
     if (usesPfx) applyPfxWorkloadCopy(w);
     secretSection.style.display = 'none';
     if (secretWarn) secretWarn.style.display = 'none';
   } else {
-    secretBtn.style.background = 'var(--black-3)';
-    secretBtn.style.color = 'var(--black-100)';
-    secretBtn.style.fontWeight = '500';
-    certBtn.style.background = 'var(--white)';
-    certBtn.style.color = 'var(--black-60)';
-    certBtn.style.fontWeight = '400';
+    _credTabState(secretBtn, certBtn);
     if (certSection) certSection.style.display = 'none';
     if (certPfxSection) certPfxSection.style.display = 'none';
     secretSection.style.display = 'block';
@@ -12787,7 +12889,7 @@ function onPfxEncryptedToggle(checked) {
 // up (GitHub, Microsoft Power Platform). Runs once after DOM is ready so the single
 // source of truth is the WIRED_WORKLOADS set below — no per-card HTML editing needed.
 (function disableUnwiredWorkloadCards() {
-  var WIRED_WORKLOADS = { 'GitHub': true, 'Active Directory': true, 'Microsoft Power Platform': true, 'Microsoft Dynamics 365': true, 'Azure DevOps': true, 'GitLab': true, 'Confluence': true, 'Okta Workforce Identity Cloud': true, 'Jira': true, 'Google Workspace': true, 'Google Identity Protection': true };
+  var WIRED_WORKLOADS = { 'GitHub': true, 'Active Directory': true, 'Microsoft Power Platform': true, 'Microsoft Dynamics 365': true, 'Azure DevOps': true, 'GitLab': true, 'Confluence': true, 'Okta Workforce Identity Cloud': true, 'Jira': true, 'Google Workspace': true, 'Google Identity Protection': true, 'Microsoft Entra ID': true };
   function apply() {
     document.querySelectorAll('.cat-card').forEach(function(card) {
       var nameEl = card.querySelector('.cat-card-name');
@@ -13483,7 +13585,7 @@ function selectWorkload(wl, skipNav) {
       } else {
         // Microsoft / ADO default copy.
         manualNoteTitle.textContent = 'Entra ID admin required';
-        manualNoteBody.innerHTML = 'An Entra ID <strong>Application Administrator</strong> (or Global Admin) must create the app registration and provide these credentials. The Entra admin doesn\'t need to be the same person setting up this connection.';
+        manualNoteBody.innerHTML = 'An Entra ID <strong>Application Administrator</strong> (or Global Admin) must create the app registration and provide these credentials. The Entra admin doesn\'t need to be the same person setting up this integration.';
       }
     }
   }
@@ -13567,7 +13669,7 @@ function selectWorkload(wl, skipNav) {
       // conditional ones (IP allowlist, large-tenant rate-limit lead time)
       // that are common silent failure causes if missed. Spec doc 4 §3.1.
       bullets.push('<strong>Okta Super Admin</strong> required. Express needs admin consent; Manual needs a Super Admin to create the OAuth 2.0 service app and grant scopes.');
-      bullets.push('If admin sign-in or app auth is <strong>restricted by IP zone</strong>, allowlist Veeam’s egress IPs first — otherwise the connection test fails with a 403.');
+      bullets.push('If admin sign-in or app auth is <strong>restricted by IP zone</strong>, allowlist Veeam’s egress IPs first — otherwise the integration test fails with a 403.');
       bullets.push('Tenants over <strong>~250,000 users</strong>: request an Okta rate-limit increase via Support (15-day lead) to keep the first backup within the 24-hour window.');
     }
     if (wl === 'jira') {
@@ -15058,6 +15160,8 @@ var PROV_WIN = {
     scopes: ['Sign you in and read your profile', 'Maintain access to data you have given it access to', 'Access Azure DevOps on your behalf (user_impersonation)', 'Consent on behalf of your organization'] },
   pp: { prov: 'microsoft', domain: 'login.microsoftonline.com', aria: 'Microsoft sign-in window', app: 'Veeam Data Cloud', user: 'alex.admin@acme.com',
     scopes: ['Sign you in and read your profile', 'Maintain access to data you have given it access to', 'Access the Power Platform admin and Power BI APIs on your behalf', 'Consent on behalf of your organization'] },
+  entra: { prov: 'microsoft', domain: 'login.microsoftonline.com', aria: 'Microsoft sign-in window', app: 'Veeam Data Cloud', user: 'alex.admin@acme.com',
+    scopes: ['Sign you in and read your profile', 'Maintain access to data you have given it access to', 'Read and write directory data, applications and policies on your behalf', 'Consent on behalf of your organization'] },
   d365: { prov: 'microsoft', domain: 'login.microsoftonline.com', aria: 'Microsoft sign-in window', app: 'Veeam Data Cloud', user: 'alex.admin@acme.com',
     scopes: ['Sign you in and read your profile', 'Maintain access to data you have given it access to', 'Access Dynamics 365 and Dataverse on your behalf (user_impersonation)', 'Consent on behalf of your organization'] }
 };
@@ -15152,21 +15256,21 @@ function _pickCfg() {
     opt: function(g){ return { v: g.id, l: g.name, sub: 'gitlab.com/' + g.path }; },
     set: function(g){ _siteList().forEach(function(x){ x.selected = !!g && x.id === g.id; }); },
     returned: function(n){ return 'GitLab returned ' + n + ' top-level groups'; },
-    help: function(n){ return 'This account can reach ' + n + ' top-level groups. Choose the one to back up; every subgroup and project under it is included. Each group is its own connection.'; } };
+    help: function(n){ return 'This account can reach ' + n + ' top-level groups. Choose the one to back up; every subgroup and project under it is included. Each group is its own integration.'; } };
   if (wl === 'azure-devops') return {
     fld: 'Organization', ph: 'Select an organization', manualTxt: 'Connected with your Entra application',
     list: function(){ if (!ADO_ORGS_STATE.length) seedDiscoveredAdoOrgs(); return ADO_ORGS_STATE; },
     opt: function(o){ return { v: o.id, l: o.name, sub: o.url }; },
     set: function(o){ adoSelectedOrgId = o ? o.id : null; },
     returned: function(n){ return 'Azure DevOps returned ' + n + ' organizations'; },
-    help: function(n){ return 'This account can reach ' + n + ' Azure DevOps organizations. Choose the one to back up; one connection covers every project in it. Each organization is its own connection.'; } };
+    help: function(n){ return 'This account can reach ' + n + ' Azure DevOps organizations. Choose the one to back up; one integration covers every project in it. Each organization is its own integration.'; } };
   return {
     fld: 'Site', ph: 'Select a site', manualTxt: 'Connected with your Atlassian OAuth app',
     list: function(){ if (!CONFLUENCE_SITES_STATE.length) seedDiscoveredConfluenceSites(); return CONFLUENCE_SITES_STATE; },
     opt: function(x){ return { v: x.id, l: x.name, sub: x.url }; },
     set: function(x){ _siteList().forEach(function(y){ y.selected = !!x && y.id === x.id; }); try { confluenceSelectedSite = x || null; } catch (e) {} },
     returned: function(n){ return 'Atlassian returned ' + n + ' Atlassian Cloud sites'; },
-    help: function(n){ return 'This account can see ' + n + ' Atlassian Cloud sites. Choose the one to back up; each site is its own connection.'; } };
+    help: function(n){ return 'This account can see ' + n + ' Atlassian Cloud sites. Choose the one to back up; each site is its own integration.'; } };
 }
 function _siteList() { return _pickCfg().list(); }
 function _siteSignedIn(via) {
@@ -16053,7 +16157,7 @@ window.__devJumpResolve = function(h) {
 <!-- Securiti DS icon runtime — swaps inline SVGs into the Securiti
      glyph set at load time. Data file MUST load first so the runtime
      finds window.__SECURITI_ICONS already populated. -->
-<script src="securiti-icons-data.js?v=20261104b"></script>
+<script src="securiti-icons-data.js?v=20261112b"></script>
 <script src="vdc-notifications.js?v=20261030a"></script>
 <script src="securiti-icons.js"></script>
 <!-- Shared workload picker (2026-09-28) — same one codebase/one component
@@ -16168,7 +16272,7 @@ function renderConnTable() {
     return c.instanceName.toLowerCase().indexOf(q) > -1 || (w && w.name.toLowerCase().indexOf(q) > -1);
   });
   if (!rows.length) {
-    el.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px 16px;color:var(--black-60);font-size:16px">No connections match this filter.</td></tr>';
+    el.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px 16px;color:var(--black-60);font-size:16px">No integrations match this filter.</td></tr>';
     return;
   }
   var statusLabel = { active: 'Active', inactive: 'Inactive', attention: 'Needs attention' };
@@ -16246,7 +16350,7 @@ function closeConnWlPicker() {
 // 'powerplatform' vs 'pp') — translate at the boundary so table filtering
 // (native ids) and the chip's mono mark (picker ids) each get the id
 // space they actually need.
-var CONN_PICKER_ID_ALIAS = { 'okta-wic': 'okta', 'powerplatform': 'pp' };
+var CONN_PICKER_ID_ALIAS = { 'okta-wic': 'okta', 'powerplatform': 'pp', 'entra-id': 'entra' };
 function _connNativeId(pickerId) { return CONN_PICKER_ID_ALIAS[pickerId] || pickerId; }
 // Default state is the "All SaaS" aggregate — there is no plain "All
 // workloads" row in the picker, only All SaaS / All Datacenter (user

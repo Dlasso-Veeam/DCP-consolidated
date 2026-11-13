@@ -922,10 +922,11 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--blue); c
 .rw-rp-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: var(--black-3); border-bottom: 1px solid var(--border-light); }
 .rw-rp-head-hint { font-size: 14px; color: var(--black-60); }
 /* Vision Button Tabs (segmented) — was: bordered white group w/ filled-accent active. */
-.rw-rp-mode-seg { display: inline-flex; gap: 2px; border: 2px solid var(--black-3); background: var(--black-3); border-radius: 4px; }
-.rw-rp-mode-btn { font-size: 16px; padding: 4px 12px; border: 1px solid transparent; border-radius: 4px; background: transparent; cursor: pointer; color: var(--black-60); font-family: inherit; }
-.rw-rp-mode-btn:hover:not(.active) { color: var(--black-100); }
-.rw-rp-mode-btn.active { background: var(--white); color: var(--black-100); border-color: var(--border); font-weight: 500; }
+.rw-rp-mode-seg { display: inline-flex; align-items: stretch; gap: 2px; background: var(--black-3); border: 2px solid var(--black-3); border-radius: 4px; }
+.rw-rp-mode-btn { padding: 8px 12px; min-height: 36px; box-sizing: border-box; font-family: inherit; font-size: 16px; line-height: 22px; font-weight: 450; color: var(--black-60); background: transparent; border: 1px solid transparent; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+.rw-rp-mode-btn:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); }
+.rw-rp-mode-btn:hover:not(.active) { background: var(--black-3); }
+.rw-rp-mode-btn.active { background: var(--white); border-color: var(--border); color: var(--em-green, var(--green)); font-weight: 500; }
 
 .rw-tl-header { display: flex; border-bottom: 1px solid var(--border-light); background: var(--black-3); }
 .rw-tl-res-hdr { width: 180px; flex-shrink: 0; padding: 8px 14px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--black-60); border-right: 1px solid var(--border-light); }
@@ -1112,10 +1113,11 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--blue); c
 /* Time-range control — aligned to the DS segmented control (.ws-cfg-seg). */
 /* Vision Button Tabs (segmented): pill-on-grey — container Black/S5 r4 gap2; active = White + 1px Black/S20 + Semi Bold Black/S100.
    was: bordered white group w/ filled-accent active segment. */
-.act-chip-group { display: inline-flex; align-items: center; gap: 2px; border: 2px solid var(--black-3); background: var(--black-3); border-radius: 4px; }
-.act-chip-btn { display: inline-flex; align-items: center; height: 28px; padding: 0 14px; font-size: 14px; border: 1px solid transparent; border-radius: 4px; background: transparent; cursor: pointer; color: var(--black-60); font-family: inherit; }
-.act-chip-btn:hover:not(.active) { color: var(--black-100); }
-.act-chip-btn.active { background: var(--white); color: var(--black-100); border-color: var(--border); font-weight: 500; }
+.act-chip-group { display: inline-flex; align-items: stretch; gap: 2px; background: var(--black-3); border: 2px solid var(--black-3); border-radius: 4px; }
+.act-chip-btn { display: inline-flex; align-items: center; justify-content: center; padding: 8px 12px; min-height: 36px; box-sizing: border-box; font-family: inherit; font-size: 16px; line-height: 22px; font-weight: 450; color: var(--black-60); background: transparent; border: 1px solid transparent; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+.act-chip-btn:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); }
+.act-chip-btn:hover:not(.active) { background: var(--black-3); }
+.act-chip-btn.active { background: var(--white); border-color: var(--border); color: var(--em-green, var(--green)); font-weight: 500; }
 @keyframes act-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 .act-status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: var(--black-30); margin-right: 6px; vertical-align: middle; }
 .act-status-dot.started { background: var(--status-blue); animation: act-pulse 1.5s ease infinite; }
@@ -1139,7 +1141,7 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--blue); c
    shipped a filled-blue segment — off-spec, corrected per designer.) */
 /* act-type family: retired tabs + the Session Type chip (Figma
    13540:88824 rows — Chip Grey Light, Default 28) */
-.act-type-tabs { display: inline-flex; align-items: stretch; gap: 2px; background: var(--black-3); border: 2px solid var(--black-3); border-radius: 4px; flex-shrink: 0; }
+.act-type-tabs { display: inline-flex; align-items: stretch; gap: 2px; background: var(--black-3); border: 2px solid var(--black-3); border-radius: 4px; flex-shrink: 0; } /* Veeam Vision Button Tabs (live, 2026-11-12): track Black/S3 + 2px self-colour ring, gap 2, r4; tab 36px (8/12), Body/B2 16/22 Book, Black/S60; hover fill Black/S3; ACTIVE = white + 1px Black/S20 + Semi Bold + Green/S80 label; focus = green ring; disabled Black/S30 */
 /* Job-type control responsive swap (designer 2026-07-15): under 1200px the
    segmented tabs can't share the scope row with the pinned chips + range —
    they collapse into a pinned-filter dropdown driving the same actTypeTab. */
@@ -1152,9 +1154,10 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--blue); c
      switcher, which must never be hidden (user 2026-08-05). */
   #actTypeDrop { display: flex; }
 }
-.act-type-tab { appearance: none; border: 1px solid transparent; background: transparent; font-family: inherit; font-size: 14px; font-weight: 450; color: var(--black-60); padding: 4px 12px; border-radius: 4px; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
-.act-type-tab:hover { color: var(--black-100); }
-.act-type-tab.is-active { background: var(--white); border-color: var(--border); color: var(--black-100); font-weight: 500; }
+.act-type-tab { appearance: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 12px; min-height: 36px; box-sizing: border-box; font-family: inherit; font-size: 16px; line-height: 22px; font-weight: 450; color: var(--black-60); background: transparent; border: 1px solid transparent; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+.act-type-tab:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); }
+.act-type-tab:hover:not(.is-active) { background: var(--black-3); }
+.act-type-tab.is-active { background: var(--white); border-color: var(--border); color: var(--em-green, var(--green)); font-weight: 500; }
 /* View-switcher pre-icons (user 2026-07-16) — 16px per the Button Tab
    component's Pre Icon slot; glyphs are the registered Unified Icons. */
 .act-type-tab .att-ic { display: inline-flex; align-items: center; flex-shrink: 0; }
@@ -1162,7 +1165,7 @@ input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--blue); c
 /* Header view switcher only (user 2026-07-16): roomier than the table's
    compact type chips — the Figma Button Tab's own 8px vertical padding,
    16px horizontal for page-header prominence. Table chips stay 4px/12px. */
-#actViewTabs .act-type-tab { padding: 8px 16px; font-size: 16px; }
+#actViewTabs .act-type-tab { padding: 8px 12px; }   /* was: 8px 16px / 16px — the Vision tab is 8/12 everywhere */
 .act-type-tab .att-count { font-size: 12px; font-weight: 450; color: var(--black-60); }
 
 /* Expiry badge on the job title — compact tinted chip; the styled
@@ -2235,9 +2238,9 @@ try { var _eh = sessionStorage.getItem('vdc-ai-handoff'), _ep = (location.pathna
      already-authenticated session hides the gate before the rest of the page
      parses. Without this, the gate flashes for a moment on refresh while the
      main password-gate IIFE (far below) finishes loading and runs its check. -->
-<script src="securiti-icons-data.js?v=20260910a"></script>
+<script src="securiti-icons-data.js?v=20261112b"></script>
 <script src="vdc-notifications.js?v=20261030a"></script>
-<script src="workload-picker.js?v=20261111"></script>
+<script src="workload-picker.js?v=20261112b"></script>
 <script src="agent-sessions.js?v=20261029a"></script>
 <script>
 (function(){
@@ -10367,7 +10370,7 @@ function actToggleFtDegraded() {
 // wl-logo-* = VERBATIM COLOR exports (Figma 9286-65490, 2026-08-19). Datacenter
 // marks (AWS/Azure/VMware) keep the store brand-* glyphs — the mock's
 // Datacenter rows were placeholders, no color exports exist for them yet.
-var _ACT_WL_ICON = { 'Okta WIC': 'wl-logo-okta-wic', 'Dynamics 365': 'wl-logo-d365', 'GitHub': 'wl-logo-github', 'Google Workspace': 'wl-logo-gws', 'GitLab': 'wl-logo-gitlab', 'Azure DevOps': 'wl-logo-azure-devops', 'Jira': 'wl-logo-jira', 'Confluence': 'wl-logo-confluence', 'Power Platform': 'wl-logo-powerplatform', 'Microsoft 365': 'wl-logo-ms365', 'AWS': 'brand-aws', 'Microsoft Azure': 'brand-azure', 'VMware vSphere': 'brand-vmware' };
+var _ACT_WL_ICON = { 'Okta WIC': 'wl-logo-okta-wic', 'Dynamics 365': 'wl-logo-d365', 'GitHub': 'wl-logo-github', 'Google Workspace': 'wl-logo-gws', 'GitLab': 'wl-logo-gitlab', 'Azure DevOps': 'wl-logo-azure-devops', 'Jira': 'wl-logo-jira', 'Confluence': 'wl-logo-confluence', 'Power Platform': 'wl-logo-powerplatform', 'Microsoft 365': 'wl-logo-ms365', 'Entra ID': 'wl-logo-entra-id', 'AWS': 'brand-aws', 'Microsoft Azure': 'brand-azure', 'VMware vSphere': 'brand-vmware' };
 function _actWlIconSvg(label, size) {
   var name = _ACT_WL_ICON[label] || 'workload-outlined';
   var e = (typeof window !== 'undefined' && window.__SECURITI_ICONS) ? window.__SECURITI_ICONS[name] : null;
@@ -10491,7 +10494,7 @@ function actWlFilterList() {
 // SHARED picker adapter (WorkloadPickerDS, workload-picker.js — user
 // 2026-08-19: one codebase for the picker). Color logos live ONLY in the
 // expanded panel; the collapsed chip shows the MONO mark (below).
-var _ACT_WL_COLOR = { 'Okta WIC': 'wl-logo-okta-wic', 'Dynamics 365': 'wl-logo-d365', 'GitHub': 'wl-logo-github', 'Google Workspace': 'wl-logo-gws', 'GitLab': 'wl-logo-gitlab', 'Azure DevOps': 'wl-logo-azure-devops', 'Jira': 'wl-logo-jira', 'Confluence': 'wl-logo-confluence', 'Power Platform': 'wl-logo-powerplatform', 'Microsoft 365': 'wl-logo-ms365' };
+var _ACT_WL_COLOR = { 'Okta WIC': 'wl-logo-okta-wic', 'Dynamics 365': 'wl-logo-d365', 'GitHub': 'wl-logo-github', 'Google Workspace': 'wl-logo-gws', 'GitLab': 'wl-logo-gitlab', 'Azure DevOps': 'wl-logo-azure-devops', 'Jira': 'wl-logo-jira', 'Confluence': 'wl-logo-confluence', 'Power Platform': 'wl-logo-powerplatform', 'Microsoft 365': 'wl-logo-ms365', 'Entra ID': 'wl-logo-entra-id' };
 var _ACT_WL_MONO  = { 'Okta WIC': 'brand-okta-wic', 'Dynamics 365': 'brand-d365', 'GitHub': 'brand-github', 'Google Workspace': 'brand-gws', 'AWS': 'brand-aws', 'Microsoft Azure': 'brand-azure', 'VMware vSphere': 'brand-vmware' };
 // Registry id → the wl string carried on job rows (the filter dimension).
 // Canonical entries with no seeded sessions (Ping, Jira, …) pick fine and

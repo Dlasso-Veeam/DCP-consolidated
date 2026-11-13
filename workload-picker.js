@@ -16,12 +16,14 @@
 //     tipAttr:    'data-tooltip'        // page's styled-tooltip attribute
 //   });
 //
-// LOGO RULE (user 2026-08-19): COLOR logos (wl-logo-* verbatim Figma
-// exports) ONLY inside the expanded panel; the collapsed button affordance
-// shows the MONOTONE mark — use monoLogo() there.
+// LOGO RULE (user 2026-11-12, revising 2026-08-19): COLOR logos (wl-logo-*
+// verbatim Figma exports) everywhere a workload is shown, including the
+// closed button (monoMark() now returns the full-colour logo) — flattening
+// a multi-tone mark to one colour turned it into a blob.
 // Selected item: Green/S5 row fill + Green/S80 Medium label + SQUARE
-// inset 2px bar + GREEN icon tile with the logo knocked out white +
+// inset 2px bar + the colour logo on a WHITE tile with a Green/S30 outline +
 // trailing check; house (home-filled) marks the default, both float right.
+// Rows with no colour logo keep the green tile with the glyph knocked out white.
 // ═══════════════════════════════════════════════════════════════════════
 (function () {
   'use strict';
@@ -45,7 +47,8 @@
     '.wlp-item-icon { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; padding:4px; background:var(--em-green-tint,#f6fbf9); border-radius:4px; flex-shrink:0; }',
     '.wlp-item-icon svg { width:20px; height:20px; display:block; }',
     '.wlp-item.is-active .wlp-item-icon { background:var(--em-green,#01804a); }',
-    '.wlp-item.is-active .wlp-item-icon svg * { fill:var(--white,#fff); stroke:none; }',
+    '.wlp-item.is-active .wlp-item-icon:not(.is-color) svg * { fill:var(--white,#fff); stroke:none; }',
+    '.wlp-item.is-active .wlp-item-icon.is-color { background:var(--white,#fff); box-shadow:inset 0 0 0 1px var(--green-s30,#9cd8be); }',   /* PREVIEW 2026-11-12: a brand mark keeps its colours on a white tile when selected (was: knocked out white on green) */
     '.wlp-item-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; min-width:0; }',
     /* Category "All <cat>" row (pattern A, 2026-09-02 — Activity only via
        cfg.categoryRows): clones the wlp-item recipe; Medium name; count in a
@@ -207,7 +210,7 @@
         lastCat = en.cat;
       }
       if (_aggCat) return;   // aggregate category: the All row IS the group
-      var icon = colorLogo(en.colorKey, 20) || monoLogo(en.monoKey, 20);
+      var _clr = colorLogo(en.colorKey, 20), icon = _clr || monoLogo(en.monoKey, 20);
       // MANAGE MODE (the approved 2026-08-05 gesture): rows lead with a
       // radio; clicking a row selects it as the DEFAULT (no navigation).
       var lead = '';
@@ -222,7 +225,7 @@
         + ' class="wlp-item' + (en.active && !st.manage ? ' is-active' : '') + (en.disabled ? ' is-disabled' : '') + '"'
         + ' data-id="' + en.id + '" data-name="' + String(en.name).replace(/"/g, '&quot;') + '"'
         + (en.disabled ? ' aria-disabled="true"' + (en.tip ? ' ' + tipAttr + '="' + String(en.tip).replace(/"/g, '&quot;') + '"' : '') : '')
-        + '>' + lead + '<span class="wlp-item-icon">' + icon + '</span><span class="wlp-item-name">' + en.name + '</span>' + tail + '</button>';
+        + '>' + lead + '<span class="wlp-item-icon' + (_clr ? ' is-color' : '') + '">' + icon + '</span><span class="wlp-item-name">' + en.name + '</span>' + tail + '</button>';
     });
     html += '<div class="wlp-list" role="menu">' + (listHtml || '<div class="wlp-empty">No workloads match.</div>') + '</div>';
     // cfg.noFooter (2026-09-08): a FORM-FIELD consumer (policy editor's
@@ -335,7 +338,7 @@
     // will show empty states when it is picked there.
     { id: 'ms365',              name: 'Microsoft 365',     cat: 'SaaS platforms', colorKey: 'wl-logo-ms365' },
     // Entra ID: a cloud identity service, so it sits with the SaaS platforms next to Okta and Google Identity (mono mark until a brand logo is added to the store).
-    { id: 'entra-id',           name: 'Entra ID',          cat: 'SaaS platforms', colorKey: null, monoKey: 'iam-identity-provider-outlined' },
+    { id: 'entra-id',           name: 'Entra ID',          cat: 'SaaS platforms', colorKey: 'wl-logo-entra-id', monoKey: 'logo-entra-id' },
     // ENABLED 2026-09-18 (was: disabled 'Not connected' placeholder, same
     // pattern as ms365 above) — seeds a flat VM list (no hierarchy; the tree
     // explorer collapses for this workload, see selectWl in protected-data.html).
@@ -365,11 +368,7 @@
     var reg = null;
     for (var i = 0; i < WORKLOADS.length; i++) if (WORKLOADS[i].id === workloadId) { reg = WORKLOADS[i]; break; }
     var svg = reg && reg.colorKey ? colorLogo(reg.colorKey, size) : '';
-    if (svg) {
-      return svg
-        .replace(/fill="(?!none")[^"]*"/g, 'fill="currentColor"')
-        .replace(/stop-color="[^"]*"/g, 'stop-color="currentColor"');
-    }
+    if (svg) return svg;   // PREVIEW 2026-11-12: full colour on the closed button (was recoloured to currentColor, which flattened multi-tone marks into a blob); original in _backups/workload-picker.pre-color-selected.js
     return monoLogo(reg && reg.monoKey ? reg.monoKey : null, size);
   }
 

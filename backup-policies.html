@@ -564,9 +564,10 @@ body.actions-parked .action-row-edit, body.actions-parked .action-row-delete, bo
 .gx-modal.open { display: flex; }
 .gx-head { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--border-light); }
 .gx-title { font-size: 20px; font-weight: 500; }
-.gx-seg { display: inline-flex; gap: 2px; background: var(--black-5); border-radius: 4px; padding: 2px; margin-left: 12px; }
-.gx-seg button { height: 28px; padding: 0 12px; border: none; border-radius: 3px; background: transparent; font-family: inherit; font-size: 14px; color: var(--black-60); cursor: pointer; }
-.gx-seg button.on { background: var(--white); color: var(--black-100); font-weight: 500; box-shadow: 0 1px 2px rgba(31,34,41,0.12); }
+.gx-seg { display: inline-flex; align-items: stretch; gap: 2px; background: var(--black-3); border: 2px solid var(--black-3); border-radius: 4px; margin-left: 12px; }
+.gx-seg button { padding: 8px 12px; min-height: 36px; box-sizing: border-box; font-family: inherit; font-size: 16px; line-height: 22px; font-weight: 450; color: var(--black-60); background: transparent; border: 1px solid transparent; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+.gx-seg button:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); }
+.gx-seg button.on { background: var(--white); border-color: var(--border); color: var(--em-green, var(--green)); font-weight: 500; }
 .gx-head-acts { margin-left: auto; display: flex; gap: 8px; align-items: center; }
 .gx-qbar { display: flex; align-items: flex-start; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--border-light); }
 .gx-qbar .gxs-q { flex: 1; }
@@ -952,11 +953,12 @@ tr.row-pending-rank { background: rgba(247, 144, 50, 0.04); }
 .link:hover { text-decoration: none; color: var(--em-green-accent); } /* was underline — Vision Link hover Green/S70, no underline */
 
 /* === POLICY STATUS SEGMENTED CONTROL (in footer) === */
-.pol-status-seg { display: inline-flex; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: var(--black-5); flex-shrink: 0; height: 36px; }
-.pol-status-seg-btn { padding: 0 12px; font-size: 14px; font-weight: 450; border: none; background: transparent; cursor: pointer; color: var(--black-60); font-family: inherit; display: inline-flex; align-items: center; gap: 6px; height: 100%; }
-.pol-status-seg-btn:hover:not(.active) { color: var(--black-100); }
-.pol-status-seg-btn.active { background: var(--white); color: var(--black-100); font-weight: 500; box-shadow: inset 0 0 0 1px var(--border); }
-.pol-status-seg-btn.active.is-active-tab { box-shadow: inset 0 0 0 1px var(--green-30); color: var(--green); }
+.pol-status-seg { display: inline-flex; align-items: stretch; gap: 2px; background: var(--black-3); border: 2px solid var(--black-3); border-radius: 4px; flex-shrink: 0; }
+.pol-status-seg-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 12px; min-height: 36px; box-sizing: border-box; font-family: inherit; font-size: 16px; line-height: 22px; font-weight: 450; color: var(--black-60); background: transparent; border: 1px solid transparent; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+.pol-status-seg-btn:focus-visible { outline: none; box-shadow: var(--vv-focus-ring); }
+.pol-status-seg-btn:hover:not(.active) { background: var(--black-3); }
+.pol-status-seg-btn.active { background: var(--white); border-color: var(--border); color: var(--em-green, var(--green)); font-weight: 500; }
+.pol-status-seg-btn.active.is-active-tab { border-color: var(--green-30); color: var(--green); }
 .pol-status-seg-btn .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--black-30); }
 .pol-status-seg-btn.active .dot { background: var(--black-60); }
 .pol-status-seg-btn.active.is-active-tab .dot { background: var(--green); }
@@ -3486,9 +3488,9 @@ try { var _eh = sessionStorage.getItem('vdc-ai-handoff'), _ep = (location.pathna
   </div>
 </aside>
 
-<script src="securiti-icons-data.js?v=20261001a"></script>
+<script src="securiti-icons-data.js?v=20261112b"></script>
 <script src="vdc-notifications.js?v=20261030a"></script>
-<script src="workload-picker.js?v=20261111"></script>
+<script src="workload-picker.js?v=20261112b"></script>
 <script>
 // ── DS ICON STORE HELPERS (cloned from protected-data.html) ───────────────────
 function _dsStoreIconSvg(name, size) {
