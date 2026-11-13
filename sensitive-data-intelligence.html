@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>/* gate pre-hide: a still-valid session hides the password gate before the first paint (the in-body check sits behind blocking scripts, so the gate flashed on every page-to-page jump) */
+(function(){try{var r=localStorage.getItem('_sw_s')||sessionStorage.getItem('_sw_s'),p=r&&JSON.parse(r);if(p&&p.expires&&Date.now()<p.expires){var s=document.createElement('style');s.textContent='#passwordGate{display:none!important}';document.documentElement.appendChild(s);}}catch(e){}})();
+</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Universal Data Explorer — Sanitize</title>
@@ -1912,9 +1915,11 @@ var VN_ITEMS = [
     return { id: it.id, label: it.label, href: it.href, disabled: it.disabled, subs: it.subs, home: it.id === 'dashboards' };
   });
   // Data Resilience REMOVED from Apps 2026-07-14 — it's core navigation now.
+  VN_ICONS['app-agentlibrary'] = VN_ICONS['agent'] || '';
   var VN_APPS = [
     // All apps disabled for now (user 2026-07-15) — ambient platform chrome.
     { id: 'app-di',      label: 'Sensitive Data Intelligence', href: 'sensitive-data-intelligence.html' },   // wired 2026-11-11 (user: open it from any page in the main series); was: disabled: true
+    { id: 'app-agentlibrary', label: 'Agent Library', href: 'agent-library.html' },   // everything Veeam Intelligence: Overview, Agent sessions, Settings
     { id: 'app-stream',  label: 'Data Remediation', disabled: true },
     { id: 'app-assess',  label: 'Compliance', disabled: true },
     { id: 'aiagents',    label: 'Agent Activity', disabled: true },

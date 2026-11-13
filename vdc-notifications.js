@@ -180,6 +180,9 @@
       el.innerHTML = '<div class="aiac-decide-done ' + done[0] + '" role="status">' + esc(done[1]) + '</div>';
       var _ch = el.closest && el.closest('.vdc-appr'); if (_ch){ var _c = _ch.querySelector('.vdc-appr-chip'); if (_c) _c.style.display = 'none'; }   // the approval's Awaiting decision chip goes with the decision it announced
     });
+    // Once the recommendation is decided its follow-up prompts have nothing left to ask about ("Why do you recommend this?" after activating it), so they go too.
+    // Only the ROT set: prompts offered for a different topic stay.
+    try { if (s.rec && typeof aiAgent !== 'undefined' && aiAgent._qpPool && aiAgent._qpPool.join('|') === ROT_FOLLOWUPS.join('|') && typeof window.vdcClearQuickPrompts === 'function') window.vdcClearQuickPrompts(); } catch(e){}
   };
   document.addEventListener('click', function(e){
     var b = e.target.closest && e.target.closest('[data-rot-act]'); if (!b || b.disabled) return;
@@ -216,6 +219,7 @@
     if (typeof showToast === 'function') showToast('Recommendation dismissed. ' + ((reasons && reasons.length) ? 'Reason recorded: ' + reasons.join(', ') + '. ' : '') + 'No policy was created.');
     say('<p>Dismissed \u2014 no policy was created.' + ((reasons && reasons.length) ? ' I\u2019ve noted: ' + esc(reasons.join(', ').toLowerCase()) + '.' : '') + ' You can undo this from the File ROT list.</p>');
     refresh();
+    if (typeof window.vdcCloseRotReview === 'function') window.vdcCloseRotReview();   // dismissed from inside the overlay: nothing left to review
   };
 
   // ── the notification stream ─────────────────────────────────────────────────────────────────────────────────
@@ -227,7 +231,7 @@
       var decided = rs.rec === 'approved' ? 'You activated this policy.' : (rs.rec === 'dismissed' ? 'You dismissed this recommendation' + (rs.reasonLabel ? ': ' + rs.reasonLabel + '.' : '.') : '');
       out.push({ id:'rot-rec', kind:'agent', at:at(0, 8, 41), title:'Veeam Intelligence recommends a ROT policy for Retail Division',
         body:'4.2 TB (63%) of backed-up content in Retail Taxes, Retail Archive and Retail Ops has not been modified in 36 months, and no ROT policy covers it.' + (decided ? ' ' + decided : ''),
-        href:'activity.html#agents/rot1', done:!!rs.rec, needs:true, topic:'Retail Division ROT policy recommendation' });
+        href:'agent-library.html#agents/rot1', done:!!rs.rec, needs:true, topic:'Retail Division ROT policy recommendation' });
     }
     // DEMO STAGING (user 2026-10-29: "stage this whole agent panel so that it just wants to bring the ROT policy to
     // our attention"). The two awaiting decisions are switched OFF, not deleted — flip DEMO_APPROVALS back to true
@@ -236,19 +240,19 @@
     if (DEMO_APPROVALS)
     {   // approval requests are not a choice: an agent that is waiting on a person must never wait silently
       if (!(ov.at3 && ov.at3.status)) out.push({ id:'appr-at3', kind:'agent', at:at(0, 3, 12), title:'Approval needed: re-run the failed SharePoint Sites backup',
-        body:'Veeam Intelligence paused the Retail Division retry and is waiting on you. Nothing runs until you answer.', href:'activity.html#agents/at3', needs:true, task:'at3', topic:'Re-run failed SharePoint Sites backup' });
+        body:'Veeam Intelligence paused the Retail Division retry and is waiting on you. Nothing runs until you answer.', href:'agent-library.html#agents/at3', needs:true, task:'at3', topic:'Re-run failed SharePoint Sites backup' });
       if (!(ov.at5 && ov.at5.status)) out.push({ id:'appr-at5', kind:'agent', at:at(0, 7, 40), title:'Approval needed: restore Account records to the Dynamics 365 sandbox',
-        body:'Veeam Intelligence staged the restore from the Oct 12, 3:15 AM restore point and paused for your approval.', href:'activity.html#agents/at5', needs:true, task:'at5', topic:'Restore Account records to the Dynamics 365 sandbox' });
+        body:'Veeam Intelligence staged the restore from the Oct 12, 3:15 AM restore point and paused for your approval.', href:'agent-library.html#agents/at5', needs:true, task:'at5', topic:'Restore Account records to the Dynamics 365 sandbox' });
     }
     if (cfg.on && cfg.actions){
       out.push({ id:'act-okta', kind:'agent', at:at(1, 16, 5), title:'Veeam Intelligence retried the failed Okta backup',
-        body:'The retry completed and all three sessions succeeded. It stayed inside its Backup jobs grant.', href:'activity.html#agents', read:true });
+        body:'The retry completed and all three sessions succeeded. It stayed inside its Backup jobs grant.', href:'agent-library.html#agents', read:true });
       out.push({ id:'act-gws', kind:'agent', at:at(5, 10, 30), title:'Veeam Intelligence restored the Finance-Admins group',
-        body:'The restore you approved on Oct 22 completed. 5 members were returned to the group.', href:'activity.html#agents', read:true });
+        body:'The restore you approved on Oct 22 completed. 5 members were returned to the group.', href:'agent-library.html#agents', read:true });
     }
     if (cfg.on && cfg.failures){
       out.push({ id:'fail-ado', kind:'agent', at:at(3, 5, 10), title:'An agent run failed: retry of the Azure DevOps backup',
-        body:'Veeam Intelligence stopped at the repository-access guardrail. Nothing was changed.', href:'activity.html#agents', read:true });
+        body:'Veeam Intelligence stopped at the repository-access guardrail. Nothing was changed.', href:'agent-library.html#agents', read:true });
     }
     [[14, 8, 40, 6], [14, 8, 40, 5], [19, 2, 32, 9], [19, 2, 32, 8], [19, 2, 32, 7]].forEach(function(s, i){
       out.push({ id:'sys' + i, kind:'system', at:at(s[0], s[1], s[2]), title:'Multiple Failed Login Attempts Detected', body:'User devops@cclinker.net could not login after ' + s[3] + ' consecutive failed login attempt(s)', read:true });
@@ -566,7 +570,8 @@
   window.vdcRestoreQuickPrompts = function(){
     try {
       var raw = JSON.parse(localStorage.getItem('vdc-ai-transcript'));
-      if (raw && raw.qp && raw.qp.length) window.vdcRenderQuickPrompts(raw.qp);
+      var decided = jget(KEY_ROT, {}).rec && raw && raw.qp && raw.qp[0] === ROT_FOLLOWUPS[0];   // a decided recommendation's prompts do not travel
+      if (raw && raw.qp && raw.qp.length && !decided) window.vdcRenderQuickPrompts(raw.qp);
     } catch(e){}
   };
   // The public call starts a NEW set: the pool is the whole list, asked is reset, the first three are shown.
@@ -1034,9 +1039,12 @@
   // reason, respond, summarize etc rather than an immediate jump to the rendered summary card"). Picking a concern
   // reads as asking for it: the list commits as the opening turn, the ask follows as the user's, then the agent
   // thinks on screen and answers — the same beats any other scenario in the panel plays.
-  window.vdcNotifSpeak = function(id){
+  // opts.proactive: the agent opens the topic itself (a session detail's Ask button), so there is no user turn before it, the page has already named the topic, and an
+  // item voiced earlier is still briefed (the detail is a second way in, not a repeat of the arrival).
+  window.vdcNotifSpeak = function(id, opts){
+    opts = opts || {};
     if (typeof aiAgent === 'undefined' || aiAgent.busy) return;
-    var list = pendingVoice(); if (!list.length) return;
+    var list = opts.proactive ? build() : pendingVoice(); if (!list.length) return;
     var v = jget(KEY_VOICED, {});
     if (id === '__appr'){   // legacy: the collapsed catch-up item, no trace to play
       commitArrival(null); speakAppr(list.filter(function(n){ return n.task; }), v, false);
@@ -1044,8 +1052,8 @@
     }
     var n = list.filter(function(x){ return x.id === id; })[0]; if (!n) return;
     commitArrival(n.id);
-    if (n.topic) window.vdcSetPanelTopic(n.topic);
-    aiAgent.msgs.push({ role:'user', html:askFor(n) });   // user bubbles render _aiEsc(m.html): plain text, never markup
+    if (n.topic && !opts.proactive) window.vdcSetPanelTopic(n.topic);
+    if (!opts.proactive) aiAgent.msgs.push({ role:'user', html:askFor(n) });   // user bubbles render _aiEsc(m.html): plain text, never markup
     recs_mark(v, n);
     // The policy page already authors this whole flow for this recommendation — use it rather than a second copy.
     if (typeof window.rotGapFlow === 'function'){
@@ -1094,14 +1102,14 @@
         if (kind === 'rec-activate' && typeof window.rotActivate === 'function'){ try { sessionStorage.removeItem('vdc-rot-activate'); } catch(e){} setTimeout(window.rotActivate, 260); }
         refresh(); return;
       }
-      _travel('backup-policies.html#rot-review'); return;
+      window.vdcOpenRotReview(); return;   // the policy opens OVER this page (was: travelled to Policies, which lost the user's place)
     }
     // No id = the collapsed catch-up line: land on the Agents lens itself rather than any one task.
     var h = id ? '#agents/' + id : '#agents';
-    // Match the Activity page with OR without the extension: a static server that serves extensionless URLs makes
+    // Match the Agent Library page with OR without the extension: a static server that serves extensionless URLs makes
     // location.pathname '/activity', so an /activity\.html$/ test silently failed there and every in-page link fell through
     // to a FULL PAGE RELOAD — which closes the panel and drops the already-voiced message, reading as "the button does nothing".
-    if (/\/activity(\.html)?$/.test(location.pathname)){
+    if (/\/agent-library(\.html)?$/.test(location.pathname)){
       // Already here: switch the lens in place. _actOpenAgentTaskLink only understands '#agents/<taskId>', so the bare
       // catch-up hash has to go through setActView — routing it to the task helper matched nothing and did nothing.
       if (!id){ if (typeof setActView === 'function') setActView('agents'); else location.hash = h; }
@@ -1109,8 +1117,92 @@
       else location.hash = h;
       refresh();
     }
-    else _travel('activity.html' + h);
+    else _travel('agent-library.html' + h);
   };
+  // ── THE POLICY REVIEW OPENS OVER THE PAGE YOU ARE ON (user 2026-11-13) ─────────────────────────────────────────────
+  // Reviewing the ROT policy used to navigate to Policies, so getting back to Activity (or wherever the user was) meant navigating
+  // again. It is now the real Policies editor in a frame laid over the content area (backup-policies.html?embed=1 shows only the
+  // editor), the same way the Agent Hub shows a session's detail. ONE overlay at a time: opening this closes whatever overlay the
+  // page has up (the session detail, the restore wizard), and any of those opening closes this.
+  var ROT_OV = 'vdcRotOv';
+  function rotFrame(){ return document.getElementById(ROT_OV) || (typeof window.vdcRotTabOpen === 'function' && window.vdcRotTabOpen() ? document.getElementById('sdPolicyPane') : null); }
+  function hostToast(o){
+    if (typeof showToast !== 'function' || !o) return;
+    if (showToast.length >= 2) showToast(o.title || '', { type: o.tone === 'error' ? 'error' : 'success', body: o.body });   // pages whose toast is (message, options)
+    else showToast(o);                                                                                                     // pages whose toast takes one object
+  }
+  function rotChanged(){   // the decision lives in the shared vdc-rot-state; every surface on this page re-reads it
+    try { refresh(); } catch (e) {}
+    ['renderAgentsTable', 'renderActTable', 'alRenderOverview', 'vdcSyncDecisions'].forEach(function(fn){ try { if (typeof window[fn] === 'function') window[fn](); } catch (e) {} });
+  }
+  window.vdcCloseRotReview = function(){ var o = document.getElementById(ROT_OV); if (o) o.remove(); if (typeof window.vdcRotTabClose === 'function') window.vdcRotTabClose(); document.removeEventListener('keydown', rotEsc); };
+  function rotEsc(e){ if (e.key === 'Escape' && document.getElementById(ROT_OV)){ window.vdcCloseRotReview(); rotChanged(); } }
+  function closeOtherOverlays(){
+    try { var sd = document.getElementById('sdModal'); if (sd && sd.classList.contains('open') && typeof closeSessionModal === 'function') closeSessionModal(); } catch (e) {}
+    try { var wo = document.getElementById('wsOverlay'); if (wo && wo.classList.contains('open') && typeof closeWorkspace === 'function') closeWorkspace(); } catch (e) {}   // keeps the cart
+  }
+  function storeIc(name, size){
+    var e = (window.__SECURITI_ICONS || {})[name]; if (!e || !e.paths) return '';
+    return '<svg width="' + size + '" height="' + size + '" viewBox="' + e.viewBox + '" fill="currentColor" aria-hidden="true">' + e.paths.map(function(d){ return '<path d="' + d + '"/>'; }).join('') + '</svg>';
+  }
+  window.vdcOpenRotReview = function(){
+    if (typeof rotShowView === 'function'){ rotShowView(false, true); refresh(); return; }   // this IS the Policies page: it is already the editor
+    // inside an open session detail the review is a TAB in that overlay (the detail stays one click away); anywhere else it is its own overlay
+    if (typeof window.vdcRotTab === 'function' && window.vdcRotTab()) return;
+    window.vdcCloseRotReview(); closeOtherOverlays();
+    if (!document.getElementById('vdcRotOvCss')){
+      var st = document.createElement('style'); st.id = 'vdcRotOvCss';
+      // the same modal as the session detail and the restore wizard: a scrim over the content area and a 12px card inset 24px, with the tab strip on top (Figma 10845:113118)
+      st.textContent = [
+        '#vdcRotOv { position: fixed; top: var(--devjump-h, 0px); left: 72px; right: var(--ai-w, 0px); bottom: 0; z-index: 1190; background: rgba(31,34,41,0.4); opacity: 0; transition: right .24s ease, opacity .15s ease; }',
+        '#vdcRotOv.is-ready { opacity: 1; }',
+        '#vdcRotOv .vro-card { position: absolute; top: 24px; left: 24px; right: 24px; bottom: 24px; background: var(--white, #fff); border-radius: 12px; border: 1px solid var(--border-light, #e4e5e6); box-shadow: 0 16px 48px rgba(0,0,0,0.18); display: flex; flex-direction: column; overflow: hidden; }',
+        '#vdcRotOv.is-ready .vro-card { animation: vroIn 200ms cubic-bezier(0, 0, 0.2, 1); }',
+        '@keyframes vroIn { from { opacity: 0; transform: translateY(8px) scale(0.98); } }',
+        '@media (prefers-reduced-motion: reduce) { #vdcRotOv, #vdcRotOv.is-ready .vro-card { animation: none; transition: none; } }',
+        '#vdcRotOv .vro-tabs { display: flex; align-items: center; background: var(--black-5, #f8f8f9); padding-right: 8px; flex-shrink: 0; }',
+        '#vdcRotOv .vro-tab { display: flex; align-items: center; gap: 8px; height: 48px; padding: 12px; max-width: 360px; min-width: 108px; background: var(--white, #fff); border: 1px solid var(--border-light, #e4e5e6); border-bottom: none; box-sizing: border-box; }',
+        '#vdcRotOv .vro-tile { display: inline-flex; align-items: center; justify-content: center; padding: 4px; border-radius: 4px; background: var(--em-green-tint, #f6fbf9); color: var(--em-green, #01804a); flex-shrink: 0; }',
+        '#vdcRotOv .vro-label { flex: 1; min-width: 0; font-size: 14px; line-height: 20px; letter-spacing: 0.005em; color: var(--black-100, #1f2229); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }',
+        '#vdcRotOv .vro-x { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: none; border-radius: 4px; background: none; color: var(--black-100, #1f2229); cursor: pointer; padding: 4px; flex-shrink: 0; }',
+        '#vdcRotOv .vro-x:hover { background: var(--black-5, #f8f8f9); }',
+        '#vdcRotOv .vro-acts { margin-left: auto; display: flex; gap: 4px; }',
+        '#vdcRotOv .vro-act { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: 1px solid var(--border, #d2d3d4); border-radius: 4px; background: var(--white, #fff); color: var(--black-100, #1f2229); cursor: pointer; padding: 8px; box-sizing: border-box; }',
+        '#vdcRotOv .vro-act:hover { background: var(--black-5, #f8f8f9); }',
+        '#vdcRotOv iframe { flex: 1; width: 100%; min-height: 0; border: 0; background: var(--white, #fff); }'
+      ].join('\n');
+      document.head.appendChild(st);
+    }
+    var ov = document.createElement('div'); ov.id = ROT_OV; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Policy review');
+    ov.innerHTML = '<div class="vro-card"><div class="vro-tabs"><div class="vro-tab"><span class="vro-tile">' + storeIc('sd-tab-store', 16) + '</span><span class="vro-label" id="vroTitle">Stale SharePoint content \u2014 Retail Division</span>'
+      + '<button type="button" class="vro-x" aria-label="Close" data-vro-close>' + storeIc('sd-close', 20) + '</button></div>'
+      + '<div class="vro-acts"><button type="button" class="vro-act" aria-label="Close" data-tooltip="Close" data-vro-close>' + storeIc('sd-close', 20) + '</button></div></div>'
+      + '<iframe id="vdcRotFrame" title="Policy review" src="' + _href('backup-policies.html?embed=1#rot-review').replace(/"/g, '&quot;') + '"></iframe></div>';
+    ov.addEventListener('click', function(e){ if (e.target === ov || e.target.closest('[data-vro-close]')){ window.vdcCloseRotReview(); rotChanged(); } });
+    document.body.appendChild(ov);
+    document.addEventListener('keydown', rotEsc);
+    setTimeout(function(){ var x = rotFrame(); if (x) x.classList.add('is-ready'); }, 2500);   // never leave it invisible if the editor does not report in
+  };
+  window.addEventListener('message', function(e){
+    var d = e.data || {}; if (!d.type) return;
+    if (d.type === 'vdc-rot-ready'){ var f = document.getElementById(ROT_OV); if (f){ f.classList.add('is-ready'); var t = document.getElementById('vroTitle'); if (t && d.title) t.textContent = d.title; } if (typeof window.vdcRotTabTitle === 'function') window.vdcRotTabTitle(d.title); }
+    else if (d.type === 'vdc-rot-close'){ window.vdcCloseRotReview(); rotChanged(); }
+    else if (d.type === 'vdc-toast'){ hostToast(d.opts); }
+    else if (d.type === 'vdc-rot-ask'){   // the overlay's "Ask Veeam Intelligence": the host's panel opens beside it with the briefing (unless the thread already carries it)
+      if (typeof aiOpen === 'function') aiOpen();
+      var has = (typeof aiAgent !== 'undefined') && aiAgent.msgs.some(function(m){ return m && m.card && m.card.approval && m.card.approval.key === 'rot'; });
+      if (!has && typeof window.vdcNotifSpeak === 'function') window.vdcNotifSpeak('rot-rec', { proactive:true });
+    }
+    else if (d.type === 'vdc-rot-dismiss'){ if (typeof window.vdcRotDismissAsk === 'function') window.vdcRotDismissAsk(); }
+  });
+  window.addEventListener('storage', function(e){ if (e.key === KEY_ROT && rotFrame()) rotChanged(); });   // a decision made inside the overlay shows behind it at once
+  // another overlay opening takes this one's place
+  window.addEventListener('load', function(){ setTimeout(function(){
+    ['openSessionModal', 'openAgentTaskModal', 'openAgentRunModal', 'openAgentRunDrawer', 'openJobDrawer', 'showWorkspace'].forEach(function(n){
+      var f = window[n]; if (typeof f !== 'function' || f.__rotWrapped) return;
+      var w = function(){ if (document.getElementById(ROT_OV)) window.vdcCloseRotReview(); return f.apply(this, arguments); }; w.__rotWrapped = true; window[n] = w;
+    });
+  }, 0); });
   // One door for leaving the page, so every exit keeps the panel and the thread.
   /* A page one folder below the prototypes it links to (the Agent Hub) sets window.VDC_BASE = '../'; every
      page in the root leaves it unset. Applied where the component navigates, so no consumer has to patch a link. */
@@ -1455,7 +1547,7 @@
         + '<div class="ai-hx-search-band"><div class="ai-hx-search">' + icon('search-outlined', 15)
         + '<input id="aiHxQ" placeholder="Search chat history" value="' + esc(window.aiHx.q) + '" oninput="aiHx.q=this.value; aiHx.kb=-1; aiHxKeepFocus()"></div></div>'
         + '<div class="ai-hx-body" id="aiHxBody">' + window._aiHxFinderBody(q) + '</div>'
-        + '<div class="ai-hx-foot"><a href="activity.html#agent">View agent activity</a></div>'
+        + '<div class="ai-hx-foot"><a href="agent-library.html#agents">View agent activity</a></div>'
         + '</div></div>');
       var b = document.getElementById('aiHxBtn'); if (b) b.classList.add('is-on');
       window.aiHxKbPaint();

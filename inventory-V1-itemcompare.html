@@ -21,6 +21,9 @@
 -->
 <html lang="en">
 <head>
+<script>/* gate pre-hide: a still-valid session hides the password gate before the first paint (the in-body check sits behind blocking scripts, so the gate flashed on every page-to-page jump) */
+(function(){try{var r=localStorage.getItem('_sw_s')||sessionStorage.getItem('_sw_s'),p=r&&JSON.parse(r);if(p&&p.expires&&Date.now()<p.expires){var s=document.createElement('style');s.textContent='#passwordGate{display:none!important}';document.documentElement.appendChild(s);}}catch(e){}})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Protected Data — Veeam</title>
@@ -2012,7 +2015,7 @@ body.ai-open .ws-overlay, body.ai-open .ws-modal { right: var(--ai-w); }
 .ai-body { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; background: var(--black-3); }
 .ai-msg { display: flex; }
 .ai-msg.user { justify-content: flex-end; }
-.ai-bubble { max-width: 88%; font-size: 14px; line-height: 1.55; border-radius: 10px; padding: 10px 13px; }
+.ai-bubble { max-width: 88%; font-size: 16px; line-height: 22px; border-radius: 10px; padding: 10px 13px; }
 .ai-msg.agent .ai-bubble { background: var(--white); border: 1px solid var(--border-light); color: var(--black-100); border-top-left-radius: 4px; }
 .ai-msg.user .ai-bubble { background: var(--blue); color: var(--white); border-top-right-radius: 4px; }
 .ai-bubble strong { font-weight: 600; }

@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>/* gate pre-hide: a still-valid session hides the password gate before the first paint (the in-body check sits behind blocking scripts, so the gate flashed on every page-to-page jump) */
+(function(){try{var r=localStorage.getItem('_sw_s')||sessionStorage.getItem('_sw_s'),p=r&&JSON.parse(r);if(p&&p.expires&&Date.now()<p.expires){var s=document.createElement('style');s.textContent='#passwordGate{display:none!important}';document.documentElement.appendChild(s);}}catch(e){}})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SaaS Rapid Workloads Mockups</title>

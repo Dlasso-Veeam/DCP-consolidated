@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script id="agents-redirect">/*AL-REDIRECT*/ (function(){ try { if (/^#(agents|agent)([\/?]|$)/.test(location.hash)) location.replace('agent-library.html' + location.search + (location.hash === '#agent' ? '#agents' : location.hash)); } catch (e) {} })();</script>
+<script>/* gate pre-hide: a still-valid session hides the password gate before the first paint (the in-body check sits behind blocking scripts, so the gate flashed on every page-to-page jump) */
+(function(){try{var r=localStorage.getItem('_sw_s')||sessionStorage.getItem('_sw_s'),p=r&&JSON.parse(r);if(p&&p.expires&&Date.now()<p.expires){var s=document.createElement('style');s.textContent='#passwordGate{display:none!important}';document.documentElement.appendChild(s);}}catch(e){}})();
+</script>
+<style>html.act-deep-pending body { opacity: 0; }</style>
+<script>/* deep-link pre-hide: a link that lands on a specific view/detail keeps the page invisible until that view is in place (failsafe 1.5s) */
+(function(){ try { var emb = /[?&]embed=1\b/.test(location.search); if (emb) document.documentElement.classList.add('act-embed');   /* embedded in the Agent Hub: mark it now, not at the end of the page, so nothing else paints first */
+  if (emb || /^#(agents|agent|audit|ir|sanitize|jobs)([\/?]|$)/.test(location.hash)) { document.documentElement.classList.add('act-deep-pending'); setTimeout(function(){ document.documentElement.classList.remove('act-deep-pending'); }, 1500); } } catch (e) {} })();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Activity — Veeam</title>
@@ -1500,6 +1509,7 @@ body.ai-open.ai-full #toast { right: 24px; }
    td is its own stacking context at the same z, so LATER rows' cells paint
    over an earlier row's open menu. Lift the cell that currently hosts the
    menu above its siblings (menu node only exists while open). */
+#agentsTable tbody td:last-child:has(.act-row-menu),
 #actTable tbody td:last-child:has(.act-row-menu),
 #auditTable tbody td:last-child:has(.act-row-menu),
 #irTable tbody td:last-child:has(.act-row-menu) { z-index: 30; }
@@ -1678,6 +1688,16 @@ body.ai-open .sd-modal { right: calc(24px + var(--ai-w)); }
 /* properties panel — Figma 10845:113250 (258/258 label-value rows) */
 .sd-props { width: 440px; flex-shrink: 0; padding: 16px 16px 24px 24px; border-left: 1px solid var(--black-10); }
 @media (max-width: 1100px) { .sd-cols { flex-direction: column; } .sd-props { width: auto; border-left: none; border-top: 1px solid var(--black-10); } }
+/* Stack on the MODAL's width, not the window's: the assistant panel takes 420px from the modal without changing the viewport. .sd-narrow is set by a ResizeObserver on #sdModal. */
+.sd-modal.sd-narrow .sd-cols { flex-direction: column; }
+.sd-modal.sd-narrow .sd-props { width: auto; border-left: none; border-top: 1px solid var(--black-10); }
+.sd-modal.sd-narrow .sd-log { padding-left: 24px; }
+/* tight: the log reads as stacked entries (time + status on one line, the message under them) instead of three squeezed columns */
+.sd-modal.sd-tight .agu-tbl thead { display: none; }
+.sd-modal.sd-tight .agu-tbl, .sd-modal.sd-tight .agu-tbl tbody { display: block; }
+.sd-modal.sd-tight .agu-tbl tr { display: flex; flex-wrap: wrap; align-items: center; column-gap: 12px; padding: 12px 0; }
+.sd-modal.sd-tight .agu-tbl td { padding: 0; width: auto; }
+.sd-modal.sd-tight .agu-tbl td:last-child { flex-basis: 100%; margin-top: 4px; }
 .sd-props-hd { display: flex; align-items: center; min-height: 28px; margin-bottom: 4px; padding: 0; font-size: 18px; font-weight: 500; line-height: 22px; color: var(--black-100); }
 /* property row — Figma 10845:113255 (_Columns Data Grid) */
 .sd-prop-row { display: flex; align-items: center; gap: 12px; min-height: 40px; margin: 0; font-size: 16px; line-height: 22px; }
@@ -1873,7 +1893,7 @@ body.ai-full #aiWorkingGlow { display: none; }
 .ai-body::-webkit-scrollbar-thumb:hover { background: var(--border); border-color: var(--white); background-clip: padding-box; }
 .ai-msg { display: flex; flex-wrap: wrap; }
 .ai-msg.user { justify-content: flex-end; }
-.ai-bubble { max-width: 88%; font-size: 14px; line-height: 1.55; border-radius: 8px; padding: 8px 12px; }
+.ai-bubble { max-width: 88%; font-size: 16px; line-height: 22px; border-radius: 8px; padding: 8px 12px; }
 .ai-msg.agent .ai-bubble { background: none; border: none; padding: 0; border-radius: 0; max-width: 100%; flex: 1; color: var(--black-100); }
 .ai-msg.user .ai-bubble { background: var(--blue); color: var(--white); border-top-right-radius: 4px; }
 .ai-bubble strong { font-weight: 600; }
@@ -1938,7 +1958,24 @@ body.ai-full #aiWorkingGlow { display: none; }
 /* verbatim clone of protected-data.html's .ai-composer input component */
 .ai-composer { display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--border); border-radius: 8px; background: var(--white); padding: 8px 8px 8px 12px; }
 .ai-composer:focus-within { border-color: var(--blue); background: var(--em-green-tint); box-shadow: none; }
-.ai-composer-input { border: none; outline: none; resize: none; background: transparent; font-family: inherit; font-size: 14px; line-height: 20px; color: var(--black-100); min-height: 20px; max-height: 96px; padding: 4px 0; }
+/* recommended-response pills (the 'View the … session' link after an approval in the conversation). Copied verbatim from activity-agent-overlay.html: this page used the markup without the styles. */
+.ov-sugg-lead { margin-top: 4px; }
+.ov-pill.is-quiet, .ov-pill.is-link { background: var(--white); border-color: var(--border); }
+.ov-pill.is-quiet { font-weight: 400; color: var(--black-60); }
+.ov-pill.is-link:hover, .ov-pill.is-quiet:hover { background: var(--black-5); }
+.ov-pill.is-done { cursor: default; color: var(--em-green); }
+.ov-pill:disabled { cursor: default; }
+.ov-pill .lbl { display: flex; flex-direction: column; min-width: 0; }
+.ov-pill .ctx { font-size: 14px; line-height: 20px; font-weight: 400; color: var(--black-60); }
+.ov-pill .dot { display: none; }
+.ov-sugg { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: -8px; }
+.ov-pill { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; min-height: 36px; padding: 6px 12px; border: 1px solid transparent; border-radius: 4px; font-family: inherit; font-size: 16px; line-height: 22px; font-weight: 500; color: var(--black-100); text-align: left; cursor: pointer;
+  background: linear-gradient(var(--white), var(--white)) padding-box, var(--ai-grad) border-box; }
+.ov-pill:hover { background: linear-gradient(var(--black-5), var(--black-5)) padding-box, var(--ai-grad) border-box; }
+.ov-pill svg { width: 16px; height: 16px; flex-shrink: 0; }
+.ov-pill { text-align: left; }
+.ov-pill > svg, .ov-pill > .disc-spinner { align-self: flex-start; margin-top: 3px; }
+.ai-composer-input { border: none; outline: none; resize: none; background: transparent; font-family: inherit; font-size: 16px; line-height: 22px; color: var(--black-100); min-height: 22px; max-height: 96px; padding: 4px 0; }
 .ai-composer-input::placeholder { color: var(--black-60); }
 .ai-composer-row { display: flex; align-items: center; gap: 4px; }
 .ai-composer-tool { width: 28px; height: 28px; border: none; background: none; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
@@ -2154,6 +2191,7 @@ body.ai-full #aiWorkingGlow { display: none; }
 .sd-hd-upd { font-size: 16px; color: var(--black-60); white-space: nowrap; }
 .ag-pbtn { display: inline-flex; align-items: center; height: 36px; padding: 0 16px; border: 1px solid var(--em-green); border-radius: 4px; background: var(--em-green); color: var(--white); font: inherit; font-size: 16px; font-weight: 500; cursor: pointer; white-space: nowrap; }
 .ag-pbtn:hover { filter: brightness(0.94); }
+.ag-pbtn { gap: 8px; }
 .ag-menu-wrap { position: relative; }
 .ag-abtn { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font: inherit; font-size: 16px; font-weight: 500; color: var(--black-100); cursor: pointer; }
 .ag-abtn:hover { background: var(--black-5); }
@@ -2239,7 +2277,7 @@ try { var _eh = sessionStorage.getItem('vdc-ai-handoff'), _ep = (location.pathna
      parses. Without this, the gate flashes for a moment on refresh while the
      main password-gate IIFE (far below) finishes loading and runs its check. -->
 <script src="securiti-icons-data.js?v=20261112b"></script>
-<script src="vdc-notifications.js?v=20261030a"></script>
+<script src="vdc-notifications.js?v=20261113g"></script>
 <script src="workload-picker.js?v=20261112b"></script>
 <script src="agent-sessions.js?v=20261029a"></script>
 <script>
@@ -10434,9 +10472,15 @@ function _actSessOutside(e) {
 }
 // Agent Sessions anchors on STATUS (not Session state): one status at a time, Awaiting decision first — the sessions to act on.
 var AG_STATUS_ORDER = ['pending', 'running', 'scheduled', 'approved', 'success', 'warning', 'failed', 'dismissed', 'cancelled'];
-var _AG_TERMINAL = { approved: 1, success: 1, warning: 1, failed: 1, dismissed: 1, cancelled: 1 };
+var _AG_TERMINAL = { approved: 1, success: 1, warning: 1, failed: 1, dismissed: 1, cancelled: 1, done: 1, declined: 1 };
+// The Status FILTER offers five groups, not the nine row statuses (the row pills keep their precise words). An agent session is either waiting on you,
+// still going (running or scheduled), finished well (approved, succeeded, warning), failed, or declined (dismissed or cancelled).
+var AG_GROUP_ORDER = ['pending', 'active', 'done', 'failed', 'declined'];
+var AG_GROUP_OF = { pending:'pending', running:'active', scheduled:'active', approved:'done', success:'done', warning:'done', failed:'failed', dismissed:'declined', cancelled:'declined' };
+var AG_GROUP_LBL = { pending:'Awaiting decision', active:'Active', done:'Completed', failed:'Failed', declined:'Dismissed' };
+function _agGroup(r){ return AG_GROUP_OF[_agStatus(r)]; }
 function _agStatusSel() { return state.agentsStatus || 'pending'; }
-function _agStatusLabel(k) { return k === 'all' ? 'All statuses' : (AG_STATUS_LBL[k] || k); }
+function _agStatusLabel(k) { return k === 'all' ? 'All statuses' : (AG_GROUP_LBL[k] || AG_STATUS_LBL[k] || k); }
 function _actSessSync() {
   var ag = state.actView === 'agents';
   var l = document.getElementById('actSessLbl'); if (l) l.textContent = ag ? 'Status' : 'Session state';
@@ -10447,8 +10491,8 @@ function actSessRenderList() {
   if (!list) return;
   if (state.actView === 'agents') {
     var pool = _agAll(), cur = _agStatusSel();
-    list.innerHTML = ['all'].concat(AG_STATUS_ORDER).map(function(k){
-      var n = k === 'all' ? pool.length : pool.filter(function(r){ return _agStatus(r) === k; }).length, sel = k === cur;
+    list.innerHTML = ['all'].concat(AG_GROUP_ORDER).map(function(k){
+      var n = k === 'all' ? pool.length : pool.filter(function(r){ return _agGroup(r) === k; }).length, sel = k === cur;
       return '<button type="button" role="menuitemradio" aria-checked="' + sel + '" class="act-wl-opt' + (sel ? ' is-current' : '') + '" onclick="actSessPick(\'' + k + '\')">'
         + '<span style="display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%"><span>' + _agStatusLabel(k) + '</span><span style="font-size:14px;color:var(--black-60);font-weight:450">' + n + '</span></span></button>';
     }).join('');
@@ -10467,7 +10511,7 @@ function actSessRenderList() {
 }
 function actSessPick(v) {
   if (state.actView === 'agents') {
-    if (AG_STATUS_ORDER.indexOf(v) < 0 && v !== 'all') return;
+    if (AG_GROUP_ORDER.indexOf(v) < 0 && v !== 'all') return;
     state.agentsStatus = v; _actSessSync();
     var hostA = document.getElementById('actSessPicker'); if (hostA) hostA.classList.remove('is-open');
     document.removeEventListener('click', _actSessOutside);
@@ -11298,22 +11342,70 @@ function agentsSelClear(){
   if (state.agentsSel) state.agentsSel.clear();
   renderAgentsTable();
 }
-var _AGENT_ROW_ACTIVE = { scheduled:1, queued:1, running:1, awaiting:1, waiting:1, Running:1 };
+var _AGENT_ROW_ACTIVE = { scheduled:1, queued:1, running:1, Running:1 };   // was: awaiting + waiting too, so Stop "cancelled" a request that was only waiting for a decision. A pending request is answered (Decline), never stopped.
+function _agRowById(id){ return _agAll().filter(function(r){ return r.id === id; })[0] || null; }
+function _agIsPending(id){ var r = _agRowById(id); return !!r && _agStatus(r) === 'pending'; }
+// Decline one pending request without opening it. Same writers as the detail's Decline button, so every surface agrees.
+function _agentDeclineOne(id){
+  var r = _agRowById(id); if (!r || _agStatus(r) !== 'pending') return false;
+  return r._task ? window.agTaskDecline(id, true) === true : window.agRunDecline(id, true) === true;
+}
+// A recommendation (rot1) is approved by creating the policy, which happens in Policies after review, so table-level Approve skips it.
+function _agIsApprovable(id){ return id !== 'rot1' && _agIsPending(id); }
+function _agentApproveOne(id){
+  var r = _agRowById(id); if (!r || id === 'rot1' || _agStatus(r) !== 'pending') return false;
+  return r._task ? window.agTaskApprove(id, true) === true : window.agRunApprove(id, true) === true;
+}
+function agentsBulkApprove(){
+  var ids = Array.from(state.agentsSel || []).filter(_agIsApprovable), n = 0;
+  ids.forEach(function(id){ if (_agentApproveOne(id)) n++; });
+  if (state.agentsSel) state.agentsSel.clear();
+  renderAgentsTable();
+  showToast('Approved ' + n + ' request' + (n === 1 ? '' : 's'));
+}
+function agentsRowApprove(id){
+  var ok = _agentApproveOne(id); renderAgentsTable();
+  if (ok) showToast('Approved 1 request');
+}
+function agentsBulkDecline(){
+  var ids = Array.from(state.agentsSel || []).filter(_agIsPending), n = 0;
+  ids.forEach(function(id){ if (_agentDeclineOne(id)) n++; });
+  if (state.agentsSel) state.agentsSel.clear();
+  renderAgentsTable();
+  showToast('Declined ' + n + ' request' + (n === 1 ? '' : 's'));
+}
+function agentsRowDecline(id){
+  var ok = _agentDeclineOne(id); renderAgentsTable();
+  if (ok) showToast('Declined 1 request');
+}
 function _agentsRenderBulkBar(){
   var host = document.getElementById('agentsBulkBar');
   if (!host) return;
   var live = _actSessState() === 'active';
   var sel = state.agentsSel || new Set();
   var n = sel.size;
-  var dis = n === 0 ? ' disabled aria-disabled="true"' : '';
+  var selRows = Array.from(sel).map(_agRowById).filter(Boolean);
+  var nPend = selRows.filter(function(r){ return _agStatus(r) === 'pending'; }).length, nOther = selRows.length - nPend;
+  // Each action enables only when something selected can take it: Decline answers pending requests; Stop / Restart act on the rest.
+  var dis = nOther === 0 ? ' disabled aria-disabled="true"' : '';
+  var disDec = nPend === 0 ? ' disabled aria-disabled="true"' : '';
+  var nApp = selRows.filter(function(r){ return _agIsApprovable(r.id); }).length;
+  var disApp = nApp === 0 ? ' disabled aria-disabled="true"' : '';
+  var thumb = function(k){ return (typeof _dsStoreIconSvg === 'function' ? _dsStoreIconSvg(k, 20) : _abbIc(k)) || _abbIc(k); };
   var chip = n
     ? '<span class="abb-chip">' + n + ' selected<button type="button" aria-label="Clear selection" onclick="agentsSelClear()">' + _abbIc('sd-close') + '</button></span>'
     : '<span class="abb-none">None Selected</span>';
   // Stop = primary destructive (Sessions ruling 2026-09-08); Restart plain.
-  var btns = (live
+  // Only the actions that can apply to what the table is showing: a view narrowed to Awaiting decision has nothing to stop or restart,
+  // and a view with nothing awaiting has nothing to approve. Mixed views (All) show both sets.
+  var inView = _agentsListRows(), vPend = inView.some(function(r){ return _agStatus(r) === 'pending'; }), vOther = inView.some(function(r){ return _agStatus(r) !== 'pending'; });
+  var decideBtns = '<button type="button" class="abb-btn"' + disApp + ' data-tooltip="Approve the selected requests that are awaiting a decision (a policy recommendation is approved in Policies)" onclick="agentsBulkApprove()">' + thumb('thumb-up-outlined') + '<span class="lbl">Approve</span></button>'
+    + '<button type="button" class="abb-btn"' + disDec + ' data-tooltip="Decline the selected requests that are awaiting a decision" onclick="agentsBulkDecline()">' + thumb('thumb-down-outlined') + '<span class="lbl">Decline</span></button>';
+  var runBtns = (live
     ? '<button type="button" class="abb-btn destructive"' + dis + ' data-tooltip="Stop — running work aborts, queued and scheduled work is cancelled" onclick="agentsBulkStop()">' + _abbIc('act-stop') + '<span class="lbl">Stop</span></button>'
     : '')
     + '<button type="button" class="abb-btn"' + dis + ' data-tooltip="Run again from the start" onclick="agentsBulkRestart()">' + _abbIc('act-restart') + '<span class="lbl">Restart</span></button>';
+  var btns = (vPend ? decideBtns : '') + (vOther ? runBtns : '');
   host.innerHTML = '<span class="abb-hint">Select items to perform actions.</span>'
     + '<div class="abb-actions">' + chip + btns + '</div>';
 }
@@ -11338,6 +11430,7 @@ function _agentMutate(ids, fn){
   return n;
 }
 function _agentStopOne(x){
+  if (x.row._st === 'pending') return false;
   if (x.kind === 'run'){
     if (x.row.outcome !== 'Running') return false;
     x.row.dur = _sdFmtDur(Date.now() - x.row.started.getTime());
@@ -11348,6 +11441,7 @@ function _agentStopOne(x){
   x.row.status = 'cancelled';
 }
 function _agentRestartOne(x){
+  if (x.row._st === 'pending' || x.row.status === 'awaiting' || x.row.status === 'waiting') return false;
   if (x.kind === 'run'){ x.row.outcome = 'Running'; x.row.started = new Date(); x.row.dur = '—'; return; }
   if (x.row.status !== 'cancelled') return false;   // a cancelled task re-queues; scheduled/gated rows aren't restartable
   x.row.status = 'queued';
@@ -11378,16 +11472,22 @@ function agentsRowKebab(e, id){
   if (!reopen) return;
   var row = _agentTaskRows().concat(AGENT_RUNS.map(function(r){ return { id: r.id, outcome: r.outcome }; }))
     .filter(function(x){ return x.id === id; })[0] || {};
-  var active = !!_AGENT_ROW_ACTIVE[row.outcome];
+  var pendingRow = _agIsPending(id);
+  var active = !!_AGENT_ROW_ACTIVE[row.outcome] && !pendingRow;
   var m = document.createElement('div');
   m.className = 'topbar-menu act-row-menu';
   m._jobId = id;
   m.style.display = 'block';
   var _id = String(id).replace(/'/g, '');
   var _mi = function(ic, label, fn){ return '<button type="button" onclick="_actRowMenuClose();' + fn + '">' + (typeof _sdIc === 'function' ? _sdIc(ic, 16) : '') + label + '</button>'; };
-  m.innerHTML = (active ? _mi('act-stop', 'Stop', "agentsRowStop('" + _id + "')") : '')
-    + _mi('act-restart', 'Restart', "agentsRowRestart('" + _id + "')");
+  var _th = function(k){ return '<button type="button" onclick="_actRowMenuClose();@F@">' + (typeof _dsStoreIconSvg === 'function' ? _dsStoreIconSvg(k, 16) : '') + '@L@</button>'; };
+  var _pm = function(k, label, fn){ return _th(k).replace('@F@', fn).replace('@L@', label); };
+  m.innerHTML = pendingRow ? (id === 'rot1' ? _mi('act-restart', 'Review in Policies', "vdcOpenRotReview()") : _pm('thumb-up-outlined', 'Approve', "agentsRowApprove('" + _id + "')")) + _pm('thumb-down-outlined', 'Decline', "agentsRowDecline('" + _id + "')")
+    : (active ? _mi('act-stop', 'Stop', "agentsRowStop('" + _id + "')") : '') + _mi('act-restart', 'Restart', "agentsRowRestart('" + _id + "')");
   host.appendChild(m);
+  // The scroller clips an open menu on the last rows, so a menu that would run past its bottom edge opens upward instead.
+  var wrap = host.closest('.table-wrap');
+  if (wrap && m.getBoundingClientRect().bottom > wrap.getBoundingClientRect().bottom){ m.style.top = 'auto'; m.style.bottom = 'calc(100% + 4px)'; }
   setTimeout(function(){ document.addEventListener('click', _actRowMenuClose); }, 0);
 }
 function renderAgentTasks(){
@@ -11528,7 +11628,7 @@ function _agentsListRows(){
   // runs + this session's finished tasks, windowed by the shared range).
   var _stSel = _agStatusSel();
   var _TASK_ACTIVE = { scheduled:1, queued:1, running:1, awaiting:1, waiting:1 };
-  var pool = _agentTaskRows().concat(AGENT_RUNS).filter(_agWlOk).filter(function(r){ return _stSel === 'all' || _agStatus(r) === _stSel; });
+  var pool = _agentTaskRows().concat(AGENT_RUNS).filter(_agWlOk).filter(function(r){ return _stSel === 'all' || _agGroup(r) === _stSel; });
   var rows = pool.filter(function(r){
     var t = r.started.getTime();
     if (_AG_TERMINAL[_agStatus(r)] && (t < b.startTs || t > b.endTs)) return false;
@@ -11564,7 +11664,7 @@ function renderAgentsTable(){
   var _rc = document.getElementById('actRangeChip');
   if (_rc && state.actView === 'agents') _rc.style.display = (_stSel === 'all' || _AG_TERMINAL[_stSel]) ? '' : 'none';   // the time range only applies to finished work
   var rows = _agentsListRows();
-  var pool = _agentTaskRows().concat(AGENT_RUNS).filter(_agWlOk).filter(function(r){ return _stSel === 'all' || _agStatus(r) === _stSel; });   // for pruning the selection below
+  var pool = _agentTaskRows().concat(AGENT_RUNS).filter(_agWlOk).filter(function(r){ return _stSel === 'all' || _agGroup(r) === _stSel; });   // for pruning the selection below
   var per = state.agentsPageSize || 10;
   var pages = Math.max(1, Math.ceil(rows.length / per));
   if (state.agentsPage > pages) state.agentsPage = pages;
@@ -11587,8 +11687,8 @@ function renderAgentsTable(){
         + '<td class="name-col"><div class="cell-name" style="color:var(--blue)">' + esc(r.capability) + '</div></td>'
         + '<td><span class="act-type-chip">' + esc(_agSkillCell(r)) + '</span></td>'
         + '<td>' + _agentTaskPill(r.outcome, r.id) + '</td>'
-        + '<td>' + esc(r.agent) + '</td>'
-        + '<td style="font-size:16px">' + esc(r.wl || '—') + '</td>'
+        + '<td style="white-space:nowrap">' + esc(r.agent) + '</td>'
+        + '<td style="font-size:16px;white-space:nowrap">' + esc(r.wl || '—') + '</td>'
         + '<td style="white-space:nowrap">' + esc(_actFmtFull(r.started)) + '</td>'
         + '<td style="white-space:nowrap">' + esc(r.dur) + '</td>'
         + acts
@@ -11600,8 +11700,9 @@ function renderAgentsTable(){
       // one status vocabulary per column: an in-flight run wears the same
       // 'In progress' pill as the task rows (was: _agentOutcomePill 'Running')
       + '<td>' + _agRunPillFor(r) + '</td>'
-      + '<td>' + esc(r.agent) + (r.parent ? '<div style="font-size:14px;color:var(--black-60)">Spawned by ' + esc(r.parent) + '</div>' : '') + '</td>'
-      + '<td style="font-size:16px">' + esc(r.wl || '—') + '</td>'
+      // one line per row: the agent name stays on a single line and "Spawned by …" moves to its tooltip (the detail still lists it), so spawned rows are no taller than the rest. was: the name plus a 14px "Spawned by" line under it, wrapping inside a narrow column.
+      + '<td style="white-space:nowrap"' + (r.parent ? ' data-tooltip="Spawned by ' + esc(r.parent) + '"' : '') + '>' + esc(r.agent) + '</td>'
+      + '<td style="font-size:16px;white-space:nowrap">' + esc(r.wl || '—') + '</td>'
       + '<td style="white-space:nowrap">' + esc(_actFmtFull(r.started)) + '</td>'
       + '<td style="white-space:nowrap">' + esc(r.dur) + '</td>'
       + acts
@@ -11875,7 +11976,7 @@ function openAgentTaskModal(taskId){
   // ── header: type + status chip, title, then the actions (the Finding page's grammar: primary decision button
   // + an Actions menu at the top right; a awaiting decision leads with the decision) ──
   var acts = [];
-  if (rot && pending) acts.push(['Open the draft in Policies', "window.location.href='backup-policies.html#rot-review'"]);
+  if (rot && pending) acts.push(['Open the draft in Policies', "vdcOpenRotReview()"]);
   if (rot && t.outcome === 'done') acts.push(['Open File ROT policies', "window.location.href='backup-policies.html#rot'"]);
   if (pending && !rot) acts.push(['Open in the assistant', "agReviewInConversation('" + t.id + "')"]);
   acts.push(['View in the audit trail', "window.location.href='activity.html#audit'"]);
@@ -11885,7 +11986,7 @@ function openAgentTaskModal(taskId){
     '<span class="sd-hd-tile">' + _sdIc('sd-session-log', 28) + '</span>'
     + '<div class="sd-hd-main"><div class="sd-hd-meta"><span class="sd-hd-eyebrow">' + (rot ? 'Agent Recommendation' : 'Agent Task') + '</span>' + _agentTaskPill(t.outcome, t.id) + '</div><div class="sd-hd-title">' + esc(t.capability) + '</div></div>'
     + '<div class="sd-hd-acts"><span class="sd-hd-upd">Last updated ' + esc(_actFmtFull(t.started)) + '</span>'
-    + (pending ? '<button type="button" class="ag-pbtn" onclick="' + (rot ? 'window.location.href=\'' + esc(goHref) + '\'' : 'agReviewInConversation(\'' + t.id + '\')') + '">' + esc(t.cta || 'Review in the conversation') + '</button>' : (rot && t.outcome === 'done' ? '<button type="button" class="ag-pbtn" onclick="window.location.href=\'backup-policies.html#rot\'">Open policy</button>' : (ses ? '<button type="button" class="ag-pbtn" onclick="agOpenSession(\'' + ses.id + '\')">Open session</button>' : '')))
+    + (pending ? '<button type="button" class="ag-pbtn" onclick="' + (rot ? 'vdcOpenRotReview()' : 'agReviewInConversation(\'' + t.id + '\')') + '">' + esc(t.cta || 'Review in the conversation') + '</button>' : (rot && t.outcome === 'done' ? '<button type="button" class="ag-pbtn" onclick="window.location.href=\'backup-policies.html#rot\'">Open policy</button>' : (ses ? '<button type="button" class="ag-pbtn" onclick="agOpenSession(\'' + ses.id + '\')">Open session</button>' : '')))
     + '<span class="ag-menu-wrap"><button type="button" class="ag-abtn" aria-haspopup="true" onclick="agTaskMenu(event)"><span>Actions</span>' + chev + '</button>'
     + '<div class="ag-menu" id="agTaskMenu" role="menu">' + acts.map(function(x){ return '<button type="button" role="menuitem" onclick="' + esc(x[1]) + '">' + esc(x[0]) + '</button>'; }).join('') + '</div></span></div>';
   // ── related-object list (left) + graph (what is held, and by whom), like the run page ──
@@ -12256,7 +12357,7 @@ function _actApplyAgentsDeepLink(hash) {
   var sk = params.get('skill');     if (sk)  filters.push({ attr: 'skill', values: sk.split(',').map(function(id){ var x = window.VDC_SESSIONS && VDC_SESSIONS.skillById(id); return x ? x.name : id; }) });
   state.agentsFilters = filters; state.agentsPage = 1; state.agentsSel = new Set();
   var se = document.getElementById('agentsSearch'); if (se) se.value = '';
-  var st = params.get('status'); state.agentsStatus = (st && (st === 'all' || AG_STATUS_ORDER.indexOf(st) >= 0)) ? st : 'all';
+  var st = params.get('status'); state.agentsStatus = (st && (st === 'all' || AG_GROUP_ORDER.indexOf(st) >= 0)) ? st : ((st && AG_GROUP_OF[st]) || 'all');   // a deep link may still name a precise status: it lands on that status's group
   var from = Number(params.get('from')), to = Number(params.get('to'));
   if (from && to) { state.actTimeRange = 'custom'; state.actCustom = { start: _actYmd(from), end: _actYmd(to), startTs: from, endTs: to }; }
   setActView('agents');
@@ -12287,7 +12388,15 @@ function _actOpenAgentTaskLink(h){
   setTimeout(function(){ if (typeof openAgentTaskModal === 'function') openAgentTaskModal(m[1]); }, 60);
   return true;
 }
-(function(){ var h = window.location.hash; if (h.indexOf('#agents?') === 0) { setTimeout(function(){ _actApplyAgentsDeepLink(h); }, 0); return; } if (h.indexOf('#agents/') === 0) { setTimeout(function(){ _actOpenAgentTaskLink(h); }, 0); return; } if (h.indexOf('#jobs?') === 0) { setTimeout(function(){ _actApplyJobsDeepLink(h); }, 0); return; } if (h === '#audit' || h === '#agents' || h === '#agent' || h === '#ir') setTimeout(function(){ setActView(h === '#agent' ? 'agents' : h.slice(1)); }, 0);  if (h === '#sanitize' || h.indexOf('#sanitize/') === 0) setTimeout(function(){ setActView('sanitize'); }, 0); })();
+(function(){ var h = window.location.hash;
+  // The page is hidden (html.act-deep-pending, set in <head>) until the deep link has put the right view, filters and detail in place, so the default Jobs view never flashes first.
+  function reveal(d){ setTimeout(function(){ document.documentElement.classList.remove('act-deep-pending'); }, d || 0); }
+  if (h.indexOf('#agents?') === 0) { setTimeout(function(){ _actApplyAgentsDeepLink(h); reveal(); }, 0); return; }
+  if (h.indexOf('#agents/') === 0) { setTimeout(function(){ _actOpenAgentTaskLink(h); reveal(120); }, 0); return; }   // the detail opens 60ms after the lens switch
+  if (h.indexOf('#jobs?') === 0) { setTimeout(function(){ _actApplyJobsDeepLink(h); reveal(); }, 0); return; }
+  if (h === '#audit' || h === '#agents' || h === '#agent' || h === '#ir') setTimeout(function(){ setActView(h === '#agent' ? 'agents' : h.slice(1)); reveal(); }, 0);
+  else if (h === '#sanitize' || h.indexOf('#sanitize/') === 0) setTimeout(function(){ setActView('sanitize'); reveal(); }, 0);
+  else if (h.indexOf('#session/') !== 0) reveal(); })();   // an embedded #session/ link is revealed by the embed script once its detail is open
 window.addEventListener('hashchange', function(){
   var h = window.location.hash;
   if (_actOpenAgentTaskLink(h)) return;
@@ -14308,6 +14417,9 @@ window.__devJumpResolve = function(h) {
   });
   document.addEventListener('focusout', hide);
   window.addEventListener('scroll', hide, true);
+  // A row kebab names itself ("Actions") until you open it; once its menu is up the bubble only covers the menu, so it goes away.
+  document.addEventListener('click', function(e){ if (e.target.closest && e.target.closest('.act-row-kebab')) hide(); }, true);   // capture: the kebab's own handler stops propagation
+  var _show = show; show = function(target){ if (target.classList && target.classList.contains('act-row-kebab') && target.parentElement && target.parentElement.querySelector('.act-row-menu')) return; _show(target); };
 })();
 </script>
 <script>
@@ -14587,9 +14699,11 @@ var VN_ITEMS = [
     return { id: it.id, label: it.label, href: it.href, disabled: it.disabled, subs: it.subs, home: it.id === 'dashboards' };
   });
   // Data Resilience REMOVED from Apps 2026-07-14 — it's core navigation now.
+  VN_ICONS['app-agentlibrary'] = VN_ICONS['agent'] || '';
   var VN_APPS = [
     // All apps disabled for now (user 2026-07-15) — ambient platform chrome.
     { id: 'app-di',      label: 'Sensitive Data Intelligence', href: 'sensitive-data-intelligence.html' },   // wired 2026-11-11 (user: open it from any page in the main series); was: disabled: true
+    { id: 'app-agentlibrary', label: 'Agent Library', href: 'agent-library.html' },   // everything Veeam Intelligence: Overview, Agent sessions, Settings
     { id: 'app-stream',  label: 'Data Remediation', disabled: true },
     { id: 'app-assess',  label: 'Compliance', disabled: true },
     { id: 'aiagents',    label: 'Agent Activity', disabled: true },
@@ -15430,20 +15544,22 @@ else aiComposerIcons();
   var EMBED = /[?&]embed=1\b/.test(location.search);
   if (EMBED) document.documentElement.classList.add('act-embed');
   function tell(m){ try { parent.postMessage(m, '*'); } catch(e){} }
-  window.agRunApprove = function(id){
+  window.agRunApprove = function(id, quiet){
     var r = (typeof AGENT_RUNS !== 'undefined' ? AGENT_RUNS : []).filter(function(x){ return x.id === id; })[0]; if (!r) return;
     if (window.VDC_SESSIONS) VDC_SESSIONS.resolve(r.sessionId);
     r._st = 'success'; r.outcome = 'Success'; r.decision = (window.VDC_SESSIONS && VDC_SESSIONS.DECISION_LABEL.approved) || 'Approved';
     if (EMBED){ tell({ type:'vdc-session-decided', id:r.sessionId, title:r.capability }); return; }
+    if (quiet) return true;   // approved from the table: the table re-renders once and owns the toast
     closeSessionModal();
     if (typeof renderAgentsTable === 'function') renderAgentsTable();
     if (typeof showToast === 'function') showToast('Approved \u2014 ' + r.capability);
   };
-  window.agRunDecline = function(id){
+  window.agRunDecline = function(id, quiet){
     var r = (typeof AGENT_RUNS !== 'undefined' ? AGENT_RUNS : []).filter(function(x){ return x.id === id; })[0]; if (!r) return;
     if (window.VDC_SESSIONS) VDC_SESSIONS.decline(r.sessionId);
     r._st = 'dismissed'; r.outcome = 'Dismissed'; r.decision = (window.VDC_SESSIONS && VDC_SESSIONS.DECISION_LABEL.denied) || 'Denied';
     if (EMBED){ tell({ type:'vdc-session-decided', decision:'declined', id:r.sessionId, title:r.capability }); return; }
+    if (quiet){ return true; }   // declined from the table: the table re-renders once and owns the toast
     closeSessionModal();
     if (typeof renderAgentsTable === 'function') renderAgentsTable();
     if (typeof showToast === 'function') showToast('Declined \u2014 ' + r.capability);
@@ -15503,6 +15619,7 @@ else aiComposerIcons();
   function openFromHash(){
     var m = /^#session\/([\w-]+)$/.exec(location.hash || ''); if (!m) return;
     if (typeof openAgentRunModal === 'function') openAgentRunModal(m[1]);
+    setTimeout(function(){ document.documentElement.classList.remove('act-deep-pending'); }, 60);   // the frame stays invisible until the detail is open (set in <head>)
   }
   window.addEventListener('load', function(){ setTimeout(openFromHash, 150); });
   window.addEventListener('hashchange', openFromHash);
@@ -15571,37 +15688,53 @@ else aiComposerIcons();
   }
   // Header Approve / Decline on a held task (user 2026-11-11: one decision pair on every agent session). They write exactly what the conversation's
   // Approve / Deny buttons write (startSession + decide) and reuse its own confirmation lines; the conversation stays the place for the full evidence.
-  window.agTaskApprove = function(id){
+  window.agTaskApprove = function(id, quiet){
     var t = (typeof _agentTaskRows === 'function' ? _agentTaskRows() : []).filter(function(x){ return x.id === id; })[0]; if (!t) return;
     var c = CONV[id] || generic(t), job = startSession(id); decide(id, 'done', job);
+    if (quiet) return true;
     if (typeof showToast === 'function') showToast(c.approved);
     if (typeof openAgentTaskModal === 'function') openAgentTaskModal(id);
   };
-  window.agTaskDecline = function(id){
+  window.agTaskDecline = function(id, quiet){
     var t = (typeof _agentTaskRows === 'function' ? _agentTaskRows() : []).filter(function(x){ return x.id === id; })[0]; if (!t) return;
+    // A policy recommendation (rot1) keeps its decision in the state key shared with Policies, so declining writes the same "dismissed" record the Policies page writes. Nothing navigates.
+    if (id === 'rot1'){
+      try { var rsx = JSON.parse(localStorage.getItem('vdc-rot-state')) || {}; if (!rsx.rec){ rsx.rec = 'dismissed'; rsx.by = 'Darren Lasso'; rsx.note = ''; rsx.ts = Date.now(); localStorage.setItem('vdc-rot-state', JSON.stringify(rsx)); } } catch (e) {}
+      if (typeof renderAgentsTable === 'function') renderAgentsTable();
+      if (quiet) return true;
+      if (typeof showToast === 'function') showToast('Declined \u2014 no policy was created');
+      if (typeof openAgentTaskModal === 'function') openAgentTaskModal(id);
+      return;
+    }
     var c = CONV[id] || generic(t); decide(id, 'cancelled');
+    if (quiet) return true;   // declined from the table: the table owns the toast, and no detail opens
     if (typeof showToast === 'function') showToast('Declined \u2014 ' + t.capability);
     if (typeof openAgentTaskModal === 'function') openAgentTaskModal(id);
   };
-  window.agReviewInConversation = function(taskId){
+  // opts.keepModal: opened from the session detail's Ask button, so the detail stays open beside the panel and re-renders when the decision is made here; opts.proactive: no user turn first.
+  window.agReviewInConversation = function(taskId, opts){
+    opts = opts || {};
     var t = (typeof _agentTaskRows === 'function' ? _agentTaskRows() : []).filter(function(x){ return x.id === taskId; })[0]; if (!t) return;
     var c = CONV[taskId] || generic(t);
-    if (typeof closeSessionModal === 'function') closeSessionModal();
-    aiAgent.msgs = []; aiAgent.activeGate = null; aiAgent.thinking = false; aiAgent.greeted = true;
+    if (!opts.keepModal && typeof closeSessionModal === 'function') closeSessionModal();
+    // From the detail's Ask button the briefing CONTINUES the open conversation (appended at the bottom); only the standalone Review button starts a fresh thread.
+    if (!opts.keepModal){ aiAgent.msgs = []; aiAgent.activeGate = null; }
+    aiAgent.thinking = false; aiAgent.greeted = true;
     if (typeof aiSetBusy === 'function') aiSetBusy(false);
     aiOpen();
-    aiAgent.msgs.push({ role:'user', html:c.user });
+    if (!opts.proactive) aiAgent.msgs.push({ role:'user', html:c.user });
     var rs = aiPushReasoning(); rs.named = true; rs.open = false;
     c.steps.forEach(function(st){ rs.steps.push({ kind:st[0], label:st[1], ms:600, detail:st[2], result:st[3] }); });
     rs.t0 = Date.now() - 4000; aiFinishReasoning(rs);
     var resolved = t.outcome !== 'awaiting' && t.outcome !== 'waiting';
     var rows = c.rows.map(function(r){ return [r[0], r[1]]; });
     aiPushAgent(c.summary, resolved ? null : { q:'', approval:{ rows:rows }, buttons:[
-      { label:'Deny', choice:'Denied', fn:function(){ decide(t.id, 'cancelled'); aiPushAgent('<p>' + c.denied + '</p>'); } },
+      { label:'Deny', choice:'Denied', fn:function(){ decide(t.id, 'cancelled'); aiPushAgent('<p>' + c.denied + '</p>'); if (opts.keepModal && typeof openAgentTaskModal === 'function') openAgentTaskModal(t.id); } },
       // SHOW ME on a held restore (user 2026-11-12): takes you to Protected Data where the restore is staged; the panel and the thread travel with you, hence the open-in-new mark
       ].concat((JOBS[t.id] && JOBS[t.id].type === 'Restore') ? [{ label:'Show me', nav:true, fn:function(){ aiacGo('nav', t.href || ('protected-data.html#agentgate/' + t.id)); } }] : []).concat([
       { label:c.primary, primary:true, choice:'Approved', fn:function(){
         var job = startSession(t.id); decide(t.id, 'done', job);
+        if (opts.keepModal && typeof openAgentTaskModal === 'function') openAgentTaskModal(t.id);
         var pill = job ? '<div class="ov-sugg" style="margin-top:12px"><button type="button" class="ov-pill" onclick="agOpenSession(\'' + job.id + '\')">' + (typeof _sdIc === 'function' ? _sdIc('sd-session-log', 16) : '') + '<span class="lbl"><span class="t">View the ' + job.type.toLowerCase() + ' session</span><span class="ctx">' + E(job.job) + ' \u00b7 In progress \u00b7 Resilience Sessions</span></span></button></div>' : '';
         aiPushAgent('<p>' + c.approved + '</p>' + (job ? '<p>I started the ' + job.type.toLowerCase() + ' session <b>' + E(job.job) + '</b>. It\u2019s running now \u2014 you can follow it in Resilience Sessions, and it lists this approval as the agent task that started it.</p>' : '') + pill);
       } } ]) });
@@ -15844,7 +15977,33 @@ function _agObjRows(spec, state){
         + '<button class="sd-tab-close" type="button" aria-label="Close tab" onclick="event.stopPropagation();_sdTabClose(' + i + ')">' + _sdIc('sd-close', 20) + '</button></div>';
     }).join('')
       + '<div class="sd-tabs-actions"><button class="sd-act-btn" type="button" data-tooltip="Close" aria-label="Close" onclick="closeSessionModal()">' + _sdIc('sd-close', 20) + '</button></div>';
+    syncPane();
   }
+  /* THE POLICY REVIEW AS A TAB (user 2026-11-13): reviewing the ROT policy from inside an open session detail adds a tab to this strip, so the
+     original detail is one click away. The tab's content is the Policies editor (backup-policies.html?embed=1) laid over the area under the strip. */
+  var POLICY_KEY = 'policy:rot', POLICY_LABEL = 'Stale SharePoint content \u2014 Retail Division';
+  function policyIdx(){ var i = -1; stack.forEach(function(t, k){ if (t.key === POLICY_KEY) i = k; }); return i; }
+  function syncPane(){
+    var pane = document.getElementById('sdPolicyPane'), i = policyIdx();
+    if (i < 0){ if (pane) pane.remove(); return; }       // the tab is gone: so is its page
+    if (pane) pane.style.display = (i === active) ? '' : 'none';
+  }
+  function showPolicy(){ switching = true; try { track(POLICY_KEY, POLICY_LABEL, showPolicy); } finally { switching = false; } }
+  window.vdcRotTab = function(){
+    var modal = document.getElementById('sdModal'); if (!isOpen() || !modal) return false;
+    if (!document.getElementById('sdPolicyPane')){
+      var pane = document.createElement('div'); pane.id = 'sdPolicyPane';
+      pane.style.cssText = 'position:absolute;left:0;right:0;bottom:0;top:48px;background:var(--white);z-index:5;display:flex';
+      var fr = document.createElement('iframe'); fr.id = 'vdcRotFrame'; fr.title = 'Policy review'; fr.src = (window.VDC_BASE || '') + 'backup-policies.html?embed=1#rot-review';
+      fr.style.cssText = 'flex:1;width:100%;height:100%;border:0;background:var(--white)';
+      pane.appendChild(fr); modal.appendChild(pane);
+    }
+    adding = true; try { track(POLICY_KEY, POLICY_LABEL, showPolicy); } finally { adding = false; }
+    return true;
+  };
+  window.vdcRotTabTitle = function(t){ var i = policyIdx(); if (i >= 0 && t){ stack[i].label = t; POLICY_LABEL = t; render(); } };
+  window.vdcRotTabClose = function(){ var i = policyIdx(); if (i < 0) return false; window._sdTabClose(i); return true; };
+  window.vdcRotTabOpen = function(){ return policyIdx() >= 0; };
   function track(key, label, reopen){
     var i = -1; stack.forEach(function(t, k){ if (t.key === key) i = k; });
     if (adding || switching){ if (i < 0){ stack.push({ key:key, label:label, reopen:reopen }); i = stack.length - 1; } active = i; }
@@ -15862,6 +16021,10 @@ function _agObjRows(spec, state){
   wrap('openAgentRunModal',  function(id){ return 'run:' + id; },  function(id){ var r = (window.AGENT_RUNS || []).filter(function(x){ return x.id === id; })[0]; return r ? r.capability : 'Agent run'; });
   wrap('openAgentTaskModal', function(id){ return 'task:' + id; }, function(id){ var t = (typeof _agentTaskRows === 'function' ? _agentTaskRows() : []).filter(function(x){ return x.id === id; })[0]; return t ? t.capability : 'Agent task'; });
   wrap('openSessionModal',   function(id){ return 'ses:' + id; },  function(id){ var j = (typeof _actAllJobs === 'function' ? _actAllJobs() : []).filter(function(x){ return x.id === id; })[0]; return j ? j.job : 'Session'; });
+  // the unified agent-session detail (render(S) below) draws its own strip; it registers here instead so extra tabs (the policy review) can sit beside it
+  window._sdTrackSpec = function(key, label, reopenFn){
+    track(key, label, function(){ switching = true; try { reopenFn(); } finally { switching = false; } });
+  };
   window._sdTabGo = function(i){ var t = stack[i]; if (t) t.reopen(); };
   window._sdTabClose = function(i){
     if (stack.length <= 1){ closeSessionModal(); return; }
@@ -15870,7 +16033,7 @@ function _agObjRows(spec, state){
     else { if (i < active) active--; render(); }
   };
   var _close = window.closeSessionModal;
-  window.closeSessionModal = function(){ stack = []; active = -1; return _close.apply(this, arguments); };
+  window.closeSessionModal = function(){ stack = []; active = -1; var pp = document.getElementById('sdPolicyPane'); if (pp) pp.remove(); return _close.apply(this, arguments); };
   // a session link clicked inside the overlay adds a tab; from anywhere else (the conversation panel) it keeps its old route to the Sessions view
   var _openSes = window.agOpenSession;
   window.agOpenSession = function(id){
@@ -16230,14 +16393,15 @@ function askBtn(){ return '<button type="button" class="ag-abtn ag-ic agu-ask" d
 function header(S){
   var run = (S.kind === 'run'), decide = '';
   if (S.pending){
-    var dec = run ? "agRunDecline('" + S.id + "')" : (S.rec ? "window.location.href='" + esc(S.goHref) + "'" : "agTaskDecline('" + S.id + "')");
-    var app = run ? "agRunApprove('" + S.id + "')" : (S.rec ? "window.location.href='" + esc(S.goHref) + "'" : "agTaskApprove('" + S.id + "')");
-    decide = '<button type="button" class="ag-abtn" onclick="' + dec + '"><span>Decline</span></button><button type="button" class="ag-pbtn" onclick="' + app + '">Approve</button>';
-  } else if (S.rec && S.outcome === 'done') decide = '<button type="button" class="ag-pbtn" onclick="window.location.href=\'backup-policies.html#rot\'">Open policy</button>';
+    var dec = run ? "agRunDecline('" + S.id + "')" : "agTaskDecline('" + S.id + "')";   // was: a recommendation's Decline went to the policy draft in Policies
+    var app = run ? "agRunApprove('" + S.id + "')" : (S.rec ? "vdcOpenRotReview()" : "agTaskApprove('" + S.id + "')");   // Approve on a recommendation opens the draft over this page: nothing is created until it is activated there
+    var _tu = (typeof _dsStoreIconSvg === 'function' ? _dsStoreIconSvg : _sdIc);
+    decide = '<button type="button" class="ag-abtn" onclick="' + dec + '">' + _tu('thumb-down-outlined', 20) + '<span>Decline</span></button><button type="button" class="ag-pbtn" onclick="' + app + '">' + _tu('thumb-up-outlined', 20) + '<span>Approve</span></button>';
+  } else if (S.rec && S.outcome === 'done') decide = '<button type="button" class="ag-pbtn" onclick="vdcOpenRotReview()">Open policy</button>';
   else if (S.sessionId) decide = '<button type="button" class="ag-pbtn" onclick="agOpenSession(\'' + esc(S.sessionId) + '\')">Open session</button>';
   var items = [];
   if (S.pending) items.push(['Ask Veeam Intelligence', 'AGU.ask()']);   // the icon is also here, spelled out, while a decision is open
-  if (S.rec && S.pending) items.push(['Review the draft in Policies', "window.location.href='" + S.goHref + "'"]);
+  if (S.rec && S.pending) items.push(['Review the draft in Policies', "vdcOpenRotReview()"]);
   if (S.rec && S.outcome === 'done') items.push(['Open File ROT policies', "window.location.href='backup-policies.html#rot'"]);
   if (!EMBED) items.push(['View in the audit trail', "window.location.href='activity.html#audit'"]);
   items.push(['Copy link', run ? "agRunCopyLink('" + S.id + "')" : "agCopyTaskLink('" + S.id + "')"]);
@@ -16249,6 +16413,10 @@ function header(S){
 }
 function render(S){
   AGU.S = S; AGU.q = ''; AGU.st = 'All'; AGU.ctx = ctxFor(S);
+  if (typeof _sdTrackSpec === 'function' && (S.kind === 'task' || S.kind === 'run')){
+    // the strip belongs to the overlay's tab list: a fresh open is one tab, and the policy review can add a second beside it
+    _sdTrackSpec('spec:' + S.id, S.title, function(){ if (S.kind === 'task') openAgentTaskModal(S.id); else openAgentRunModal(S.id); });
+  } else
   $('sdTabs').innerHTML = '<div class="sd-tab"><span class="sd-tab-tile">' + _sdIc('sd-tab-store', 16) + '</span><span class="sd-tab-label">' + esc(S.title) + '</span>'
     + '<button class="sd-tab-close" type="button" aria-label="Close" onclick="closeSessionModal()">' + _sdIc('sd-close', 20) + '</button></div>'
     + '<div class="sd-tabs-actions"><button class="sd-act-btn" type="button" data-tooltip="Close" aria-label="Close" onclick="closeSessionModal()">' + _sdIc('sd-close', 20) + '</button></div>';
@@ -16263,6 +16431,9 @@ function render(S){
   _agPaneInit(m);
   $('sdOverlay').classList.add('open'); $('sdModal').classList.add('open'); document.body.style.overflow = 'hidden';
 }
+(function(){ var m = document.getElementById('sdModal'), main = m && m.querySelector('.sd-main'); if (!m || !main || !window.ResizeObserver) return;
+  // The content column's own width decides the layout (the modal also holds the section rail, and the assistant panel takes 420px from it).
+  new ResizeObserver(function(){ var w = main.clientWidth; m.classList.toggle('sd-narrow', w < 860); m.classList.toggle('sd-tight', w < 620); }).observe(main); })();
 /* the originals stay in the file, parked (disable-over-delete) */
 window._openAgentRunModalLegacy2 = window.openAgentRunModal; window._openAgentTaskModalLegacy2 = window.openAgentTaskModal;
 window.openAgentRunModal = function(runId){ var r = (typeof AGENT_RUNS !== 'undefined' ? AGENT_RUNS : []).filter(function(x){ return x.id === runId; })[0]; if (!r) return; render(specRun(r)); };
@@ -16293,11 +16464,31 @@ AGU.ask = function(){
   if (EMBED && S.kind === 'run' && S.pending && typeof agRunAsk === 'function') return agRunAsk(S.id);   // inside the Agent Hub the host owns the panel
   AGU.openPanel(c);
 };
+/* A session that is waiting on a decision is briefed the way the agent briefs it everywhere else: its reasoning, a summary, then the decision card with its actions, and only then
+   the quick prompts for deeper questions. Returns true when it did. Anything already decided keeps the plain opening line. */
+AGU.brief = function(c){
+  var S = AGU.S; if (!S || !S.pending || typeof aiAgent === 'undefined' || aiAgent.busy) return false;
+  aiAgent._scrollAnchor = 'bottom';
+  if (S.rec && typeof vdcNotifSpeak === 'function'){ aiAgent._arrivalHtml = null; vdcNotifSpeak('rot-rec', { proactive:true }); return true; }   // no "Welcome back" arrival first: this is a briefing on the session that is open   // the ROT recommendation card, exactly as it arrives from the panel
+  if (S.kind === 'task' && typeof agReviewInConversation === 'function'){ agReviewInConversation(S.id, { keepModal:true, proactive:true }); if (typeof vdcRenderQuickPrompts === 'function') vdcRenderQuickPrompts(c.prompts); return true; }
+  var runRow = (S.kind === 'run' && typeof AGENT_RUNS !== 'undefined') ? AGENT_RUNS.filter(function(x){ return x.id === S.id; })[0] : null;
+  if (runRow && runRow.sessionId && typeof window.hubApprInfo === 'function' && window.hubPendingIndex){
+    var i = window.hubPendingIndex(runRow.sessionId); if (i < 0) return false;
+    // what the open detail already knows (what it touches, restore point, connection, policy), the same context agRunAsk hands the panel
+    var m = window._agGraph || {}, R = m.rows || {}, ot = (m.types || []).filter(function(t){ return t[0] === 'Objects'; })[0];
+    var first = function(k){ return (R[k] && R[k].rows && R[k].rows[0]) ? R[k].rows[0] : null; };
+    var ctx = { n: ot ? ot[1] : null, noun: first('Objects') ? first('Objects')[1] : '', names: (R.Objects && R.Objects.rows ? R.Objects.rows.slice(0, 3).map(function(x){ return x[0]; }) : []),
+      point: first('Restore point') ? first('Restore point')[0] : null, conn: first('Connection') ? first('Connection')[0] : null, policy: first('Policy') ? first('Policy')[0] : null };
+    window.hubApprInfo(i, ctx, c.prompts && c.prompts.length ? c.prompts : true); return true;
+  }
+  return false;
+};
 AGU.openPanel = function(c){
   if (typeof aiAgent === 'undefined') return;
   if (typeof aiOpen === 'function') aiOpen();
   if (aiAgent._topic === c.title && aiAgent.msgs.length) return;   // already asking about this session: open the panel, don't repeat the opening line
   if (typeof vdcSetPanelTopic === 'function') vdcSetPanelTopic(c.title);
+  if (AGU.brief(c)) return;
   aiAgent._scrollAnchor = 'bottom';
   if (typeof aiPushAgent === 'function') aiPushAgent(lead(c.title));
   if (typeof vdcRenderQuickPrompts === 'function') vdcRenderQuickPrompts(c.prompts);
@@ -16375,7 +16566,7 @@ AGU.decorateSession = function(j){
 var _ARL = [
   { id: 'jobs',     label: 'Resilience sessions', icon: 'sd-session-log',        count: function(){ return _actJobsListRows().filtered.length; } },
   { id: 'audit',    label: 'Audit log',           icon: 'sd-findings',           count: function(){ return _auditListRows().length; } },
-  { id: 'agents',   label: 'Agent sessions',      icon: 'my-ai-agents-outlined', count: function(){ return _agentsListRows().length; } },   /* was: every task + run, unscoped — it did not match the table */
+  // Agent sessions moved to the Agent Library (agent-library.html); Activity no longer lists them. was: { id: 'agents', label: 'Agent sessions', icon: 'my-ai-agents-outlined', count: _agentsListRows().length }
   { id: 'sanitize', label: 'Sanitize jobs',       icon: 'sanitizer-outlined',    count: function(){ return _sanListRows().length; } }
 ];
 var _arlQ = '';
@@ -16480,7 +16671,7 @@ _arlRender();
 .disc-spinner { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; margin-top: 1px; border: 2px solid var(--blue-30); border-top-color: var(--blue); animation: disc-spin 0.8s linear infinite; }
 .ai-msg { display: flex; flex-wrap: wrap; }
 .ai-msg.user { justify-content: flex-end; }
-.ai-bubble { max-width: 88%; font-size: 14px; line-height: 1.55; border-radius: 8px; padding: 8px 12px; }
+.ai-bubble { max-width: 88%; font-size: 16px; line-height: 22px; border-radius: 8px; padding: 8px 12px; }
 .ai-msg.agent .ai-bubble { background: none; border: none; padding: 0; border-radius: 0; max-width: 100%; flex: 1; color: var(--black-100); }
 .ai-msg.user .ai-bubble { background: var(--em-green-tint); color: var(--black-100); border-top-right-radius: 4px; }
 .ai-bubble strong { font-weight: 600; }
@@ -16811,7 +17002,7 @@ function aiRender(){
                + (st.spawn ? [['task', st.spawn.task], ['granted', st.spawn.granted], ['not granted', st.spawn.denied], ['lifetime', 'Retired when the task completes']].map(function(kv){ return '<div class="ai-tr2-kv"><span class="k">' + _aiEsc(kv[0]) + '</span><span class="v">' + _aiEsc(kv[1]) + '</span></div>'; }).join('') : '')
                + (st.detail || []).map(function(kv){ return '<div class="ai-tr2-kv"><span class="k">' + _aiEsc(kv[0]) + '</span><span class="v">' + _aiEsc(kv[1]) + '</span></div>'; }).join('')
                + (st.result ? '<div class="ai-tr2-kv res"><span class="k">result</span><span class="v">' + _aiEsc(st.result) + '</span></div>' : '')
-               + (st.spawn ? '<div class="ai-tr2-kv"><span class="k"></span><button type="button" style="border:none;background:none;padding:0;font-family:inherit;font-size:12px;color:var(--em-green);cursor:pointer" onclick="event.stopPropagation();aiacGo(\'nav\', \'activity.html#agents\')">View in Agent activity</button></div>' : '')
+               + (st.spawn ? '<div class="ai-tr2-kv"><span class="k"></span><button type="button" style="border:none;background:none;padding:0;font-family:inherit;font-size:12px;color:var(--em-green);cursor:pointer" onclick="event.stopPropagation();aiacGo(\'nav\', \'agent-library.html#agents\')">View in Agent activity</button></div>' : '')
                + '</div>'
              : '')
           + '</div>';
@@ -17230,7 +17421,7 @@ function aiHxRenderOverlay(){
     // The agent-activity door, rehomed from the retired dock footer (user
     // 2026-09-17). History is where you go to look back at agent work, so the
     // audit trail belongs beside it rather than pinned above the composer.
-    + '<div class="ai-hx-foot"><a href="activity.html#agent">View agent activity</a></div>'
+    + '<div class="ai-hx-foot"><a href="agent-library.html#agents">View agent activity</a></div>'
     + '</div></div>');
   var b = document.getElementById('aiHxBtn'); if (b) b.classList.add('is-on');
   aiHxKbPaint();

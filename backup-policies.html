@@ -1,6 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>/* embedded as the ROT review overlay on another page (?embed=1): nothing but the editor shows, and it stays invisible until it has drawn */
+var ROT_EMBED = /[?&]embed=1\b/.test(location.search);
+function tellHost(m){ try { parent.postMessage(m, '*'); } catch (e) {} }
+try { if (ROT_EMBED) document.documentElement.classList.add('rot-embed'); } catch (e) {}
+</script>
+<style>
+html.rot-embed, html.rot-embed body { background: transparent !important; }
+html.rot-embed body > *:not(#rotEditor):not(script):not(style) { display: none !important; }
+html.rot-embed .rot-editor { left: 0; right: 0; top: 0; }
+/* shown inside the host's modal: the host carries the close, so the page header's breadcrumb and help are dropped; the policy title and its actions remain */
+html.rot-embed .rot-ed-bc, html.rot-embed .rot-help { display: none; }   /* the breadcrumb and help are the page's; the policy's own title stays, left of its actions */
+</style>
+<script>/* gate pre-hide: a still-valid session hides the password gate before the first paint (the in-body check sits behind blocking scripts, so the gate flashed on every page-to-page jump) */
+(function(){try{var r=localStorage.getItem('_sw_s')||sessionStorage.getItem('_sw_s'),p=r&&JSON.parse(r);if(p&&p.expires&&Date.now()<p.expires){var s=document.createElement('style');s.textContent='#passwordGate{display:none!important}';document.documentElement.appendChild(s);}}catch(e){}})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Backup Policies — Securiti</title>
@@ -1865,7 +1880,7 @@ body.ai-full #aiWorkingGlow { display: none; }
 .ai-body::-webkit-scrollbar-thumb:hover { background: var(--border); border-color: var(--white); background-clip: padding-box; }
 .ai-msg { display: flex; flex-wrap: wrap; }
 .ai-msg.user { justify-content: flex-end; }
-.ai-bubble { max-width: 88%; font-size: 14px; line-height: 1.55; border-radius: 8px; padding: 8px 12px; }
+.ai-bubble { max-width: 88%; font-size: 16px; line-height: 22px; border-radius: 8px; padding: 8px 12px; }
 /* Agent responses sit flat on the white panel, full width; only the user's
    messages keep bubble chrome, right-aligned. */
 .ai-msg.agent .ai-bubble { background: none; border: none; padding: 0; border-radius: 0; max-width: 100%; flex: 1; color: var(--black-100); }
@@ -1938,7 +1953,7 @@ body.ai-full #aiWorkingGlow { display: none; }
 /* Composer: one bordered box — textarea + tool row */
 .ai-composer { display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--border); border-radius: 8px; background: var(--white); padding: 8px 8px 8px 12px; }
 .ai-composer:focus-within { border-color: var(--blue); background: var(--em-green-tint); box-shadow: none; } /* was: white fill + inset 1px ring — Vision input Active = S5 fill + 1px S80 border */
-.ai-composer-input { border: none; outline: none; resize: none; background: transparent; font-family: inherit; font-size: 14px; line-height: 20px; color: var(--black-100); min-height: 20px; max-height: 96px; padding: 4px 0; }
+.ai-composer-input { border: none; outline: none; resize: none; background: transparent; font-family: inherit; font-size: 16px; line-height: 22px; color: var(--black-100); min-height: 22px; max-height: 96px; padding: 4px 0; }
 .ai-composer-input::placeholder { color: var(--black-60); }
 .ai-composer-row { display: flex; align-items: center; gap: 4px; }
 .ai-composer-tool { width: 28px; height: 28px; border: none; background: none; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
@@ -3489,7 +3504,7 @@ try { var _eh = sessionStorage.getItem('vdc-ai-handoff'), _ep = (location.pathna
 </aside>
 
 <script src="securiti-icons-data.js?v=20261112b"></script>
-<script src="vdc-notifications.js?v=20261030a"></script>
+<script src="vdc-notifications.js?v=20261113g"></script>
 <script src="workload-picker.js?v=20261112b"></script>
 <script>
 // ── DS ICON STORE HELPERS (cloned from protected-data.html) ───────────────────
@@ -10045,9 +10060,11 @@ var VN_ITEMS = [
     return { id: it.id, label: it.label, href: it.href, disabled: it.disabled, subs: it.subs, home: it.id === 'dashboards' };
   });
   // Data Resilience REMOVED from Apps 2026-07-14 — it's core navigation now.
+  VN_ICONS['app-agentlibrary'] = VN_ICONS['agent'] || '';
   var VN_APPS = [
     // All apps disabled for now (user 2026-07-15) — ambient platform chrome.
     { id: 'app-di',      label: 'Sensitive Data Intelligence', href: 'sensitive-data-intelligence.html' },   // wired 2026-11-11 (user: open it from any page in the main series); was: disabled: true
+    { id: 'app-agentlibrary', label: 'Agent Library', href: 'agent-library.html' },   // everything Veeam Intelligence: Overview, Agent sessions, Settings
     { id: 'app-stream',  label: 'Data Remediation', disabled: true },
     { id: 'app-assess',  label: 'Compliance', disabled: true },
     { id: 'aiagents',    label: 'Agent Activity', disabled: true },
@@ -10459,7 +10476,7 @@ function _aiHeadlessExecute(){
     _aiTaskMirror('done');
     aiPushAgent(
       '<p><strong>Restore job started \u2014 1 mailbox queued.</strong></p>'
-      + '<p>Ran in the background: searched his full backup history, resolved the mailbox to its <strong>Apr 17, 2026</strong> restore point, and dispatched the job \u2014 writing in place to the source Microsoft 365 environment, approved by you. Progress is live in <a class="aiac-more" href="activity.html#agent">Activity</a>; once it lands, IT can grant his manager delegate access.</p>'
+      + '<p>Ran in the background: searched his full backup history, resolved the mailbox to its <strong>Apr 17, 2026</strong> restore point, and dispatched the job \u2014 writing in place to the source Microsoft 365 environment, approved by you. Progress is live in <a class="aiac-more" href="agent-library.html#agents">Activity</a>; once it lands, IT can grant his manager delegate access.</p>'
       + aiAction('Approved & dispatched · Restore \u00b7 Mark Aldridge\u2019s mailbox'));
     aiSetBusy(false);
   }, 2200);
@@ -11871,6 +11888,7 @@ body.ai-open .rot-editor { right: var(--ai-w); }   /* the assistant pushes the p
     var ed = document.getElementById('rotEditor'); ed.innerHTML = editorShell(); ed.classList.add('open');
     document.getElementById('rotEdBody').innerHTML = editorBody(!!draft._blank);
     rotValidate(); ed.scrollTop = 0;
+    if (ROT_EMBED) tellHost({ type:'vdc-rot-ready', title:(draft && draft.name) || '' });   // the host reveals the overlay once there is something to show, and titles its tab
   }
   // keep the banner's buttons honest about whether the conversation is open (Ask Veeam Intelligence only when it is not)
   new MutationObserver(function(){
@@ -11915,7 +11933,7 @@ body.ai-open .rot-editor { right: var(--ai-w); }   /* the assistant pushes the p
   window.rotToggleQuery = function(){ if (typeof showToast === 'function') showToast('The full query builder is not part of this prototype \u2014 adjust the age and size in the query above'); };
   window.rotQueryChanged = function(){ readDraft(); };
   window.rotShowImpact = function(){ var b = document.getElementById('rotImpact'); if (b) { b.textContent = draft && !draft._blank ? '4.2 TB matched' : '0 matched'; b.disabled = true; } };
-  window.rotCloseEditor = function(){ document.getElementById('rotEditor').classList.remove('open', 'rot-saved'); draft = null; rotRender(); };
+  window.rotCloseEditor = function(){ document.getElementById('rotEditor').classList.remove('open', 'rot-saved'); draft = null; rotRender(); if (ROT_EMBED) tellHost({ type:'vdc-rot-close' }); };
   // Activating from the proposal's banner or from the assistant acts on the page the user is already on: the policy is created
   // and switched on in place and the page becomes its read-only view, so nobody is navigated away.
   window.rotAgentSave = function(){
@@ -12237,7 +12255,7 @@ body.ai-open .rot-editor { right: var(--ai-w); }   /* the assistant pushes the p
   aiSend = function(text){ if (/\brot\b|retail division|untouched|stale content/i.test(String(text))) { rotGapFlow(); return; } return _sendPrev.apply(this, arguments); };
 
   var _toast = showToast;
-  showToast = function(a){ return _toast(typeof a === 'string' ? { tone:'success', title:a } : a); };
+  showToast = function(a){ var o = typeof a === 'string' ? { tone:'success', title:a } : a; if (ROT_EMBED){ tellHost({ type:'vdc-toast', opts:o }); return; } return _toast(o); };   // as an overlay the toast belongs to the page underneath
 
   function boot(){
     var pol = document.querySelector('#wl-list .wl-item[data-cat="policies"]'); if (pol) pol.onclick = rotShowPolicies;
@@ -12252,6 +12270,9 @@ body.ai-open .rot-editor { right: var(--ai-w); }   /* the assistant pushes the p
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else setTimeout(boot, 0);
   window.addEventListener('storage', function(e){ if (e.key === KEY) rotRender(); });
+  // as an overlay the conversation is the HOST page's, so Ask and Dismiss hand over to it (this frame's own panel is hidden)
+  if (ROT_EMBED){ window.rotAsk = function(){ tellHost({ type:'vdc-rot-ask' }); }; window.rotDismissAsk = function(){ tellHost({ type:'vdc-rot-dismiss' }); }; }
+  if (ROT_EMBED) document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && document.getElementById('rotEditor').classList.contains('open') && !(draft && draft._mode === 'edit')) rotCloseEditor(); });
 })();
 </script>
 <style id="ai-canon">
@@ -12260,7 +12281,7 @@ body.ai-open .rot-editor { right: var(--ai-w); }   /* the assistant pushes the p
 .disc-spinner { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; margin-top: 1px; border: 2px solid var(--blue-30); border-top-color: var(--blue); animation: disc-spin 0.8s linear infinite; }
 .ai-msg { display: flex; flex-wrap: wrap; }
 .ai-msg.user { justify-content: flex-end; }
-.ai-bubble { max-width: 88%; font-size: 14px; line-height: 1.55; border-radius: 8px; padding: 8px 12px; }
+.ai-bubble { max-width: 88%; font-size: 16px; line-height: 22px; border-radius: 8px; padding: 8px 12px; }
 .ai-msg.agent .ai-bubble { background: none; border: none; padding: 0; border-radius: 0; max-width: 100%; flex: 1; color: var(--black-100); }
 .ai-msg.user .ai-bubble { background: var(--em-green-tint); color: var(--black-100); border-top-right-radius: 4px; }
 .ai-bubble strong { font-weight: 600; }
@@ -12598,7 +12619,7 @@ function aiRender(){
                + (st.spawn ? [['task', st.spawn.task], ['granted', st.spawn.granted], ['not granted', st.spawn.denied], ['lifetime', 'Retired when the task completes']].map(function(kv){ return '<div class="ai-tr2-kv"><span class="k">' + _aiEsc(kv[0]) + '</span><span class="v">' + _aiEsc(kv[1]) + '</span></div>'; }).join('') : '')
                + (st.detail || []).map(function(kv){ return '<div class="ai-tr2-kv"><span class="k">' + _aiEsc(kv[0]) + '</span><span class="v">' + _aiEsc(kv[1]) + '</span></div>'; }).join('')
                + (st.result ? '<div class="ai-tr2-kv res"><span class="k">result</span><span class="v">' + _aiEsc(st.result) + '</span></div>' : '')
-               + (st.spawn ? '<div class="ai-tr2-kv"><span class="k"></span><button type="button" style="border:none;background:none;padding:0;font-family:inherit;font-size:12px;color:var(--em-green);cursor:pointer" onclick="event.stopPropagation();aiacGo(\'nav\', \'activity.html#agents\')">View in Agent activity</button></div>' : '')
+               + (st.spawn ? '<div class="ai-tr2-kv"><span class="k"></span><button type="button" style="border:none;background:none;padding:0;font-family:inherit;font-size:12px;color:var(--em-green);cursor:pointer" onclick="event.stopPropagation();aiacGo(\'nav\', \'agent-library.html#agents\')">View in Agent activity</button></div>' : '')
                + '</div>'
              : '')
           + '</div>';
@@ -13017,7 +13038,7 @@ function aiHxRenderOverlay(){
     // The agent-activity door, rehomed from the retired dock footer (user
     // 2026-09-17). History is where you go to look back at agent work, so the
     // audit trail belongs beside it rather than pinned above the composer.
-    + '<div class="ai-hx-foot"><a href="activity.html#agent">View agent activity</a></div>'
+    + '<div class="ai-hx-foot"><a href="agent-library.html#agents">View agent activity</a></div>'
     + '</div></div>');
   var b = document.getElementById('aiHxBtn'); if (b) b.classList.add('is-on');
   aiHxKbPaint();

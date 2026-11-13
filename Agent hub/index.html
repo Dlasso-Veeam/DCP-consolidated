@@ -1202,7 +1202,7 @@ body.ai-full #aiWorkingGlow { display: none; }
 .ai-body::-webkit-scrollbar-thumb:hover { background: var(--border); border-color: var(--white); background-clip: padding-box; }
 .ai-msg { display: flex; flex-wrap: wrap; }
 .ai-msg.user { justify-content: flex-end; }
-.ai-bubble { max-width: 88%; font-size: 14px; line-height: 1.55; border-radius: 8px; padding: 8px 12px; }
+.ai-bubble { max-width: 88%; font-size: 16px; line-height: 22px; border-radius: 8px; padding: 8px 12px; }
 /* Agent responses sit flat on the white panel, full width; only the user's
    messages keep bubble chrome, right-aligned. */
 .ai-msg.agent .ai-bubble { background: none; border: none; padding: 0; border-radius: 0; max-width: 100%; flex: 1; color: var(--black-100); }
@@ -1262,7 +1262,7 @@ body.ai-full #aiWorkingGlow { display: none; }
 .ai-composer { display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--border); border-radius: 8px; background: var(--white); padding: 8px 8px 8px 12px; }
 .ai-composer:focus-within { border-color: var(--blue); background: var(--em-green-tint); box-shadow: none; }
 /* was: white fill + inset 1px ring — Vision input Active = S5 fill + 1px S80 border */
-.ai-composer-input { border: none; outline: none; resize: none; background: transparent; font-family: inherit; font-size: 14px; line-height: 20px; color: var(--black-100); min-height: 20px; max-height: 96px; padding: 4px 0; }
+.ai-composer-input { border: none; outline: none; resize: none; background: transparent; font-family: inherit; font-size: 16px; line-height: 22px; color: var(--black-100); min-height: 22px; max-height: 96px; padding: 4px 0; }
 .ai-composer-input::placeholder { color: var(--black-60); }
 .ai-composer-row { display: flex; align-items: center; gap: 4px; }
 .ai-composer-tool { width: 28px; height: 28px; border: none; background: none; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
@@ -1429,7 +1429,7 @@ body.ai-full #aiWorkingGlow { display: none; }
 .ai-body::-webkit-scrollbar-thumb:hover { background: var(--border); border-color: var(--white); background-clip: padding-box; }
 .ai-msg { display: flex; flex-wrap: wrap; }
 .ai-msg.user { justify-content: flex-end; }
-.ai-bubble { max-width: 88%; font-size: 14px; line-height: 1.55; border-radius: 8px; padding: 8px 12px; }
+.ai-bubble { max-width: 88%; font-size: 16px; line-height: 22px; border-radius: 8px; padding: 8px 12px; }
 .ai-msg.agent .ai-bubble { background: none; border: none; padding: 0; border-radius: 0; max-width: 100%; flex: 1; color: var(--black-100); }
 .ai-msg.user .ai-bubble { background: var(--em-green-tint); color: var(--black-100); border-top-right-radius: 4px; }
 .ai-bubble strong { font-weight: 600; }
@@ -1506,7 +1506,7 @@ body.ai-full #aiWorkingGlow { display: none; }
 /* verbatim clone of protected-data.html's .ai-composer input component */
 .ai-composer { display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--border); border-radius: 8px; background: var(--white); padding: 8px 8px 8px 12px; }
 .ai-composer:focus-within { border-color: var(--blue); background: var(--em-green-tint); box-shadow: none; }
-.ai-composer-input { border: none; outline: none; resize: none; background: transparent; font-family: inherit; font-size: 14px; line-height: 20px; color: var(--black-100); min-height: 20px; max-height: 96px; padding: 4px 0; }
+.ai-composer-input { border: none; outline: none; resize: none; background: transparent; font-family: inherit; font-size: 16px; line-height: 22px; color: var(--black-100); min-height: 22px; max-height: 96px; padding: 4px 0; }
 .ai-composer-input::placeholder { color: var(--black-60); }
 .ai-composer-row { display: flex; align-items: center; gap: 4px; }
 .ai-composer-tool { width: 28px; height: 28px; border: none; background: none; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
@@ -1660,7 +1660,7 @@ body.ai-full #aiWorkingGlow { display: none; }
 .disc-spinner { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; margin-top: 1px; border: 2px solid var(--blue-30); border-top-color: var(--blue); animation: disc-spin 0.8s linear infinite; }
 .ai-msg { display: flex; flex-wrap: wrap; }
 .ai-msg.user { justify-content: flex-end; }
-.ai-bubble { max-width: 88%; font-size: 14px; line-height: 1.55; border-radius: 8px; padding: 8px 12px; }
+.ai-bubble { max-width: 88%; font-size: 16px; line-height: 22px; border-radius: 8px; padding: 8px 12px; }
 .ai-msg.agent .ai-bubble { background: none; border: none; padding: 0; border-radius: 0; max-width: 100%; flex: 1; color: var(--black-100); }
 .ai-msg.user .ai-bubble { background: var(--em-green-tint); color: var(--black-100); border-top-right-radius: 4px; }
 .ai-bubble strong { font-weight: 600; }
@@ -3090,7 +3090,7 @@ function dashboardHTML(deployed){
     + '<button onclick="ovActPage(' + (OV_ACT_PAGE + 1) + ')"' + (OV_ACT_PAGE >= pages ? ' disabled' : '') + ' aria-label="Next page">' + chev('r') + '</button></div></div>';
   defFilter('ovActStatus', { title: 'Status', options: [['running','Running'],['attention','Attention'],['healthy','Healthy'],['paused','Paused']].map(function(s){ return { v: s[0], label: s[1], count: AUDIT.filter(function(e){ return actStatus(e) === s[0]; }).length }; }), apply: function(){ OV_ACT_PAGE = 1; renderOverview(); } });
   var actFilter = filterTrigger('ovActStatus');
-  var activityW = '<div class="widget w-12 w-table no-pad"><div class="w-head"><span class="w-title">Activity</span><span class="w-meta">' + actFilter + '<a class="btn btn-outline" href="../activity.html#agents" style="text-decoration:none">View all in Activity<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;margin-left:4px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>' + wRefresh() + '</span></div>'
+  var activityW = '<div class="widget w-12 w-table no-pad"><div class="w-head"><span class="w-title">Activity</span><span class="w-meta">' + actFilter + '<a class="btn btn-outline" href="../agent-library.html#agents" style="text-decoration:none">View all in Activity<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;margin-left:4px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>' + wRefresh() + '</span></div>'
     + '<div class="dg-wrap"><table class="dg"><thead><tr><th>When</th><th>Agent</th><th>Action</th><th>Target</th><th>Result</th></tr></thead><tbody>' + actRows + '</tbody></table></div>' + pager + '</div>';
 
   return '<div class="dash"><div class="stat-strip">' + stats + '</div>' + trend + healthW + tmapW + status + mapW + outcomes + successRate + activityW + '</div>';
@@ -3579,7 +3579,7 @@ function hubActivityLink(o){
   var base = VDC_SESSIONS.BASE;
   p.set('from', String(o.from != null ? Math.round(o.from) : base - HUB.days * VDC_SESSIONS.DAY));
   p.set('to', String(o.to != null ? Math.round(o.to) : base));
-  return '../activity.html#agents?' + p.toString();
+  return '../agent-library.html#agents?' + p.toString();
 }
 function hubGoActivity(el, over){
   var o = { decision: el.getAttribute('data-act-decision'), status: el.getAttribute('data-act-status'), skill: el.getAttribute('data-act-skill') };
@@ -5285,9 +5285,11 @@ VN_ICONS['activitylog'] = VN_ICONS['activity'];   // Activity Log keeps the VIRO
     return { id: it.id, label: it.label, href: it.href, disabled: it.disabled, subs: it.subs, home: it.id === 'dashboards' };
   });
   // Data Resilience REMOVED from Apps 2026-07-14 — it's core navigation now.
+  VN_ICONS['app-agentlibrary'] = VN_ICONS['agent'] || '';
   var VN_APPS = [
     // All apps disabled for now (user 2026-07-15) — ambient platform chrome.
     { id: 'app-di',      label: 'Sensitive Data Intelligence', disabled: true },
+    { id: 'app-agentlibrary', label: 'Agent Library', href: '../agent-library.html' },   // everything Veeam Intelligence: Overview, Agent sessions, Settings
     { id: 'app-stream',  label: 'Data Remediation', disabled: true },
     { id: 'app-assess',  label: 'Compliance', disabled: true },
     { id: 'aiagents',    label: 'Agent Activity', disabled: true },
@@ -5372,7 +5374,7 @@ renderHub();
   </div>
 </aside>
 <script>window.VDC_BASE = '../';   /* this page lives one folder below the prototypes it links to */</script>
-<script src="../vdc-notifications.js?v=20261030a"></script>
+<script src="../vdc-notifications.js?v=20261113g"></script>
 <script id="ai-shell">
 // Page shims so the copied shell code stays verbatim and diffable (Activity's helpers → this page's own).
 function _dsStoreIconSvg(name, size){ var e = (window.__SECURITI_ICONS || {})[name]; if (!e || !e.paths) return ''; return '<svg width="' + (size || 16) + '" height="' + (size || 16) + '" viewBox="' + e.viewBox + '" fill="currentColor" aria-hidden="true">' + e.paths.map(function(p){ return '<path d="' + p + '"/>'; }).join('') + '</svg>'; }
@@ -6034,7 +6036,7 @@ function aiRender(){
                + (st.spawn ? [['task', st.spawn.task], ['granted', st.spawn.granted], ['not granted', st.spawn.denied], ['lifetime', 'Retired when the task completes']].map(function(kv){ return '<div class="ai-tr2-kv"><span class="k">' + _aiEsc(kv[0]) + '</span><span class="v">' + _aiEsc(kv[1]) + '</span></div>'; }).join('') : '')
                + (st.detail || []).map(function(kv){ return '<div class="ai-tr2-kv"><span class="k">' + _aiEsc(kv[0]) + '</span><span class="v">' + _aiEsc(kv[1]) + '</span></div>'; }).join('')
                + (st.result ? '<div class="ai-tr2-kv res"><span class="k">result</span><span class="v">' + _aiEsc(st.result) + '</span></div>' : '')
-               + (st.spawn ? '<div class="ai-tr2-kv"><span class="k"></span><button type="button" style="border:none;background:none;padding:0;font-family:inherit;font-size:12px;color:var(--em-green);cursor:pointer" onclick="event.stopPropagation();aiacGo(\'nav\', \'activity.html#agents\')">View in Agent activity</button></div>' : '')
+               + (st.spawn ? '<div class="ai-tr2-kv"><span class="k"></span><button type="button" style="border:none;background:none;padding:0;font-family:inherit;font-size:12px;color:var(--em-green);cursor:pointer" onclick="event.stopPropagation();aiacGo(\'nav\', \'agent-library.html#agents\')">View in Agent activity</button></div>' : '')
                + '</div>'
              : '')
           + '</div>';
@@ -6378,7 +6380,7 @@ function aiHxRenderOverlay(){
     // The agent-activity door, rehomed from the retired dock footer (user
     // 2026-09-17). History is where you go to look back at agent work, so the
     // audit trail belongs beside it rather than pinned above the composer.
-    + '<div class="ai-hx-foot"><a href="activity.html#agent">View agent activity</a></div>'
+    + '<div class="ai-hx-foot"><a href="agent-library.html#agents">View agent activity</a></div>'
     + '</div></div>');
   var b = document.getElementById('aiHxBtn'); if (b) b.classList.add('is-on');
   aiHxKbPaint();

@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>/* gate pre-hide: a still-valid session hides the password gate before the first paint (the in-body check sits behind blocking scripts, so the gate flashed on every page-to-page jump) */
+(function(){try{var r=localStorage.getItem('_sw_s')||sessionStorage.getItem('_sw_s'),p=r&&JSON.parse(r);if(p&&p.expires&&Date.now()<p.expires){var s=document.createElement('style');s.textContent='#passwordGate{display:none!important}';document.documentElement.appendChild(s);}}catch(e){}})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Agentic Studio — Securiti</title>
@@ -1603,7 +1606,7 @@ body.ai-full #aiWorkingGlow { display: none; }
 .ai-body::-webkit-scrollbar-thumb:hover { background: var(--border); border-color: var(--white); background-clip: padding-box; }
 .ai-msg { display: flex; flex-wrap: wrap; }
 .ai-msg.user { justify-content: flex-end; }
-.ai-bubble { max-width: 88%; font-size: 14px; line-height: 1.55; border-radius: 8px; padding: 8px 12px; }
+.ai-bubble { max-width: 88%; font-size: 16px; line-height: 22px; border-radius: 8px; padding: 8px 12px; }
 /* Agent responses sit flat on the white panel, full width; only the user's
    messages keep bubble chrome, right-aligned. */
 .ai-msg.agent .ai-bubble { background: none; border: none; padding: 0; border-radius: 0; max-width: 100%; flex: 1; color: var(--black-100); }
@@ -1660,7 +1663,7 @@ body.ai-full #aiWorkingGlow { display: none; }
 /* Composer: one bordered box — textarea + tool row */
 .ai-composer { display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--border); border-radius: 8px; background: var(--white); padding: 8px 8px 8px 12px; }
 .ai-composer:focus-within { border-color: var(--blue); background: var(--em-green-tint); box-shadow: none; } /* was: white fill + inset 1px ring — Vision input Active = S5 fill + 1px S80 border */
-.ai-composer-input { border: none; outline: none; resize: none; background: transparent; font-family: inherit; font-size: 14px; line-height: 20px; color: var(--black-100); min-height: 20px; max-height: 96px; padding: 4px 0; }
+.ai-composer-input { border: none; outline: none; resize: none; background: transparent; font-family: inherit; font-size: 16px; line-height: 22px; color: var(--black-100); min-height: 22px; max-height: 96px; padding: 4px 0; }
 .ai-composer-input::placeholder { color: var(--black-60); }
 .ai-composer-row { display: flex; align-items: center; gap: 4px; }
 .ai-composer-tool { width: 28px; height: 28px; border: none; background: none; border-radius: 4px; color: var(--black-60); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
@@ -2408,7 +2411,7 @@ td.as-td-actions { position: relative; }
   </div>
 </div>
 <script src="securiti-icons-data.js?v=20261112b"></script>
-<script src="vdc-notifications.js?v=20261030a"></script>
+<script src="vdc-notifications.js?v=20261113g"></script>
 <script>
 (function() {
   'use strict';
@@ -2702,9 +2705,11 @@ var VN_ITEMS = [
     return { id: it.id, label: it.label, href: it.href, disabled: it.disabled, subs: it.subs, home: it.id === 'dashboards' };
   });
   // Data Resilience REMOVED from Apps 2026-07-14 — it's core navigation now.
+  VN_ICONS['app-agentlibrary'] = VN_ICONS['agent'] || '';
   var VN_APPS = [
     // All apps disabled for now (user 2026-07-15) — ambient platform chrome.
     { id: 'app-di',      label: 'Sensitive Data Intelligence', href: 'sensitive-data-intelligence.html' },   // wired 2026-11-11 (user: open it from any page in the main series); was: disabled: true
+    { id: 'app-agentlibrary', label: 'Agent Library', href: 'agent-library.html' },   // everything Veeam Intelligence: Overview, Agent sessions, Settings
     { id: 'app-stream',  label: 'Data Remediation', disabled: true },
     { id: 'app-assess',  label: 'Compliance', disabled: true },
     { id: 'aiagents',    label: 'Agent Activity', disabled: true },
