@@ -11312,7 +11312,8 @@ function _agentTaskRows(){
   return _agentTasksLive().map(function(t, i){ t.id = 'lv' + i; return t; }).concat([_rotTask()]).concat(AGENT_TASKS_SEED).map(function(t){
     return { _task: true, id: t.id, capability: t.title, agent: t.agent,
       kind: t.kind || '—', wl: t.wl || '—', trigger: t.trigger || t.source,
-      started: t.started || new Date(), whenLbl: t.when, dur: '—', outcome: t.status, href: t.href, cta: t.cta, rs: t.rs };
+      started: t.started || new Date(), whenLbl: t.when, dur: '—', outcome: t.status, href: t.href, cta: t.cta, rs: t.rs,
+      decision: (t.status === 'awaiting' || t.status === 'waiting') ? 'Awaiting decision' : undefined };   // a held task is a request waiting on a person, like a held session, so the same Decision filter finds both
   });
 }
 // ── selection + bulk actions (user 2026-09-10: Sessions is the reference
@@ -11655,26 +11656,16 @@ function _agentsListRows(){
   });
   return rows;
 }
-function renderAgentsTable(){
-  var tbody = document.getElementById('agentsTbody');
-  if (!tbody) return;
+// ONE ROW, WHEREVER AGENT SESSIONS ARE LISTED: the Agent sessions table and the Overview's awaiting table (Agent Library) draw rows with this.
+// o.cb: include the selection checkbox cell (the table has bulk actions; the Overview's list does not).
+var _AG_DETAIL_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>';
+function _agRowHtml(r, o){
+  o = o || {};
   var esc = function(v){ return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
-  renderAgentsThead();
-  var _stSel = _agStatusSel();
-  var _rc = document.getElementById('actRangeChip');
-  if (_rc && state.actView === 'agents') _rc.style.display = (_stSel === 'all' || _AG_TERMINAL[_stSel]) ? '' : 'none';   // the time range only applies to finished work
-  var rows = _agentsListRows();
-  var pool = _agentTaskRows().concat(AGENT_RUNS).filter(_agWlOk).filter(function(r){ return _stSel === 'all' || _agGroup(r) === _stSel; });   // for pruning the selection below
-  var per = state.agentsPageSize || 10;
-  var pages = Math.max(1, Math.ceil(rows.length / per));
-  if (state.agentsPage > pages) state.agentsPage = pages;
-  var pageRows = rows.slice((state.agentsPage - 1) * per, state.agentsPage * per);
-  var _sel = state.agentsSel || new Set();
-  var _detailSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>';
-  tbody.innerHTML = pageRows.map(function(r){
+  var _sel = state.agentsSel || new Set(), _detailSvg = _AG_DETAIL_SVG;
     // Sessions-parity row chrome (user 2026-09-10): checkbox, detail
     // button, kebab — on task rows and run rows alike.
-    var cb = '<td class="cb-col" onclick="event.stopPropagation()"><input type="checkbox" class="row-cb"' + (_sel.has(r.id) ? ' checked' : '') + ' onchange="toggleAgentsSel(\'' + r.id + '\', this)"></td>';
+    var cb = !o.cb ? '' : '<td class="cb-col" onclick="event.stopPropagation()"><input type="checkbox" class="row-cb"' + (_sel.has(r.id) ? ' checked' : '') + ' onchange="toggleAgentsSel(\'' + r.id + '\', this)"></td>';
     var opener = r._task ? 'openAgentTaskModal' : 'openAgentRunDrawer';
     var acts = '<td><div style="display:flex;align-items:center;gap:4px;justify-content:flex-end;position:relative">'
       + '<button class="btn-icon btn-icon-sm act-row-detail" data-tooltip="View details" aria-label="View details" onclick="event.stopPropagation();' + opener + '(\'' + r.id + '\')">' + _detailSvg + '</button>'
@@ -11707,7 +11698,24 @@ function renderAgentsTable(){
       + '<td style="white-space:nowrap">' + esc(r.dur) + '</td>'
       + acts
     + '</tr>';
-  }).join('') || '<tr><td colspan="9"><div class="inv-empty-state" style="padding:32px;text-align:center;color:var(--black-60)">' + (_stSel === 'all' ? 'No sessions match.' : 'No sessions are ' + _agStatusLabel(_stSel).toLowerCase() + ' for this workload scope.') + '</div></td></tr>';
+}
+function renderAgentsTable(){
+  var tbody = document.getElementById('agentsTbody');
+  if (!tbody) return;
+  var esc = function(v){ return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+  renderAgentsThead();
+  var _stSel = _agStatusSel();
+  var _rc = document.getElementById('actRangeChip');
+  if (_rc && state.actView === 'agents') _rc.style.display = (_stSel === 'all' || _AG_TERMINAL[_stSel]) ? '' : 'none';   // the time range only applies to finished work
+  var rows = _agentsListRows();
+  var pool = _agentTaskRows().concat(AGENT_RUNS).filter(_agWlOk).filter(function(r){ return _stSel === 'all' || _agGroup(r) === _stSel; });   // for pruning the selection below
+  var per = state.agentsPageSize || 10;
+  var pages = Math.max(1, Math.ceil(rows.length / per));
+  if (state.agentsPage > pages) state.agentsPage = pages;
+  var pageRows = rows.slice((state.agentsPage - 1) * per, state.agentsPage * per);
+  var _sel = state.agentsSel || new Set();
+  var _detailSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>';
+  tbody.innerHTML = pageRows.map(function(r){ return _agRowHtml(r, { cb: true }); }).join('') || '<tr><td colspan="9"><div class="inv-empty-state" style="padding:32px;text-align:center;color:var(--black-60)">' + (_stSel === 'all' ? 'No sessions match.' : 'No sessions are ' + _agStatusLabel(_stSel).toLowerCase() + ' for this workload scope.') + '</div></td></tr>';
   // selection bookkeeping (Sessions convention): prune to the scoped set,
   // sync the header checkbox, render the bulk bar
   _agentsLastPageIds = pageRows.map(function(r){ return r.id; });

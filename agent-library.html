@@ -678,7 +678,11 @@ a.vn-fly-link:hover { color: var(--blue); }
 #actTable thead th.cb-col,
 #actTable tbody td.cb-col,
 #agentsTable thead th.cb-col,
-#agentsTable tbody td.cb-col {
+#agentsTable tbody td.cb-col,
+#actTable thead th.cb-col,
+#actTable tbody td.cb-col,
+#alOvTable thead th.cb-col,
+#alOvTable tbody td.cb-col {
   position: sticky; left: 0; background: var(--white); z-index: 3; overflow: visible;
   /* deterministic width: auto table layout shrank this cell to 32px while
      name-col pins at --cb-col-w (42) — a 10px seam let scrolled content
@@ -688,29 +692,49 @@ a.vn-fly-link:hover { color: var(--blue); }
 #actTable thead th.name-col,
 #actTable tbody td.name-col,
 #agentsTable thead th.name-col,
-#agentsTable tbody td.name-col {
+#agentsTable tbody td.name-col,
+#actTable thead th.name-col,
+#actTable tbody td.name-col,
+#alOvTable thead th.name-col,
+#alOvTable tbody td.name-col {
   position: sticky; left: var(--cb-col-w, 42px); background: var(--white); z-index: 3; overflow: visible;
 }
 #actTable thead th.cb-col,
 #actTable thead th.name-col,
 #agentsTable thead th.cb-col,
-#agentsTable thead th.name-col { z-index: 31; }
+#agentsTable thead th.name-col,
+#actTable thead th.cb-col,
+#actTable thead th.name-col,
+#alOvTable thead th.cb-col,
+#alOvTable thead th.name-col { z-index: 31; }
 #actTable thead th:last-child,
 #actTable tbody td:last-child,
 #agentsTable thead th:last-child,
-#agentsTable tbody td:last-child {
+#agentsTable tbody td:last-child,
+#actTable thead th:last-child,
+#actTable tbody td:last-child,
+#alOvTable thead th:last-child,
+#alOvTable tbody td:last-child {
   position: sticky; right: 0; background: var(--white); z-index: 4; overflow: visible;
 }
 #actTable tbody td.name-col .cell-name,
 #actTable tbody td.name-col .cell-meta,
 #agentsTable tbody td.name-col .cell-name,
-#agentsTable tbody td.name-col .cell-meta {
+#agentsTable tbody td.name-col .cell-meta,
+#actTable tbody td.name-col .cell-name,
+#actTable tbody td.name-col .cell-meta,
+#alOvTable tbody td.name-col .cell-name,
+#alOvTable tbody td.name-col .cell-meta {
   max-width: 300px; overflow: hidden; text-overflow: ellipsis;
 }
 #actTable tbody td.name-col::after,
 #actTable thead th.name-col::after,
 #agentsTable tbody td.name-col::after,
-#agentsTable thead th.name-col::after {
+#agentsTable thead th.name-col::after,
+#actTable tbody td.name-col::after,
+#actTable thead th.name-col::after,
+#alOvTable tbody td.name-col::after,
+#alOvTable thead th.name-col::after {
   content: ''; position: absolute; top: 0; right: -8px; bottom: 0; width: 8px;
   background: linear-gradient(to right, rgba(0,0,0,0.10), rgba(0,0,0,0));
   pointer-events: none; opacity: 0; transition: opacity 0.18s ease;
@@ -718,22 +742,36 @@ a.vn-fly-link:hover { color: var(--blue); }
 #actTable tbody td:last-child::before,
 #actTable thead th:last-child::before,
 #agentsTable tbody td:last-child::before,
-#agentsTable thead th:last-child::before {
+#agentsTable thead th:last-child::before,
+#actTable tbody td:last-child::before,
+#actTable thead th:last-child::before,
+#alOvTable tbody td:last-child::before,
+#alOvTable thead th:last-child::before {
   content: ''; position: absolute; top: 0; left: -8px; bottom: 0; width: 8px;
   background: linear-gradient(to left, rgba(0,0,0,0.10), rgba(0,0,0,0));
   pointer-events: none; opacity: 0; transition: opacity 0.18s ease;
 }
 /* Agent Sessions: the activity title is a sentence, so its pinned column is wide enough to read on one line (two at most). */
-#agentsTable thead th.name-col, #agentsTable tbody td.name-col { width: 460px; min-width: 460px; max-width: 460px; box-sizing: border-box; }
-#agentsTable tbody td.name-col .cell-name { max-width: 100%; white-space: normal; overflow: visible; }
+#agentsTable thead th.name-col, #agentsTable tbody td.name-col,
+#alOvTable thead th.name-col, #alOvTable tbody td.name-col { width: 460px; min-width: 460px; max-width: 460px; box-sizing: border-box; }
+#agentsTable tbody td.name-col .cell-name,
+#alOvTable tbody td.name-col .cell-name { max-width: 100%; white-space: normal; overflow: visible; }
 .table-wrap.has-h-scroll-left #actTable tbody td.name-col::after,
 .table-wrap.has-h-scroll-left #actTable thead th.name-col::after,
 .table-wrap.has-h-scroll-left #agentsTable tbody td.name-col::after,
-.table-wrap.has-h-scroll-left #agentsTable thead th.name-col::after { opacity: 1; }
+.table-wrap.has-h-scroll-left #agentsTable thead th.name-col::after,
+.table-wrap.has-h-scroll-left #actTable tbody td.name-col::after,
+.table-wrap.has-h-scroll-left #actTable thead th.name-col::after,
+.table-wrap.has-h-scroll-left #alOvTable tbody td.name-col::after,
+.table-wrap.has-h-scroll-left #alOvTable thead th.name-col::after { opacity: 1; }
 .table-wrap.has-h-scroll-right #actTable tbody td:last-child::before,
 .table-wrap.has-h-scroll-right #actTable thead th:last-child::before,
 .table-wrap.has-h-scroll-right #agentsTable tbody td:last-child::before,
-.table-wrap.has-h-scroll-right #agentsTable thead th:last-child::before { opacity: 1; }
+.table-wrap.has-h-scroll-right #agentsTable thead th:last-child::before,
+.table-wrap.has-h-scroll-right #actTable tbody td:last-child::before,
+.table-wrap.has-h-scroll-right #actTable thead th:last-child::before,
+.table-wrap.has-h-scroll-right #alOvTable tbody td:last-child::before,
+.table-wrap.has-h-scroll-right #alOvTable thead th:last-child::before { opacity: 1; }
 /* Audit log: same pins as Sessions and Agent sessions — Action (the link) left, the details button right (user 2026-11-11). No checkbox column, so the name column pins at 0. */
 #auditTable thead th.name-col, #auditTable tbody td.name-col { position: sticky; left: 0; background: var(--white); z-index: 3; overflow: visible; width: 240px; min-width: 240px; max-width: 240px; box-sizing: border-box; }
 #auditTable thead th.name-col { z-index: 31; }
@@ -750,7 +788,13 @@ a.vn-fly-link:hover { color: var(--blue); }
 #actTable tbody tr:hover td:last-child,
 #agentsTable tbody tr:hover td.cb-col,
 #agentsTable tbody tr:hover td.name-col,
-#agentsTable tbody tr:hover td:last-child { background: var(--blue-light); }
+#agentsTable tbody tr:hover td:last-child,
+#actTable tbody tr:hover td.cb-col,
+#actTable tbody tr:hover td.name-col,
+#actTable tbody tr:hover td:last-child,
+#alOvTable tbody tr:hover td.cb-col,
+#alOvTable tbody tr:hover td.name-col,
+#alOvTable tbody tr:hover td:last-child { background: var(--blue-light); }
 table { width: 100%; border-collapse: collapse; min-width: 900px; }
 /* DS Table organism (verified live 2026-07-09; ported from inventory-V1):
    WHITE header, 14px/450 labels (the uppercase 12px band is retired), single
@@ -1511,6 +1555,10 @@ body.ai-open.ai-full #toast { right: 24px; }
 #agentsTable tbody td:last-child:has(.act-row-menu),
 #actTable tbody td:last-child:has(.act-row-menu),
 #auditTable tbody td:last-child:has(.act-row-menu),
+#irTable tbody td:last-child:has(.act-row-menu),
+#alOvTable tbody td:last-child:has(.act-row-menu),
+#actTable tbody td:last-child:has(.act-row-menu),
+#auditTable tbody td:last-child:has(.act-row-menu),
 #irTable tbody td:last-child:has(.act-row-menu) { z-index: 30; }
 .act-row-kebab:hover { background: var(--black-3); border: none; }
 .act-row-detail svg, .act-row-kebab svg { width: 20px; height: 20px; }
@@ -1625,7 +1673,8 @@ body.ai-open .sd-modal { right: calc(24px + var(--ai-w)); }
 .abb-btn:disabled { color: var(--black-30); cursor: default; background: transparent; }
 .abb-btn.primary:disabled { background: var(--black-5); color: var(--black-30); }
 .abb-btn svg { flex-shrink: 0; }
-#actTable .row-cb, #actSelAll, #agentsTable .row-cb, #agentsSelAll { accent-color: var(--em-green); width: 16px; height: 16px; cursor: pointer; }
+#actTable .row-cb, #actSelAll, #agentsTable .row-cb, #agentsSelAll,
+#actTable .row-cb, #actSelAll, #alOvTable .row-cb, #agentsSelAll { accent-color: var(--em-green); width: 16px; height: 16px; cursor: pointer; }
 /* Export wizard body (shell = the .sd-overlay/.sd-modal full-page overlay) */
 .aex-header { display: flex; align-items: center; gap: 12px; padding: 14px 12px; flex-shrink: 0; }
 .aex-hd-tile { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 4px; background: var(--em-green-tint); color: var(--em-green); flex-shrink: 0; }
@@ -11316,7 +11365,8 @@ function _agentTaskRows(){
   return _agentTasksLive().map(function(t, i){ t.id = 'lv' + i; return t; }).concat([_rotTask()]).concat(AGENT_TASKS_SEED).map(function(t){
     return { _task: true, id: t.id, capability: t.title, agent: t.agent,
       kind: t.kind || '—', wl: t.wl || '—', trigger: t.trigger || t.source,
-      started: t.started || new Date(), whenLbl: t.when, dur: '—', outcome: t.status, href: t.href, cta: t.cta, rs: t.rs };
+      started: t.started || new Date(), whenLbl: t.when, dur: '—', outcome: t.status, href: t.href, cta: t.cta, rs: t.rs,
+      decision: (t.status === 'awaiting' || t.status === 'waiting') ? 'Awaiting decision' : undefined };   // a held task is a request waiting on a person, like a held session, so the same Decision filter finds both
   });
 }
 // ── selection + bulk actions (user 2026-09-10: Sessions is the reference
@@ -11659,26 +11709,16 @@ function _agentsListRows(){
   });
   return rows;
 }
-function renderAgentsTable(){
-  var tbody = document.getElementById('agentsTbody');
-  if (!tbody) return;
+// ONE ROW, WHEREVER AGENT SESSIONS ARE LISTED: the Agent sessions table and the Overview's awaiting table (Agent Library) draw rows with this.
+// o.cb: include the selection checkbox cell (the table has bulk actions; the Overview's list does not).
+var _AG_DETAIL_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>';
+function _agRowHtml(r, o){
+  o = o || {};
   var esc = function(v){ return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
-  renderAgentsThead();
-  var _stSel = _agStatusSel();
-  var _rc = document.getElementById('actRangeChip');
-  if (_rc && state.actView === 'agents') _rc.style.display = (_stSel === 'all' || _AG_TERMINAL[_stSel]) ? '' : 'none';   // the time range only applies to finished work
-  var rows = _agentsListRows();
-  var pool = _agentTaskRows().concat(AGENT_RUNS).filter(_agWlOk).filter(function(r){ return _stSel === 'all' || _agGroup(r) === _stSel; });   // for pruning the selection below
-  var per = state.agentsPageSize || 10;
-  var pages = Math.max(1, Math.ceil(rows.length / per));
-  if (state.agentsPage > pages) state.agentsPage = pages;
-  var pageRows = rows.slice((state.agentsPage - 1) * per, state.agentsPage * per);
-  var _sel = state.agentsSel || new Set();
-  var _detailSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>';
-  tbody.innerHTML = pageRows.map(function(r){
+  var _sel = state.agentsSel || new Set(), _detailSvg = _AG_DETAIL_SVG;
     // Sessions-parity row chrome (user 2026-09-10): checkbox, detail
     // button, kebab — on task rows and run rows alike.
-    var cb = '<td class="cb-col" onclick="event.stopPropagation()"><input type="checkbox" class="row-cb"' + (_sel.has(r.id) ? ' checked' : '') + ' onchange="toggleAgentsSel(\'' + r.id + '\', this)"></td>';
+    var cb = !o.cb ? '' : '<td class="cb-col" onclick="event.stopPropagation()"><input type="checkbox" class="row-cb"' + (_sel.has(r.id) ? ' checked' : '') + ' onchange="toggleAgentsSel(\'' + r.id + '\', this)"></td>';
     var opener = r._task ? 'openAgentTaskModal' : 'openAgentRunDrawer';
     var acts = '<td><div style="display:flex;align-items:center;gap:4px;justify-content:flex-end;position:relative">'
       + '<button class="btn-icon btn-icon-sm act-row-detail" data-tooltip="View details" aria-label="View details" onclick="event.stopPropagation();' + opener + '(\'' + r.id + '\')">' + _detailSvg + '</button>'
@@ -11711,7 +11751,24 @@ function renderAgentsTable(){
       + '<td style="white-space:nowrap">' + esc(r.dur) + '</td>'
       + acts
     + '</tr>';
-  }).join('') || '<tr><td colspan="9"><div class="inv-empty-state" style="padding:32px;text-align:center;color:var(--black-60)">' + (_stSel === 'all' ? 'No sessions match.' : 'No sessions are ' + _agStatusLabel(_stSel).toLowerCase() + ' for this workload scope.') + '</div></td></tr>';
+}
+function renderAgentsTable(){
+  var tbody = document.getElementById('agentsTbody');
+  if (!tbody) return;
+  var esc = function(v){ return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+  renderAgentsThead();
+  var _stSel = _agStatusSel();
+  var _rc = document.getElementById('actRangeChip');
+  if (_rc && state.actView === 'agents') _rc.style.display = (_stSel === 'all' || _AG_TERMINAL[_stSel]) ? '' : 'none';   // the time range only applies to finished work
+  var rows = _agentsListRows();
+  var pool = _agentTaskRows().concat(AGENT_RUNS).filter(_agWlOk).filter(function(r){ return _stSel === 'all' || _agGroup(r) === _stSel; });   // for pruning the selection below
+  var per = state.agentsPageSize || 10;
+  var pages = Math.max(1, Math.ceil(rows.length / per));
+  if (state.agentsPage > pages) state.agentsPage = pages;
+  var pageRows = rows.slice((state.agentsPage - 1) * per, state.agentsPage * per);
+  var _sel = state.agentsSel || new Set();
+  var _detailSvg = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>';
+  tbody.innerHTML = pageRows.map(function(r){ return _agRowHtml(r, { cb: true }); }).join('') || '<tr><td colspan="9"><div class="inv-empty-state" style="padding:32px;text-align:center;color:var(--black-60)">' + (_stSel === 'all' ? 'No sessions match.' : 'No sessions are ' + _agStatusLabel(_stSel).toLowerCase() + ' for this workload scope.') + '</div></td></tr>';
   // selection bookkeeping (Sessions convention): prune to the scoped set,
   // sync the header checkbox, render the bulk bar
   _agentsLastPageIds = pageRows.map(function(r){ return r.id; });
@@ -17657,6 +17714,11 @@ function aiFbRow(i){
 #alOverview { --black-20: #d2d3d4; --black-70: #626469; --d-blue: #1CA8DD; --d-green: #52B471; --d-amber: #F59E0B; --d-red: #EF4444; --green-50: #3cb783; min-width: 0; flex: 1; }
 #alOverview #screen-hub { display: flex; flex-direction: column; gap: 16px; padding: 8px 20px 24px; }
 #alOverview .dsh-narrow .w-age { display: none; }
+#alOvTable thead th.name-col, #alOvTable tbody td.name-col { left: 0; }   /* no selection column ahead of it here */
+#alOverview .dg-scroll { overflow-x: auto; }
+/* the pinned columns' edge shadows (the Agent sessions table gets these from .table-wrap; the Overview scrolls inside .dg-scroll) */
+#alOverview .dg-scroll.has-h-scroll-left #alOvTable tbody td.name-col::after, #alOverview .dg-scroll.has-h-scroll-left #alOvTable thead th.name-col::after { opacity: 1; }
+#alOverview .dg-scroll.has-h-scroll-right #alOvTable tbody td:last-child::before, #alOverview .dg-scroll.has-h-scroll-right #alOvTable thead th:last-child::before { opacity: 1; }
 #alOverview .content-head .ch-sub { margin-top: 2px; }
 #alOverview .dash { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
 #alOverview .widget { grid-column: span 12; height: 336px; background: var(--white); border: 1px solid var(--border-light); border-radius: 4px; padding: 0; display: flex; flex-direction: column; min-width: 0; overflow: visible; }
@@ -18154,7 +18216,8 @@ function renderHub(){
   hubSyncChrome(); hubStamp();
   var S = hubModel();
   var n = function(a){ return a.length; };
-  var total = n(S),
+  var taskPend = (typeof _agentTaskRows === 'function' ? _agentTaskRows() : []).filter(function(t){ return t.outcome === 'awaiting' || t.outcome === 'waiting'; });   /* held tasks (a failed backup's retry, the ROT recommendation) wait on the same person */
+  var total = n(S) + taskPend.length,
       auto = n(S.filter(function(x){ return x.decided === 'auto'; })),
       appr = n(S.filter(function(x){ return x.decided === 'approved'; })),
       deny = n(S.filter(function(x){ return x.decided === 'denied'; })),
@@ -18166,7 +18229,9 @@ function renderHub(){
   var liveSkills = HUB_SKILLS.filter(function(sk){ return sk.runs > 0; }).length;
   var reach = HUB_SKILLS.reduce(function(a, sk){ return a + hubSkillWls(sk).length; }, 0);
   var cnt = function(f){ return S.filter(f).length; };
-  var waitN = cnt(function(x){ return x.decided === 'waiting'; });
+  var waitN = cnt(function(x){ return x.decided === 'waiting'; }) + taskPend.length;
+  var pendAg = (typeof _agentTaskRows === 'function' ? _agentTaskRows() : []).concat(typeof AGENT_RUNS !== 'undefined' ? AGENT_RUNS : []).filter(function(r){ return _agStatus(r) === 'pending'; }).sort(function(a, b){ return new Date(a.started) - new Date(b.started); });   /* longest wait first: exactly the rows Agent sessions lists as awaiting a decision */
+  var nPend = pendAg.length;
   /* SUCCESS RATE = sessions that completed successfully, of the sessions that actually RAN. Denied sessions were
      declined, not failed, and waiting ones have not run, so neither is in the denominator. */
   var doneAll = cnt(function(x){ return !!x.outcome; }), okAll = cnt(function(x){ return x.outcome === 'success'; });
@@ -18207,7 +18272,7 @@ function renderHub(){
     + (doneAll >= 8
         ? kpiW('Success rate', rate >= 95 ? 'ok' : rate >= 85 ? 'warn' : 'err', rate + '%', okAll + ' of ' + doneAll + ' sessions completed successfully', A_RAN)
         : kpiW('Success rate', '', doneAll ? okAll + ' of ' + doneAll : '\u2014', 'sessions completed successfully', A_RAN))
-    + kpiW('Awaiting decision', open.length ? 'warn' : '', open.length, med ? 'median wait ' + hubDur(med) : 'nothing queued', { decision: 'waiting', status: 'pending', label: 'Awaiting decision' })
+    + kpiW('Awaiting decision', nPend ? 'warn' : '', nPend, med ? 'median wait ' + hubDur(med) : 'nothing queued', { decision: 'waiting', status: 'pending', label: 'Awaiting decision' })
     + (asked >= 8
         ? kpiW('Turned down', denyPct >= 15 ? 'err' : '', denyPct + '%', deny + ' of ' + asked + ' it asked for', { decision: 'denied', status: 'dismissed', label: 'Turned down' })
         : kpiW('Turned down', '', deny, asked ? 'of ' + asked + ' it asked for' : 'it asked for nothing', { decision: 'denied', status: 'dismissed', label: 'Turned down' }));
@@ -18293,11 +18358,25 @@ function renderHub(){
       // Approve of its own: Review opens the request's full session detail over this page, and the decision is made there.
       + '<td class="hb-tc-a"><button type="button" class="hb-ibtn" data-tooltip="Review this request" aria-label="Review ' + esc(sk.name) + ' on ' + esc(w.name) + '" onclick="hubReviewSession(' + i + ')">' + (_dsStoreIconSvg('metadata-explorer-outlined', 16) || '') + '</button></td></tr>';   // was: a "Review" text button
   }
+  function agOvTbl(rows){
+    return '<div class="dg-scroll"><table id="alOvTable" class="ag-ov-tbl"><thead><tr>' + AGENTS_COLUMNS.map(function(c, i){ return '<th' + (i === 0 ? ' class="name-col"' : '') + '>' + c.label + '</th>'; }).join('') + '<th></th></tr></thead>'
+      + '<tbody>' + rows.map(function(r){ return _agRowHtml(r, { cb: false }); }).join('') + '</tbody></table></div>';
+  }
   function hubTbl(cols, head, rows, pin){
     return '<div class="dg-scroll"><table class="dg hb-tbl' + (pin ? ' pin-r' : '') + '"><colgroup>' + cols.map(function(c){ return '<col style="width:' + c + '">'; }).join('') + '</colgroup>'
       + '<thead><tr>' + head.map(function(h){ return '<th>' + h + '</th>'; }).join('') + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
   }
   HUB_PENDING = pend;
+  function taskRow(t){
+    var w = hubWlAll().filter(function(k){ return VDC_SESSIONS.actWl(k.id) === t.wl || k.name === t.wl; })[0] || { name: t.wl };
+    var days = Math.max(0, Math.floor((Date.now() - new Date(t.started).getTime()) / 86400000));
+    var skill = typeof _agSkillCell === 'function' ? _agSkillCell(t) : t.kind, access = t.id === 'rot1' ? 'Recommend only' : (/^(Restore|Backup)$/.test(t.kind) ? 'Asks before it writes' : 'Read-only');
+    return '<tr><td><span class="hb-tc-1">' + esc(skill) + '</span></td><td>' + wlCell(w) + '</td><td>' + esc(access) + '</td><td>' + hubAge(days) + '</td>'
+      + '<td class="hb-tc-a"><button type="button" class="hb-ibtn" data-tooltip="Review this request" aria-label="Review ' + esc(skill) + ' on ' + esc(w.name) + '" onclick="hubReviewTask(\'' + t.id + '\')">' + (_dsStoreIconSvg('metadata-explorer-outlined', 16) || '') + '</button></td></tr>';
+  }
+  var apprRows = pend.map(function(x, i){ return { age: x.age, html: apprRow(x, i) }; })
+    .concat(taskPend.map(function(t){ return { age: Math.max(0, Math.floor((Date.now() - new Date(t.started).getTime()) / 86400000)), html: taskRow(t) }; }))
+    .sort(function(a, b){ return b.age - a.age; });
   /* ONE CARD, TWO VIEWS (user 2026-10-30): the default is what is awaiting a decision; the chevron beside the title flips it to
      every recent session, whatever the outcome — same title-picker control as the identity dashboard. */
   var recent = S.slice().sort(function(a, b){ return a.ageF - b.ageF; }).slice(0, 6);
@@ -18311,17 +18390,20 @@ function renderHub(){
       + '<td>' + (x.decided === 'waiting' && typeof vdcDecisionChip === 'function' ? vdcDecisionChip()
           : esc(VDC_SESSIONS.DECISION_LABEL[x.decided] || x.decided)) + '</td></tr>';
   }
+  var _allAg = (typeof _agentTaskRows === 'function' ? _agentTaskRows() : []).concat(typeof AGENT_RUNS !== 'undefined' ? AGENT_RUNS : []), _bd = hubBounds();
+  var _inWin = _allAg.filter(function(r){ var t = new Date(r.started).getTime(); return t >= _bd.startTs && t <= _bd.endTs; }).sort(function(a, b){ return new Date(b.started) - new Date(a.started); });
+  var recentAg = _inWin.slice(0, 6);
   var apprRecent = HUB_APPR_VIEW === 'recent';
   var apprW = '<div class="widget w-auto">' + hubPickHead(apprRecent ? 'Recent sessions' : 'Awaiting your decision')
     + '<div class="w-body flush">'
     + (apprRecent
-        ? (recent.length
-            ? hubTbl(['18%', '22%', '22%', '16%', '22%'], ['Skill', 'Workload', 'Access', 'Started', 'Decision'], recent.map(recentRow).join(''))
-              + '<div class="hb-tfoot"><span class="hb-sp"></span><button type="button" class="link" onclick="hubGoLink(hubActivityLink({ decision: HUB_ALL }))">View all sessions</button><span class="cnt">1 - ' + recent.length + ' of ' + S.length + '</span></div>'
+        ? (recentAg.length
+            ? agOvTbl(recentAg)
+              + '<div class="hb-tfoot"><span class="hb-sp"></span><button type="button" class="link" onclick="hubGoLink(hubActivityLink({ decision: HUB_ALL }))">View all sessions</button><span class="cnt">1 - ' + recentAg.length + ' of ' + _inWin.length + '</span></div>'
             : '<div class="hb-kpi-sub">No sessions in this period.</div>')
-        : (pend.length
-            ? /* was: a summary line above the table ("N requests are awaiting your decision · median wait …") — removed (user 2026-11-12): the title and the rows already say it, and median wait belongs in a KPI, not here */ hubTbl(['22%', '26%', '24%', '16%', '56px'], ['Skill', 'Workload', 'Access', 'Waiting', ''], pend.map(apprRow).join(''), true)
-              + '<div class="hb-tfoot"><span class="hb-sp"></span><button type="button" class="link" onclick="hubGoLink(hubActivityLink({ decision: \'approved,denied,waiting\' }))">View all sessions</button><span class="cnt">1 - ' + pend.length + ' of ' + pend.length + '</span></div>'
+        : (pendAg.length
+            ? /* was: a summary line above the table ("N requests are awaiting your decision · median wait …") — removed (user 2026-11-12): the title and the rows already say it, and median wait belongs in a KPI, not here */ agOvTbl(pendAg)
+              + '<div class="hb-tfoot"><span class="hb-sp"></span><button type="button" class="link" onclick="hubGoLink(hubActivityLink({ decision: \'approved,denied,waiting\' }))">View all sessions</button><span class="cnt">1 - ' + pendAg.length + ' of ' + pendAg.length + '</span></div>'
             : '<div class="hb-kpi-sub">Nothing is awaiting your decision.</div>'))
     + '</div></div>';
 
@@ -18329,7 +18411,7 @@ function renderHub(){
 
   host.innerHTML = '<div class="dash">' + kpis + apprW + gaugeW + donutW + tmapW + successW + trendW + '</div>';
   hubDrawTrend();   /* needs the laid-out width, so it runs after the markup is in */
-  [].forEach.call(host.querySelectorAll('.dg-scroll'), function(w){ var f = function(){ w.classList.toggle('has-h-scroll-right', w.scrollWidth - w.clientWidth - w.scrollLeft > 1); }; w.addEventListener('scroll', f); f(); });   /* the pinned column's shadow shows only while something is hidden behind it */
+  [].forEach.call(host.querySelectorAll('.dg-scroll'), function(w){ var f = function(){ w.classList.toggle('has-h-scroll-right', w.scrollWidth - w.clientWidth - w.scrollLeft > 1); w.classList.toggle('has-h-scroll-left', w.scrollLeft > 1); }; w.addEventListener('scroll', f); f(); });   /* the pinned column's shadow shows only while something is hidden behind it */
   hubWatchTrend();
 }
 
@@ -18411,6 +18493,7 @@ function hubReviewSession(i){
   var x = HUB_PENDING[i]; if (!x) return;
   openAgentRunModal('hs-' + x.id);   // the session detail is this page's own overlay
 }
+function hubReviewTask(id){ openAgentTaskModal(id); }   /* a held task opens its own session detail, like a held session */
 function hubCloseSession(){ if (typeof closeSessionModal === 'function' && document.getElementById('sdModal') && document.getElementById('sdModal').classList.contains('open')) closeSessionModal(); }
 
 /* MORE INFO continues in the conversation, in the panel's own grammar: your question as a user turn, the agent
@@ -18592,10 +18675,12 @@ window.hubPickMenu = hubPickMenu;
 window.hubRefreshAll = hubRefreshAll;
 window.hubRefreshWidget = hubRefreshWidget;
 window.hubReviewSession = hubReviewSession;
+window.hubReviewTask = hubReviewTask;
 window.hubSetApprView = hubSetApprView;
 window.hubWidgetMenu = hubWidgetMenu;
 window.renderHub = renderHub;
 window.hubApprInfo = hubApprInfo;
+window.hubReviewTask = hubReviewTask;
 window.hubPendingIndex = function(id){ if (!HUB_PENDING.some(function(p){ return p.id === id; })) renderHub(); return HUB_PENDING.map(function(p){ return p.id; }).indexOf(id); };
 window.alRenderOverview = renderHub;
 /* cards that are narrow drop their age stamp (the dashboards panel does this for every dashboard page; this page has no panel, so it carries the same rule) */
