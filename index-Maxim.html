@@ -7440,7 +7440,7 @@ function enterConfluenceSitesScreen() {
     cfsSearchTerm = '';
   }
   // Auto-select when exactly one site is returned (per the PRD's
-  // accessible-resources behaviour table). For more than one, leave
+  // accessible-resources behavior table). For more than one, leave
   // selection empty so the admin must explicitly pick.
   if (CONFLUENCE_SITES_STATE.length === 1) {
     CONFLUENCE_SITES_STATE[0].selected = true;

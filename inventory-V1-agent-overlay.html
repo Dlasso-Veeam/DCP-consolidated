@@ -1427,7 +1427,7 @@ tbody tr.rec-diff-row-unchanged .diff-dot { background: var(--black-30); }
    stays at z:4 and the tree-nav's z:35 paints over it whenever the
    menu happens to extend leftward into the tree-nav's coordinate
    space (narrow viewports, wide tree-nav). The lift is scoped via
-   :has() so scroll-under-thead behaviour is unchanged the rest of
+   :has() so scroll-under-thead behavior is unchanged the rest of
    the time. */
 #invTable tbody td:last-child:has(.row-kebab-menu.show),
 #invTable tbody td:last-child:has(.seg-btn-menu.open),
@@ -4577,7 +4577,7 @@ body.ai-hx-transcript .ai-foot { display: none; }
    rows or needed a sideways scroll nobody expects inside a dropdown. Headers
    cost NO horizontal space, scale to any number of types, and double as a
    scroll landmark in a 60-row list. Search still narrows; the headers only
-   organise what survives — and search already filters by type, because it
+   organize what survives — and search already filters by type, because it
    matches the row's badge text (typing "sandbox" = the old Sandbox chip).
    Cloned from .wlp-group-hdr in workload-picker.js (4px 8px, 14/16, S60 ink),
    plus a trailing live count. Figma: the workload picker's own group header —
@@ -27948,7 +27948,7 @@ function _treeMakePseudoFolderNode(parentId, folder) {
   return { kind: 'pseudoFolder', key: 'pf:' + parentId + ':' + folder.id, label: folder.label, parentId: parentId, folder: folder };
 }
 // Schema lookup with empty-folder filtering — mirrors the drill
-// table's countByFolder > 0 behaviour so the tree never surfaces a
+// table's countByFolder > 0 behavior so the tree never surfaces a
 // pseudo-folder card the table wouldn't show.
 function _treePseudoFoldersFor(parent) {
   if (!parent) return null;
@@ -32623,7 +32623,7 @@ function _buildSearchGroupsUncached(query) {
   //     the match lives within the hierarchy.
   // Jira: always descend so an inventory search surfaces matching objects
   // across the hierarchy (Projects/Boards/Issues/…), which the object-type
-  // gear then narrows — mirroring the drill behaviour.
+  // gear then narrows — mirroring the drill behavior.
   // v8 (D365): the bubble-up superset ALWAYS descends — depth is no
   // longer a user-facing toggle there; the pinned Type filter decides
   // which tier of the superset the list shows.
@@ -37422,7 +37422,7 @@ function _v1RowRestoreIconBtn(opts) {
   // the cart — so the button is STATELESS: always "Restore this item", never
   // the green "Added" / "Included" cart states (the checkbox owns the cart).
   // Detected by the handler name so we don't thread a flag through every row
-  // call site. Folder-group / records / GWS buttons keep the cart behaviour
+  // call site. Folder-group / records / GWS buttons keep the cart behavior
   // below (they still add to the cart).
   var express = /^(addToRestoreRow|addToRestoreChildRow|addToRestoreRecordRow|addToRestoreFieldRow|addToRestoreGwsRow|restoreNowFolder)\(/.test(ma);
   // Genuinely non-restorable (no backups) wins over everything, express or not.
@@ -44869,7 +44869,7 @@ function wsRenderPpDestination(n, noun, cfg) {
   var cType    = isWs ? 'Workspace' : 'Environment';
   // TYPED containers only: environments carry Production/Sandbox/Trial/…, so
   // they get the type chip and the type group headers. Workspaces have no such
-  // classification (a licence tier is not a destination category), so their
+  // classification (a license tier is not a destination category), so their
   // picker is search ONLY — user 2026-09-17.
   var cTyped   = !isWs;
   var srcEnvs = _ppSourceContainers(cType);
@@ -67119,7 +67119,7 @@ function _aiResetTheater(){
    implies the agent will DO something. The code vocabulary was renamed with
    it — aiAgent.showing / aiShowStart / aiShowStop / _showStopped /
    _aiShowNavGuard / opts.show / '__show:' — because a label surviving only in
-   the source is how labels and behaviour drift apart. "Rejoin" folded into
+   the source is how labels and behavior drift apart. "Rejoin" folded into
    the same single label: there is one gesture, not one-per-history.
    ══════════════════════════════════════════════════════════════════════ */
 function _aiVoice(screenText, dataText){
@@ -67587,7 +67587,7 @@ function aiShowStart(embedHost, embedFlow){
   // "join" — by the time you click, the work may already be done. So
   // watching rewinds the workspace to the pre-run frame and REPLAYS every
   // action the agent took, paced to be followable, ending wherever the run
-  // actually is. Jumping to the final state (the old behaviour) only ever
+  // actually is. Jumping to the final state (the old behavior) only ever
   // showed the last frame.
   // ONE presentation for a watched run, whenever you click (user 2026-09-17).
   // was: only replayed _stageRuns, so clicking Watch before anything had been
@@ -69317,7 +69317,7 @@ function aiStepsMs365TeamsGaps(){
 // contract as the estate Q&A above (headline + sub answer every prompt
 // clause · ONE vis shaped like the claim · findings are words + at most one
 // action · insight behind Show more); the sheet's acceptance criteria are
-// carried as card/trace behaviours (zero vs unscanned, label mismatch,
+// carried as card/trace behaviors (zero vs unscanned, label mismatch,
 // attribution, No Data ≠ no access, write vs performed). Graph node names
 // live ONLY in trace tool labels. Agents/sites/people are the seeded
 // contoso tenant's (Retail Division · Finance Group · R&D Projects …).
@@ -70684,7 +70684,7 @@ document.addEventListener('DOMContentLoaded', function () {
   EM('accounts', [1, 11, 20], [[7, 'Revenue', '$151.0M']]);
   EM('accounts', [1, 15, 10], [[22, 'Owner', 'Dev Patel']]);
   B('accounts', 19, [9, 11, 0]); B('accounts', 24, [2, 10, 5]);                                              // created since
-  G('accounts', [3, 13, 12], { Name: 'Relecloud Services', Industry: 'Technology', Revenue: '$14.8M', Owner: 'James Park', Modified: 'Sep 29, 2026', Description: 'Cloud-migration partner running a two-wave data-centre exit. Wave 2 is in procurement and is the largest open opportunity attached to this account.' });
+  G('accounts', [3, 13, 12], { Name: 'Relecloud Services', Industry: 'Technology', Revenue: '$14.8M', Owner: 'James Park', Modified: 'Sep 29, 2026', Description: 'Cloud-migration partner running a two-wave data-center exit. Wave 2 is in procurement and is the largest open opportunity attached to this account.' });
   G('accounts', [3, 13, 21], { Name: 'Northridge Logistics', Industry: 'Logistics', Revenue: '$23.1M', Owner: 'Maria Gonzalez', Modified: 'Oct 1, 2026', Description: 'Regional freight forwarder consolidating three warehouse systems onto one platform. Renewal due next quarter.' });
   G('accounts', [3, 13, 41], { Name: 'Bellows College', Industry: 'Education', Revenue: '$3.9M', Owner: 'Sarah Chen', Modified: 'Aug 14, 2026', Description: 'Small private college piloting the student-services module. Budget approval expected at the next board meeting.' });
   E('accounts', [14, 9, 0], nRows('accounts') + 0, 'Revenue', '$12.9M');                                      // Relecloud revenue edited before it was deleted

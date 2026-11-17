@@ -1228,7 +1228,7 @@ tbody tr.rec-diff-row-unchanged .diff-dot { background: var(--black-30); }
    stays at z:4 and the tree-nav's z:35 paints over it whenever the
    menu happens to extend leftward into the tree-nav's coordinate
    space (narrow viewports, wide tree-nav). The lift is scoped via
-   :has() so scroll-under-thead behaviour is unchanged the rest of
+   :has() so scroll-under-thead behavior is unchanged the rest of
    the time. */
 #invTable tbody td:last-child:has(.row-kebab-menu.show),
 #invTable tbody td:last-child:has(.seg-btn-menu.open),
@@ -21868,7 +21868,7 @@ function _treeMakePseudoFolderNode(parentId, folder) {
   return { kind: 'pseudoFolder', key: 'pf:' + parentId + ':' + folder.id, label: folder.label, parentId: parentId, folder: folder };
 }
 // Schema lookup with empty-folder filtering — mirrors the drill
-// table's countByFolder > 0 behaviour so the tree never surfaces a
+// table's countByFolder > 0 behavior so the tree never surfaces a
 // pseudo-folder card the table wouldn't show.
 function _treePseudoFoldersFor(parent) {
   if (!parent) return null;
@@ -26093,7 +26093,7 @@ function _buildSearchGroupsUncached(query) {
   //     the match lives within the hierarchy.
   // Jira: always descend so an inventory search surfaces matching objects
   // across the hierarchy (Projects/Boards/Issues/…), which the object-type
-  // gear then narrows — mirroring the drill behaviour.
+  // gear then narrows — mirroring the drill behavior.
   // v8 (D365): the bubble-up superset ALWAYS descends — depth is no
   // longer a user-facing toggle there; the pinned Type filter decides
   // which tier of the superset the list shows.
@@ -30253,7 +30253,7 @@ function _v1RowRestoreIconBtn(opts) {
   // the cart — so the button is STATELESS: always "Restore this item", never
   // the green "Added" / "Included" cart states (the checkbox owns the cart).
   // Detected by the handler name so we don't thread a flag through every row
-  // call site. Folder-group / records / GWS buttons keep the cart behaviour
+  // call site. Folder-group / records / GWS buttons keep the cart behavior
   // below (they still add to the cart).
   var express = /^(addToRestoreRow|addToRestoreChildRow|addToRestoreRecordRow|addToRestoreFieldRow|addToRestoreGwsRow|restoreNowFolder)\(/.test(ma);
   // Genuinely non-restorable (no backups) wins over everything, express or not.

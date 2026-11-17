@@ -1429,7 +1429,7 @@ tbody tr.rec-diff-row-unchanged .diff-dot { background: var(--black-30); }
    stays at z:4 and the tree-nav's z:35 paints over it whenever the
    menu happens to extend leftward into the tree-nav's coordinate
    space (narrow viewports, wide tree-nav). The lift is scoped via
-   :has() so scroll-under-thead behaviour is unchanged the rest of
+   :has() so scroll-under-thead behavior is unchanged the rest of
    the time. */
 #invTable tbody td:last-child:has(.row-kebab-menu.show),
 #invTable tbody td:last-child:has(.seg-btn-menu.open),
@@ -4965,7 +4965,7 @@ body.ai-hx-transcript .ai-foot { display: none; }
    rows or needed a sideways scroll nobody expects inside a dropdown. Headers
    cost NO horizontal space, scale to any number of types, and double as a
    scroll landmark in a 60-row list. Search still narrows; the headers only
-   organise what survives — and search already filters by type, because it
+   organize what survives — and search already filters by type, because it
    matches the row's badge text (typing "sandbox" = the old Sandbox chip).
    Cloned from .wlp-group-hdr in workload-picker.js (4px 8px, 14/16, S60 ink),
    plus a trailing live count. Figma: the workload picker's own group header —
@@ -13281,7 +13281,7 @@ var RESOURCES = (function(){
 
   // ─── Entra ID (Identity, SaaS) and Active Directory (Directory, Datacenter) ───────────────────────────────────
   // Same tenant/forest-rooted model as Microsoft 365 and Okta: ONE root row per workload, then explicit Folder rows (sections → object types) and the objects themselves.
-  //   Entra ID          → Tenant meridianfg.com → Directory (Users · Groups · Devices) · Applications (App registrations) · Security (Conditional Access policies · Named locations · Directory roles)
+  //   Entra ID          → Tenant meridianfg.com → Identities (Users · Groups · Devices) · Applications (App registrations) · Security (Conditional Access policies · Named locations · Directory roles)
   //   Active Directory  → Forest corp.meridian.local → Organizational Units (Finance · Engineering · IT · Service Accounts) · Group Policy Objects · Domain Controllers
   // j.alvarez is the person the Identity Resilience finding FND-24551 restores: deleted in live in both, with restore points from before the deletion.
   (function(){
@@ -13298,7 +13298,7 @@ var RESOURCES = (function(){
     function entraTenant(px, root, name, metaLine, d) {
       var sec = function(k){ return px + '-sec-' + k; }, ty = function(k){ return px + '-t-' + k; };
       list.push(R(root, name, 'Tenant', EW, ET, EC, {drillable:true, drillTarget:'children', meta:metaLine}));
-      EF(sec('dir'),  'Directory',    root, '4 types');
+      EF(sec('dir'),  'Identities',   root, '4 types');   // was: 'Directory' (user 2026-11-16: in Microsoft's vocabulary a directory is the tenant, so a Directory folder inside a tenant confuses; Users, Groups, Administrative Units and Organization Contacts stay as they are)
       EF(sec('apps'), 'Applications', root, d.cnt.apps + ' items');
       EF(sec('sec'),  'Security',     root, '2 types');
       EF(sec('dev'),  'Devices',      root, '2 types');
@@ -13311,7 +13311,7 @@ var RESOURCES = (function(){
       EF(ty('ca'),       'Conditional Access policies', sec('sec'), d.ca.length + ' items');
       EF(ty('devices'),  'Devices',                     sec('dev'), d.cnt.devices + ' items');
       EF(ty('intune'),   'Intune policies',             sec('dev'), d.intune.length + ' items');
-      d.users.forEach(function(u){ EI(u[0], u[1], 'User', ty('users'), [u[1]], u[2], u[3]); });
+      d.users.forEach(function(u){ EI(u[0], u[1], 'User', ty('users'), [u[2]], u[3], u[4]); });   // [id, display name, UPN, meta, opts] — display name is the person's name; User Name column is the UPN
       d.groups.forEach(function(g){ EI(g[0], g[1], 'Group', ty('groups'), [g[2], g[3], g[4]], g[2] + ' group · ' + g[5], {entraGroupType:g[2]}); });
       d.aus.forEach(function(x){ EI(x[0], x[1], 'Administrative Unit', ty('aus'), [x[2], x[3]], x[2]); });
       d.contacts.forEach(function(x){ EI(x[0], x[1], 'Organization Contact', ty('contacts'), [x[2], x[3], x[4]], x[2] + ' · ' + x[3]); });
@@ -13329,13 +13329,13 @@ var RESOURCES = (function(){
       cnt: {users:18420, groups:1364, roles:148, apps:103, devices:9876},
       cover: 'May 20 – Aug 18, 2026',
       users: [
-        ['entra-user-j-alvarez', 'j.alvarez@meridianfg.com', 'DELETED · Finance · Jordan Alvarez', {existence:'deleted-in-live', rpGapDays:[0]}],
-        ['entra-user-m-okafor',  'm.okafor@meridianfg.com',  'ACTIVE · Finance · Mira Okafor'],
-        ['entra-user-t-nguyen',  't.nguyen@meridianfg.com',  'ACTIVE · Engineering · Tran Nguyen'],
-        ['entra-user-d-kovac',   'd.kovac@meridianfg.com',   'ACTIVE · IT · Dana Kovac'],
-        ['entra-user-s-rivera',  's.rivera@meridianfg.com',  'ACTIVE · Security · Sarah Rivera'],
-        ['entra-user-d-lasso',   'd.lasso@meridianfg.com',   'ACTIVE · Product · Darren Lasso'],
-        ['entra-user-svc-syncgw','svc-syncgw@meridianfg.com','ACTIVE · Service account']
+        ['entra-user-j-alvarez', 'Jordan Alvarez',  'j.alvarez@meridianfg.com',  'DELETED · Finance · Senior Financial Analyst', {existence:'deleted-in-live', rpGapDays:[0]}],
+        ['entra-user-m-okafor',  'Mira Okafor',     'm.okafor@meridianfg.com',   'ACTIVE · Finance · Finance Manager'],
+        ['entra-user-t-nguyen',  'Tran Nguyen',     't.nguyen@meridianfg.com',   'ACTIVE · Engineering'],
+        ['entra-user-d-kovac',   'Dana Kovac',      'd.kovac@meridianfg.com',    'ACTIVE · IT'],
+        ['entra-user-s-rivera',  'Sarah Rivera',    's.rivera@meridianfg.com',   'ACTIVE · Security'],
+        ['entra-user-d-lasso',   'Darren Lasso',    'd.lasso@meridianfg.com',    'ACTIVE · Product'],
+        ['entra-user-svc-syncgw','SyncGW Service',  'svc-syncgw@meridianfg.com', 'ACTIVE · Service account']
       ],
       groups: [
         ['entra-grp-finance',   'Finance-Staff',   'Security',      'Assigned', '—',       '48 members'],
@@ -13387,10 +13387,10 @@ var RESOURCES = (function(){
       cnt: {users:2140, groups:186, roles:148, apps:57, devices:1312},
       cover: 'Jun 4 – Aug 18, 2026',
       users: [
-        ['entra-b-user-l-brandt', 'l.brandt@meridian-emea.com',  'ACTIVE · Finance · Lena Brandt'],
-        ['entra-b-user-p-moreau', 'p.moreau@meridian-emea.com',  'ACTIVE · Operations · Paul Moreau'],
-        ['entra-b-user-a-silva',  'a.silva@meridian-emea.com',   'DELETED · Sales · Ana Silva', {existence:'deleted-in-live', rpGapDays:[0]}],
-        ['entra-b-user-svc-sync', 'svc-emea-sync@meridian-emea.com','ACTIVE · Service account']
+        ['entra-b-user-l-brandt', 'Lena Brandt',  'l.brandt@meridian-emea.com',   'ACTIVE · Finance'],
+        ['entra-b-user-p-moreau', 'Paul Moreau',  'p.moreau@meridian-emea.com',   'ACTIVE · Operations'],
+        ['entra-b-user-a-silva',  'Ana Silva',    'a.silva@meridian-emea.com',    'DELETED · Sales', {existence:'deleted-in-live', rpGapDays:[0]}],
+        ['entra-b-user-svc-sync', 'EMEA Sync Service', 'svc-emea-sync@meridian-emea.com', 'ACTIVE · Service account']
       ],
       groups: [
         ['entra-b-grp-finance',   'Finance-Staff',   'Security',      'Assigned', '—',   '21 members'],
@@ -16141,7 +16141,7 @@ var D365_SCHEMAS = {
       {Name:'Humongous Insurance', Industry:'Insurance', Revenue:'$87.4M', Owner:'James Park', Modified:'Mar 24, 2026', Description:'National property and casualty insurer with a large captive agent network. Compliance and data-residency requirements make this one of the most heavily governed accounts in the book.'},
       {Name:'Blue Yonder Airlines', Industry:'Transportation', Revenue:'$156.2M', Owner:'Sarah Chen', Modified:'Mar 23, 2026', Description:'Regional carrier operating short-haul routes out of three hub airports. An open fleet-analytics opportunity is championed by their VP of Operations.'},
       {Name:'Adventure Works Cycles', Industry:'Manufacturing', Revenue:'$34.6M', Owner:'Maria Gonzalez', Modified:'Mar 17, 2026', Description:'Designs and assembles premium bicycles sold through specialty dealers and direct to consumers. Pronounced demand seasonality makes accurate forecasting a recurring conversation.'},
-      {Name:'Tailspin Toys', Industry:'Retail', Revenue:'$9.8M', Owner:'James Park', Modified:'Mar 16, 2026', Description:'Tailspin Toys designs and distributes mass-market toys through national retail chains and a growing direct-to-consumer storefront. The account is managed by a three-person team covering North America, with seasonal support from the partner programme between September and December. Order volumes peak in the fourth quarter, and the finance team has asked for backup retention to be extended through the end of the fiscal year so that holiday-season orders can be reconstructed if a dispute arises. Their catalogue holds more than four thousand active products, each linked to supplier records, safety certifications and regional packaging requirements that change several times a year. A dedicated data steward reviews product-record changes every Friday and signs off on bulk updates before they reach the storefront. Contacts at the account include the head of merchandising, the director of logistics and two regional account leads, all of whom have been briefed on the restore process and on how to request an out-of-cycle recovery. A cross-border expansion into the European market is planned for next year, which will add a second Dynamics environment and a second set of retention requirements under local data-protection rules. The last quarterly business review flagged integration latency between the warehouse system and the order platform as the main operational concern, with a remediation plan due before the next peak season.'},
+      {Name:'Tailspin Toys', Industry:'Retail', Revenue:'$9.8M', Owner:'James Park', Modified:'Mar 16, 2026', Description:'Tailspin Toys designs and distributes mass-market toys through national retail chains and a growing direct-to-consumer storefront. The account is managed by a three-person team covering North America, with seasonal support from the partner program between September and December. Order volumes peak in the fourth quarter, and the finance team has asked for backup retention to be extended through the end of the fiscal year so that holiday-season orders can be reconstructed if a dispute arises. Their catalog holds more than four thousand active products, each linked to supplier records, safety certifications and regional packaging requirements that change several times a year. A dedicated data steward reviews product-record changes every Friday and signs off on bulk updates before they reach the storefront. Contacts at the account include the head of merchandising, the director of logistics and two regional account leads, all of whom have been briefed on the restore process and on how to request an out-of-cycle recovery. A cross-border expansion into the European market is planned for next year, which will add a second Dynamics environment and a second set of retention requirements under local data-protection rules. The last quarterly business review flagged integration latency between the warehouse system and the order platform as the main operational concern, with a remediation plan due before the next peak season.'},
       {Name:'Wingtip Toys', Industry:'Retail', Revenue:'$5.2M', Owner:'Sarah Chen', Modified:'Mar 15, 2026', Description:'Specialty toy and hobby retailer serving a loyal niche customer base. Smaller footprint, but a high repeat-purchase rate and unusually strong brand affinity.'},
       {Name:'Wide World Importers', Industry:'Distribution', Revenue:'$67.3M', Owner:'Maria Gonzalez', Modified:'Mar 14, 2026', Description:'Wholesale distributor moving goods across North American and EMEA corridors. Complex logistics needs span warehousing, customs clearance, and multi-currency invoicing.'},
       {Name:'Coho Vineyard', Industry:'Food & Beverage', Revenue:'$3.1M', Owner:'James Park', Modified:'Mar 13, 2026', Description:'Family-owned winery with a direct-to-consumer club and selective wholesale distribution. A very small IT team means they lean heavily on managed onboarding and support.'},
@@ -29578,7 +29578,7 @@ function _treeMakePseudoFolderNode(parentId, folder) {
   return { kind: 'pseudoFolder', key: 'pf:' + parentId + ':' + folder.id, label: folder.label, parentId: parentId, folder: folder };
 }
 // Schema lookup with empty-folder filtering — mirrors the drill
-// table's countByFolder > 0 behaviour so the tree never surfaces a
+// table's countByFolder > 0 behavior so the tree never surfaces a
 // pseudo-folder card the table wouldn't show.
 function _treePseudoFoldersFor(parent) {
   if (!parent) return null;
@@ -34272,7 +34272,7 @@ function _buildSearchGroupsUncached(query) {
   //     the match lives within the hierarchy.
   // Jira: always descend so an inventory search surfaces matching objects
   // across the hierarchy (Projects/Boards/Issues/…), which the object-type
-  // gear then narrows — mirroring the drill behaviour.
+  // gear then narrows — mirroring the drill behavior.
   // v8 (D365): the bubble-up superset ALWAYS descends — depth is no
   // longer a user-facing toggle there; the pinned Type filter decides
   // which tier of the superset the list shows.
@@ -39218,7 +39218,7 @@ function _v1RowRestoreIconBtn(opts) {
   // the cart — so the button is STATELESS: always "Restore this item", never
   // the green "Added" / "Included" cart states (the checkbox owns the cart).
   // Detected by the handler name so we don't thread a flag through every row
-  // call site. Folder-group / records / GWS buttons keep the cart behaviour
+  // call site. Folder-group / records / GWS buttons keep the cart behavior
   // below (they still add to the cart).
   var express = /^(addToRestoreRow|addToRestoreChildRow|addToRestoreRecordRow|addToRestoreFieldRow|addToRestoreGwsRow|restoreNowFolder)\(/.test(ma);
   // Genuinely non-restorable (no backups) wins over everything, express or not.
@@ -43997,7 +43997,15 @@ function _wsSelectColumns() {
   // (No Organization column — the table is already tight. The org relationship
   // is summarized by the label in the controls row: top org + "+N", full list
   // in its tooltip. See the ws-table-controls-right block in wsRenderConfigure.)
-  var cols = _wsCartAllUsers() ? WS_SELECT_COLUMNS_USERS : WS_SELECT_COLUMNS;
+  var cols = WS_SELECT_COLUMNS;
+  if (_wsCartAllUsers()) {
+    // Okta's user cart keeps its reference layout (Status · User type · Department). Every other workload's users carry no fields worth scanning in the cart, so the cart is Name · Restore point (Entra ID matches VDC's Restore step: no Status, User type or Department).
+    var _firstKey = state.restorePlan.keys().next().value, _first = RESOURCES.find(function(x){ return x.id === _firstKey; });
+    var _bare = WS_SELECT_COLUMNS_USERS.filter(function(c){ return c.key === 'name' || c.key === 'target' || c.key === 'actions'; });
+    if (_first && _first.wl === 'Okta WIC') cols = WS_SELECT_COLUMNS_USERS;
+    else if (_first && _first.wl === 'Entra ID') cols = [{ key: 'name', label: 'Display Name' }, { key: 'userName', label: 'User Name' }].concat(_bare.slice(1));   // VDC's Entra Users columns: Display Name · User Name
+    else cols = _bare;
+  }
   // Export-only carts keep the Restore point chip too (user 2026-10-21): what gets exported is read from the same backup point, so its metadata is just as useful
   // to review before exporting. (A time RANGE an export takes, e.g. the Okta System Log, is still chosen on Configure.)
   return cols;
@@ -44035,6 +44043,7 @@ function _wsBasketSortValue(key, colKey) {
     case 'oktaStatus':   return ((String(r.meta || '').split(/\s*·\s*/)[0]) || '').toLowerCase();
     case 'oktaUserType': return (r.oktaUserType || '').toLowerCase();
     case 'oktaDept':     return (r.oktaDept || '').toLowerCase();
+    case 'userName':     return String((r.adoCells && r.adoCells[0]) || '').toLowerCase();
     case 'details':      return (_wsSelectDetailsText(key, r) || '').toLowerCase();
     // Numeric ts so points order chronologically; unpinned resolves to the
     // item's OWN latest RP (per-item coverage — not the global latest).
@@ -44124,6 +44133,8 @@ function wsRenderSelectTableRow(key, q) {
           _uChip = _uRaw ? wsEscape(_uRaw.charAt(0).toUpperCase() + _uRaw.slice(1).toLowerCase().replace(/_/g, ' ')) : '<span class="ws-cell-muted">—</span>';
         }
         _midCells += '<td class="ws-td">' + _uChip + '</td>'; break;
+      case 'userName':
+        _midCells += '<td class="ws-td ws-col-username"><span class="ws-attr-desc" data-tooltip="' + wsEscape((r && r.adoCells && r.adoCells[0]) || '') + '">' + wsEscape((r && r.adoCells && r.adoCells[0]) || '—') + '</span></td>'; break;
       case 'oktaUserType':
         _midCells += '<td class="ws-td ws-col-usertype">' + wsEscape((r && r.oktaUserType) || '—') + '</td>'; break;
       case 'oktaDept':
@@ -47327,7 +47338,7 @@ function wsRenderReview(part) {
   // request): the ADO cross-region warning + same-region info, and GitHub's
   // Platform-Admin region info, are gated off here. The code is kept (just
   // unreachable) for easy revival — flip the `false` / drop the wl exclusions.
-  // Other non-PP workloads (GitLab / Okta / Jira / …) keep their region info.
+  // GitHub is the only workload that shows its region info (the gate is the GitHub model); every other workload shows none.
   if (false /* ADO cross-region removed for now */ && wl === 'Azure DevOps') {
     // ADO region treatment per restore spec §5 (target-org picker: "Region
     // match indicator inline — if target region differs, show critical
@@ -47349,7 +47360,7 @@ function wsRenderReview(part) {
         + '<span><strong>Region: US East</strong> — matches the source organization (contoso-org). No cross-region transfer.</span>'
       + '</div>';
     }
-  } else if (!isPP && wl && wl !== 'GitHub' && wl !== 'Azure DevOps') {
+  } else if (wl === 'GitHub') {   // GitHub only (user 2026-11-16): the Platform-Admin cross-region gate is GitHub's model per the restore spec, so no other workload shows it
     targetBody += '<div class="ws-cfg-inline-info">'
       + regionInfoSvg
       + '<span><strong>Region: US East</strong> (same as source). Cross-region transfer is gated by Platform Admin Settings — currently off. To enable, a platform admin must turn on cross-region transfer for this connector.</span>'
@@ -48462,7 +48473,7 @@ function wsSetD365WriteEmpty(write) {
   ws.config.d365WriteEmpty = !!write;
   wsRenderAll();
 }
-/* An existing record is overwritten in this job (the only case where empty values can matter): the Overwrite choice, or a changed-only scope where Overwrite is the only behaviour. */
+/* An existing record is overwritten in this job (the only case where empty values can matter): the Overwrite choice, or a changed-only scope where Overwrite is the only behavior. */
 function _d365OverwriteOn(cfg) {
   var sc = (typeof ws !== 'undefined' && ws.scopeStrategy === 'changed');
   return (((cfg && cfg.d365ConflictMode) || (sc ? 'override' : 'skip')) === 'override') || sc;
@@ -48697,7 +48708,7 @@ function wsRenderPpDestination(n, noun, cfg) {
   var cType    = isWs ? 'Workspace' : 'Environment';
   // TYPED containers only: environments carry Production/Sandbox/Trial/…, so
   // they get the type chip and the type group headers. Workspaces have no such
-  // classification (a licence tier is not a destination category), so their
+  // classification (a license tier is not a destination category), so their
   // picker is search ONLY — user 2026-09-17.
   var cTyped   = !isWs;
   var srcEnvs = _ppSourceContainers(cType);
@@ -49037,7 +49048,7 @@ function wsRenderReviewD365(variant, n, noun, cfg) {
     conflictCols = 2;
   }
   if (_scopeChanged) {
-    // Overwrite is the only behaviour, so there is nothing to choose: no section, no lone card. The alert at the top says what happens (and covers related records when they are on).
+    // Overwrite is the only behavior, so there is nothing to choose: no section, no lone card. The alert at the top says what happens (and covers related records when they are on).
   } else sections.push(
     '<div class="ws-cfg-section">'
       + '<div class="ws-cfg-section-hdr">'
@@ -71643,7 +71654,7 @@ function _aiResetTheater(){
    implies the agent will DO something. The code vocabulary was renamed with
    it — aiAgent.showing / aiShowStart / aiShowStop / _showStopped /
    _aiShowNavGuard / opts.show / '__show:' — because a label surviving only in
-   the source is how labels and behaviour drift apart. "Rejoin" folded into
+   the source is how labels and behavior drift apart. "Rejoin" folded into
    the same single label: there is one gesture, not one-per-history.
    ══════════════════════════════════════════════════════════════════════ */
 function _aiVoice(screenText, dataText){
@@ -72203,7 +72214,7 @@ function aiShowStart(embedHost, embedFlow){
   // "join" — by the time you click, the work may already be done. So
   // watching rewinds the workspace to the pre-run frame and REPLAYS every
   // action the agent took, paced to be followable, ending wherever the run
-  // actually is. Jumping to the final state (the old behaviour) only ever
+  // actually is. Jumping to the final state (the old behavior) only ever
   // showed the last frame.
   // ONE presentation for a watched run, whenever you click (user 2026-09-17).
   // was: only replayed _stageRuns, so clicking Watch before anything had been
@@ -75297,9 +75308,9 @@ document.addEventListener('DOMContentLoaded', function () {
   EM('accounts', [1, 15, 10], [[22, 'Owner', 'Dev Patel']]);
   /* long text, for the Compare to peek: ~620 chars with the edit near the start (Northwind), ~1,600 chars with edits in the middle and at the end (Tailspin) */
   E('accounts', [3, 10, 0], 2, 'Description', 'Regional grocery and household-goods retailer operating 140 stores across the Midwest. The account renewed its multi-year platform agreement in the spring and is now evaluating the analytics add-on for demand forecasting. Procurement is centralised in Chicago, with regional buyers approving category-level purchases up to a defined limit. The integration team runs a weekly sync with our solutions engineers, and the main open risk is the planned migration of their point-of-sale data to a new cloud provider later this year. Executive sponsor is the VP of Supply Chain; day-to-day contact is the Director of Merchandising Systems.');
-  E('accounts', [2, 14, 30], 9, 'Description', 'Tailspin Toys designs and distributes mass-market toys through national retail chains and a growing direct-to-consumer storefront. The account is managed by a three-person team covering North America, with seasonal support from the partner programme between September and December. Order volumes peak in the fourth quarter, and the finance team has asked for backup retention to be extended through the end of the fiscal year so that holiday-season orders can be reconstructed if a dispute arises. Their catalogue holds more than four thousand active products, each linked to supplier records, safety certifications and regional packaging requirements that change several times a year. A dedicated data steward reviews product-record changes every Monday and signs off on bulk updates before they reach the storefront. Contacts at the account include the head of merchandising, the director of logistics and two regional account leads, all of whom have been briefed on the restore process and on how to request an out-of-cycle recovery. A cross-border expansion into the European market is planned for next year, which will add a second Dynamics environment and a second set of retention requirements under local data-protection rules. The last quarterly business review flagged integration latency between the warehouse system and the order platform as the main operational concern, with a remediation plan due in the first quarter.');
+  E('accounts', [2, 14, 30], 9, 'Description', 'Tailspin Toys designs and distributes mass-market toys through national retail chains and a growing direct-to-consumer storefront. The account is managed by a three-person team covering North America, with seasonal support from the partner program between September and December. Order volumes peak in the fourth quarter, and the finance team has asked for backup retention to be extended through the end of the fiscal year so that holiday-season orders can be reconstructed if a dispute arises. Their catalog holds more than four thousand active products, each linked to supplier records, safety certifications and regional packaging requirements that change several times a year. A dedicated data steward reviews product-record changes every Monday and signs off on bulk updates before they reach the storefront. Contacts at the account include the head of merchandising, the director of logistics and two regional account leads, all of whom have been briefed on the restore process and on how to request an out-of-cycle recovery. A cross-border expansion into the European market is planned for next year, which will add a second Dynamics environment and a second set of retention requirements under local data-protection rules. The last quarterly business review flagged integration latency between the warehouse system and the order platform as the main operational concern, with a remediation plan due in the first quarter.');
   B('accounts', 19, [9, 11, 0]); B('accounts', 24, [2, 10, 5]);                                              // created since
-  G('accounts', [3, 13, 12], { Name: 'Relecloud Services', Industry: 'Technology', Revenue: '$14.8M', Owner: 'James Park', Modified: 'Sep 29, 2026', Description: 'Cloud-migration partner running a two-wave data-centre exit. Wave 2 is in procurement and is the largest open opportunity attached to this account.' });
+  G('accounts', [3, 13, 12], { Name: 'Relecloud Services', Industry: 'Technology', Revenue: '$14.8M', Owner: 'James Park', Modified: 'Sep 29, 2026', Description: 'Cloud-migration partner running a two-wave data-center exit. Wave 2 is in procurement and is the largest open opportunity attached to this account.' });
   G('accounts', [3, 13, 21], { Name: 'Northridge Logistics', Industry: 'Logistics', Revenue: '$23.1M', Owner: 'Maria Gonzalez', Modified: 'Oct 1, 2026', Description: 'Regional freight forwarder consolidating three warehouse systems onto one platform. Renewal due next quarter.' });
   G('accounts', [3, 13, 41], { Name: 'Bellows College', Industry: 'Education', Revenue: '$3.9M', Owner: 'Sarah Chen', Modified: 'Aug 14, 2026', Description: 'Small private college piloting the student-services module. Budget approval expected at the next board meeting.' });
   E('accounts', [14, 9, 0], nRows('accounts') + 0, 'Revenue', '$12.9M');                                      // Relecloud revenue edited before it was deleted
@@ -75721,7 +75732,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (sc && sc.changedOnly) ws.scopeStrategy = 'changed'; else if (ws.scopeStrategy === 'changed' && sc && !sc.changedOnly) ws.scopeStrategy = 'full';
     var html = origReview.apply(this, arguments);
     if (sc && sc.changedOnly) {
-      // The shared Vision alert (one line of text, no bold lead-in). With Overwrite the only behaviour there is no conflict choice below, so this says what happens to existing records.
+      // The shared Vision alert (one line of text, no bold lead-in). With Overwrite the only behavior there is no conflict choice below, so this says what happens to existing records.
       var _sc2 = X.scope, _whole = _sc2.mode === 'whole', _cn = X.scopeNoun();
       var _txt = _whole
         ? plural(sc.mod + sc.del, 'record') + ' changed since ' + esc(X.short(sc.rpTs)) + ': ' + plural(sc.mod, 'modified record') + ' (earlier values are written back to the existing records) and ' + plural(sc.del, 'deleted record') + ' (recreated). Records that did not change are left alone.'
