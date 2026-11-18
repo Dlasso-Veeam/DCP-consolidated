@@ -4235,12 +4235,38 @@ body.ai-hx-transcript .ai-foot { display: none; }
    actions column — 8px between the date chip and Remove — and the header
    cluster (label + sort arrow) shares the chip's exact right edge. */
 .ws-sel-cq { container-type: inline-size; container-name: selq; }
+/* D365 review table (column-level restores): the Select step's own table carries the values. Wider step; reading column centered, table and pager break out symmetrically; Name and Restore point/remove pinned
+   with the main table's 8px edge shadows (shown while content is hidden behind them); a sticky scrollbar so the horizontal scroll stays reachable on a tall table. */
+.ws-step-pad.rv-wide { max-width: none; }
+.ws-step-pad.rv-wide > *:not(.ws-sel-cq):not(.rv-bar2):not(.wspg) { max-width: 732px; margin-left: auto; margin-right: auto; }
+.rv-bar2 { margin-bottom: 8px; }
+.rv-bar2 .rv-sub { font-size: 14px; line-height: 20px; color: var(--black-60); }
+.ws-sel-cq:has(.rv-one) .ws-table-wrap { overflow-x: auto; scrollbar-width: none; }
+.ws-sel-cq:has(.rv-one) .ws-table-wrap::-webkit-scrollbar { display: none; }
+.rv-one { table-layout: auto !important; width: max-content; min-width: 100%; }
+.rv-one th { white-space: nowrap; }
+.rv-one th:first-child, .rv-one td:first-child { position: sticky; left: 0; z-index: 3; background: var(--white); min-width: 176px; max-width: 220px; overflow: visible; }
+.rv-one th.ws-col-target, .rv-one td.ws-col-target { position: sticky; right: 48px; z-index: 3; background: var(--white); width: 176px; min-width: 176px; max-width: 176px; overflow: visible; }
+.rv-one th.is-actions-col, .rv-one td.is-actions-col { position: sticky; right: 0; z-index: 3; background: var(--white); width: 48px; min-width: 48px; max-width: 48px; }
+.rv-one tbody tr:hover td:first-child, .rv-one tbody tr:hover td.ws-col-target, .rv-one tbody tr:hover td.is-actions-col { background: var(--blue-light); }
+.rv-one .rv-v { min-width: 152px; max-width: 240px; }
+.rv-one td.rv-v > div { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rv-na { color: var(--black-60); }
+.rv-one td:first-child::after, .rv-one th:first-child::after { content: ""; position: absolute; top: 0; right: -8px; bottom: 0; width: 8px; background: linear-gradient(to right, rgba(0,0,0,0.10), rgba(0,0,0,0)); pointer-events: none; opacity: 0; transition: opacity .18s ease; }
+.rv-one td.ws-col-target::before, .rv-one th.ws-col-target::before { content: ""; position: absolute; top: 0; left: -8px; bottom: 0; width: 8px; background: linear-gradient(to left, rgba(0,0,0,0.10), rgba(0,0,0,0)); pointer-events: none; opacity: 0; transition: opacity .18s ease; }
+.ws-table-wrap.has-h-scroll-left .rv-one td:first-child::after, .ws-table-wrap.has-h-scroll-left .rv-one th:first-child::after { opacity: 1; }
+.ws-table-wrap.has-h-scroll-right .rv-one td.ws-col-target::before, .ws-table-wrap.has-h-scroll-right .rv-one th.ws-col-target::before { opacity: 1; }
+.rv-hbar { position: sticky; bottom: 0; z-index: 6; height: 14px; overflow-x: scroll; overflow-y: hidden; background: var(--white); }
+.rv-hbar > div { height: 1px; }
+.rv-hbar::-webkit-scrollbar { height: 10px; }
+.rv-hbar::-webkit-scrollbar-track { background: transparent; }
+.rv-hbar::-webkit-scrollbar-thumb { background: var(--black-20); border-radius: 5px; border: 2px solid var(--white); }
 /* Restore point chip: Vision Chip, Type Green, Mode Light, Size Default (28px, Body/B2 Semi Bold): Green/S5 fill, Green/S80 text, radius 2; hover shows the Outline mode border (Green/S70) */
 .ws-rp-chip { display: inline-flex; align-items: center; height: 28px; padding: 0 8px; border: 1px solid transparent; border-radius: 2px; background: var(--soft-green-bg); color: var(--btn-success); font: inherit; font-size: 16px; font-weight: 500; line-height: 22px; cursor: pointer; white-space: nowrap; flex: none; }   /* never narrower than its label: a squeezed chip lets the text run past its own border */
 .ws-rp-chip:hover, .ws-rp-chip:focus-visible { border-color: var(--green-s70); outline: none; }
 /* The step is at most 715px of table (about 520px in a 1024px window). Details, the stand-in for per-item metadata, now lives behind the chip, so it only
    returns if the step ever gets wide enough to hold it without clipping. The user carts need about 775px for every column, so Department yields first, then User type. */
-@container selq (max-width: 860px) { .ws-col-details { display: none; } }
+@container selq (max-width: 860px) { .ws-table:not(.ws-sel-logs) .ws-col-details { display: none; } }   /* a log-stream cart (ws-sel-logs) has only Name · Details · remove, so Details always has the room */
 @container selq (max-width: 700px) { col.ws-col-name { width: auto !important; } }   /* the name keeps a fixed 280px (the chip stays near the left edge, clear of the metadata panel that floats over the right) until the step narrows */
 @container selq (max-width: 800px) { .ws-col-dept { display: none; } }
 @container selq (max-width: 640px) { col.ws-col-type { width: 120px !important; } .ws-col-usertype { display: none; } }
@@ -7702,7 +7728,7 @@ body.ai-open.ai-full #toast { right: 24px; }   /* full screen: nothing beside it
 
 /* ════════ Reusable tooltip — promotes native title= to a styled bubble ════════ */
 /* Attach via data-tooltip="…" on any element; positioned by the JS handler. */
-.app-tooltip { position: fixed; z-index: 10000; pointer-events: none; background: var(--white); color: var(--black-100); border: 1px solid var(--border-light); font-size: 14px; /* DS Tooltip WHITE theme (user 2026-08-05; docs: white bg, S100 text, body 14/450) */ line-height: 1.35; font-weight: 450; padding: 6px 9px; border-radius: 4px; box-shadow: 0 4px 14px rgba(0,0,0,0.22); max-width: 260px; opacity: 0; transition: opacity 0.12s ease; }
+.app-tooltip { position: fixed; z-index: 10000; pointer-events: none; background: var(--white); color: var(--black-100); border: 1px solid var(--border-light); font-size: 14px; /* DS Tooltip WHITE theme (user 2026-08-05; docs: white bg, S100 text, body 14/450) */ line-height: 1.35; font-weight: 450; padding: 6px 9px; border-radius: 4px; box-shadow: 0 4px 14px rgba(0,0,0,0.22); max-width: 260px; overflow-wrap: anywhere; /* a long unbroken value (an Entra tag) wraps inside the bubble instead of spilling out */ opacity: 0; transition: opacity 0.12s ease; }
 .app-tooltip.show { opacity: 1; }
 
 /* ════════ Roadmap: topbar entry + on-demand modal ════════ */
@@ -10659,6 +10685,7 @@ var RESOURCES = (function(){
       adoPipelines: opts.adoPipelines || null,
       adoLastActivity: opts.adoLastActivity || null,
       adoCovers: opts.adoCovers || null,   // audit-file capture window (PRD §2.5)
+      logStream: !!opts.logStream,   // a log stream (Entra Audit / Sign-in Logs, Okta System Log): exported whole over a time range chosen on Configure, so the Select step lists it by what it covers, not by type or restore point
       defaultBranch: opts.defaultBranch || null,
       // T12: full audit-event record for the Organization Audit Log Events columns.
       adoAudit: opts.adoAudit || null,
@@ -13069,7 +13096,7 @@ var RESOURCES = (function(){
   // is expressed purely through parentId. Counts use the Veeam Software tenant
   // baseline (PRD doc 1). Representative depth: all 50 types render; high-value
   // types get object records; alice gets sub-resources. Pills/cols are Phase 2.
-  list.push(R('okta-org-acme', 'acme.okta.com', 'Organization', 'Okta WIC', 'acme-corp', 'okta-org', {drillable:true, drillTarget:'children', meta:'4 sections · 13 object types · 13,765 users'}));
+  list.push(R('okta-org-acme', 'acme.okta.com', 'Organization', 'Okta WIC', 'acme-corp', 'okta-org', {drillable:true, drillTarget:'children', meta:'4 folders · 13 object types · 13,765 users'}));
   // ── 4 sections per doc 2 v4 (left-panel spec §2): Directory, Applications,
   // Security, System Log — fixed order, mirrors Okta Admin Console. Sections
   // and types outside the 29-unit V1 catalog are parked below (doc2v4 parked). ──
@@ -13172,7 +13199,7 @@ var RESOURCES = (function(){
   // Leaf-level (user direction 2026-07-07): the log is added/exported whole —
   // no drill into individual events/files from the name or the tree.
   // was: meta tail '· JSON/CSV export' — CSV retired 2026-08-06
-  OT('okta-sl-log', 'System Log', 'okta-syslog', '90-day retention', {drillable:false, existence:'audit-only', adoCells:['Covers May 20 \u2013 Aug 18, 2026'], meta:'Covers May 20 \u2013 Aug 18, 2026 · hourly packages · 90-day retention'}); // universal audit-leaf grid (PM 2026-08-17)
+  OT('okta-sl-log', 'System Log', 'okta-syslog', '90-day retention', {drillable:false, existence:'audit-only', logStream:true, adoCells:['Covers May 20 \u2013 Aug 18, 2026'], meta:'Covers May 20 \u2013 Aug 18, 2026 · hourly packages · 90-day retention'}); // universal audit-leaf grid (PM 2026-08-17)
 
   // ── 7f / I16 — Multi-org. The "Organizations" rail entry is the spec's
   // "All Organizations" root; it lists every onboarded Okta org as a
@@ -13181,7 +13208,7 @@ var RESOURCES = (function(){
   // the grid to that org via the standard parent/child drill (no new scope
   // logic). Structure mirrors acme's 7-section taxonomy at a fraction of the
   // size so the taxonomy reads consistently across orgs. ──
-  list.push(R('okta-org-sb', 'acme-sandbox.okta.com', 'Organization', 'Okta WIC', 'acme-corp', 'okta-org', {drillable:true, drillTarget:'children', meta:'4 sections · sandbox tenant · 412 users'}));
+  list.push(R('okta-org-sb', 'acme-sandbox.okta.com', 'Organization', 'Okta WIC', 'acme-corp', 'okta-org', {drillable:true, drillTarget:'children', meta:'4 folders · sandbox tenant · 412 users'}));
   function SBPL(id, name, count){ list.push(R(id, name, 'Folder', 'Okta WIC', 'acme-corp', 'okta-org', {parentId:'okta-org-sb', drillable:true, drillTarget:'children', meta:count})); }
   function SBT(id, name, parent, count, opts){ opts = opts || {}; opts.drillable = (opts.drillable !== false); opts.drillTarget = 'children'; opts.parentId = parent; if(!opts.meta) opts.meta = count; return list.push(R(id, name, 'Object Type', 'Okta WIC', 'acme-corp', 'okta-org', opts)); }
   SBPL('okta-sb-sec-dir',  'Directory',      '4 types');
@@ -13300,8 +13327,8 @@ var RESOURCES = (function(){
       list.push(R(root, name, 'Tenant', EW, ET, EC, {drillable:true, drillTarget:'children', meta:metaLine}));
       EF(sec('dir'),  'Identities',   root, '4 types');   // was: 'Directory' (user 2026-11-16: in Microsoft's vocabulary a directory is the tenant, so a Directory folder inside a tenant confuses; Users, Groups, Administrative Units and Organization Contacts stay as they are)
       EF(sec('apps'), 'Applications', root, d.cnt.apps + ' items');
-      EF(sec('sec'),  'Security',     root, '2 types');
-      EF(sec('dev'),  'Devices',      root, '2 types');
+      EF(sec('sec'),  'Security',     root, '3 types');
+      EF(sec('dev'),  'Devices',      root, d.cnt.devices + ' items');   // lists the devices directly, like Applications (user 2026-11-18); was a section of 2 types with a second 'Devices' folder inside it
       EF(sec('log'),  'System Log',   root, '2 types');
       EF(ty('users'),    'Users',                       sec('dir'), d.cnt.users + ' items');
       EF(ty('groups'),   'Groups',                      sec('dir'), d.cnt.groups + ' items');
@@ -13309,8 +13336,7 @@ var RESOURCES = (function(){
       EF(ty('contacts'), 'Organization Contacts',       sec('dir'), d.contacts.length + ' items');
       EF(ty('roles'),    'Roles',                       sec('sec'), d.cnt.roles + ' items');
       EF(ty('ca'),       'Conditional Access policies', sec('sec'), d.ca.length + ' items');
-      EF(ty('devices'),  'Devices',                     sec('dev'), d.cnt.devices + ' items');
-      EF(ty('intune'),   'Intune policies',             sec('dev'), d.intune.length + ' items');
+      EF(ty('intune'),   'Intune policies',             sec('sec'), d.intune.length + ' items');   // was under Devices; a policy sits with Conditional Access policies (user 2026-11-18)
       d.users.forEach(function(u){ EI(u[0], u[1], 'User', ty('users'), [u[2]], u[3], u[4]); });   // [id, display name, UPN, meta, opts] — display name is the person's name; User Name column is the UPN
       d.groups.forEach(function(g){ EI(g[0], g[1], 'Group', ty('groups'), [g[2], g[3], g[4]], g[2] + ' group · ' + g[5], {entraGroupType:g[2]}); });
       d.aus.forEach(function(x){ EI(x[0], x[1], 'Administrative Unit', ty('aus'), [x[2], x[3]], x[2]); });
@@ -13318,14 +13344,14 @@ var RESOURCES = (function(){
       d.roles.forEach(function(x){ EI(x[0], x[1], 'Role', ty('roles'), [x[2] ? 'Yes' : 'No', 'Yes', x[3]], (x[2] ? 'Built-in' : 'Custom') + ' · ' + x[3], {entraBuiltIn:!!x[2]}); });
       d.apps.forEach(function(x){ EI(x[0], x[1], x[2], sec('apps'), [x[2], x[3], x[4]], x[2] + (x[3] !== '—' ? ' · ' + x[3] : '')); });
       d.ca.forEach(function(x){ EI(x[0], x[1], 'Conditional Access policy', ty('ca'), [x[2]], x[2]); });
-      d.devices.forEach(function(x){ EI(x[0], x[1], 'Device', ty('devices'), [x[2], x[3], x[4], x[5]], x[3] + ' ' + x[4] + ' · ' + x[2]); });
+      d.devices.forEach(function(x){ EI(x[0], x[1], 'Device', sec('dev'), [x[2], x[3], x[4], x[5]], x[3] + ' ' + x[4] + ' · ' + x[2]); });
       d.intune.forEach(function(x){ EI(x[0], x[1], 'Intune Policy', ty('intune'), [x[2], x[3], x[4]], x[3] + ' · v' + x[4]); });
       // System Log: VDC's Entra ID Logs page has two streams, Audit Logs and Sign-In Logs. Each is a leaf added/exported whole; the time range is chosen in the export wizard (Okta's System Log model).
       [['audit', 'Audit Logs'], ['signin', 'Sign-in Logs']].forEach(function(lg){
-        EI(px + '-sl-' + lg[0], lg[1], 'Audit Log', sec('log'), ['Covers ' + d.cover], 'Covers ' + d.cover + ' \u00b7 hourly packages \u00b7 90-day retention', {drillable:false, existence:'audit-only', adoCovers:d.cover});
+        EI(px + '-sl-' + lg[0], lg[1], lg[0] === 'signin' ? 'Sign-in Log' : 'Audit Log', sec('log'), ['Covers ' + d.cover], 'Covers ' + d.cover + ' \u00b7 hourly packages \u00b7 90-day retention', {drillable:false, existence:'audit-only', logStream:true, adoCovers:d.cover});   // the Sign-in stream was typed 'Audit Log' like the other; its own type keeps the Type column honest wherever it shows
       });
     }
-    entraTenant('entra', 'entra-tenant-meridianfg', 'meridianfg.com', '5 sections · 9 object types · 18,420 users', {
+    entraTenant('entra', 'entra-tenant-meridianfg', 'meridianfg.com', '5 folders · 9 object types · 18,420 users', {
       cnt: {users:18420, groups:1364, roles:148, apps:103, devices:9876},
       cover: 'May 20 – Aug 18, 2026',
       users: [
@@ -13383,7 +13409,7 @@ var RESOURCES = (function(){
     });
     // Second tenant: the EMEA subsidiary's own Entra ID tenant. Same model; Finance-Staff, Security-Admins, Require MFA for admins, Global Administrator and Security Administrator exist in BOTH
     // tenants so cross-tenant restore has real name collisions to resolve, and the smaller counts make it a plausible recovery target.
-    entraTenant('entra-b', 'entra-tenant-meridian-emea', 'meridian-emea.com', '5 sections · 9 object types · 2,140 users', {
+    entraTenant('entra-b', 'entra-tenant-meridian-emea', 'meridian-emea.com', '5 folders · 9 object types · 2,140 users', {
       cnt: {users:2140, groups:186, roles:148, apps:57, devices:1312},
       cover: 'Jun 4 – Aug 18, 2026',
       users: [
@@ -13442,7 +13468,7 @@ var RESOURCES = (function(){
         ['Distinguished name', dnOf(disp, ouPath, extra.cont)], ['SID', SIDP + rid], ['Password last set', extra.pwd || 'Sep 12, 2026'], ['Last logon', extra.last || 'Oct 5, 2026'], ['Account expires', 'Never']];
     }
     list.push(R(AR, 'corp.meridian.local', 'Forest', AW, AT, AC, {drillable:true, drillTarget:'children', meta:'1 domain · 6 domain controllers'}));
-    list.push(R('ad-domain', 'corp.meridian.local', 'Domain', AW, AT, AC, {parentId:AR, drillable:true, drillTarget:'children', meta:'5 sections · NetBIOS MERIDIAN'}));
+    list.push(R('ad-domain', 'corp.meridian.local', 'Domain', AW, AT, AC, {parentId:AR, drillable:true, drillTarget:'children', meta:'5 folders · NetBIOS MERIDIAN'}));
     AF('ad-sec-dc',  'Domain Controllers',   'ad-domain', '');   // a folder of its own at the domain, as the Domain Controllers OU is at the root of a real domain (user 2026-10-22); was under Users and Computers
     AF('ad-sec-uc',  'Users and Computers',  'ad-domain', '');
     AF('ad-sec-gpo', 'Group Policy Objects', 'ad-domain', '');
@@ -13788,7 +13814,7 @@ var RESOURCES = (function(){
         list.push(R(fid, F.name, 'Forest', AW, AT, AC, {drillable:true, drillTarget:'children', meta:F.domains.length + ' domain' + (F.domains.length > 1 ? 's' : '') + ' · ' + dcTotal + ' domain controllers'}));
         F.domains.forEach(function(D, di){
           var k = F.slug + '-' + di, did = 'ad-domain-' + k, uc = 'ad-sec-uc-' + k, gp = 'ad-sec-gpo-' + k, dnsF = 'ad-sec-dns-' + k, cf = 'ad-sec-cfg-' + k, dcF = 'ad-sec-dc-' + k;
-          list.push(R(did, D.name, 'Domain', AW, AT, AC, {parentId:fid, drillable:true, drillTarget:'children', meta:'5 sections · NetBIOS ' + D.nb}));
+          list.push(R(did, D.name, 'Domain', AW, AT, AC, {parentId:fid, drillable:true, drillTarget:'children', meta:'5 folders · NetBIOS ' + D.nb}));
           AF(dcF, 'Domain Controllers', did, ''); AF(uc, 'Users and Computers', did, ''); AF(gp, 'Group Policy Objects', did, ''); AF(dnsF, 'Integrated DNS', did, ''); AF(cf, 'Configuration Partition', did, '');
           D.dcs.forEach(function(d, i){
             AI('ad-dc-' + k + '-' + i, d[0], 'Domain Controller', dcF, d[0].replace(/\d+$/, '') && /^PDC/.test(d[4]) ? 'PDC emulator · ' + d[2].replace(' Standard', '') : d[2].replace(' Standard', ''),
@@ -14073,7 +14099,7 @@ var RESOURCES = (function(){
   // are retired (a message's Thread subject is still visible in its own
   // name; GWS has no real "folder" concept — see the Label-vs-folder note
   // at GWS_ITEM_GRIDS above _gwsItemGridDesc).
-  list.push(R('gws-tenant-acme', 'acme.com', 'Tenant', 'Google Workspace', 'acme-corp', 'gws-tenant', {drillable:true, drillTarget:'children', meta:'4 sections · 307 users · 5 shared drives · 5 spaces · 2 courses'}));
+  list.push(R('gws-tenant-acme', 'acme.com', 'Tenant', 'Google Workspace', 'acme-corp', 'gws-tenant', {drillable:true, drillTarget:'children', meta:'4 folders · 307 users · 5 shared drives · 5 spaces · 2 courses'}));
   function GWSEC(id, name, count){ list.push(R(id, name, 'Folder', 'Google Workspace', 'acme-corp', 'gws-tenant', {parentId:'gws-tenant-acme', drillable:true, drillTarget:'children', meta:count})); }
   GWSEC('gws-sec-users',     'Users',         '307 users');
   GWSEC('gws-sec-groups',    'Groups',        '7 groups');
@@ -14158,7 +14184,7 @@ var RESOURCES = (function(){
     list.push(R(id+'-mydrive',  'My Drive', 'Drive',  'Google Workspace', 'acme-corp', 'gws-tenant', {parentId:id, drillable:true, drillTarget:'children', meta:storageLabel + ' · files, folders, revisions, permissions'}));
     list.push(R(id+'-calendar', 'Calendar', 'Folder', 'Google Workspace', 'acme-corp', 'gws-tenant', {parentId:id, drillable:true, drillTarget:'children', meta:'Primary calendar · events, ACL rules'}));
     list.push(R(id+'-contacts', 'Contacts', 'Folder', 'Google Workspace', 'acme-corp', 'gws-tenant', {parentId:id, drillable:true, drillTarget:'children', meta:'Personal contacts, contact groups'}));
-    list.push(R(id+'-chat',     'Chats',    'Folder', 'Google Workspace', 'acme-corp', 'gws-tenant', {parentId:id, drillable:true, drillTarget:'children', meta:'Direct messages'}));
+    list.push(R(id+'-chat',     'Chat',     'Folder', 'Google Workspace', 'acme-corp', 'gws-tenant', {parentId:id, drillable:true, drillTarget:'children', meta:'Direct messages'}));
     // System labels (real Gmail terminology — Inbox/Sent/Drafts/Trash are
     // Labels, not folders; Gmail has no folder concept). Precise counts for
     // sarah are set below in her hand-authored section.
@@ -14239,6 +14265,45 @@ var RESOURCES = (function(){
     _gwsSetMeta(u.id+'-lb-sent',   'System label · 8 messages');
     _gwsSetMeta(u.id+'-lb-drafts', 'System label · 2 messages');
     _gwsSetMeta(u.id+'-lb-trash',  'System label · 2 messages');
+  });
+  // Bulk users' other four services (user 2026-11-18: the deeper you drilled the emptier it got — Drive, Calendar, Contacts and Chat held nothing for the 300 generated users).
+  // Each user gets a small, deterministic set in the exact shapes the exemplars use, so Chat spaces drill to messages and members, Contacts to contacts and a group, Calendar to events and
+  // an access rule, and My Drive to a folder with files: Chat 2 spaces (2 messages + 1 member each), Contacts 3 + 1 group, Calendar 3 events + 1 rule, Drive 1 folder (2 files) + 1 file.
+  var GWS_BULK_EVENTS = [['Team standup','Recurring · weekdays 09:30'],['Weekly status sync','Recurring · Mondays 10:00'],['1:1 with manager','Recurring · Thursdays 14:00'],['Quarterly planning','Aug 14'],['Security awareness training','Aug 19'],['Project kickoff','Jul 30'],['Office hours','Recurring · Wednesdays 15:00'],['Customer call','Aug 7'],['Benefits enrollment webinar','Aug 21'],['Retro','Recurring · biweekly Fridays 13:00']];
+  var GWS_BULK_CONTACTS = [['Jordan Lee','Northwind Traders','northwind.com'],['Amara Diallo','Fabrikam','fabrikam.com'],['Dana Whitfield','KPMG','kpmg.com'],['Kai Tanaka','Studio Kai','studiokai.tv'],['Sofia Marino','Bright PR','brightpr.com'],['Ravi Menon','Contoso','contoso.com'],['Elena Petrova','Wingtip Toys','wingtiptoys.com'],['Marcus Obi','Tailspin','tailspin.io'],['Hana Sato','Litware','litware.com'],['Oscar Brandt','Adatum','adatum.com']];
+  var GWS_BULK_CONTACT_GROUPS = [['Vendors',6],['Clients',9],['Recruiters',4],['Partners',7]];
+  var GWS_BULK_CHAT_LINES = [['Do you have the numbers from Friday?','Sending them over now'],['Can you review my draft before standup?','On it — give me ten minutes'],['Are you joining the planning call?','Yes, see you there'],['Thanks for covering for me yesterday','Anytime'],['Quick question about the access request','Happy to help, what do you need?'],['Moving our 1:1 to Thursday','Works for me']];
+  var GWS_BULK_DOCS = [['Meeting notes — Q3','Native Doc','Google Doc'],['Project plan','Native Doc','Google Sheet'],['Onboarding checklist','Native Doc','Google Doc'],['Roadmap review','Native Doc','Google Slides']];
+  function _gwsBulkName(email){ return email.split('@')[0].replace(/\d+$/, '').split('.').map(function(w){ return w.charAt(0).toUpperCase() + w.slice(1); }).join(' '); }
+  GWS_BULK_USERS.forEach(function(u, i){
+    var dl = u.dept.toLowerCase();
+    for (var e = 0; e < 3; e++) {
+      var ev = GWS_BULK_EVENTS[(i * 3 + e * 4) % GWS_BULK_EVENTS.length];
+      GWL(u.id+'-ev-'+e, ev[0], 'Event', u.id+'-calendar', ev[1] + ' · ' + (3 + (i + e * 5) % 10) + ' attendees');
+    }
+    GWL(u.id+'-acl-0', 'ACL: ' + dl + '-leads@acme.com — See all details', 'ACL Rule', u.id+'-calendar', 'reader · group scope');
+    for (var c = 0; c < 3; c++) {
+      var ct = GWS_BULK_CONTACTS[(i * 2 + c * 3) % GWS_BULK_CONTACTS.length];
+      GWL(u.id+'-ct-'+c, ct[0] + ' — ' + ct[1], 'Contact', u.id+'-contacts', ct[0].toLowerCase().replace(/ /g, '.') + '@' + ct[2] + ' · +1 (415) 555-01' + String(10 + (i * 7 + c * 13) % 90));
+    }
+    var cg = GWS_BULK_CONTACT_GROUPS[i % GWS_BULK_CONTACT_GROUPS.length];
+    GWL(u.id+'-cg-0', cg[0], 'Contact Group', u.id+'-contacts', cg[1] + ' members');
+    [3, 11].forEach(function(off, k){
+      var peer = GWS_BULK_USERS[(i + off) % GWS_BULK_USERS.length], sid = u.id+'-sp-'+k, ln = GWS_BULK_CHAT_LINES[(i + k * 2) % GWS_BULK_CHAT_LINES.length], day = 'Aug ' + (3 + (i + k * 4) % 20);
+      GWL(sid, _gwsBulkName(peer.email), 'Chat Space', u.id+'-chat', 'spaceType: DIRECT_MESSAGE · 2 members · last message ' + day, {drillable:true, drillTarget:'children'});
+      GWL(sid+'-msg-0', ln[0], 'Chat Message', sid, 'From: ' + u.email + ' · ' + day);
+      GWL(sid+'-msg-1', ln[1], 'Chat Message', sid, 'From: ' + peer.email + ' · ' + day);
+      GWL(sid+'-mb-0', peer.email + ' — MEMBER', 'Membership', sid, 'Member · direct message');
+    });
+    var fid = u.id+'-dvf-0', d1 = GWS_BULK_DOCS[i % GWS_BULK_DOCS.length], d2 = GWS_BULK_DOCS[(i + 2) % GWS_BULK_DOCS.length];
+    GWL(fid, 'Documents', 'Drive Folder', u.id+'-mydrive', '2 files', {drillable:true, drillTarget:'children'});
+    GWL(fid+'-fl-0', d1[0], d1[1], fid, d1[2] + ' · modified Aug ' + (2 + i % 9));
+    GWL(fid+'-fl-1', dl + '-budget.xlsx', 'Drive File', fid, 'XLSX · ' + (0.4 + (i % 25) / 10).toFixed(1) + ' MB · modified Jul ' + (10 + i % 18));
+    GWL(u.id+'-dvr-0', d2[0], d2[1], u.id+'-mydrive', d2[2] + ' · modified Aug ' + (5 + i % 8));
+    // One comment thread on the folder's document, like the exemplars (a comment with one reply), so Drive > Comments is not empty either.
+    var cmid = fid+'-fl-0-cm-0', cp = GWS_BULK_USERS[(i + 5) % GWS_BULK_USERS.length];
+    GWL(cmid, 'Comment: Can we add the Q3 numbers here?', 'Comment', fid+'-fl-0', cp.email + ' · Aug ' + (1 + i % 12) + ' · open · 1 reply', {drillable:true, drillTarget:'children'});
+    GWL(cmid+'-rp-0', 'Reply: Added, please take a look', 'Reply', cmid, u.email + ' · Aug ' + (2 + i % 12));
   });
   // Mail → Labels (direct children of Mail — 2026-09-21 restructure).
   _gwsSetMeta('gws-user-sarah-lb-inbox',  'System label · 6 messages');
@@ -14659,7 +14724,7 @@ var RESOURCES = (function(){
   // /Sales, /Finance, /Marketing) — _gwsOuScopedUserIds matches users by
   // OU-path substring across ALL GWS rows with no tenant scoping, so two
   // tenants sharing an OU path would cross-contaminate each other's lens.
-  list.push(R('gws-tenant-sb', 'acme-sandbox.com', 'Tenant', 'Google Workspace', 'acme-corp', 'gws-tenant', {drillable:true, drillTarget:'children', meta:'4 sections · 3 users · 2 shared drives · 1 space · 1 course'}));
+  list.push(R('gws-tenant-sb', 'acme-sandbox.com', 'Tenant', 'Google Workspace', 'acme-corp', 'gws-tenant', {drillable:true, drillTarget:'children', meta:'4 folders · 3 users · 2 shared drives · 1 space · 1 course'}));
   function GWSEC2(id, name, count){ list.push(R(id, name, 'Folder', 'Google Workspace', 'acme-corp', 'gws-tenant', {parentId:'gws-tenant-sb', drillable:true, drillTarget:'children', meta:count})); }
   GWSEC2('gws-sec-users-sb',     'Users',         '3 users');
   GWSEC2('gws-sec-groups-sb',    'Groups',        '2 groups');
@@ -14682,7 +14747,7 @@ var RESOURCES = (function(){
     list.push(R(id+'-mydrive',  'My Drive', 'Drive',  'Google Workspace', 'acme-corp', 'gws-tenant', {parentId:id, drillable:true, drillTarget:'children', meta:u[1] + ' · files, folders, revisions, permissions'}));
     list.push(R(id+'-calendar', 'Calendar', 'Folder', 'Google Workspace', 'acme-corp', 'gws-tenant', {parentId:id, drillable:true, drillTarget:'children', meta:'Primary calendar · events, ACL rules'}));
     list.push(R(id+'-contacts', 'Contacts', 'Folder', 'Google Workspace', 'acme-corp', 'gws-tenant', {parentId:id, drillable:true, drillTarget:'children', meta:'Personal contacts, contact groups'}));
-    list.push(R(id+'-chat',     'Chats',    'Folder', 'Google Workspace', 'acme-corp', 'gws-tenant', {parentId:id, drillable:true, drillTarget:'children', meta:'Direct messages'}));
+    list.push(R(id+'-chat',     'Chat',     'Folder', 'Google Workspace', 'acme-corp', 'gws-tenant', {parentId:id, drillable:true, drillTarget:'children', meta:'Direct messages'}));
     ['Inbox','Sent','Drafts','Trash'].forEach(function(lb){
       list.push(R(id+'-lb-'+lb.toLowerCase(), lb, 'Label', 'Google Workspace', 'acme-corp', 'gws-tenant', {parentId:id+'-gmail', drillable:true, drillTarget:'children', meta:'System label · ' + GWS_LBL_DEFAULT[lb]}));
     });
@@ -14966,7 +15031,7 @@ var RESOURCES = (function(){
     }
     list.push(R('ms365-tenant-contoso', 'contoso.onmicrosoft.com', 'Tenant', MW, MT, MC,
       {drillable:true, drillTarget:'children', p:'P1',
-       meta:'4 sections · 12 mailboxes · 12 OneDrive accounts · 6 SharePoint sites · 6 teams'}));
+       meta:'4 folders · 12 mailboxes · 12 OneDrive accounts · 6 SharePoint sites · 6 teams'}));
     function SEC(id, name, count){ list.push(R(id, name, 'Folder', MW, MT, MC,
       {parentId:'ms365-tenant-contoso', drillable:true, drillTarget:'children', p:'P1', meta:count})); }
     SEC('ms365-sec-mailboxes',  'All Mailboxes',  '12 mailboxes');
@@ -20635,9 +20700,27 @@ function renderChildCell(r, key, ctx) {
     // chips — Visibility / Status / Type / State / Hosted columns. Open or
     // compound values (emails, URLs, versions, Access level) stay plain;
     // booleans (Default, Auto-provision) read better plain too.
+    // Google Workspace users' Services (user 2026-11-18): the count was the same on nearly every row, so the cell names the first three services and counts the rest; the tooltip lists them all.
+    var _acG = (typeof childState !== 'undefined' && childState && typeof RESOURCES !== 'undefined') ? RESOURCES.find(function(x){ return x.id === childState.parentId; }) : null;
+    var _acGD = (_acG && _acG.wl === 'Google Workspace' && typeof _gwsItemGridDesc === 'function') ? _gwsItemGridDesc(_acG) : null;
+    if (_acGD && _acGD.cols[_aci] === 'Services') {
+      var _gsv = _gwsUserServiceNames(r, +_acv);
+      if (_gsv.length) {
+        var _gsHead = _gsv.slice(0, 3).join(', ');
+        return '<td style="font-size:16px;color:var(--black-60)"><div ' + (_gsv.length > 3 ? 'data-tooltip="' + wsEscape(_gsv.join(', ')) + '" ' : '') + 'style="display:flex;align-items:baseline;gap:4px;max-width:284px"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + wsEscape(_gsHead) + '</span>' + (_gsv.length > 3 ? '<span style="flex:none">+' + (_gsv.length - 3) + '</span>' : '') + '</div></td>';
+      }
+    }
     var _ADO_CHIP_COLS = { 'Visibility': 1, 'Status': 1, 'Type': 1, 'State': 1, 'Hosted': 1, 'Severity': 1, 'Role': 1, 'Shared/Personal': 1 };
     var _acP = (typeof childState !== 'undefined' && childState && typeof RESOURCES !== 'undefined')
       ? RESOURCES.find(function(x){ return x.id === childState.parentId; }) : null;
+    // Entra ID Tags (user 2026-11-18): the platform stores them as one string joined with semicolons and some are long unbroken names, so the cell shows the first tag and a count of the
+    // rest; the tooltip lists them all, and the metadata panel's Tags row carries the full list. Tags are open-ended (admins add their own), so plain text, not chips.
+    var _acE = (_acP && _acP.wl === 'Entra ID' && typeof _entraItemGridDesc === 'function') ? _entraItemGridDesc(_acP) : null;
+    if (_acE && _acE.cols[_aci] === 'Tags') {
+      var _tg = String(_acv).split(';').map(function(x){ return x.trim(); }).filter(Boolean);
+      if (_tg.length < 2) return '<td style="font-size:16px;color:var(--black-60)"><div data-tip-clip="' + wsEscape(_tg[0] || '') + '" style="max-width:284px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + wsEscape(_tg[0] || '\u2014') + '</div></td>';
+      return '<td style="font-size:16px;color:var(--black-60)"><div data-tooltip="' + wsEscape(_tg.join(', ')) + '" style="display:flex;align-items:baseline;gap:4px;max-width:284px"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + wsEscape(_tg[0]) + '</span><span style="flex:none">+' + (_tg.length - 1) + '</span></div></td>';
+    }
     var _acD = (_acP && typeof _adoItemGridDesc === 'function') ? _adoItemGridDesc(_acP) : null;
     // GL PRD Phase 2: GitLab item grids reuse the positional adoc columns —
     // resolve their descriptor for the same chip decisions (GL-guarded).
@@ -20702,6 +20785,16 @@ function renderChildCell(r, key, ctx) {
 // Leaf row renderer — a direct child of the current parent. When `showFolder`
 // is true the Resource cell appends an "in FolderLabel" meta link so search
 // results across folders can still be traced back to their bucket.
+// The services a Google Workspace user has, in a fixed order and short names, read from the service folders under the user. The row's count can exceed what the tree holds (Tasks and Keep are optional), so extras are named in order.
+var _GWS_SVC_SHORT = { 'Mail': 'Mail', 'My Drive': 'Drive', 'Calendar': 'Calendar', 'Contacts': 'Contacts', 'Chat': 'Chat', 'Task Lists': 'Tasks', 'Keep': 'Keep' };
+var _GWS_SVC_ORDER = ['Mail', 'Drive', 'Calendar', 'Contacts', 'Chat', 'Tasks', 'Keep'];
+var _gwsSvcIdx = null;
+function _gwsUserServiceNames(user, count) {
+  if (!_gwsSvcIdx) { _gwsSvcIdx = {}; RESOURCES.forEach(function(x){ if (x.wl === 'Google Workspace' && _GWS_SVC_SHORT[x.name] && x.parentId) (_gwsSvcIdx[x.parentId] = _gwsSvcIdx[x.parentId] || []).push(_GWS_SVC_SHORT[x.name]); }); }
+  var have = (_gwsSvcIdx[user.id] || []).slice();
+  _GWS_SVC_ORDER.forEach(function(n){ if (have.length < (count || 0) && have.indexOf(n) < 0) have.push(n); });
+  return _GWS_SVC_ORDER.filter(function(n){ return have.indexOf(n) >= 0; });
+}
 function childRenderLeafRow(r, showFolder, folderLabel, diffStatus, matchCount) {
   var badgeCls = 'b-' + r.status;
   var badgeText = r.status === 'protected' ? 'Protected' : r.status === 'excluded' ? 'Excluded' : r.status === 'unprotected' ? 'Unprotected' : r.status;
@@ -21427,7 +21520,7 @@ function _oktaDetailsCell(r) {
 function _contentsValue(r) {
   if (!r || r.wl !== 'Okta WIC') return null;
   var meta = String(r.meta || '');
-  if (r.type === 'Organization') { var a = meta.match(/([\d,]+)\s*sections?/i); return a ? a[1] + ' sections' : null; }
+  if (r.type === 'Organization') { var a = meta.match(/([\d,]+)\s*(?:sections?|folders?)/i); return a ? a[1] + (a[1] === '1' ? ' folder' : ' folders') : null; }   // the tenant's children are folders in the tree (user 2026-11-18; was 'sections', Okta's spec term)
   if (r.type === 'Object Type')  { var c = meta.match(/^\s*([\d,]+)/);        return c ? c[1] + ' items' : null; }
   if (r.type === 'Folder') {
     var f = meta.match(/^\s*([\d,]+)\s+([A-Za-z][A-Za-z ]*?)\s*(?:$|·)/);
@@ -21994,8 +22087,8 @@ var ENTRA_ITEM_GRIDS = {
 };
 function _entraItemGridDesc(parent) {
   if (!parent || parent.wl !== 'Entra ID') return null;
-  var m = /^entra(?:-b)?-(?:t|sec)-(users|groups|aus|contacts|roles|apps|ca|devices|intune|log)$/.exec(parent.id || '');
-  return m ? ENTRA_ITEM_GRIDS[m[1]] : null;
+  var m = /^entra(?:-b)?-(?:t|sec)-(users|groups|aus|contacts|roles|apps|ca|dev|intune|log)$/.exec(parent.id || '');   // 'dev' = the Devices section, which lists the devices itself
+  return m ? ENTRA_ITEM_GRIDS[m[1] === 'dev' ? 'devices' : m[1]] : null;
 }
 function _entraItemGridCols(parent) {
   var desc = _entraItemGridDesc(parent);
@@ -24276,6 +24369,7 @@ function _firstColEntityLabel(fallback) {
     var kids = (typeof RESOURCES !== 'undefined' && childState && childState.parentId)
       ? RESOURCES.filter(function(x){ return x.parentId === childState.parentId && x.type !== 'Folder'; }) : [];
     var _fclD = (typeof RESOURCES !== 'undefined' && childState && childState.parentId) ? RESOURCES.find(function(x){ return x.id === childState.parentId; }) : null;
+    if (_fclD && _fclD.wl === 'Google Workspace' && _fclD.type === 'User') return 'Service';   // a user's rows are its services (Mail, My Drive, Calendar, Contacts, Chat); the dominant-type noun read 'Drive' because the service folders are skipped
     return dominantType(kids) || ((_fclD && _fclD.wl === 'Dynamics 365') ? 'Name' : fallback);   // a Dynamics 365 environment holds tables next to campaigns, journeys and segments: the honest header is Name (Active Directory does the same)
   }
   if (typeof RESOURCES !== 'undefined' && typeof resourcePassesFilters === 'function') {
@@ -29715,6 +29809,8 @@ function _treeNavStopHere(node) {
       // at USER / GROUP / SHARED-DRIVE instances — everything inside a user
       // (the 5 service containers), a group, or a drive browses in the GRID
       // with the breadcrumb carrying position.
+      // The tenant's Users folder is terminal too (user 2026-11-18): hundreds of users do not belong in the left panel, so the folder stays selected while the full list scrolls on the right.
+      if (r.type === 'Folder' && r.name === 'Users') { var _gwUsPar = RESOURCES.find(function(x){ return x.id === r.parentId; }); if (_gwUsPar && _gwUsPar.type === 'Tenant') return true; }
       if (r.type === 'User') return true;
       if (r.type === 'Group') return true;
       if (r.type === 'Drive') return true;
@@ -30166,6 +30262,7 @@ var _DS_TYPE_ICON_MAP = [
   ['label',               'tags-outlined'],
   ['wiki',                'policy-statement-outlined'],
   ['audit',               'reporting-outlined'],
+  ['sign-in log',         'reporting-outlined'],   // Entra's second log stream shares the Audit Log glyph (it was typed 'Audit Log' until 2026-11-17)
   ['area path',           'reorder-outlined'],
   ['iteration',           'reorder-outlined'],
   ['pipeline environment','locations-outlined'],
@@ -30205,7 +30302,38 @@ var _MS365_MAILFOLDER_ICON = {
   'Inbox': 'ms365-inbox', 'Drafts': 'ms365-drafts', 'Deleted Items': 'ms365-deleted',
   'Junk Email': 'ms365-junk', 'Archive': 'ms365-archive'
 };
+// ── Entra ID and Okta WIC tree icons (user 2026-11-18, from the options proto tree-folder-icons.html: every folder gets its own icon) ──────────────────────
+// A folder that holds one type of object takes that type's icon (the same icon its rows use); a grouping folder takes the icon of what it groups; System Log keeps its
+// own. The DS store had no glyph for several of these types, so TYPE_ICON gives them one (and Role no longer shares Group's). Entra and Okta only: other workloads keep
+// the plain folder until the rule is extended to them. Weak fit: Organization Contact (shares the tenant's glyph). Device uses the Unified Icons "devices" glyph.
+var _EO_WL = { 'Entra ID': 1, 'Okta WIC': 1 };
+var _EO_TYPE_ICON = {
+  'Administrative Unit': 'child-roles-outlined', 'Device': 'devices-outlined', 'Application': 'apps-outlined', 'Role': 'security-outlined', 'IAM Role': 'security-outlined',
+  'User Type': 'tags-outlined', 'Group Rule': 'checklist-outlined', 'Network Zone': 'locations-outlined', 'Identity Provider': 'iam-identity-provider-outlined',
+  'IdP Key': 'secret-manager-outlined', 'Authorization Server': 'management-outlined', 'Resource Set': 'objects-outlined'
+};
+// Okta's "Object Type" rows are its collections. Their names say what they hold (the sandbox org has empty ones, so the name is the reliable key).
+var _EO_OKTA_COLLECTION = { 'Users': 'User', 'User Types': 'User Type', 'Groups': 'Group', 'Group Rules': 'Group Rule', 'Applications': 'Application', 'Policies': 'Policy', 'Network Zones': 'Network Zone',
+  'Identity Providers': 'Identity Provider', 'IdP Keys': 'IdP Key', 'Authorization Servers': 'Authorization Server', 'IAM Roles': 'IAM Role', 'Resource Sets': 'Resource Set' };
+var _EO_GROUPING_ICON = { 'Identities': 'tenant-user-outlined', 'Directory': 'tenant-user-outlined', 'Applications': 'apps-outlined', 'Security': 'security-outlined', 'Devices': 'devices-outlined' };
+var _eoKids = null;
+function _eoTypeIcon(type, wl) {   // a type's glyph: the store glyph above, else the type's own (the legacy chain below, reached with a workload that is not Entra or Okta)
+  var n = _EO_TYPE_ICON[type], g = n ? _dsStoreIconSvg(n, 14) : null;
+  return g || _treeIconSvgFor({ type: type, wl: 'x', name: type });
+}
+function _eoTreeIcon(r) {   // null when the row is not Entra or Okta, or has nothing special
+  if (!r || !_EO_WL[r.wl]) return null;
+  if (r.type !== 'Folder' && r.type !== 'Object Type') return _EO_TYPE_ICON[r.type] ? _eoTypeIcon(r.type, r.wl) : null;
+  if (r.name === 'System Log') return _dsStoreIconSvg('reporting-outlined', 14);
+  if (r.type === 'Object Type' && _EO_OKTA_COLLECTION[r.name]) return _eoTypeIcon(_EO_OKTA_COLLECTION[r.name], r.wl);
+  if (!_eoKids) { _eoKids = {}; RESOURCES.forEach(function(x){ if (_EO_WL[x.wl]) (_eoKids[x.parentId || ''] = _eoKids[x.parentId || ''] || []).push(x); }); }
+  var k = _eoKids[r.id] || [], types = {}, n = 0, only = null;
+  k.forEach(function(x){ if (!types[x.type]) { types[x.type] = 1; n++; only = x.type; } });
+  if (r.type === 'Folder' && k.length && n === 1 && only !== 'Folder' && only !== 'Object Type') return _eoTypeIcon(only, r.wl);   // a folder of one type
+  return _EO_GROUPING_ICON[r.name] ? _dsStoreIconSvg(_EO_GROUPING_ICON[r.name], 14) : null;                                             // a grouping folder
+}
 function _treeIconSvgFor(r) {
+  var _eoIcon = _eoTreeIcon(r); if (_eoIcon) return _eoIcon;
   if (r && r.wl === 'Active Directory' && (r.type === 'Forest' || r.type === 'Domain')) {
     var _adI = _dsStoreIconSvg(r.type === 'Forest' ? 'regions-outlined' : 'organization-outlined', 14);
     if (_adI) return _adI;
@@ -33700,6 +33828,7 @@ function _typeLabel(r) {
       && (/-gmail$|-calendar$|-contacts$|-chat$/.test(r.id || '') || /^Calendar/.test(r.name || ''))) {
     return 'Service';
   }
+  if (r && typeof r === 'object' && r.wl === 'Google Workspace' && t === 'Drive' && r.name === 'My Drive') return 'Service';   // a user's My Drive sits beside Mail, Calendar, Contacts and Chat (user 2026-11-18); Shared Drives stay 'Drive'
   return t;
 }
 function renderInvCell(r, key, ctx) {
@@ -40721,7 +40850,7 @@ function _restoreAvailability(r) {
     // The tenant and section/type folders are navigation. Following VDC's restore limits: the Entra ID Logs (audit log), organization contacts and devices are compare/export only; built-in roles
     // and distribution / mail-enabled security groups can't be restored either. Those are EXPORT primaries (export-through-cart); everything else restores as a unit.
     if (r.type === 'Folder') return 'context';
-    if (r.type === 'Audit Log' || r.type === 'Organization Contact' || r.type === 'Device') return 'export';
+    if (r.type === 'Audit Log' || r.type === 'Sign-in Log' || r.type === 'Organization Contact' || r.type === 'Device') return 'export';
     var _enC0 = (r.adoCells && r.adoCells[0]) || '';
     if (r.type === 'Role' && _enC0 === 'Yes') return 'export';
     if (r.type === 'Group' && /^(Distribution|Mail-enabled security)/i.test(_enC0)) return 'export';
@@ -42354,6 +42483,7 @@ function renderTopActionBar() {
       // The hint adapts to whether anything in THIS view is actually
       // selectable: a view of non-selectable containers (e.g. GitHub orgs)
       // shouldn't say "select items" — it points the user to drill in instead.
+      var _rtVerb = 'Restore';   // flips to Export below when everything selectable in this view can only be exported
       var _rtBody = document.getElementById(bar.id === 'topActionBar' ? 'invTbody' : 'childTbody');
       var _selectable = _rtBody ? _rtBody.querySelectorAll('.row-cb:not(:disabled), .folder-cb:not(:disabled)').length : 1;
       var _rtMsg;
@@ -42437,6 +42567,12 @@ function renderTopActionBar() {
         var _rtExpSection = (bar.id !== 'topActionBar' && typeof childState !== 'undefined'
           && typeof _GH_EXPORT_FOLDER_IDS !== 'undefined'
           && (_GH_EXPORT_FOLDER_IDS.indexOf(childState.ghSection) >= 0 || _GH_EXPORT_FOLDER_IDS.indexOf(childState.folder) >= 0));
+        // A view whose every selectable row is export-only (Entra devices and organization contacts, log streams) speaks export too, not just GitHub's export sections (user 2026-11-18).
+        var _rtSelCbs = _rtBody ? _rtBody.querySelectorAll('.row-cb[data-id]:not(:disabled), .folder-cb[data-id]:not(:disabled)') : [];
+        var _rtAllExport = _rtSelCbs.length > 0 && typeof RESOURCES !== 'undefined' && typeof _restoreAvailability === 'function'
+          && Array.prototype.every.call(_rtSelCbs, function(cb){ var rr = RESOURCES.find(function(x){ return x.id === cb.getAttribute('data-id'); }); return !!rr && _restoreAvailability(rr) === 'export'; });
+        if (_rtAllExport) _rtExpSection = true;
+        if (_rtExpSection) _rtVerb = 'Export';
         // Editorialized resting state (ported 2026-09-08): when the window is
         // hiding items, that beats the boilerplate instruction — the
         // disclosure takes the resting slot, instruction returns when
@@ -42450,7 +42586,7 @@ function renderTopActionBar() {
       // Mock resting state: quiet "None Selected" + disabled Restore keep
       // the commit affordance discoverable without any color.
       rightEl.innerHTML = '<span class="tab-none-chip">None Selected</span>'
-        + '<button class="tab-right-primary" disabled aria-disabled="true">Restore</button>';
+        + '<button class="tab-right-primary" disabled aria-disabled="true">' + _rtVerb + '</button>';
       rightEl.style.display = '';
     }
     bar.classList.toggle('visible', hasActive);
@@ -43703,7 +43839,7 @@ function wsRenderConfigure() {
   // resource-type categorization the user already knows.
   var noun = wsCartNoun(n);
   var nounPair = wsCartNoun();
-  var html = '<div class="ws-step-pad">';
+  var html = '<div class="ws-step-pad' + ((window.D365RV && D365RV.applies()) ? ' rv-wide' : '') + '">';   // a column-level D365 job widens the step: its table carries the restored values (see D365RV)
   // Step header — title + description, mirrors the connector wizard's
   // per-step .form-title / .form-subtitle pattern.
   // Export jobs: no restore point to choose — the System Log is a package
@@ -43855,7 +43991,8 @@ function wsRenderConfigure() {
   } else if (_total === 0) {
     html += '<div class="ws-basket-empty">' + (q ? 'No items match "' + wsEscape(q) + '" — try clearing the search.' : 'No items in this restore.') + '</div>';
   } else {
-    html += '<div class="ws-sel-cq"><div class="ws-table-wrap"><table class="ws-table">' + _colgroup + _theadHtml + '<tbody>' + _pageRows + '</tbody></table></div></div>';
+    var _rvOn = !!(window.D365RV && D365RV.applies());   // column-level D365 job: this table IS the review table (records x restored columns x values)
+    html += (_rvOn ? D365RV.summaryLine() : '') + '<div class="ws-sel-cq"><div class="ws-table-wrap"><table class="ws-table' + (_wsCartAllLogStreams() ? ' ws-sel-logs' : '') + (_rvOn ? ' rv-one' : '') + '">' + _colgroup + _theadHtml + '<tbody>' + _pageRows + '</tbody></table></div>' + (_rvOn ? '<div class="rv-hbar" aria-hidden="true"><div></div></div>' : '') + '</div>';
     html += _wsPgBar(_total, _page, _size, 'wsBasketGotoPage', 'wsBasketSetSize', 'item');
   }
   if (_d3 && (REL_OPT === 'A' || REL_OPT === 'D' || REL_OPT === 'F')) html += _d365RelBlock();   // A: the app's own selection card, under the cart
@@ -43906,6 +44043,7 @@ var WS_SELECT_COLUMNS = [
 ];
 // Details cell text — the most identifying metadata available per row shape.
 function _wsSelectDetailsText(key, r) {
+  if (r && r.logStream && r.adoCells && r.adoCells[0]) return String(r.adoCells[0]);   // a log stream: the one fact that matters here, the window it covers ("Covers May 20 – Aug 18, 2026")
   if (r && r.meta) return String(r.meta);
   if (!r && typeof key === 'string') {
     if (key.indexOf('rec-') === 0 && typeof _resolveD365Record === 'function') {
@@ -43954,6 +44092,17 @@ function _wsCartAllUsers() {
   state.restorePlan.forEach(function(_, key){
     var r = RESOURCES.find(function(x){ return x.id === key; });
     if (!r || r.type !== 'User') all = false;
+  });
+  return all;
+}
+// True when every cart item is a log stream (Entra Audit / Sign-in Logs, Okta System Log). Their cart is Name · Details · remove: the type would repeat the name,
+// and a log is exported over a time range chosen on Configure, so it has no restore point to review here.
+function _wsCartAllLogStreams() {
+  if (!state.restorePlan || !state.restorePlan.size) return false;
+  var all = true;
+  state.restorePlan.forEach(function(_, key){
+    var r = RESOURCES.find(function(x){ return x.id === key; });
+    if (!r || !r.logStream) all = false;
   });
   return all;
 }
@@ -44006,8 +44155,11 @@ function _wsSelectColumns() {
     else if (_first && _first.wl === 'Entra ID') cols = [{ key: 'name', label: 'Display Name' }, { key: 'userName', label: 'User Name' }].concat(_bare.slice(1));   // VDC's Entra Users columns: Display Name · User Name
     else cols = _bare;
   }
-  // Export-only carts keep the Restore point chip too (user 2026-10-21): what gets exported is read from the same backup point, so its metadata is just as useful
-  // to review before exporting. (A time RANGE an export takes, e.g. the Okta System Log, is still chosen on Configure.)
+  // Log streams (user 2026-11-17): Name · Details (what the log covers) · remove. No Type, which would repeat the name, and no Restore point, because the log is
+  // exported over a time range chosen on Configure. Every other export cart keeps the Restore point chip (user 2026-10-21): what gets exported is read from the
+  // same backup point, so its metadata is just as useful to review before exporting.
+  if (_wsCartAllLogStreams()) return WS_SELECT_COLUMNS.filter(function(c){ return c.key === 'name' || c.key === 'details' || c.key === 'actions'; });
+  if (window.D365RV && D365RV.applies()) return D365RV.columns(cols);   // a column-level D365 job: Type and Details give way to one column per restored column
   return cols;
 }
 // Org → item-count across the cart, sorted most-populated first. Drives the
@@ -44034,6 +44186,7 @@ function wsSetBasketSort(key) {
 // Sort-value resolver for a cart KEY per column — mirrors the cells
 // wsRenderSelectTableRow renders so what you see is what sorts.
 function _wsBasketSortValue(key, colKey) {
+  if (String(colKey).indexOf('d365col:') === 0 && window.D365RV) return D365RV.sortValue(key, String(colKey).slice(8));
   var r = RESOURCES.find(function(x){ return x.id === key; });
   if (!r) return String(key).toLowerCase();
   switch (colKey) {
@@ -44111,6 +44264,7 @@ function wsRenderSelectTableRow(key, q) {
   var _rowCols = _wsSelectColumns();
   var _midCells = '';
   _rowCols.forEach(function(c){
+    if (c.key.indexOf('d365col:') === 0) { _midCells += D365RV.cell(key, c.key.slice(8)); return; }   // the value this record will have written for that column
     switch (c.key) {
       case 'target':
         // Restore point chip (Vision Chip Green Light, Default): opens this item's metadata at the job's restore point, single point, no comparison.
@@ -46476,7 +46630,7 @@ function wsRenderReviewGWS(n, noun, cfg, part) {
 function wsGwsSet(k, v){ if(!ws.config) ws.config={}; ws.config[k]=v; wsRenderAll(); }
 
 // ── Entra ID Configure step = VDC's "Options" (verified in the VDC Entra ID restore wizards, 2026-11-12, never submitted) ───────────────────────
-// Common to every restorable category: Restore mode (Skip | Overwrite · full object restore), Advanced (Reason, Keep relationships + Merge | Overwrite, Restore from Entra ID Recycle Bin).
+// Common to every restorable category: Conflict handling (VDC calls it Restore mode; Skip | Overwrite · full object restore), Advanced (Reason, Keep relationships + Merge | Overwrite, Restore from Entra ID Recycle Bin).
 // Users add a Password block (one default password for all, or unique temporary passwords, and force a change at first sign-in). Applications add "Application certificates"
 // (a certificate file per selected app). Groups, administrative units, conditional access and Intune policies use the common options; their wizards were not reachable in the
 // reference tenant (no data), so the common set is INFERRED for them. Destination stays our own Restore options step (original tenant | different tenant).
@@ -46511,7 +46665,8 @@ function wsRenderReviewEntra(n, noun, cfg, part) {
     + '<div class="ws-step-title">Configure restore options</div>'
     + '<div class="ws-step-description">Choose how existing objects are handled, then record why you&rsquo;re running it.</div></div>';
   var sections = [];
-  sections.push(section('Restore mode', 'How to handle the object&rsquo;s restore',
+  sections.push(section('Conflict handling', 'What to do when the target object already exists',   // was: 'Restore mode' / 'How to handle the object\u2019s restore' (VDC\u2019s label; user 2026-11-17: the product term is Conflict handling)
+    
     '<div class="ws-cfg-choices">'
       + choice(cfg.entraMode === 'skip', "wsEntraSet('entraMode','skip')", 'Skip', 'Skip objects if they already exist (do not update).')
       + choice(cfg.entraMode === 'overwrite', "wsEntraSet('entraMode','overwrite')", 'Overwrite (full object restore)', 'Overwrite all data from the object.')
@@ -46519,11 +46674,10 @@ function wsRenderReviewEntra(n, noun, cfg, part) {
   var _ent = _entraCartResources();
   if (kind === 'user') {
     var ic = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('info-outlined', 24)) || '';
-    var _pwDone = _ent.filter(function(r){ return ((cfg.entraPwUnique || {})[r.id] || '').length; }).length;
-    var _pwStatus = (_pwDone === _ent.length && _ent.length ? 'Passwords set for ' + _pwDone + (_pwDone === 1 ? ' user' : ' users') : (_pwDone ? _pwDone + ' of ' + _ent.length + ' set' : 'Not set yet. Set one for each of the ' + _ent.length + (_ent.length === 1 ? ' user' : ' users') + ' to continue.'));
+    var _pwDone = _entraPwDone();
     var _pwDefault = '<label class="ws-fld-l" for="wsEntraPw">Default password</label>' + wsPwField('wsEntraPw', cfg.entraPw, 'ws.config.entraPw=this.value;wsEntraRefreshNext()');
     var _pwUnique = '<div style="display:flex;flex-direction:column;align-items:flex-start;gap:8px"><button type="button" class="btn btn-outline" style="white-space:nowrap" onclick="wsEntraOpenDrawer(\'pw\')">' + (_pwDone ? 'Edit passwords' : 'Set passwords') + '</button>'
-      + '<span style="font-size:14px;line-height:20px;color:var(--black-60)">' + _pwStatus + '</span></div>';
+      + '<span id="wsEnPwStatus" style="display:flex;align-items:flex-start;gap:8px;font-size:14px;line-height:20px">' + _entraPwStatusHtml() + '</span></div>';
     sections.push(section('Password', 'Restored users need a new password',
       '<div class="ws-target-cards">'
         + _entraPwCard(cfg.entraPwMode === 'default', 'default', 'Set a default password for all users', 'Every restored user gets this password.', _pwDefault)
@@ -46537,7 +46691,7 @@ function wsRenderReviewEntra(n, noun, cfg, part) {
     var _certDone = _ent.filter(function(r){ return (cfg.entraCerts || {})[r.id]; }).length;
     sections.push(section('Application certificates <span class="ws-cfg-label-optional">Optional</span>', 'Add a certificate file for the restored applications',
       '<div style="display:flex;align-items:center;gap:12px"><button type="button" class="btn btn-outline" onclick="wsEntraOpenDrawer(\'cert\')">' + (_certDone ? 'Edit certificates' : 'Add certificates') + '</button>'
-      + '<span style="font-size:14px;line-height:20px;color:var(--black-60)">' + (_certDone ? 'Certificates added for ' + _certDone + ' of ' + _ent.length + (_ent.length === 1 ? ' application' : ' applications') : 'None added.') + '</span></div>'));
+      + '<span id="wsEnCertStatus" style="font-size:14px;line-height:20px;color:var(--black-60)">' + _entraCertStatusText() + '</span></div>'));
   }
   sections.push(wsReasonTicketSections(cfg));
   function _relRad(v, title, hint) {
@@ -46588,17 +46742,34 @@ function wsEntraToggleAdv(){ ws.entraAdvExpanded=!ws.entraAdvExpanded; wsRenderA
 // It lives inside the modal as a side column that narrows the step (never a layer over the page) and shares the Restore guide's slot, so only one is open at a time.
 // Entries are held as a draft until Save; Cancel / close discards them. Lists longer than 5 get a search that filters the rows without losing what was typed.
 function wsEntraOpenDrawer(mode) {
-  var cfg = ws.config || (ws.config = {});
   ws.entraDrawer = mode;
-  ws.entraDraft = { pw: Object.assign({}, cfg.entraPwUnique || {}), cert: Object.assign({}, cfg.entraCerts || {}) };
   ws.helpDrawerOpen = true;
   wsRenderHelpDrawer();
 }
 function wsEntraCloseDrawer() { ws.entraDrawer = null; ws.helpDrawerOpen = false; wsRenderAll(); }
+// The drawer has no buttons: every entry applies as it is typed (like the default-password field), the header X closes it, and the wizard's Review is the only primary action.
+function _entraPwDone() { var u = (ws.config || {}).entraPwUnique || {}; return _entraCartResources().filter(function(r){ return (u[r.id] || '').length; }).length; }
+// Status line in the "unique passwords" card: a warning (Orange, with the warning icon) while none or only some are set, muted once every user has one.
+function _entraPwStatusHtml() {
+  var n = _entraCartResources().length, done = _entraPwDone(), noun = n === 1 ? 'user' : 'users';
+  if (n && done === n) return '<span style="color:var(--black-60)">Passwords set for ' + done + ' ' + noun + '</span>';
+  var ic = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('alert-warning-outlined', 16)) || '';
+  var txt = done ? done + ' of ' + n + ' set. Set a password for the other ' + (n - done) + ' ' + ((n - done) === 1 ? 'user' : 'users') + ' to continue.' : 'No passwords set. Set one for each of the ' + n + ' ' + noun + ' to continue.';
+  return '<span style="display:inline-flex;flex:none;color:var(--orange);margin-top:2px">' + ic + '</span><span style="color:var(--black-100);font-weight:500">' + txt + '</span>';
+}
+function _entraCertStatusText() { var u = (ws.config || {}).entraCerts || {}, e = _entraCartResources(), n = e.filter(function(r){ return u[r.id]; }).length; return n ? 'Certificates added for ' + n + ' of ' + e.length + (e.length === 1 ? ' application' : ' applications') : 'None added.'; }
+function wsEntraPwLive(id, v) {
+  var cfg = ws.config || (ws.config = {}); if (!cfg.entraPwUnique) cfg.entraPwUnique = {};
+  cfg.entraPwUnique[id] = v;
+  var c = document.getElementById('wsEnCount'); if (c) c.textContent = _entraPwDone() + ' of ' + _entraCartResources().length + ' set';
+  var st = document.getElementById('wsEnPwStatus'); if (st) st.innerHTML = _entraPwStatusHtml();
+  wsEntraRefreshNext();
+}
 function wsEntraDrawerHtml() {
-  var mode = ws.entraDrawer, rows = _entraCartResources(), d = ws.entraDraft || { pw: {}, cert: {} };
+  var mode = ws.entraDrawer, rows = _entraCartResources(), cfg = ws.config || {};
   var noun = mode === 'pw' ? (rows.length === 1 ? 'user' : 'users') : (rows.length === 1 ? 'application' : 'applications');
   var body = '<p class="ws-help-topic-blurb">' + (mode === 'pw' ? 'Set a temporary password for each restored user.' : 'Add a certificate file for each application you want to restore with one.') + '</p>';
+  if (mode === 'pw') body += '<div id="wsEnCount" style="font-size:14px;line-height:20px;color:var(--black-60);margin-bottom:16px">' + _entraPwDone() + ' of ' + rows.length + ' set</div>';
   if (rows.length > 5) {
     body += '<div class="ws-picker-search-wrap" style="position:static;border:1px solid var(--border);border-radius:4px;background:var(--form-bg);margin-bottom:16px">'
       + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('search-outlined', 20)) || '')
@@ -46610,48 +46781,30 @@ function wsEntraDrawerHtml() {
     body += '<div class="ws-en-row" data-name="' + wsEscape((r.name || '').toLowerCase()) + '" style="margin-bottom:16px">';
     if (mode === 'pw') {
       body += '<label class="ws-fld-l" for="wsEnPw-' + id + '">' + wsEscape(r.name) + '</label>'
-        + wsPwField('wsEnPw-' + id, d.pw[r.id], 'ws.entraDraft.pw[\'' + id + '\']=this.value;wsEntraDrawerRefresh()');
+        + wsPwField('wsEnPw-' + id, (cfg.entraPwUnique || {})[r.id], 'wsEntraPwLive(\'' + id + '\',this.value)');
     } else {
       body += '<label class="ws-fld-l" for="wsEnCert-' + id + '">' + wsEscape(r.name) + '</label>'
-        + '<div style="display:flex;gap:8px"><input id="wsEnCert-' + id + '" class="ws-ticket-input" type="text" readonly placeholder="No file selected" value="' + wsEscape(d.cert[r.id] || '') + '" style="flex:1">'
+        + '<div style="display:flex;gap:8px"><input id="wsEnCert-' + id + '" class="ws-ticket-input" type="text" readonly placeholder="No file selected" value="' + wsEscape((cfg.entraCerts || {})[r.id] || '') + '" style="flex:1">'
         + '<input type="file" accept=".cer,.crt,.pem" id="wsEnFile-' + id + '" style="display:none" onchange="wsEntraPickFile(\'' + id + '\',this)">'
         + '<button type="button" class="btn btn-outline" style="height:44px" onclick="document.getElementById(\'wsEnFile-' + id + '\').click()">Browse</button></div>';
     }
     body += '</div>';
   });
   body += '</div><div id="wsEnEmpty" class="ws-help-empty" style="display:none">No ' + noun + ' match your search.</div>';
-  var ok = wsEntraDrawerOk();
-  body += '<div style="display:flex;align-items:center;gap:8px;margin-top:24px"><button type="button" id="wsEnSave" class="btn btn-blue" onclick="wsEntraDrawerSave()"' + (ok ? '' : ' disabled aria-disabled="true"') + '>Save</button>'
-    + '<button type="button" class="btn btn-outline" onclick="wsEntraCloseDrawer()">Cancel</button>'
-    + (mode === 'pw' ? '<span id="wsEnCount" style="margin-left:auto;font-size:14px;color:var(--black-60)">' + wsEntraPwCount() + ' of ' + rows.length + ' set</span>' : '') + '</div>';
   return body;
 }
-function wsEntraPwCount() { var d = ws.entraDraft || { pw: {} }; return _entraCartResources().filter(function(r){ return (d.pw[r.id] || '').length; }).length; }
 function wsEntraDrawerFilter(q) {
   q = String(q || '').toLowerCase().trim();
   var shown = 0;
   Array.prototype.forEach.call(document.querySelectorAll('#wsEnList .ws-en-row'), function(el){ var hit = !q || el.getAttribute('data-name').indexOf(q) >= 0; el.style.display = hit ? '' : 'none'; if (hit) shown++; });
   var e = document.getElementById('wsEnEmpty'); if (e) e.style.display = shown ? 'none' : '';
 }
-function wsEntraDrawerOk() {
-  var d = ws.entraDraft || { pw: {}, cert: {} };
-  return ws.entraDrawer === 'pw' ? _entraCartResources().every(function(r){ return (d.pw[r.id] || '').length; }) : true;
-}
-function wsEntraDrawerRefresh() {
-  var b = document.getElementById('wsEnSave'); if (b) { var ok = wsEntraDrawerOk(); b.disabled = !ok; if (ok) b.removeAttribute('aria-disabled'); else b.setAttribute('aria-disabled', 'true'); }
-  var c = document.getElementById('wsEnCount'); if (c) c.textContent = wsEntraPwCount() + ' of ' + _entraCartResources().length + ' set';
-}
 function wsEntraPickFile(id, input) {
   var f = input.files && input.files[0]; if (!f) return;
-  ws.entraDraft.cert[id] = f.name;
+  var cfg = ws.config || (ws.config = {}); if (!cfg.entraCerts) cfg.entraCerts = {};
+  cfg.entraCerts[id] = f.name;
   var t = document.getElementById('wsEnCert-' + id); if (t) t.value = f.name;
-}
-function wsEntraDrawerSave() {
-  if (!wsEntraDrawerOk()) return;
-  var cfg = ws.config || (ws.config = {});
-  if (ws.entraDrawer === 'pw') cfg.entraPwUnique = Object.assign({}, ws.entraDraft.pw);
-  else cfg.entraCerts = Object.assign({}, ws.entraDraft.cert);
-  wsEntraCloseDrawer();
+  var st = document.getElementById('wsEnCertStatus'); if (st) st.textContent = _entraCertStatusText();
 }
 function wsEntraRefreshNext(){ var b=document.querySelector('.ws-cta-primary[onclick="wsGotoStep(4)"]'); if(!b) return; var ok=_entraCfgOk(); b.disabled=!ok; if(ok) b.removeAttribute('aria-disabled'); else b.setAttribute('aria-disabled','true'); }
 
@@ -47105,8 +47258,8 @@ function wsRenderReview(part) {
       _srcCons   = 'An ' + containerNoun + ' can’t be restored over itself.';
       _crossCons = 'Everything currently in the destination ' + containerNoun + ' is <strong>overwritten</strong> from the snapshot.';
     } else if (restoreMode === 'additive') {
-      _srcCons   = 'Items merge back into <strong>' + wsEscape(sourceOrgName) + '</strong>; same-named collisions follow Conflict handling.';
-      _crossCons = 'Items merge into the chosen ' + containerNoun + '; same-named collisions follow Conflict handling.';
+      _srcCons   = isEntra ? 'Items are restored into <strong>' + wsEscape(sourceOrgName) + '</strong>; objects that already exist follow Conflict handling.' : 'Items merge back into <strong>' + wsEscape(sourceOrgName) + '</strong>; same-named collisions follow Conflict handling.';
+      _crossCons = isEntra ? 'Items are restored into the chosen ' + containerNoun + '; objects that already exist follow Conflict handling.' : 'Items merge into the chosen ' + containerNoun + '; same-named collisions follow Conflict handling.';
     } else { // 'as-copy'
       if (_glWholeProject) {
         // PM 2026-08-17: auto-generated read-only name; collisions add a
@@ -57756,6 +57909,273 @@ function _rdSplitAuditForLedger(F) {
   if (!ts.length || !rest.some(function(it){ return !it.section; })) return F;
   return rest.concat([{ section: 'Audit' }], ts);
 }
+// ── Preview fields for the types that had no drawer of their own (user 2026-11-17: the drawer exists for ALL resources of ALL workloads) ──
+// One spec per type, in the grammar of the Okta and Google Workspace drawers: a flat list of what the platform's own API returns for the object, its ID first;
+// a "Restore behavior" section only where the vendor documents what a restore does not write back; timestamps are lifted into Audit by _rdOrderFields;
+// relationships ride the shared ledger (_entraRelUniverse). Values are synthesized deterministically from the row, so they are stable across renders.
+// Entra property lists follow VDC's "Supported Entra ID Item Properties" tables. Mail and file CONTENT never renders: those rows carry an explicit not-viewable row.
+var _RD_NV = '— not viewable in backup review';
+function _rdGuid(seed) {
+  var x = _relgHash(seed) || 1, hex = '';
+  while (hex.length < 32) { x = (Math.imul(x, 1664525) + 1013904223) >>> 0; hex += ('00000000' + x.toString(16)).slice(-8); }
+  return hex.slice(0, 8) + '-' + hex.slice(8, 12) + '-4' + hex.slice(13, 16) + '-a' + hex.slice(17, 20) + '-' + hex.slice(20, 32);
+}
+function _rdUp(r, type) { var c = RESOURCES.find(function(x){ return x.id === r.parentId; }), n = 0; while (c && n++ < 14) { if (c.type === type) return c; c = RESOURCES.find(function(x){ return x.id === c.parentId; }); } return null; }
+function _rdSeg(r, i) { return String(r.meta || '').split(/\s*·\s*/)[i] || ''; }
+var _EN_FIRST = ['Jordan', 'Mira', 'Tran', 'Dana', 'Sarah', 'Priya', 'Luis', 'Ana', 'Kofi', 'Mei', 'Omar', 'Elena', 'Noah', 'Ines', 'Raj', 'Hana', 'Marcus', 'Leila', 'Felix', 'Yuki'];
+var _EN_LAST = ['Alvarez', 'Okafor', 'Nguyen', 'Kovac', 'Rivera', 'Natarajan', 'Ortiz', 'Silva', 'Mensah', 'Chen', 'Haddad', 'Petrov', 'Becker', 'Costa', 'Iyer', 'Sato', 'Larsen', 'Bianchi', 'Walker', 'Mbeki'];
+// What an Entra object is linked to, for the shared relationship ledger. Static membership (the Google Workspace model): no join or leave drift between restore points.
+function _entraRelUniverse(r) {
+  var h = _relgHash(r.id), same = function(type){ return RESOURCES.filter(function(x){ return x.wl === 'Entra ID' && x.type === type && x.tenant === r.tenant; }); };
+  var users = same('User'), groups = same('Group'), roles = same('Role'), apps = same('Application');
+  function it(name, payload) { return { name: name, payload: payload || null, joinOff: 9999, leaveOff: null }; }
+  function pickN(arr, n, salt) { var out = [], i = 0; while (out.length < Math.min(n, arr.length) && i < arr.length * 3) { var x = arr[(_relgHash(r.id + salt + i)) % arr.length]; if (out.indexOf(x) < 0) out.push(x); i++; } return out; }
+  if (r.type === 'User') {
+    var dept = _rdSeg(r, 1), priv = /^(IT|Security)$/.test(dept);
+    var gs = pickN(groups.filter(function(g){ return g.name !== 'All-Staff'; }), 1 + (h % 3), 'g');
+    var gItems = groups.filter(function(g){ return g.name === 'All-Staff'; }).concat(gs).map(function(g){ return it(g.name, ((g.adoCells && g.adoCells[0]) || 'Security') + ', ' + ((g.adoCells && g.adoCells[1]) || 'Assigned')); });
+    return [
+      { key: 'groups', label: 'Groups', items: gItems },
+      { key: 'roles', label: 'Directory roles', items: priv ? pickN(roles.filter(function(x){ return x.name !== 'Global Administrator'; }), 1, 'r').map(function(x){ return it(x.name, 'Active'); }) : [] },
+      { key: 'apps', label: 'Applications', items: pickN(apps, 1 + (h % 3), 'a').map(function(x){ return it(x.name, 'App role assigned'); }) }
+    ];
+  }
+  if (r.type === 'Group') {
+    var n = parseInt(((/([\d,]+)\s+members?/.exec(r.meta || '') || [0, '12'])[1]).replace(/,/g, ''), 10) || 12, via = /^Dynamic/i.test((r.adoCells && r.adoCells[1]) || ''), seen = {}, mem = [], i = 0;
+    while (mem.length < n && i < n * 4) {
+      var nm = i < users.length ? users[(i + h) % users.length].name : _EN_FIRST[(h + i * 7) % _EN_FIRST.length] + ' ' + _EN_LAST[(h + i * 11 + ((i / _EN_LAST.length) | 0)) % _EN_LAST.length];
+      if (seen[nm]) nm = nm.replace(' ', ' ' + String.fromCharCode(65 + (i % 26)) + '. ');   // the 400 first/last pairs run out in a large group: add a middle initial
+      i++; if (seen[nm]) continue; seen[nm] = 1; mem.push(it(nm, via ? 'Via rule' : 'Direct'));
+    }
+    return [{ key: 'members', label: 'Members', items: mem }, { key: 'owners', label: 'Owners', items: pickN(users, 1 + (h % 2), 'o').map(function(u){ return it(u.name, 'Owner'); }) }];
+  }
+  if (r.type === 'Administrative Unit') {
+    return [{ key: 'members', label: 'Members', items: pickN(users, 3 + (h % 5), 'm').map(function(u){ return it(u.name, 'User'); }) },
+            { key: 'scoped', label: 'Scoped role members', items: pickN(users.filter(function(u){ return /^(IT|Security)$/.test(_rdSeg(u, 1)); }), 1 + (h % 2), 's').map(function(u){ return it(u.name, /finance/i.test(r.name) ? 'User Administrator' : 'Helpdesk Administrator'); }) }];
+  }
+  if (r.type === 'Role') {
+    return [{ key: 'members', label: 'Assigned members', items: pickN(users, /Global/.test(r.name) ? 3 : 1 + (h % 3), 'x').map(function(u, k){ return it(u.name, k === 0 ? 'Active' : 'Eligible'); }) }];
+  }
+  return [];
+}
+function _rdSpecFields(r, hasDiff, H) {
+  var F = [], h = _relgHash(r.id), key = r.wl + '::' + r.type;
+  function P(f, v, o) { var x = { f: f, snap: v, prod: v }; if (o) for (var k in o) x[k] = o[k]; F.push(x); }
+  function D(f, snap, prod) { F.push({ f: f, snap: snap, prod: hasDiff ? prod : snap, diff: hasDiff }); }
+  function S(name) { F.push({ section: name }); }
+  function rn(min, max, salt) { return min + _relgHash(r.id + (salt || '')) % (max - min + 1); }
+  function pk(arr, salt) { return arr[_relgHash(r.id + (salt || '')) % arr.length]; }
+  function yes(v) { return v ? 'Yes' : 'No'; }
+  function seg(i) { return _rdSeg(r, i); }
+  function par(type) { return _rdUp(r, type); }
+  function size() { var m = /(\d[\d.,]*\s?(?:KB|MB|GB|TB))/i.exec(r.meta || ''); return m ? m[1] : '—'; }
+  function lastMod() { var m = /Modified\s+([A-Za-z]{3} \d{1,2}, \d{4})/.exec(r.meta || ''); return m ? m[1] : H.day(rn(2, 60, 'lm')); }
+  var ten = par('Tenant'), dom = ten ? ten.name : 'meridianfg.com';
+  var cells = r.adoCells || [];
+  var B = {};
+  // ── Entra ID ──
+  B['Entra ID::User'] = function () {
+    var upn = cells[0] || r.name, local = upn.split('@')[0], parts = String(r.name).split(' '), dept = seg(1) || '—', svc = /service/i.test(dept);
+    var title = seg(2) || ({ IT: 'Systems Engineer', Security: 'Security Analyst', Engineering: 'Software Engineer', Product: 'Product Manager', Finance: 'Financial Analyst' }[dept] || '—');
+    var peers = RESOURCES.filter(function (u) { return u.wl === 'Entra ID' && u.type === 'User' && u.id !== r.id && u.tenant === r.tenant && !/service/i.test(_rdSeg(u, 1)); }), mgr = peers.length ? peers[h % peers.length] : null;
+    var synced = h % 3 !== 0, base = dom.split('.')[0], adDom = /meridian/.test(dom) ? 'corp.meridian.local' : 'corp.' + base + '.local';
+    var zw = function (v) { return v.replace(/,/g, ',​'); };
+    P('Object ID', _rdGuid(r.id)); P('User principal name', upn); P('Display name', r.name);
+    P('Given name', parts[0]); P('Surname', parts.slice(1).join(' ') || '—');
+    P('Mail', upn); P('Mail nickname', local);
+    P('Account enabled', 'Yes');
+    P('User type', 'Member'); P('Job title', title); P('Department', dept);
+    P('Employee ID', svc ? '—' : 'E' + (10000 + h % 89999)); P('Employee type', svc ? 'Service account' : 'Employee');
+    P('Manager', mgr ? mgr.name : '—', mgr ? { navValue: mgr.id } : null);
+    D('Office location', pk(['Chicago office', 'London office', 'Remote'], 'o'), 'New York headquarters'); P('City', pk(['New York', 'Chicago', 'London', 'Austin'], 'c')); P('Country', 'United States'); P('Usage location', 'US');
+    P('Business phone', '+1 212 555 01' + String(10 + h % 89)); P('Mobile phone', '+1 646 555 01' + String(10 + (h >> 3) % 89));
+    P('Assigned licenses', svc ? 'None' : 'Microsoft 365 E5'); P('Password policies', svc ? 'DisablePasswordExpiration' : 'None');
+    P('On-premises sync', synced ? 'Synced from Active Directory' : 'Cloud only');
+    if (synced) { P('On-premises immutable ID', btoa(local + h).replace(/=+$/, '').slice(0, 20)); P('On-premises domain name', adDom); P('On-premises distinguished name', zw('CN=' + r.name + ',OU=Users,DC=' + adDom.split('.').join(',DC='))); }
+    P('Created', H.day(rn(300, 1400, 'cr')));
+    S('Restore behavior');
+    P('Must be unique', 'User principal name, mail and on-premises immutable ID restore only if no other object holds the value');
+    P('Read-only', 'Created, on-premises distinguished name and on-premises domain name are set by Entra ID and are not restored');
+    P('Role assignments', 'Backed up on Entra ID P2 and Governance tenants');
+  };
+  B['Entra ID::Group'] = function () {
+    var gt = cells[0] || 'Security', dyn = /^Dynamic/i.test(cells[1] || ''), mail = gt !== 'Security', roleA = (cells[2] || '—') !== '—', exp = typeof _restoreAvailability === 'function' && _restoreAvailability(r) === 'export';
+    var nick = r.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'), n = (/([\d,]+)\s+members?/.exec(r.meta || '') || [0, '—'])[1];
+    P('Object ID', _rdGuid(r.id)); P('Display name', r.name);
+    P('Description', ({ Security: 'Security group for ', 'Microsoft 365': 'Team workspace for ', Distribution: 'Mailing list for ' }[gt] || 'Group for ') + r.name.replace(/-/g, ' ').toLowerCase());
+    P('Group type', gt); P('Membership type', cells[1] || 'Assigned');
+    if (dyn) { P('Membership rule', '(user.department -eq "' + (/vpn/i.test(r.name) ? 'IT' : 'Engineering') + '")'); P('Membership rule processing', 'On'); }
+    P('Security enabled', yes(gt === 'Security')); P('Mail enabled', yes(mail)); P('Mail', mail ? nick + '@' + dom : '—'); P('Mail nickname', nick);
+    P('Visibility', gt === 'Microsoft 365' ? 'Private' : '—'); P('Classification', '—'); P('Role-assignable', yes(roleA)); P('Members', n);
+    P('On-premises sync', 'Cloud only'); P('Created', H.day(rn(200, 1200, 'cr')));
+    S('Restore behavior');
+    if (exp) P('Restore', 'Export only: distribution and mail-enabled security groups cannot be restored');
+    P('Must be unique', 'Mail nickname restores only if no other object holds the value');
+    P('Read-only', 'Mail, mail enabled, role-assignable, on-premises domain name and created are set by Entra ID and are not restored');
+    P('App role assignments', 'Not available for restore');
+  };
+  B['Entra ID::Administrative Unit'] = function () {
+    var u = _entraRelUniverse(r);
+    P('Object ID', _rdGuid(r.id)); P('Display name', r.name); P('Description', cells[0] || '—'); P('Visibility', cells[1] || 'Public'); P('Membership type', 'Assigned');
+    P('Members', String(u[0].items.length)); P('Scoped role members', String(u[1].items.length)); P('Created', H.day(rn(200, 900, 'cr')));
+  };
+  B['Entra ID::Organization Contact'] = function () {
+    var mail = cells[2] || '—';
+    P('Object ID', _rdGuid(r.id)); P('Display name', r.name); P('Mail', mail); P('Mail nickname', mail.split('@')[0]);
+    P('Company name', cells[0] || '—'); P('Job title', cells[1] || '—'); P('On-premises sync', 'Cloud only'); P('Created', H.day(rn(200, 1000, 'cr')));
+    S('Restore behavior'); P('Restore', 'Export only: organization contacts are exported for reference and cannot be restored');
+  };
+  B['Entra ID::Role'] = function () {
+    var builtIn = cells[0] === 'Yes', u = _entraRelUniverse(r);
+    P('Role ID', _rdGuid(r.id)); P('Display name', r.name); P('Description', cells[2] || '—'); P('Built-in', yes(builtIn)); P('Enabled', cells[1] || 'Yes');
+    P('Allowed actions', /Global/.test(r.name) ? 'All actions' : String(rn(8, 240, 'p')) + ' actions'); P('Assigned members', String(u[0].items.length));
+    S('Restore behavior');
+    P('Restore', builtIn ? 'Export only: built-in roles are read only and cannot be restored' : 'Restores the role definition; assignments follow Keep relationships');
+  };
+  B['Entra ID::Application'] = function () {
+    var p = String(cells[2] || '').split(/\s*·\s*/), perm = p[0] && p[0] !== '—' ? p[0] : '—', cm = /created\s+([A-Za-z]{3} \d{1,2})/.exec(p[1] || ''), appId = _rdGuid('app' + r.id);
+    var peers = RESOURCES.filter(function (u) { return u.wl === 'Entra ID' && u.type === 'User' && u.tenant === r.tenant && !/service/i.test(_rdSeg(u, 1)); }), own = peers.length ? peers[h % peers.length] : null;
+    P('Application (client) ID', appId); P('Object ID', _rdGuid(r.id)); P('Display name', r.name); P('Tags', cells[1] && cells[1] !== '\u2014' ? cells[1].split(';').join(', ') : '\u2014'); P('Sign-in audience', 'My organization only'); P('Identifier URI', 'api://' + appId);
+    P('Redirect URIs', rn(1, 4, 'u') + ' URIs'); P('API permissions', perm); P('Client secrets', rn(1, 2, 's') + ' secret' + (rn(1, 2, 's') > 1 ? 's' : '') + ', values not in backup'); P('Certificates', String(h % 2));
+    P('Owner', own ? own.name : '—', own ? { navValue: own.id } : null); P('Publisher domain', dom);
+    P('Created', cm ? cm[1] + ', ' + new Date(MOCK_TODAY).getFullYear() : H.day(rn(60, 600, 'cr')));
+    S('Restore behavior'); P('Secrets', 'Secret values are never readable, so a restored application needs new client secrets');
+  };
+  B['Entra ID::Service Principal'] = function () {
+    var app = RESOURCES.find(function (x) { return x.wl === 'Entra ID' && x.type === 'Application' && x.name === r.name && x.tenant === r.tenant; });
+    P('Object ID', _rdGuid(r.id)); P('Application (client) ID', _rdGuid('app' + (app ? app.id : r.id))); P('Display name', r.name); P('Account enabled', 'Yes');
+    P('Service principal type', 'Application'); P('Tags', cells[1] && cells[1] !== '—' ? cells[1].split(';').join(', ') : '—'); P('Assignment required', 'No');
+    P('Sign-in audience', 'My organization only'); P('Verified publisher', '—'); P('SAML single sign-on', 'Not configured'); P('Created', H.day(rn(60, 600, 'cr')));
+    S('Restore behavior'); P('Read-only', 'Service principal type, sign-in audience, service principal names, token encryption key ID and verified publisher come from the application and are not restored');
+  };
+  B['Entra ID::Conditional Access policy'] = function () {
+    var n = r.name, st = cells[0] || 'Enabled', adm = /admin/i.test(n), leg = /legacy/i.test(n), dev = /compliant/i.test(n), geo = /outside|EMEA/i.test(n);
+    P('Policy ID', _rdGuid(r.id)); P('Display name', n); P('State', st);
+    P('Included users', adm ? 'Directory roles, 9 included' : 'All users'); P('Excluded users', 'Emergency access accounts, 2'); P('Target resources', 'All cloud apps');
+    P('Conditions', leg ? 'Client apps: Exchange ActiveSync and other clients' : geo ? 'Locations: any location except EMEA' : dev ? 'Device platforms: all platforms' : 'None');
+    P('Grant controls', (leg || geo) ? 'Block access' : dev ? 'Require device to be marked as compliant' : 'Require multifactor authentication'); P('Session controls', '—'); P('Created', H.day(rn(90, 700, 'cr')));
+    S('Restore behavior'); P('Read-only', 'Template ID, created and modified dates are set by Entra ID and are not restored');
+  };
+  B['Entra ID::Device'] = function () {
+    var peers = RESOURCES.filter(function (u) { return u.wl === 'Entra ID' && u.type === 'User' && u.tenant === r.tenant && !/service/i.test(_rdSeg(u, 1)); }), own = peers.length ? peers[h % peers.length] : null;
+    P('Device ID', _rdGuid('dev' + r.id)); P('Object ID', _rdGuid(r.id)); P('Display name', r.name); P('Operating system', cells[1] || '—'); P('OS version', cells[2] || '—'); P('Account enabled', cells[0] === 'Enabled' ? 'Yes' : 'No');
+    P('Join type', pk(['Microsoft Entra joined', 'Microsoft Entra hybrid joined'], 'j')); P('Compliance', pk(['Compliant', 'Compliant', 'Not compliant'], 'k')); P('Managed by', 'Microsoft Intune');
+    P('Registered owner', own ? own.name : '—', own ? { navValue: own.id } : null); P('BitLocker recovery keys', '1 key, value hidden in backup review'); P('Registered', H.day(rn(30, 700, 'cr')));
+    S('Restore behavior'); P('Restore', 'Export only: devices are exported for reference and cannot be restored');
+  };
+  B['Entra ID::Intune Policy'] = function () {
+    var kind = cells[1] || 'Policy', ver = parseInt(cells[2], 10) || 1, plat = /ios/i.test(r.name) ? 'iOS/iPadOS' : /android/i.test(r.name) ? 'Android' : /mac/i.test(r.name) ? 'macOS' : 'Windows';
+    P('Policy ID', _rdGuid(r.id)); P('Name', r.name); P('Description', cells[0] || '—'); P('Policy type', kind); P('Platform', plat);
+    P('Version', String(ver)); P('Assigned to', pk(['All devices', 'All users', 'Group Finance-Staff'], 'a')); P('Created', H.day(rn(60, 500, 'cr')));
+  };
+  // ── Active Directory domain: its facts; the domain controllers it holds ride the ledger as "Contains" ──
+  B['Active Directory::Domain'] = function () {
+    var fo = RESOURCES.find(function (x) { return x.id === r.parentId; }), fm = fo && fo.type === 'Forest' ? _adForestModel(fo) : null, dm = fm ? fm.domains.filter(function (d) { return d.res.id === r.id; })[0] : null;
+    var nb = (/NetBIOS\s+(\S+)/.exec(r.meta || '') || [0, r.name.split('.')[0].toUpperCase()])[1], newest = 0;
+    if (dm) dm.dcs.forEach(function (c) { var m = /20(16|19|22|25)/.exec(_frAttr(c, 'Operating system')); if (m) newest = Math.max(newest, +m[1]); });
+    P('Name', r.name); P('NetBIOS name', nb); P('Domain SID', 'S-1-5-21-' + (1000000000 + h % 899999999) + '-' + (1000000000 + (h >> 2) % 899999999) + '-' + (1000000000 + (h >> 4) % 899999999));
+    P('Domain type', dm ? (dm.root ? 'Root domain' : 'Child domain') : '—'); P('Forest', fo ? fo.name : '—', fo ? { navValue: fo.id } : null);
+    P('Functional level', newest ? 'Windows Server 20' + newest : '—'); P('Domain controllers', dm ? String(dm.dcs.length) : '—'); P('PDC emulator', dm && dm.auth ? dm.auth.name : '—');
+  };
+  // ── Okta policy rule ──
+  B['Okta WIC::Policy Rule'] = function () {
+    var pol = RESOURCES.find(function (x) { return x.id === r.parentId; }), n = r.name, pri = (/pri\s+(\d+)/.exec(r.meta || '') || [0, '1'])[1];
+    P('ID', 'rul' + h.toString(36) + (h >> 3).toString(36)); P('Name', n); P('Status', seg(0) || 'ACTIVE'); P('Policy', pol ? pol.name : seg(1), pol ? { navValue: pol.id } : null); P('Priority', pri);
+    P('People', /contractor/i.test(n) ? 'Group: Contractors' : /admin/i.test(n) ? 'Group: Administrators' : 'Everyone');
+    P('Network', /geo|sanction/i.test(n) ? 'Sanctioned countries zone' : /trusted/i.test(n) ? 'Trusted zones' : 'Any network');
+    P('Action', /block|deny/i.test(n) ? 'Deny access' : /MFA/i.test(n) ? 'Require multifactor authentication' : /session/i.test(n) ? 'Limit session to 4 hours' : /enrollment/i.test(n) ? 'Allow Okta Verify enrollment' : /12 char/i.test(n) ? 'Require at least 12 characters' : /90 day/i.test(n) ? 'Expire password after 90 days' : 'Allow access');
+  };
+  // ── Google Workspace collection (labels, messages, calendars, ...) ──
+  B['Google Workspace::Entity'] = function () {
+    var u = par('User'), items = (/^(\d[\d,]*)\s/.exec(r.meta || '') || [0, '—'])[1];
+    var svc = { msg: 'Gmail', labels: 'Gmail', calendars: 'Calendar', events: 'Calendar', contacts: 'Contacts', cgroups: 'Contacts', drivect: 'Drive', comments: 'Drive', acl: 'Drive' }[r.gwsGrid] || 'Google Workspace';
+    P('Name', r.name); P('Service', svc); P('Items', items); P('Owner', u ? u.name : '—', u ? { navValue: u.id } : null);
+    if (r.gwsGrid === 'msg' || r.gwsGrid === 'comments') P('Item content', _RD_NV);
+  };
+  // ── Microsoft 365 ──
+  B['Microsoft 365::Mailbox'] = function () {
+    var em = (/([\w.+-]+@[\w.-]+)/.exec(r.meta || '') || [0, '—'])[1], fo = (/(\d+)\s+folders/.exec(r.meta || '') || [0, '—'])[1];
+    P('Display name', r.name); P('Email address', em); P('Mailbox type', 'User mailbox'); P('Folders', fo); P('Mailbox size', size()); P('Time zone', 'Eastern Standard Time'); P('Language', 'English (United States)');
+    P('Automatic replies', 'Off'); P('Archive mailbox', pk(['Enabled', 'Not enabled'], 'ar')); P('Mailbox content', _RD_NV);
+  };
+  B['Microsoft 365::Mail Folder'] = function () {
+    var mb = par('Mailbox'), sys = /^(Inbox|Sent Items|Drafts|Deleted Items|Archive|Junk Email)$/i.test(r.name), kids = RESOURCES.filter(function (x) { return x.parentId === r.id && x.type === 'Mail Folder'; }).length;
+    P('Folder name', r.name); P('Mailbox', mb ? mb.name : '—', mb ? { navValue: mb.id } : null); P('Folder type', sys ? 'Default folder' : 'User folder'); P('Items', (/([\d.,]+k?)\s+items/.exec(r.meta || '') || [0, '—'])[1]); P('Size', size()); P('Child folders', String(kids));
+    P('Last modified', lastMod());
+  };
+  B['Microsoft 365::Email'] = function () {
+    var fo = par('Mail Folder'), mb = par('Mailbox'), dm = ((mb && /@([\w.-]+)/.exec(mb.meta || '')) || [0, 'contoso.onmicrosoft.com'])[1];
+    var from = pk(['m.okafor', 't.nguyen', 'd.kovac', 's.rivera', 'p.natarajan'], 'f') + '@' + dm, att = h % 3 === 0;
+    P('Subject', r.name); P('Folder', fo ? fo.name : '—', fo ? { navValue: fo.id } : null); P('Mailbox', mb ? mb.name : '—', mb ? { navValue: mb.id } : null);
+    P('From', from); P('To', mb && /([\w.+-]+@[\w.-]+)/.exec(mb.meta || '') ? /([\w.+-]+@[\w.-]+)/.exec(mb.meta)[1] : '—'); P('Importance', pk(['Normal', 'Normal', 'High'], 'i'));
+    P('Attachments', att ? rn(1, 3, 'at') + ' attached' : 'None'); P('Read', pk(['Read', 'Read', 'Unread'], 'rd')); P('Size', size()); P('Message body', _RD_NV); P('Last modified', lastMod());
+  };
+  B['Microsoft 365::OneDrive'] = function () {
+    var em = (/([\w.+-]+@[\w.-]+)/.exec(r.meta || '') || [0, '—'])[1], fo = (/(\d+)\s+folders/.exec(r.meta || '') || [0, '—'])[1];
+    P('Owner', r.name); P('Email address', em); P('Folders', fo); P('Storage used', size()); P('Storage quota', '1 TB');
+    P('Site URL', 'https://' + (em.split('@')[1] || 'contoso.onmicrosoft.com').split('.')[0] + '-my.sharepoint.com/personal/' + em.replace(/[@.]/g, '_')); P('Files', _RD_NV);
+  };
+  B['Microsoft 365::File'] = function () {
+    var od = par('OneDrive'), fo = RESOURCES.find(function (x) { return x.id === r.parentId; }), ext = (/^([A-Z0-9]+)\s/.exec(r.meta || '') || [0, ''])[1];
+    P('Name', r.name); P('File type', ext || '—'); P('Size', size()); P('Folder', fo ? fo.name : '—', fo ? { navValue: fo.id } : null); P('OneDrive', od ? od.name : '—', od ? { navValue: od.id } : null);
+    P('Versions', String(rn(1, 14, 'v'))); P('Sharing', pk(['Private', 'Private', 'Shared with 3 people', 'Shared within the organization'], 'sh')); P('File content', _RD_NV); P('Last modified', lastMod());
+  };
+  B['Microsoft 365::Site'] = function () {
+    var kind = seg(0) || 'Team site', slug = r.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    P('Site name', r.name); P('Site type', kind); P('URL', 'https://contoso.sharepoint.com/sites/' + slug); P('Folders', (/(\d+)\s+folders/.exec(r.meta || '') || [0, '—'])[1]); P('Storage used', size());
+    P('Owners', String(rn(1, 3, 'ow'))); P('Hub site', 'Not associated'); P('Site content', _RD_NV);
+  };
+  B['Microsoft 365::Team'] = function () {
+    var slug = r.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    P('Team name', r.name); P('Visibility', pk(['Private', 'Private', 'Public'], 'vis')); P('Group email', slug + '@contoso.onmicrosoft.com'); P('Channels', String(rn(3, 9, 'ch'))); P('Owners', String(rn(1, 3, 'ow'))); P('Members', String(rn(8, 220, 'mm')));
+    P('Storage used', size()); P('Conversations and files', _RD_NV);
+  };
+  // ── Power Platform ──
+  function pp(extra) {
+    var env = par('Environment') || par('Workspace'), own = pk(['m.okafor', 't.nguyen', 'd.kovac', 's.rivera'], 'own') + '@contoso.com';
+    P('Name', r.name); P(par('Workspace') && !par('Environment') ? 'Workspace' : 'Environment', env ? env.name : '—', env ? { navValue: env.id } : null);
+    extra(); P('Owner', own);
+    var sy = /synced\s+([A-Za-z]{3} \d{1,2}, \d{4})/.exec(r.meta || ''); if (sy) P('Last synced', sy[1]); else if (/nightly/i.test(r.meta || '')) P('Sync', 'Nightly');
+  }
+  B['Power Platform::Canvas App'] = function () { pp(function () { P('App ID', _rdGuid(r.id)); P('Status', /standby/i.test(r.meta) ? 'Standby replica' : 'Published'); P('Connections', String(rn(1, 5, 'cn'))); P('Version', '1.' + rn(0, 14, 'ver')); }); };
+  B['Power Platform::Model-Driven App'] = function () { pp(function () { P('App ID', _rdGuid(r.id)); P('Status', 'Standby replica'); P('Tables', String(rn(4, 18, 'tb'))); P('Backed by', 'Dataverse'); }); };
+  B['Power Platform::Cloud Flow'] = function () { pp(function () { P('Flow ID', _rdGuid(r.id)); P('Trigger', seg(0) || 'Automated'); P('State', /disabled/i.test(r.meta) ? 'Off until failover' : 'On'); P('Connections', String(rn(1, 6, 'cn'))); }); };
+  B['Power Platform::Power Pages Site'] = function () { pp(function () { P('Website ID', _rdGuid(r.id)); P('URL', 'https://' + r.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.powerappsportals.com'); P('Status', /offline/i.test(r.meta) ? 'Offline until failover' : 'Online'); P('Authentication', 'Microsoft Entra ID'); }); };
+  B['Power Platform::Dataverse Table'] = function () { pp(function () { P('Logical name', r.name.toLowerCase().replace(/[^a-z0-9]+/g, '')); P('Table type', seg(0) || 'Standard'); P('Records', (/([\d,]+)\s+records/.exec(r.meta || '') || [0, '—'])[1]); }); };
+  B['Power Platform::Bot'] = function () { pp(function () { P('Bot ID', _rdGuid(r.id)); P('Topics', (/(\d+)\s+topics/.exec(r.meta || '') || [0, '—'])[1]); P('Language', 'English (United States)'); P('Channels', 'Microsoft Teams, web'); P('Status', /offline/i.test(r.meta) ? 'Offline until failover' : 'Published'); }); };
+  B['Power Platform::Dataset'] = function () { pp(function () { P('Dataset ID', _rdGuid(r.id)); P('Storage mode', seg(0) || 'Import'); P('Rows', (/([\d.,]+[MKB]?)\s+rows/.exec(r.meta || '') || [0, '—'])[1]); P('Refresh', /nightly/i.test(r.meta) ? 'Nightly' : 'Scheduled'); }); };
+  B['Power Platform::Report'] = function () { pp(function () { var ds = RESOURCES.find(function (x) { return x.wl === 'Power Platform' && x.type === 'Dataset' && x.parentId === r.parentId; }); P('Report ID', _rdGuid(r.id)); P('Pages', (/(\d+)\s+pages/.exec(r.meta || '') || [0, '—'])[1]); P('Dataset', ds ? ds.name : '—', ds ? { navValue: ds.id } : null); P('Copy', /standby/i.test(r.meta) ? 'Standby copy' : 'Primary'); }); };
+  B['Power Platform::Dashboard'] = function () { pp(function () { P('Dashboard ID', _rdGuid(r.id)); P('Visuals', (/(\d+)\s+visuals/.exec(r.meta || '') || [0, '—'])[1]); P('Tile type', seg(0) || 'KPI tiles'); }); };
+  B['Power Platform::Desktop Flow'] = function () { pp(function () { P('Flow ID', _rdGuid(r.id)); P('Type', seg(0) || 'RPA'); P('Mode', seg(1) || 'Attended'); P('Department', (seg(2) || '').replace(/ dept$/i, '') || '—'); }); };
+  B['Power Platform::Custom Connector'] = function () {
+    pp(function () { P('Connector ID', _rdGuid(r.id)); P('Definition', seg(0) || 'OpenAPI'); P('Operations', (/(\d+)\s+operations/.exec(r.meta || '') || [0, '—'])[1]); });
+    if (r.notSupported) { S('Restore behavior'); P('Restore', 'Not supported: the connector contains secrets that Microsoft’s API does not export'); }
+  };
+  // ── Entra ID log streams (export only): what the stream covers and how it is captured ──
+  B['Entra ID::Audit Log'] = B['Entra ID::Sign-in Log'] = function () {
+    var cov = String(cells[0] || '').replace(/^Covers\s+/, '') || (r.adoCovers || '—');
+    P('Name', r.name); P('Stream', r.type === 'Sign-in Log' ? 'Sign-in events' : 'Audit events'); P('Covers', cov); P('Capture', 'Hourly packages'); P('Retention', '90 days'); P('Export format', 'ZIP of JSON, one file per hour');
+    S('Restore behavior'); P('Restore', 'Export only: logs are append-only and cannot be written back');
+  };
+  // ── Google Workspace: a Drive folder, and a person's membership of a chat space ──
+  B['Google Workspace::Drive Folder'] = function () {
+    var dr = par('Drive');
+    P('Name', r.name); P('Owner', cells[0] || '—'); P('Drive', dr ? dr.name : '—'); P('Contains', seg(0) || '—'); P('Shared', pk(['Private', 'Shared with 2 people', 'Shared within the organization'], 'sh'));
+    if (cells[3] && cells[3] !== '—') P('Last modified', cells[3]);
+  };
+  B['Google Workspace::Membership'] = function () {
+    var sp = par('Chat Space');
+    P('Member', cells[0] || '—'); P('Display name', cells[1] || '—'); P('Role', /member/i.test(seg(0)) ? 'Member' : seg(0) || '—'); P('Chat space', sp ? sp.name : '—', sp ? { navValue: sp.id } : null); P('Space type', /direct/i.test(seg(1)) ? 'Direct message' : seg(1) || 'Space');
+  };
+  // ── Virtual machine (VBR) ──
+  B['Virtual Machines::VM'] = function () {
+    var v = r.vm || {}, jobs = String(v.jobName || '').split(/,\s*/).filter(Boolean);
+    P('Name', r.name); P('Platform', v.platform || '—'); P('Backup server', v.backupServer || '—'); P('Backup jobs', jobs.length ? jobs.join(', ') : '—'); P('Disks', String(rn(1, 4, 'dk'))); P('Restore scope', 'Entire virtual machine');
+  };
+  if (!B[key]) return null;
+  B[key]();
+  return F;
+}
 function buildResourceSnapshotFields(resource, hasDiff) {
   var out = _buildResourceSnapshotFieldsCore(resource, hasDiff);
   // "Last modified" row (user 2026-07-20): every compared item carries an
@@ -57829,6 +58249,10 @@ function _buildResourceSnapshotFieldsCore(resource, hasDiff) {
       return _drawerSemanticRegroup(ghOut);
     }
   }
+
+  // Types that had no drawer of their own (Entra ID, Microsoft 365, Power Platform, VMs, ...): one spec per type, see _rdSpecFields.
+  var _spF = _rdSpecFields(r, hasDiff, { day: daysAgoLabel });
+  if (_spF) return _spF;
 
   // ── Active Directory forest: its facts, then whether it can be restored from this point (the same checks the Summary runs before a restore) ──
   if (wl === 'Active Directory' && r.type === 'Forest') {
@@ -61841,6 +62265,13 @@ function renderRdBody() {
       if (resource.type === 'Forest' || resource.type === 'Domain') _relLedger.title = 'Contains';
     }
   }
+  if (!_relLedger && resource && resource.wl === 'Entra ID'
+      && ['User','Group','Administrative Unit','Role'].indexOf(resource.type) >= 0
+      && typeof _rdGenericRelLedger === 'function') {
+    // Entra: group memberships, directory roles, application roles; a group's members and owners; an administrative unit's members; a role's assignments (what Keep relationships restores).
+    var _enUniv = _entraRelUniverse(resource);
+    if (_enUniv.some(function(g){ return g.items.length; })) _relLedger = _rdGenericRelLedger(_enUniv, leftInfo, rightInfo);
+  }
   var _relChangedTotal = _relLedger ? _relLedger.totalChanged : 0;
 
   // V1: existence delta. When the resource is classified as 'added'
@@ -63107,7 +63538,7 @@ function _exportConfig(r) {
         dateRange: false, packages: false
       };
     }
-    if (t === 'Audit Log' || t === 'Audit Event' || /Audit Log|Audit Events|Group Auditing/.test(nm)) {
+    if (t === 'Audit Log' || t === 'Sign-in Log' || t === 'Audit Event' || /Audit Log|Audit Events|Group Auditing/.test(nm)) {
       // Unified audit model (user 2026-08-06): the artifact IS the backed-up
       // hourly JSON files — a ZIP of JSON, one file per 1-hour capture,
       // exactly like Okta's System Log. CSV was an event-grid-era fiction
@@ -77189,6 +77620,61 @@ window.D365X.recChip = function (key, item) {
   };
   var oc = window._clearInvCompareDateImpl;
   window._clearInvCompareDateImpl = function () { var r = oc.apply(this, arguments); try { renderTopActionBar(); if (document.getElementById('childTable')) childRender(); } catch (e) {} return r; };   /* "changed" ends with compare: repaint the bar and the rows */
+})();
+
+/* ═══ D365 review table (Select step): for a column-level restore, the cart table itself shows which records, which columns and which values will be written ═══
+   Scope is still chosen on the main screen (Restore scope menu). Here the Select step's own table swaps Type and Details for one column per restored column; each cell is the value AT THE RESTORE POINT
+   (the product reads backups, not production, so there is no current-value column). A dash = the column is not restored for that record (customized in its preview); "Whole record" = it restores whole.
+   Read-only: columns change on the main screen, a single record's in its preview (the Restore point chip). Hooks live in wsRenderConfigure, _wsSelectColumns, wsRenderSelectTableRow and _wsBasketSortValue. */
+(function () {
+  var X = window.D365X; if (!X || !X.scope) return;
+  var S = X.scope;
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function pl(n, a, b) { return n + ' ' + (n === 1 ? a : b); }
+  function recKeys() { var o = []; state.restorePlan.forEach(function (_, k) { if (typeof k === 'string' && k.indexOf('rec-') === 0) o.push(k); }); return o; }
+  function allCols(sk) { var sc = D365_SCHEMAS[sk]; if (!sc) return []; return sc.cols.concat(sc.extendedCols || []).filter(function (c, i, a) { return a.indexOf(c) === i && !/^(Name|Modified|Modified on|Created|Created on)$/i.test(c); }); }
+  var R = window.D365RV = {};
+  R.applies = function () { try { return state.wlLabel === 'Dynamics 365' && ws.step === 1 && recKeys().length > 0 && (S.mode !== 'whole' || X.scopeCustomized() > 0); } catch (e) { return false; } };
+  function usedCols() {
+    var keys = recKeys(), sk = _parseD365RecordId(keys[0]).schemaKey, used = {};
+    keys.forEach(function (k) { (X.colsFor(k) || []).forEach(function (c) { used[c] = 1; }); });
+    return allCols(sk).filter(function (c) { return used[c]; });
+  }
+  function valueOf(key, col) { var p = _parseD365RecordId(key); return X.val(p.schemaKey, 'p', p.idx, col, (typeof wsItemTargetTs === 'function' && wsItemTargetTs(key)) || MOCK_TODAY.getTime()); }
+  R.columns = function (cols) {
+    var out = cols.filter(function (c) { return c.key === 'name'; });
+    usedCols().forEach(function (c) { out.push({ key: 'd365col:' + c, label: c, w: '168px' }); });
+    return out.concat(cols.filter(function (c) { return c.key === 'target' || c.key === 'actions'; }));
+  };
+  R.cell = function (key, col) {
+    var c = X.colsFor(key);
+    if (!c) return '<td class="ws-td rv-v"><span class="rv-na">Whole record</span></td>';
+    if (c.indexOf(col) < 0) return '<td class="ws-td rv-v"><span class="rv-na">—</span></td>';
+    var v = valueOf(key, col);
+    if (v == null || v === '') return '<td class="ws-td rv-v"><span class="rv-na">Empty</span></td>';
+    return '<td class="ws-td rv-v"><div data-tip-clip="' + esc(v) + '">' + esc(v) + '</div></td>';
+  };
+  R.sortValue = function (key, col) { return String(valueOf(key, col) || '').toLowerCase(); };
+  R.summaryLine = function () {
+    var keys = recKeys(), nVals = 0; keys.forEach(function (k) { nVals += (X.colsFor(k) || []).length; });
+    return '<div class="rv-bar2"><div class="rv-sub">' + pl(keys.length, 'record', 'records') + ', ' + pl(usedCols().length, 'column', 'columns') + ', ' + pl(nVals, 'value', 'values') + ' to write</div></div>';
+  };
+  // the sticky scrollbar mirrors the table's horizontal scroll; the edge shadows follow it
+  function wire() {
+    document.querySelectorAll('.ws-sel-cq:has(.rv-one) .ws-table-wrap').forEach(function (w) {
+      var hb = w.parentElement.querySelector('.rv-hbar'), t = w.querySelector('.rv-one'), busy = false;
+      if (!w.dataset.rvWired) {
+        w.dataset.rvWired = '1';
+        w.addEventListener('scroll', function () { updateTableScrollShadows(w); if (hb && !busy) { busy = true; hb.scrollLeft = w.scrollLeft; busy = false; } }, { passive: true });
+        if (hb) hb.addEventListener('scroll', function () { if (!busy) { busy = true; w.scrollLeft = hb.scrollLeft; busy = false; } }, { passive: true });
+      }
+      if (hb && t) { hb.firstElementChild.style.width = t.scrollWidth + 'px'; hb.style.display = t.scrollWidth > w.clientWidth + 1 ? '' : 'none'; hb.scrollLeft = w.scrollLeft; }
+      updateTableScrollShadows(w);
+    });
+  }
+  var origAll = window.wsRenderAll;
+  window.wsRenderAll = function () { var r = origAll.apply(this, arguments); setTimeout(wire, 0); return r; };
+  window.addEventListener('resize', function () { setTimeout(wire, 0); });
 })();
 </script>
 </body>

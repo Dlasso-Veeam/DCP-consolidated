@@ -4165,7 +4165,8 @@ function hydrateDefaultPolicyForm(wl) {
   var VIEWS = { settings:['Agent Settings','ssViewSettings'] };   // one page now; 'caps' / #skills are aliases that scroll to the skills section
   function renderNav(){
     var chev = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg>';
-    document.getElementById('ssNav').innerHTML = NAV.map(function(n){
+    // Agent settings now live in the Agent Library, so the other system settings sections are hidden (user 2026-11-17). NAV keeps the full list; only AI Agents is drawn.
+    document.getElementById('ssNav').innerHTML = NAV.filter(function(n){ return n === 'AI Agents'; }).map(function(n){
       var open = n === 'AI Agents';
       var kids = open ? ['settings'].map(function(k){ return '<button type="button" class="ss-nav-item ss-nav-child' + (view === k ? ' is-active' : '') + '"' + (view === k ? ' aria-current="page"' : '') + ' onclick="ssGo(\'' + k + '\')">' + VIEWS[k][0] + '</button>'; }).join('')
         + '<button type="button" class="ss-nav-item ss-nav-child is-off" data-plv-tip="Not part of this prototype">LLM Providers</button><button type="button" class="ss-nav-item ss-nav-child is-off" data-plv-tip="Not part of this prototype">Agent Traces</button>' : '';
