@@ -2800,6 +2800,10 @@ body.okov-mode .floating-thead { display: none !important; }
 .ws-hd-title { min-width: 0; font-family: 'Circular Pro', sans-serif; font-size: 18px; font-weight: 500; line-height: 22px; color: var(--black-100); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ws-hd-chip { display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 4px; border-radius: 2px; background: var(--black-5); color: var(--black-100); font-size: 14px; line-height: 20px; letter-spacing: .005em; white-space: nowrap; flex: none; }
 .ws-hd-chip svg { width: 16px; height: 16px; display: block; flex: none; }
+.ws-hd-kick .ws-hd-bc { margin: 0; min-width: 0; flex-wrap: nowrap; }   /* header path (every workload): static product breadcrumb; the workload crumb and separators keep their size, tenant and user truncate (tooltip carries the full value) */
+.ws-hd-bc .bc-wl { display: inline-flex; align-items: center; gap: 4px; flex: none; }
+.ws-hd-bc .bc-sep { flex: none; }
+.ws-hd-bc > span:not(.bc-sep):not(.bc-wl) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ws-hd-act { width: 36px; height: 36px; border-radius: 4px; border: 1px solid var(--border); background: var(--white); color: var(--black-100); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; padding: 0; box-sizing: border-box; }
 .ws-hd-act:hover { background: var(--black-5); }
 .ws-hd-act + .ws-hd-act { margin-left: -8px; }   /* the header's own gap is 16px; the help and close buttons sit 8px apart */
@@ -16106,12 +16110,17 @@ var RESOURCES = (function(){
       if (cal){
         var evs = (kids[cal.id] || []).filter(function(r){ return r.type === 'Event'; }), acl = (kids[cal.id] || []).filter(function(r){ return r.type === 'ACL Rule'; });
         var cal2 = sv.filter(function(r){ return /^Calendar — /.test(r.name || ''); })[0];
-        var gc = mk(cal, 'calendars', 'Calendars', 'calendars', n(cal2 ? 2 : 1, 'calendar', 'calendars'));
-        list.push(Object.assign({}, cal, { id: cal.id + '-primary', name: 'Primary calendar', type: 'Calendar', parentId: gc.id, drillable: false, drillTarget: undefined, meta: 'Primary · ' + n(evs.length, 'event', 'events'), adoCells: ['America/New_York', 'owner', u.name] }));
-        if (cal2){ cal2.parentId = gc.id; cal2.type = 'Calendar'; cal2.adoCells = ['America/New_York', 'writer', u.name]; }
-        var ge = mk(cal, 'events', 'Events', 'events', n(evs.length, 'event', 'events')); adopt(evs, ge);
-        var ga = mk(cal, 'acl', 'Access Control', 'acl', n(acl.length, 'rule', 'rules')); adopt(acl, ga);
-        cal.meta = 'Calendars, events, access control';
+        // Flattened 2026-11-18: no 'Calendars' collection. Each calendar (primary + secondary) sits directly under the Calendar service folder and owns its own Events + Access Control.
+        var c2kids = cal2 ? (kids[cal2.id] || []) : [];
+        var prim = Object.assign({}, cal, { id: cal.id + '-primary', name: 'Primary calendar', type: 'Calendar', parentId: cal.id, drillable: true, drillTarget: 'children', meta: 'Primary', adoCells: ['America/New_York', 'owner', u.name] });
+        { var _ci = cal2 ? list.indexOf(cal2) : -1; if (_ci > -1) list.splice(_ci, 0, prim); else list.push(prim); } byId[prim.id] = prim;   // Primary lists first
+        if (cal2){ cal2.parentId = cal.id; cal2.type = 'Calendar'; cal2.meta = 'Secondary'; cal2.adoCells = ['America/New_York', 'writer', u.name]; }
+        [[prim, evs, acl], [cal2, c2kids.filter(function(r){ return r.type === 'Event'; }), c2kids.filter(function(r){ return r.type === 'ACL Rule'; })]].forEach(function(t){
+          if (!t[0]) return;
+          var ge = mk(t[0], 'events', 'Events', 'events', n(t[1].length, 'event', 'events'), { adoCells: undefined }); adopt(t[1], ge);
+          var ga = mk(t[0], 'acl', 'Access Control', 'acl', n(t[2].length, 'rule', 'rules'), { adoCells: undefined }); adopt(t[2], ga);
+        });
+        cal.meta = cal2 ? 'Primary and secondary calendars' : 'Primary calendar';
       }
       if (ct){
         var cs = (kids[ct.id] || []).filter(function(r){ return r.type === 'Contact'; }), cg = (kids[ct.id] || []).filter(function(r){ return r.type === 'Contact Group'; });
@@ -22057,6 +22066,7 @@ function _gwsItemGridDesc(parent) {
   if (/^gws-sec-classroom/.test(parent.id || '')) return GWS_ITEM_GRIDS.courses;
   if (/^gws-sec-spaces/.test(parent.id || ''))    return GWS_ITEM_GRIDS.spaces;
   if (parent.type === 'Drive' || parent.type === 'Drive Folder') return GWS_ITEM_GRIDS.drivect;
+  if (parent.type === 'Calendar') return null;   // a calendar lists its Events + Access Control collections
   if (parent.type === 'Calendar' || /^Calendar/.test(parent.name || '')) return GWS_ITEM_GRIDS.events;
   if (/-contacts$/.test(parent.id || '')) return GWS_ITEM_GRIDS.contacts;
   if (parent.type === 'Coursework') return GWS_ITEM_GRIDS.submissions;
@@ -24358,7 +24368,7 @@ function _firstColEntityLabel(fallback) {
     var ty = rows[0].type;
     if (!ty) return null;
     for (var i = 1; i < rows.length; i++) { if (rows[i].type !== ty) return null; }
-    return ty;
+    return (ty === 'Entity' && rows[0].wl === 'Google Workspace') ? 'Collection' : ty;   // header text only; the type itself stays 'Entity'
   }
   var app = document.querySelector('.app');
   var inDrill = app && app.getAttribute('data-inv-mode') === 'drill';
@@ -24707,6 +24717,7 @@ function childRender() {
   var allChildren = RESOURCES.filter(function(r){
     return (r.parentId === childState.parentId || (_gwsOuIds && _gwsOuIds[r.id]) || (_gwsLblIds && _gwsLblIds[r.id]))
       && r.status !== 'unprotected'
+      && !(r.wl === 'Google Workspace' && r.type === 'Membership')   // a space's members live in its Relationships ledger, not in its table
       // policy '—' normally means "nothing to show here" — EXCEPT the
       // window-aware excluded rows (GWS, user ruling 2026-08-18), which
       // legitimately carry no current policy yet stay listed because an
@@ -29809,8 +29820,8 @@ function _treeNavStopHere(node) {
       // at USER / GROUP / SHARED-DRIVE instances — everything inside a user
       // (the 5 service containers), a group, or a drive browses in the GRID
       // with the breadcrumb carrying position.
-      // The tenant's Users folder is terminal too (user 2026-11-18): hundreds of users do not belong in the left panel, so the folder stays selected while the full list scrolls on the right.
-      if (r.type === 'Folder' && r.name === 'Users') { var _gwUsPar = RESOURCES.find(function(x){ return x.id === r.parentId; }); if (_gwUsPar && _gwUsPar.type === 'Tenant') return true; }
+      // The tenant's Users, Classroom and Spaces folders are terminal too (user 2026-11-18): hundreds of users do not belong in the left panel, and courses and spaces are not tree nodes, so the folder stays selected while its list scrolls or a course or space is drilled on the right.
+      if (r.type === 'Folder' && /^(Users|Classroom|Spaces)$/.test(r.name)) { var _gwUsPar = RESOURCES.find(function(x){ return x.id === r.parentId; }); if (_gwUsPar && _gwUsPar.type === 'Tenant') return true; }
       if (r.type === 'User') return true;
       if (r.type === 'Group') return true;
       if (r.type === 'Drive') return true;
@@ -33687,7 +33698,8 @@ function _firstContentsPiece(meta) {
   if (!meta) return '—';
   var parts = String(meta).split(/\s*·\s*/);
   for (var i = 0; i < parts.length; i++) {
-    if (/^\s*\d/.test(parts[i])) return parts[i].trim();
+    // a count of what is inside ("847 files"); not a file size ("640 KB") or a score ("10 points"), which describe the item itself
+    if (/^\s*\d/.test(parts[i]) && !/^\s*[\d.,]+\s?(?:[KMGT]?B|bytes?)\s*$/i.test(parts[i]) && !/^\s*[\d.,]+\s+points?\s*$/i.test(parts[i])) return parts[i].trim();
   }
   return '—';
 }
@@ -33828,6 +33840,7 @@ function _typeLabel(r) {
       && (/-gmail$|-calendar$|-contacts$|-chat$/.test(r.id || '') || /^Calendar/.test(r.name || ''))) {
     return 'Service';
   }
+  if (r && typeof r === 'object' && r.wl === 'Google Workspace' && t === 'Entity') return 'Collection';   // Calendars, Events, Contacts, Files, Labels and so on: Google's APIs call these collections (user 2026-11-18); 'Entity' was an internal name
   if (r && typeof r === 'object' && r.wl === 'Google Workspace' && t === 'Drive' && r.name === 'My Drive') return 'Service';   // a user's My Drive sits beside Mail, Calendar, Contacts and Chat (user 2026-11-18); Shared Drives stay 'Drive'
   return t;
 }
@@ -38884,6 +38897,7 @@ function _buildChildSelectAllOverflowMsg() {
     var allChildren = RESOURCES.filter(function(r){
       return (r.parentId === childState.parentId || (_gwsOuIds && _gwsOuIds[r.id]) || (_gwsLblIds && _gwsLblIds[r.id]))
         && r.status !== 'unprotected'
+        && !(r.wl === 'Google Workspace' && r.type === 'Membership')   // a space's members live in its Relationships ledger, not in its table
         // policy '—' normally means "nothing to show here" — EXCEPT the
         // window-aware excluded rows (GWS, user ruling 2026-08-18), which
         // legitimately carry no current policy yet stay listed because an
@@ -38974,6 +38988,7 @@ function _childExpandSelectionToAllPagesRun() {
   var allChildren = RESOURCES.filter(function(r){
     return (r.parentId === childState.parentId || (_gwsOuIds && _gwsOuIds[r.id]) || (_gwsLblIds && _gwsLblIds[r.id]))
       && r.status !== 'unprotected'
+      && !(r.wl === 'Google Workspace' && r.type === 'Membership')   // a space's members live in its Relationships ledger, not in its table
       // policy '—' normally means "nothing to show here" — EXCEPT the
       // window-aware excluded rows (GWS, user ruling 2026-08-18), which
       // legitimately carry no current policy yet stay listed because an
@@ -39835,6 +39850,7 @@ function renderUnavailableSegBtn(availability, r) {
       // §3.1 organizational containers.
       if (r.type === 'Org Unit') ctxTip = 'Organizational containers aren’t backed up as objects — drill in to browse scoped users.';
       else if (r.type === 'Domain') ctxTip = 'Domains are verified tenant identifiers — captured as context, never restored as objects.';
+      else if (r.type === 'User') ctxTip = 'This item can’t be added on its own — drill in to restore the items inside it.';   // same line as the checkbox-cell fallback; the "why" (identities are never recreated) is not repeated in tooltips
       else if (r.type === 'Tenant' || r.type === 'Folder') ctxTip = 'This level is navigation — drill in to reach the restorable objects.';
     }
     // PM 2026-07-06: the icon button is the canonical Restore control in
@@ -40869,6 +40885,9 @@ function _restoreAvailability(r) {
     // section folders, is no longer lumped in here as of 2026-09-22).
     if (r.type === 'Tenant') return 'context';
     if (r.type === 'Folder' && /^gws-sec-/.test(r.id || '')) return 'context';
+    // 2026-11-18 (user ruling, restoring the PRD): User is NOT a Restore Item (PRD §3.2: "Not itself restored — DCC never recreates identities"). It is browse-only: no checkbox, no restore;
+    // the restorable objects are its service containers (Mail, My Drive, Calendar, Contacts, Chat) and what's inside them. Supersedes the 2026-09-22 whole-user ruling.
+    if (r.type === 'User') return 'context';
     // Phase 2 export-only split (user ruling 2026-08-17): captured-but-not-
     // individually-restorable = EXPORT primary, through the export-through-
     // cart pattern. A Calendar ACL Rule exports its sharing grant, a Chat
@@ -41956,6 +41975,7 @@ function _categoryLockBlocks(keyOrResource) {
   if (state.restorePlan.size && typeof planActiveGwsKind === 'function') {
     var _gkA = planActiveGwsKind(), _gkC = _gwsKindOf(keyOrResource);
     if (_gkA && _gkC && _gkA !== _gkC) return true;
+    if (_gkA === 'user' && _gkC === 'user') { var _guA = planActiveGwsUser(), _guC = _gwsUserOf(keyOrResource); if (_guA && _guC && _guA.id !== _guC.id) return true; }   // one user per job
   }
   if (state.restorePlan.size && typeof planActiveEntraKind === 'function') {
     var _ekA = planActiveEntraKind(), _ekC = _entraKindOf(keyOrResource);
@@ -41972,6 +41992,19 @@ function _workloadLockMsg(activeWl) {
   return 'Restore job is limited to ' + activeWl + ' resources. Clear the job to add other workloads.';
 }
 // One copy string for every category-lock surface (tooltips + toasts).
+// ONE copy for the Conflict handling cards of every workload (user ruling 2026-11-19): labels Skip / Overwrite, a noun slot, and the consequence line on Overwrite.
+// Real exceptions keep their own card copy: Google Workspace courses (a restored course is created, never overwritten), Dynamics 365 changed-column jobs (overwrite only),
+// Create a copy / Side-by-side cards, GitHub's per-repository skip, and Azure DevOps' blocked Overwrite.
+function _wsConflictCopy(noun) {
+  noun = noun || 'item';
+  return {
+    sub: 'What to do when the ' + noun + ' already exists',
+    skipLabel: 'Skip', skipBody: 'Leave the existing ' + noun + ' as it is. Only restore what is missing.',
+    overLabel: 'Overwrite', overBody: 'Replace the existing ' + noun + ' with the backed-up version. Changes made since the backup are lost.',
+    skipSum: 'Skip \u2014 existing ' + noun + 's are left as they are',
+    overSum: 'Overwrite \u2014 existing ' + noun + 's are replaced with the backup'
+  };
+}
 function _categoryLockMsg() {
   // A job restores one forest at a time, and nothing alongside it. Each message names the forest and says what to do.
   if (_frLockWhy === 'other-forest') return 'A restore job can include only one forest. Remove ' + _frLockName + ' from the job to add a different one.';
@@ -41992,6 +42025,8 @@ function _categoryLockMsg() {
   var _gkM = (planActiveWorkload() === 'Google Workspace') ? planActiveGwsKind() : null;
   if (_gkM) {
     var _gc = planActiveContainerNode();
+    var _guM = (_gkM === 'user') ? planActiveGwsUser() : null;
+    if (_guM) return 'Restore job is limited to content from ' + _guM.name + ' \u2014 one user per job. Clear the job to add anything else.';
     return 'Restore job is limited to ' + _GWS_KIND_LABEL[_gkM] + (_gc ? ' in ' + _gc.name : '') + ' \u2014 one kind of object and one tenant per job. Clear the job to add anything else.';
   }
   var active = planActiveCategory();
@@ -43476,6 +43511,7 @@ function _wsJobTitle(fallback) {
     // where = the root the items belong to (org, tenant, site, group, forest, environment), the same one the Select step names; the shared folder only when no root is known
     var roots = (typeof _wsCartOrgCounts === 'function') ? _wsCartOrgCounts() : [];
     var place = roots.length ? roots[0].name + (roots.length > 1 ? ' +' + (roots.length - 1) : '') : (par ? par.name : '');
+    var _gwu = (typeof _wsGwsJobUser === 'function') ? _wsGwsJobUser() : null; if (_gwu) place = _gwu.name;   // a Google Workspace job restores one user's content: the title names the user, the header path names the tenant
     return _wsCartNoun(n) + (place ? ' in ' + place : '');
   } catch (e) { return fallback; }
 }
@@ -43508,6 +43544,22 @@ function _wsCartSharedType() {
 }
 // "3 users" when the items share a type, "3 items" when they do not.
 function _wsCartNoun(n) { var t = _wsCartSharedType(), p = t && _wsPluralType(t); return n + ' ' + (p || 'items'); }
+// The user a Google Workspace job restores (one per job), or null when the job holds tenant-level objects or another workload.
+function _wsGwsJobUser() {
+  try { return (planActiveWorkload() === 'Google Workspace' && planActiveGwsKind() === 'user') ? planActiveGwsUser() : null; } catch (e) { return null; }
+}
+// Header path for every workload's job: <workload> › <root the items belong to> (tenant, organization, site, environment, forest...), plus the user for a Google Workspace
+// job (one user per job). Static crumbs; the job is not navigable. Returns '' when the job has no single root (a flat workload such as virtual machines), and the header keeps the workload chip.
+function _wsHeaderPath(wl) {
+  var orgs = (typeof _wsCartOrgCounts === 'function') ? _wsCartOrgCounts() : [];
+  if (orgs.length !== 1) return '';
+  var node = (typeof planActiveContainerNode === 'function') ? planActiveContainerNode() : null;
+  var noun = node && node.type ? node.type + ' ' : '';
+  var sep = '<span class="bc-sep" aria-hidden="true">\u203a</span>', user = _wsGwsJobUser();
+  return '<nav class="breadcrumbs drill-crumb-static ws-hd-bc" aria-label="Restore target"><span class="bc-wl">' + _wsWlLogo(wl, 16) + wsEscape(wl === 'Okta WIC' ? 'Okta' : wl) + '</span>' + sep
+    + '<span' + (user ? '' : ' class="bc-current"') + ' data-tooltip="' + wsEscape(noun + orgs[0].name) + '">' + wsEscape(orgs[0].name) + '</span>'
+    + (user ? sep + '<span class="bc-current" data-tooltip="' + wsEscape('User ' + user.name) + '">' + wsEscape(user.name) + '</span>' : '') + '</nav>';
+}
 function wsRenderTopbar() {
   // OVERLAY HEADER (Figma 9303:90358, 2026-09-04): restore-point tile +
   // "Restore N items • <Workload>" (Single Line/Title, Avant Garde 24/32,
@@ -43526,7 +43578,7 @@ function wsRenderTopbar() {
     '<div class="ws-hd">'
       + '<span class="ws-hd-tile">' + _ic('restore-point', 24) + '</span>'
       + '<div class="ws-hd-main"><div class="ws-hd-kick">' + (_tbExp ? 'Export job' : 'Restore job')
-      + (wl ? '<span class="ws-hd-chip">' + _wsWlLogo(wl, 16) + wsEscape(wl === 'Okta WIC' ? 'Okta' : wl) + '</span>' : '') + '</div>'
+      + (wl && _wsHeaderPath(wl) ? _wsHeaderPath(wl) : (wl ? '<span class="ws-hd-chip">' + _wsWlLogo(wl, 16) + wsEscape(wl === 'Okta WIC' ? 'Okta' : wl) + '</span>' : '')) + '</div>'
       + '<div class="ws-hd-title">' + wsEscape(_wsJobTitle(noun)) + '</div></div>'
       + '<button class="ws-hd-act" type="button" data-tooltip="' + (_tbExp ? 'Export' : 'Restore') + ' guide" aria-label="' + (_tbExp ? 'Export' : 'Restore') + ' guide" onclick="wsToggleHelpDrawer()">' + _ic('help-circle-outlined', 20) + '</button>'
       + (ws.restoreInitiated
@@ -45400,9 +45452,9 @@ function wsRenderReviewOkta(n, noun, cfg, part) {
   }
 
   // Conflict handling — what to do when the object already exists in production.
-  sections.push('<div class="ws-cfg-section"><div class="ws-cfg-section-hdr"><div class="ws-cfg-section-title">Conflict handling</div><div class="ws-cfg-section-sub">When a restored object already exists in production</div></div><div class="ws-cfg-section-body"><div class="ws-cfg-choices">'
-    + _okRadio('wsOktaSetConflict(\'skip\')',     cfg.oktaConflict === 'skip',     'Skip', 'Leave the production object untouched — restore only objects that are missing.')
-    + _okRadio('wsOktaSetConflict(\'override\')', cfg.oktaConflict === 'override', 'Override', 'Replace the production object with the backed-up version, reverting changes since the backup.')
+  sections.push('<div class="ws-cfg-section"><div class="ws-cfg-section-hdr"><div class="ws-cfg-section-title">Conflict handling</div><div class="ws-cfg-section-sub">' + _wsConflictCopy('object').sub + '</div></div><div class="ws-cfg-section-body"><div class="ws-cfg-choices">'
+    + _okRadio('wsOktaSetConflict(\'skip\')',     cfg.oktaConflict === 'skip',     _wsConflictCopy('object').skipLabel, _wsConflictCopy('object').skipBody)
+    + _okRadio('wsOktaSetConflict(\'override\')', cfg.oktaConflict === 'override', _wsConflictCopy('object').overLabel, _wsConflictCopy('object').overBody)
   + '</div></div></div>');
 
   // Restore options — settings ROWS (approved prototype 2026-07-20, Option 1):
@@ -45551,8 +45603,8 @@ function wsRenderReviewJira(n, noun, cfg, part) {
   // ── Conflict handling (reuses wsConfigChoiceCard) ───────────────────
   // Three modes → 3-column variant so they sit on one row (same as PP).
   var conflictBody = '<div class="ws-cfg-choices ws-cfg-choices-3">'
-    + wsConfigChoiceCard('skip',     'Skip',                '', 'Restore only missing items. Existing ones stay as-is — changes aren’t reverted.', cfg.conflictMode === 'skip')
-    + wsConfigChoiceCard('override', 'Override',            '',            'Replace existing items with the backup version, reverting changes since the backup.', cfg.conflictMode === 'override')
+    + wsConfigChoiceCard('skip',     _wsConflictCopy('item').skipLabel, '', _wsConflictCopy('item').skipBody, cfg.conflictMode === 'skip')
+    + wsConfigChoiceCard('override', _wsConflictCopy('item').overLabel, '', _wsConflictCopy('item').overBody, cfg.conflictMode === 'override')
     + wsConfigChoiceCard('side',     'Side-by-side as new', '',            'Restore each as a new copy (prefixed) beside the existing item to compare or merge.', cfg.conflictMode === 'side')
   + '</div>';
   if (cfg.conflictMode === 'side') {
@@ -45560,7 +45612,7 @@ function wsRenderReviewJira(n, noun, cfg, part) {
       + '<input class="form-input" style="margin-top:4px;height:36px" maxlength="60" value="' + wsEscape(cfg.jiraSidePrefix) + '" oninput="wsJiraSetSidePrefix(this.value)">'
       + '</label></div>';
   }
-  sections.push('<div class="ws-cfg-section"><div class="ws-cfg-section-hdr"><div class="ws-cfg-section-title">Conflict handling</div><div class="ws-cfg-section-sub">What to do when the target item already exists</div></div><div class="ws-cfg-section-body">' + conflictBody + '</div></div>');
+  sections.push('<div class="ws-cfg-section"><div class="ws-cfg-section-hdr"><div class="ws-cfg-section-title">Conflict handling</div><div class="ws-cfg-section-sub">' + _wsConflictCopy('item').sub + '</div></div><div class="ws-cfg-section-body">' + conflictBody + '</div></div>');
 
   // ── Advanced settings (collapsed) ───────────────────────────────────
   var advExpanded = !!ws.jiraAdvExpanded;
@@ -46494,10 +46546,10 @@ function wsRenderReviewAD(n, noun, cfg, part) {
     + '<div class="ws-step-description">Choose how conflicts are handled, then record why you&rsquo;re running it.</div>'
   + '</div>';
   var sections = [];
-  sections.push('<div class="ws-cfg-section"><div class="ws-cfg-section-hdr"><div class="ws-cfg-section-title">Conflict handling</div><div class="ws-cfg-section-sub">What to do when the target object already exists</div></div>'
+  sections.push('<div class="ws-cfg-section"><div class="ws-cfg-section-hdr"><div class="ws-cfg-section-title">Conflict handling</div><div class="ws-cfg-section-sub">' + _wsConflictCopy('object').sub + '</div></div>'
     + '<div class="ws-cfg-section-body"><div class="ws-cfg-choices">'
-      + choice(cfg.adMode === 'overwrite', "wsSetAdMode('overwrite')", 'Overwrite', 'Overwrite all data from the object.')
-      + choice(cfg.adMode === 'skip',      "wsSetAdMode('skip')",      'Skip', 'Skip objects if they already exist (do not update).')
+      + choice(cfg.adMode === 'skip',      "wsSetAdMode('skip')",      _wsConflictCopy('object').skipLabel, _wsConflictCopy('object').skipBody)
+      + choice(cfg.adMode === 'overwrite', "wsSetAdMode('overwrite')", _wsConflictCopy('object').overLabel, _wsConflictCopy('object').overBody)
     + '</div></div></div>');
   sections.push(wsReasonTicketSections(cfg));
   sections.push(wsAdvancedSectionHtml('adAdvExpanded', 'wsAdToggleAdvanced()', 'Configure advanced settings', [
@@ -46523,7 +46575,7 @@ function wsJiraTogglePreserveDeps(){ if(!ws.config) ws.config={}; ws.config.jira
 // A job restores ONE kind in ONE tenant (see _categoryLockBlocks), so the wizard asks only the questions
 // that kind has an answer to:
 //   course — always created fresh with a NEW course ID; no destination card, an optional owner instead.
-//   drive  — Original location only; conflict handling + how members/permissions combine (Object relationships).
+//   drive  — Original location only; conflict handling, plus Advanced settings ▸ Keep relationships (members and permissions; Merge | Overwrite) like Entra ID.
 //   space  — Original location only; conflict handling.
 //   user   — a service folder, entity list or item inside a user: restored in place into that user's account.
 // ── Entra ID restore, one category per job (VDC restores per category: "Restore Users", "Restore Applications", …) ─────────────────────────
@@ -46561,6 +46613,22 @@ function planActiveGwsKind() {
   state.restorePlan.forEach(function(_, key){ if (!k) k = _gwsKindOf(key); });
   return k;
 }
+// The user a Google Workspace item sits under (null for tenant-level objects: shared drives, spaces, courses). A job restores one user's content, never two users' (user ruling 2026-11-19).
+function _gwsUserOf(keyOrResource) {
+  var r = keyOrResource;
+  if (typeof r === 'string') r = _resById(r.indexOf(':') > 0 ? r.split(':')[0] : r);
+  var guard = 0;
+  while (r && guard++ < 30) {
+    if (r.wl === 'Google Workspace' && r.type === 'User') return r;
+    r = r.parentId ? _resById(r.parentId) : null;
+  }
+  return null;
+}
+function planActiveGwsUser() {
+  var u = null;
+  state.restorePlan.forEach(function(_, key){ if (!u) u = _gwsUserOf(key); });
+  return u;
+}
 var _GWS_KIND_LABEL = { course: 'Courses', drive: 'Shared drives', space: 'Chat spaces', user: 'User content' };
 var _GWS_TYPE_NOUN = { Message: 'message', Draft: 'message', Label: 'label', Event: 'event', Contact: 'contact', 'Drive File': 'file', 'Native Doc': 'file', 'Drive Folder': 'folder' };
 function _gwsNoun(kind) {
@@ -46576,6 +46644,7 @@ function wsRenderReviewGWS(n, noun, cfg, part) {
   cfg = cfg || ws.config || (ws.config = {});
   if (cfg.gwsMode !== 'overwrite') cfg.gwsMode = 'skip';
   if (cfg.gwsRel !== 'overwrite') cfg.gwsRel = 'merge';
+  if (cfg.gwsKeepRel == null) cfg.gwsKeepRel = true;   // Keep relationships: on by default, like Entra ID (VDC)
   var kind = planActiveGwsKind() || 'user';
   var gn = _gwsNoun(kind);
   function choice(selected, fn, title, body) {
@@ -46607,27 +46676,37 @@ function wsRenderReviewGWS(n, noun, cfg, part) {
     + '<div class="ws-step-description">Choose how conflicts are handled, then record why you&rsquo;re running it.</div></div>'
     // Where the job lands is a fact, not a choice (the Restore options step is dropped for these kinds) \u2014 stated in the shared Vision alert so it can't be missed.
     + (kind === 'course' ? '' : '<div class="vis-alert" role="note" style="margin-bottom:16px">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('info-outlined', 24)) || '')
-        + '<div class="vis-alert-txt">' + (kind === 'user' ? 'Restoring into the original user account, in its original folder structure.' : 'Restoring to the original location, in its original structure.') + '</div></div>');
-  var skipBody = kind === 'course' ? 'Leave the existing course untouched' : 'Leave existing ' + gn + 's as they are.';
-  var overBody = kind === 'course' ? 'Create the course from the backup even when one of the same name is already present' : 'Replace existing ' + gn + 's with the backed-up version.';
+        + '<div class="vis-alert-txt">' + (kind === 'user' ? 'Restoring into ' + ((function(){ var _au = planActiveGwsUser(); return _au ? wsEscape(_au.name) + '\u2019s account' : 'the original user account'; })()) + ', in its original folder structure.' : 'Restoring to the original location, in its original structure.') + '</div></div>');
+  var skipBody = kind === 'course' ? 'Leave the existing course untouched' : _wsConflictCopy(gn).skipBody;
+  var overBody = kind === 'course' ? 'Create the course from the backup even when one of the same name is already present' : _wsConflictCopy(gn).overBody;
   var sections = [];
   sections.push('<div class="ws-cfg-section"><div class="ws-cfg-section-hdr"><div class="ws-cfg-section-title">Conflict handling</div><div class="ws-cfg-section-sub">What to do when ' + (kind === 'course' ? 'a course with the same name' : 'the ' + gn) + ' already exists</div></div>'
     + '<div class="ws-cfg-section-body"><div class="ws-cfg-choices">'
       + choice(cfg.gwsMode === 'skip', "wsGwsSet('gwsMode','skip')", 'Skip', skipBody)
       + choice(cfg.gwsMode === 'overwrite', "wsGwsSet('gwsMode','overwrite')", 'Overwrite', overBody)
     + '</div></div></div>');
-  if (kind === 'drive') {
-    sections.push('<div class="ws-cfg-section"><div class="ws-cfg-section-hdr"><div class="ws-cfg-section-title">Object relationships</div><div class="ws-cfg-section-sub">How members and permissions are combined</div></div>'
-      + '<div class="ws-cfg-section-body"><div class="ws-cfg-choices">'
-        + choice(cfg.gwsRel === 'merge', "wsGwsSet('gwsRel','merge')", 'Merge', 'Add the backed-up members and permissions to those already present.')
-        + choice(cfg.gwsRel === 'overwrite', "wsGwsSet('gwsRel','overwrite')", 'Overwrite', 'Replace the current members and permissions with the backed-up ones.')
-      + '</div></div></div>');
-  }
   sections.push(wsReasonTicketSections(cfg));
+  if (kind === 'drive') {
+    // Keep relationships: the same Advanced-settings toggle as Entra ID (VDC), with the Merge / Overwrite choice nested under it (shown only while the toggle is on).
+    function _relRad(v, title, hint) {
+      return '<label class="fr-rad" style="align-items:flex-start"><input type="radio" name="wsGwsRel" ' + (cfg.gwsRel === v ? 'checked ' : '') + 'onchange="wsGwsSet(\'gwsRel\',\'' + v + '\')">'
+        + '<span><span style="display:block">' + title + '</span><span class="fr-dtr-hint">' + hint + '</span></span></label>';
+    }
+    var relAfter = cfg.gwsKeepRel
+      ? '<div style="margin:4px 0 8px 52px"><div style="font-size:14px;line-height:20px;color:var(--black-60);margin-bottom:8px">How to handle relationship conflicts</div>'
+        + '<div class="fr-rads">' + _relRad('merge', 'Merge', 'Add the backed-up members and permissions to those already present.') + _relRad('overwrite', 'Overwrite', 'Replace the current members and permissions with the backed-up ones.') + '</div>'
+        + (cfg.gwsRel === 'overwrite' ? _entraWarn('Members and permissions added since the backup are removed.') : '') + '</div>'
+      : '';
+    sections.push(wsAdvancedSectionHtml('gwsAdvExpanded', 'wsGwsToggleAdv()', 'Members and permissions of the restored shared drive', [
+      { on: cfg.gwsKeepRel, label: 'Keep relationships', hint: 'Including members and permissions', fn: "wsGwsToggle('gwsKeepRel')", after: relAfter }
+    ]));
+  }
   html += '<div class="ws-cfg-card"><div class="ws-cfg-sections">' + sections.join('') + '</div></div></div>';
   return html;
 }
 function wsGwsSet(k, v){ if(!ws.config) ws.config={}; ws.config[k]=v; wsRenderAll(); }
+function wsGwsToggle(k){ if(!ws.config) ws.config={}; ws.config[k]=!ws.config[k]; wsRenderAll(); }
+function wsGwsToggleAdv(){ ws.gwsAdvExpanded=!ws.gwsAdvExpanded; wsRenderAll(); }
 
 // ── Entra ID Configure step = VDC's "Options" (verified in the VDC Entra ID restore wizards, 2026-11-12, never submitted) ───────────────────────
 // Common to every restorable category: Conflict handling (VDC calls it Restore mode; Skip | Overwrite · full object restore), Advanced (Reason, Keep relationships + Merge | Overwrite, Restore from Entra ID Recycle Bin).
@@ -46665,11 +46744,11 @@ function wsRenderReviewEntra(n, noun, cfg, part) {
     + '<div class="ws-step-title">Configure restore options</div>'
     + '<div class="ws-step-description">Choose how existing objects are handled, then record why you&rsquo;re running it.</div></div>';
   var sections = [];
-  sections.push(section('Conflict handling', 'What to do when the target object already exists',   // was: 'Restore mode' / 'How to handle the object\u2019s restore' (VDC\u2019s label; user 2026-11-17: the product term is Conflict handling)
+  sections.push(section('Conflict handling', _wsConflictCopy('object').sub,   // was: 'Restore mode' / 'How to handle the object\u2019s restore' (VDC\u2019s label; user 2026-11-17: the product term is Conflict handling)
     
     '<div class="ws-cfg-choices">'
-      + choice(cfg.entraMode === 'skip', "wsEntraSet('entraMode','skip')", 'Skip', 'Skip objects if they already exist (do not update).')
-      + choice(cfg.entraMode === 'overwrite', "wsEntraSet('entraMode','overwrite')", 'Overwrite (full object restore)', 'Overwrite all data from the object.')
+      + choice(cfg.entraMode === 'skip', "wsEntraSet('entraMode','skip')", _wsConflictCopy('object').skipLabel, _wsConflictCopy('object').skipBody)
+      + choice(cfg.entraMode === 'overwrite', "wsEntraSet('entraMode','overwrite')", _wsConflictCopy('object').overLabel, _wsConflictCopy('object').overBody)
     + '</div>' + (cfg.entraMode === 'overwrite' ? _entraWarn('Objects that already exist are overwritten with their backed-up data.') : '')));
   var _ent = _entraCartResources();
   if (kind === 'user') {
@@ -47601,14 +47680,12 @@ function wsRenderReview(part) {
       '<div class="ws-cfg-section">'
         + '<div class="ws-cfg-section-hdr">'
           + '<div class="ws-cfg-section-title">Conflict handling</div>'
-          + '<div class="ws-cfg-section-sub">' + ((isPP && cfg && cfg.ppDest === 'cross' && cfg.ppTargetEnvName)
-              ? 'When a restored item already exists in ' + wsEscape(cfg.ppTargetEnvName) + ' with the same name'
-              : 'When a restored item already exists at the destination with the same name') + '</div>'
+          + '<div class="ws-cfg-section-sub">' + _wsConflictCopy('item').sub + '</div>'
         + '</div>'
         + '<div class="ws-cfg-section-body">'
           + '<div class="ws-cfg-choices' + (isPP ? ' ws-cfg-choices-3' : '') + '">'
-            + wsConfigChoiceCard('skip',     'Skip',     '', 'Keep the existing item — only create what is missing.', cfg.conflictMode === 'skip')
-            + wsConfigChoiceCard('override', 'Overwrite', '',            'Replace the existing item with the version from this backup.', cfg.conflictMode === 'override', adoOverrideBlocked, adoOverrideBlocked ? ((function(){
+            + wsConfigChoiceCard('skip',     _wsConflictCopy('item').skipLabel, '', _wsConflictCopy('item').skipBody, cfg.conflictMode === 'skip')
+            + wsConfigChoiceCard('override', _wsConflictCopy('item').overLabel, '', _wsConflictCopy('item').overBody, cfg.conflictMode === 'override', adoOverrideBlocked, adoOverrideBlocked ? ((function(){
                 var _hasSec = false;
                 state.restorePlan.forEach(function(_, k){ var rr = RESOURCES.find(function(x){ return x.id === k; }); if (rr && ['Code Scanning Alert','Dependabot Alert','Secret Scanning Alert'].indexOf(rr.type) >= 0) _hasSec = true; });
                 return _hasSec
@@ -49196,8 +49273,8 @@ function wsRenderReviewD365(variant, n, noun, cfg) {
     conflictCols = 1;
   } else {
     conflictBody = ''
-      + wsD365ConflictChoiceCard('skip',     'Skip',     '', 'Keep the existing record — only create records that are missing.', cm === 'skip')
-      + wsD365ConflictChoiceCard('override', 'Overwrite', '',            'Replace the existing record with the backed-up version.', cm === 'override');
+      + wsD365ConflictChoiceCard('skip',     _wsConflictCopy('record').skipLabel, '', _wsConflictCopy('record').skipBody, cm === 'skip')
+      + wsD365ConflictChoiceCard('override', _wsConflictCopy('record').overLabel, '', _wsConflictCopy('record').overBody, cm === 'override');
     conflictCols = 2;
   }
   if (_scopeChanged) {
@@ -49206,7 +49283,7 @@ function wsRenderReviewD365(variant, n, noun, cfg) {
     '<div class="ws-cfg-section">'
       + '<div class="ws-cfg-section-hdr">'
         + '<div class="ws-cfg-section-title">Conflict handling</div>'
-        + '<div class="ws-cfg-section-sub">When a restored record already exists at the destination with the same primary key</div>'
+        + '<div class="ws-cfg-section-sub">' + _wsConflictCopy('record').sub + '</div>'
       + '</div>'
       + '<div class="ws-cfg-section-body">'
         + '<div class="ws-cfg-choices" style="grid-template-columns:repeat(' + conflictCols + ',1fr)">' + conflictBody + '</div>'
@@ -50657,7 +50734,8 @@ function wsBeginRestoreAnimation() {
     // wizard summary can never disagree.
     var dest = '';
     try {
-      var rows = (typeof wsBuildConfigSummary === 'function') ? wsBuildConfigSummary() : [];
+      // An export writes nothing back: its Activity row names the download, never the restore destination the restore-style recap carries.
+      var rows = (!isExp && typeof wsBuildConfigSummary === 'function') ? wsBuildConfigSummary() : [];
       var dr = rows.filter(function (r) { return /^Destination/i.test(r.label); })[0];
       dest = dr ? String(dr.value).slice(0, 60) : '';
     } catch (e) {}
@@ -51631,7 +51709,7 @@ function wsBuildConfigSummary() {
     // One row per area; supporting settings ride as labelled detail lines under the value (row.subs), so nothing is hidden and a user job reads as three rows.
     var _relTxt = cfg.entraKeepRel === false ? 'Not restored' : (cfg.entraRelMode === 'overwrite' ? 'Restored, conflicts overwritten with the backup' : 'Restored, conflicts merged with existing relationships');
     var _binTxt = cfg.entraRecycle === false ? 'Not used' : 'Restored from the Entra ID Recycle Bin';
-    rows.push({ label: 'Restore behavior', value: cfg.entraMode === 'overwrite' ? 'Overwrite \u2014 full object restore' : 'Skip \u2014 existing objects are left as they are',
+    rows.push({ label: 'Conflict handling', value: cfg.entraMode === 'overwrite' ? _wsConflictCopy('object').overSum : _wsConflictCopy('object').skipSum,
       subs: [['Relationships', _relTxt], ['Recycle Bin', _binTxt]] });
     var _ek = planActiveEntraKind();
     if (_ek === 'user') {
@@ -51654,12 +51732,12 @@ function wsBuildConfigSummary() {
     rows.push({ label: 'Conflict handling', value: cfg.gwsMode === 'overwrite'
       ? (_gk === 'course' ? (state.restorePlan.size > 1 ? 'Overwrite \u2014 create each course even when one of the same name exists' : 'Overwrite \u2014 create the course even when one of the same name exists') : 'Overwrite \u2014 existing ' + _gn + 's are replaced with the backup')
       : (_gk === 'course' ? (state.restorePlan.size > 1 ? 'Skip \u2014 existing courses are left untouched' : 'Skip \u2014 the existing course is left untouched') : 'Skip \u2014 existing ' + _gn + 's are left as they are') });
-    if (_gk === 'drive') rows.push({ label: 'Object relationships', value: cfg.gwsRel === 'overwrite' ? 'Overwrite \u2014 members and permissions are replaced' : 'Merge \u2014 members and permissions are added to the existing ones' });
+    if (_gk === 'drive') rows.push({ label: 'Relationships', value: cfg.gwsKeepRel === false ? 'Not restored' : (cfg.gwsRel === 'overwrite' ? 'Restored, conflicts overwritten with the backup' : 'Restored, conflicts merged with existing relationships') });
   } else
   if (summaryPlanWl === 'Active Directory') {
     rows.push({ label: 'Destination', value: cfg.adDest === 'export' ? 'Export \u2014 download only' : 'Source directory' });
     if (cfg.adDest !== 'export') {
-      rows.push({ label: 'Conflict handling', value: cfg.adMode === 'skip' ? 'Skip \u2014 existing objects are left as they are' : 'Overwrite \u2014 existing objects are reverted to the backup' });
+      rows.push({ label: 'Conflict handling', value: cfg.adMode === 'skip' ? _wsConflictCopy('object').skipSum : _wsConflictCopy('object').overSum });
       rows.push({ label: 'Keep relationships', value: cfg.adKeepRelationships === false ? 'Off' : 'On \u2014 memberships and applications included' });
       rows.push({ label: 'AD Recycle Bin', value: cfg.adUseRecycleBin === false ? 'Not used' : 'Restore from Recycle Bin when available' });
     }
@@ -51668,9 +51746,11 @@ function wsBuildConfigSummary() {
   // Conflict handling — only meaningful for additive (the doc forces
   // Override for in-place and there's no conflict possible for as-copy)
   if (restoreMode === 'additive' && summaryPlanWl !== 'Active Directory' && summaryPlanWl !== 'Google Workspace' && summaryPlanWl !== 'Entra ID') {
-    var conflictLabel = 'Skip conflicts';
-    if (cfg.conflictMode === 'override') conflictLabel = 'Override existing items';
-    else if (cfg.conflictMode === 'copy') conflictLabel = 'Restore as a copy alongside existing items';
+    var _cmv = (summaryPlanWl === 'Okta WIC') ? (cfg.oktaConflict === 'override' ? 'override' : 'skip') : cfg.conflictMode;   // Okta's cards write cfg.oktaConflict, not cfg.conflictMode
+    var _ccn = _wsConflictCopy(summaryPlanWl === 'Okta WIC' ? 'object' : 'item');
+    var conflictLabel = _ccn.skipSum;
+    if (_cmv === 'override') conflictLabel = _ccn.overSum;
+    else if (_cmv === 'copy') conflictLabel = 'Create a copy \u2014 restored beside the existing items';
     rows.push({
       label: 'Conflict handling',
       value: conflictLabel
@@ -58088,7 +58168,7 @@ function _rdSpecFields(r, hasDiff, H) {
   // ── Google Workspace collection (labels, messages, calendars, ...) ──
   B['Google Workspace::Entity'] = function () {
     var u = par('User'), items = (/^(\d[\d,]*)\s/.exec(r.meta || '') || [0, '—'])[1];
-    var svc = { msg: 'Gmail', labels: 'Gmail', calendars: 'Calendar', events: 'Calendar', contacts: 'Contacts', cgroups: 'Contacts', drivect: 'Drive', comments: 'Drive', acl: 'Drive' }[r.gwsGrid] || 'Google Workspace';
+    var svc = { msg: 'Gmail', labels: 'Gmail', calendars: 'Calendar', events: 'Calendar', contacts: 'Contacts', cgroups: 'Contacts', drivect: 'Drive', comments: 'Drive', acl: 'Calendar' }[r.gwsGrid] || 'Google Workspace';
     P('Name', r.name); P('Service', svc); P('Items', items); P('Owner', u ? u.name : '—', u ? { navValue: u.id } : null);
     if (r.gwsGrid === 'msg' || r.gwsGrid === 'comments') P('Item content', _RD_NV);
   };
@@ -58176,8 +58256,83 @@ function _rdSpecFields(r, hasDiff, H) {
   B[key]();
   return F;
 }
+// ── Google Workspace preview metadata: the API envelope for every type (user 2026-11-18, "PRD is the authority, and show the metadata the Google APIs make available") ─────────────────────────────
+// The PRD names each object's identifier and says what it holds (message: sender, recipients, subject, body, attachments, labelIds; event: start/end, attendees, recurrence; file: metadata + content), and that
+// credentials are never backed up. Its per-type property list (§3.3) is an unfilled template, so the field lists below come from the resource definitions of the APIs behind each type: Admin SDK Directory (users),
+// Gmail, Drive, Calendar, People, Chat and Classroom. Envelope only: bodies, event descriptions, comment text, chat text, notes and file content stay "not viewable"; no password, token or secret is ever listed.
+// Rows are added to what a type already shows (never duplicating a label); the five containers that can be previewed from the cart (Mail, Contacts, Chat, My Drive, Shared Drive) get a drawer of their own.
+function _gwsApiSpec(r) {
+  var t = r.type, h = _relgHash(r.id), NV = _RD_NV;
+  function P(a, s) { return a[_relgHash(r.id + (s || '')) % a.length]; }
+  function N(a, b, s) { return a + _relgHash(r.id + (s || '')) % (b - a + 1); }
+  function day(n) { var d = new Date(MOCK_TODAY); d.setDate(d.getDate() - n); return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
+  function gen(id, len, alpha, s) { var x = _relgHash(id + (s || '')) || 1, o = ''; while (o.length < len) { x = (Math.imul(x, 1664525) + 1013904223) >>> 0; o += alpha[(x >>> 16) % alpha.length]; } return o; }   // high bits: the low bits of this generator repeat with a short period
+  var HEX = '0123456789abcdef', B62 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', B64 = B62 + '-_';
+  function spaceName(id) { return 'spaces/' + gen(id, 11, B62, 'sp'); }
+  var par = RESOURCES.find(function (x) { return x.id === r.parentId; }), user = _rdUp(r, 'User') || (r.type === 'User' ? r : null), email = user ? user.name : '—';
+  var m = String(r.meta || '');
+  function cnt(re) { var x = re.exec(m); return x ? x[1] : null; }
+  function kidsOf(id, type) { return RESOURCES.filter(function (x) { return x.parentId === id && (!type || x.type === type); }); }
+  switch (t) {
+    case 'User': return { rows: [['Given name', String(r.name).split('@')[0].split(/[._-]/)[0].replace(/^./, function (c) { return c.toUpperCase(); })], ['Family name', (String(r.name).split('@')[0].split(/[._-]/)[1] || '—').replace(/\d+$/, '').replace(/^./, function (c) { return c.toUpperCase(); })],
+      ['Job title', P(['Software Engineer', 'Account Executive', 'Product Designer', 'Financial Analyst', 'Support Specialist', 'Counsel', 'Operations Manager'], 'jt')], ['Manager', P(['sarah.chen@acme.com', 'marcus.wong@acme.com', 'priya.patel@acme.com'], 'mg')],
+      ['Aliases', h % 4 === 0 ? String(r.name).split('@')[0] + '.acme@acme.com' : '—'], ['Delegated admin', h % 11 === 0 ? 'Yes' : 'No'], ['2-Step Verification enforced', h % 4 === 0 ? 'No' : 'Yes'], ['Archived', 'No'], ['Change password at next sign-in', 'No'], ['Directory visibility', 'Listed in the global address list'], ['Language', 'English (United States)'], ['Customer ID', 'C03' + gen('acme', 6, HEX, 'c')]] };
+    case 'Message': { var lab = par && par.name ? String(par.name).toUpperCase() : 'INBOX'; return { section: 'Message envelope', rows: [['Message ID', gen(r.id, 16, HEX)], ['Thread ID', gen('thread' + (h ^ 1540483477) + r.id.length, 16, HEX)], ['Labels', [lab].concat(r.labels || []).join(', ')], ['Cc', h % 5 === 0 ? 'it-help@acme.com' : '—'], ['Read state', lab === 'SENT' ? 'Read' : P(['Read', 'Read', 'Unread'], 'rd')], ['Starred', h % 9 === 0 ? 'Yes' : 'No']] }; }
+    case 'Draft': return { section: 'Draft envelope', rows: [['Draft ID', 'r' + String(h).slice(0, 8) + gen(r.id, 6, '0123456789', 'd')], ['Message ID', gen(r.id, 16, HEX)], ['Cc', '—']] };
+    case 'Label': { var tot = parseInt((cnt(/([\d,]+)\s+messages?/) || '0').replace(/,/g, ''), 10); return { rows: [['Unread messages', String(Math.round(tot * (0.02 + (h % 9) / 100)))], ['Threads', String(Math.max(1, Math.round(tot * 0.62)))], ['Unread threads', String(Math.round(tot * (0.01 + (h % 6) / 100)))]] }; }
+    case 'Calendar': return { rows: [['Description', '—'], ['Calendar color', P(['#9fe1e7', '#f83a22', '#4986e7', '#42d692'], 'cc')], ['Shown in list', 'Yes'], ['Hidden', 'No'], ['Default reminder', '10 minutes before'], ['Video conferencing', 'Google Meet']] };
+    case 'Event': return { rows: [['Event ID', gen(r.id, 26, '0123456789abcdefghijklmnopqrstuv')], ['Status', /^Deleted/i.test(r.name) ? 'Cancelled' : 'Confirmed'], ['Location', P(['Conference room B', 'Video call', 'HQ 3rd floor', '—'], 'lc')], ['Visibility', 'Default'], ['Show as', 'Busy'], ['Video conference', h % 3 ? 'Google Meet' : 'None'], ['Reminders', '10 minutes before'], ['Creator', email], ['Created', day(30 + h % 60)], ['Description', NV]] };
+    case 'Contact': return { rows: [['Phone', /\+?\d[\d ()-]{8,}/.exec(m) ? /\+?\d[\d ()-]{8,}/.exec(m)[0] : '—'], ['Job title', P(['Account Manager', 'Partner Lead', 'Recruiter', 'Operations', '—'], 'jt')], ['Contact groups', P(['Vendors', 'Clients', 'Partners', 'My Contacts'], 'cg')], ['Photo', h % 4 === 0 ? 'Yes' : 'No'], ['Notes', NV]] };
+    case 'Chat Space': { var dm = /DIRECT/i.test(m); return { rows: [['Space resource name', spaceName(r.id)], ['Last active', day(h % 20)], ['External users allowed', dm ? 'No' : P(['No', 'No', 'Yes'], 'ex')], ['Chat history', 'On'], ['Threaded replies', dm ? 'Off' : 'On'], ['Description', dm ? '—' : r.name + ' team space']] }; }
+    case 'Chat Message': return { section: 'Message envelope', rows: [['Message resource name', (par ? spaceName(par.id) : 'spaces/—') + '/messages/' + gen(r.id, 11, B62)], ['Thread', (par ? spaceName(par.id) : 'spaces/—') + '/threads/' + gen(r.id, 11, B62, 'th')], ['Last edited', h % 6 === 0 ? 'Edited' : 'Not edited'], ['Reactions', String(h % 5 === 0 ? 1 + h % 3 : 0)], ['Thread reply', h % 3 === 0 ? 'Yes' : 'No']] };
+    case 'Membership': return { rows: [['Membership resource name', (par ? spaceName(par.id) : 'spaces/—') + '/members/' + gen(r.id, 11, B62)], ['State', 'Joined'], ['Member type', /APP|bot/i.test(r.name) ? 'App' : 'Person'], ['Joined', day(60 + h % 400)]] };
+    case 'Drive File': case 'Native Doc': { var isDoc = t === 'Native Doc'; return { rows: [['File ID', '1' + gen(r.id, 32, B64)], ['MIME type', isDoc ? ({ Sheet: 'application/vnd.google-apps.spreadsheet', Slides: 'application/vnd.google-apps.presentation' }[(/Google (Sheet|Slides)/.exec(m) || [0, ''])[1]] || 'application/vnd.google-apps.document') : (/PDF/.test(m) ? 'application/pdf' : /XLSX/.test(m) ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : /DOCX/.test(m) ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : /PNG/.test(m) ? 'image/png' : /CSV/.test(m) ? 'text/csv' : /JSON/.test(m) ? 'application/json' : 'application/octet-stream')],
+      ['Folder', par ? par.name : '—'], ['Created', day(40 + h % 300)], ['Last modified by', email], ['Version', String(N(3, 40, 'v'))], isDoc ? ['Export format', 'DOCX, XLSX or PPTX by type'] : ['Checksum (MD5)', gen(r.id, 32, HEX, 'm')], ['Shared', h % 3 === 0 ? 'Yes' : 'No'], ['Starred', h % 8 === 0 ? 'Yes' : 'No'], ['Permissions', String(N(1, 5, 'pm'))], ['Revisions', String(N(1, 14, 'rv'))]] }; }
+    case 'Drive Folder': return { rows: [['Folder ID', '1' + gen(r.id, 32, B64)], ['MIME type', 'application/vnd.google-apps.folder'], ['Parent', par ? par.name : '—'], ['Created', day(60 + h % 300)], ['Shared', h % 3 === 0 ? 'Yes' : 'No'], ['Starred', 'No'], ['Folder color', P(['Default', 'Blue', 'Green', 'Red'], 'fc')], ['Permissions', String(N(1, 4, 'pm'))]] };
+    case 'Permission': return { rows: [['Permission ID', gen(r.id, 20, '0123456789')], ['Inherited', h % 2 ? 'No' : 'Yes'], ['Pending owner', 'No']] };
+    case 'Revision': return { rows: [['MIME type', 'application/pdf'], ['Published', 'No'], ['Checksum (MD5)', gen(r.id, 32, HEX, 'm')]] };
+    case 'Comment': return { rows: [['Comment ID', 'AAAB' + gen(r.id, 7, B62)], ['Last modified', day(h % 20)], ['Deleted', 'No']] };
+    case 'Reply': return { rows: [['Reply ID', 'AAAB' + gen(r.id, 7, B62, 'r')], ['Action', '—'], ['Last modified', day(h % 20)]] };
+    case 'Shared Drive Member': return { rows: [['Display name', String(r.name).split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); })]] };
+    case 'Course': return { rows: [['Section', P(['Period 1', 'Fall cohort', 'Section A'], 'sc')], ['Room', P(['Room 204', 'Online', 'Lab 3'], 'rm')], ['Owner', 'admin@acme.com'], ['Created', day(120 + h % 200)], ['Updated', day(h % 30)], ['Course group email', gen(r.id, 6, '0123456789abcdef', 'g') + '@acme.com'], ['Guardians enabled', 'No']] };
+    case 'Coursework': return { rows: [['Coursework ID', String(100000000000 + h % 900000000000)], ['Created', day(30 + h % 40)], ['Updated', day(h % 20)], ['Topic', P(['Unit 1', 'Unit 2', 'Review'], 'tp')]] };
+    case 'Announcement': return { rows: [['Announcement ID', String(100000000000 + h % 900000000000)], ['Created', day(20 + h % 30)], ['Updated', day(h % 10)], ['Creator', 'admin@acme.com']] };
+    case 'Material': return { rows: [['Material ID', String(100000000000 + h % 900000000000)], ['Created', day(20 + h % 30)], ['Updated', day(h % 10)]] };
+    case 'Submission': return { rows: [['Submission ID', gen(r.id, 12, B62)], ['Updated', day(h % 15)], ['Assigned grade', /Graded/.test(m) ? (/Graded\s+([\d/]+)/.exec(m) || [0, '—'])[1] : 'Not graded yet']] };
+    case 'Drive': {
+      var mine = /-mydrive$/.test(r.id);
+      return mine ? { replace: true, section: 'My Drive', rows: [['Owner', email], ['Root folder ID', '0A' + gen(r.id, 18, B64)], ['Storage used in Drive', (m.split(/\s*·\s*/)[0] || '—')], ['Storage used in trash', N(8, 190, 'tr') + ' MB'], ['Storage limit', '30 GB']] }
+        : { replace: true, section: 'Shared Drive', rows: [['Drive ID', '0A' + gen(r.id, 17, B64)], ['Name', r.name], ['Created', day(200 + h % 500)], ['Hidden', 'No'], ['Organizational unit', '/'], ['Domain users only', 'Yes'], ['Drive members only', 'No'], ['Admins manage sharing', 'Yes'], ['Copy requires writer access', 'No']] };
+    }
+    case 'Folder': {
+      if (!par || par.type !== 'User') return null;
+      var nm = r.name;
+      if (nm === 'Calendar') { var _cals = kidsOf(r.id, 'Calendar'), _evN = 0; _cals.forEach(function (c) { _evN += RESOURCES.filter(function (x) { return x.type === 'Event' && x.parentId === c.id + '-events'; }).length; }); return { replace: true, section: 'Calendar', rows: [['Owner', email], ['Calendars', String(_cals.length)], ['Events', String(_evN)]] }; }
+      if (/^Calendar/.test(nm)) return _gwsApiSpec(Object.assign({}, r, { type: 'Calendar' }));
+      if (nm === 'Mail') { var labs = kidsOf(r.id, 'Label'), msgs = 0; labs.forEach(function (l) { msgs += parseInt(((/([\d,]+)\s+messages?/.exec(l.meta || '') || [0, '0'])[1]).replace(/,/g, ''), 10); }); return { replace: true, section: 'Mailbox', rows: [['Email address', email], ['Messages', msgs.toLocaleString('en-US')], ['Threads', Math.round(msgs * 0.62).toLocaleString('en-US')], ['Labels', String(labs.length)], ['History ID', String(100000 + h % 900000)]] }; }
+      if (nm === 'Contacts') return { replace: true, section: 'Contacts', rows: [['Owner', email], ['Contacts', String(RESOURCES.filter(function (x) { return x.type === 'Contact' && x.parentId === r.id; }).length)], ['Contact groups', String(RESOURCES.filter(function (x) { return x.type === 'Contact Group' && x.parentId === r.id; }).length)]] };
+      if (nm === 'Chat') return { replace: true, section: 'Chat', rows: [['Owner', email], ['Direct messages', String(kidsOf(r.id, 'Chat Space').length)]] };
+      return null;
+    }
+    default: return null;
+  }
+}
+function _gwsApiMerge(r, out) {
+  var spec; try { spec = _gwsApiSpec(r); } catch (e) { return out; }
+  if (!spec) return out;
+  var rows = spec.rows.map(function (kv) { return { f: kv[0], snap: kv[1], prod: kv[1] }; });
+  if (spec.replace) return [{ section: spec.section }].concat(rows);
+  out = out || [];
+  var have = {}; out.forEach(function (x) { if (x.f) have[String(x.f).toLowerCase()] = 1; });
+  rows = rows.filter(function (x) { return !have[x.f.toLowerCase()]; });
+  if (!rows.length) return out;
+  var at = -1; for (var i = 1; i < out.length; i++) { if (out[i].section && /^(content|audit)$/i.test(out[i].section)) { at = i; break; } }
+  if (at < 0) at = out.length;
+  return out.slice(0, at).concat(rows, out.slice(at));
+}
 function buildResourceSnapshotFields(resource, hasDiff) {
   var out = _buildResourceSnapshotFieldsCore(resource, hasDiff);
+  if (resource && resource.wl === 'Google Workspace') out = _gwsApiMerge(resource, out);   // the API envelope for each Google Workspace type (see _gwsApiSpec)
   // "Last modified" row (user 2026-07-20): every compared item carries an
   // HONEST modification date (newest real change / witnessed inception) —
   // per-RP values overlaid in rdBuildStateForSel. Skipped inside the pair
@@ -58359,20 +58514,22 @@ function _buildResourceSnapshotFieldsCore(resource, hasDiff) {
         });
         _gwFirstTo = _gwSib ? _gwSib.adoCells[0] : null;
       }
+      if (_gwc[1] && _gwc[1] !== '\u2014') _gwFirstTo = _gwc[1];   // the grid's To column (cells are [From, To, Date, User Email])
       var _gwToN = _gwFirstTo ? 1 + (_gwH % 3) : 0;
       var _gwToVal = !_gwFirstTo ? '—'
-        : (_gwToN === 1 ? _gwFirstTo : _gwToN + ' recipients · first: ' + _gwFirstTo);
-      var _gwAttN = (_gwc[3] && _gwc[3] !== '—') ? +_gwc[3] : 0;
+        : (_gwToN === 1 ? _gwFirstTo : _gwToN + ' recipients, first: ' + _gwFirstTo);
+      var _gwAttN = +((/(\d+)\s+attachment/.exec(r.meta || '') || [0, 0])[1]);   // the count rides the row's meta; the grid has no attachments column
       // Count + total size ONLY — never attachment filenames.
       var _gwAttVal = _gwAttN
-        ? _gwAttN + ' attachment' + (_gwAttN > 1 ? 's' : '') + ' · ' + ((_gwAttN * 0.4) + 0.2 + (_gwH % 10) / 10).toFixed(1) + ' MB'
+        ? _gwAttN + ' attachment' + (_gwAttN > 1 ? 's' : '') + ', ' + ((_gwAttN * 0.4) + 0.2 + (_gwH % 10) / 10).toFixed(1) + ' MB'
         : '—';
       F.push({ section: r.type === 'Draft' ? 'Draft envelope' : 'Message envelope' });
       F.push({ f: 'From', snap: _gwFrom, prod: _gwFrom });
       F.push({ f: 'To', snap: _gwToVal, prod: _gwToVal });
       F.push({ f: 'Subject', snap: r.name, prod: r.name });
-      F.push({ f: r.type === 'Draft' ? 'Saved' : 'Date', snap: _gwc[1] || '—', prod: _gwc[1] || '—' });
-      F.push({ f: 'Size', snap: _gwc[2] || '—', prod: _gwc[2] || '—' });
+      F.push({ f: r.type === 'Draft' ? 'Saved' : 'Date', snap: _gwc[2] || '—', prod: _gwc[2] || '—' });
+      var _gwSize = (8 + (_gwH % 90) + (_gwAttN ? Math.round(_gwAttN * 400 + (_gwH % 300)) : 0)); _gwSize = _gwSize >= 1000 ? (_gwSize / 1000).toFixed(1) + ' MB' : _gwSize + ' KB';   // Gmail's sizeEstimate
+      F.push({ f: 'Size', snap: _gwSize, prod: _gwSize });
       F.push({ f: 'Attachments', snap: _gwAttVal, prod: _gwAttVal });
       // Location = where it structurally lives (Inbox/Sent/Trash/Drafts —
       // the one drillable parent). A message can ALSO carry other, non-
@@ -58381,7 +58538,8 @@ function _buildResourceSnapshotFieldsCore(resource, hasDiff) {
       // count pill, same component Okta's Group/User ledger uses — see
       // _gwsRelUniverse + the renderRdBody wiring), not a second drillable
       // parent, so the same message is never reachable by two drill paths.
-      F.push({ f: 'Location', snap: _gwc[4] || '—', prod: _gwc[4] || '—' });
+      var _gwLocP = RESOURCES.find(function(x){ return x.id === r.parentId; });
+      F.push({ f: 'Location', snap: _gwLocP ? _gwLocP.name : '—', prod: _gwLocP ? _gwLocP.name : '—' });
       F.push({ section: 'Content' });
       F.push({ f: r.type === 'Draft' ? 'Draft content' : 'Message content', snap: _gwNV, prod: _gwNV });
       return F;
@@ -58463,7 +58621,7 @@ function _buildResourceSnapshotFieldsCore(resource, hasDiff) {
     if (r.type === 'Calendar' || (r.type === 'Folder' && /^Calendar/.test(r.name || ''))) {
       var _gwSec2 = /—/.test(r.name);
       return _gwKV('Calendar', [['Calendar name', r.name], ['Kind', _gwSec2 ? 'Secondary' : 'Primary'], ['Calendar ID', _gwSec2 ? 'c_' + String(_gwH).slice(0,8) + '@group.calendar.google.com' : (_gwOwnerEmail || '—')], ['Time zone', _gwPick(['America/New_York','Europe/Prague','America/Los_Angeles'])], ["Owner's access", 'owner'], ['Events', String(nEvts())]]);
-      function nEvts(){ return RESOURCES.filter(function(x){ return x.parentId === r.id && x.type === 'Event'; }).length; }
+      function nEvts(){ return RESOURCES.filter(function(x){ return (x.parentId === r.id || x.parentId === r.id + '-events') && x.type === 'Event'; }).length; }
     }
     if (r.type === 'ACL Rule') {
       var _gwRole = (/(reader|writer|owner|freeBusyReader)/i.exec(r.meta || '') || [0, 'reader'])[1];
@@ -58504,7 +58662,7 @@ function _buildResourceSnapshotFieldsCore(resource, hasDiff) {
       return _gwKV('Permission', [['Scope', /domain/i.test(r.meta || '') ? 'domain' : 'user'], ['Role', (/(owner|organizer|writer|commenter|reader)/i.exec(r.meta || '') || [0, 'reader'])[1]], ['Grantee', _gwPmail], ['Link discovery', 'Off'], ['Expires', '—']]);
     }
     if (r.type === 'Chat Space') {
-      return _gwKV('Space', [['Space name', r.name], ['Type', /DIRECT/i.test(r.meta || '') ? 'DIRECT_MESSAGE' : 'SPACE'], ['Members', String(RESOURCES.filter(function(x){ return x.parentId === r.id && x.type === 'Membership'; }).length || (2 + _gwH % 16))], ['Created', _gwPick(['Feb 14, 2025','Nov 2, 2025','Apr 30, 2026'])]]);
+      return _gwKV('Space', [['Space name', r.name], ['Type', /DIRECT/i.test(r.meta || '') ? 'DIRECT_MESSAGE' : 'SPACE'], ['Members', String(_gwsRelUniverse(r)[0].items.length || (2 + _gwH % 16))], ['Created', _gwPick(['Feb 14, 2025','Nov 2, 2025','Apr 30, 2026'])]]);
     }
     // Classroom (2026-09-21, net-new — "real but modest" per user ruling).
     // Attribute names from the Google Classroom REST API (courses,
@@ -61497,6 +61655,17 @@ function _adRelUniverse(r) {
   return [{ key: 'groups', label: 'Member of', items: groups.map(function(g){ return st(g.name); }) }];
 }
 function _gwsRelUniverse(r) {
+  if (r.type === 'Chat Space') {   // a space's members are metadata, shown in the Relationships ledger like a Group's (user 2026-11-18), not rows in the space's table: "Manager, joined Jan 2024"
+    var _csItems = RESOURCES.filter(function(x){ return x.parentId === r.id && x.type === 'Membership'; }).map(function(m){
+      var parts = String(m.name).split(' \u2014 '), seg = String(m.meta || '').split(/\s*\u00b7\s*/), role = seg[0] || '', rest = seg.slice(1).filter(function(x){ return x !== 'direct message'; }).join(', ');
+      return { name: parts[0], joinOff: 9999, leaveOff: null, payload: role + (rest ? ', ' + rest : '') };
+    });
+    if (/DIRECT/i.test(r.meta || '')) {   // only the other person was seeded as a membership; the owner of the Chat folder is the second member of the conversation
+      var _csPar = RESOURCES.find(function(x){ return x.id === r.parentId; }), _csOwner = _csPar && RESOURCES.find(function(x){ return x.id === _csPar.parentId && x.type === 'User'; });
+      if (_csOwner && !_csItems.some(function(i){ return i.name === _csOwner.name; })) _csItems.unshift({ name: _csOwner.name, joinOff: 9999, leaveOff: null, payload: 'Member' });
+    }
+    return [{ key: 'members', label: 'Members', items: _csItems }];
+  }
   if (r.type === 'Group') {
     return [{ key: 'members', label: 'Members', items: (r.members || []).map(function(m){
       return { name: m[0], joinOff: 9999, leaveOff: null, payload: m[1] || null };
@@ -62248,6 +62417,7 @@ function renderRdBody() {
   if (!_relLedger && resource && resource.wl === 'Google Workspace'
       && (((resource.type === 'Message' || resource.type === 'Draft') && resource.labels && resource.labels.length)
           || (resource.type === 'Group' && resource.members && resource.members.length)
+          || (resource.type === 'Chat Space' && RESOURCES.some(function(x){ return x.parentId === resource.id && x.type === 'Membership'; }))
           || resource.type === 'User')
       && typeof _rdGenericRelLedger === 'function') {
     var _guUniv = (resource.type === 'User') ? _gwsRelUniverse(resource) : null;
@@ -76208,7 +76378,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var rows = _origSumEmpty.apply(this, arguments), cfg = ws && ws.config;
     if (!cfg || !(typeof wsIsD365Cart === 'function' && wsIsD365Cart())) return rows;
     var i = rows.findIndex(function (r) { return r.label === 'Conflict handling'; }), cr = i >= 0 ? rows[i] : null, ow = _d365OverwriteOn(cfg);
-    if (cr && /^(Skip conflicts|Override existing items|Restore as a copy)/.test(cr.value)) cr.value = ow ? 'Overwrite \u2014 existing records are replaced with the backed-up version' : 'Skip \u2014 existing records are kept and missing records are created';
+    if (cr && /^(Skip|Overwrite|Create a copy)/.test(cr.value)) cr.value = ow ? _wsConflictCopy('record').overSum : _wsConflictCopy('record').skipSum;
     if (ow && _d365EmptyApplies()) {
       var sc2 = !!(X.scope && X.scope.mode !== 'whole'), keep = cfg.d365WriteEmpty === false;
       rows.splice(i < 0 ? rows.length : i + 1, 0, { label: 'Overwrite writes', value: keep ? (sc2 ? 'Only columns in scope that have a value at the restore point' : 'Only columns that have a value at the restore point') : (sc2 ? 'Every column in scope, empty ones included' : 'Every column, empty ones included') });
