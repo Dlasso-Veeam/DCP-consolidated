@@ -3447,13 +3447,18 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
                          impersonates. Client ID + secret sections are hidden for
                          gws; toggled in selectWorkload. -->
                     <div id="manual-gws-extras" style="display:none">
+                      <div class="form-field" style="margin-bottom:24px">
+                        <label class="form-label">Super Admin email<span class="req">*</span></label>
+                        <input class="form-input" type="text" placeholder="admin@yourdomain.com" id="manual-gws-admin-email" oninput="checkManualFields()" />
+                        <span style="font-size: 14px;color:var(--black-60);margin-top:4px;display:block">The Super Admin the service account impersonates under domain-wide delegation. Must match an active Super Admin in your Workspace domain.</span>
+                      </div>
                       <div style="margin-bottom:12px">
                         <div style="font-size:14px;font-weight:500;color:var(--black-100);margin-bottom:4px">Service account credential</div>
                         <div style="font-size: 14px;color:var(--black-60);line-height:18px">Upload the JSON key of the Google Cloud service account you authorized for domain-wide delegation. The key contains the account's identity and key pair — no separate client ID or secret is needed.</div>
                       </div>
-                      <div class="form-field" style="margin-bottom:16px">
+                      <div class="form-field" style="margin-bottom:24px">
                         <label class="form-label">Service account key (.json or .p12)<span class="req">*</span></label>
-                        <div id="gwskey-drop-zone" onclick="document.getElementById('gwskey-file-input').click()" style="border:2px dashed var(--border);border-radius:4px;padding:20px 16px;text-align:center;cursor:pointer;transition:all 0.15s" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--border)'">
+                        <div id="gwskey-drop-zone" onclick="document.getElementById('gwskey-file-input').click()" ondragover="handleGwsKeyDragOver(event)" ondragleave="handleGwsKeyDragLeave(event)" ondrop="handleGwsKeyDrop(event)" style="border:2px dashed var(--border);border-radius:4px;padding:20px 16px;text-align:center;cursor:pointer;transition:all 0.15s" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--border)'">
                           <div id="gwskey-drop-empty">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--black-30)" stroke-width="2" style="margin:0 auto 8px;display:block"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
                             <div style="font-size:14px;color:var(--black-60)">Drag &amp; drop your service account key file here (.json or .p12)</div>
@@ -3469,11 +3474,6 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--green); cursor
                         </div>
                         <input type="file" id="gwskey-file-input" accept=".json,.p12" style="display:none" onchange="handleGwsKeyFile(this)">
                         <span style="font-size: 14px;color:var(--black-60);margin-top:4px;display:block">Downloaded from the Google Cloud console when you created the service account key — JSON (recommended) or P12. Stored encrypted at rest; never logged.</span>
-                      </div>
-                      <div class="form-field" style="margin-bottom:24px">
-                        <label class="form-label">Super Admin email<span class="req">*</span></label>
-                        <input class="form-input" type="text" placeholder="admin@yourdomain.com" id="manual-gws-admin-email" oninput="checkManualFields()" />
-                        <span style="font-size: 14px;color:var(--black-60);margin-top:4px;display:block">The Super Admin the service account impersonates under domain-wide delegation. Must match an active Super Admin in your Workspace domain.</span>
                       </div>
                     </div>
 
@@ -12115,7 +12115,7 @@ var WORKLOADS = {
     prereqs: [
       'A Google Workspace Super Admin is required to install the Veeam connection app and grant domain-wide delegation',
       'Google Workspace Marketplace app installs must be allowed for your domain (Admin console → Apps → Marketplace settings)',
-      'Manual path only: ability to create a Google Cloud service account and authorize it for domain-wide delegation'
+      'Manual path only: ability to create a Google Cloud service account and authorize it for domain-wide delegation, then provide its key file and a Super Admin email'
     ],
     splashHero: {
       title: 'Cloud-Native Backup<br>&amp; Recovery',
@@ -12168,6 +12168,7 @@ var WORKLOADS = {
         icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6"/><path d="M12 3a6 6 0 0 0-4 10.5c.6.55 1 1.33 1 2.15V17h6v-1.35c0-.82.4-1.6 1-2.15A6 6 0 0 0 12 3z"/></svg>' }
     ],
     hideScopeStep: true,   // everything listed above is backed up by default; no separate Scope substep
+    prereqsInHelp: true,   // 'Before you connect' renders in the help panel behind the shared "Requirements apply before connecting" pointer, same as gip/okta/jira/github (user 2026-11-20); the Manual in-card alert is retired (see selectWorkload)
     // Test-connection capability rows (PRD §4.2.3). Scope names are ⚠️
     // PLACEHOLDERS pending the PM's §4.2.2 permissions table — same caveat
     // as helpContent. No propagation row (PRD: no delay). Row 1 (Gmail) is
@@ -12777,16 +12778,32 @@ function handlePfxFile(input) {
 // GWS service-account key upload — same interaction pattern as the PFX zone.
 var gwsKeyFileSelected = false;
 function handleGwsKeyFile(input) {
-  if (input.files && input.files[0]) {
-    gwsKeyFileSelected = true;
-    document.getElementById('gwskey-file-name').textContent = input.files[0].name;
-    document.getElementById('gwskey-drop-empty').style.display = 'none';
-    document.getElementById('gwskey-drop-filled').style.display = 'block';
-    var zone = document.getElementById('gwskey-drop-zone');
-    zone.style.border = '2px solid var(--green)';
-    zone.style.background = 'var(--blue-light)';
-    checkManualFields();
-  }
+  if (input.files && input.files[0]) setGwsKeyFile(input.files[0]);
+}
+function setGwsKeyFile(file) {
+  gwsKeyFileSelected = true;
+  document.getElementById('gwskey-file-name').textContent = file.name;
+  document.getElementById('gwskey-drop-empty').style.display = 'none';
+  document.getElementById('gwskey-drop-filled').style.display = 'block';
+  var zone = document.getElementById('gwskey-drop-zone');
+  zone.style.border = '2px solid var(--green)';
+  zone.style.background = 'var(--blue-light)';
+  checkManualFields();
+}
+// Drop support, same behaviour as the Google Identity zone (handleGipKeyDrop). Only .json / .p12
+// are accepted, matching the file input's accept filter.
+function handleGwsKeyDragOver(e) {
+  e.preventDefault();
+  document.getElementById('gwskey-drop-zone').style.borderColor = 'var(--green)';
+}
+function handleGwsKeyDragLeave(e) {
+  if (!gwsKeyFileSelected) document.getElementById('gwskey-drop-zone').style.borderColor = 'var(--border)';
+}
+function handleGwsKeyDrop(e) {
+  e.preventDefault();
+  var f = e.dataTransfer.files && e.dataTransfer.files[0];
+  if (f && /\.(json|p12)$/i.test(f.name)) setGwsKeyFile(f);
+  else if (!gwsKeyFileSelected) document.getElementById('gwskey-drop-zone').style.borderColor = 'var(--border)';
 }
 function clearGwsKeyFile() {
   gwsKeyFileSelected = false;
@@ -13292,7 +13309,7 @@ function selectWorkload(wl, skipNav) {
     } else if (wl === 'gws') {
       // ⚠️ Placeholder pending PM credential spec (PRD §4.4 unfilled) —
       // modeled on Google's standard service-account + DWD pattern.
-      manualDesc.textContent = 'Provide a Google Cloud service account key file (JSON or P12) authorized for domain-wide delegation';
+      manualDesc.textContent = 'Provide your Google Cloud service account\u2019s key file and a Super Admin email for delegation';
     } else if (wl === 'ad') {
       manualDesc.textContent = 'Enter the forest, a domain controller, and a Domain Admin account';
     } else if (wl === 'gip') {
@@ -13698,6 +13715,12 @@ function selectWorkload(wl, skipNav) {
       bullets.push('<strong>Atlassian Guard</strong> tenants: add a Data Security Policy app-access exception for Veeam DCC on in-scope spaces, and add the published Veeam egress IP ranges if IP allowlisting is enabled — otherwise discovery returns empty or 403 per space.');
       bullets.push('Site on a <strong>Standard, Premium, or Enterprise</strong> plan. Free-tier eligibility is TBD — Free caps installed apps at 10.');
     }
+    if (wl === 'gws') {
+      // Same rows as the catalog card's "Minimum requirements" (PRD Workload Card),
+      // reused word for word so the requirements live in one place. The Manual walkthrough
+      // stays in the help drawer's Manual section, reached from this same "View in Help" pointer.
+      w.prereqs.forEach(function(p) { bullets.push(p); });
+    }
     if (wl === 'gip') {
       // Manual is the only path offered at launch (user 2026-09-25) —
       // its setup is genuinely multi-step, so it's treated as a prereq
@@ -13817,8 +13840,15 @@ function selectWorkload(wl, skipNav) {
       // the PM's credential spec (PRD §4.4 unfilled): modeled on Google's
       // standard service-account + domain-wide-delegation pattern. Full
       // walkthrough lives in the help drawer.
-      manualInfoCard.style.display = 'flex';
-      if (manualInfoText) manualInfoText.innerHTML = 'Create a Google Cloud service account, authorize its client ID for domain-wide delegation in the Admin console (Security → API controls), then upload its key file (JSON or P12) and a Super Admin email here. <a href="#" onclick="event.preventDefault();event.stopPropagation();toggleHelpDrawer();return false;" style="color:var(--green);text-decoration:underline">View detailed steps</a>.';
+      // Reworked to prereqsInHelp (user 2026-11-20), same as gip: the shared
+      // "Requirements apply before connecting" pointer + the help panel carry
+      // this, so the screen shows one alert, not two. The numbered steps stay
+      // in the help drawer's Manual section.
+      // was: manualInfoCard 'flex' + "Create a Google Cloud service account,
+      // authorize its client ID for domain-wide delegation in the Admin console
+      // (Security → API controls), then upload its key file (JSON or P12) and a
+      // Super Admin email here. View detailed steps."
+      manualInfoCard.style.display = 'none';
     } else {
       manualInfoCard.style.display = hasUpfrontPrereqs ? 'none' : 'flex';
       if (manualInfoText) manualInfoText.textContent = 'Create an Entra ID app registration in your Azure Portal, assign the required permissions, then enter the credentials here.';
