@@ -40969,6 +40969,10 @@ function _restoreAvailability(r) {
     // individually-restorable = EXPORT primary, through the export-through-
     // cart pattern. A Calendar ACL Rule exports its sharing grant, a Chat
     // Membership its roster record.
+    // PM 2026-11-23, read by the user as a general statement: chat spaces are not restorable, only exportable (to be confirmed with engineering). That means EVERY Chat Space and Chat Message, in the tenant's Chat spaces section and inside a user's Chat folder,
+    // and the user's Chat folder itself (it is only a container for them). The export/restore purity guard then keeps a cart all one or all the other. was: only the tenant-level spaces (gws-sec-spaces); a user's chats stayed restorable.
+    if (r.type === 'Chat Space' || r.type === 'Chat Message') return 'export';
+    if (r.type === 'Folder' && /^gws-user-.+-chat$/.test(r.id || '')) return 'export';
     if (r.type === 'Membership') return 'export';
     if (r.type === 'ACL Rule') return 'export';
     // Terminal: every other GWS row is single-item restorable. Falling
@@ -42031,7 +42035,9 @@ function planIsExportOnly() {
 // True when adding `keyOrResource` would cross the cart's category lock.
 // Shared by every add surface (row checkbox, seg-btn, folder card, drawer).
 var _frLockWhy = null, _frLockName = '', _frLockName2 = '';   // why the last forest lock check refused: 'plan' (the job holds a forest, the item is something else), 'other-forest' (both are forests) or 'cand' (the item is a forest and the job holds other items); the forest's name
+var _purityCand = false;   // the last lock check refused because the item is export-only and the job restores (the message must say that, not blame the kind or the user)
 function _categoryLockBlocks(keyOrResource) {
+  _purityCand = false;
   if (keyOrResource && typeof keyOrResource === 'object' && keyOrResource.vm && keyOrResource.vm.dcId) keyOrResource = keyOrResource.vm.dcId;   // a virtual machine that is also a domain controller is judged as the domain controller
   else keyOrResource = _planKey(keyOrResource);
   // A forest restores on its own: once the job holds one, nothing else joins it, and a forest can't join a job that already holds something.
@@ -42058,7 +42064,7 @@ function _categoryLockBlocks(keyOrResource) {
     if (typeof _exportCartEligibleKey === 'function' && typeof planIsExportOnly === 'function') {
       var _candExp = _exportCartEligibleKey(keyOrResource);
       var _planExp = planIsExportOnly();
-      if (_candExp !== _planExp) return true;
+      if (_candExp !== _planExp) { _purityCand = _candExp && !_planExp; return true; }
     }
   }
   // One container per job (user 2026-07-16): compare root ancestors by
@@ -42112,6 +42118,7 @@ function _categoryLockMsg() {
   if (_frLockWhy === 'vm-platform') return 'This job restores virtual machines backed up from ' + _frLockName + ', and ones from ' + _frLockName2 + ' can’t join it. Clear the job to add them.';
   if (_frLockWhy === 'cand-rodc') return _frLockName + ' is a read-only domain controller, which can’t be restored, only exported. Clear the job to export it.';
   if (_frLockWhy === 'cand-dc') return _frLockName + ' is a domain controller, and domain controllers can’t be restored alongside other items. Clear the job to add it.';
+  if (_purityCand) return 'Restore job can\u2019t include export-only items. Clear the job to start an export.';
   if (typeof planIsExportOnly === 'function' && planIsExportOnly()) {
     return 'This job is an export — only export-only items can join it. Clear the job to restore items.';
   }
@@ -43483,7 +43490,9 @@ function wsGetSteps() {
   }
   // Google Workspace: only a course asks anything at Restore options (who owns it). Every other kind has exactly one
   // place to land, so there is no decision to present \u2014 the step is dropped and the Summary states the destination.
-  if (typeof planActiveWorkload === 'function' && planActiveWorkload() === 'Google Workspace' && planActiveGwsKind() !== 'course') {
+  // PM 2026-11-23: user content (mailbox, Drive, calendar, contacts, chats) can land in a DIFFERENT existing user's account of the same tenant, and a shared drive can land in another shared drive, so those two kinds ask where at Restore options.
+  // Chat spaces (export only, to be defined with engineering) and courses (their own owner question) are unchanged. A different tenant and download are out of scope for v1.
+  if (typeof planActiveWorkload === 'function' && planActiveWorkload() === 'Google Workspace' && ['course', 'user', 'drive'].indexOf(planActiveGwsKind()) < 0) {
     steps = steps.filter(function(s){ return s.id !== 2; });
   }
   return steps;
@@ -43822,12 +43831,14 @@ function wsRenderFooterV2() {
     var _wlFoot = (typeof planActiveWorkload === 'function') ? planActiveWorkload() : null;
     var _destPickPending =
       (_wlFoot === 'Power Platform' && ws.config && ws.config.ppDest === 'cross' && !ws.config.ppTargetEnvId)
-      || (isD365 && ws.config && ws.config.d365TargetEnv === 'cross' && !ws.config.d365TargetEnvName);
+      || (isD365 && ws.config && ws.config.d365TargetEnv === 'cross' && !ws.config.d365TargetEnvName)
+      || (_wlFoot === 'Google Workspace' && ws.config && ws.config.gwsDest === 'other' && !ws.config.gwsTarget && ['user', 'drive'].indexOf(planActiveGwsKind()) >= 0);
+    var _destPickMsg = (_wlFoot === 'Google Workspace') ? (planActiveGwsKind() === 'drive' ? 'Select a target shared drive to continue' : 'Select a target user to continue') : 'Select a target environment to continue';
     var _destGateAttrs = _destPickPending
-      ? ' disabled aria-disabled="true" data-tooltip="Select a target environment to continue"'
+      ? ' disabled aria-disabled="true" data-tooltip="' + _destPickMsg + '"'
       : '';
     var _destGateWrap = function(btn){
-      return _destPickPending ? '<span class="icon-dtip" style="flex:1;display:flex" data-tooltip="Select a target environment to continue">' + btn + '</span>' : btn;
+      return _destPickPending ? '<span class="icon-dtip" style="flex:1;display:flex" data-tooltip="' + _destPickMsg + '">' + btn + '</span>' : btn;
     };
     // Export is a Destination card for every workload now (D365 included); the footer is Back + Continue.
     inner.innerHTML = back
@@ -46780,6 +46791,7 @@ function wsRenderReviewGWS(n, noun, cfg, part) {
     var body = kind === 'user'
       ? 'Recover into the original user account, in its original folder structure.'
       : 'Recover to the source location in its original structure.';
+    if (kind === 'user' || kind === 'drive') return wsDestStepHtml(_gwsDestBody(kind, cfg, choice, body));
     return wsDestStepHtml('<div class="ws-cfg-choices">' + choice(true, 'void 0', 'Original location', body) + '</div>');
   }
   var html = '<div class="ws-step-pad"><div class="ws-step-header">'
@@ -46787,7 +46799,11 @@ function wsRenderReviewGWS(n, noun, cfg, part) {
     + '<div class="ws-step-description">Choose how conflicts are handled, then record why you&rsquo;re running it.</div></div>'
     // Where the job lands is a fact, not a choice (the Restore options step is dropped for these kinds) \u2014 stated in the shared Vision alert so it can't be missed.
     + (kind === 'course' ? '' : '<div class="vis-alert" role="note" style="margin-bottom:16px">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('info-outlined', 24)) || '')
-        + '<div class="vis-alert-txt">' + (kind === 'user' ? 'Restoring into ' + ((function(){ var _au = planActiveGwsUser(); return _au ? wsEscape(_au.name) + '\u2019s account' : 'the original user account'; })()) + ', in its original folder structure.' : 'Restoring to the original location, in its original structure.') + '</div></div>');
+        + '<div class="vis-alert-txt">' + (function(){
+            var _t = (cfg.gwsDest === 'other' && cfg.gwsTarget) ? _resById(cfg.gwsTarget) : null, _au = planActiveGwsUser();
+            if (kind === 'user') return _t ? 'Restoring ' + (_au ? wsEscape(_au.name) + '\u2019s items' : 'the items') + ' into ' + wsEscape(_t.name) + '\u2019s account.' : 'Restoring into ' + (_au ? wsEscape(_au.name) + '\u2019s account' : 'the original user account') + ', in its original folder structure.';
+            return _t ? 'Restoring into the shared drive ' + wsEscape(_t.name) + '.' : 'Restoring to the original location, in its original structure.';
+          })() + '</div></div>');
   var skipBody = kind === 'course' ? 'Leave the existing course untouched' : _wsConflictCopy(gn).skipBody;
   var overBody = kind === 'course' ? 'Create the course from the backup even when one of the same name is already present' : _wsConflictCopy(gn).overBody;
   var sections = [];
@@ -46818,6 +46834,55 @@ function wsRenderReviewGWS(n, noun, cfg, part) {
 function wsGwsSet(k, v){ if(!ws.config) ws.config={}; ws.config[k]=v; wsRenderAll(); }
 function wsGwsToggle(k){ if(!ws.config) ws.config={}; ws.config[k]=!ws.config[k]; wsRenderAll(); }
 function wsGwsToggleAdv(){ ws.gwsAdvExpanded=!ws.gwsAdvExpanded; wsRenderAll(); }
+// ── Google Workspace destination (PM 2026-11-23): another existing user in the same tenant, or another shared drive ────────────────────────────────────────────────────────────────────────────
+// Same two-card pattern as the Jira / Power Platform destination (Original location | an alternate), with the app's own trigger + searchable popover (.rl-trig / .rl-pop) for the target, because a tenant has hundreds of users.
+function _gwsTargetCandidates(kind) {
+  var src = (kind === 'user') ? planActiveGwsUser() : null, inCart = {}; state.restorePlan.forEach(function(_, k){ inCart[k] = 1; });
+  return RESOURCES.filter(function(r){
+    if (r.wl !== 'Google Workspace' || r.existence === 'deleted-in-live') return false;
+    if (kind === 'user') return r.type === 'User' && (!src || r.id !== src.id);
+    return r.type === 'Drive' && _gwsKindOf(r.id) === 'drive' && !inCart[r.id];
+  }).sort(function(a, b){ return a.name.localeCompare(b.name); });
+}
+function _gwsDriveCount() { var n = 0; state.restorePlan.forEach(function(_, k){ if (_gwsKindOf(k) === 'drive') n++; }); return n; }
+function _gwsTargetPicker(kind, cfg) {
+  /* PM/user 2026-11-23: the picker lives INSIDE the "Another ..." selection card. The list has no radios: the chosen row takes the List Item selected state (Green/S5 fill, 2px Green/S80 bar) and sits at the top, out of the list below it. Rows are the workload picker's own (.tnwl-item). */
+  var P = ws.gwsPick || (ws.gwsPick = { open: false, q: '' }), list = _gwsTargetCandidates(kind), sel = cfg.gwsTarget ? _resById(cfg.gwsTarget) : null, noun = kind === 'user' ? 'user' : 'shared drive';
+  var q = (P.q || '').trim().toLowerCase(), match = function(r){ return !q || r.name.toLowerCase().indexOf(q) >= 0; };
+  var hits = list.filter(function(r){ return match(r) && !(sel && r.id === sel.id); }), shown = hits.slice(0, 50);
+  var mag = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('search-outlined', 20)) || '';
+  var chev = ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('keyboard-arrow-down-outlined', 20)) || '').replace('width="20" height="20"', 'width="16" height="16"');
+  var item = function(r, on){ return '<button type="button" class="tnwl-item' + (on ? ' is-active' : '') + '" role="option" aria-selected="' + !!on + '" onclick="wsGwsSetTarget(\'' + r.id + '\')">' + wsEscape(r.name) + '</button>'; };
+  var rows = (sel && match(sel) ? item(sel, true) : '') + shown.map(function(r){ return item(r, false); }).join('');
+  if (!rows) rows = '<div class="rl-cnote">No ' + noun + 's match.</div>';
+  var selShown = (sel && match(sel)) ? 1 : 0, total = hits.length + selShown;
+  var foot = hits.length > shown.length ? 'Showing the first ' + (shown.length + selShown) + ' of ' + total + ' ' + noun + 's. Search to narrow the list.' : (q ? total + ' of ' + list.length + ' ' + noun + 's' : list.length + ' ' + noun + 's in this tenant');   /* the bottom bar carries the count and the truncation note */
+  var pop = P.open ? '<div class="rl-pop" onclick="event.stopPropagation()"><div class="tnwl-search rl-search">' + mag + '<input id="wsGwsTq" type="text" autocomplete="off" placeholder="Search ' + noun + 's" value="' + wsEscape(P.q || '') + '" oninput="wsGwsPickQ(this.value)"></div>'
+    + '<div class="tnwl-list" role="listbox">' + rows + '</div><div class="rl-pf"><span class="rl-sp">' + foot + '</span></div></div>' : '';
+  return '<div class="ws-subchoice-label" style="margin-bottom:8px">' + (kind === 'user' ? 'Target user' : 'Target shared drive') + '</div><div class="rl-popwrap"><button type="button" class="rl-trig" onclick="wsGwsPickToggle(event)" aria-haspopup="listbox" aria-expanded="' + !!P.open + '"><span class="rl-trig-val">' + (sel ? wsEscape(sel.name) : 'Select a ' + noun) + '</span><span class="rl-trig-chev">' + chev + '</span></button>' + pop + '</div>';
+}
+function _gwsDestBody(kind, cfg, choice, origBody) {
+  var other = cfg.gwsDest === 'other', noun = kind === 'user' ? 'user' : 'shared drive';
+  var blocked = kind === 'drive' && _gwsDriveCount() > 1;   // one target drive for several source drives would merge them: choose one at a time
+  var altBody = kind === 'user' ? 'Restore into a different existing user\u2019s account in this tenant.' : (blocked ? 'Available when one shared drive is selected.' : 'Restore into a different existing shared drive in this tenant.');
+  var alt;
+  if (blocked) alt = '<button class="ws-cfg-choice is-disabled" type="button" disabled aria-disabled="true"><span class="ws-cfg-radio"></span><span class="ws-cfg-choice-text"><span class="ws-cfg-choice-title">Another ' + noun + '</span><span class="ws-cfg-choice-body">' + altBody + '</span></span></button>';
+  else {
+    // a selection card that holds its own entry: a div (a button cannot contain the picker), the picker sits in the card once it is chosen
+    var sel = other;
+    alt = '<div class="ws-cfg-choice' + (sel ? ' is-selected' : '') + '" role="radio" aria-checked="' + sel + '" tabindex="0" onclick="wsGwsSetDest(\'other\')" onkeydown="if (event.target === this && (event.key === \' \' || event.key === \'Enter\')) { event.preventDefault(); wsGwsSetDest(\'other\'); }">'
+      + '<span class="ws-cfg-radio"' + (sel ? ' data-selected="1"' : '') + '></span>'
+      + '<span class="ws-cfg-choice-text"><span class="ws-cfg-choice-title">Another ' + noun + '</span><span class="ws-cfg-choice-body">' + altBody + '</span>'
+      + (sel ? '<div class="ws-target-card-detail" onclick="event.stopPropagation()">' + _gwsTargetPicker(kind, cfg) + '</div>' : '') + '</span></div>';
+  }
+  return '<div class="ws-cfg-choices">' + choice(!other || blocked, "wsGwsSetDest('original')", 'Original location', origBody) + alt + '</div>';
+}
+function wsGwsSetDest(v) { if (!ws.config) ws.config = {}; ws.config.gwsDest = v; if (v !== 'other') ws.config.gwsTarget = ''; if (ws.gwsPick) { ws.gwsPick.open = false; ws.gwsPick.q = ''; } wsRenderAll(); }
+function wsGwsPickToggle(e) { if (e) e.stopPropagation(); var P = ws.gwsPick || (ws.gwsPick = { open: false, q: '' }); P.open = !P.open; P.q = ''; wsRenderAll(); if (P.open) setTimeout(function(){ var i = document.getElementById('wsGwsTq'); if (i) i.focus(); }, 0); }
+function wsGwsPickQ(v) { ws.gwsPick.q = v; wsRenderAll(); setTimeout(function(){ var i = document.getElementById('wsGwsTq'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 0); }
+function wsGwsSetTarget(id) { if (!ws.config) ws.config = {}; ws.config.gwsTarget = id; if (ws.gwsPick) { ws.gwsPick.open = false; ws.gwsPick.q = ''; } wsRenderAll(); }
+document.addEventListener('click', function(){ if (typeof ws !== 'undefined' && ws && ws.gwsPick && ws.gwsPick.open) { ws.gwsPick.open = false; wsRenderAll(); } });
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && typeof ws !== 'undefined' && ws && ws.gwsPick && ws.gwsPick.open) { ws.gwsPick.open = false; wsRenderAll(); } });
 
 // ── Entra ID Configure step = VDC's "Options" (verified in the VDC Entra ID restore wizards, 2026-11-12, never submitted) ───────────────────────
 // Common to every restorable category: Conflict handling (VDC calls it Restore mode; Skip | Overwrite · full object restore), Advanced (Reason, Keep relationships + Merge | Overwrite, Restore from Entra ID Recycle Bin).
@@ -48652,12 +48717,12 @@ function _d365RelCfgSection() {
   var roots = _d365RelRoots(); if (!roots.length) return '';
   var c = _d365RelCfg(), over = roots.length > D365REL_MAX_ROOTS, on = !!c.on && !over;
   var icon = (typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('child-roles-outlined', 20)) || '';
-  var tip = 'Related records are the records that point to your selection (children, such as contacts and cases) and the records it points to (parents, such as a parent account). Only direct links are followed unless you raise Levels. What happens to related records that already exist is chosen under Conflict handling.';
+  var tip = 'Related records are the records that point to your selection (children, such as contacts and cases) and the records it points to (parents, such as a parent account). Only direct links are followed unless you raise Levels. What happens to related records that already exist is chosen in this card, once it is on.';
   var key = "if (event.key === ' ' || event.key === 'Enter') { event.preventDefault(); wsRelCfgToggle(); }";
   var attrs = over ? ' aria-disabled="true" tabindex="-1"' : ' tabindex="0" onclick="wsRelCfgToggle()" onkeydown="' + key + '"';
   var head = '<div class="sc-header" role="switch" aria-checked="' + on + '"' + attrs + '><span class="rc-icon">' + icon + '</span><span class="ws-cfg-choice-title">Include related records</span><span class="rc-tg">' + (on ? _ADV_TOG_ON : _ADV_TOG_OFF) + '</span></div>'
     + '<div class="sc-desc"><div class="rl-def">Records directly linked to your selection, like an account’s contacts and cases. <span class="rl-how" data-tooltip="' + wsEscape(tip) + '">How this works</span></div></div>';
-  var card = '<div class="ws-cfg-choice sc rc-card' + (on ? ' is-selected' : '') + (over ? ' is-disabled' : '') + '" role="group" aria-label="Include related records">' + head + (on ? '<div class="rc-body">' + _d365RelScopeRow() + '</div>' : '') + '</div>';
+  var card = '<div class="ws-cfg-choice sc rc-card' + (on ? ' is-selected' : '') + (over ? ' is-disabled' : '') + '" role="group" aria-label="Include related records">' + head + (on ? '<div class="rc-body">' + _d365RelScopeRow() + _d365RelModeHtml() + '</div>' : '') + '</div>';
   var limit = over ? '<div class="vis-alert" role="status" style="margin-top:12px">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('info-outlined', 24)) || '')
     + '<div class="vis-alert-txt">Related records can be included for up to ' + D365REL_MAX_ROOTS + ' records. You have ' + roots.length + ' selected. Remove ' + (roots.length - D365REL_MAX_ROOTS) + (roots.length - D365REL_MAX_ROOTS === 1 ? ' record' : ' records') + ' to turn this on.</div></div>' : '';
   return '<div class="ws-cfg-section rc-cfg-sec"><div class="ws-cfg-section-hdr"><div class="ws-cfg-section-title">Related records</div></div>'
@@ -49429,8 +49494,6 @@ function wsRenderReviewD365(variant, n, noun, cfg) {
     + '<div class="ws-step-description">Review how this Dynamics 365 restore will run.</div>'
   + '</div>';
   var sections = [];
-  // Related records first (design D2, 2026-11-23): the related-records rule sits under Conflict handling, so the switch that causes it comes before it.
-  var _relCfgHtml = _d365RelCfgSection(); if (_relCfgHtml) sections.push(_relCfgHtml);
   // Conflict handling — mirrors the Power Platform model (Skip /
   // Override / Create a copy) for cross-workload consistency rather than
   // inventing a D365-only set. The options are scope-aware:
@@ -49475,11 +49538,12 @@ function wsRenderReviewD365(variant, n, noun, cfg) {
       + '<div class="ws-cfg-section-body">'
         + '<div class="ws-cfg-choices" style="grid-template-columns:repeat(' + conflictCols + ',1fr)">' + conflictBody + '</div>'
         + ((cm === 'override' && _d365EmptyApplies()) ? '<div class="d365-empty-line">' + _d365EmptySentence(cfg) + '. Change in <button type="button" class="rl-lnk" onclick="wsD365OpenAdvEmpty()">Advanced settings</button>.</div>' : '')
-        + ((cfg.d365Rel && cfg.d365Rel.on) ? _d365RelModeHtml() : '')
+        // PM 2026-11-23: the related-records choice lives in the Include related records card itself (_d365RelCfgSection), not here: nothing is switched on in one place and shown in another.
       + '</div>'
     + '</div>'
   );
-  // Related records: ONE switch right after Conflict handling (REL_OPT 'T', PM ruling 2026-11-20).
+  // Related records: right after Conflict handling (REL_OPT 'T', PM ruling 2026-11-20). 2026-11-23: it briefly came first so the related-records rule could sit under Conflict handling; that rule now lives inside this card, so Conflict handling leads again.
+  var _relCfgHtml = _d365RelCfgSection(); if (_relCfgHtml) sections.push(_relCfgHtml);
   // was: the Select step carried a card, tabs and a paged list of the related records (REL_OPT 'H', parked); before that, Advanced held "Restore related records" with depth fields.
   // Advanced settings (collapsed by default, last before the reason block): the same chrome as every other workload's
   // advanced section. Each row is a switch; the controls a switch reveals sit directly under it.
@@ -51915,7 +51979,8 @@ function wsBuildConfigSummary() {
         ? (_cn > 1 ? 'All ' + _cn + ' courses \u2192 ' + _tch : _tch)
         : (_cn > 1 ? 'Each course\u2019s original owner \u2014 new course IDs are issued' : 'Original owner \u2014 a new course ID is issued') });
     } else {
-      rows.push({ label: 'Destination', value: _gk === 'user' ? 'Original location \u2014 the owning user\u2019s account' : 'Original location' });
+      var _gt = (cfg.gwsDest === 'other' && cfg.gwsTarget) ? _resById(cfg.gwsTarget) : null;
+      rows.push({ label: 'Destination', value: _gt ? (_gk === 'user' ? 'Another user \u2014 ' : 'Another shared drive \u2014 ') + _gt.name : (_gk === 'user' ? 'Original location \u2014 the owning user\u2019s account' : 'Original location') });
     }
     rows.push({ label: 'Conflict handling', value: cfg.gwsMode === 'overwrite'
       ? (_gk === 'course' ? (state.restorePlan.size > 1 ? 'Overwrite \u2014 create each course even when one of the same name exists' : 'Overwrite \u2014 create the course even when one of the same name exists') : 'Overwrite \u2014 existing ' + _gn + 's are replaced with the backup')
@@ -53148,11 +53213,11 @@ function wsCompareTableHtml(resourceId, item, rps, selRp) {
     if (displayRpId === 'prod') return ''; // production is never an Add target
     if (isCommitted) {
       // C2 toggle (2026-07-29): Success rest / Destructive hover reveal.
-      return _rwAddedToggleHtml('wsRemoveFromRestore(\''+safeId+'\')', 'Added to restore');
+      return _rwAddedToggleHtml('wsRemoveFromRestore(\''+safeId+'\')', 'Selected for restore');
     }
     return '<button class="rw-use-side-btn" onclick="wsAddSideToRestore(\''+safeId+'\',\''+side+'\')" data-tooltip="Use this restore point">'
       + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
-      + 'Add to restore'
+      + 'Select for restore'
     + '</button>';
   }
 
@@ -53287,7 +53352,7 @@ function _rwAddedToggleHtml(removeCall, addedLabel) {
   return '<button type="button" class="rw-added-toggle' + latch + '"' +
     ' onmouseleave="this.classList.remove(\'just-added\')"' +
     ' onclick="if(this.classList.contains(\'just-added\'))return;' + removeCall + '"' +
-    ' aria-label="Added to restore \u2014 activate to remove">' +
+    ' aria-label="Selected for restore \u2014 activate to remove">' +
     '<span class="lbl-added">' + _rwIco('sd-log-check') + addedLabel + '</span>' +
     '<span class="lbl-remove">' + _rwIco('close-outlined') + 'Remove</span>' +
   '</button>';
@@ -54231,12 +54296,12 @@ function rdCtaLabels() {
     };
   }
   return {
-    add:           'Add to restore',
-    added:         '&#10003;&nbsp;Added to restore',
-    addedPlain:    'Added to restore',
-    addCompact:    'Restore',
-    addedCompact:  'Added',
-    toast:         'added to restore'
+    add:           'Select for restore',
+    added:         '&#10003;&nbsp;Selected',
+    addedPlain:    'Selected',
+    addCompact:    'Select',
+    addedCompact:  'Selected',
+    toast:         'selected for restore'
   };
 }
 
@@ -61352,18 +61417,18 @@ function rdBuildSideAction(side, sel, resource) {
         // The OTHER column keeps a live Select (user 2026-07-15): clicking it
         // re-points the job to this column's point and the badge flips sides.
         return '<button class="rw-use-side-btn" onclick="rdAddFromPoint(\'' + side + '\')" data-tooltip="Moves the job\u2019s restore point to the point shown in this column.">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add to restore</button>';
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Select for restore</button>';
       }
       // C2 toggle (2026-07-29): Success rest / Destructive hover reveal.
       return _rwAddedToggleHtml('rdRemoveFromRestore()', _afLabels.addedCompact);
     }
-    var _afBtnInner = _rwIco('add-outlined') + _rwAddLbl('Add to restore', 'Add');
+    var _afBtnInner = _rwIco('add-outlined') + _rwAddLbl('Select for restore', 'Select');   // PM 2026-11-23: the verb is Select (was: Add to restore / Add)
     var _afLockArg = rdState.fieldScope ? _rdPlanId() : resource;   // a field is checked as a field, not as the record that holds it
     if (_afLockArg && typeof _categoryLockBlocks === 'function' && _categoryLockBlocks(_afLockArg)) {
       return '<span class="icon-dtip" data-tooltip="' + _categoryLockMsg().replace(/"/g, '&quot;') + '">' +
         '<button class="rw-use-side-btn" disabled aria-disabled="true" style="pointer-events:none">' + _afBtnInner + '</button></span>';
     }
-    return '<button class="rw-use-side-btn" onclick="rdAddFromPoint(\'' + side + '\')" aria-label="Add to restore" data-tooltip="Adds this item to the restore job, restoring from the point shown in this column.">' + _afBtnInner + '</button>';
+    return '<button class="rw-use-side-btn" onclick="rdAddFromPoint(\'' + side + '\')" aria-label="Select for restore" data-tooltip="Selects this item for the restore job, restoring from the point shown in this column.">' + _afBtnInner + '</button>';
   }
   // CART RE-ANCHOR (single-RP cart): with items in the cart and the as-of lens
   // owning the point, EITHER compare column can move the WHOLE cart to its
@@ -77694,6 +77759,9 @@ window.D365X.recChip = function (key, item) {
       [].slice.call(bar.querySelectorAll('.dxs-btn, .dxs-dtip, .dxs-seg')).forEach(function (o) { o.remove(); });
       [].slice.call(bar.querySelectorAll('.dxs-rdis')).forEach(function (w) { var b0 = w.querySelector('button'); if (b0) { b0.disabled = false; b0.removeAttribute('aria-disabled'); w.parentNode.insertBefore(b0, w); } w.remove(); });
       if (!applies()) return;
+      /* PM 2026-11-23: the bar is busy, so Whole records | Specific columns shows only once at least one record is selected. It stays when a scope is already set (columns chosen, or Changed columns) or while comparing two dates,
+         so a choice that is in force is never hidden. It sits left of Restore, whose right edge does not move, so appearing it shifts nothing but the free space to its left. (Choosing columns BEFORE selecting any record is no longer possible.) */
+      if (!(recKeys().length > 0 || S.mode !== 'whole' || X.on())) { if (panelEl && S.mode === 'whole') closePanel(); return; }
       var anchor = bar.querySelector('.dx-rs') || bar.querySelector('.tab-right-primary'); if (!anchor) return;
       /* 2026-11-21 (user): the "Restore scope" dropdown is a Button Tabs segmented control: Whole records | Specific columns. Specific columns is also the way to the picker: choosing it sets the scope AND opens the list beneath it (again = close); Whole records closes it.
          was: one .dxs-btn ("Restore scope  <value> v") that opened a three-row menu whose Specific columns row slid the panel to the picker. The menu pane, onScopeClick and the back row are left in place, unreferenced. */
@@ -77976,6 +78044,7 @@ window.D365X.recChip = function (key, item) {
     [].slice.call(tbl.querySelectorAll('thead th[data-col-key]')).forEach(function (th) {
       var col = rawByKey[th.getAttribute('data-col-key')]; if (!col || all.indexOf(col) < 0) return;
       var on = S.mode === 'chosen' && !!S.cols[col], blocked = !on && lastOne, b = document.createElement('button');
+      if (!on) return;   /* PM 2026-11-23: a header can REMOVE a chosen column, never add one; adding is done only in the column list (the + below is parked, not deleted) */
       b.type = 'button'; b.className = 'dx-col-tick' + (on ? ' on' : '') + (on && X._justCol === col ? ' just' : ''); b.setAttribute('data-col', col); b.setAttribute('aria-pressed', on ? 'true' : 'false');
       /* 2026-11-22 (user, header option A): the header is quiet at rest. The label side sorts as it always did; this control is its own zone at the far edge, shown on hover, and it stays once the column is chosen.
          A chosen column's check turns into a close on hover (a click removes the column), except right after it was added while the pointer is still on it (.just: it keeps the check until the pointer leaves and returns).
@@ -78083,8 +78152,8 @@ window.D365X.recChip = function (key, item) {
     '.rc-icon { display: inline-flex; flex: none; } .rc-cb { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; display: inline-flex; color: var(--black-40); } .rc-card.is-selected .rc-cb { color: var(--em-green); } .rc-cb svg { display: block; }',
     '.rc-card .sc-desc { display: block; } .rc-card .sc-desc .rl-def { margin: 0; padding: 0; font: inherit; color: inherit; } .rc-line { margin-top: 4px; font-size: 14px; line-height: 20px; color: var(--black-60); } .rc-line b { font-weight: 500; color: var(--black-100); }',
     '.rc-body { border-top: 1px solid var(--black-10); padding: 0; background: var(--white); border-radius: 0 0 3px 3px; }',
-    '.rc-cfg-sec .rc-card { margin-top: 0; } .rc-cfg-sec .rc-card .sc-header { padding-right: 56px; } .rc-tg { position: absolute; top: 7px; right: 8px; display: inline-flex; } .rc-tg svg { display: block; }',
-    '.rc-cfg-sec .rc-body { padding: 0 12px 12px; } .rc-cfg-sec .rl-scope { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 0 0; border-top: none; }',
+    '.rc-cfg-sec .rc-card { margin-top: 0; } .rc-cfg-sec .rc-card > .sc-header { padding-right: 56px; } .rc-tg { position: absolute; top: 7px; right: 8px; display: inline-flex; } .rc-tg svg { display: block; }',
+    '.rc-cfg-sec .rc-body { padding: 0 12px 12px; } .rc-cfg-sec .rc-body .ws-subchoice { margin-top: 16px; } .rc-cfg-sec .rc-body .ws-cfg-choice { cursor: pointer; } .rc-cfg-sec .rl-scope { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 0 0; border-top: none; }',
     '.dxs-alert { padding: 0; } .dxs-alert + .rd-rel-sec { margin-top: 12px; } .dxs-alert .ws-btn { font-size: 16px; line-height: 22px; }',
     '.dxs-type-btn { border: 0; font-family: inherit; cursor: pointer; } .dxs-type-btn:hover { background: var(--black-10); } .dxs-type-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--white), 0 0 0 4px var(--em-green); }',
     '.dxs-line { margin-left: auto; font-size: 14px; line-height: 20px; color: var(--black-60); }',

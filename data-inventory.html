@@ -3403,11 +3403,12 @@ function ghTd(r, k) {
   if (k === 'lb') return '<td>' + (r.lb ? r.lb : '&mdash;') + '</td>';
   if (k === 'id') return '<td><span class="inv-id" data-plv-tip="' + esc(r.id) + '">' + esc(r.id) + '</span></td>';
   if (k !== 'ep') return '<td>' + esc(r[k]) + '</td>';
-  var ep = effective(r.o, POLS), others = otherCover(r.o);
-  var cell = (ep ? '<span class="atp-ep-name">' + esc(ep.name) + '</span>' : '<span style="color:var(--black-60)">&ndash;</span>')
-    + (others.length ? ' <span class="vchip vchip-green atp-flag" data-plv-tip="' + others.length + (others.length === 1 ? ' other policy also covers' : ' other policies also cover') + ' this object. Click to see the ladder.">+' + others.length + '</span>' : '')
+  // PM feedback 2026-11-23: the table shows ONLY the effective policy, as its own column, linked to that policy's page. The full ladder (the "+N other policies" flag and the ladder drawer) is not on this table any more.
+  // was: a "+N" flag and a click that opened the ladder drawer (openLadder, ladderHtml and the drawer markup are kept, unreferenced).
+  var ep = effective(r.o, POLS);
+  var cell = (ep ? '<a class="inv-link atp-ext" href="backup-policies.html" target="_blank" rel="noopener" aria-label="' + esc('Open ' + ep.name + ' on the Policy page (new tab)') + '">' + esc(ep.name) + '</a>' : '<span style="color:var(--black-60)">&ndash;</span>')
     + (S.pending[r.o.id] ? ' <span class="badge b-discovering">Updating</span>' : '');
-  return '<td' + (ep || others.length ? ' class="atp-ep-click" onclick="openLadder(\'' + r.o.id + '\')"' : '') + '>' + cell + '</td>';
+  return '<td>' + cell + '</td>';
 }
 function _filtered() {
   var q = inv.q.trim().toLowerCase();
@@ -3485,7 +3486,7 @@ var GH_OBJECTS = [
   { id: 'old-payments',          integ: 'e-commerce', project: 'E-commerce' }
 ];
 /* GitHub Repositories as prod lists them (qa-fra, entity GITHUBREPOEXT): its ten default columns, in prod's order, with the two protection columns this feature adds after Object Name */
-var GH_COLS = [{ k: 'id', l: 'ID' }, { k: 'name', l: 'Object Name' }, { k: 'ep', l: 'Backup Policy' }, { k: 'lb', l: 'Last Backup' }, { k: 'org', l: 'Github Organization' }, { k: 'fork', l: 'Fork' }, { k: 'ds', l: 'Datasource ID' }, { k: 'vis', l: 'Visibility' }, { k: 'archived', l: 'Archived' }, { k: 'created', l: 'Created At' }, { k: 'modified', l: 'Modified At' }, { k: 'oid', l: 'Object ID' }];
+var GH_COLS = [{ k: 'id', l: 'ID' }, { k: 'name', l: 'Object Name' }, { k: 'ep', l: 'Effective policy' }, { k: 'lb', l: 'Last Backup' }, { k: 'org', l: 'Github Organization' }, { k: 'fork', l: 'Fork' }, { k: 'ds', l: 'Datasource ID' }, { k: 'vis', l: 'Visibility' }, { k: 'archived', l: 'Archived' }, { k: 'created', l: 'Created At' }, { k: 'modified', l: 'Modified At' }, { k: 'oid', l: 'Object ID' }];
 function ghProps(o, i) {
   var hx = function (seed, n) { var x = seed >>> 0, s = ''; for (var k = 0; k < n; k++) { x = (Math.imul(x, 1664525) + 1013904223) >>> 0; s += ((x >>> 16) & 15).toString(16); } return s; };
   var d = ['Nov 12 2026, 7:10 pm', 'Sep 7 2026, 11:16 am', 'Oct 14 2026, 10:32 pm'];
@@ -3577,7 +3578,7 @@ function scopeQuery(p, o, withAdd) {
 function scopeSection(p, o, withAdd) { return '<div class="atp-section atp-dscope"><div class="atp-h">Data scope</div>' + scopeQuery(p, o, withAdd) + '</div>'; }
 function actionsSection(p) {
   var row = function (k, v) { return '<div class="prio-dtable-row"><div class="prio-dtable-k">' + k + '</div><div class="prio-dtable-v">' + v + '</div></div>'; };
-  return '<div class="atp-section atp-dscope"><div class="atp-h">Actions</div><div class="prio-dtable">' + row('Backup SLA Domain', p.sla) + row('Backup frequency', p.freq) + row('Retention', p.ret + ' days') + '</div></div>';
+  return '<div class="atp-section atp-dscope"><div class="atp-h">Policy details</div><div class="prio-dtable">' + row('Backup SLA Domain', p.sla) + row('Backup frequency', p.freq) + row('Retention', p.ret + ' days') + '</div></div>';
 }
 
 /* ── ADD TO POLICY (one content, two containers) ──────────────────────────────────────────────────────────────────── */
@@ -3710,7 +3711,7 @@ function impactHtml(o, cur, scopeHtml) {
     : '<strong>' + esc(after.name) + '</strong> has a higher priority and also covers this object.' + back));
   if (short && retA != null) al.push(alertHtml('warn', 'Restore points older than ' + retA + ' days will be deleted, but not before their storage lock ends.'));
   var change = '<div class="atp-section atp-dscope"><div class="atp-dhead" style="margin-bottom:8px"><div class="atp-h" style="margin:0">What will change</div>' + '</div>'
-    + '<div class="prio-dtable">' + rows + '</div>' + (al.length ? '<div class="atp-stack" style="margin-top:12px">' + al.join('') + '</div>' : '') + whyBlock(o, sim, picked) + '</div>';
+    + '<div class="prio-dtable">' + rows + '</div>' + (al.length ? '<div class="atp-stack" style="margin-top:12px">' + al.join('') + '</div>' : '') + '</div>';
   return change + (scopeHtml || '');
 }
 /* full page: the list stays put; picking a policy opens its detail panel on the right (configuration mirror, then the impact) */
@@ -3723,8 +3724,8 @@ function pageDetail(o) {
   if (!p) return '<div class="atp-h">No effective policy</div><div class="atp-muted">This object is not backed up. Pick a policy to add it.</div>';
   // title + state chip on one row, the prioritization panel's own title style (16/500); the section headings below it are 14/500
   return '<div class="prio-preview-title"><a class="inv-link atp-ext" href="backup-policies.html" target="_blank" rel="noopener" aria-label="' + esc('Open ' + p.name + ' on the Policy page (new tab)') + '">' + esc(p.name) + (_dsStoreIconSvg('open-in-new-outlined', 16) || '') + '</a><span class="plv-chip ' + (p.enabled ? 'plv-chip-state-active' : 'plv-chip-state-inactive') + '">' + (p.enabled ? 'Enabled' : 'Disabled') + '</span></div>'
-    + (picked ? impactHtml(o, cur, scopeSection(p, o, true) + actionsSection(p))
-      : scopeSection(p, o, false) + actionsSection(p) + '<div class="atp-muted" style="margin-top:12px">Pick a policy to see what will change.</div>');
+    + (picked ? impactHtml(o, cur, actionsSection(p))
+      : actionsSection(p) + '<div class="atp-muted" style="margin-top:12px">Pick a policy to see what will change.</div>');   // PM feedback 2026-11-23: no Data scope and no policy ladder in this panel (scopeSection, whyBlock and ladderTable are kept, unreferenced)
 }
 function footerHtml(o) {
   var cur = curOf(o), pk = S.pick && POLS.filter(function (p) { return p.id === S.pick; })[0], noop = pk && (listsById(pk, o) || (cur && cur.id === pk.id));
