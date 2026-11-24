@@ -4581,6 +4581,8 @@ body.ai-hx-transcript .ai-foot { display: none; }
 .ws-target-card:hover:not(.is-locked):not(.is-selected), .ws-cfg-choice:hover:not(.is-disabled):not(.is-selected) { border-color: var(--black-30); }
 .ws-target-card.is-selected, .ws-cfg-choice.is-selected { border-color: var(--em-green); }
 .ws-target-card.is-locked, .ws-cfg-choice.is-disabled { opacity: 0.5; cursor: not-allowed; }
+.ws-target-card.is-nopermit, .ws-cfg-choice.is-nopermit { cursor: not-allowed; } .ws-target-card.is-nopermit:hover, .ws-cfg-choice.is-nopermit:hover { border-color: var(--black-10); }
+.is-nopermit > .sc-header { color: var(--black-40); } .is-nopermit .sc-radio { opacity: .4; } .is-nopermit .sc-desc > :first-child { color: var(--black-40); }   /* the reason (last line) stays at full strength */
 .sc-header { position: relative; display: flex; align-items: center; gap: 8px; min-height: 38px; padding: 8px 36px 8px 12px; background: var(--black-3); border-radius: 3px 3px 0 0; font-size: 16px; font-weight: 450; line-height: 22px; color: var(--black-100); }
 .is-selected > .sc-header { background: var(--em-green-tint); color: var(--em-green); font-weight: 700; line-height: 20px; }
 .sc-header .ws-target-card-title, .sc-header .ws-cfg-choice-title { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 0; font: inherit; color: inherit; }
@@ -8704,6 +8706,8 @@ try { var _eh = sessionStorage.getItem('vdc-ai-handoff'), _ep = (location.pathna
     <span class="devjump-divider"></span>
     <span class="devjump-section">Restore</span>
     <a href="protected-data.html" title="Restore inventory — Protected Data">Protected Data</a>
+    <a href="protected-data.html#export-allowed" title="Data Export destination card: the user can export">Export: allowed</a>
+    <a href="protected-data.html#export-denied" title="Data Export destination card: the user lacks permission to export">Export: no permission</a>
 
   </div>
   <!-- Reset the agent demo to a clean slate. Dev-only, sits beside the hide control. Implementation is shared
@@ -30432,6 +30436,18 @@ function _treeIconSvgFor(r) {
       if (_msSvg) return _msSvg;
     }
   }
+  // Google Workspace (user 2026-11-24): Drive, Drive Folder, Drive File and Shared Drive Member all fell through to one generic Material inbox glyph. Each type takes
+  // its own store glyph (Unified Icons: folder, folder_shared, File, chat_bubble) and members take the store's users glyph. A shared drive is a shared folder; My Drive is a plain folder.
+  if (r && r.wl === 'Google Workspace') {
+    var _gwT = r.type, _gwName = null;
+    if (_gwT === 'Drive') _gwName = (r.parentId && String(r.parentId).indexOf('gws-sec-drives') === 0) ? 'folder-shared-outlined' : 'folder-outlined';
+    else if (_gwT === 'Drive Folder') _gwName = 'folder-outlined';
+    else if (_gwT === 'Drive File' || _gwT === 'Native Doc') _gwName = 'file-outlined';
+    else if (_gwT === 'Shared Drive Member') _gwName = 'users-outlined';
+    else if (_gwT === 'Chat Space' || _gwT === 'Chat Message') _gwName = 'chat-bubble-outlined';
+    var _gwSvg = _gwName && _dsStoreIconSvg(_gwName, 14);
+    if (_gwSvg) return _gwSvg;
+  }
   // DS store first (ruling 2026-07-24). The user-provided User glyph
   // (2026-07-09 asset) keeps precedence via the legacy chain below —
   // 'user' deliberately has no store entry here.
@@ -43647,7 +43663,7 @@ function _wsCartSharedType() {
     if (mixed) return;
     var t = null;
     if (typeof k === 'string' && k.indexOf('rec-') === 0) t = 'Record';
-    else { var res = typeof k === 'string' ? _resById(k.indexOf(':') > 0 ? k.split(':')[0] : k) : null; t = res && res.type; }
+    else { var res = typeof k === 'string' ? _resById(k.indexOf(':') > 0 ? k.split(':')[0] : k) : null; t = res && ((res.wl === 'Google Workspace' && typeof _typeLabel === 'function') ? _typeLabel(res) : res.type); }   // a user's Mail, Calendar, Contacts, Chat and My Drive are Services, so a cart of them reads "4 services" (was: folders)
     if (!t || (type && type !== t)) { mixed = true; return; }
     type = t;
   });
@@ -44089,6 +44105,7 @@ function wsRenderConfigure() {
     + (function(){
         var _oc = (typeof _wsCartOrgCounts === 'function') ? _wsCartOrgCounts() : [];
         if (!_oc.length) return '';
+        if (typeof wsIsD365Cart === 'function' && wsIsD365Cart()) return '';   // 2026-11-23 (user): the Dynamics 365 cart does not repeat which environment the records belong to (was: "All N records belong to <environment>")
         var _orgSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M12 6h.01M8 10h.01M16 10h.01M12 10h.01M8 14h.01M16 14h.01M12 14h.01"/></svg>';
         var _n = state.restorePlan.size;
         var _inner, _tipAttr = '';
@@ -44378,7 +44395,7 @@ function _wsBasketSortValue(key, colKey) {
 function wsRenderSelectTableRow(key, q) {
   var r = RESOURCES.find(function(x){ return x.id === key; });
   var name = r ? r.name : key;
-  var typeLabel = r ? r.type : 'Resource';
+  var typeLabel = r ? ((r.wl === 'Google Workspace' && typeof _typeLabel === 'function') ? _typeLabel(r) : r.type) : 'Resource';   // 2026-11-23: a user's Mail, My Drive, Calendar, Contacts and Chat are Services in the table, so the cart says Service too (was: Folder)
   var workloadLabel = r ? (r.wl || '') : '';
   // Synthesized D365 ids aren't in RESOURCES — resolve name/type so they
   // don't fall back to the raw key + generic "Resource" (mirrors the card).
@@ -44557,7 +44574,7 @@ function wsRenderBasketRow(key, q) {
     if (!blobHit && !isPinned && matchCount === 0) return null;
   }
   var name = r ? r.name : key;
-  var typeLabel = r ? r.type : 'Resource';
+  var typeLabel = r ? ((r.wl === 'Google Workspace' && typeof _typeLabel === 'function') ? _typeLabel(r) : r.type) : 'Resource';   // 2026-11-23: a user's Mail, My Drive, Calendar, Contacts and Chat are Services in the table, so the cart says Service too (was: Folder)
   var workloadLabel = r ? (r.wl || '') : '';
   // Synthesized D365 ids aren't in RESOURCES — resolve them so the
   // row's name + type render properly instead of falling back to the
@@ -45505,7 +45522,7 @@ function wsRenderReviewOkta(n, noun, cfg, part) {
   } else {
     destBody = '<div class="ws-cfg-choices">'
       + _destCard('inplace', 'Original location', '', 'Recover to the source location in its original structure.')
-      + _destCard('export', 'Export', '', 'Download the selected items instead of restoring them.')
+      + wsExportChoiceHtml(_dest === 'export', "wsOktaSetDest('export')")
     + '</div>';
   }
   // Alternate-location: per-entity allowlist + naming note + mixed-basket fallback alert (§6.4).
@@ -45773,7 +45790,7 @@ function wsAdvancedSectionHtml(stateKey, toggleFn, desc, items) {
     + '<button class="ws-adv-hdr" type="button" onclick="' + toggleFn + '" aria-expanded="' + (open ? 'true' : 'false') + '">'
       + (open ? _ADV_EXP_OPEN : _ADV_EXP_CLOSED) + '<span class="ws-adv-title">Advanced settings</span></button>';
   if (open) {
-    html += '<div class="ws-adv-desc">' + desc + '</div><div class="ws-adv-list">';
+    html += (desc ? '<div class="ws-adv-desc">' + desc + '</div>' : '') + '<div class="ws-adv-list">';   // desc is optional: a lone toggle whose tooltip already says it needs no lead-in line
     items.forEach(function(it) {
       html += '<button class="ws-adv-toggle" type="button" role="switch" aria-checked="' + (it.on ? 'true' : 'false') + '" onclick="' + it.fn + '">'
         + (it.on ? _ADV_TOG_ON : _ADV_TOG_OFF) + '<span class="ws-adv-label">' + it.label + '</span>'
@@ -46659,7 +46676,7 @@ function wsRenderReviewAD(n, noun, cfg, part) {
   if (part === 'dest') {
     return wsDestStepHtml('<div class="ws-cfg-choices">'
       + choice(cfg.adDest === 'original', "wsSetAdDest('original')", 'Original location', 'Recover to the source location in its original structure.')
-      + choice(cfg.adDest === 'export',   "wsSetAdDest('export')",   'Export', 'Download the selected items instead of restoring them.')
+      + wsExportChoiceHtml(cfg.adDest === 'export', "wsSetAdDest('export')")
     + '</div>');
   }
   var html = '<div class="ws-step-pad">';
@@ -46697,7 +46714,7 @@ function wsJiraTogglePreserveDeps(){ if(!ws.config) ws.config={}; ws.config.jira
 // A job restores ONE kind in ONE tenant (see _categoryLockBlocks), so the wizard asks only the questions
 // that kind has an answer to:
 //   course — always created fresh with a NEW course ID; no destination card, an optional owner instead.
-//   drive  — Original location only; conflict handling, plus Advanced settings ▸ Keep relationships (members and permissions; Merge | Overwrite) like Entra ID.
+//   drive  — Original location only; conflict handling, plus Advanced settings ▸ Keep relationships (members and permissions; a toggle only, Conflict handling decides).
 //   space  — Original location only; conflict handling.
 //   user   — a service folder, entity list or item inside a user: restored in place into that user's account.
 // ── Entra ID restore, one category per job (VDC restores per category: "Restore Users", "Restore Applications", …) ─────────────────────────
@@ -46765,8 +46782,7 @@ function _gwsNoun(kind) {
 function wsRenderReviewGWS(n, noun, cfg, part) {
   cfg = cfg || ws.config || (ws.config = {});
   if (cfg.gwsMode !== 'overwrite') cfg.gwsMode = 'skip';
-  if (cfg.gwsRel !== 'overwrite') cfg.gwsRel = 'merge';
-  if (cfg.gwsKeepRel == null) cfg.gwsKeepRel = true;   // Keep relationships: on by default, like Entra ID (VDC)
+  if (cfg.gwsKeepRel == null) cfg.gwsKeepRel = true;   // Keep relationships: on by default, like Entra ID (VDC). It has no conflict choice of its own: the job's Conflict handling decides (Overwrite resets members and permissions to the backup, Skip leaves existing drives alone)
   var kind = planActiveGwsKind() || 'user';
   var gn = _gwsNoun(kind);
   function choice(selected, fn, title, body) {
@@ -46796,14 +46812,7 @@ function wsRenderReviewGWS(n, noun, cfg, part) {
   }
   var html = '<div class="ws-step-pad"><div class="ws-step-header">'
     + '<div class="ws-step-title">Configure restore options</div>'
-    + '<div class="ws-step-description">Choose how conflicts are handled, then record why you&rsquo;re running it.</div></div>'
-    // Where the job lands is a fact, not a choice (the Restore options step is dropped for these kinds) \u2014 stated in the shared Vision alert so it can't be missed.
-    + (kind === 'course' ? '' : '<div class="vis-alert" role="note" style="margin-bottom:16px">' + ((typeof _dsStoreIconSvg === 'function' && _dsStoreIconSvg('info-outlined', 24)) || '')
-        + '<div class="vis-alert-txt">' + (function(){
-            var _t = (cfg.gwsDest === 'other' && cfg.gwsTarget) ? _resById(cfg.gwsTarget) : null, _au = planActiveGwsUser();
-            if (kind === 'user') return _t ? 'Restoring ' + (_au ? wsEscape(_au.name) + '\u2019s items' : 'the items') + ' into ' + wsEscape(_t.name) + '\u2019s account.' : 'Restoring into ' + (_au ? wsEscape(_au.name) + '\u2019s account' : 'the original user account') + ', in its original folder structure.';
-            return _t ? 'Restoring into the shared drive ' + wsEscape(_t.name) + '.' : 'Restoring to the original location, in its original structure.';
-          })() + '</div></div>');
+    + '<div class="ws-step-description">Choose how conflicts are handled, then record why you&rsquo;re running it.</div></div>';
   var skipBody = kind === 'course' ? 'Leave the existing course untouched' : _wsConflictCopy(gn).skipBody;
   var overBody = kind === 'course' ? 'Create the course from the backup even when one of the same name is already present' : _wsConflictCopy(gn).overBody;
   var sections = [];
@@ -46814,18 +46823,9 @@ function wsRenderReviewGWS(n, noun, cfg, part) {
     + '</div></div></div>');
   sections.push(wsReasonTicketSections(cfg));
   if (kind === 'drive') {
-    // Keep relationships: the same Advanced-settings toggle as Entra ID (VDC), with the Merge / Overwrite choice nested under it (shown only while the toggle is on).
-    function _relRad(v, title, hint) {
-      return '<label class="fr-rad" style="align-items:flex-start"><input type="radio" name="wsGwsRel" ' + (cfg.gwsRel === v ? 'checked ' : '') + 'onchange="wsGwsSet(\'gwsRel\',\'' + v + '\')">'
-        + '<span><span style="display:block">' + title + '</span><span class="fr-dtr-hint">' + hint + '</span></span></label>';
-    }
-    var relAfter = cfg.gwsKeepRel
-      ? '<div style="margin:4px 0 8px 52px"><div style="font-size:14px;line-height:20px;color:var(--black-60);margin-bottom:8px">How to handle relationship conflicts</div>'
-        + '<div class="fr-rads">' + _relRad('merge', 'Merge', 'Add the backed-up members and permissions to those already present.') + _relRad('overwrite', 'Overwrite', 'Replace the current members and permissions with the backed-up ones.') + '</div>'
-        + (cfg.gwsRel === 'overwrite' ? _entraWarn('Members and permissions added since the backup are removed.') : '') + '</div>'
-      : '';
-    sections.push(wsAdvancedSectionHtml('gwsAdvExpanded', 'wsGwsToggleAdv()', 'Members and permissions of the restored shared drive', [
-      { on: cfg.gwsKeepRel, label: 'Keep relationships', hint: 'Including members and permissions', fn: "wsGwsToggle('gwsKeepRel')", after: relAfter }
+    // Keep relationships: the Advanced-settings toggle Entra ID (VDC) has, WITHOUT its nested Merge | Overwrite (user 2026-11-24: a second conflict setting competes with Conflict handling, and nothing in the PRD asks for it). No lead-in line: the tooltip carries the context.
+    sections.push(wsAdvancedSectionHtml('gwsAdvExpanded', 'wsGwsToggleAdv()', '', [
+      { on: cfg.gwsKeepRel, label: 'Keep relationships', hint: 'Including members and permissions. With Overwrite, members and permissions added since the backup are removed.', fn: "wsGwsToggle('gwsKeepRel')" }
     ]));
   }
   html += '<div class="ws-cfg-card"><div class="ws-cfg-sections">' + sections.join('') + '</div></div></div>';
@@ -46836,15 +46836,19 @@ function wsGwsToggle(k){ if(!ws.config) ws.config={}; ws.config[k]=!ws.config[k]
 function wsGwsToggleAdv(){ ws.gwsAdvExpanded=!ws.gwsAdvExpanded; wsRenderAll(); }
 // ── Google Workspace destination (PM 2026-11-23): another existing user in the same tenant, or another shared drive ────────────────────────────────────────────────────────────────────────────
 // Same two-card pattern as the Jira / Power Platform destination (Original location | an alternate), with the app's own trigger + searchable popover (.rl-trig / .rl-pop) for the target, because a tenant has hundreds of users.
+// the distinct shared drives the cart's items come from (an item may be the drive itself or something inside it)
+function _gwsSourceDrives() {
+  var ids = {}; state.restorePlan.forEach(function(_, k){ var r = _resById(k.indexOf(':') > 0 ? k.split(':')[0] : k), g = 0; while (r && r.type !== 'Drive' && g++ < 30) r = r.parentId ? _resById(r.parentId) : null; if (r && r.type === 'Drive') ids[r.id] = 1; });
+  return Object.keys(ids);
+}
 function _gwsTargetCandidates(kind) {
-  var src = (kind === 'user') ? planActiveGwsUser() : null, inCart = {}; state.restorePlan.forEach(function(_, k){ inCart[k] = 1; });
+  var src = (kind === 'user') ? planActiveGwsUser() : null, inCart = {}, srcDr = _gwsSourceDrives(); state.restorePlan.forEach(function(_, k){ inCart[k] = 1; });
   return RESOURCES.filter(function(r){
     if (r.wl !== 'Google Workspace' || r.existence === 'deleted-in-live') return false;
     if (kind === 'user') return r.type === 'User' && (!src || r.id !== src.id);
-    return r.type === 'Drive' && _gwsKindOf(r.id) === 'drive' && !inCart[r.id];
+    return r.type === 'Drive' && _gwsKindOf(r.id) === 'drive' && !inCart[r.id] && srcDr.indexOf(r.id) < 0;
   }).sort(function(a, b){ return a.name.localeCompare(b.name); });
 }
-function _gwsDriveCount() { var n = 0; state.restorePlan.forEach(function(_, k){ if (_gwsKindOf(k) === 'drive') n++; }); return n; }
 function _gwsTargetPicker(kind, cfg) {
   /* PM/user 2026-11-23: the picker lives INSIDE the "Another ..." selection card. The list has no radios: the chosen row takes the List Item selected state (Green/S5 fill, 2px Green/S80 bar) and sits at the top, out of the list below it. Rows are the workload picker's own (.tnwl-item). */
   var P = ws.gwsPick || (ws.gwsPick = { open: false, q: '' }), list = _gwsTargetCandidates(kind), sel = cfg.gwsTarget ? _resById(cfg.gwsTarget) : null, noun = kind === 'user' ? 'user' : 'shared drive';
@@ -46863,11 +46867,9 @@ function _gwsTargetPicker(kind, cfg) {
 }
 function _gwsDestBody(kind, cfg, choice, origBody) {
   var other = cfg.gwsDest === 'other', noun = kind === 'user' ? 'user' : 'shared drive';
-  var blocked = kind === 'drive' && _gwsDriveCount() > 1;   // one target drive for several source drives would merge them: choose one at a time
-  var altBody = kind === 'user' ? 'Restore into a different existing user\u2019s account in this tenant.' : (blocked ? 'Available when one shared drive is selected.' : 'Restore into a different existing shared drive in this tenant.');
+  var altBody = kind === 'user' ? 'Restore into a different existing user\u2019s account in this tenant.' : 'Restore into a different existing shared drive in this tenant. Each source drive goes into its own folder named after it.';
   var alt;
-  if (blocked) alt = '<button class="ws-cfg-choice is-disabled" type="button" disabled aria-disabled="true"><span class="ws-cfg-radio"></span><span class="ws-cfg-choice-text"><span class="ws-cfg-choice-title">Another ' + noun + '</span><span class="ws-cfg-choice-body">' + altBody + '</span></span></button>';
-  else {
+  {
     // a selection card that holds its own entry: a div (a button cannot contain the picker), the picker sits in the card once it is chosen
     var sel = other;
     alt = '<div class="ws-cfg-choice' + (sel ? ' is-selected' : '') + '" role="radio" aria-checked="' + sel + '" tabindex="0" onclick="wsGwsSetDest(\'other\')" onkeydown="if (event.target === this && (event.key === \' \' || event.key === \'Enter\')) { event.preventDefault(); wsGwsSetDest(\'other\'); }">'
@@ -46875,7 +46877,7 @@ function _gwsDestBody(kind, cfg, choice, origBody) {
       + '<span class="ws-cfg-choice-text"><span class="ws-cfg-choice-title">Another ' + noun + '</span><span class="ws-cfg-choice-body">' + altBody + '</span>'
       + (sel ? '<div class="ws-target-card-detail" onclick="event.stopPropagation()">' + _gwsTargetPicker(kind, cfg) + '</div>' : '') + '</span></div>';
   }
-  return '<div class="ws-cfg-choices">' + choice(!other || blocked, "wsGwsSetDest('original')", 'Original location', origBody) + alt + '</div>';
+  return '<div class="ws-cfg-choices">' + choice(!other, "wsGwsSetDest('original')", 'Original location', origBody) + alt + '</div>';
 }
 function wsGwsSetDest(v) { if (!ws.config) ws.config = {}; ws.config.gwsDest = v; if (v !== 'other') ws.config.gwsTarget = ''; if (ws.gwsPick) { ws.gwsPick.open = false; ws.gwsPick.q = ''; } wsRenderAll(); }
 function wsGwsPickToggle(e) { if (e) e.stopPropagation(); var P = ws.gwsPick || (ws.gwsPick = { open: false, q: '' }); P.open = !P.open; P.q = ''; wsRenderAll(); if (P.open) setTimeout(function(){ var i = document.getElementById('wsGwsTq'); if (i) i.focus(); }, 0); }
@@ -47067,6 +47069,36 @@ function wsEntraRefreshNext(){ var b=document.querySelector('.ws-cta-primary[onc
 // Destination step. The step header carries the "Destination" title, so the
 // inner section is header-less — mirrors wsRenderD365Destination, avoiding a
 // duplicate "Destination" heading. Shared by every non-D365 workload.
+// ── Data Export destination card (PM copy 2026-11-23), ONE builder for every workload's Export destination ────────────────────────────────────────────────
+// Title "Data Export"; no "— download only" tag. Two states: allowed, and the user lacks permission to export (the card is not selectable and says why). The prototype has no permission model, so the state is a session flag
+// (ws.noExport) switched from the Dev jump bar (Restore > Export: no permission / Export: allowed; hashes #export-denied / #export-allowed). A refresh returns to allowed.
+var WS_EXPORT_COPY = {
+  title: 'Data Export',
+  body: 'Download the selected point-in-time data instead of restoring it.',
+  note: 'User gets a private time-limited export link in downloads area.',
+  denied: 'You don’t have permission to export data. Ask your administrator for access.'
+};
+function wsCanExport() { try { return !(typeof ws !== 'undefined' && ws && ws.noExport); } catch (e) { return true; } }
+// The Selection-card variant used by Dynamics 365, Power Platform and GitHub.
+function wsExportTargetCard(extraCls, selected, onclickCall) {
+  var ok = wsCanExport(), sel = !!selected && ok;
+  return '<div class="ws-target-card ' + extraCls + (sel ? ' is-selected' : '') + (ok ? '' : ' is-nopermit') + '" role="radio" aria-checked="' + sel + '"' + (ok ? ' tabindex="0" onclick="' + onclickCall + '"' : ' aria-disabled="true" tabindex="-1"') + '>'
+    + '<span class="ws-target-card-dot"></span>'
+    + '<span class="ws-target-card-title">' + WS_EXPORT_COPY.title + '</span>'
+    + '<span class="ws-target-card-body">' + WS_EXPORT_COPY.body + '</span>'
+    + '<span class="ws-target-card-consequence">' + (ok ? WS_EXPORT_COPY.note : WS_EXPORT_COPY.denied) + '</span>'
+  + '</div>';
+}
+// The same card for the workloads whose destination step uses .ws-cfg-choice (Okta, Active Directory).
+function wsExportChoiceHtml(selected, onclickCall) {
+  var ok = wsCanExport(), sel = !!selected && ok;
+  return '<button class="ws-cfg-choice' + (sel ? ' is-selected' : '') + (ok ? '' : ' is-nopermit') + '" type="button"' + (ok ? ' onclick="' + onclickCall + '"' : ' disabled aria-disabled="true"') + '>'
+    + '<span class="ws-cfg-radio"' + (sel ? ' data-selected="1"' : '') + '></span>'
+    + '<span class="ws-cfg-choice-text"><span class="ws-cfg-choice-title">' + WS_EXPORT_COPY.title + '</span>'
+    + '<span class="ws-cfg-choice-body">' + WS_EXPORT_COPY.body + '</span>'
+    + '<span class="ws-cfg-choice-body">' + (ok ? WS_EXPORT_COPY.note : WS_EXPORT_COPY.denied) + '</span></span>'
+  + '</button>';
+}
 function wsDestStepHtml(destBodyHtml, bannerHtml) {
   return '<div class="ws-step-pad">'
     + '<div class="ws-step-header">'
@@ -47720,15 +47752,7 @@ function wsRenderReview(part) {
       // 2026-07-07: export is a peer choice, never a sub-option of an org).
       // Whole repos, repo settings, and org-settings items; E2 has none.
       + (_ghExportCardShown
-          ? '<div class="ws-target-card ws-target-card--wide' + (_ghExportPicked ? ' is-selected' : '') + '" role="radio"'
-            + ' aria-checked="' + (_ghExportPicked ? 'true' : 'false') + '" tabindex="0"'
-            + ' onclick="wsGhSetDest(\'export\')">'
-            + '<span class="ws-target-card-dot"></span>'
-            + '<span class="ws-target-card-title">Export</span>'
-            + '<span class="ws-target-card-meta">Download package</span>'
-            + '<span class="ws-target-card-body">Download the selected items instead of restoring them.</span>'
-            + '<span class="ws-target-card-consequence">Nothing is written back — you’ll get an email when it’s ready to download.</span>'
-          + '</div>'
+          ? wsExportTargetCard('ws-target-card--wide', _ghExportPicked, "wsGhSetDest('export')")
           : '')
     + '</div>';  // close .ws-target-cards
     ws._destDetailAnim = false;   // one-shot consumed — next re-render won't replay the slide
@@ -48372,7 +48396,11 @@ function wsRelToggle(on) {
   wsRelRender();
 }
 function wsRelOpen() { var c = _d365RelCfg(); c.open = !c.open; c.pop = false; wsRelRender(); }
-function wsRelTbl(k, on) { var c = _d365RelCfg(); c.tbl[k] = on; c.page = 1; wsRelRender(); }
+// At least one related table always stays included (user 2026-11-23): with every table cleared, Include related records would restore nothing. A table counts as included only while the table it is reached
+// through is included, so the table that cannot be unticked is the last one that is included.
+function _d365RelOnIf(k, offK) { var c = _d365RelCfg(), t0 = _d365RelT(k); if (k === offK) return false; if (t0 && t0.via && !_d365RelOnIf(t0.via, offK)) return false; return !!c.on && !c.loading && (c.tbl[k] === undefined ? true : c.tbl[k]); }
+function _d365RelLastOn(k) { var tabs = _d365RelTables(_d365RelRoots()); return _d365RelOn(k) && !tabs.some(function(t){ return _d365RelOnIf(t.k, k); }); }
+function wsRelTbl(k, on) { var c = _d365RelCfg(); if (!on && _d365RelLastOn(k)) { wsRelRender(); return; } c.tbl[k] = on; c.page = 1; wsRelRender(); }
 function wsRelLv(dir, n) { var c = _d365RelCfg(); if (dir === 'c') c.lvC = n; else c.lvP = n; c.page = 1; wsRelRender(); }
 function wsRelLvPop(e) { if (e) e.stopPropagation(); var c = _d365RelCfg(); c.lvpop = !c.lvpop; c.pop = false; wsRelRender(); }
 function wsRelLvReset() { var c = _d365RelCfg(); c.lvC = 1; c.lvP = 1; c.page = 1; wsRelRender(); }
@@ -48385,7 +48413,11 @@ function wsRelCat(v) { var c = _d365RelCfg(); c.cat = v; c.tq = ''; wsRelRender(
 function _d365RelInCat(t) { var v = _d365RelCfg().cat || 'all'; return v === 'all' || (v === 'par' ? !!t.par : !t.par); }
 // Select all / Clear act on the rows currently shown in the dropdown (the chip and the table search), like the workload picker's filters.
 function _d365RelShownTables() { var c = _d365RelCfg(), q = (c.tq || '').trim().toLowerCase(); return _d365RelTables(_d365RelRoots()).filter(function(t){ return _d365RelInCat(t) && (!q || t.n.toLowerCase().indexOf(q) >= 0); }); }
-function wsRelAll(on) { var c = _d365RelCfg(); _d365RelShownTables().forEach(function(t){ c.tbl[t.k] = on; }); c.page = 1; wsRelRender(); }
+function wsRelAll(on) {
+  var c = _d365RelCfg(); _d365RelShownTables().forEach(function(t){ c.tbl[t.k] = on; });
+  if (!on) { var tabs = _d365RelTables(_d365RelRoots()); if (!tabs.some(function(t){ return _d365RelOn(t.k); })) { var keep = tabs.filter(function(t){ return !t.via; })[0]; if (keep) c.tbl[keep.k] = true; } }   // clearing never leaves nothing included
+  c.page = 1; wsRelRender();
+}
 function wsRelPop(e) { if (e) e.stopPropagation(); var c = _d365RelCfg(); c.pop = !c.pop; c.lvpop = false; c.tq = ''; wsRelRender(); }
 function wsRelTblReset() { var c = _d365RelCfg(); c.tbl = {}; c.tpage = 1; wsRelRender(); }
 var REL_E_STEP = 10;   // E: a band opens with its first 10 records and loads 10 more per click
@@ -48704,8 +48736,8 @@ function _d365RelScopeRow() {
   var cats = (nChild && nPar) ? '<div class="rl-cats" role="tablist" aria-label="Show related tables">' + [['all', 'All', tabs.length], ['child', 'Children', nChild], ['par', 'Parents', nPar]].map(function(x){ return '<button type="button" class="rl-cat' + (cat === x[0] ? ' is-on' : '') + '" role="tab" aria-selected="' + (cat === x[0]) + '" onclick="wsRelCat(\'' + x[0] + '\')">' + x[1] + ' <span class="rl-cc">' + x[2] + '</span></button>'; }).join('') + '</div>' : '';
   var catNote = cat === 'par' ? '<div class="rl-cnote">Records your selection points to, such as a parent account. Needed when restoring to a different environment where they may not exist.</div>' : (cat === 'child' ? '<div class="rl-cnote">Records that belong to your selection, such as an account’s contacts and cases.</div>' : '');
   var pop = c.pop ? '<div class="rl-pop" onclick="event.stopPropagation()"><div class="tnwl-search rl-search">' + mag + '<input id="wsRelTq" type="text" autocomplete="off" placeholder="Search tables" value="' + wsEscape(c.tq || '') + '" oninput="wsRelTq(this.value)"></div>' + cats + catNote + '<div class="rl-pl">'
-    + (rows.length ? (function(){ var out = '', lastLv = 0, deep = _d365RelDepth() > 1; rows.forEach(function(t){ var lv = t.lv || 1; if (deep && lv !== lastLv) { out += '<div class="rl-lvh">Level ' + lv + '</div>'; lastLv = lv; } var off = t.via && !_d365RelOn(t.via), viaN = t.via ? _d365RelT(t.via).n.replace(/ \(.*\)$/, '') : ''; out += '<div class="rl-it' + (off ? ' is-dis' : '') + '"><label><input type="checkbox" class="row-cb" ' + (_d365RelOn(t.k) ? 'checked' : '') + (off ? ' disabled' : '') + ' onchange="wsRelTbl(\'' + t.k + '\',this.checked)"><span>' + t.n + (t.via ? ' <span class="rl-via">via ' + viaN + (off ? ', not included' : '') + '</span>' : '') + '</span></label></div>'; }); return out; })() : '<div class="rl-it" style="color:var(--black-60)">No tables match.</div>')
-    + '</div><div class="rl-pf"><span class="rl-sp">' + nOn + ' of ' + tabs.length + ' selected</span><button type="button" class="rl-lnk" onclick="wsRelAll(true)">Select all' + scopeLbl + '</button><button type="button" class="rl-lnk" onclick="wsRelAll(false)">Clear' + scopeLbl + '</button></div></div>' : '';
+    + (rows.length ? (function(){ var out = '', lastLv = 0, deep = _d365RelDepth() > 1; rows.forEach(function(t){ var lv = t.lv || 1; if (deep && lv !== lastLv) { out += '<div class="rl-lvh">Level ' + lv + '</div>'; lastLv = lv; } var off = t.via && !_d365RelOn(t.via), last = _d365RelLastOn(t.k), dis = off || last, viaN = t.via ? _d365RelT(t.via).n.replace(/ \(.*\)$/, '') : ''; out += '<div class="rl-it' + (dis ? ' is-dis' : '') + '"><label><input type="checkbox" class="row-cb" ' + (_d365RelOn(t.k) ? 'checked' : '') + (dis ? ' disabled' : '') + ' onchange="wsRelTbl(\'' + t.k + '\',this.checked)"><span>' + t.n + (t.via ? ' <span class="rl-via">via ' + viaN + (off ? ', not included' : '') + '</span>' : '') + '</span></label></div>'; }); return out; })() : '<div class="rl-it" style="color:var(--black-60)">No tables match.</div>')
+    + '</div><div class="rl-pf"><span class="rl-sp">' + nOn + ' of ' + tabs.length + ' selected' + (nOn === 1 ? '. At least one stays included.' : '') + '</span><button type="button" class="rl-lnk" onclick="wsRelAll(true)">Select all' + scopeLbl + '</button></div></div>' : '';
   var tblTrig = '<div class="rl-popwrap"><button type="button" class="rl-trig" onclick="wsRelPop(event)" aria-haspopup="listbox" aria-expanded="' + !!c.pop + '"><span class="rl-trig-pre">Related tables</span><span class="rl-trig-val">' + nOn + ' of ' + tabs.length + '</span><span class="rl-trig-chev">' + chev + '</span></button>' + pop + '</div>';
   var lvBoth = _d365RelLvRow('c', 'Child levels') + _d365RelLvRow('p', 'Parent levels') + '<div class="rl-lvhelp">' + _D365REL_LVHELP + '</div>';
   var lvTrig = '<div class="rl-popwrap"><button type="button" class="rl-trig" onclick="wsRelLvPop(event)" aria-haspopup="dialog" aria-expanded="' + !!c.lvpop + '" aria-label="Levels: ' + _d365RelLvLbl() + '"><span class="rl-trig-pre">Levels</span><span class="rl-trig-val">' + _d365RelLvShort() + '</span><span class="rl-trig-chev">' + chev + '</span></button>'
@@ -48845,15 +48877,7 @@ function wsRenderD365Destination() {
             })() : '')
         + '</div>'
         // Export — a peer destination card, the same as Okta, GitHub, PP and AD: choosing it flips the whole wizard into an export job.
-        + '<div class="ws-target-card ws-target-card-full' + (exportSelected ? ' is-selected' : '') + '" role="radio"'
-          + ' aria-checked="' + (exportSelected ? 'true' : 'false') + '" tabindex="0"'
-          + ' onclick="wsSetD365TargetEnv(\'export\')">'
-          + '<span class="ws-target-card-dot"></span>'
-          + '<span class="ws-target-card-title">Export</span>'
-          + '<span class="ws-target-card-meta">— download only</span>'
-          + '<span class="ws-target-card-body">Download the selected items instead of restoring them.</span>'
-          + '<span class="ws-target-card-consequence">Nothing is written back — the job produces a point-in-time download.</span>'
-        + '</div>'
+        + wsExportTargetCard('ws-target-card-full', exportSelected, "wsSetD365TargetEnv('export')")
       + '</div>'
     + '</div>'
   + '</div>';
@@ -49389,15 +49413,7 @@ function wsRenderPpDestination(n, noun, cfg) {
         + '</div>'
         // 3 · Export — replaces "Different tenant"; routes into the shared
         // export flow (Okta precedent), no new export UX.
-        + '<div class="ws-target-card ws-target-card-full' + (exportSelected ? ' is-selected' : '') + '" role="radio"'
-          + ' aria-checked="' + (exportSelected ? 'true' : 'false') + '" tabindex="0"'
-          + ' onclick="wsSetPpDest(\'export\')">'
-          + '<span class="ws-target-card-dot"></span>'
-          + '<span class="ws-target-card-title">Export</span>'
-          + '<span class="ws-target-card-meta">— download only</span>'
-          + '<span class="ws-target-card-body">Download the selected items instead of restoring them.</span>'
-          + '<span class="ws-target-card-consequence">Nothing is written back — the job produces a point-in-time download.</span>'
-        + '</div>'
+        + wsExportTargetCard('ws-target-card-full', exportSelected, "wsSetPpDest('export')")
       + '</div>'
     + '</div>'
   + '</div>';
@@ -51934,7 +51950,7 @@ function wsBuildConfigSummary() {
   if (summaryPlanWl === 'Power Platform') {
     var _sumEnvs = (typeof _ppSourceEnvs === 'function') ? _ppSourceEnvs() : [];
     if (cfg.ppDest === 'export') {
-      destValue = 'Export — download only';
+      destValue = 'Data Export';
     } else if (cfg.ppDest === 'cross' && cfg.ppTargetEnvName) {
       var _sumTgt = _ppEnvById(cfg.ppTargetEnvId);
       destValue = 'Different environment — ' + cfg.ppTargetEnvName
@@ -51985,10 +52001,10 @@ function wsBuildConfigSummary() {
     rows.push({ label: 'Conflict handling', value: cfg.gwsMode === 'overwrite'
       ? (_gk === 'course' ? (state.restorePlan.size > 1 ? 'Overwrite \u2014 create each course even when one of the same name exists' : 'Overwrite \u2014 create the course even when one of the same name exists') : 'Overwrite \u2014 existing ' + _gn + 's are replaced with the backup')
       : (_gk === 'course' ? (state.restorePlan.size > 1 ? 'Skip \u2014 existing courses are left untouched' : 'Skip \u2014 the existing course is left untouched') : 'Skip \u2014 existing ' + _gn + 's are left as they are') });
-    if (_gk === 'drive') rows.push({ label: 'Relationships', value: cfg.gwsKeepRel === false ? 'Not restored' : (cfg.gwsRel === 'overwrite' ? 'Restored, conflicts overwritten with the backup' : 'Restored, conflicts merged with existing relationships') });
+    if (_gk === 'drive') rows.push({ label: 'Relationships', value: cfg.gwsKeepRel === false ? 'Not restored' : (cfg.gwsMode === 'overwrite' ? 'Restored, replacing current members and permissions' : 'Restored for recreated drives. Existing drives keep their current members and permissions') });
   } else
   if (summaryPlanWl === 'Active Directory') {
-    rows.push({ label: 'Destination', value: cfg.adDest === 'export' ? 'Export \u2014 download only' : 'Source directory' });
+    rows.push({ label: 'Destination', value: cfg.adDest === 'export' ? 'Data Export' : 'Source directory' });
     if (cfg.adDest !== 'export') {
       rows.push({ label: 'Conflict handling', value: cfg.adMode === 'skip' ? _wsConflictCopy('object').skipSum : _wsConflictCopy('object').overSum });
       rows.push({ label: 'Keep relationships', value: cfg.adKeepRelationships === false ? 'Off' : 'On \u2014 memberships and applications included' });
@@ -68663,6 +68679,13 @@ function refreshAllTableScrollShadows() {
 // or they'll throw on undefined state. Use the dedicated open* helpers
 // with a sensible default id so a cold jump lands on a real drilldown.
 window.__devJumpResolve = function(h) {
+  // Data Export permission demo (see wsCanExport): the two states of the Data Export destination card.
+  if (h === 'export-denied' || h === 'export-allowed') {
+    if (typeof ws !== 'undefined' && ws) ws.noExport = (h === 'export-denied');
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+    if (typeof ws !== 'undefined' && ws && ws.isOpen && typeof wsRenderAll === 'function') wsRenderAll();
+    return;
+  }
   // Okta spec-tree deep link (#okta/<resourceId>) — the write side lives in
   // _oktaTreeReflectHash. Scope to the Okta workload, then drill to the node.
   if (h.indexOf('okta/') === 0) {
