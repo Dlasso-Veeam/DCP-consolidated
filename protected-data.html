@@ -4256,7 +4256,7 @@ body.ai-hx-transcript .ai-foot { display: none; }
 .ws-sel-cq.rv-card { border: 1px solid var(--border-light); border-radius: 8px; background: var(--white); }
 .rv-card .ws-table-wrap { border: 0; border-radius: 0 0 8px 8px; }
 .rv-card > .inv-search { padding: 10px 20px; }
-.rv-card > .inv-search .rv-show { margin-left: auto; padding-left: 16px; white-space: nowrap; font-size: 14px; line-height: 20px; color: var(--black-60); }
+.ws-sel-cq + .rv-foot { padding: 12px 0 0; font-size: 16px; line-height: 22px; color: var(--black-60); text-align: left; }   /* outside the card, flush with its left edge: same size and colour as the pager's "Showing" text */
 .rv-kpis .kpi-tile { flex: 1; padding: 16px 20px 16px 28px; border-left: 1px solid var(--border-light); display: flex; flex-direction: column; position: relative; }
 .rv-kpis .kpi-tile:first-child { border-left: none; }
 .rv-kpis .kpi-label { font-size: 14px; font-weight: 450; color: var(--black-60); margin-bottom: 8px; }
@@ -25852,7 +25852,7 @@ function _childRenderRecords() {
     if (r._diffStatus === 'removed') rowTitle = ' title="Record removed since ' + fmtCompareDate(state.recCompareDate) + '"';
     var cb = r._phantom
       ? '<td class="cb-col"><span style="display:inline-block;width:14px"></span></td>'
-      : '<td class="cb-col"><input type="checkbox" class="row-cb" data-id="' + r._id + '"' + (rowSelected ? ' checked' : '') + ((isCovered || _dxAdded || (!rowSelected && (typeof _d365Locked === 'function' && _d365Locked('rec-' + r._id)))) ? ' disabled' : '') + ' onchange="toggleRecRow(\'' + r._id + '\',this)"></td>';
+      : '<td class="cb-col"' + ((!isCovered && !_dxAdded && !rowSelected && typeof _d365Locked === 'function' && _d365Locked('rec-' + r._id)) ? ' data-tooltip="' + String(_categoryLockMsg()).replace(/"/g, '&quot;') + '"' : '') + '><input type="checkbox" class="row-cb" data-id="' + r._id + '"' + (rowSelected ? ' checked' : '') + ((isCovered || _dxAdded || (!rowSelected && (typeof _d365Locked === 'function' && _d365Locked('rec-' + r._id)))) ? ' disabled' : '') + ' onchange="toggleRecRow(\'' + r._id + '\',this)"></td>';
     var actions;
     // V1: phantom (deleted) rows are informational only — they exist
     // at the compare date but not the global as-of, so restoring them
@@ -26145,7 +26145,7 @@ function _childRenderFields() {
     var _valueChangedCls = _isChanged ? ' rec-diff-cell-changed' : '';
     var _fieldDiffBadge = _isChanged ? _diffBadgeHtml('modified', _fieldsCmpLbl) : '';
     // Cells, in thead order — cb / Field / Type / Value / Modified / actions.
-    var cb = '<td class="cb-col"><input type="checkbox" class="row-cb" data-id="' + fid + '"' + cbChecked + (cbDisabled || (!_rowSelectedFinal && (typeof _d365Locked === 'function' && _d365Locked('field-' + fid))) ? ' disabled' : '') + ' onchange="toggleFieldRow(\'' + safeForJs + '\',this)"></td>';
+    var cb = '<td class="cb-col"' + ((!cbDisabled && !_rowSelectedFinal && typeof _d365Locked === 'function' && _d365Locked('field-' + fid)) ? ' data-tooltip="' + String(_categoryLockMsg()).replace(/"/g, '&quot;') + '"' : '') + '><input type="checkbox" class="row-cb" data-id="' + fid + '"' + cbChecked + (cbDisabled || (!_rowSelectedFinal && (typeof _d365Locked === 'function' && _d365Locked('field-' + fid))) ? ' disabled' : '') + ' onchange="toggleFieldRow(\'' + safeForJs + '\',this)"></td>';
     // Name = leaf: clicking opens the preview drawer (same pattern as
     // any leaf elsewhere in the platform). Wraps cell-name + diff badge
     // in a flex container so the badge wraps onto its own line on narrow
@@ -42285,6 +42285,13 @@ function renderTopActionBar() {
         ? _restoreCategoryOf(_drillResForCat) : null;
       // D365: a table opened to its records IS the place those records live, so what you are viewing is "<table> records" (not the table's own "Tables" category).
       if (_drillResForCat && _drillResForCat.wl === 'Dynamics 365' && _drillResForCat.drillTarget === 'records') _viewCat = _drillResForCat.name + ' records';
+      // D365: the Tables and Marketing & Journeys folders list the rows themselves (tables, campaigns), and those rows are what the lock blocks. 2026-11-25 (user): the folder resolved to no category, so the rows were disabled and the bar said nothing.
+      if (_drillResForCat && _drillResForCat.wl === 'Dynamics 365' && _drillResForCat.type === 'Environment' && childState.folder && typeof childFolderById === 'function' && typeof _restoreCategoryNodeOf === 'function') {
+        var _fdLk = childFolderById(_drillResForCat, childState.folder);
+        var _fdRow = RESOURCES.find(function (x) { return x.parentId === _drillResForCat.id && (childState.folder === 'tables' ? x.drillTarget === 'records' : !!(_fdLk && _fdLk.types && _fdLk.types.indexOf(x.type) >= 0)); });
+        var _fdNode = _fdRow && _restoreCategoryNodeOf(_fdRow);
+        if (_fdNode && _fdNode.name) _viewCat = _fdNode.name;
+      }
       if (_viewCat && _viewCat !== _activeCat) lockedCat = _activeCat;
     }
   }
@@ -42473,10 +42480,13 @@ function renderTopActionBar() {
       var _lockedCatTargetId = (_barCatName && _lockedCatNode)
         ? ((!_lockedCatNode.drillable && _lockedCatNode.parentId) ? _lockedCatNode.parentId : _lockedCatNode.id)
         : null;
+      // D365 (user 2026-11-25): "Restore job locked to Accounts", the table name as the link; the link opens the table in its own environment, so the environment is not repeated here.
+      var _barD365 = !!_cartCtr && _cartCtr.wl === 'Dynamics 365';
+      var _barLinkTxt = (_barD365 && _barCatName) ? String(_barCatName).replace(/ records$/, '') : _barCatName;
       var _lockedCatLabel = _lockedCatTargetId
-        ? '<button class="tab-left-link" type="button" style="margin:0" onclick="' + (/^(records|fields|other):|^tables$/.test(String(_lockedCatTargetId)) && window.D365X && D365X.jumpToLocked ? 'D365X.jumpToLocked()' : 'openChildrenDrill(\'' + String(_lockedCatTargetId).replace(/'/g, "\\'") + '\')') + '">' + wsEscape(_barCatName) + '</button>'
-        : (_barCatName ? '<strong>' + wsEscape(_barCatName) + '</strong>' : null);
-      var _barCtrHtml = _cartCtr ? ' in <strong>' + wsEscape(_cartCtr.name) + '</strong>' : '';
+        ? '<button class="tab-left-link" type="button" style="margin:0" onclick="' + (/^(records|fields|other):|^tables$/.test(String(_lockedCatTargetId)) && window.D365X && D365X.jumpToLocked ? 'D365X.jumpToLocked()' : 'openChildrenDrill(\'' + String(_lockedCatTargetId).replace(/'/g, "\\'") + '\')') + '">' + wsEscape(_barLinkTxt) + '</button>'
+        : (_barCatName ? '<strong>' + wsEscape(_barLinkTxt) + '</strong>' : null);
+      var _barCtrHtml = (_cartCtr && !_barD365) ? ' in <strong>' + wsEscape(_cartCtr.name) + '</strong>' : '';
       var _barCtrNoun = _cartCtr ? String(_cartCtr.type || 'container').toLowerCase() : '';
       // Terse (user 2026-07-16): "<Job> locked to Users in acme.okta.com" —
       // no remedial tail; Clear selection sits on this same bar.
@@ -44179,6 +44189,7 @@ function wsRenderConfigure() {
   } else {
     var _rvOn = !!(window.D365RV && D365RV.applies());   // column-level D365 job: this table IS the review table (records x restored columns x values)
     html += '<div class="ws-sel-cq' + ((_rvOn || _cardOn) ? ' rv-card' : '') + '">' + ((_rvOn || _cardOn) ? D365RV.cardHead() : '') + '<div class="ws-table-wrap"><table class="ws-table' + (_wsCartAllLogStreams() ? ' ws-sel-logs' : '') + (_rvOn ? ' rv-one' + ((window.D365RV && D365RV.noCols()) ? ' rv-none' : '') : '') + '">' + _colgroup + _theadHtml + '<tbody>' + _pageRows + '</tbody></table></div>' + (_rvOn ? '<div class="rv-hbar" aria-hidden="true"><div></div></div>' : '') + '</div>';
+    html += (_rvOn || _cardOn) ? D365RV.footNote(_visRows.slice(_start, _start + _size).length) : '';   // below the card, on the left, where the table's "Showing 1–1 of 1 items" line sits
     html += _wsPgBar(_total, _page, _size, 'wsBasketGotoPage', 'wsBasketSetSize', 'item');
   }
   if (_d3 && (REL_OPT === 'A' || REL_OPT === 'D' || REL_OPT === 'F')) html += _d365RelBlock();   // A: the app's own selection card, under the cart
@@ -57399,44 +57410,27 @@ function buildRecordLevelDrawerFields(resourceId, titleFallback) {
   // D365 compare exploration: the fields that can differ across restore points are the ones the change log edits (real history, not a synthesized pool)
   if (window.D365X && D365X.CL[schemaKey]) { changedSet = {}; D365X.eventCols(schemaKey, D365X.env(), rowIdx).forEach(function(c){ changedSet[c] = true; }); isAdded = false; }
   var fields = [];
-  // Section divider — primary cols read as the "Identity" group, extended
-  // cols as "Details". If a schema has no extended cols we just use a
-  // single Details header so the drawer always opens with at least one
-  // section label visible.
-  if (primaryCols.length > 0) fields.push({ section: extCols.length ? 'Identity' : 'Details' });
-  primaryCols.forEach(function(c){
+  // 2026-11-25 (user): one flat list, no tiers. The record's ID leads, its columns follow in the table's own order (the same order as the column picker and the cart), and its
+  // system timestamps close in Audit (_rdOrderFields). was: "Identity" (the grid's default columns) and "Extended attributes" (the rest), a split of grid visibility, not of the data;
+  // only Accounts had it, every other table got one "Details" list.
+  fields.push({ f: 'Record ID', prod: _rdGuid(resourceId), snap: _rdGuid(resourceId), diff: false, fixed: true });   /* fixed: the same at every restore point; the change-log state override below leaves it alone */
+  var _ts = [];
+  allCols.forEach(function(c){
     var current = getRecCellValue(rec, c, rowIdx);
-    if (current == null || current === '') current = '—';
+    if (current == null || current === '') current = '\u2014';
     var changed = !!changedSet[c];
     var prior;
     if (isAdded) {
-      prior = '—';
+      prior = '\u2014';
     } else if (changed) {
       prior = getRecPriorValue(schemaKey, rowIdx, c, current, schema.rows);
     } else {
       prior = current;
     }
-    // prod = today's live value (left side when leftSel='prod')
-    // snap = compare-date value (right side when rightSel='snap')
-    fields.push({ f: c, prod: current, snap: prior, diff: changed || isAdded });
+    var row = { f: c, prod: current, snap: prior, diff: changed || isAdded };
+    if (typeof _RD_TS_ROW !== 'undefined' && _RD_TS_ROW.test(c)) _ts.push(row); else fields.push(row);
   });
-  if (extCols.length > 0) {
-    fields.push({ section: 'Extended attributes' });
-    extCols.forEach(function(c){
-      var current = getRecCellValue(rec, c, rowIdx);
-      if (current == null || current === '') current = '—';
-      var changed = !!changedSet[c];
-      var prior;
-      if (isAdded) {
-        prior = '—';
-      } else if (changed) {
-        prior = getRecPriorValue(schemaKey, rowIdx, c, current, schema.rows);
-      } else {
-        prior = current;
-      }
-      fields.push({ f: c, prod: current, snap: prior, diff: changed || isAdded });
-    });
-  }
+  if (_ts.length) { fields.push({ section: 'Audit' }); _ts.forEach(function(r){ fields.push(r); }); }
   // Same order rule as every other preview (see _rdOrderFields): the record's own columns lead, in the table's order; its system columns (Modified, Updated) close in Audit.
   return _rdOrderFields(fields);
 }
@@ -68982,6 +68976,8 @@ window.__devJumpResolve = function(h) {
     var box = cell.querySelector('input[type="checkbox"]');
     if (!box || !box.disabled) return null;
     if (cell.tagName === 'TH') {
+      // Locked by the cart (D365 sets data-dx-locked): the reason is the cart's, not "drill in".
+      if (box.hasAttribute('data-dx-locked') && typeof _categoryLockMsg === 'function') return { cell: cell, txt: _categoryLockMsg() };
       // Bulk select-all disabled = nothing at this level is individually
       // selectable (whole-container restore isn't supported). Name the
       // container so it's clear you CAN drill in and restore the parts inside.
@@ -76857,7 +76853,7 @@ window.D365X.recChip = function (key, item) {
     else { var rp = _v1GlobalRps().find(function (x) { return x.id === sel; }); ts = rp ? rp.ts : null; }
     if (ts == null) return out;
     var env = X.env(), here = X.exists(p.schemaKey, env, p.idx, ts);
-    baseFields.forEach(function (it) { if (it.section) return; out.state[it.f] = here ? X.val(p.schemaKey, env, p.idx, it.f, ts) : '—'; });
+    baseFields.forEach(function (it) { if (it.section || it.fixed) return; out.state[it.f] = here ? X.val(p.schemaKey, env, p.idx, it.f, ts) : '—'; });
     return out;
   };
 
@@ -77720,6 +77716,9 @@ window.D365X.recChip = function (key, item) {
   X.jumpToLocked = function () {
     var first = null; state.restorePlan.forEach(function (_, k) { if (first == null && typeof k === 'string') first = k; }); if (first == null) return;
     var rr = /^(rec|field)-/.test(first) ? _resolveD365Record(/^field-/.test(first) ? first.replace(/^field-([^~]+)~(\d+)~.*$/, 'rec-$1-$2') : first) : null, res = rr && rr.tableResource;
+    /* the same table exists in every environment: open the one in the environment the job was started in (the plan item carries it) */
+    var _pi = state.restorePlan.get(first), _envId = _pi && _pi.d365Env;
+    if (rr && _envId) { var _sameTbl = RESOURCES.find(function (x) { return x.parentId === _envId && x.drillTarget === 'records' && x.name === (res && res.name); }); if (_sameTbl) res = _sameTbl; }
     if (res) { if (state.invMode === 'drill' && childState.parentId === res.id && childState.entryId === res.id) return; openRecordsDrill(res.id); return; }
     var r = RESOURCES.find(function (x) { return x.id === first; }); if (r && r.parentId) openChildrenDrill(r.parentId);
   };
@@ -77926,11 +77925,13 @@ window.D365X.recChip = function (key, item) {
     }
     return r;
   }
-  function cats() { return (X.on() && FEATURE_CHANGED_COLUMNS) ? [['changed', 'Changed'], ['all', 'All'], ['files', 'Files and images']] : [['all', 'All'], ['files', 'Files and images']]; }
-  function inCat(c, k, cx) { var t = typeOf(c); if (k === 'all') return true; if (k === 'files') return t === 'File' || t === 'Image'; if (k === 'changed') return cx.ch > 0; return true; }
+  /* 2026-11-25 (user): a Selected chip (with its count) instead of floating ticked rows to the top; the list order never moves while you tick. Disabled at 0. */
+  function cats() { var sel = ['selected', 'Selected (' + nChosen() + ')'], nF = allCols().some(function (c) { var t = typeOf(c); return t === 'File' || t === 'Image'; }), f = nF ? [['files', 'Files and images']] : []; return (X.on() && FEATURE_CHANGED_COLUMNS) ? [['changed', 'Changed'], ['all', 'All'], sel].concat(f) : [['all', 'All'], sel].concat(f); }
+  function inCat(c, k, cx) { var t = typeOf(c); if (k === 'all') return true; if (k === 'selected') return !!S.cols[c]; if (k === 'files') return t === 'File' || t === 'Image'; if (k === 'changed') return cx.ch > 0; return true; }
   var CAT_LBL = { changed: 'Changed columns', all: 'All columns', files: 'Files and images' };
   function popHtml() {
     if (!S.cat || (S.cat === 'changed' && !(X.on() && FEATURE_CHANGED_COLUMNS))) S.cat = (X.on() && FEATURE_CHANGED_COLUMNS) ? 'changed' : 'all';
+    if (S.cat === 'selected' && !nChosen()) S.cat = (X.on() && FEATURE_CHANGED_COLUMNS) ? 'changed' : 'all';   /* Clear while filtered to Selected: nothing left to show */
     var q = S.q.trim().toLowerCase(), all = allCols().map(function (c) { return { k: c, cx: ctxFor(c) }; }), cs = cats();
     var cols = all.filter(function (c) { return inCat(c.k, S.cat, c.cx) && (!q || c.k.toLowerCase().indexOf(q) >= 0); });
     if (X.on()) cols.sort(function (a, b) { return b.cx.ch - a.cx.ch; });
@@ -77938,7 +77939,7 @@ window.D365X.recChip = function (key, item) {
     X._scopeShown = shown; X._scopeAllOn = allOn;
     var lastOne = all.length > 1 && nChosen() >= all.length - 1;
     var after = {}; Object.keys(S.cols).forEach(function (k) { after[k] = 1; }); shown.forEach(function (k) { after[k] = 1; }); var wouldAll = Object.keys(after).length >= all.length;   /* Select all would tick every column */
-    var nFile = all.filter(function (c) { return inCat(c.k, 'files', c.cx); }).length, showPin = (X.on() && FEATURE_CHANGED_COLUMNS) || nFile > 0;
+    var nFile = all.filter(function (c) { return inCat(c.k, 'files', c.cx); }).length, showPin = true;
     /* one line per column: the name (its example values or changes ride in a tooltip) and, quietly at the right, the type, or the evidence while comparing */
     var rows = cols.map(function (c) {
       var on = !!S.cols[c.k], cx = c.cx, en = X.on() ? cx.ch > 0 : true, tip = X.on() ? (cx.tip || cx.l2) : '' /* 2026-11-22 (user: noisy): outside compare a row carries no tooltip; it listed every distinct value in the column. Compare keeps its what-changed evidence. */, right = (X.on() && cx.ev) ? cx.ev : typeOf(c.k);
@@ -77947,7 +77948,7 @@ window.D365X.recChip = function (key, item) {
     }).join('') || '<div class="dxs-none">Nothing matches.</div>';
     /* 2026-11-22 (user): the picker follows the workload picker (workload-picker.js): a borderless search row across the top with a hairline under it, a row of 28px filter pills below it (Black/S3, green tint when on), the list, a hairline footer, no heading.
        The pills are the category set (All, Files and images; Changed while comparing), so the filter reads as a filter and not as a button. was: a boxed search with a pinned filter chip beside it, and a radio menu behind the chip (#dxsPin, .dxs-fm, S.fmenu: kept, unreferenced). */
-    var pills = !showPin ? '' : '<div class="dxs-wcats">' + cs.map(function (x) { return '<button type="button" class="dxs-wcat' + (S.cat === x[0] ? ' is-on' : '') + '" aria-pressed="' + (S.cat === x[0]) + '" data-cat="' + x[0] + '">' + x[1] + '</button>'; }).join('') + '</div>';
+    var pills = !showPin ? '' : '<div class="dxs-wcats">' + cs.map(function (x) { return '<button type="button" class="dxs-wcat' + (S.cat === x[0] ? ' is-on' : '') + '" aria-pressed="' + (S.cat === x[0]) + '" data-cat="' + x[0] + '"' + (x[0] === 'selected' && !nChosen() ? ' disabled' : '') + '>' + x[1] + '</button>'; }).join('') + '</div>';
     /* Select all only when the list is narrowed (a filter, a search, or unchangeable rows), and it acts on what is shown; Clear always empties the whole selection; there is no Deselect */
     var narrowed = cols.length !== all.length || shown.length !== cols.length;
     /* was: a back row to the scope menu, then a "Columns to restore" heading; the segmented control above names the panel, and the workload picker has no heading */
@@ -78204,6 +78205,7 @@ window.D365X.recChip = function (key, item) {
     '.dxs-wsearch { display: flex; align-items: center; gap: 8px; height: 44px; padding: 4px 12px; border-bottom: 1px solid var(--border-light); color: var(--black-60); } .dxs-wsearch svg { flex: none; }',
     '.dxs-wsearch input { flex: 1; min-width: 0; height: 100%; border: none; outline: none; background: transparent; font: inherit; font-size: 16px; color: var(--black-100); }',
     '.dxs-wcats { display: flex; align-items: center; gap: 8px; padding: 8px 12px; flex: none; }',
+    '.dxs-wcat:disabled { opacity: .4; cursor: default; } .dxs-wcat:disabled:hover { background: var(--black-3); }',
     '.dxs-wcat { height: 28px; min-width: 28px; padding: 3px 8px; border: none; border-radius: 2px; background: var(--black-3); font: inherit; font-size: 16px; font-weight: 500; line-height: 22px; color: var(--black-100); cursor: pointer; } .dxs-wcat:hover { background: var(--black-5); } .dxs-wcat.is-on { background: var(--em-green-tint); color: var(--em-green); }',
     '.dxs-sbar { display: flex; align-items: center; gap: 4px; margin: 8px 8px 4px; } .dxs-sbar .dxs-search { flex: 1; min-width: 0; height: 36px; border: 1px solid var(--black-20); border-radius: 4px; background: var(--white); } .dxs-sbar .dxs-search:focus-within { background: var(--em-green-tint); border-color: var(--em-green); }',
     '.dxs-fm { position: absolute; right: 8px; top: 80px; z-index: 5; min-width: 220px; background: var(--white); border: 1px solid var(--border-light); border-radius: 8px; box-shadow: 0 8px 24px rgba(31,34,41,.16); overflow: hidden; } .dxs-fm .dxs-li { align-items: center; padding: 8px 12px; }',
@@ -78391,26 +78393,33 @@ body.cmp-off #d365CmpBtn, body.cmp-off #d365CmpChip, body.cmp-off #d365CmpX, bod
      was: one 14px muted sentence, "3 records, 3 columns, 9 values to write", only for column-level jobs. */
   function fmt(n) { return Number(n).toLocaleString('en-US'); }
   R.noCols = function () { try { return R.applies() && shownCols().length === 0; } catch (e) { return false; } };   /* a column-level job with no column chosen yet: the table is names and restore points with the empty area on the right */
+  /* Below the table card, on the left, like the "Showing n of n" line on every other Select step: the records on this page of the cart's records, and how many of the record's columns the table displays.
+     A whole-record job that displays only some columns also says all of them are restored. (Moved out of the search field, where it read as part of the input.) */
+  R.footNote = function (shownRows) {
+    var nR = recKeys().length, sR = shownRows == null ? nR : shownRows, t = 'Showing ' + fmt(sR) + ' of ' + fmt(nR) + (nR === 1 ? ' record' : ' records');
+    if (R.applies()) {
+      var all = allCols(_parseD365RecordId(recKeys()[0]).schemaKey).length, rest = restoredCols().length, shown = shownCols().length;   // of the record's columns: a specific-columns job restores fewer than the record has
+      t += ', ' + fmt(shown) + ' of ' + fmt(all) + ' columns.' + (!R.scoped() && shown < rest ? ' All ' + fmt(rest) + ' are restored.' : '');
+    } else t += '.';
+    return '<div class="rv-foot">' + t + '</div>';
+  };
   R.hasRecords = function () { try { return state.wlLabel === 'Dynamics 365' && recKeys().length > 0; } catch (e) { return false; } };
   R.cardHead = function () {
-    var keys = recKeys(), fld = function (n, l) { return '<div class="kpi-tile"><div class="kpi-label">' + l + '</div><div class="kpi-value-row"><div class="kpi-value">' + n + '</div></div></div>'; }, figs, note = '';
+    var keys = recKeys(), fld = function (n, l) { return '<div class="kpi-tile"><div class="kpi-label">' + l + '</div><div class="kpi-value-row"><div class="kpi-value">' + n + '</div></div></div>'; }, figs;
     if (R.applies() && !R.scoped()) {
-      var restW = restoredCols();
       figs = fld(fmt(keys.length), keys.length === 1 ? 'Record' : 'Records') + fld('All', 'Columns');
-      var shownW = shownCols().length; if (shownW < restW.length) note = '<span class="rv-show">Showing ' + shownW + ' of ' + restW.length + ' columns. All ' + restW.length + ' are restored.</span>';
     } else if (R.applies()) {
       var rest = restoredCols(), nVals = 0; keys.forEach(function (k) { nVals += (X.colsFor(k) || rest).length; });
       figs = fld(fmt(keys.length), keys.length === 1 ? 'Record' : 'Records') + fld(fmt(rest.length), rest.length === 1 ? 'Column' : 'Columns') + fld(fmt(nVals), nVals === 1 ? 'Value to write' : 'Values to write');
-      var shown = shownCols().length; if (shown < rest.length) note = '<span class="rv-show">Showing ' + shown + ' of ' + rest.length + ' columns</span>';
     } else figs = fld(fmt(keys.length), keys.length === 1 ? 'Record' : 'Records') + fld('All', 'Columns');
     /* the cart can be long: search it (the app's table search, same markup as the Protected Data drill; the filter plumbing, ws.tableSearch / wsTableFilter, was kept when the Select-step search was retired for short carts) */
     var search = '<div class="inv-search"><div class="inv-search-inner"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>'
       + '<input id="wsTableSearch" type="text" autocomplete="off" placeholder="Search by name or type" value="' + esc(ws.tableSearch || '') + '" oninput="wsTableFilter(this.value)">'
-      + '<button type="button" class="search-clear-btn" onclick="wsTableFilter(\'\')" aria-label="Clear search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>' + note + '</div></div>';
+      + '<button type="button" class="search-clear-btn" onclick="wsTableFilter(\'\')" aria-label="Clear search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div></div>';
     /* 2026-11-22 (user): the scope is revisable here, with the same control and picker as Protected Data, and the note says what the scope does to the records (the PM cart's "N deleted, not restored in this scope"). */
     var nr = keys.length, gone = X.goneCount(), spec = S.mode === 'chosen', nc = X.nChosen(), note;
     if (gone) note = '<b>' + pl(gone, 'record', 'records') + '</b> of ' + nr + (gone === 1 ? ' is' : ' are') + ' deleted at this restore point and ' + (spec ? (gone === 1 ? 'is recreated whole, not column by column.' : 'are recreated whole, not column by column.') : (gone === 1 ? 'is recreated.' : 'are recreated.'));
-    else note = '<b>' + pl(nr, 'record', 'records') + '</b> will be restored' + (spec ? '.' : ' with all columns.');
+    else note = '<b>' + pl(nr, 'record', 'records') + '</b> will be restored' + (spec ? (nc ? ' with the selected columns only.' : '.') : ' with all columns.');   // parallel to "with all columns"; with no column chosen yet there is nothing to name
     var scope = '<div class="rv-scope"><span class="rv-note">' + note + '</span>' + X.cartSegHtml() + '</div>';
     return '<div class="kpi-band rv-kpis">' + figs + '</div>' + scope + search;
   };

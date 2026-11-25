@@ -2414,7 +2414,6 @@ body.ai-full #aiWorkingGlow { display: none; }
 .atp-box table tbody tr:last-child td { border-bottom: 0; }
 .table-scroll.atp-ts.atp-box { overflow: clip; }
 #atpPage .ws-modal > .topbar { border-bottom: 1px solid var(--border-light); }   /* edge to edge: the topbar is the modal's full-width first child */
-.atp-hrow { display: flex; align-items: baseline; justify-content: space-between; }
 .atp-tools { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex: none; }
 #atpPList .atp-fill > .atp-tools{ flex: none; }
 .atp-fixed td { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -2427,6 +2426,13 @@ body.ai-full #aiWorkingGlow { display: none; }
 .atp-bd { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-gutter: stable; }
 #atp-table-h thead th { top: auto; }
 #atp-table-h th { text-transform: none; letter-spacing: 0; font-size: 14px; font-weight: 500; color: var(--black-60); background: var(--white); padding: 10px 10px; white-space: nowrap; }
+/* Figma: search + filters are a row above the table card; the grey form fill is the Vision Form BG */
+#atpPList .atp-fill > .plv-psearch { flex: none; padding: 0 0 12px; border-bottom: 0; background: none; }
+#atpPList .atp-fill > .plv-psearch input { background: var(--form-bg); border-radius: 4px; }
+.atp-hcount { display: flex; align-items: center; gap: 8px; }   /* Figma: the count is a grey chip in front of the heading, not a line on the right */
+/* short dividers between header cells, from Policy Name on (none between the radio column and Priority) */
+#atp-table-h th { position: relative; }
+#atp-table-h th:nth-child(n+3)::before { content: ''; position: absolute; left: 0; top: 50%; width: 1px; height: 16px; margin-top: -8px; background: var(--border); }
 #atpPList .atp-section{ flex: none; }
 #atpPList .atp-section.atp-fill{ flex: 1; }
 .atp-box th { background: var(--white); }
@@ -3594,7 +3600,7 @@ function scopeQuery(p, o, withAdd) {
 function scopeSection(p, o, withAdd) { return '<div class="atp-section atp-dscope"><div class="atp-h">Data scope</div>' + scopeQuery(p, o, withAdd) + '</div>'; }
 function actionsSection(p) {
   var row = function (k, v) { return '<div class="prio-dtable-row"><div class="prio-dtable-k">' + k + '</div><div class="prio-dtable-v">' + v + '</div></div>'; };
-  return '<div class="atp-section atp-dscope"><div class="atp-h">Policy details</div><div class="prio-dtable">' + row('Backup SLA Domain', p.sla) + row('Backup frequency', p.freq) + row('Retention', p.ret + ' days') + '</div></div>';
+  return '<div class="atp-section atp-dscope"><div class="atp-h">Policy details</div><div class="prio-dtable">' + row('Backup SLA Domain', slaChip(p.sla)) + row('Backup frequency', p.freq) + row('Retention', p.ret + ' days') + '</div></div>';
 }
 
 /* ── ADD TO POLICY (one content, two containers) ──────────────────────────────────────────────────────────────────── */
@@ -3606,7 +3612,7 @@ function colg() { return '<colgroup><col style="width:40px"><col style="width:80
 function objectCard(o, cur) {
   var row = !cur
     ? '<tr><td></td><td colspan="' + 4 + '">No effective policy. This object is not backed up.</td></tr>'
-    : '<tr class="is-clickable' + (S.pick ? '' : ' is-viewing') + '" tabindex="0" role="button" aria-label="Show current policy details" onclick="atpUnpick()" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();atpUnpick()}"><td></td><td>' + prioChip(cur.prio, true) + '</td><td>' + esc(cur.name) + '</td><td><span class="badge ' + (cur.enabled ? 'b-protected' : 'b-excluded') + '">' + (cur.enabled ? 'Enabled' : 'Disabled') + '</span></td><td>' + cur.sla + '</td>' + '' + '</tr>';
+    : '<tr class="is-clickable' + (S.pick ? '' : ' is-viewing') + '" tabindex="0" role="button" aria-label="Show current policy details" onclick="atpUnpick()" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();atpUnpick()}"><td></td><td>' + prioChip(cur.prio, true) + '</td><td>' + esc(cur.name) + '</td><td><span class="badge ' + (cur.enabled ? 'b-protected' : 'b-excluded') + '">' + (cur.enabled ? 'Enabled' : 'Disabled') + '</span></td><td>' + slaChip(cur.sla) + '</td>' + '' + '</tr>';
   return '<div class="atp-section atp-current-sec"><div class="atp-h">Current policy</div><div class="table-scroll"><table class="data-table atp-fixed atp-current">' + colg() + '<tbody>' + row + '</tbody></table></div></div>';
 }
 function visiblePolicies(cur) {
@@ -3615,7 +3621,7 @@ function visiblePolicies(cur) {
   return POLS.filter(function (p) {
     if (cur && cur.id === p.id) return false;   // the current policy lives above, not in the list
     for (var i = 0; i < S.filters.length; i++) { if (S.filters[i].values.indexOf(atpAttrLabel(p, S.filters[i].attr)) < 0) return false; }
-    return !q || (p.name + ' ' + p.sla + ' ' + p.prio).toLowerCase().indexOf(q) >= 0;
+    return !q || p.name.toLowerCase().indexOf(q) >= 0;
   }).sort(function (a, b) { return a.prio - b.prio; });
 }
 /* concept 2: a policy that would not become effective for this object says so before it is picked */
@@ -3625,18 +3631,22 @@ function policyRows(cur) {
   return list.map(function (p) {
     return '<tr class="' + (S.pick === p.id ? 'is-picked' : '') + '" data-id="' + p.id + '" onclick="atpPick(\'' + p.id + '\')"><td><input type="radio" name="atpPol" ' + (S.pick === p.id ? 'checked' : '') + ' aria-label="Pick ' + esc(p.name) + '"></td><td>' + prioChip(p.prio, S.pick === p.id) + '</td>'
       + '<td>' + esc(p.name) + '' + '</td>'
-      + '<td><span class="badge ' + (p.enabled ? 'b-protected' : 'b-excluded') + '">' + (p.enabled ? 'Enabled' : 'Disabled') + '</span></td><td>' + p.sla + '</td>' + '' + '</tr>';
+      + '<td><span class="badge ' + (p.enabled ? 'b-protected' : 'b-excluded') + '">' + (p.enabled ? 'Enabled' : 'Disabled') + '</span></td><td>' + slaChip(p.sla) + '</td>' + '' + '</tr>';
   }).join('');
 }
 function policyListHtml(o, cur) {
-  var head = '<tr><th></th><th>Priority</th><th>Policy name</th><th>Status</th><th>SLA Domain</th></tr>';
-  // filter bar, search and table in one card; the header is its own non-scrolling strip, so the scrollbar starts below it
-  return '<div class="atp-box atp-split">' + atpToolbar() + '<div class="atp-hd"><table class="data-table atp-fixed" id="atp-table-h">' + colg() + '<thead>' + head + '</thead></table></div>'
+  var head = '<tr><th></th><th>Priority</th><th>Policy Name</th><th>Status</th><th>SLA Domain</th></tr>';
+  // Figma: the search and the two filters sit above the table card, not inside it; the header is its own non-scrolling strip, so the scrollbar starts below it
+  return atpToolbar() + '<div class="atp-box atp-split"><div class="atp-hd"><table class="data-table atp-fixed" id="atp-table-h">' + colg() + '<thead>' + head + '</thead></table></div>'
     + '<div class="atp-bd"><table class="data-table atp-fixed" id="atp-table">' + colg() + '<tbody>' + policyRows(cur) + '</tbody></table></div></div>';
 }
 /* full page: the lister's own filter bar (+ opens the two-pane Filter picker, chips show what's applied) and the table search, as on the Policies page */
-var ATP_ATTRS = [{ id: 'status', label: 'Status' }, { id: 'sla', label: 'SLA Domain' }];
-function atpAttrLabel(p, attr) { return attr === 'status' ? (p.enabled ? 'Enabled' : 'Disabled') : p.sla; }
+var ATP_ATTRS = [{ id: 'status', label: 'Status' }, { id: 'sla', label: 'SLA domain' }];
+function atpAttrLabel(p, attr) { return attr === 'status' ? (p.enabled ? 'Enabled' : 'Disabled') : slaTier(p.sla); }
+/* the tier is what the table shows (Gold), so it is also what the filter lists */
+function slaTier(sla) { return String(sla).split(' - ')[0]; }
+/* Figma: SLA Domain is a grey chip with the tier name. The gold shield glyph in the mock is not in the icon store or the DS library, so it is left out rather than drawn. */
+function slaChip(sla) { return '<span class="vchip vchip-default">' + esc(slaTier(sla)) + '</span>'; }
 /* the pinned filter component (Protected Data's folder pins): a ghost chip with a chevron per filter, to the right of the search; once applied it becomes a value chip (label, count, X). Click opens the shared Filter picker on that property. */
 var PIN_CHEV = '<svg class="fchip-pin-chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>';
 function atpPinsHtml() {
@@ -3647,7 +3657,7 @@ function atpPinsHtml() {
   }).join('');
 }
 function atpToolbar() {
-  return '<div class="plv-psearch inv-search-row"><div class="plv-psearch-box inv-search-inner' + (S.q ? ' has-text' : '') + '" id="atpSearchBox"><input type="text" class="table-search" id="atpSearch" placeholder="Search policies" value="' + esc(S.q) + '" oninput="atpSearch(this.value)" aria-label="Search policies"><span class="plv-psearch-glyph" data-plv-icon="search-outlined" data-plv-icon-size="20"></span><button type="button" class="plv-psearch-clear" aria-label="Clear search" onclick="atpClearSearch()"><span data-plv-icon="close-outlined" data-plv-icon-size="20"></span></button></div><span class="folder-pins" id="atpPins" style="display:flex">' + atpPinsHtml() + '</span></div>';
+  return '<div class="plv-psearch inv-search-row"><div class="plv-psearch-box inv-search-inner' + (S.q ? ' has-text' : '') + '" id="atpSearchBox"><input type="text" class="table-search" id="atpSearch" placeholder="Find policy name" value="' + esc(S.q) + '" oninput="atpSearch(this.value)" aria-label="Find policy name"><span class="plv-psearch-glyph" data-plv-icon="search-outlined" data-plv-icon-size="20"></span><button type="button" class="plv-psearch-clear" aria-label="Clear search" onclick="atpClearSearch()"><span data-plv-icon="close-outlined" data-plv-icon-size="20"></span></button></div><span class="folder-pins" id="atpPins" style="display:flex">' + atpPinsHtml() + '</span></div>';
 }
 var fpA = { attr: null, selected: {}, anchor: null };
 function atpOpenFilterPicker(trigger, attr) {
@@ -3678,10 +3688,9 @@ function atpApplyFilter() {
 }
 function atpPinClear(attr) { S.filters = S.filters.filter(function (f) { return f.attr !== attr; }); atpRefreshFilters(); }
 function atpRefreshFilters() { var z = document.getElementById('atpPins'); if (z) z.innerHTML = atpPinsHtml(); atpRefreshRows(); }
-function atpCountText(cur) { var all = POLS.filter(function (p) { return !(cur && cur.id === p.id); }).length, n = visiblePolicies(cur).length; return n === all ? all + ' policies' : n + ' of ' + all + ' policies'; }
 function atpRefreshRows() {
   var cur = curOf(S.obj), tb = document.querySelector('#atp-table tbody'); if (!tb) return;
-  tb.innerHTML = policyRows(cur); document.getElementById('atpCount').textContent = atpCountText(cur);
+  tb.innerHTML = policyRows(cur); document.getElementById('atpCount').textContent = visiblePolicies(cur).length;
 }
 function atpSearch(v) { S.q = v; document.getElementById('atpSearchBox').classList.toggle('has-text', !!v); atpRefreshRows(); }
 function atpClearSearch() { S.q = ''; var i = document.getElementById('atpSearch'); i.value = ''; document.getElementById('atpSearchBox').classList.remove('has-text'); atpRefreshRows(); i.focus(); }
@@ -3746,7 +3755,7 @@ function pageList(o) {
   // the shared descriptive empty state (Protected Data's .inv-empty-state: title, muted body, tertiary Small action); no "Available policies" heading above it, the title already says there are none
   if (o.noEdit) return objectCard(o, cur) + '<div class="atp-section atp-fill"><div class="atp-box"><div class="inv-empty-state"><div class="inv-empty-title">No policies you can edit</div><div class="inv-empty-body">You don\'t have permission to edit any policy that could include this object.</div>'
     + '<a class="inv-empty-action" href="backup-policies.html" target="_blank" rel="noopener" style="text-decoration:none">Open Policy page' + (_dsStoreIconSvg('open-in-new-outlined', 16) || '') + '</a></div></div></div>';
-  return objectCard(o, cur) + '<div class="atp-section atp-fill"><div class="atp-h atp-hrow"><span>Available policies</span><span class="atp-muted" id="atpCount">' + atpCountText(cur) + '</span></div>' + policyListHtml(o, cur) + '</div>';
+  return objectCard(o, cur) + '<div class="atp-section atp-fill"><div class="atp-h atp-hcount"><span class="vchip vchip-default" id="atpCount" aria-label="Policies shown">' + visiblePolicies(cur).length + '</span><span>Available policies</span></div>' + policyListHtml(o, cur) + '</div>';
 }
 function pageDetail(o) {
   var cur = curOf(o), picked = !!S.pick, p = picked ? POLS.filter(function (x) { return x.id === S.pick; })[0] : cur;
