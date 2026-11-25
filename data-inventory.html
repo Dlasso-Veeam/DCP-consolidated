@@ -190,6 +190,8 @@
   --orange-30: #fbc9ab;
   --red: #ed2c3d;      /* was d96758 (drift red) — Ignis/S50 */
   --red-10: #fde8e9;   /* was fbeeec — Ignis/S10 */
+  --red-40: #f15b68;   /* Ignis/S40 — destructive hover (same value activity.html and Protected Data ship) */
+  --red-60: #d31223;   /* Ignis/S60 — destructive active/pressed */
   --error: #ed2c3d;    /* was d96758 — Ignis/S50 */
   --nav-dark: #1f2229;
   --nav-icon-bg: #35383e;
@@ -1182,6 +1184,7 @@ body.ai-open .toast-stack { right: calc(var(--ai-w) + 24px); }   /* toasts sit a
   --green-50: #3cb783;          /* Veeam Green/S50 — Button Tertiary border (verified live, set 228:10477) */
   --green-s10: #e4f6ee;         /* Veeam Green/S10 — Button Tertiary hover fill */
   --green-s20: #c6eddd;         /* Veeam Green/S20 — Button Tertiary active fill */
+  --green-s60: #3cb783;         /* Veeam Green/S60 — Button Tertiary border (same value Protected Data ships) */
   --blue: var(--em-green);
   --dark-blue: var(--em-green-accent);
   --blue-light: var(--em-green-tint);
@@ -1221,6 +1224,9 @@ body.ai-open .toast-stack { right: calc(var(--ai-w) + 24px); }   /* toasts sit a
 .plv-btn-primary { background: var(--em-green); color: var(--white); }
 .plv-btn-primary:hover { background: var(--em-green-accent); } /* Vision Primary hover Green/S70 */
 .plv-btn-primary:active { background: var(--green-90); } /* Vision Primary active Green/S90 */
+.plv-btn-destructive { background: var(--red); color: var(--white); }   /* Vision Button Primary + Destructive: Ignis/S50, hover S40, active S60. Only where the action deletes data. */
+.plv-btn-destructive:hover { background: var(--red-40); }
+.plv-btn-destructive:active { background: var(--red-60); }
 .plv-btn-secondary { background: var(--white); border: 1px solid var(--border); color: var(--black-100); }
 .plv-btn-secondary:hover { background: var(--black-5); }
 /* Vision Button Type=Tertiary, Size=Default (set 228:10477, verified live 2026-10-01):
@@ -2462,6 +2468,15 @@ body.ai-full #aiWorkingGlow { display: none; }
 .atp-tip[data-plv-tip]:hover::after { white-space: normal; left: auto; right: 0; width: 240px; }
 .atp-info { display: inline-flex; flex: none; width: 20px; height: 20px; color: var(--black-60); cursor: default; }
 .atp-info svg { display: block; }
+/* Descriptive empty state, ported from Protected Data (.inv-empty-state): centered block with a one-click action. The action is DS Button Type=Tertiary, Size=Small (28px, r4, Green/S60 border, em-green label). */
+.inv-empty-state { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 32px 16px; text-align: center; }
+.inv-empty-title { font-size: 14px; font-weight: 500; color: var(--black-100); }
+.inv-empty-body { font-size: 14px; color: var(--black-60); max-width: 440px; line-height: 1.4; }
+.inv-empty-action { margin-top: 8px; height: 28px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--green-s60); border-radius: 4px; background: var(--em-green-tint); color: var(--em-green); font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; }
+.inv-empty-action:hover { background: var(--green-s10); }
+.inv-empty-action:active { background: var(--green-s20); }
+.atp-info.th-info { width: 16px; height: 16px; margin-left: 4px; vertical-align: middle; position: relative; }   /* column-header variant: 16px, sits right after the label */
+.atp-info.th-info[data-plv-tip]:hover::after { bottom: auto; top: calc(100% + 6px); text-transform: none; letter-spacing: 0; text-align: left; }   /* opens down and left: up would be clipped by the table's scroll container, and the header's uppercase must not reach the tooltip */
 .atp-info[data-plv-tip]:hover::after { white-space: normal; left: auto; right: 0; width: 280px; }
 #atpCfText .atp-info[data-plv-tip]:hover::after { left: 0; right: auto; }   /* the review dialog scrolls and clips on the left: open to the right */
 #ladDrawer .atp-info[data-plv-tip]:hover::after { left: 0; right: auto; top: calc(100% + 6px); bottom: auto; }   /* near the drawer's top-left edge: open down and right, not up and left into the clip */
@@ -2726,7 +2741,7 @@ body.ai-full #aiWorkingGlow { display: none; }
 <div class="v1-cmp-warn-modal" id="atpCf" style="display:none" role="dialog" aria-modal="true">
   <div class="v1-cmp-warn-modal-icon" id="atpCfIcon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
   <div class="v1-cmp-warn-modal-body"><div class="v1-cmp-warn-modal-title" id="atpCfTitle"></div><div class="v1-cmp-warn-modal-text" id="atpCfText"></div><div class="v1-cmp-warn-modal-text" id="atpCfNote"></div>
-    <div class="v1-cmp-warn-modal-actions"><div class="v1-cmp-warn-modal-actions-right"><button type="button" class="plv-btn plv-btn-secondary" id="atpCfBack" onclick="atpCfClose()">Cancel</button><button type="button" class="plv-btn plv-btn-primary" onclick="atpCommit()">Add to policy</button></div></div></div>
+    <div class="v1-cmp-warn-modal-actions"><div class="v1-cmp-warn-modal-actions-right"><button type="button" class="plv-btn plv-btn-secondary" id="atpCfBack" onclick="atpCfClose()">Cancel</button><button type="button" class="plv-btn plv-btn-primary" id="atpCfOk" onclick="atpCommit()">Add to policy</button></div></div></div>
 </div>
 
 <div class="toast" id="toast" role="status"><div class="toast-content"><div class="toast-title" id="toastTitle"></div><div class="toast-body" id="toastBody"></div></div></div>
@@ -3326,7 +3341,7 @@ var INV_TREE = [
   'Policy|Backup Copy Job:0,Backup Job:0,Backup Job (Agent):0,Backup Job (Unstructured Data):0,Backup Job (VM):0,Classification Labels:0,Policy Classification Labels:0,Scanned Classification Labels:0',
   'Identity Applications|Google Identity Audit Log:228,Google Identity Object:3.5k,Google Identity Tenant:228,Okta Organization:490,Okta Organization Log:490',
   'SaaS Applications|Confluence Global Templates:6,Confluence Site:6,Confluence Spaces:425,Databricks Account:0,Databricks Metastores:0,Databricks Workspaces:0,Google Workspace Objects:189,Google Workspace Organization:4,Jira Boards:5,Jira Site:5,Jira Spaces:46,Power BI Workspaces:22',
-  'DevOps Applications|Azure DevOps Audit Logs:0,Azure DevOps Organization Settings:0,Azure DevOps Projects:0,Azure DevOps Repositories:0,GitHub Audit Log Events:0,GitHub Organization Settings:0,GitHub Repositories:8,GitLab Group Audit Events:0,GitLab Group Settings:0,GitLab Project Audit Events:0,GitLab Projects:0',
+  'Developer Tools|Azure DevOps Audit Logs:0,Azure DevOps Organization Settings:0,Azure DevOps Projects:0,Azure DevOps Repositories:0,GitHub Audit Log Events:0,GitHub Organization Settings:0,GitHub Repositories:8,GitLab Group Audit Events:0,GitLab Group Settings:0,GitLab Project Audit Events:0,GitLab Projects:0',
   'Protected Microsoft 365|Protected Mailbox:31,Protected Microsoft 365:605,Protected OneDrive:13,Protected Sharepoint Online:561,Protected Team:0,VDC Backup:2,VDC Data System:2',
   'Virtual Infrastructure|Datastores & Volumes:0,Host System:0,Hypervisor Host:0,Infrastructure Object:0,Management Server:0,Network:0,Resource Container:0',
   'Nutanix Virtual Infrastructure|Nutanix AHV Cluster:0,Nutanix AHV Prism Central:0,Tag Category:0,Virtual Machine:0',
@@ -3338,7 +3353,7 @@ var INV_TREE = [
   'File & Object Storage|File Server:0,File Share:0,Object Storage:0,Unstructured Data:0',
   'Backup Activity|Job Session:0,Recent Backup Session:0,Recent Job Session:0,Recent Restore Session:0,SaaS Job Session:3.9k,SaaS Session Task:78.3k,Session Task:0,Session Tasks (All):0'
 ];
-var GWS_KEY = 'SaaS Applications|Google Workspace Objects', GH_KEY = 'DevOps Applications|GitHub Repositories';
+var GWS_KEY = 'SaaS Applications|Google Workspace Objects', GH_KEY = 'Developer Tools|GitHub Repositories';
 var INV_LIVE = [GWS_KEY, GH_KEY];   // the entities with data in this prototype
 
 // ── SEED: Google Workspace Objects (189), same columns and shapes as prod ──────────────────────────────────────
@@ -3427,7 +3442,7 @@ function renderInvTable() {
   document.getElementById('inv-table').classList.toggle('has-3act', !!ent.gh);
   document.getElementById('inv-thead-row').innerHTML = ent.cols.map(function (c) {
     var active = inv.sort.key === c.k;
-    return '<th class="sort-th' + (active ? ' sort-active' : '') + '" data-sortkey="' + c.k + '" onclick="invSetSort(\'' + c.k + '\')">' + esc(c.l) + sortArrowSvg(active ? inv.sort.dir : 'asc') + '</th>';
+    return '<th class="sort-th' + (active ? ' sort-active' : '') + '" data-sortkey="' + c.k + '" onclick="invSetSort(\'' + c.k + '\')">' + esc(c.l) + (c.tip ? '<span class="atp-info th-info" tabindex="0" aria-label="About ' + esc(c.l) + '" data-plv-tip="' + esc(c.tip) + '" onclick="event.stopPropagation()">' + (_dsStoreIconSvg('info-outlined', 16) || '') + '</span>' : '') + sortArrowSvg(active ? inv.sort.dir : 'asc') + '</th>';
   }).join('') + '<th class="col-toggle-th plv-col-actions"><button type="button" class="col-toggle-btn is-disabled" disabled aria-disabled="true" data-plv-tip="Not part of this prototype" aria-label="Column visibility">' + COL_ICON + '</button></th>';
   document.getElementById('inv-tbody').innerHTML = slice.map(function (r) {
     return '<tr>' + ent.cols.map(function (c) {
@@ -3460,7 +3475,7 @@ function prioChip(n, onTint) { return '<span class="vchip ' + (onTint ? 'vchip-g
 function seedPolicies() {
   return [
     { id: 'p1', prio: 1, name: 'Regulated repos - hourly', enabled: true, sla: 'Gold - SaaS', freq: 'Every 1 hour', ret: 365, direct: [], rule: { project: ['Regulated'] } },
-    { id: 'p2', prio: 2, name: 'Critical repos - hourly', enabled: true, sla: 'Gold - SaaS', freq: 'Every 1 hour', ret: 90, direct: [] },
+    { id: 'p2', prio: 2, name: 'Critical repos - hourly', enabled: true, sla: 'Gold - SaaS', freq: 'Every 1 hour', ret: 90, direct: ['vendor-adapters'] },   // vendor-adapters is in the marketing integration, which Default Backup doesn't cover: leaving this policy leaves it with nothing
     { id: 'p3', prio: 3, name: 'CasePilot repos - daily', enabled: true, sla: 'Silver - SaaS', freq: 'Every 1 day', ret: 180, direct: [], rule: { project: ['CasePilot'] } },
     { id: 'p4', prio: 4, name: 'Critical repos - weekly', enabled: true, sla: 'Silver - SaaS', freq: 'Every 1 week', ret: 365, direct: ['whiskerworks-api', 'whiskerworks-docs'] },
     { id: 'p5', prio: 5, name: 'Experiments - daily', enabled: false, sla: 'Bronze - SaaS', freq: 'Every 1 day', ret: 30, direct: ['whiskerworks-legacy'] },
@@ -3480,13 +3495,13 @@ var GH_OBJECTS = [
   { id: 'whiskerworks-shop',     integ: 'e-commerce', project: 'CasePilot' },
   { id: 'ledger-service',        integ: 'e-commerce', project: 'Regulated' },
   { id: 'whiskerworks-docs',     integ: 'e-commerce', project: 'E-commerce',  archived: true },
-  { id: 'whiskerworks-sandbox',  integ: 'marketing',  project: 'Marketing' },
+  { id: 'whiskerworks-sandbox',  integ: 'marketing',  project: 'Marketing', noEdit: true },   // the user can't edit any policy that could include it: reaches the empty state in the Add to policy page
   { id: 'whiskerworks-legacy',   integ: 'marketing',  project: 'Marketing' },
   { id: 'vendor-adapters',       integ: 'marketing',  project: 'Marketing' },
   { id: 'old-payments',          integ: 'e-commerce', project: 'E-commerce' }
 ];
 /* GitHub Repositories as prod lists them (qa-fra, entity GITHUBREPOEXT): its ten default columns, in prod's order, with the two protection columns this feature adds after Object Name */
-var GH_COLS = [{ k: 'id', l: 'ID' }, { k: 'name', l: 'Object Name' }, { k: 'ep', l: 'Effective policy' }, { k: 'lb', l: 'Last Backup' }, { k: 'org', l: 'Github Organization' }, { k: 'fork', l: 'Fork' }, { k: 'ds', l: 'Datasource ID' }, { k: 'vis', l: 'Visibility' }, { k: 'archived', l: 'Archived' }, { k: 'created', l: 'Created At' }, { k: 'modified', l: 'Modified At' }, { k: 'oid', l: 'Object ID' }];
+var GH_COLS = [{ k: 'id', l: 'ID' }, { k: 'name', l: 'Object Name' }, { k: 'ep', l: 'Effective policy', tip: 'It can take up to 15 minutes for a policy change to appear in Inventory.' }, { k: 'lb', l: 'Last Backup' }, { k: 'org', l: 'Github Organization' }, { k: 'fork', l: 'Fork' }, { k: 'ds', l: 'Datasource ID' }, { k: 'vis', l: 'Visibility' }, { k: 'archived', l: 'Archived' }, { k: 'created', l: 'Created At' }, { k: 'modified', l: 'Modified At' }, { k: 'oid', l: 'Object ID' }];
 function ghProps(o, i) {
   var hx = function (seed, n) { var x = seed >>> 0, s = ''; for (var k = 0; k < n; k++) { x = (Math.imul(x, 1664525) + 1013904223) >>> 0; s += ((x >>> 16) & 15).toString(16); } return s; };
   var d = ['Nov 12 2026, 7:10 pm', 'Sep 7 2026, 11:16 am', 'Oct 14 2026, 10:32 pm'];
@@ -3528,7 +3543,8 @@ function ladderTable(o, sim) {
     }).join('') + '</tbody></table></div>';
 }
 function effective(o, pols) {
-  var c = pols.concat([DEFAULT_POLICY]).filter(function (p) { return covers(p, o); });
+  // PM feedback 2026-11-25: a disabled policy never becomes the effective policy; the next enabled policy that covers the object takes over (or none does)
+  var c = pols.concat([DEFAULT_POLICY]).filter(function (p) { return p.enabled && covers(p, o); });
   c.sort(function (a, b) { return a.prio - b.prio; });
   return c[0] || null;
 }
@@ -3582,7 +3598,7 @@ function actionsSection(p) {
 }
 
 /* ── ADD TO POLICY (one content, two containers) ──────────────────────────────────────────────────────────────────── */
-function alertHtml(kind, text) { return '<div class="vis-alert vis-alert-' + kind + '" role="note">' + (_dsStoreIconSvg(kind === 'warn' ? 'alert-warning-outlined' : 'info-outlined', 24) || '') + '<div class="vis-alert-txt">' + text + '</div></div>'; }
+function alertHtml(kind, text) { return '<div class="vis-alert vis-alert-' + kind + '" role="' + (kind === 'error' ? 'alert' : 'note') + '">' + (_dsStoreIconSvg(kind === 'warn' ? 'alert-warning-outlined' : kind === 'error' ? 'status-error-outlined' : 'info-outlined', 24) || '') + '<div class="vis-alert-txt">' + text + '</div></div>'; }
 function curOf(o) { return effective(o, POLS); }
 function listsById(p, o) { return p.direct.indexOf(o.id) >= 0; }
 function otherCover(o) { var cur = curOf(o); return POLS.concat([DEFAULT_POLICY]).filter(function (p) { return covers(p, o) && !(cur && cur.id === p.id); }).sort(function (a, b) { return a.prio - b.prio; }); }
@@ -3594,6 +3610,7 @@ function objectCard(o, cur) {
   return '<div class="atp-section atp-current-sec"><div class="atp-h">Current policy</div><div class="table-scroll"><table class="data-table atp-fixed atp-current">' + colg() + '<tbody>' + row + '</tbody></table></div></div>';
 }
 function visiblePolicies(cur) {
+  if (S.obj && S.obj.noEdit) return [];   // no policy this user can edit for this object
   var q = S.q.trim().toLowerCase();
   return POLS.filter(function (p) {
     if (cur && cur.id === p.id) return false;   // the current policy lives above, not in the list
@@ -3693,23 +3710,31 @@ function whyBlock(o, sim, picked) {
     + (S.why ? '<div style="margin-top:8px">' + ladderTable(o, sim) + '</div>' : '') + '</div>';
 }
 function atpWhy() { S.why = !S.why; renderAtp(); }
+/* what happens to the object itself, in one sentence group shared by the panel and the confirm dialog: removed from the current policy, and/or the picked policy is disabled */
+function objectMsg(o, picked, sim, after, n) {
+  var m = '';
+  if (sim.removedFrom) m += '<strong>' + esc(o.id) + '</strong> will be removed from ' + n(sim.removedFrom) + '.' + (after ? '' : ' No other enabled policy covers it, so it will not be backed up.');
+  if (!picked.enabled) m += (m ? ' ' : '') + n(picked) + ' is disabled, so it can\'t ' + (sim.removedFrom ? 'take over.' : 'become the effective policy. Nothing is backed up under it until it is enabled.');
+  return m;
+}
 function impactHtml(o, cur, scopeHtml) {
   if (!S.pick) return '';
-  var sim = simulate(o, S.pick), picked = POLS.filter(function (p) { return p.id === S.pick; })[0], after = sim.after, retB = cur ? cur.ret : null, retA = after ? after.ret : null, short = retB != null && retA != null && retA < retB && after.enabled;   // nothing is deleted while the effective policy is off
-  var nm = function (x) { return esc(x.name) + (x.enabled ? '' : ' (disabled)'); };
+  var sim = simulate(o, S.pick), picked = POLS.filter(function (p) { return p.id === S.pick; })[0], after = sim.after, retB = cur ? cur.ret : null, retA = after ? after.ret : null;
+  var nm = function (x) { return esc(x.name); };   // an effective policy is never disabled, so the name never carries a "(disabled)" tag
   var back = ' To change this, change the priority on the <a class="inv-link" href="backup-policies.html" target="_blank" rel="noopener">Policy page</a>.', pr = function (x) { return '<strong>' + esc(x.name) + '</strong> (priority ' + x.prio + ')'; };
   // every alert lives in one place: directly under the "What will change" table, in the same order each time
-  var same = cur && after && cur.id === after.id, arrow = '<span class="atp-count-arrow">&rarr;</span>';
+  var same = (!cur && !after) || (cur && after && cur.id === after.id), arrow = '<span class="atp-count-arrow">&rarr;</span>';
+  var short = !same && retB != null && retA != null && retA < retB;   // only when the effective policy changes does retention change; shorter means data is deleted
   var row = function (k, v) { return '<div class="prio-dtable-row"><div class="prio-dtable-k">' + k + '</div><div class="prio-dtable-v">' + v + '</div></div>'; };
-  var rows = row('Effective policy', same ? nm(after) + ' <span class="atp-muted">(unchanged)</span>' : (cur ? nm(cur) : 'None') + arrow + (after ? '<strong>' + nm(after) + '</strong>' : 'None'));
-  if (retB != null && retA != null && retB !== retA && after.enabled) rows += row('Retention', retB + arrow + '<strong>' + retA + ' days</strong>');
-  var al = [];   // reasons and consequences only: the table above already states the numbers
-  if (!picked.enabled) al.push(alertHtml('warn', esc(picked.name) + ' is disabled. Nothing is backed up under it until it is enabled.'));
-  if (listsById(picked, o)) al.push(alertHtml('info', '<strong>' + esc(picked.name) + '</strong> already lists this object.' + (after && after.id !== picked.id ? ' It is not effective because ' + pr(after) + ' outranks it.' + back : '')));
-  else if (after && after.id !== picked.id) al.push(alertHtml('warn', sim.removedFrom
-    ? pr(after) + ' also covers this object and outranks <strong>' + esc(picked.name) + '</strong>. <strong>' + esc(sim.removedFrom.name) + '</strong> will no longer list it.' + back
-    : '<strong>' + esc(after.name) + '</strong> has a higher priority and also covers this object.' + back));
-  if (short && retA != null) al.push(alertHtml('warn', 'Restore points older than ' + retA + ' days will be deleted, but not before their storage lock ends.'));
+  var rows = row('Effective policy', same ? (after ? nm(after) : 'None') + ' <span class="atp-muted">(unchanged)</span>' : (cur ? nm(cur) : 'None') + arrow + (after ? '<strong>' + nm(after) + '</strong>' : 'None'));
+  // retention follows the effective policy: no policy means no retention, so a change to or from "None" shows here too
+  if (!same && retB !== retA) rows += row('Retention', (retB == null ? 'None' : retA == null ? retB + ' days' : retB) + arrow + '<strong>' + (retA == null ? 'None' : retA + ' days') + '</strong>');
+  var al = [];   // at most: what happens to the object (removal + disabled pick in one alert), outranked, deletion; the table above already carries the numbers
+  var objMsg = objectMsg(o, picked, sim, after, function (x) { return '<strong>' + esc(x.name) + '</strong>'; });
+  if (objMsg) al.push(alertHtml('warn', objMsg));
+  if (listsById(picked, o)) al.push(alertHtml('info', '<strong>' + esc(picked.name) + '</strong> already lists this object.' + (picked.enabled && after && after.id !== picked.id ? ' It is not effective because ' + pr(after) + ' outranks it.' + back : '')));
+  else if (picked.enabled && after && after.id !== picked.id) al.push(alertHtml('warn', pr(after) + ' has a higher priority and also covers this object.' + back));
+  if (short) al.push(alertHtml('warn', 'Restore points older than ' + retA + ' days will be deleted, but not before their storage lock ends.'));
   var change = '<div class="atp-section atp-dscope"><div class="atp-dhead" style="margin-bottom:8px"><div class="atp-h" style="margin:0">What will change</div>' + '</div>'
     + '<div class="prio-dtable">' + rows + '</div>' + (al.length ? '<div class="atp-stack" style="margin-top:12px">' + al.join('') + '</div>' : '') + '</div>';
   return change + (scopeHtml || '');
@@ -3717,13 +3742,17 @@ function impactHtml(o, cur, scopeHtml) {
 /* full page: the list stays put; picking a policy opens its detail panel on the right (configuration mirror, then the impact) */
 function pageList(o) {
   var cur = curOf(o);
+  // empty state: the user can't edit any policy that could include this object, so there is nothing to pick; the Policy page is where policies are managed
+  // the shared descriptive empty state (Protected Data's .inv-empty-state: title, muted body, tertiary Small action); no "Available policies" heading above it, the title already says there are none
+  if (o.noEdit) return objectCard(o, cur) + '<div class="atp-section atp-fill"><div class="atp-box"><div class="inv-empty-state"><div class="inv-empty-title">No policies you can edit</div><div class="inv-empty-body">You don\'t have permission to edit any policy that could include this object.</div>'
+    + '<a class="inv-empty-action" href="backup-policies.html" target="_blank" rel="noopener" style="text-decoration:none">Open Policy page' + (_dsStoreIconSvg('open-in-new-outlined', 16) || '') + '</a></div></div></div>';
   return objectCard(o, cur) + '<div class="atp-section atp-fill"><div class="atp-h atp-hrow"><span>Available policies</span><span class="atp-muted" id="atpCount">' + atpCountText(cur) + '</span></div>' + policyListHtml(o, cur) + '</div>';
 }
 function pageDetail(o) {
   var cur = curOf(o), picked = !!S.pick, p = picked ? POLS.filter(function (x) { return x.id === S.pick; })[0] : cur;
-  if (!p) return '<div class="atp-h">No effective policy</div><div class="atp-muted">This object is not backed up. Pick a policy to add it.</div>';
+  if (!p) return (S.err ? alertHtml('error', S.err) : '') + '<div class="atp-h">No effective policy</div><div class="atp-muted">This object is not backed up.' + (o.noEdit ? '' : ' Pick a policy to add it.') + '</div>';
   // title + state chip on one row, the prioritization panel's own title style (16/500); the section headings below it are 14/500
-  return '<div class="prio-preview-title"><a class="inv-link atp-ext" href="backup-policies.html" target="_blank" rel="noopener" aria-label="' + esc('Open ' + p.name + ' on the Policy page (new tab)') + '">' + esc(p.name) + (_dsStoreIconSvg('open-in-new-outlined', 16) || '') + '</a><span class="plv-chip ' + (p.enabled ? 'plv-chip-state-active' : 'plv-chip-state-inactive') + '">' + (p.enabled ? 'Enabled' : 'Disabled') + '</span></div>'
+  return (S.err ? '<div style="margin-bottom:12px">' + alertHtml('error', S.err) + '</div>' : '') + '<div class="prio-preview-title"><a class="inv-link atp-ext" href="backup-policies.html" target="_blank" rel="noopener" aria-label="' + esc('Open ' + p.name + ' on the Policy page (new tab)') + '">' + esc(p.name) + (_dsStoreIconSvg('open-in-new-outlined', 16) || '') + '</a><span class="plv-chip ' + (p.enabled ? 'plv-chip-state-active' : 'plv-chip-state-inactive') + '">' + (p.enabled ? 'Enabled' : 'Disabled') + '</span></div>'
     + (picked ? impactHtml(o, cur, actionsSection(p))
       : actionsSection(p) + '<div class="atp-muted" style="margin-top:12px">Pick a policy to see what will change.</div>');   // PM feedback 2026-11-23: no Data scope and no policy ladder in this panel (scopeSection, whyBlock and ladderTable are kept, unreferenced)
 }
@@ -3741,7 +3770,7 @@ function renderAtp() {
   hydrateInvIcons();
 }
 function openAtp(id) {
-  S.obj = GH_OBJECTS.filter(function (x) { return x.id === id; })[0]; S.pick = null; S.why = false; S.q = ''; S.filters = []; renderAtp();
+  S.obj = GH_OBJECTS.filter(function (x) { return x.id === id; })[0]; S.pick = null; S.why = false; S.q = ''; S.filters = []; S.err = null; S.snap = polSig(); renderAtp();
   document.getElementById('atpPage').classList.add('open');
 }
 function closeAtp() {
@@ -3750,26 +3779,43 @@ function closeAtp() {
   document.getElementById('atpPDetail').hidden = true;
   document.getElementById('atpPage').classList.remove('open'); S.obj = null;
 }
-function atpUnpick() { S.pick = null; renderAtp(); }
-function atpPick(id) { S.pick = id; S.why = false; renderAtp(); }
+function atpUnpick() { S.pick = null; S.err = null; renderAtp(); }
+function atpPick(id) { S.pick = id; S.why = false; S.err = null; renderAtp(); }
 function atpAdd() {
   var o = S.obj, sim = simulate(o, S.pick), cur = sim.cur, after = sim.after, picked = POLS.filter(function (p) { return p.id === S.pick; })[0];
-  var changes = !cur || !after || cur.id !== after.id, shorter = cur && after && after.enabled && after.ret < cur.ret, n = function (x) { return '<strong>' + esc(x.name) + '</strong>'; };
+  var changes = !cur !== !after || (cur && after && cur.id !== after.id), shorter = changes && cur && after && after.ret < cur.ret, n = function (x) { return '<strong>' + esc(x.name) + '</strong>'; };
+  var retB = cur ? cur.ret : null, retA = after ? after.ret : null, fmtRet = function (d) { return d == null ? 'none' : d + ' days'; };
   document.getElementById('atpCfTitle').textContent = 'Add ' + o.id + ' to ' + picked.name + '?';
-  document.getElementById('atpCfText').innerHTML = '<p>' + (changes ? 'Effective policy changes from ' + (cur ? n(cur) : 'none') + ' to ' + (after ? n(after) : 'none') + '.' : 'Effective policy stays ' + n(after) + '.') + '</p>'
-    + (picked.enabled ? '' : '<p>' + n(picked) + ' is disabled. Nothing is backed up under it until it is enabled.</p>')
-    + (shorter ? '<p>Restore points older than ' + after.ret + ' days will be deleted, but not before their storage lock ends.</p>' : '');
+  document.getElementById('atpCfText').innerHTML = '<p>' + (changes ? 'Effective policy changes from ' + (cur ? n(cur) : 'none') + ' to ' + (after ? n(after) : 'none') + '.' : 'Effective policy stays ' + (after ? n(after) : 'none') + '.') + '</p>'
+    + (objectMsg(o, picked, sim, after, n) ? '<p>' + objectMsg(o, picked, sim, after, n) + '</p>' : '')
+    + (changes && retB !== retA ? '<p>Retention changes from ' + fmtRet(retB) + ' to ' + fmtRet(retA) + '.' + (shorter ? ' Restore points older than ' + after.ret + ' days will be deleted, but not before their storage lock ends.' : '') + '</p>' : '');   // the same retention change the panel's table shows; the deletion sentence only when a shorter number deletes restore points
   document.getElementById('atpCfNote').innerHTML = '<p>It can take up to 15 minutes for this change to appear in Inventory.</p>';
-  document.getElementById('atpCfIcon').style.display = shorter ? '' : 'none';   // the warning icon only when something is deleted
+  document.getElementById('atpCfIcon').style.display = shorter || (cur && !after) ? '' : 'none';   // the warning icon only when something is deleted or left unprotected
+  var ok = document.getElementById('atpCfOk'); ok.classList.toggle('plv-btn-destructive', !!shorter); ok.classList.toggle('plv-btn-primary', !shorter);   // red only when restore points are deleted
   document.getElementById('atpCfBackdrop').style.display = 'block'; document.getElementById('atpCf').style.display = 'flex';
 }
 function atpCfClose() { document.getElementById('atpCfBackdrop').style.display = 'none'; document.getElementById('atpCf').style.display = 'none'; }
+/* Error state: the policy changed while this page was open. Detected the way a server would, by comparing what the page loaded with what is there now.
+   Prototype hook: the first time "CasePilot repos - daily" is confirmed, another admin has just disabled it, so this state can be reached. */
+var _EXT_EDIT_DONE = false;
+function polSig() { return JSON.stringify(POLS.map(function (p) { return [p.id, p.prio, p.enabled, p.ret, p.direct]; })); }
+function simulateConcurrentEdit(pickId) {
+  if (_EXT_EDIT_DONE || pickId !== 'p3') return;
+  _EXT_EDIT_DONE = true; POLS.forEach(function (p) { if (p.id === 'p3') p.enabled = false; });
+}
 function atpCommit() {
   atpCfClose();
-  var o = S.obj, sim = simulate(o, S.pick), picked = POLS.filter(function (p) { return p.id === S.pick; })[0], changes = !sim.cur || !sim.after || sim.cur.id !== sim.after.id;
+  simulateConcurrentEdit(S.pick);
+  if (polSig() !== S.snap) {   // stale: nothing is saved, the page refreshes to the new state and says why
+    var p0 = POLS.filter(function (p) { return p.id === S.pick; })[0];
+    S.snap = polSig(); S.err = 'Couldn\'t add <strong>' + esc(S.obj.id) + '</strong> to <strong>' + esc(p0.name) + '</strong>. The policy was changed by someone else after you opened this page. What you see now is up to date. Review it and try again.';
+    renderAtp(); renderInvTable(); hydrateInvIcons(); return;
+  }
+  var o = S.obj, sim = simulate(o, S.pick), picked = POLS.filter(function (p) { return p.id === S.pick; })[0], changes = !sim.cur !== !sim.after || (sim.cur && sim.after && sim.cur.id !== sim.after.id);
   POLS = sim.pols; if (changes) S.pending[o.id] = true; closeAtp(); renderInvTable(); hydrateInvIcons();
   // the confirmation states what actually happened, not what was asked for
   if (sim.after && sim.after.id === picked.id) showToast(o.id + ' added to ' + picked.name + '.', '');
+  else if (!picked.enabled) showToast(o.id + ' added to ' + picked.name + '.', picked.name + ' is disabled, so it is not effective. ' + (sim.after ? 'The effective policy is ' + sim.after.name + '.' : 'This object is not backed up.'));
   else showToast(o.id + ' added to ' + picked.name + '. Effective policy ' + (changes ? 'is now ' : 'is still ') + (sim.after ? sim.after.name : 'none') + '.', sim.after ? sim.after.name + ' outranks ' + picked.name + ' for this object. Priority is changed on the Policy page.' : '');
   if (changes) setTimeout(function () { delete S.pending[o.id]; if (inv.cat === GH_KEY) { renderInvTable(); hydrateInvIcons(); } }, 3500);
 }
